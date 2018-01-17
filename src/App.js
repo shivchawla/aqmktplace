@@ -1,47 +1,37 @@
 import * as React from 'react';
-import * as Radium from 'radium';
-import {Layout, Menu, Breadcrumb, Icon, Row, Col} from 'antd';
-import {Link, NavLink} from 'react-router-dom';
-import {BrowserRouter as Router, Route, withRouter} from 'react-router-dom';
-import {Dashboard, QuantResearch, StockResearch, ScreenAdvices} from './containers'; 
-import {AqNavLink, AqBreadCrumb} from './components';
-import logo from './logo.svg';
+import {Layout, Menu, Row, Col} from 'antd';
+import {Route, withRouter} from 'react-router-dom';
+import {Dashboard, QuantResearch, StockResearch, ScreenAdvices, AdviceDetail} from './containers'; 
+import AqBreadCrumb from './components/AqBreadCrumb';
+import {AqNavLink, AqLink} from './components';
 
-const {Header, Content, Sider, Footer} = Layout;
-const {SubMenu} = Menu;
+const {Header, Content} = Layout;
 
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            breadCrumbLocation: ''
+            pageTitle: 'Home'
         };
     }
 
     componentWillMount() {
-        this.props.history.listen((location) => {
-            this.setState({breadCrumbLocation: location.state.name});
+        // listening to route change and updating local state
+        this.props.history.listen((location) => { 
+            const {pageTitle = ''} = location.state;
+            this.setState({pageTitle});
         });
     }
-    
-    render() {
-        const {breadCrumbLocation} = this.state;
-        const pageTitle = breadCrumbLocation.trim().split('/')[breadCrumbLocation.length - 1];
 
+    render() {
         return (
             <Layout style={{backgroundColor: '#fff'}}>
                 <Header style={headerStyle}>
                     <Row type="flex">
                         <Col span={4}>
-                            <Link to={{
-                                    pathname: '/',
-                                    state: {
-                                        name: 'Home'
-                                    }
-                                }}
-                            >
+                            <AqLink to='/' pageTitle='Home'>
                                 <h1 style={headerColor}>AIMSQUANT</h1>
-                            </Link>
+                            </AqLink>
                         </Col>
                         <Col span={10} offset={10}>
                             <Menu 
@@ -50,29 +40,30 @@ class App extends React.Component {
                                 style={{lineHeight: '64px'}}
                             >
                             <Menu.Item key={1}>
-                                <AqNavLink to='/dashboard' breadCrumbName='Dashboard' pathName='Dashboard'/>
+                                <AqNavLink to='/dashboard' pageTitle='Dashboard' />
                             </Menu.Item>
                             <Menu.Item key={2}>
-                                <AqNavLink to='/screenadvices' breadCrumbName='Screen Advices' pathName='Screen Advices' />
+                                <AqNavLink to='/advice' pageTitle='Screen Advices' />
                             </Menu.Item>
                             <Menu.Item key={3}>
-                                <AqNavLink to='/stockresearch' breadCrumbName='Stock Research' pathName='Stock Research' />
+                                <AqNavLink to='/stockresearch' pageTitle='Stock Research' />
                             </Menu.Item>
                             <Menu.Item key={4}>
-                                <AqNavLink to='/quantresearch' breadCrumbName='Quant Research' pathName='Quant Research' />
+                                <AqNavLink to='/quantresearch' pageTitle='Quant Research' />
                             </Menu.Item>
                         </Menu>
                         </Col> 
                     </Row>
                 </Header>
                 <Layout style={contentLayoutStyle}>
-                    <h2 style={pageNameStyle}>{pageTitle}</h2>
-                    <AqBreadCrumb path={this.state.breadCrumbLocation}/>
+                    <h1 style={pageTitleStyle}>{this.state.pageTitle}</h1>
+                    <AqBreadCrumb />
                     <Content>
                         <Route path='/dashboard' component={Dashboard} />
-                        <Route path='/screenadvices' component={ScreenAdvices} />
+                        <Route path='/advice' component={ScreenAdvices} />
                         <Route path='/stockresearch' component={StockResearch} />
                         <Route path='/quantresearch' component={QuantResearch} />
+                        <Route path='/advice/:id' component={AdviceDetail} />
                     </Content>
                 </Layout>
             </Layout>
@@ -99,12 +90,7 @@ const contentLayoutStyle = {
     marginTop: '25px'
 };
 
-const pageNameStyle = {
+const pageTitleStyle = {
     fontSize: '18px',
     color: '#595959'
 };
-
-const linkActiveStyle = {
-    color: '#26899A',
-    fontWeight: 600
-}

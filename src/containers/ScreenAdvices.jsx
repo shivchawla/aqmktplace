@@ -1,22 +1,11 @@
 import * as React from 'react';
-import {Link} from 'react-router-dom';
+import {AqLink} from '../components';
 
 export class ScreenAdvices extends React.Component {
     render() {
         return (
             <div>
-                <h1>Screen Advices</h1>
-                <Link 
-                    to={{
-                        pathname: 'advice/1',
-                        state: {
-                            name: 'Screen Advices/Advice Detail'
-                        }
-                    }}
-
-                >
-                    Advice Detail
-                </Link>
+                <AqLink to='/advice/1' pageTitle='Advice Detail'/>
             </div>
         );
     }

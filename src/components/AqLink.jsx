@@ -1,27 +1,21 @@
 import * as React from 'react';
-import {NavLink} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
-export function AqNavLink(props) {
+export function AqLink(props) {
     const {to, pageTitle} = props;
     
     return (
-        <NavLink 
+        <Link 
                 to={{
                     pathname: to, 
                     state:{pageTitle}
                 }} 
-                activeStyle={linkActiveStyle}
-        >
+        >   
             {
                 props.children
                  ? props.children
                  : pageTitle
             }
-        </NavLink>
+        </Link>
     );
 }
-
-const linkActiveStyle = {
-    color: '#26899A',
-    fontWeight: 600
-};

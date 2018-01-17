@@ -1,31 +1,31 @@
 import * as React from 'react';
+import {Link} from 'react-router-dom';
 import {Breadcrumb} from 'antd';
+import {withBreadcrumbs} from 'react-router-breadcrumbs-hoc';
+import {routesNew} from '../routes';
 
-export class AqBreadCrumb extends React.Component {
-    renderBreadCrumbs = (breadCrumbs) => {
-        return breadCrumbs.map((item, index) => {
-            if (index === breadCrumbs.length - 1) {
-                return <Breadcrumb.Item key={index}><a style={{color: '#26899A'}} href="">{item}</a></Breadcrumb.Item>;
-            }
-
-            return <Breadcrumb.Item key={index}>{item}</Breadcrumb.Item>
-        }); 
-    }
-
-    render() {
-        const {path = null} = this.props;
-        const breadCrumbs = path.split('/');
-        console.log(breadCrumbs);
-
-        return (
-            <Breadcrumb style={{background: '#fff'}}>
-                <Breadcrumb.Item>Home</Breadcrumb.Item>
-                {
-                    breadCrumbs.length > 0
-                        ? this.renderBreadCrumbs(breadCrumbs)
-                        : null
-                }
-            </Breadcrumb>
-        );
-    }
+const BreadCrumbs = ({breadcrumbs}) => {
+    return <Breadcrumb style={{background: '#fff'}}>
+        {
+            breadcrumbs.map(({breadcrumb, path, match}) => {
+                return (
+                    <Breadcrumb.Item 
+                        key={path}>
+                        <Link 
+                            to={{
+                                pathname: `${path}`,
+                                state: {
+                                    pageTitle: breadcrumb
+                                }
+                            }}
+                        >
+                            {breadcrumb}
+                        </Link>
+                    </Breadcrumb.Item>
+                );
+            })
+        }
+    </Breadcrumb>
 }
+
+export default withBreadcrumbs(routesNew)(BreadCrumbs); // using the react-router-breadcrumbs-hoc
