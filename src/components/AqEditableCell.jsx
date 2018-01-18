@@ -1,24 +1,27 @@
 import * as React from 'react';
-import {Input} from 'antd';
+import {Input, Form} from 'antd';
 
-export class AqEditableCell extends React.Component {
+const FormItem = Form.Item;
+
+export class EditableCell extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            value: this.props.value
-        };
-    }
-
-    handleChange = (e) => {
-        this.setState({value: e.target.value});
     }
 
     render() {
-        return(
-            <Input 
-                    value={this.state.value}
-                    onChange={this.handleChange}
-            />
+        const {value, onChange, type, validationStatus} = this.props;
+
+        return (
+            <FormItem
+                hasFeedback
+                validateStatus={validationStatus}
+            >
+                <Input 
+                        type={type} 
+                        value={value} 
+                        onChange={e => onChange(e.target.value)} 
+                />
+            </FormItem>
         );
     }
 }
