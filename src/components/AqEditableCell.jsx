@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Input, Form} from 'antd';
+import {Input, InputNumber, Form} from 'antd';
 
 const FormItem = Form.Item;
 
@@ -9,7 +9,7 @@ export class EditableCell extends React.Component {
     }
 
     render() {
-        const {value, onChange, type, validationStatus} = this.props;
+        const {value, onChange, type, validationStatus, disabled = false} = this.props;
 
         return (
             <FormItem
@@ -20,6 +20,7 @@ export class EditableCell extends React.Component {
                         type={type} 
                         value={value} 
                         onChange={e => onChange(e.target.value)} 
+                        disabled={disabled}
                 />
             </FormItem>
         );
