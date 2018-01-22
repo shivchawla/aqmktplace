@@ -1,9 +1,13 @@
 import * as React from 'react';
-import {Layout, Input, Row, Col, DatePicker, Form, Button, Table} from 'antd';
+import {Layout, Input, Row, Col, DatePicker, Form, Button, Table, message, Dropdown, Menu, Icon, Spin} from 'antd';
 import moment from 'moment';
 import axios from 'axios';
-import {inputStyle, inputHeaderStyle} from '../constants';
+import _ from 'lodash';
+import {inputHeaderStyle} from '../constants';
 import {EditableCell} from '../components';
+import '../css/highstock.css';
+
+const ReactHighstock = require('react-highcharts/ReactHighstock.src');
 
 const localConfig = require('../localConfig.json');
 
@@ -22,9 +26,30 @@ export class CreateAdviceImpl extends React.Component {
             endDate: '',
             endDateEditable: false,
             data: [],
-            transactionStatus: true,
             remainingCash: 100000,
-            initialCash: 100000
+            initialCash: 100000,
+            benchmarks: [
+                'NIFTY_50',
+                'TCS',
+                'WIPRO'
+            ],
+            selectedBenchmark: 'TCS',
+            loadingBenchmark: false,
+            currentBenchmarkObject: {},
+            highStockConfig: {
+                rangeSelector: {
+                    selected: 5
+                },
+                title: {
+                    text: 'AAPL Stock Price'
+                },
+                legend: {
+                    enabled: true
+                },
+                series: []
+            },
+            // dummy count - this will be removed when the timeseries for stock performance is obtained from backend
+            count: 2
         }
         this.columns = [
             {
@@ -61,11 +86,67 @@ export class CreateAdviceImpl extends React.Component {
 
     componentWillMount() {
         this.addInitialTransactions();
+        message.info('Loading Benchmark Metrics');
+        this.getStockData(this.state.selectedBenchmark)
+        .then((response) => {
+            this.getUnixTimeSeries(response.data.priceHistory.values)
+            .then((modifiedData) => {
+                const benchmarkSeries = {
+                    name: 'Benchmark',
+                    data: modifiedData,
+                    tooltip: {
+                    valueDecimals: 2
+                    }
+                };
+                const {highStockConfig} = this.state;
+                highStockConfig.series.push(benchmarkSeries);
+                this.setState({highStockConfig});
+                message.success('Successfully loaded Benchmark Metrics');
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+            message.error('Error occured while loading Benchmark Metrics');
+        });
+    }
+    
+    addTimeSeries = (name, data) => {
+        const {highStockConfig} = this.state;
+        const benchmarkSeries = {
+            name, 
+            data,
+            tooltip: {
+                valueDecimals: 2
+            }
+        };
+        // To get the index of the ticker from the series array of HighStock config
+        const tickerIndex = _.findIndex(highStockConfig.series, (object) => {
+            return object.name === name;
+        });
+        // To check if the series for the ticker is already added
+        if(tickerIndex === -1) {
+            highStockConfig.series.push(benchmarkSeries);
+        } else {
+            highStockConfig.series[0].data = data;
+        }
+        this.setState({highStockConfig});
+        message.success('Successfully added timeseries to HighStock');
+    }
+
+    // dummy function, this will be removed when the time-series is obtained from the backend
+    modifyTimeSeries = (data) => {
+        let {count} = this.state;
+        const modifiedTimeSeries = data.map((item, index) => {
+            const price = item[1] + (10 * count);
+            return [item[0], price];
+        });
+        count++;
+        this.setState({count});
+
+        return modifiedTimeSeries;
     }
 
     renderColumns = (text, record, column, type, validationStatus, disabled = false) => {
-        console.log(disabled);
-
         return (
             <EditableCell 
                     validationStatus={validationStatus}
@@ -80,28 +161,32 @@ export class CreateAdviceImpl extends React.Component {
     handleRowChange = (value, key, column) => {
         const newData = [...this.state.data];
         const target = newData.filter(item => key === item.key)[0];
-        const {aimsquantToken, requestUrl} = localConfig;
         if(target) {
             target[column] = value;
             if(column === 'symbol') {
                 if (value.length === 0) {
                     target['tickerValidationStatus'] = 'warning';
                 } else {
-                    const url = `${requestUrl}/stock?ticker=${value.toUpperCase()}&exchange=NSE&country=IN&securityType=EQ`;
                     target['tickerValidationStatus'] = 'validating';
-                    axios.get(url, {
-                        headers: {
-                            'aimsquant-token': aimsquantToken
-                        }
-                    }).then((response) => {
+                    this.getStockData(value)
+                    .then((response) => {
                         const priceHistoryObj = response.data.priceHistory.values;
                         if(priceHistoryObj) {
+                            // ticker search successful
                             const priceHistoryArray = Object.keys(priceHistoryObj);
                             const lastDate = priceHistoryArray[priceHistoryArray.length - 1];
                             const lastPrice = priceHistoryObj[lastDate];
                             target['lastPrice'] = lastPrice;
                             target['tickerValidationStatus'] = 'success';
                             target['sharesDisabledStatus'] = false;
+                            // adding stock timeseries to HighStock
+                            this.getUnixTimeSeries(response.data.priceHistory.values)
+                            .then((modifiedData) => {
+                                this.addTimeSeries(
+                                    `${target['symbol'].toUpperCase()} - ${key + 1}`, 
+                                    this.modifyTimeSeries(modifiedData)
+                                );
+                            });
                         } else {
                             target['lastPrice'] = 0;
                             target['tickerValidationStatus'] = 'error';
@@ -115,11 +200,7 @@ export class CreateAdviceImpl extends React.Component {
                 target['totalValue'] = value * target['lastPrice'];
                 this.calculateRemainingCash();
                 if(value.length === 0) {
-                    if (target['tickerValidationStatus'] === 'success' || target['tickerValidationStatus'] === 'warning') {
-                        target['sharesValidationStatus'] = 'error';
-                    } else {
                     target['sharesValidationStatus'] = 'warning';
-                    }
                 } 
                 else if(value < 0) {
                     target['sharesValidationStatus'] = 'error';
@@ -173,11 +254,46 @@ export class CreateAdviceImpl extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         let requestData = {};
-        console.log(this.validateTransactions());
+        const {requestUrl, aimsquantToken} = localConfig;
         this.props.form.validateFields((err, values) => {
-            if(!err) {
-                requestData = Object.assign(values, {transactions: this.state.data});
+            let {name, description, headline, startDate, endDate} = values;
+            startDate = moment(startDate).format('YYYY-MM-DD');
+            endDate = moment(endDate).format('YYYY-MM-DD');
+            if(!err && this.validateTransactions()) {
+                requestData = {
+                    name,
+                    description,
+                    heading: headline,
+                    benchmark: {
+                        ticker: 'NIFTY_50',
+                        securityType: 'EQ',
+                        country: 'IN',
+                        exchange: 'NSE'
+                    },
+                    portfolio: {
+                        startDate,
+                        endDate,
+                        positions: this.processTransactions(),
+                        cash: 0
+                    }
+                };
                 console.log(requestData);
+                axios({
+                    method: 'post',
+                    url: `${requestUrl}/advice`,
+                    headers: {
+                        'aimsquant-token': aimsquantToken
+                    },
+                    data: requestData
+                })
+                .then((response) => {
+                    console.log(response.data);
+                    message.success('Advice Created successfully');
+                })
+                .catch((error) => {
+                    console.log(error);
+                    message.error(error.message);
+                });
             }
         });
     }
@@ -191,7 +307,7 @@ export class CreateAdviceImpl extends React.Component {
                 lastPrice: 0,
                 totalValue: 0,
                 tickerValidationStatus: "warning",
-                sharesValidationStatus: "warning",
+                sharesValidationStatus: "success",
                 sharesDisabledStatus: true
             });
         });
@@ -207,6 +323,13 @@ export class CreateAdviceImpl extends React.Component {
         const {data} = this.state;
         let isValid = false;
         const validArray = [];
+        if(this.getVerifiedTransactions(data).length < 1) {
+            message.error('Atleast one valid transaction must be provided for a valid advice');
+            return false;
+        } else if (this.state.remainingCash < 0) {
+            message.error('Remaining cash should be equal or greater than 0');
+            return false;
+        }
         data.map((item, index) => {
             const {tickerValidationStatus, sharesValidationStatus, symbol, shares} = item;
             if(tickerValidationStatus === 'error') {
@@ -222,8 +345,9 @@ export class CreateAdviceImpl extends React.Component {
             }
         });
         const falseItems = validArray.filter(item => item === false);
-        this.setState({transactionStatus: !falseItems.length});
-        console.log(validArray);
+        if(falseItems.length) {
+            message.error('Please provide a valid ticker and valid number of shares for each transaction');
+        }
 
         return !falseItems.length;
     }
@@ -237,132 +361,231 @@ export class CreateAdviceImpl extends React.Component {
         return verifiedTransactions;
     }
 
+    processTransactions = () => {
+        const positions = this.getVerifiedTransactions();
+        const newPositions = [];
+        positions.map((item, index) => {
+            const position = {
+                security: {
+                    ticker: item.symbol.toUpperCase(),
+                    securityType: 'EQ',
+                    country: 'IN',
+                    exchange: 'NSE'
+                }, 
+                quantity: parseInt(item.shares)
+            };
+            newPositions.push(position);
+        });
+
+        return newPositions;
+    }
+
+    getUnixTimeSeries = (data) => {
+        return new Promise((resolve, reject) => {
+            const benchmarkArray = _.toPairs(data);
+            const unixBenchmarkArray = benchmarkArray.map((item, index) => {
+                const timeStamp = moment(item[0], 'YYYY-MM-DD').valueOf();
+                return [timeStamp, item[1]];
+            });
+            resolve(unixBenchmarkArray);
+        });
+    }
+
+    onBenchmarkSelected = (benchmarkTicker) => {
+        this.setState({
+            selectedBenchmark: benchmarkTicker,
+            loadingBenchmark: true
+        });
+        this.getStockData(benchmarkTicker)
+        .then((response) => {
+            this.setState({
+                currentBenchmarkObject: response.data
+            });
+            const {highStockConfig} = this.state;
+            this.getUnixTimeSeries(response.data.priceHistory.values)
+            .then((modifiedData) => {
+                highStockConfig.series[0].data = modifiedData;
+                this.setState({highStockConfig});
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+        .finally(() => {
+            this.setState({
+                loadingBenchmark: false
+            });
+            message.success('Successfully loaded Benchmark Metrics for ' + this.state.selectedBenchmark);
+        });
+    }
+
+    getStockData = (ticker) => {
+        const {requestUrl, aimsquantToken} = localConfig;
+        const url = `${requestUrl}/stock?ticker=${ticker.toUpperCase()}&exchange=NSE&country=IN&securityType=EQ`;
+        return axios.get(url, {
+            headers: {
+                'aimsquant-token': aimsquantToken
+            }
+        });
+    }
+
+    renderBenchmarkMenu = () => {
+        return (
+            <Menu>
+                {
+                    this.state.benchmarks.map((item, index) => {
+                        return (
+                            <Menu.Item key={index}>
+                                <a onClick={() => this.onBenchmarkSelected(item)}>{item}</a>
+                            </Menu.Item>
+                        );
+                    })
+                }
+            </Menu>
+        );
+    }
+
     render() {
         const {startDate, endDate} = this.state;
         const {getFieldDecorator} = this.props.form;
 
         return (
-            <Form onSubmit={this.handleSubmit}>
-                <Row>
-                    <Col span={18} style={layoutStyle}>
+            <Row>
+                <Col span={18}>
+                    <Form onSubmit={this.handleSubmit}>
                         <Row>
-                            <Col span={24}>
-                                <h3 style={inputHeaderStyle}>
-                                    Advice Name
-                                </h3>
-                            </Col>
-                            <Col span={8}>
-                                <FormItem>
-                                    {getFieldDecorator('name', {
-                                        rules: [{required: true, message: 'Please enter Advice Name'}]
-                                    })(
-                                        <Input />
-                                    )}
-                                    
-                                </FormItem>
+                            <Col span={24} style={layoutStyle}>
+                                <Row>
+                                    <Col span={24}>
+                                        <h3 style={inputHeaderStyle}>
+                                            Advice Name
+                                        </h3>
+                                    </Col>
+                                    <Col span={8}>
+                                        <FormItem>
+                                            {getFieldDecorator('name', {
+                                                rules: [{required: true, message: 'Please enter Advice Name'}]
+                                            })(
+                                                <Input style={inputStyle}/>
+                                            )}
+                                            
+                                        </FormItem>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col span={24}>
+                                        <h3 style={inputHeaderStyle}>
+                                            Headline
+                                        </h3>
+                                    </Col>
+                                    <Col span={24}>
+                                        <FormItem>
+                                            {getFieldDecorator('headline', {
+                                                rules: [{required: true, message: 'Please enter Headline'}]
+                                            })(
+                                                <Input style={inputStyle}/>
+                                            )}
+                                        </FormItem>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col span={24}>
+                                        <h3 style={inputHeaderStyle}>
+                                            Description
+                                        </h3>
+                                    </Col>
+                                    <Col span={24}>
+                                        <FormItem>
+                                            {getFieldDecorator('description', {
+                                                rules: [{required: true, message: 'Please enter Description'}]
+                                            })(
+                                                <TextArea style={inputStyle} autosize={{minRows: 3, maxRows: 6}}/>
+                                            )}
+                                        </FormItem>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col span={24}>
+                                        <h3 style={inputHeaderStyle}>Advice Portfolio</h3>
+                                    </Col>
+                                </Row>
+                                <Row type="flex" justify="space-between">
+                                    <Col span={6}>
+                                        <h4 style={labelStyle}>Initial Cash</h4>
+                                        <h3>{this.state.initialCash}</h3>
+                                    </Col>
+                                    <Col span={6}>
+                                        <h4 style={labelStyle}>Remaining Cash</h4>
+                                        {
+                                            this.state.remainingCash <= 0
+                                                ? <h3 style={{color: 'red'}}>{this.state.remainingCash}</h3>
+                                                : <h3>{this.state.remainingCash}</h3>
+                                        }
+                                    </Col>
+                                    <Col span={6}>
+                                        <h4 style={labelStyle}>Start Date</h4>
+                                        <FormItem>
+                                            {getFieldDecorator('startDate', {
+                                                rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
+                                            })(
+                                                <DatePicker 
+                                                    // disabledDate={this.disabledStartDate} 
+                                                    onChange={this.onStartDateChange} 
+                                                    format={dateFormat}
+                                                    style={inputStyle} 
+                                                /> 
+                                            )}
+                                        </FormItem>
+                                    </Col>
+                                    <Col span={6}>
+                                        <h4 style={labelStyle}>End Date</h4>     
+                                        <FormItem>
+                                            {getFieldDecorator('endDate', {
+                                                rules: [{type: 'object', required: true, message: 'Please select End Date'}]
+                                            })(
+                                                <DatePicker 
+                                                    disabledDate={this.disabledEndDate} 
+                                                    onChange={this.onEndDateChange} 
+                                                    format={dateFormat} 
+                                                    disabled={!this.state.endDateEditable}
+                                                    style={inputStyle}
+                                                />
+                                            )}
+                                        </FormItem>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col span={6}>
+                                        Benchmark:
+                                        <Dropdown overlay={this.renderBenchmarkMenu()} trigger={['click']}>
+                                            <a className="ant-dropdown-link" href="#">
+                                                {this.state.selectedBenchmark} <Icon type="down" />
+                                            </a>
+                                        </Dropdown>
+                                    </Col>
+                                    <Col span={6}>
+                                        <Spin spinning={this.state.loadingBenchmark}></Spin>
+                                    </Col>
+                                </Row>
+                                <Row type="flex" justify="end">
+                                    <Col span={24}>
+                                        <Table pagination={false} columns={this.columns} dataSource={this.state.data}></Table>
+                                    </Col>
+                                    <Col style={{marginTop: '20px'}} span={4} offset={18}>
+                                        <Button onClick={this.addTransaction}>Add Transaction</Button>
+                                    </Col>
+                                </Row>
                             </Col>
                         </Row>
-                        <Row>
-                            <Col span={24}>
-                                <h3 style={inputHeaderStyle}>
-                                    Headline
-                                </h3>
-                            </Col>
-                            <Col span={24}>
-                                <FormItem>
-                                    {getFieldDecorator('headline', {
-                                        rules: [{required: true, message: 'Please enter Headline'}]
-                                    })(
-                                        <Input />
-                                    )}
-                                </FormItem>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={24}>
-                                <h3 style={inputHeaderStyle}>
-                                    Description
-                                </h3>
-                            </Col>
-                            <Col span={24}>
-                                <FormItem>
-                                    {getFieldDecorator('description', {
-                                        rules: [{required: true, message: 'Please enter Description'}]
-                                    })(
-                                        <TextArea autosize={{minRows: 3, maxRows: 6}}/>
-                                    )}
-                                </FormItem>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={24}>
-                                <h3 style={inputHeaderStyle}>Advice Portfolio</h3>
-                            </Col>
-                        </Row>
-                        <Row type="flex" justify="space-between">
-                            <Col span={6}>
-                                <h4 style={labelStyle}>Initial Cash</h4>
-                                <h3>{this.state.initialCash}</h3>
-                            </Col>
-                            <Col span={6}>
-                                <h4 style={labelStyle}>Remaining Cash</h4>
-                                {
-                                    this.state.remainingCash <= 0
-                                        ? <h3 style={{color: 'red'}}>{this.state.remainingCash}</h3>
-                                        : <h3>{this.state.remainingCash}</h3>
-                                }
-                            </Col>
-                            <Col span={6}>
-                                <h4 style={labelStyle}>Start Date</h4>
-                                <FormItem>
-                                    {getFieldDecorator('startDate', {
-                                        rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
-                                    })(
-                                        <DatePicker 
-                                            disabledDate={this.disabledStartDate} 
-                                            onChange={this.onStartDateChange} 
-                                            format={dateFormat} 
-                                        /> 
-                                    )}
-                                </FormItem>
-                            </Col>
-                            <Col span={6}>
-                                <h4 style={labelStyle}>End Date</h4>     
-                                <FormItem>
-                                    {getFieldDecorator('endDate', {
-                                        rules: [{type: 'object', required: true, message: 'Please select End Date'}]
-                                    })(
-                                        <DatePicker 
-                                            disabledDate={this.disabledEndDate} 
-                                            onChange={this.onEndDateChange} 
-                                            format={dateFormat} 
-                                            disabled={!this.state.endDateEditable}
-                                        />
-                                    )}
-                                </FormItem>
-                            </Col>
-                        </Row>
-                        <Row type="flex" justify="end">
-                            <Col span={24}>
-                                <Table pagination={false} columns={this.columns} dataSource={this.state.data}></Table>
-                                <h5 style={{color: 'red'}}>
-                                    {
-                                        this.state.transactionStatus
-                                            ? null
-                                            : "Please provide valid ticker and valid number of shares for each transactions"
-                                    }
-                                </h5>
-                            </Col>
-                            <Col style={{marginTop: '20px'}} span={4} offset={18}>
-                                <Button onClick={this.addTransaction}>Add Transaction</Button>
-                            </Col>
-                        </Row>
-                    </Col>
-                </Row>
-                <FormItem>
-                      <Button type="primary" htmlType="submit">Register</Button>
-                </FormItem>
-            </Form>
+                        <FormItem>
+                            <Button style={{borderRadius: '0'}} type="primary" htmlType="submit">Save</Button>
+                        </FormItem>
+                    </Form>
+                </Col>
+                <Col span={18}>
+                    <ReactHighstock config={this.state.highStockConfig}/>
+                </Col>
+            </Row>
         );
     }
 }
@@ -378,5 +601,8 @@ const layoutStyle = {
 
 const labelStyle = {
     color: '#898989'
-}
+};
 
+const inputStyle = {
+    borderRadius: '0px'
+};

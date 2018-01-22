@@ -17,6 +17,7 @@ export class EditableCell extends React.Component {
                 validateStatus={validationStatus}
             >
                 <Input 
+                        style={{borderRadius: '0'}}
                         type={type} 
                         value={value} 
                         onChange={e => onChange(e.target.value)} 
