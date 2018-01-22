@@ -3,8 +3,11 @@ import {Layout, Input, Row, Col, DatePicker, Form, Button, Table, message, Dropd
 import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
+import {connect} from 'react-redux';
 import {inputHeaderStyle} from '../constants';
-import {EditableCell} from '../components';
+import {EditableCell, AqStockTable} from '../components';
+import {getUnixTimeSeries, getStockData, addTimeSeries, calculateRemainingCash} from '../utils';
+import {store} from '../store';
 import '../css/highstock.css';
 
 const ReactHighstock = require('react-highcharts/ReactHighstock.src');
@@ -50,7 +53,7 @@ export class CreateAdviceImpl extends React.Component {
             },
             // dummy count - this will be removed when the timeseries for stock performance is obtained from backend
             count: 2
-        }
+        };
         this.columns = [
             {
                 title: 'Symbol',
@@ -84,12 +87,23 @@ export class CreateAdviceImpl extends React.Component {
         ];
     }
 
+    renderColumns = (text, record, column, type, validationStatus, disabled = false) => {
+        return (
+            <EditableCell 
+                    validationStatus={validationStatus}
+                    type={type}
+                    value={text}
+                    onChange={value => this.handleRowChange(value, record.key, column)}
+                    disabled={disabled}
+            />
+        );
+    }
+
     componentWillMount() {
-        this.addInitialTransactions();
         message.info('Loading Benchmark Metrics');
-        this.getStockData(this.state.selectedBenchmark)
+        getStockData(this.state.selectedBenchmark)
         .then((response) => {
-            this.getUnixTimeSeries(response.data.priceHistory.values)
+            getUnixTimeSeries(response.data.priceHistory.values)
             .then((modifiedData) => {
                 const benchmarkSeries = {
                     name: 'Benchmark',
@@ -133,95 +147,8 @@ export class CreateAdviceImpl extends React.Component {
         message.success('Successfully added timeseries to HighStock');
     }
 
-    // dummy function, this will be removed when the time-series is obtained from the backend
-    modifyTimeSeries = (data) => {
-        let {count} = this.state;
-        const modifiedTimeSeries = data.map((item, index) => {
-            const price = item[1] + (10 * count);
-            return [item[0], price];
-        });
-        count++;
-        this.setState({count});
-
-        return modifiedTimeSeries;
-    }
-
-    renderColumns = (text, record, column, type, validationStatus, disabled = false) => {
-        return (
-            <EditableCell 
-                    validationStatus={validationStatus}
-                    type={type}
-                    value={text}
-                    onChange={value => this.handleRowChange(value, record.key, column)}
-                    disabled={disabled}
-            />
-        );
-    }
-
-    handleRowChange = (value, key, column) => {
-        const newData = [...this.state.data];
-        const target = newData.filter(item => key === item.key)[0];
-        if(target) {
-            target[column] = value;
-            if(column === 'symbol') {
-                if (value.length === 0) {
-                    target['tickerValidationStatus'] = 'warning';
-                } else {
-                    target['tickerValidationStatus'] = 'validating';
-                    this.getStockData(value)
-                    .then((response) => {
-                        const priceHistoryObj = response.data.priceHistory.values;
-                        if(priceHistoryObj) {
-                            // ticker search successful
-                            const priceHistoryArray = Object.keys(priceHistoryObj);
-                            const lastDate = priceHistoryArray[priceHistoryArray.length - 1];
-                            const lastPrice = priceHistoryObj[lastDate];
-                            target['lastPrice'] = lastPrice;
-                            target['tickerValidationStatus'] = 'success';
-                            target['sharesDisabledStatus'] = false;
-                            // adding stock timeseries to HighStock
-                            this.getUnixTimeSeries(response.data.priceHistory.values)
-                            .then((modifiedData) => {
-                                this.addTimeSeries(
-                                    `${target['symbol'].toUpperCase()} - ${key + 1}`, 
-                                    this.modifyTimeSeries(modifiedData)
-                                );
-                            });
-                        } else {
-                            target['lastPrice'] = 0;
-                            target['tickerValidationStatus'] = 'error';
-                        }
-                        this.setState({data: newData});
-                    }).catch((error) => {
-                        console.log(error);
-                    });
-                }
-            } else if(column === 'shares') {
-                target['totalValue'] = value * target['lastPrice'];
-                this.calculateRemainingCash();
-                if(value.length === 0) {
-                    target['sharesValidationStatus'] = 'warning';
-                } 
-                else if(value < 0) {
-                    target['sharesValidationStatus'] = 'error';
-                } else {
-                    target['sharesValidationStatus'] = 'success';
-                }
-            }
-            this.setState({data: newData});
-        }
-    }
-
-    calculateRemainingCash = () => {
-        const {data, initialCash} = this.state;
-        let totalCash = 0;
-        data.map((item, index) => {
-            totalCash += item.totalValue;
-        });
-        this.setState({remainingCash: initialCash - totalCash});
-    }
-
     onStartDateChange = (date) => {
+        console.log(this.props.transactions)
         const startDate = moment(date).format(dateFormat);
         if(startDate === 'Invalid date') {
             this.setState({
@@ -298,27 +225,6 @@ export class CreateAdviceImpl extends React.Component {
         });
     }
 
-    addTransaction = () => {
-        this.setState((prevState) => {
-            return prevState.data.push({
-                symbol: '',
-                key: prevState.data.length,
-                shares: 0,
-                lastPrice: 0,
-                totalValue: 0,
-                tickerValidationStatus: "warning",
-                sharesValidationStatus: "success",
-                sharesDisabledStatus: true
-            });
-        });
-    }
-
-    addInitialTransactions = () => {
-        for(let i = 0; i < 5 ; i++) {
-            this.addTransaction();
-        }
-    }
-
     validateTransactions = () => {
         const {data} = this.state;
         let isValid = false;
@@ -353,7 +259,7 @@ export class CreateAdviceImpl extends React.Component {
     }
 
     getVerifiedTransactions = () => {
-        const {data} = this.state;
+        const data = this.props.transactions;
         const verifiedTransactions = data.filter((item, index) => {
             return item.tickerValidationStatus === 'success' && item.sharesValidationStatus === 'success';
         });
@@ -380,29 +286,18 @@ export class CreateAdviceImpl extends React.Component {
         return newPositions;
     }
 
-    getUnixTimeSeries = (data) => {
-        return new Promise((resolve, reject) => {
-            const benchmarkArray = _.toPairs(data);
-            const unixBenchmarkArray = benchmarkArray.map((item, index) => {
-                const timeStamp = moment(item[0], 'YYYY-MM-DD').valueOf();
-                return [timeStamp, item[1]];
-            });
-            resolve(unixBenchmarkArray);
-        });
-    }
-
     onBenchmarkSelected = (benchmarkTicker) => {
         this.setState({
             selectedBenchmark: benchmarkTicker,
             loadingBenchmark: true
         });
-        this.getStockData(benchmarkTicker)
+        getStockData(benchmarkTicker)
         .then((response) => {
             this.setState({
                 currentBenchmarkObject: response.data
             });
             const {highStockConfig} = this.state;
-            this.getUnixTimeSeries(response.data.priceHistory.values)
+            getUnixTimeSeries(response.data.priceHistory.values)
             .then((modifiedData) => {
                 highStockConfig.series[0].data = modifiedData;
                 this.setState({highStockConfig});
@@ -416,16 +311,6 @@ export class CreateAdviceImpl extends React.Component {
                 loadingBenchmark: false
             });
             message.success('Successfully loaded Benchmark Metrics for ' + this.state.selectedBenchmark);
-        });
-    }
-
-    getStockData = (ticker) => {
-        const {requestUrl, aimsquantToken} = localConfig;
-        const url = `${requestUrl}/stock?ticker=${ticker.toUpperCase()}&exchange=NSE&country=IN&securityType=EQ`;
-        return axios.get(url, {
-            headers: {
-                'aimsquant-token': aimsquantToken
-            }
         });
     }
 
@@ -445,10 +330,31 @@ export class CreateAdviceImpl extends React.Component {
         );
     }
 
+    addRow = () => {
+        store.dispatch({
+            type: "ADD_TRANSACTION",
+            payload: {
+                symbol: '',
+                key: 5,
+                shares: 0,
+                lastPrice: 0,
+                totalValue: 0,
+                tickerValidationStatus: "warning",
+                sharesValidationStatus: "success",
+                sharesDisabledStatus: true
+            }
+        });
+    }
+
     render() {
         const {startDate, endDate} = this.state;
         const {getFieldDecorator} = this.props.form;
+        let tableConfig = {
+            dataSource: this.props.transactions,
+            handleRowChange: this.handleRowChange
+        };
 
+        
         return (
             <Row>
                 <Col span={18}>
@@ -517,9 +423,9 @@ export class CreateAdviceImpl extends React.Component {
                                     <Col span={6}>
                                         <h4 style={labelStyle}>Remaining Cash</h4>
                                         {
-                                            this.state.remainingCash <= 0
-                                                ? <h3 style={{color: 'red'}}>{this.state.remainingCash}</h3>
-                                                : <h3>{this.state.remainingCash}</h3>
+                                            this.props.remainingCash <= 0
+                                                ? <h3 style={{color: 'red'}}>{this.props.remainingCash}</h3>
+                                                : <h3>{this.props.remainingCash}</h3>
                                         }
                                     </Col>
                                     <Col span={6}>
@@ -569,10 +475,11 @@ export class CreateAdviceImpl extends React.Component {
                                 </Row>
                                 <Row type="flex" justify="end">
                                     <Col span={24}>
-                                        <Table pagination={false} columns={this.columns} dataSource={this.state.data}></Table>
+                                        <AqStockTable addTimeSeries={this.addTimeSeries}/>
+                                        {/* <Table pagination={false} columns={this.columns} dataSource={this.props.transactions} /> */}
                                     </Col>
                                     <Col style={{marginTop: '20px'}} span={4} offset={18}>
-                                        <Button onClick={this.addTransaction}>Add Transaction</Button>
+                                        <Button onClick={this.addRow}>Add Transaction</Button>
                                     </Col>
                                 </Row>
                             </Col>
@@ -590,7 +497,14 @@ export class CreateAdviceImpl extends React.Component {
     }
 }
 
-export const CreateAdvice = Form.create()(CreateAdviceImpl);
+const mapStateToProps = (state) => {
+    return {
+        transactions: state.transactions.get('transactionData').toJS(),
+        remainingCash: state.transactions.get('remainingCash')
+    }
+};
+
+export const CreateAdvice = Form.create()(connect(mapStateToProps)(CreateAdviceImpl));
 
 const layoutStyle = {
     backgroundColor: '#fff',
