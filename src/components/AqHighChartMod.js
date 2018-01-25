@@ -2,10 +2,12 @@ import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
-import {Checkbox, Switch, message, Tag, Row, Col} from 'antd';
-import {getUnixStockData} from '../utils';
+import {Checkbox, Switch, message, Tag, Row, Col, Spin, Icon} from 'antd';
+import {getStockPerformance} from '../utils';
+import { error } from 'util';
 
 const ReactHighstock = require('react-highcharts/ReactHighstock.src');
+const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 const defaultYAxis = {
     labels:{
@@ -52,6 +54,7 @@ export class AqHighChartMod extends React.Component {
             },
             legendItems: [],
             maxTickerCount: 10,
+            spinning: false,
             color: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1"]
         };
     }
@@ -77,21 +80,33 @@ export class AqHighChartMod extends React.Component {
     }
 
     componentWillMount() {
-        const {tickers} = this.props;
-        const {config, legendItems} = this.state;
-        if(tickers.length < this.state.maxTickerCount) {
-            tickers.map((ticker, index) => {
-                getUnixStockData(ticker.name)
-                .then(performance => {
-                    if(performance.length > 0){ // ticker search successful
-                        this.addTickerToSeries(ticker, performance, true);
-                    }
-                });
-            });
-        } else {
-            message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
-        }
-
+        // const {tickers} = this.props;
+        // const {config, legendItems} = this.state;
+        // if(tickers.length <= this.state.maxTickerCount) {
+        //     this.setState({spinning: true});
+        //     tickers.map((ticker, index) => {
+        //         getStockPerformance(ticker.name)
+        //         .then(performance => {
+        //             this.addTickerToSeries(ticker, performance, ticker.show);
+        //             if(index === tickers.length - 1) {
+        //                 this.setState({spinning: false});
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.log(error);
+        //         });
+        //     });
+        // } else {
+        //     message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
+        // }
+        this.setState({spinning: true});
+        this.lodInitialBenchmarkPerformance()
+        .then(response => {
+            this.setState({spinning: false});
+        })
+        .catch(response => {
+            message.error(error);
+        });
     }
 
     componentWillReceiveProps(nextProps) {
@@ -101,11 +116,12 @@ export class AqHighChartMod extends React.Component {
             tickers.map((ticker, index) => {
                 const legendIndex = _.findIndex(legendItems, legend => legend.name === ticker.name.toUpperCase());
                 if(legendIndex === -1) { // Check if ticker already added
-                    getUnixStockData(ticker.name)
+                    getStockPerformance(ticker.name)
                     .then(performance => {
-                        if(performance.length > 0){ // ticker search successful
-                            this.addTickerToSeries(ticker, performance)
-                        }
+                        this.addTickerToSeries(ticker, performance);
+                    })
+                    .catch(error => {
+                        message.error(error.message);
                     });
                 }
             }); 
@@ -137,7 +153,7 @@ export class AqHighChartMod extends React.Component {
         const selectedTickers = legendItems.filter(item => item.show === true);
         return selectedTickers.map((item, index) => {
             return (
-                <Tag color={item.color} key={index}>{item.name} {item.x} - {item.y.toFixed(2)}</Tag>
+                <Tag color={item.color} key={index}>{item.name} - {item.y.toFixed(2)}</Tag>
             );
         })
     }
@@ -147,10 +163,25 @@ export class AqHighChartMod extends React.Component {
         return legendItems.map((item, index) => {
             return (
                 <Checkbox key={index} checked={item.show} onChange={(e) => this.onCheckboxChange(e, item)}>
-                    <span style={{color: legendItems[index].color}}>{index + 1}. {item.name}</span>
+                    <span style={{color: item.color}}>{index + 1}. {item.name}</span>
                 </Checkbox>
             );
         });
+    }
+
+    renderLegendBox = () => {
+        const {legendItems} = this.state;
+
+        return legendItems.map((legend, index) => {
+            return (
+                <Col key={index} span={6}>
+                    <Checkbox key={index} checked={legend.show} onChange={(e) => this.onCheckboxChange(e, legend)}>
+                        <span style={{color: legend.color}}>{legend.name}</span> -
+                        <span>{legend.y}</span>
+                    </Checkbox>
+                </Col>
+            );
+        })
     }
 
     onCheckboxChange = (e, ticker) => {
@@ -175,18 +206,47 @@ export class AqHighChartMod extends React.Component {
         
     }
 
+    lodInitialBenchmarkPerformance = () => {
+        const {tickers} = this.props;
+        const {config, legendItems} = this.state;
+
+        return new Promise((resolve, reject) => {
+            if(tickers.length <= this.state.maxTickerCount) {
+                const allStockRequests = tickers.map((ticker, index) => {
+                    return getStockPerformance(ticker.name);
+                });
+                Promise.all(allStockRequests)
+                .then(performanceArray => {
+                    performanceArray.map((performance, index) => {
+                        this.addTickerToSeries(tickers[index], performance, tickers[index].show);
+                    });
+                })
+                .catch(error => {
+                    console.log(error);
+                    reject(error);
+                })
+                .finally(() => {
+                    resolve('Initial Metrics Loaded');
+                });
+            } else {
+                reject(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
+            }
+        })
+    }
+
     render() {
         return (
             <div>
                 <Row>
-                    <Col span={24}>
-                        {this.renderTickers()}
+                    <Col span={12}>
+                        <Row>
+                            {this.renderLegendBox()}
+                        </Row>
                     </Col>
-                    <Col span={24}>
-                        {this.renderLegend()}
+                    <Col span={6} offset={6}>
+                        <Spin indicator={antIcon} spinning={this.state.spinning}/>
                     </Col>
                 </Row>
-                <h5>{this.state.tickerName} -{this.state.xAxisValue} -- {this.state.yAxisValue}</h5>
                 <ReactHighstock ref='chart' isPureConfig={true} config={this.state.config} />
             </div>
         );

@@ -22,4 +22,23 @@ export const getUnixStockData = (data) => {
     })
 }
 
+export const getStockPerformance = (tickerName) => {
+    return new Promise((resolve, reject) => {
+        getStockData(tickerName)
+        .then(performance => {
+            const data = performance.data.priceHistory.values;
+            if (data.length > 0) { // Check if ticker is valid
+                const performanceArray = data.map((item, index) => {
+                    return [item.date * 1000, item.price]
+                });
+                resolve(performanceArray);
+            } else {
+                reject('Invalid Ticker');
+            }
+        })
+        .catch(error => {
+            reject(error);
+        });
+    });
+}
 export * from './requests';

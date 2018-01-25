@@ -8,7 +8,7 @@ export class StockResearch extends React.Component {
         this.state = {
             tickers: [
                 {name: 'TCS', show: true},
-                {name: 'WIPRO', show: true}
+                {name: 'WIPRO', show: true},
             ],
             tickerName: ''
         };
