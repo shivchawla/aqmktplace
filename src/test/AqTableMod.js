@@ -11,32 +11,59 @@ export class AqTableMod extends React.Component {
             dataIndex: 'ticker',
             render: (text, record) => this.renderColumns(text, record, 'ticker')
         }];
+        this.state ={
+            data: [
+                {
+                    ticker: '',
+                    validationStatus: 'warning',
+                    key: 0
+                },
+                {
+                    ticker: '',
+                    validationStatus: 'warning',
+                    key: 1
+                },
+                {
+                    ticker: '',
+                    validationStatus: 'warning',
+                    key: 2
+                }
+            ]
+        }
     }
     handleRowChange = (value, key, column) => {
-        const newData = [...this.props.data];
+        const newData = [...this.state.data];
         const target = newData.filter(item => key === item.key)[0];
         if (target) {
             target[column] = value;
             target['validationStatus'] = 'validating';
-            getStockData(value)
-            .then((response) => {
-                const priceHistoryObj = response.data.priceHistory.values;
-                if(priceHistoryObj) {
-                    target['validationStatus'] = 'success';
-                    console.log('Valid Ticker');
-                } else {
-                    target['validationStatus'] = 'error';
-                }
-            })
-            .catch((error) => {
-                target['validationStatus'] = 'error';
-            })
-            .finally(() => {
-                this.props.onChange(newData);
+            this.asyncGetTickerValidationStatus(value)
+            .then(response => {
+                target['validationStatus'] = response;
+                this.setState({data: newData});
+                this.props.onChange({data: newData});
             });
-            this.props.onChange(newData);
+            this.setState({data: newData});
         }
     }
+
+    asyncGetTickerValidationStatus = (ticker) => {
+        let validationStatus = 'error';
+        return new Promise((resolve, reject) => {
+            getStockData(ticker)
+            .then(response => {
+                const priceHistoryObj = response.data.priceHistory.values;
+                validationStatus = priceHistoryObj !== null ? 'success' : 'error';
+            })
+            .catch(error => {
+                validationStatus = 'error';
+            })
+            .finally(() => {
+                resolve(validationStatus);
+            });
+        });
+    }
+
     renderColumns = (text, record, column) => {
         return (
             <EditableCell
@@ -46,9 +73,23 @@ export class AqTableMod extends React.Component {
             />
         );
     }
+
+    addItem = () => {
+        this.setState((prevState) => {
+            return prevState.data.push({
+                ticker: '',
+                validationStatus: 'warning',
+                key: this.state.data.length
+            })
+        });
+    }
+
     render() {
         return (
-            <Table dataSource={this.props.data} columns={this.columns} />
+            <div>
+                <Table dataSource={this.state.data} columns={this.columns} />
+                <button onClick={this.addItem}>Add Item</button>
+            </div>
         );
     }
 }
