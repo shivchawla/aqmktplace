@@ -46,18 +46,13 @@ export class AqHighChartMod extends React.Component {
                 series: [],
                 plotOptions: this.getPlotOptions(),
                 yAxis: defaultYAxis,
-                toolTip: {
-                    formatter: function() {
-                        console.log(this.x);
-                        return 'The Value is {point.x} {point.y}';
-                    }
+                tooltip: {
+                    enabled: false
                 }
             },
-            xAxisValue: 0,
-            yAxisValue:0,
-            tickerName: '',
-            tickerItems: [],
-            maxTickerCount: 10
+            legendItems: [],
+            maxTickerCount: 10,
+            color: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1"]
         };
     }
 
@@ -68,12 +63,11 @@ export class AqHighChartMod extends React.Component {
                 point: {
                     events: {
                         mouseOver: (e) =>  {
-                            // const index = _.findIndex(tickerItems, ticker => ticker.name === e.target.series.name);
-                            // tickerItems[index].x = moment(e.target.x).format('YYYY-MM-DD');
-                            // tickerItems[index].y = e.target.y;
-                            const xAxisValue = moment(e.target.x).format('YYYY-MM-DD');
-                            const yAxisValue = e.target.y;
-                            this.setState({xAxisValue, yAxisValue});
+                            const {legendItems} = this.state;
+                            const legendIndex = _.findIndex(legendItems, legend => legend.name === e.target.series.name);
+                            legendItems[legendIndex].x = moment(e.target.x).format('YYYY-MM-DD');
+                            legendItems[legendIndex].y = e.target.y;
+                            this.setState({legendItems});
                         }
                     }
                 }
@@ -84,77 +78,111 @@ export class AqHighChartMod extends React.Component {
 
     componentWillMount() {
         const {tickers} = this.props;
-        const {config, tickerItems} = this.state;
+        const {config, legendItems} = this.state;
         if(tickers.length < this.state.maxTickerCount) {
             tickers.map((ticker, index) => {
-                getUnixStockData(ticker)
-                .then(response => {
-                    if(response.length > 0){ // ticker search successful
-                        config.series.push({
-                            name: ticker.toUpperCase(),
-                            data: response,
-                            selected: false,
-                        });
-                        tickerItems.push({
-                            name: ticker.toUpperCase(),
-                            x: 0,
-                            y: 0
-                        });
+                getUnixStockData(ticker.name)
+                .then(performance => {
+                    if(performance.length > 0){ // ticker search successful
+                        this.addTickerToSeries(ticker, performance, true);
                     }
-                    this.setState({config: _.cloneDeep(config), tickerItems});
                 });
             });
         } else {
-            message.error('Max of 10 tickers can be added at once');
+            message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
         }
 
     }
 
     componentWillReceiveProps(nextProps) {
         const {tickers} = nextProps;
-        const {config, tickerItems} = this.state;
-        tickers.map((ticker, index) => {
-            const findIndex = _.findIndex(config.series, item => item.name === ticker.toUpperCase());
-            if(findIndex === -1) { // Check if ticker already added
-                getUnixStockData(ticker)
-                .then(response => {
-                    if(response.length > 0){ // ticker search successful
-                        config.series.push({
-                            name: ticker.toUpperCase(),
-                            data: response 
-                        });
-                    }
-                    tickerItems.push({
-                        name: ticker.toUpperCase(),
-                        x: 0,
-                        y: 0
+        const {config, legendItems} = this.state;
+        if(legendItems.length < this.state.maxTickerCount) {
+            tickers.map((ticker, index) => {
+                const legendIndex = _.findIndex(legendItems, legend => legend.name === ticker.name.toUpperCase());
+                if(legendIndex === -1) { // Check if ticker already added
+                    getUnixStockData(ticker.name)
+                    .then(performance => {
+                        if(performance.length > 0){ // ticker search successful
+                            this.addTickerToSeries(ticker, performance)
+                        }
                     });
-                    this.setState({config: _.cloneDeep(config), tickerItems});
-                });
-            }
-            
+                }
+            }); 
+        } else {
+            message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
+        }
+    }
+
+    addTickerToSeries = (ticker, performance, visible = false) => {
+        const {config, legendItems, color} = this.state;
+        config.series.push({
+            name: ticker.name.toUpperCase(),
+            data: performance,
+            visible,
+            color: color[legendItems.length]
         });
+        legendItems.push({
+            name: ticker.name.toUpperCase(),
+            x: '1994-16-02',
+            y: 0,
+            show: ticker.show,
+            color: color[legendItems.length]
+        });
+        this.setState({config: _.cloneDeep(config), legendItems});
     }
 
     renderLegend = () => {
-        return this.state.tickerItems.map((item, index) => {
+        const {legendItems} = this.state;
+        const selectedTickers = legendItems.filter(item => item.show === true);
+        return selectedTickers.map((item, index) => {
             return (
-                <Tag key={index}>{item.name} {item.x} - {item.y}</Tag>
+                <Tag color={item.color} key={index}>{item.name} {item.x} - {item.y.toFixed(2)}</Tag>
             );
         })
     }
 
-    componentWillUpdate() {
-        console.log('Component Updated');
+    renderTickers = () => {
+        const {legendItems} = this.state;
+        return legendItems.map((item, index) => {
+            return (
+                <Checkbox key={index} checked={item.show} onChange={(e) => this.onCheckboxChange(e, item)}>
+                    <span style={{color: legendItems[index].color}}>{index + 1}. {item.name}</span>
+                </Checkbox>
+            );
+        });
+    }
+
+    onCheckboxChange = (e, ticker) => {
+        const {legendItems} = this.state;
+        const chart = this.refs.chart.getChart();
+        const selectedLegendIndex = _.findIndex(legendItems, legend => legend.name === ticker.name);
+        const selectedLegendCount = legendItems.filter(legend => legend.show === true).length;
+
+        if(!e.target.checked) { // When checkbox is not checked
+            legendItems[selectedLegendIndex].show = e.target.checked;
+            chart.series[selectedLegendIndex].hide();
+            this.setState({legendItems});
+        } else {
+            if(selectedLegendCount < 5) { // When checkbox checked
+                legendItems[selectedLegendIndex].show = e.target.checked;
+                chart.series[selectedLegendIndex].show();
+                this.setState({legendItems});
+            } else {
+                message.error('Only 5 items can be added to the graph at once');
+            }
+        }
+        
     }
 
     render() {
-        console.log(this.state.tickerItems);
-
         return (
             <div>
                 <Row>
-                    <Col span={12}>
+                    <Col span={24}>
+                        {this.renderTickers()}
+                    </Col>
+                    <Col span={24}>
                         {this.renderLegend()}
                     </Col>
                 </Row>

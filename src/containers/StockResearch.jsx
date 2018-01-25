@@ -6,14 +6,17 @@ export class StockResearch extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            tickers: ['TCS', 'WIPRO'],
+            tickers: [
+                {name: 'TCS', show: true},
+                {name: 'WIPRO', show: true}
+            ],
             tickerName: ''
         };
     }
 
     addItem = () => {
-        const {tickers} = this.state;
-        tickers.push(this.state.tickerName);
+        const {tickers, tickerName} = this.state;
+        tickers.push({name: tickerName, show: false});
         this.setState(tickers);
     }
 
