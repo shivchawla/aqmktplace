@@ -3,7 +3,7 @@ import _ from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import {Checkbox, Switch, message, Tag, Row, Col, Spin, Icon} from 'antd';
-import {getStockPerformance} from '../utils';
+import {getStockPerformance, getStockData} from '../utils';
 import { error } from 'util';
 
 const ReactHighstock = require('react-highcharts/ReactHighstock.src');
@@ -17,7 +17,7 @@ const defaultYAxis = {
     }
 };
 
-export class AqHighChartMod extends React.Component {
+export class AqHighChartMod extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -66,7 +66,7 @@ export class AqHighChartMod extends React.Component {
                 point: {
                     events: {
                         mouseOver: (e) =>  {
-                            const {legendItems} = this.state;
+                            const legendItems = [...this.state.legendItems];
                             const legendIndex = _.findIndex(legendItems, legend => legend.name === e.target.series.name);
                             legendItems[legendIndex].x = moment(e.target.x).format('YYYY-MM-DD');
                             legendItems[legendIndex].y = e.target.y;
@@ -80,25 +80,6 @@ export class AqHighChartMod extends React.Component {
     }
 
     componentWillMount() {
-        // const {tickers} = this.props;
-        // const {config, legendItems} = this.state;
-        // if(tickers.length <= this.state.maxTickerCount) {
-        //     this.setState({spinning: true});
-        //     tickers.map((ticker, index) => {
-        //         getStockPerformance(ticker.name)
-        //         .then(performance => {
-        //             this.addTickerToSeries(ticker, performance, ticker.show);
-        //             if(index === tickers.length - 1) {
-        //                 this.setState({spinning: false});
-        //             }
-        //         })
-        //         .catch(error => {
-        //             console.log(error);
-        //         });
-        //     });
-        // } else {
-        //     message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
-        // }
         this.setState({spinning: true});
         this.lodInitialBenchmarkPerformance()
         .then(response => {
@@ -110,29 +91,88 @@ export class AqHighChartMod extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        const {tickers} = nextProps;
-        const {config, legendItems} = this.state;
-        if(legendItems.length < this.state.maxTickerCount) {
-            tickers.map((ticker, index) => {
-                const legendIndex = _.findIndex(legendItems, legend => legend.name === ticker.name.toUpperCase());
-                if(legendIndex === -1) { // Check if ticker already added
+        if(nextProps.tickers !== this.props.tickers) {
+            const {tickers} = nextProps;
+            const {config, legendItems} = this.state;
+            const series = [...config.series];
+            if (tickers.length === 1) {
+                const ticker = tickers[0];
+                if (series.length == 0) { // empty array
+                    console.log("Empty array");
+                    this.setState({spinning: true});
                     getStockPerformance(ticker.name)
                     .then(performance => {
-                        this.addTickerToSeries(ticker, performance);
+                        this.addTickerToSeries(ticker, performance, ticker.show);
                     })
                     .catch(error => {
-                        message.error(error.message);
+                        message.error(error);
+                    })
+                    .finally(() => {
+                        this.setState({spinning: false});
+                    })
+                } else if (series.length == 1) { // series[0] should be updated
+                    console.log("Item should be updated");
+                    this.setState({spinning: true});
+                    getStockPerformance(ticker.name)
+                    .then(performance => {
+                        series[0].data = performance;
+                        series[0].name = ticker.name;
+                        legendItems[0].name = ticker.name;
+                        this.setState({config: {...this.state.config, series}});
+                    })
+                    .catch(error => {
+                        message.error(error);
+                    }) 
+                    .finally(() => {
+                        this.setState({spinning: false}, () => {
+                            console.log(this.state.legendItems);
+                            console.log(this.state.config.series);
+                        });
+                    });
+                } else {
+                    console.log("Items more than 1, array should be destroyed and current ticker should be added");
+                    this.setState({config: {...this.state.config, series: []}, legendItems: [], spinning: true});
+                    getStockPerformance(ticker.name)
+                    .then(performance => {
+                        this.addTickerToSeries(ticker, performance, ticker.show);
+                    })
+                    .catch(error => {
+                        message.error(error);
+                    })
+                    .finally(() => {
+                        this.setState({spinning: false});
                     });
                 }
-            }); 
-        } else {
-            message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
+            } else if (tickers.length > legendItems.length) { // Item should be added
+                if( legendItems.length < this.state.maxTickerCount) {
+                    tickers.map((ticker, index) => {
+                        const legendIndex = _.findIndex(legendItems, legend => legend.name === ticker.name.toUpperCase());
+                        if (legendIndex === -1) { // Adding ticker to series
+                            this.setState({spinning: true});
+                            getStockPerformance(ticker.name)
+                            .then(performance => {
+                                this.addTickerToSeries(ticker, performance, ticker.show);
+                            })
+                            .catch(error => {
+                                message.error(error);
+                            })
+                            .finally(() => {
+                                this.setState({spinning: false});
+                            });
+                        }
+                    });
+                } else {
+                    message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
+                }
+            }
         }
     }
 
     addTickerToSeries = (ticker, performance, visible = false) => {
-        const {config, legendItems, color} = this.state;
-        config.series.push({
+        const {color} = this.state;
+        const legendItems = [...this.state.legendItems];
+        const series = [...this.state.config.series];
+        series.push({
             name: ticker.name.toUpperCase(),
             data: performance,
             visible,
@@ -142,10 +182,20 @@ export class AqHighChartMod extends React.Component {
             name: ticker.name.toUpperCase(),
             x: '1994-16-02',
             y: 0,
+            disabled: ticker.disabled || false,
             show: ticker.show,
             color: color[legendItems.length]
         });
-        this.setState({config: _.cloneDeep(config), legendItems});
+        
+        this.setState({config: {...this.state.config, series}, legendItems});
+    }
+
+    deleteTickerFromSeries = (ticker) => {
+        const legendItems = [...this.state.legendItems];
+        const series = [...this.state.config.series];
+        _.remove(series, item => item.name === ticker.name.toUpperCase());
+        _.remove(legendItems, item => item.name === ticker.name.toUpperCase());
+        this.setState({config: {...this.state.config, series}, legendItems});
     }
 
     renderLegend = () => {
@@ -173,9 +223,11 @@ export class AqHighChartMod extends React.Component {
         const {legendItems} = this.state;
 
         return legendItems.map((legend, index) => {
+            console.log(legend);
+            
             return (
                 <Col key={index} span={6}>
-                    <Checkbox key={index} checked={legend.show} onChange={(e) => this.onCheckboxChange(e, legend)}>
+                    <Checkbox disabled={legend.disabled} key={index} checked={legend.show} onChange={(e) => this.onCheckboxChange(e, legend)}>
                         <span style={{color: legend.color}}>{legend.name}</span> -
                         <span>{legend.y}</span>
                     </Checkbox>
@@ -189,16 +241,17 @@ export class AqHighChartMod extends React.Component {
         const chart = this.refs.chart.getChart();
         const selectedLegendIndex = _.findIndex(legendItems, legend => legend.name === ticker.name);
         const selectedLegendCount = legendItems.filter(legend => legend.show === true).length;
-
         if(!e.target.checked) { // When checkbox is not checked
-            legendItems[selectedLegendIndex].show = e.target.checked;
+            const newLegendItems = [...legendItems];
+            newLegendItems[selectedLegendIndex].show = e.target.checked;
             chart.series[selectedLegendIndex].hide();
-            this.setState({legendItems});
+            this.setState({legendItems: newLegendItems});
         } else {
             if(selectedLegendCount < 5) { // When checkbox checked
-                legendItems[selectedLegendIndex].show = e.target.checked;
+                const newLegendItems = [...legendItems];
+                newLegendItems[selectedLegendIndex].show = e.target.checked;
                 chart.series[selectedLegendIndex].show();
-                this.setState({legendItems});
+                this.setState({legendItems: newLegendItems});
             } else {
                 message.error('Only 5 items can be added to the graph at once');
             }

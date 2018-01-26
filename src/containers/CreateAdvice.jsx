@@ -4,7 +4,7 @@ import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {inputHeaderStyle} from '../constants';
+import {inputHeaderStyle, layoutStyle} from '../constants';
 import {EditableCell, AqStockTable} from '../components';
 import {getUnixStockData} from '../utils';
 import {store} from '../store';
@@ -439,13 +439,6 @@ export class CreateAdviceImpl extends React.Component {
 }
 
 export const CreateAdvice = Form.create()(CreateAdviceImpl);
-
-const layoutStyle = {
-    backgroundColor: '#fff',
-    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)',
-    padding: '20px 30px',
-    marginTop: '20px'
-};
 
 const labelStyle = {
     color: '#898989'

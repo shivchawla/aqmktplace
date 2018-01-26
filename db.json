@@ -1,0 +1,68 @@
+{
+    "tickers": [
+        {
+            "id": 1,
+            "name": "TCS"
+        },
+        {
+            "id": 2,
+            "name": "WIPRO"
+        },
+        {
+            "id": 3,
+            "name": "LT"
+        },
+        {
+            "id": 4,
+            "name": "ICICIBANK"
+        },
+        {
+            "id": 5,
+            "name": "MARUTI"
+        },
+        {
+            "id": 6,
+            "name": "NTPC"
+        },
+        {
+            "id": 7,
+            "name": "ONGC"
+        },
+        {
+            "id": 8,
+            "name": "COALINDIA"
+        },
+        {
+            "id": 9,
+            "name": "SBIN"
+        },
+        {
+            "id": 10,
+            "name": "AXISBANK"
+        },
+        {
+            "id": 11,
+            "name": "HDFCBANK"
+        },
+        {
+            "id": 12,
+            "name": "INFY"
+        },
+        {
+            "id": 13,
+            "name": "YESBANK"
+        },
+        {
+            "id": 14,
+            "name": "INDUSINDBK"
+        },
+        {
+            "id": 15,
+            "name": "HEROMOTOCO"
+        },
+        {
+            "id": 16,
+            "name": "ASIANPAINT"
+        }
+    ]
+}
