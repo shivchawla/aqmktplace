@@ -4,3 +4,4 @@ export * from './ScreenAdvices';
 export * from './StockResearch';
 export * from '../test/AdviceDetail';
 export * from './CreateAdvice';
+export * from './CreatePortfolio';

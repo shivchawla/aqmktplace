@@ -25,7 +25,8 @@ export class Dashboard extends React.Component {
         return (
             <div>
                 {/* <ReactHighstock config={config}/> */}
-                <AqLink to='/dashboard/createadvice' pageTitle='Create Advice'/>
+                <AqLink to='/dashboard/createadvice' pageTitle='Create Advice'/> <br></br>
+                <AqLink to='/dashboard/createportfolio' pageTitle='Create Portfolio'/>
             </div>
         );
     }

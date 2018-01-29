@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Layout, Menu, Row, Col} from 'antd';
 import {Route, withRouter} from 'react-router-dom';
-import {Dashboard, QuantResearch, StockResearch, ScreenAdvices, AdviceDetail, CreateAdvice} from './containers'; 
+import {Dashboard, QuantResearch, StockResearch, ScreenAdvices, AdviceDetail, CreateAdvice, CreatePortfolio} from './containers'; 
 import AqBreadCrumb from './components/AqBreadCrumb';
 import {AqNavLink, AqLink} from './components';
 
@@ -65,6 +65,7 @@ class App extends React.Component {
                         <Route exact={true} path='/quantresearch' component={QuantResearch} />
                         <Route exact={true} path='/advice/:id' component={AdviceDetail} />
                         <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} />
+                        <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} />
                     </Content>
                 </Layout>
             </Layout>

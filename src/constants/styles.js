@@ -1,5 +1,5 @@
 export const inputStyle = {
-    marginBottom: '20px'
+    borderRadius: '0px'
 };
 export const inputHeaderStyle = {
     fontSize: '14px',
@@ -12,4 +12,8 @@ export const layoutStyle = {
     boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)',
     padding: '20px 30px',
     marginTop: '20px'
+};
+
+export const labelStyle = {
+    color: '#898989'
 };

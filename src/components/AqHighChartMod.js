@@ -82,11 +82,14 @@ export class AqHighChartMod extends React.PureComponent {
     componentWillMount() {
         this.setState({spinning: true});
         this.lodInitialBenchmarkPerformance()
-        .then(response => {
-            this.setState({spinning: false});
+        .then(successMessage => {
+            message.success(successMessage);
         })
         .catch(response => {
             message.error('Error occurred while load initial benchmark');
+        })
+        .finally(() => {
+            this.setState({spinning: false});
         });
     }
 
@@ -100,17 +103,23 @@ export class AqHighChartMod extends React.PureComponent {
                 if (series.length == 0) { // empty array
                     this.addTickerToEmptyArray(ticker);
                 } else if (series.length == 1) { // series[0] should be updated
-                    this.updateTicker(ticker);
+                    if (ticker.name.toUpperCase() !== legendItems[0].name) {
+                        console.log('series[0] should be updated');
+                        this.updateTicker(ticker);
+                    }
                 } else { // Items more than 1, array should be destroyed and current ticker should be added
                     this.destroyAndAddTicker(ticker);
                 }
             } else if (tickers.length > legendItems.length) { // Item should be added
+                console.log("Item will be added");
                 // Check to see if the no. of tickers added is lesser than max count
                 if (legendItems.length < this.state.maxTickerCount) { 
                     this.addTickersToCompare(tickers);
                 } else {
                     message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
                 }
+            } else if (tickers.length < legendItems.length) {
+                this.deleteTickersFromSeries(tickers);
             }
         }
     }
@@ -211,11 +220,27 @@ export class AqHighChartMod extends React.PureComponent {
     }
 
     deleteTickerFromSeries = (ticker) => {
+        console.log('Deleting ' + ticker);
         const legendItems = [...this.state.legendItems];
         const series = [...this.state.config.series];
-        _.remove(series, item => item.name === ticker.name.toUpperCase());
-        _.remove(legendItems, item => item.name === ticker.name.toUpperCase());
-        this.setState({config: {...this.state.config, series}, legendItems});
+        _.remove(series, item => item.name === ticker);
+        _.remove(legendItems, item => item.name === ticker);
+        console.log(legendItems);
+        this.setState({config: {...this.state.config, series}, legendItems}, () => {
+            console.log(legendItems);
+        });
+    }
+
+    deleteTickersFromSeries = tickers => {
+        const legendItems = [...this.state.legendItems];
+        const series = [...this.state.config.series];
+        legendItems.map((legend, index) => {
+            const tickerIndex = _.findIndex(tickers, ticker => ticker.name === legend.name);
+            if (tickerIndex === -1) {
+                _.remove(legendItems, item => legend.name = item.name);
+                _.remove(series, item => item.name === legend.name);
+            }
+        });
     }
 
     renderLegend = () => {
@@ -243,8 +268,6 @@ export class AqHighChartMod extends React.PureComponent {
         const {legendItems} = this.state;
 
         return legendItems.map((legend, index) => {
-            console.log(legend);
-            
             return (
                 <Col key={index} span={6}>
                     <Checkbox disabled={legend.disabled} key={index} checked={legend.show} onChange={(e) => this.onCheckboxChange(e, legend)}>

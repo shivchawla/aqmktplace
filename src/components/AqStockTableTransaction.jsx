@@ -1,9 +1,11 @@
 import * as React from 'react';
-import {Table, Button} from 'antd';
+import {Table, Button, Checkbox, DatePicker} from 'antd';
 import moment from 'moment';
 import _ from 'lodash';
 import {EditableCell} from './AqEditableCell';
 import {getUnixStockData, getStockData} from '../utils';
+
+const dateFormat = 'YYYY-MM-DD';
 
 const initialTransactions = () => {
     const data = [];
@@ -17,13 +19,14 @@ const initialTransactions = () => {
             tickerValidationStatus: "warning",
             sharesValidationStatus: "success",
             sharesDisabledStatus: true,
-            priceHistory: []
+            cashLink: false,
+            date: '1994-02-16'
         });
     }
     return data;
 };
 
-export class AqStockTableMod extends React.Component {
+export class AqStockTableTransaction extends React.Component {
     constructor(props) {
         super(props);
         this.columns = [
@@ -55,12 +58,55 @@ export class AqStockTableMod extends React.Component {
                 title: 'Total Value',
                 dataIndex: 'totalValue',
                 key: 'totalValue'
+            },
+            {
+                title: 'Cash Link',
+                dataIndex: 'cashLink',
+                key: 'cashLink',
+                render: (text, record) => (
+                    <Checkbox 
+                            onChange={() => {this.onCheckboxChange(text, record)}}
+                            checked={record.cashLink}
+                    >
+                        Link Cash
+                    </Checkbox>
+                )
+            },
+            {
+                title: 'Select Date',
+                dataIndex: 'date',
+                key: 'date',
+                render: (text, record) => (
+                    <DatePicker 
+                            onChange={(date, dateString) => {this.onDateChange(date, record)}}
+                    />
+                )
             }
         ];
         this.state = {
             data: initialTransactions(),
             selectedRows: []
         };
+    }
+
+    onCheckboxChange = (text, record) => {
+        const newData = [...this.state.data];
+        const target = newData.filter((item) => item.key === record.key)[0];
+        if (target) {
+            target.cashLink = !target.cashLink;
+        }
+        this.setState({data: newData});
+        this.props.onChange(newData);
+    }
+
+    onDateChange = (date, record) => {
+        const newData = [...this.state.data];
+        const target = newData.filter((item) => item.key === record.key)[0];
+        if (target) {
+            target.date = moment(date).format(dateFormat);
+        }
+        this.setState({data: newData});
+        this.props.onChange(newData);
     }
 
     renderColumns = (text, record, column, type, validationStatus, disabled = false) => {
@@ -129,7 +175,7 @@ export class AqStockTableMod extends React.Component {
     }
 
     deleteItems = () => {
-        let data = [...this.state];
+        let {data} = this.state;
         data = _.pull(data, ...this.state.selectedRows);
         this.setState({data}, () => {
             this.props.onChange(data);
@@ -137,7 +183,7 @@ export class AqStockTableMod extends React.Component {
     }
 
     addItem = () => {
-        const data = [...this.state];
+        const {data} = this.state;
         data.push({
             symbol: '',
             key: data.length,
@@ -149,10 +195,7 @@ export class AqStockTableMod extends React.Component {
             sharesDisabledStatus: true,
             priceHistory: []
         });
-        this.setState({data}, () => {
-            console.log(this.state.data);
-            this.props.onChange(data);
-        });
+        this.setState({data: _.cloneDeep(data)});
     }
 
     render() {
