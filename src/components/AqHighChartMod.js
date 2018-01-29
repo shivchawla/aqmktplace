@@ -142,13 +142,11 @@ export class AqHighChartMod extends React.PureComponent {
             this.setState({config: {...this.state.config, series}});
         })
         .catch(error => {
-            message.error(error);
+            message.error(error.message);
+            console.log(error);
         }) 
         .finally(() => {
-            this.setState({spinning: false}, () => {
-                console.log(this.state.legendItems);
-                console.log(this.state.config.series);
-            });
+            this.setState({spinning: false});
         });
     }
 
@@ -160,6 +158,7 @@ export class AqHighChartMod extends React.PureComponent {
         })
         .catch(error => {
             message.error(error.message);
+            console.log(error);
         })
         .finally(() => {
             this.setState({spinning: false});
