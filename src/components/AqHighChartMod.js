@@ -86,7 +86,7 @@ export class AqHighChartMod extends React.PureComponent {
             this.setState({spinning: false});
         })
         .catch(response => {
-            message.error(error);
+            message.error('Error occurred while load initial benchmark');
         });
     }
 
@@ -98,69 +98,16 @@ export class AqHighChartMod extends React.PureComponent {
             if (tickers.length === 1) {
                 const ticker = tickers[0];
                 if (series.length == 0) { // empty array
-                    console.log("Empty array");
-                    this.setState({spinning: true});
-                    getStockPerformance(ticker.name)
-                    .then(performance => {
-                        this.addTickerToSeries(ticker, performance, ticker.show);
-                    })
-                    .catch(error => {
-                        message.error(error);
-                    })
-                    .finally(() => {
-                        this.setState({spinning: false});
-                    })
+                    this.addTickerToEmptyArray(ticker);
                 } else if (series.length == 1) { // series[0] should be updated
-                    console.log("Item should be updated");
-                    this.setState({spinning: true});
-                    getStockPerformance(ticker.name)
-                    .then(performance => {
-                        series[0].data = performance;
-                        series[0].name = ticker.name;
-                        legendItems[0].name = ticker.name;
-                        this.setState({config: {...this.state.config, series}});
-                    })
-                    .catch(error => {
-                        message.error(error);
-                    }) 
-                    .finally(() => {
-                        this.setState({spinning: false}, () => {
-                            console.log(this.state.legendItems);
-                            console.log(this.state.config.series);
-                        });
-                    });
-                } else {
-                    console.log("Items more than 1, array should be destroyed and current ticker should be added");
-                    this.setState({config: {...this.state.config, series: []}, legendItems: [], spinning: true});
-                    getStockPerformance(ticker.name)
-                    .then(performance => {
-                        this.addTickerToSeries(ticker, performance, ticker.show);
-                    })
-                    .catch(error => {
-                        message.error(error);
-                    })
-                    .finally(() => {
-                        this.setState({spinning: false});
-                    });
+                    this.updateTicker(ticker);
+                } else { // Items more than 1, array should be destroyed and current ticker should be added
+                    this.destroyAndAddTicker(ticker);
                 }
             } else if (tickers.length > legendItems.length) { // Item should be added
-                if( legendItems.length < this.state.maxTickerCount) {
-                    tickers.map((ticker, index) => {
-                        const legendIndex = _.findIndex(legendItems, legend => legend.name === ticker.name.toUpperCase());
-                        if (legendIndex === -1) { // Adding ticker to series
-                            this.setState({spinning: true});
-                            getStockPerformance(ticker.name)
-                            .then(performance => {
-                                this.addTickerToSeries(ticker, performance, ticker.show);
-                            })
-                            .catch(error => {
-                                message.error(error);
-                            })
-                            .finally(() => {
-                                this.setState({spinning: false});
-                            });
-                        }
-                    });
+                // Check to see if the no. of tickers added is lesser than max count
+                if (legendItems.length < this.state.maxTickerCount) { 
+                    this.addTickersToCompare(tickers);
                 } else {
                     message.error(`Max of ${this.state.maxTickerCount} tickers can be added at once`);
                 }
@@ -168,14 +115,89 @@ export class AqHighChartMod extends React.PureComponent {
         }
     }
 
-    addTickerToSeries = (ticker, performance, visible = false) => {
+    addTickerToEmptyArray = (ticker) => {
+        this.setState({spinning: true});
+        getStockPerformance(ticker.name)
+        .then(performance => {
+            this.addTickerToSeries(ticker, performance);
+        })
+        .catch(error => {
+            message.error('Error occurred');
+            console.log(error);
+        })
+        .finally(() => {
+            this.setState({spinning: false});
+        })
+    }
+
+    updateTicker = (ticker) => {
+        const {config, legendItems} = this.state;
+        const series = [...config.series];
+        this.setState({spinning: true});
+        getStockPerformance(ticker.name)
+        .then(performance => {
+            series[0].data = performance;
+            series[0].name = ticker.name;
+            legendItems[0].name = ticker.name;
+            this.setState({config: {...this.state.config, series}});
+        })
+        .catch(error => {
+            message.error(error);
+        }) 
+        .finally(() => {
+            this.setState({spinning: false}, () => {
+                console.log(this.state.legendItems);
+                console.log(this.state.config.series);
+            });
+        });
+    }
+
+    destroyAndAddTicker = (ticker) => {
+        this.setState({config: {...this.state.config, series: []}, legendItems: [], spinning: true});
+        getStockPerformance(ticker.name)
+        .then(performance => {
+            this.addTickerToSeries(ticker, performance);
+        })
+        .catch(error => {
+            message.error(error.message);
+        })
+        .finally(() => {
+            this.setState({spinning: false});
+        });
+    }
+
+    addTickersToCompare = (tickers) => {
+        const {config, legendItems} = this.state;
+        tickers.map((ticker, index) => {
+            const legendIndex = _.findIndex(legendItems, legend => legend.name === ticker.name.toUpperCase());
+            if (legendIndex === -1) { // Adding ticker to series
+                this.setState({spinning: true});
+                getStockPerformance(ticker.name)
+                .then(performance => {
+                    this.addTickerToSeries(ticker, performance);
+                })
+                .catch(error => {
+                    console.log(error);
+                    message.error(error.message);
+                })
+                .finally(() => {
+                    this.setState({spinning: false});
+                });
+            }
+        });
+    }
+
+    addTickerToSeries = (ticker, performance) => {
+        let isLegendVisible, isSeriesVisible;
         const {color} = this.state;
         const legendItems = [...this.state.legendItems];
         const series = [...this.state.config.series];
+        const legendLength = legendItems.filter(item => item.show === true).length;
+        isSeriesVisible = isLegendVisible = legendLength < 5 ? true: false;
         series.push({
             name: ticker.name.toUpperCase(),
             data: performance,
-            visible,
+            visible: isSeriesVisible,
             color: color[legendItems.length]
         });
         legendItems.push({
@@ -183,10 +205,9 @@ export class AqHighChartMod extends React.PureComponent {
             x: '1994-16-02',
             y: 0,
             disabled: ticker.disabled || false,
-            show: ticker.show,
+            show: isLegendVisible,
             color: color[legendItems.length]
         });
-        
         this.setState({config: {...this.state.config, series}, legendItems});
     }
 
@@ -271,7 +292,7 @@ export class AqHighChartMod extends React.PureComponent {
                 Promise.all(allStockRequests)
                 .then(performanceArray => {
                     performanceArray.map((performance, index) => {
-                        this.addTickerToSeries(tickers[index], performance, tickers[index].show);
+                        this.addTickerToSeries(tickers[index], performance);
                     });
                 })
                 .catch(error => {

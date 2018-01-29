@@ -67,8 +67,6 @@ export class StockResearch extends React.Component {
         newTickers.push({name: value, show: true, disabled: true});
         this.setState(prevState => {
             return Object.assign({}, {tickers: newTickers});
-        }, () => {
-            console.log(this.state.tickers);
         });
         getStockData(value, 'latestDetail')
         .then(response => {
@@ -85,9 +83,7 @@ export class StockResearch extends React.Component {
             return getStockData(value, 'rollingPerformance');
         })
         .then(response => {
-            this.setState({rollingPerformance: response.data.rollingPerformance.detail}, () => {
-                // console.log(this.state.rollingPerformance);
-            })
+            this.setState({rollingPerformance: response.data.rollingPerformance.detail});
         })
         .finally(() => {
             this.setState({loadingData: false});
