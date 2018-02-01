@@ -82,12 +82,14 @@ export class AqStockTableMod extends React.Component {
             target[column] = value;
             if(column === 'symbol') {
                 target['tickerValidationStatus'] = value.length === 0 ? 'warning' : 'validating';
-                this.asyncGetTarget(value)
-                .then(response => {
-                    target = Object.assign(target, response);
-                    this.setState({data: newData});
-                    this.props.onChange(newData);
-                });
+                _.throttle(() => {
+                    return this.asyncGetTarget(value)
+                    .then(response => {
+                        target = Object.assign(target, response);
+                        this.setState({data: newData});
+                        this.props.onChange(newData);
+                    });
+                }, 5000)();
             } else {
                 target['totalValue'] = value * target['lastPrice'];
             }
@@ -129,7 +131,7 @@ export class AqStockTableMod extends React.Component {
     }
 
     deleteItems = () => {
-        let data = [...this.state];
+        let data = [...this.state.data];
         data = _.pull(data, ...this.state.selectedRows);
         this.setState({data}, () => {
             this.props.onChange(data);
@@ -137,7 +139,8 @@ export class AqStockTableMod extends React.Component {
     }
 
     addItem = () => {
-        const data = [...this.state];
+        const data = [...this.state.data];
+        console.log(data);
         data.push({
             symbol: '',
             key: data.length,
@@ -150,7 +153,6 @@ export class AqStockTableMod extends React.Component {
             priceHistory: []
         });
         this.setState({data}, () => {
-            console.log(this.state.data);
             this.props.onChange(data);
         });
     }
@@ -160,7 +162,7 @@ export class AqStockTableMod extends React.Component {
             <div>
                 <Table rowSelection={this.getRowSelection()} pagination={false} dataSource={this.state.data} columns={this.columns} />
                 <Button onClick={this.deleteItems}>Delete Selected</Button>
-                <Button onClick={this.addItem}>Add Transaction</Button>
+                <Button onClick={this.addItem}>Add Position</Button>
             </div>
         );
     }

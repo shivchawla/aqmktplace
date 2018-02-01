@@ -5,7 +5,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 import {inputHeaderStyle, layoutStyle} from '../constants';
-import {EditableCell, AqStockTable} from '../components';
+import {EditableCell, AqStockTable, AqDropDown, AqHighChartMod} from '../components';
 import {getUnixStockData} from '../utils';
 import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
@@ -18,6 +18,8 @@ const FormItem = Form.Item;
 
 const dateFormat = 'DD/MM/YYYY';
 const dateOffset = 5;
+const maxNotional = ['100000', '200000', '300000', '500000', '750000', '1000000'];
+const rebalancingFrequency = ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'];
 
 export class CreateAdviceImpl extends React.Component {
     constructor(props) {
@@ -35,9 +37,9 @@ export class CreateAdviceImpl extends React.Component {
                 'HDFC'
             ],
             selectedBenchmark: 'TCS',
-            loadingBenchmark: false,
-            highstockSeries: [],
-            validTickerData: []
+            tickers: [],
+            rebalancingFrequency: rebalancingFrequency[1],
+            maxNotional: maxNotional[0]
         };
         this.columns = [
             {
@@ -133,19 +135,25 @@ export class CreateAdviceImpl extends React.Component {
                     name,
                     description,
                     heading: headline,
-                    benchmark: {
-                        ticker: 'NIFTY_50',
-                        securityType: 'EQ',
-                        country: 'IN',
-                        exchange: 'NSE'
-                    },
                     portfolio: {
-                        startDate,
-                        endDate,
-                        positions: this.processTransactions(),
-                        cash: 0
-                    }
+                        name,
+                        detail: {
+                            startDate,
+                            positions: this.processTransactions(),
+                            cash: 0
+                        },
+                        benchmark: {
+                            ticker: 'NIFTY_50',
+                            securityType: 'EQ',
+                            country: 'IN',
+                            exchange: 'NSE'
+                        },
+                    },
+                    rebalance: this.state.rebalancingFrequency,
+                    maxNotional: this.state.maxNotional
                 };
+                console.log('Everything successful');
+                console.log(requestData);
                 axios({
                     method: 'post',
                     url: `${requestUrl}/advice`,
@@ -227,26 +235,24 @@ export class CreateAdviceImpl extends React.Component {
   
     onChange = (data) => {
         let totalCash = 0;
+        const tickers = [...this.state.tickers];
         data.map((item) => {
+            const tickerIndex = _.findIndex(tickers, item.symbol);
+            if (tickerIndex === -1) {
+                if (item.tickerValidationStatus === 'success') {
+                    tickers.push({name: item.symbol});
+                }
+            }
             if(item.tickerValidationStatus === 'success') {
                 totalCash += item.totalValue;
             }
         });
         const remainingCash = this.state.initialCash - totalCash;
-        const validatedTransaction = this.getVerifiedTransactions().map((item, index) => {
-            return {
-                name: item.symbol,
-                priceHistory: item.priceHistory,
-                show: false,
-                key: index + 1
-            };
+        this.setState({
+            data: _.cloneDeep(data), 
+            remainingCash,
+            tickers: [...tickers]
         });
-        let {validTickerData} = this.state;
-        validTickerData = validTickerData.filter((item, index) => {
-            return item.show === true
-        });
-        validTickerData = [...validTickerData, ...validatedTransaction];
-        this.setState({data: _.cloneDeep(data), remainingCash, validTickerData: _.cloneDeep(validTickerData)});
     }
 
     renderBenchmarkMenu = () => {
@@ -266,32 +272,52 @@ export class CreateAdviceImpl extends React.Component {
     }
 
     onBenchmarkSelected = (ticker) => {
-        this.setState({selectedBenchmark: ticker, loadingBenchmark: true});
-        const {validTickerData} = this.state;
-        getUnixStockData(ticker)
-        .then(timeSeries => {
-            validTickerData[0].priceHistory = timeSeries;
-            validTickerData[0].name = ticker;
-            this.setState({loadingBenchmark: false, validTickerData});
-            console.log(this.state.validTickerData);
-            message.success(`Succesfully loaded benchmark metrics for ${ticker}`);
-        });
+        const tickers = [...this.state.tickers];
+        tickers[0].name = ticker;
+        this.setState({tickers, selectedBenchmark: ticker});
     }
 
-    addTimeSeries = (name, data, renderDefault = false) => {
-        const {validTickerData} = this.state;
-        validTickerData.push({name, priceHistory: data, show: renderDefault, key: 0});
-        this.setState({validTickerData});
+    handleRebalanceMenuClick = (frequency) => {
+        let {rebalancingFrequency} = {...this.state};
+        rebalancingFrequency = frequency;
+        this.setState({rebalancingFrequency});
     }
+
+    handleMaxNotionalClick = (value) => {
+        let {maxNotional} = {...this.state};
+        maxNotional = value;
+        this.setState({maxNotional});
+    }
+
+    renderRebalanceMenu = () => (
+        <Menu>
+            {
+                rebalancingFrequency.map((frequency, index) => (
+                    <Menu.Item key={index}>
+                        <a onClick={() => {this.handleRebalanceMenuClick(frequency)}}>{frequency}</a>
+                    </Menu.Item>
+                ))
+            }
+        </Menu>
+    )
+
+    renderMaxNotionalMenu = () => (
+        <Menu>
+            {
+                maxNotional.map((value, index) => (
+                    <Menu.Item key={index}>
+                        <a onClick={() => this.handleMaxNotionalClick(value)}>{value}</a>
+                    </Menu.Item>
+                ))
+            }
+        </Menu>
+    )
 
     componentWillMount() {
         const {selectedBenchmark} = this.state;
-        message.info(`Loading Benchmark Metrics for ${selectedBenchmark}`);
-        getUnixStockData('TCS')
-        .then(timeSeries => {
-            this.addTimeSeries(selectedBenchmark, timeSeries, true);
-            message.success(`Successfully loaded Benchmark Metrics for ${selectedBenchmark}`);
-        });
+        const tickers = [...this.state.tickers];
+        tickers.push({name: selectedBenchmark, disbled: true, show: true, type: 'Benchmark'});
+        this.setState({tickers});
     }    
 
     render() {
@@ -360,16 +386,18 @@ export class CreateAdviceImpl extends React.Component {
                                 </Row>
                                 <Row type="flex" justify="space-between">
                                     <Col span={6}>
-                                        <h4 style={labelStyle}>Initial Cash</h4>
-                                        <h3>{this.state.initialCash}</h3>
+                                        <h4 style={labelStyle}>Max Notional</h4>
+                                        <AqDropDown 
+                                                renderMenu={this.renderMaxNotionalMenu} 
+                                                value={this.state.maxNotional} 
+                                        />
                                     </Col>
                                     <Col span={6}>
-                                        <h4 style={labelStyle}>Remaining Cash</h4>
-                                        {
-                                            this.state.remainingCash <= 0
-                                                ? <h3 style={{color: 'red'}}>{this.state.remainingCash}</h3>
-                                                : <h3>{this.state.remainingCash}</h3>
-                                        }
+                                        <h4>Rebalancing Frequency</h4>
+                                        <AqDropDown 
+                                                renderMenu={this.renderRebalanceMenu} 
+                                                value={this.state.rebalancingFrequency} 
+                                        />
                                     </Col>
                                     <Col span={6}>
                                         <h4 style={labelStyle}>Start Date</h4>
@@ -378,7 +406,6 @@ export class CreateAdviceImpl extends React.Component {
                                                 rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
                                             })(
                                                 <DatePicker 
-                                                    // disabledDate={this.disabledStartDate} 
                                                     onChange={this.onStartDateChange} 
                                                     format={dateFormat}
                                                     style={inputStyle} 
@@ -386,34 +413,14 @@ export class CreateAdviceImpl extends React.Component {
                                             )}
                                         </FormItem>
                                     </Col>
-                                    <Col span={6}>
-                                        <h4 style={labelStyle}>End Date</h4>     
-                                        <FormItem>
-                                            {getFieldDecorator('endDate', {
-                                                rules: [{type: 'object', required: true, message: 'Please select End Date'}]
-                                            })(
-                                                <DatePicker 
-                                                    disabledDate={this.disabledEndDate} 
-                                                    onChange={this.onEndDateChange} 
-                                                    format={dateFormat} 
-                                                    disabled={!this.state.endDateEditable}
-                                                    style={inputStyle}
-                                                />
-                                            )}
-                                        </FormItem>
-                                    </Col>
                                 </Row>
                                 <Row>
                                     <Col span={6}>
                                         Benchmark: 
-                                        <Dropdown overlay={this.renderBenchmarkMenu()} trigger={['click']}>
-                                            <a className="ant-dropdown-link" href="#">
-                                                {this.state.selectedBenchmark} <Icon type="down" />
-                                            </a>
-                                        </Dropdown>
-                                    </Col>
-                                    <Col span={6}>
-                                        <Spin spinning={this.state.loadingBenchmark}></Spin>
+                                        <AqDropDown 
+                                                renderMenu={this.renderBenchmarkMenu} 
+                                                value={this.state.selectedBenchmark} 
+                                        />
                                     </Col>
                                 </Row>
                                 <Row type="flex" justify="end">
@@ -427,11 +434,11 @@ export class CreateAdviceImpl extends React.Component {
                             <Button style={{borderRadius: '0'}} type="primary" htmlType="submit">Save</Button>
                         </FormItem>
                     </Form>
-                    <Row>
+                    {/* <Row>
                         <Col span={24}>
-                            <AqHighChart series={this.state.validTickerData}/>
+                            <AqHighChartMod tickers={this.state.tickers}/>
                         </Col>
-                    </Row>
+                    </Row> */}
                 </Col>
             </Row>
         );
