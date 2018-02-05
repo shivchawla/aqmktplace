@@ -5,3 +5,5 @@ export * from './StockResearch';
 export * from '../test/AdviceDetail';
 export * from './CreateAdvice';
 export * from './CreatePortfolio';
+export * from './PortfolioDetail';
+export * from './UpdateAdvice';
