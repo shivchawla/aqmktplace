@@ -1,9 +1,12 @@
 import * as React from 'react';
 import {Table, Button} from 'antd';
 import moment from 'moment';
+import axios from 'axios';
 import _ from 'lodash';
 import {EditableCell} from './AqEditableCell';
 import {getUnixStockData, getStockData} from '../utils';
+
+const {aimsquantToken, requestUrl} = require('../localConfig.json');
 
 const initialTransactions = () => {
     const data = [];
@@ -58,8 +61,9 @@ export class AqStockTableMod extends React.Component {
             }
         ];
         this.state = {
-            data: initialTransactions(),
-            selectedRows: []
+            selectedRows: [],
+            data: [],
+            positions: [],
         };
     }
 
@@ -108,6 +112,7 @@ export class AqStockTableMod extends React.Component {
                 target['lastPrice'] = lastPrice;
                 target['tickerValidationStatus'] = 'success';
                 target['sharesDisabledStatus'] = false;
+                target['ticker'] = ticker;
             })
             .catch(error => {
                 target['tickerValidationStatus'] = 'error';
@@ -157,10 +162,31 @@ export class AqStockTableMod extends React.Component {
         });
     }
 
+    componentWillReceiveProps(nextProps) {
+        let data = [];
+        if (this.props.data !== nextProps.data) {
+            data = nextProps.data;
+            this.setState({data});
+        }
+    }
+
+    componentWillMount() {
+        if (!this.props.isUpdate) {
+            const data = initialTransactions();
+            this.setState({data});
+        }
+    }
+
     render() {
         return (
             <div>
-                <Table rowSelection={this.getRowSelection()} pagination={false} dataSource={this.state.data} columns={this.columns} />
+                <Table 
+                        rowSelection={this.getRowSelection()} 
+                        pagination={false} 
+                        dataSource={this.state.data} 
+                        columns={this.columns} 
+                        size="small"
+                />
                 <Button onClick={this.deleteItems}>Delete Selected</Button>
                 <Button onClick={this.addItem}>Add Position</Button>
             </div>

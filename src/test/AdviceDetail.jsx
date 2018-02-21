@@ -1,5 +1,6 @@
 import * as React from 'react';
 import axios from 'axios';
+import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal} from 'antd';
 import {layoutStyle} from '../constants';
@@ -8,7 +9,7 @@ import {AqTableMod, AqPortfolioTable, AqHighChartMod} from '../components';
 
 const TabPane = Tabs.TabPane;
 
-const {aimsquantToken, requestUrl} = require('../localConfig.json');
+const {aimsquantToken, requestUrl, investorId} = require('../localConfig.json');
 const dateFormat = 'YYYY-MM-DD';
 
 export class AdviceDetail extends React.Component {
@@ -22,9 +23,12 @@ export class AdviceDetail extends React.Component {
                 heading: '',
                 advisor: {},
                 updatedDate: '',
-                followers: 0,
+                followers: [],
                 rating: 0,
-                subscribers: 0
+                subscribers: [],
+                maxNotional: 300000,
+                rebalance: '',
+                isPublic: false
             },
             metrics: {
                 totalReturns: 0,
@@ -37,8 +41,27 @@ export class AdviceDetail extends React.Component {
             isDialogVisible: false,
             isUpdateDialogVisible: false,
             userId: '',
+            adviceResponse: {},
+            portfolio: {},
+            disableSubscribeButton: false,
+            disableFollowButton: false
         };
     }
+
+    makeAdvicePublic = () => {
+        const url = `${requestUrl}/advice/${this.props.match.params.id}/publish`;
+        axios({
+            method: 'POST',
+            url,
+            headers: {'aimsquant-token': aimsquantToken},
+        })
+        .then(response => {
+            console.log(response.data);
+        })
+        .catch(error => {
+            console.log(error.message);
+        });
+    };
 
     getAdviceDetail = () => {
         const adviceId = this.props.match.params.id;
@@ -52,6 +75,7 @@ export class AdviceDetail extends React.Component {
         .then((response) => {
             const {name, description, heading, advisor, updatedDate, followers, rating, subscribers} = response.data;
             this.setState({
+                adviceResponse: response.data,
                 adviceDetail: {
                     ...this.state.adviceDetail, 
                     name, 
@@ -59,9 +83,10 @@ export class AdviceDetail extends React.Component {
                     heading,
                     advisor,
                     updatedDate: moment(updatedDate).format(dateFormat),
-                    followers: followers.length,
+                    followers: followers.filter(item => item.active === true),
                     rating: rating.length,
-                    subscribers: subscribers.length
+                    subscribers: subscribers.filter(item => item.active === true),
+                    isPublic: response.data.public
                 }
             });
 
@@ -82,9 +107,12 @@ export class AdviceDetail extends React.Component {
             return axios.get(`${url}/detail`, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
+            console.log(response.data);
             const portfolioArray = [...this.state.portfolioArray]; 
             const tickers = [...this.state.tickers];
+            const portfolio = {...this.state.portfolio};
             const subPositions = response.data.portfolio.detail.subPositions;
+            const {maxNotional, rebalance} = response.data;
             subPositions.map((position, index) => {
                 portfolioArray.push({
                     no: index + 1,
@@ -96,25 +124,34 @@ export class AdviceDetail extends React.Component {
                 });
                 tickers.push({name: position.security.ticker});
             });
-            this.setState({portfolioArray, tickers});
+            this.setState({
+                portfolioArray, 
+                tickers,
+                adviceDetail: {
+                    ...this.state.adviceDetail,
+                    maxNotional,
+                    rebalance
+                },
+                portfolio: response.data.portfolio
+            });
         })
         .catch((error) => {
             console.log(error.data);
         });
-    }
+    };
 
     renderAdviceData = () => {
         const {followers, subscribers, rating} = this.state.adviceDetail;
         return (
             <Col span={18}>
                 <Row>
-                    <CardItem value={followers} label="Subscribers"/>
+                    <CardItem value={followers.length} label="Followers"/>
                     <CardItem value={rating} label="Average Rating"/>
-                    <CardItem value={subscribers} label="Subscribers"/>
+                    <CardItem value={subscribers.length} label="Subscribers"/>
                 </Row>
             </Col>
         );
-    }
+    };
 
     renderAdviceMetrics = () => {
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
@@ -129,32 +166,74 @@ export class AdviceDetail extends React.Component {
                 </Row>
             </Col>
         );
-    }
+    };
 
     toggleDialog = () => {
         const {adviceDetail} = this.state;
         console.log(adviceDetail.advisor.user._id);
         this.setState({isDialogVisible: !this.state.isDialogVisible});
-    }
+    };
+
+    subscribeAdvice = () => {
+        this.setState({disableSubscribeButton: true});
+        axios({
+            method: 'POST',
+            url: `${requestUrl}/advice/${this.props.match.params.id}/subscribe`,
+            headers: {'aimsquant-token': aimsquantToken}
+        })
+        .then(response => {
+            this.toggleDialog();
+            this.getAdviceDetail();
+        })
+        .catch(error => {
+            console.log(error.message);
+        })
+        .finally(() => {
+            this.setState({disableSubscribeButton: false});
+        });
+    };
+
+    followAdvice = () => {
+        this.setState({disableFollowButton: true});
+        axios({
+            method: 'POST',
+            url: `${requestUrl}/advice/${this.props.match.params.id}/follow`,
+            headers: {'aimsquant-token': aimsquantToken}
+        })
+        .then(response => {
+            this.getAdviceDetail();
+        })
+        .catch(error => {
+            console.log(error.message);
+        })
+        .finally(() => {
+            this.setState({disableFollowButton: false});
+        });
+    };
 
     toggleUpdateDialog = () => {
         this.setState({isUpdateDialogVisible: !this.state.isUpdateDialogVisible});
-    }
+    };
 
     renderModal = () => {
         return (
             <Modal
                     title="Subscribe"
                     visible={this.state.isDialogVisible}
-                    onOk={this.toggleDialog}
+                    onOk={this.subscribeAdvice}
                     onCancel={this.toggleDialog}
             >
                 <h3>
-                    Are you sure you want to subscribe
+                    { 
+                        this.checkSubscriber()
+                        ? "Are you sure you want to Unsubscribe"
+                        : "Are you sure you want to Subscribe"
+                    }
                 </h3>
             </Modal>
         );
     }
+
     renderUpdateModal = () => {
         return (
             <Modal
@@ -164,10 +243,10 @@ export class AdviceDetail extends React.Component {
                     onCancel={this.toggleUpdateDialog}
                     width={'100%'}
             >
-                <UpdateAdvice />
+                <UpdateAdvice adviceId={this.props.match.params.id}/>
             </Modal>
         );
-    }
+    };
 
     getUserData = () => {
         const url = `${requestUrl}/me`;
@@ -176,7 +255,7 @@ export class AdviceDetail extends React.Component {
             const userId = response.data._id;
             this.setState({userId});
         });
-    }
+    };
 
     componentWillMount() {
         this.getUserData();
@@ -186,16 +265,27 @@ export class AdviceDetail extends React.Component {
     renderActionButtons = () => {
         const {userId} = this.state;
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
-        console.log(userId);
-        console.log(advisorId);
         if (userId !== advisorId) {
             return (
                 <Row>
                     <Col span={24}>
-                        <Button style={{width: 150}} type="primary" onClick={this.toggleDialog}>Subscribe</Button>
+                        <Button 
+                                onClick={this.toggleDialog} 
+                                style={{width: 150}} 
+                                type="primary" 
+                                disabled={this.state.disableSubscribeButton}
+                        >
+                            {!this.checkSubscriber() ? "Subscribe" : "Unsubscribe"}
+                        </Button>
                     </Col>
                     <Col span={24}>
-                        <Button style={{width: 150, marginTop: 10}}>Follow</Button>
+                        <Button 
+                                onClick={this.followAdvice} 
+                                style={{width: 150, marginTop: 10}} 
+                                disabled={this.state.disableFollowButton}
+                        >
+                            {!this.checkFollower() ? "Follow" : "Unfollow"}
+                        </Button>
                     </Col>
                 </Row>
             );
@@ -204,14 +294,30 @@ export class AdviceDetail extends React.Component {
         return (
             <Row>
                 <Col span={24}>
-                    <Button style={{width: 150}} type="primary">Publish</Button>
+                    {
+                        !this.state.adviceDetail.isPublic 
+                        && <Button onClick={this.makeAdvicePublic} style={{width: 150}} type="primary">Publish</Button>}
                 </Col>
                 <Col span={24}>
                     <Button onClick={this.toggleUpdateDialog} style={{width: 150, marginTop: 10}}>Update Portfolio</Button>
                 </Col>
             </Row>
         );  
-    }
+    };
+
+    checkSubscriber = () => {
+        const {subscribers} = this.state.adviceDetail;
+        return subscribers.filter(item => {
+                return item.investor === investorId && item.active === true;
+            }).length > 0;
+    };
+
+    checkFollower = () => {
+        const {followers} = this.state.adviceDetail;
+        return followers.filter(item => {
+                return item.investor === investorId && item.active === true;
+            }).length > 0;
+    };
 
     render() { 
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
@@ -284,7 +390,7 @@ const CardItem = (props) => {
             <h5>{props.label}</h5>
         </Col>
     );
-}
+};
 
 const DividerItem = () => (
     <Row>
@@ -296,12 +402,12 @@ const DividerItem = () => (
 
 const headerStyle = {
     fontSize: '20px'
-}
+};
 
 const labelStyle = {
     fontsize: '18px'
-}
+};
 
 const cardItemStyle = {
     border: '1px solid #444'
-}
+};

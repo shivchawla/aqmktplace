@@ -7,3 +7,4 @@ export * from './CreateAdvice';
 export * from './CreatePortfolio';
 export * from './PortfolioDetail';
 export * from './UpdateAdvice';
+export * from './CreatePortfolioDialog';

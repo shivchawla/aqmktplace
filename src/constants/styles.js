@@ -11,7 +11,8 @@ export const layoutStyle = {
     backgroundColor: '#fff',
     boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)',
     padding: '20px 30px',
-    marginTop: '20px'
+    marginTop: '20px',
+    transition: 'all 0.4s ease-in-out'
 };
 
 export const labelStyle = {

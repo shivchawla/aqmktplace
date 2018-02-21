@@ -1,144 +1,160 @@
 import * as React from 'react';
 import axios from 'axios';
 import _ from 'lodash';
-import {Tabs, Row, Col, Input, Form, message, Button} from 'antd';
-import {labelStyle, inputStyle} from '../constants';
-import {AqStockTableTransaction, AqHighChartMod} from '../components';
+import {Row, Col, Checkbox, Tabs, Button, Modal} from 'antd';
+import {adviceTransactions} from '../mockData/AdviceTransaction';
+import {AdviceTransactionTable, AqStockTableTransaction} from '../components';
+import {AdviceItem} from '../components/AdviceItem';
+import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
+import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
+import {layoutStyle} from '../constants';
 
-const {TabPane} = Tabs; 
-const FormItem = Form.Item;
-const {localConfig, requestUrl} = require('../localConfig.json');
+const TabPane = Tabs.TabPane;
+const {investorId} = require('../localConfig.json');
 
-class CreatePortfolioImpl extends React.Component {
+export class CreatePortfolio extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: [],
-            tickers: [
-                // {name: TCS, show: false}
-            ],
-            initialCash: 100000,
-            transactionError: '',
-            investorId: ''
+            advices: [],
+            isSubscibedAdviceModalVisible: false,
+            stockTransactions: [],
+            cashTransactions: []
         }
     }
 
-    tabChange = (key) => {
-        console.log(key);
+    renderAdviceTransactions = () => {
+        const {advices} = this.state;
+        return (
+            <Row>
+                <Col span={4}>
+                    <Button>Delete Selected</Button>
+                </Col>
+                <Col span={4} offset={16}>
+                    <Button 
+                            onClick={this.toggleSubscribedAdviceModal} 
+                            style={{right: 0, position: 'absolute'}}
+                    >
+                        Browse Advice
+                    </Button>
+                </Col>
+                <Col span={24} style={{marginTop: 20}}>
+                    {
+                        advices.length > 0 
+                        ? <AdviceTransactionTable advices={advices} />
+                        : <h5>Please add advices to your portfolio</h5>
+                    }
+                </Col>
+            </Row>
+        );
     }
 
-    onChange = (data) => {
-        this.setState({data});
-        const tickers = [];
-        data.map((transaction, index) => {
-            const tickerIndex = _.findIndex(tickers, transaction.symbol);
-            if (tickerIndex === -1) {
-                if (transaction.tickerValidationStatus === 'success') {
-                    tickers.push({name: transaction.symbol.toUpperCase()});
-                }
-            } else {
-                message.error('Ticker already added');
-            }
-            
-        });
-        this.setState({tickers: [...tickers]});
+    renderStockTransactions = () => {
+        return (
+            <AqStockTableCreatePortfolio onChange={this.onStockTransactionChange}/>
+        );
     }
 
-    getRemainingCash = () => {
-        const {data} = this.state;
-        let totalCash = 0;
-        data.map((item, index) => {
-            if (item.cashLink) {
-                totalCash += item.totalValue;
-            }
-        });
-
-        return this.state.initialCash - totalCash;
+    renderCashTransactions = () => {
+        return (
+            <AqStockTableCashTransaction onChange={this.onCashTransactionChange}/>
+        );
     }
 
-    handleSubmit = (e) => {
-        e.preventDefault();
-        const verifiedTransactions = this.getVerifiedTransactions();
-        let transactionError = '';
-        
-        this.props.form.validateFields((err, values) => {
-            if (!err && verifiedTransactions.length > 0) {
-                transactionError = '';
-            } else {
-                transactionError = 'Valid Transactions must be added';
-            }
-            this.setState({transactionError});
+    toggleSubscribedAdviceModal = () => {
+        this.setState({isSubscibedAdviceModalVisible: !this.state.isSubscibedAdviceModalVisible});
+    }
+
+    renderSubscribedAdviceModal = () => {
+        return (
+            <Modal 
+                    title="Add Advices"
+                    visible={this.state.isSubscibedAdviceModalVisible}
+                    onCancel={this.toggleSubscribedAdviceModal}
+                    onOk={this.toggleSubscribedAdviceModal}
+                    width="80%"
+                    bodyStyle={{
+                        height: '600px',
+                        overflow: 'hidden',
+                        overflowY: 'scroll'
+                    }}
+            >
+                <AdviceItem 
+                        investorId={investorId}
+                        addAdvice={this.addAdvice}
+                        deleteAdvice = {this.deleteAdvice}
+                />
+            </Modal>
+        );
+    }
+
+    addAdvice = (advice) => {
+        const advices = [...this.state.advices];
+        advices.push(advice);
+        this.setState({advices}, () => {
+            console.log(this.state.advices);
+        });
+    }
+    
+    deleteAdvice = (advice) => {
+        const advices = [...this.state.advices];
+        const adviceIndex = _.findIndex(advices, item => item.key === advice.key);
+        advices.splice(adviceIndex, 1);
+        this.setState({advices}, () => {
+            console.log(this.state.advices);
         });
     }
 
-    getVerifiedTransactions = () => {
-        const {data} = this.state;
-        const verifiedTransactions = data.filter((item, index) => {
-            return item.tickerValidationStatus === 'success'; 
-        });
+    onStockTransactionChange = (data) => {
+        this.setState({stockTransactions: data});
+    }
 
-        return verifiedTransactions;
+    onCashTransactionChange = (data) => {
+        this.setState({cashTransactions: data});
+    }
+
+    handleSubmit = () => {
+        console.log('Advice Transactions', this.state.advices);
+        console.log('Stock Transactions', this.state.stockTransactions);
+        console.log('Cash Transactions', this.state.cashTransactions);
     }
 
     render() {
-        const {getFieldDecorator} = this.props.form;
-        return(
+        return (
             <Row>
-                <Col span={18}>
-                    <Form onSubmit={this.handleSubmit}>
-                        <Row>
-                            <Col span={8}>
-                                <FormItem>
-                                    {getFieldDecorator('name', {
-                                        rules: [{required: true, message: 'Please enter Portfolio Name'}]
-                                    })(
-                                        <Input style={inputStyle} placeholder="Portfolio Name"/>
-                                    )}
-                                </FormItem>
-                            </Col>
+                {this.renderSubscribedAdviceModal()}
+                <Col span={18} style={layoutStyle}>
+                    <Row type="flex" justify="end">
+                        <Col span={5}>
+                            <h5>Remaining Cash 10000</h5>
+                        </Col>
+                        <Col span={4}>
+                            <Checkbox>Link Cash</Checkbox>
+                        </Col>
                     </Row>
-                        <Row type="flex" justify="start">
-                            <Col span={6}>
-                                <h4 style={labelStyle}>Initial Cash</h4>
-                                <h3>{this.state.initialCash}</h3>
-                            </Col>
-                            <Col span={6}>
-                                <h4 style={labelStyle}>Remaining Cash</h4>
-                                {
-                                    this.getRemainingCash() <= 0
-                                        ? <h3 style={{color: 'red'}}>{this.getRemainingCash()}</h3>
-                                        : <h3>{this.getRemainingCash()}</h3>
-                                }
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={24}>
-                                <h4 style={{color: 'red'}}>{this.state.transactionError}</h4>
-                            </Col>
-                            <Col span={24}>
-                                <Tabs onChange={this.tabChange}>
-                                    <TabPane tab="tab1" key="1">
-                                        <Row>
-                                            <Col span={24}>
-                                                <AqStockTableTransaction onChange={this.onChange}/>
-                                            </Col>
-                                        </Row>
-                                    </TabPane>
-                                    <TabPane tab="tab1" key="2">Advice Transaction</TabPane>
-                                </Tabs>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={24}>
-                                <FormItem>
-                                    <Button style={{borderRadius: '0'}} type="primary" htmlType="submit">Create Portfolio</Button>
-                                </FormItem>
-                            </Col>
-                        </Row>
-                    </Form>
                     <Row>
                         <Col span={24}>
-                            <AqHighChartMod tickers={this.state.tickers}/> 
+                            <Tabs defaultActiveKey="1">
+                                <TabPane tab="Stock Transaction" key="1">
+                                    {this.renderStockTransactions()}
+                                </TabPane> 
+                                <TabPane tab="Advice Transaction" key="2">
+                                    {this.renderAdviceTransactions()}
+                                </TabPane> 
+                                <TabPane tab="Cash Transaction" key="3">
+                                    {this.renderCashTransactions()}
+                                </TabPane> 
+                            </Tabs>
+                        </Col>
+                    </Row>
+                </Col>
+                <Col span={5} offset={1}>
+                    <Row type="flex">
+                        <Col span={24}>
+                            <Button type="primary" onClick={this.handleSubmit}>Save</Button>
+                        </Col>
+                        <Col span={24} style={{marginTop: 10}}>
+                            <Button>Cancel</Button>
                         </Col>
                     </Row>
                 </Col>
@@ -146,5 +162,3 @@ class CreatePortfolioImpl extends React.Component {
         );
     }
 }
-
-export const CreatePortfolio = Form.create()(CreatePortfolioImpl);

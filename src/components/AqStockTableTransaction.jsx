@@ -9,7 +9,7 @@ const dateFormat = 'YYYY-MM-DD';
 
 const initialTransactions = () => {
     const data = [];
-    for(let i=0; i < 5; i++) {
+    for(let i=0; i < 3; i++) {
         data.push({
             symbol: '',
             key: i,
