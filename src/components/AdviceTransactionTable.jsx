@@ -1,6 +1,8 @@
 import * as React from 'react';
+import moment from 'moment';
 import {Collapse, Row, Col, Table, Input, DatePicker} from 'antd';
 import {EditableCell} from './AqEditableCell';
+import {getStockData} from '../utils';
 
 const Panel = Collapse.Panel;
 
@@ -53,11 +55,15 @@ export class AdviceTransactionTable extends React.Component {
     }
 
     handleRowChange = (value, record, column) => {
-        const newData = [...this.state.data];
+        const advices = [...this.state.advices];
+        const targetAdvice = advices.filter(item => item.key === record.adviceKey)[0];
+        const newData = targetAdvice.composition;
         const target = newData.filter(item => item.key === record.key)[0];
         if (target) {
             target[column] = value;
-            this.setState({data: newData});
+            target['costBasic'] = value * target['shares'];
+            targetAdvice.composition = newData;
+            this.setState({advices});
         }
     }
 
@@ -105,8 +111,45 @@ export class AdviceTransactionTable extends React.Component {
         e.stopPropagation();
     }
 
-    handleDateChange = (date) => {
-        console.log(date);
+    handleDateChange = (date, advice) => {
+        const advices = [...this.state.advices];
+        const targetAdvice = advices.filter(item => item.key === advice.key)[0];
+        targetAdvice.date = date.format('YYYY-MM-DD');
+        const tickers = targetAdvice.composition.map(item => item.symbol); // Get the symbols from advice
+        this.fetchLastPrice(tickers)
+        .then(priceHistory => {
+            priceHistory.map((tickerItem, index) => {
+                const  compositionItem = targetAdvice.composition.filter(item => item.symbol === tickerItem.ticker)[0];
+                const selectedPrice = tickerItem.priceHistory.filter(item => {
+                    const newDate = moment(item.date * 1000).format('YYYY-MM-DD');
+                    const selectedDate = date.format('YYYY-MM-DD');
+                    return newDate === selectedDate;
+                })[0];
+                compositionItem.price = selectedPrice !== undefined ? selectedPrice.price.toFixed(2) : 15;
+                this.setState({advices});
+            });
+        });
+    }
+
+    fetchLastPrice = (tickers) => { // fetch last price by tickers
+        const priceData = [];
+        return new Promise((resolve, reject) => {
+            tickers.map(ticker => {
+                getStockData(ticker)
+                .then(response => {
+                    priceData.push({
+                        ticker,
+                        priceHistory: response.data.priceHistory.values
+                    });
+                    if (priceData.length === tickers.length) {
+                        resolve(priceData);
+                    }
+                })
+                .catch(error => {
+                    console.log(error.message);
+                });
+            });   
+        });
     }
 
     handleDateClick = (e) => {
@@ -135,7 +178,7 @@ export class AdviceTransactionTable extends React.Component {
                     </Col>
                     <Col span={4} offset={1}>
                         <DatePicker
-                            onChange={this.handleDateChange}
+                            onChange={date => this.handleDateChange(date, advice)}
                         />
                     </Col>
                     <Col span={4} offset={2}>

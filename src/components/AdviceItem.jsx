@@ -136,7 +136,6 @@ export class AdviceItem extends React.Component {
     
     handleCheckboxChange = (e, advice) => {
         if (e.target.checked) {
-            console.log(advice);
             this.props.addAdvice(this.processAdvice(advice));
         } else {
             this.props.deleteAdvice(this.processAdvice(advice));
@@ -145,27 +144,31 @@ export class AdviceItem extends React.Component {
     }
 
     processAdvice = (advice) => {
+        const key = this.adviceKey++;
+
         return {
             name: advice.name,
             netAssetValue: 1234,
             weight: '12.4%',
             profitLoss: '+12.4%',
             units: 1,
-            key: this.adviceKey++,
-            composition: this.processAdviceComposition(advice)
+            key,
+            date: moment().format('YYYY-MM-DD'),
+            composition: this.processAdviceComposition(advice, key)
         }
     }
 
-    processAdviceComposition = (advice) => {
+    processAdviceComposition = (advice, key) => {
         const composition = [];
         advice.portfolio.detail.positions.map((item, index) => {
             composition.push({
                 key: index,
+                adviceKey: key,
                 symbol: item.security.ticker,
                 shares: item.quantity,
                 modifiedShares: item.quantity,
-                price: '$15',
-                costBasic: '$12',
+                price: 15,
+                costBasic: 12,
                 unrealizedPL: 1231,
                 weight: '12%',
             });

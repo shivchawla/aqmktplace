@@ -45,7 +45,7 @@ export class AqStockTableCashTransaction extends React.Component {
                 title: 'Notes',
                 dataIndex: 'notes',
                 key: 'notes',
-                render: (text, record) => this.renderInput(text, record, 'text')
+                render: (text, record) => this.renderInput(text, record, 'notes', 'text')
             }
         ];
         this.state = {

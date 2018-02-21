@@ -9,6 +9,7 @@ export const adviceTransactions = [
         composition: [
             {
                 key: 1,
+                adviceKey: 1,
                 symbol: 'AMZ',
                 shares: 1234,
                 modifiedShares: 1234,
@@ -19,6 +20,7 @@ export const adviceTransactions = [
             },
             {
                 key: 2,
+                adviceKey: 1,
                 symbol: 'TCS',
                 shares: 1234,
                 modifiedShares: 1234,
@@ -29,6 +31,7 @@ export const adviceTransactions = [
             },
             {
                 key: 3,
+                adviceKey: 1,
                 symbol: 'WIPRO',
                 shares: 1234,
                 modifiedShares: 1234,
@@ -49,6 +52,7 @@ export const adviceTransactions = [
         composition: [
             {
                 key: 1,
+                adviceKey: 2,
                 symbol: 'AMZ',
                 shares: 1234,
                 modifiedShares: 1234,
@@ -59,6 +63,7 @@ export const adviceTransactions = [
             },
             {
                 key: 2,
+                adviceKey: 2,
                 symbol: 'TCS',
                 shares: 1234,
                 modifiedShares: 1234,
