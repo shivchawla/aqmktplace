@@ -147,6 +147,7 @@ export class AdviceItem extends React.Component {
         const key = this.adviceKey++;
 
         return {
+            adviceId: advice.id,
             name: advice.name,
             netAssetValue: 1234,
             weight: '12.4%',

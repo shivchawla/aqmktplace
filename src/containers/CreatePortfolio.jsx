@@ -118,21 +118,23 @@ export class CreatePortfolio extends React.Component {
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
-        console.log(transactions);
-        const portfolioId = '5a8d426573a4de1cc54d1aad';
+        const portfolioId = '5a8d62c1091d574133ba5606';
         const url = `${requestUrl}/investor/${investorId}/portfolio/${portfolioId}/transactions`;
         axios({
             url,
             method: 'POST',
             headers: {'aimsquant-token': aimsquantToken},
-            data: transactions
+            data: {
+                action: "add",
+                transactions
+            }
         })
         .then(response => {
             message.success('Transactions Added');
         })
         .catch(error => {
             message.error(error.message);
-        })
+        });
     }
 
     processAdviceTransaction = (adviceTransactions) => {
@@ -152,7 +154,7 @@ export class CreatePortfolio extends React.Component {
                     date: transaction.date,
                     commission: 0,
                     cashLinked: false,
-                    advice: "",
+                    advice: transaction.adviceId,
                     _id: ""
                 })
             });
@@ -177,7 +179,7 @@ export class CreatePortfolio extends React.Component {
                     price: Number(price),
                     fee: 0,
                     date,
-                    commission,
+                    commission: Number(commission),
                     cashLinked: false,
                     advice: "",
                     _id: ""

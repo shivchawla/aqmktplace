@@ -9,7 +9,7 @@ const addInititalTransaction = () => {
         transactions.push({
             key: i,
             symbol: '',
-            date: '',
+            date: moment().format("YYYY-MM-DD"),
             shares: 0,
             price: 0,
             commission: 0
