@@ -1,6 +1,7 @@
 import * as React from 'react';
 import moment from 'moment';
-import {Table, DatePicker, Menu, Dropdown, Icon} from 'antd';
+import _ from 'lodash';
+import {Table, DatePicker, Menu, Dropdown, Icon, Row, Col, Button} from 'antd';
 import {EditableCell} from './AqEditableCell';
 
 const addInitialTransactions = () => {
@@ -49,7 +50,8 @@ export class AqStockTableCashTransaction extends React.Component {
             }
         ];
         this.state = {
-            data: addInitialTransactions()
+            data: addInitialTransactions(),
+            selectedRows: []
         }
     }
 
@@ -106,9 +108,60 @@ export class AqStockTableCashTransaction extends React.Component {
         }
     }
 
+    getRowSelection = () => {
+        return {
+            onChange: (selectedRowKeys, selectedRows) => {
+                this.setState(prevState => {
+                    return {selectedRows}
+                });
+            }
+        };
+    }
+
+    deleteItems = () => {
+        let data = [...this.state.data];
+        data = _.pull(data, ...this.state.selectedRows);
+        this.setState({data}, () => {
+            this.props.onChange(data);
+        });
+    }
+
+    addItem = () => {
+        let data = [...this.state.data];
+        data.push({
+            cash: 0,
+            date: '2018-02-21',
+            type: 'deposit',
+            notes: '',
+            key: data.length + 1
+        });
+        this.setState({data}, () => {
+            this.props.onChange(data);
+        });
+    }
+
     render() {
         return (
-            <Table columns={this.columns} dataSource={this.state.data} pagination={false}/>
+            <Row>
+                <Col span={24}>
+                    <Row>
+                        <Col span={4}>
+                            <Button onClick={this.deleteItems}>Delete Selected</Button>
+                        </Col>
+                        <Col span={4} offset={16}>
+                            <Button onClick={this.addItem}>Add Transaction</Button>
+                        </Col>
+                    </Row>
+                </Col>
+                <Col span={24} style={{marginTop: 20}}>
+                    <Table 
+                            dataSource={this.state.data} 
+                            columns={this.columns} 
+                            pagination={false} 
+                            rowSelection={this.getRowSelection()} 
+                    />
+                </Col>
+            </Row>
         );
     }
 }

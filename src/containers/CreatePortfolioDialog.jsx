@@ -1,6 +1,7 @@
 import * as React from 'react';
-import {Form, Modal, Button, Row, Col, Input, Menu, Dropdown, Icon, message} from 'antd';
 import axios from 'axios';
+import {Redirect, withRouter} from 'react-router';
+import {Form, Modal, Button, Row, Col, Input, Menu, Dropdown, Icon, message} from 'antd';
 
 const FormItem = Form.Item;
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.json');
@@ -60,7 +61,9 @@ class CreatePortfolioDialogImpl extends React.Component {
                     data: requestData
                 })
                 .then(response => {
+                    const portfolioId = response.data._id;
                     message.success("Portfolio Created successfully");
+                    this.props.history.push(`dashboard/createportfolio/${portfolioId}`);
                 })
                 .catch(error => {
                     message.error(error.message);

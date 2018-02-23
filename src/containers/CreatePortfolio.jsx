@@ -2,7 +2,7 @@ import * as React from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
-import {Row, Col, Checkbox, Tabs, Button, Modal, message} from 'antd';
+import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 import {AdviceTransactionTable, AqStockTableTransaction} from '../components';
 import {AdviceItem} from '../components/AdviceItem';
@@ -18,9 +18,11 @@ export class CreatePortfolio extends React.Component {
         super(props);
         this.state = {
             advices: [],
+            presentAdvices: [],
             isSubscibedAdviceModalVisible: false,
             stockTransactions: [],
-            cashTransactions: []
+            cashTransactions: [],
+            toggleValue: 'advice'
         }
     }
 
@@ -43,6 +45,20 @@ export class CreatePortfolio extends React.Component {
                     {
                         advices.length > 0 
                         ? <AdviceTransactionTable advices={advices} />
+                        : <h5>Please add advices to your portfolio</h5>
+                    }
+                </Col>
+            </Row>
+        );
+    }
+
+    renderPresentAdviceTransactions = () => {
+        return (
+            <Row>
+                <Col span={24} style={{marginTop: 20}}>
+                    {
+                        adviceTransactions.length > 0 
+                        ? <AdviceTransactionTable preview advices={this.state.presentAdvices} />
                         : <h5>Please add advices to your portfolio</h5>
                     }
                 </Col>
@@ -118,7 +134,8 @@ export class CreatePortfolio extends React.Component {
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
-        const portfolioId = '5a8d62c1091d574133ba5606';
+        console.log(transactions);
+        const portfolioId = this.props.match.params.id;
         const url = `${requestUrl}/investor/${investorId}/portfolio/${portfolioId}/transactions`;
         axios({
             url,
@@ -126,6 +143,7 @@ export class CreatePortfolio extends React.Component {
             headers: {'aimsquant-token': aimsquantToken},
             data: {
                 action: "add",
+                preview: false,
                 transactions
             }
         })
@@ -161,6 +179,51 @@ export class CreatePortfolio extends React.Component {
         });
 
         return transactions;
+    }
+
+    processPresentAdviceTransaction = (adviceTransactions) => {
+        const advices = [];
+        adviceTransactions.map((item, index) => {
+            const adviceIndex = _.findIndex(advices, advice => advice.id === item.advice);
+            if (adviceIndex === -1) {
+                advices.push({
+                    id: item.advice,
+                    name: item.advice !== null ? `Sample Advice ${index}` : 'My Portfolio',
+                    key: index,
+                    netAssetValue: 1234,
+                    weight: '12.4%',
+                    profitLoss: '+12.4%',
+                    units: 1,
+                    composition: [
+                        {
+                            key: 1,
+                            adviceKey: index,
+                            symbol: item.security.ticker,
+                            shares: 1234,
+                            modifiedShares: 1234,
+                            price: item.lastPrice,
+                            costBasic: item.avgPrice,
+                            unrealizedPL: 1231,
+                            weight: '12%',
+                        }
+                    ]
+                })
+            } else {
+                advices[adviceIndex].composition.push({
+                    key: index + 1,
+                    adviceKey: advices[adviceIndex].key,
+                    symbol: item.security.ticker,
+                    shares: 1234,
+                    modifiedShares: 1234,
+                    price: item.lastPrice,
+                    costBasic: item.avgPrice,
+                    unrealizedPL: 1231,
+                    weight: '12%',
+                })
+            }
+        });
+
+        return advices;
     }
 
     processStockTransaction = (stockTransactions) => {
@@ -217,6 +280,22 @@ export class CreatePortfolio extends React.Component {
         return transactions;
     }
 
+    toggleView = (e) => {
+        this.setState({toggleValue: e.target.value});
+    }
+
+    componentWillMount() {
+        const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
+        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        .then(response => {
+            console.log(this.processPresentAdviceTransaction(response.data.detail.subPositions));
+            this.setState({presentAdvices: this.processPresentAdviceTransaction(response.data.detail.subPositions)});
+        })
+        .catch(error => {
+            console.log(error.message);
+        })
+    }
+
     render() {
         return (
             <Row>
@@ -232,7 +311,7 @@ export class CreatePortfolio extends React.Component {
                     </Row>
                     <Row>
                         <Col span={24}>
-                            <Tabs defaultActiveKey="2">
+                            <Tabs defaultActiveKey="1">
                                 <TabPane tab="Stock Transaction" key="1">
                                     {this.renderStockTransactions()}
                                 </TabPane> 
@@ -245,6 +324,38 @@ export class CreatePortfolio extends React.Component {
                             </Tabs>
                         </Col>
                     </Row>
+                    {/* <Row>
+                        <Col span={24} style={{marginTop: 20}}>
+                            <Row>
+                                <Col span={24}>
+                                    <h3>Preview</h3>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Tabs defaultActiveKey="2">
+                                    <TabPane tab="Performance" key="1"></TabPane>
+                                    <TabPane tab="Portfolio" key="2">
+                                        <Row>
+                                            <Col span={4}>
+                                                <h5>Cash 1000</h5>
+                                            </Col>
+                                            <Col span={8} offset={12}>
+                                                <Radio.Group value={this.state.toggleValue} onChange={this.toggleView} style={{position: 'absolute', right: 0}}>
+                                                    <Radio.Button value="advice">Advice</Radio.Button>
+                                                    <Radio.Button value="stock">Stock</Radio.Button>
+                                                </Radio.Group>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col span={24}>
+                                                {this.renderPresentAdviceTransactions()}
+                                            </Col>
+                                        </Row>
+                                    </TabPane>
+                                </Tabs>
+                            </Row>
+                        </Col>
+                    </Row> */}
                 </Col>
                 <Col span={5} offset={1}>
                     <Row type="flex">

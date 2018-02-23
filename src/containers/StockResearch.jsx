@@ -42,7 +42,7 @@ export class StockResearch extends React.Component {
     addItem = () => {
         const {tickerName} = this.state;
         const tickers = [...this.state.tickers];
-        tickers.push({name: tickerName, show: true});
+        tickers.push({name: tickerName, show: true, data: []});
         this.setState({tickers});
     }
 
@@ -92,7 +92,7 @@ export class StockResearch extends React.Component {
 
     onCompareSelect = (value) => {
         const tickers = [...this.state.tickers];
-        tickers.push({name: value, show: false});
+        tickers.push({name: value, show: false, data: []});
         this.setState({tickers});
     }
 

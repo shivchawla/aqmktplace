@@ -75,9 +75,9 @@ class App extends React.Component {
                         <Route exact={true} path='/quantresearch' component={QuantResearch} />
                         <Route exact={true} path='/advice/:id' component={AdviceDetail} />
                         <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} />
-                        <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} />
+                        <Route exact={true} path='/dashboard/createportfolio/:id' component={CreatePortfolio} />
                         <Route exact={true} path='/dashboard/updateadvice' component={UpdateAdvice} />
-                        <Route exact={true} path='/dashboard/portfolio' component={PortfolioDetail} />
+                        <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} />
                     </Content>
                 </Layout>
             </Layout>

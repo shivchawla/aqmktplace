@@ -177,12 +177,15 @@ export class AdviceTransactionTable extends React.Component {
                         }
                     </Col>
                     <Col span={4} offset={1}>
-                        <DatePicker
-                            onChange={date => this.handleDateChange(date, advice)}
-                        />
+                        {
+                            !this.props.preview &&
+                            <DatePicker
+                                onChange={date => this.handleDateChange(date, advice)}
+                            />
+                        }
                     </Col>
                     <Col span={4} offset={2}>
-                        <MetricItem value={advice.netAssetValue} label="Net Cost Value" />
+                        <MetricItem value={advice.netAssetValue} label="Net Asset Value" />
                     </Col>
                 </Row>
             );
