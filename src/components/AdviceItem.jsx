@@ -106,7 +106,7 @@ export class AdviceItem extends React.Component {
                 <Panel header={this.renderHeaderItem(item)} key={index}>
                     <Tabs>
                         <TabPane tab="Composition" key="1">
-                            <Table columns={this.columns} dataSource={data} pagination={false}/>
+                            <Table size="small" columns={this.columns} dataSource={data} pagination={false}/>
                         </TabPane>
                         <TabPane tab="Performance" key="2">
                             <h4>Performance</h4>

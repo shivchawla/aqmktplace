@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Layout, Menu, Row, Col} from 'antd';
 import {Route, withRouter} from 'react-router-dom';
+import TransitionGroup from 'react-transition-group/TransitionGroup';
 import AqBreadCrumb from './components/AqBreadCrumb';
 import {AqNavLink, AqLink} from './components';
 import {
@@ -12,10 +13,15 @@ import {
     CreateAdvice, 
     CreatePortfolio,
     PortfolioDetail,
-    UpdateAdvice
+    UpdateAdvice,
+    PortfolioAddTransactions
 } from './containers'; 
 
 const {Header, Content} = Layout;
+const firstChild = props => {
+    const childrenArray = React.Children.toArray(props.children);
+    return childrenArray[0] || null;
+};
 
 class App extends React.Component {
     constructor(props) {
@@ -28,8 +34,11 @@ class App extends React.Component {
     componentWillMount() {
         // listening to route change and updating local state
         this.props.history.listen((location) => { 
-            const {pageTitle = ''} = location.state;
-            this.setState({pageTitle});
+            if (location.state) {
+                const {pageTitle = ''} = location.state;
+                console.log(location.state);
+                this.setState({pageTitle});
+            }   
         });
     }
 
@@ -75,9 +84,10 @@ class App extends React.Component {
                         <Route exact={true} path='/quantresearch' component={QuantResearch} />
                         <Route exact={true} path='/advice/:id' component={AdviceDetail} />
                         <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} />
-                        <Route exact={true} path='/dashboard/createportfolio/:id' component={CreatePortfolio} />
+                        <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} />
                         <Route exact={true} path='/dashboard/updateadvice' component={UpdateAdvice} />
                         <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} />
+                        <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
                     </Content>
                 </Layout>
             </Layout>

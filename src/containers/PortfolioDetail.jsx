@@ -1,9 +1,13 @@
 import * as React from 'react';
 import _ from 'lodash';
+import Radium from 'radium';
 import axios from 'axios';
-import {Row, Col, Divider, Tabs, Radio, Card, Table} from 'antd';
+import {Row, Col, Divider, Tabs, Radio, Card, Table, Button} from 'antd';
 import {layoutStyle} from '../constants';
 import {AdviceTransactionTable, AqHighChartMod} from '../components';
+import {CreatePortfolioDialog} from '../containers';
+
+const ReactHighcharts = require('react-highcharts');
 
 const TabPane = Tabs.TabPane;
 const {requestUrl, investorId, aimsquantToken} = require('../localConfig.json');
@@ -17,15 +21,47 @@ const metrics = [
 ]
 
 export class PortfolioDetail extends React.Component {
-
     constructor(props) {
         super(props);
         this.state = {
             presentAdvices: [],
             toggleValue: 'advice',
+            togglePerformance: 'dollar',
             stockPositions: [],
             portfolioMetrics: [],
-            tickers: []
+            tickers: [],
+            portfolioConfig: {
+                chart: {
+                    type: 'pie',
+                    options3d: {
+                        enabled: true,
+                        alpha: 45
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        innerSize: 100,
+                        depth: 45
+                    }
+                },
+                series: [],
+                colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
+            },
+            performanceDollarSeries: [],
+            performancepercentageSeries: [],
+            performanceConfig: {
+                colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
+                chart: {
+                    type: 'bar'
+                },
+                xAxis: {
+                    categories: ['Performance']
+                },
+                credits: {
+                    enabled: false
+                },
+                series: []
+            }
         };
         this.columns = [
             {
@@ -53,11 +89,10 @@ export class PortfolioDetail extends React.Component {
                 dataIndex: 'country',
                 key: 'country'
             }
-        ]
+        ];
     }
 
     renderMetrics = () => {
-        console.log(this.state.portfolioMetrics);
         return this.state.portfolioMetrics.map((item, index) => (
             <Col span={3} style={{marginRight: 30}} key={index}>
                 <MetricItem value={item.value} label={item.label} />
@@ -155,13 +190,27 @@ export class PortfolioDetail extends React.Component {
         this.setState({toggleValue: e.target.value});
     }
 
+    handlePerformanceToggle = (e) => {
+        const performanceSeries = e.target.value === 'dollar' 
+                ? this.state.performanceDollarSeries 
+                : this.state.performancepercentageSeries;
+        this.setState({
+            togglePerformance: e.target.value,
+            performanceConfig: {
+                ...this.state.performanceConfig,
+                series: performanceSeries
+            }
+        });
+    }
+
     componentWillMount() {
+        const series = [];
+        let performanceSeries = [...this.state.performanceConfig.series];
         const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
         const tickers = [...this.state.tickers];
         const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${this.props.match.params.id}`;
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            console.log(response.data);
             tickers.push({
                 name: response.data.benchmark.ticker,
                 show: true
@@ -174,17 +223,26 @@ export class PortfolioDetail extends React.Component {
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
-            console.log(response.data);
-            let performanceSeries = response.data[0].current.portfolioValues.map((item, index) => {
+            let performanceSeries = response.data.current.portfolioValues.map((item, index) => {
                 return [item.date * 1000, item.netValue];
             });
-            console.log(performanceSeries);
             tickers.push({
                 name: 'Advice',
                 show: true,
                 data: performanceSeries
             });
-            const portfolioMetrics = response.data[0].current.metrics[0].portfolioPerformance;
+            const portfolioMetrics = response.data.current.metrics.portfolioPerformance;
+            const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
+                return {name: item.ticker, data: [item.stockPerformance.pnl]}
+            });
+            console.log(constituentDollarPerformance);
+            const constituentPercentagePerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
+                return {name: item.ticker, data: [item.stockPerformance.pnl_pct]}
+            });
+            const portfolioComposition = response.data.current.metrics.portfolioComposition.map((item, index) =>{
+                return [item.ticker, Math.round(item.weight * 10000) / 100]
+            });
+            series.push({name: 'Composition', data: portfolioComposition});
             const metrics = [
                 {value: portfolioMetrics.portfoliostats.netvalue, label: 'Net Value'},
                 {value: portfolioMetrics.returns.annualreturn, label: 'Annual Return'},
@@ -193,8 +251,21 @@ export class PortfolioDetail extends React.Component {
                 {value: portfolioMetrics.returns.totalreturn, label: 'Total Return'},
                 {value: portfolioMetrics.drawdown.maxdrawdown, label: 'Max Draw Down'},
             ];
-            this.setState({portfolioMetrics: metrics, tickers}, () => {
-                console.log(this.state);
+            this.setState({
+                portfolioMetrics: metrics, tickers,
+                portfolioConfig: {
+                    ...this.state.portfolioConfig, 
+                    series
+                },
+                performanceDollarSeries: constituentDollarPerformance,
+                performancepercentageSeries: constituentPercentagePerformance,
+                performanceConfig: {
+                    ...this.state.performanceConfig,
+                    series: 
+                            this.state.togglePerformance === 'dollar'
+                            ? constituentDollarPerformance
+                            : constituentPercentagePerformance
+                }
             });
         })
         .catch(error => {
@@ -226,14 +297,22 @@ export class PortfolioDetail extends React.Component {
                                     <Card 
                                             title="Portfolio Overview"
                                     >
-                                        <h4>Yo</h4>
+                                        <ReactHighcharts config = {this.state.portfolioConfig} />
                                     </Card>
                                 </Col>
                                 <Col span={11} offset={2}>
                                     <Card 
                                             title="Performance Overview"
                                     >
-                                        <h4>Dude</h4>
+                                        <Radio.Group 
+                                            defaultValue={this.state.togglePerformance} 
+                                            onChange={this.handlePerformanceToggle} 
+                                            size="small"
+                                        >
+                                            <Radio.Button value="dollar">Dollar</Radio.Button>
+                                            <Radio.Button value="percentage">Percentage</Radio.Button>
+                                        </Radio.Group>
+                                        <ReactHighcharts config = {this.state.performanceConfig} />
                                     </Card>
                                 </Col>
                             </Row>
@@ -242,17 +321,15 @@ export class PortfolioDetail extends React.Component {
                     <Row>
                         <Col span={24}>
                             <Tabs defaultActiveKey="2">
-                                <TabPane tab="Performance" key="1">
-                                    <Row>
-                                        <Col span={24}>
-                                            <AqHighChartMod tickers={this.state.tickers}/> 
-                                        </Col>
-                                    </Row>
-                                </TabPane>
                                 <TabPane tab="Portfolio" key="2">
                                     <Row>
                                         <Col span={8} offset={16} style={{marginBottom: 20}}>
-                                            <Radio.Group value={this.state.toggleValue} onChange={this.toggleView} style={{position: 'absolute', right: 0}}>
+                                            <Radio.Group 
+                                                    value={this.state.toggleValue} 
+                                                    onChange={this.toggleView} 
+                                                    style={{position: 'absolute', right: 0}}
+                                                    size="small"
+                                            >
                                                 <Radio.Button value="advice">Advice</Radio.Button>
                                                 <Radio.Button value="stock">Stock</Radio.Button>
                                             </Radio.Group>
@@ -264,7 +341,41 @@ export class PortfolioDetail extends React.Component {
                                         : this.renderPresentStockTransactions()
                                     }
                                 </TabPane>
+                                <TabPane tab="Performance" key="1">
+                                    <Row>
+                                        <Col span={24}>
+                                            <AqHighChartMod tickers={this.state.tickers}/> 
+                                        </Col>
+                                    </Row>
+                                </TabPane>
                             </Tabs>
+                        </Col>
+                    </Row>
+                </Col>
+                <Col span={5} offset={1}>
+                    <Row>
+                        <Col span={24}>
+                            <Button 
+                                    type="primary" 
+                                    style={{marginBottom: 20}} 
+                                    onClick={() => this.props.history.push(
+                                        '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
+                                    )}
+                            >
+                                Create Portfolio
+                            </Button>
+                        </Col>
+                        <Col span={24}>
+                            <Button
+                                    onClick={() => this.props.history.push(
+                                        `/dashboard/portfolio/transactions/${this.props.match.params.id}`, 
+                                        {
+                                            pageTitle: 'Add Transactions',
+                                            advices: this.state.presentAdvices,
+                                            stocksPositions: this.state.stockPositions
+                                        }
+                                    )}
+                            >Add Transactions</Button>
                         </Col>
                     </Row>
                 </Col>
@@ -272,6 +383,8 @@ export class PortfolioDetail extends React.Component {
         );
     }
 }
+
+PortfolioDetail = Radium(PortfolioDetail);
 
 const MetricItem = ({value, label}) => {
     return (
@@ -285,4 +398,8 @@ const MetricItem = ({value, label}) => {
 const metricItemStyle = {
     padding: 10,
     boxShadow: '0px 3px 8px rgba(0,0,0,0.2)'
+};
+
+const newLayoutStyle = {
+    border: '2px solid red'
 };

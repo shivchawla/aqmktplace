@@ -1,5 +1,7 @@
 import * as React from 'react';
 import moment from 'moment';
+import axios from 'axios';
+import {getStockData} from '../utils';
 import _ from 'lodash';
 import {Table, Button, Input, DatePicker, Row, Col} from 'antd';
 import {EditableCell} from './AqEditableCell';
@@ -13,6 +15,7 @@ const addInititalTransaction = () => {
             date: moment().format("YYYY-MM-DD"),
             shares: 0,
             price: 0,
+            tickerValidationStatus: "warning",
             commission: 0
         });
     }
@@ -29,7 +32,7 @@ export class AqStockTableCreatePortfolio extends React.Component {
                 title: 'SYMBOL',
                 dataIndex: 'symbol',
                 key: 'symbol',
-                render: (text, record) => this.renderInput(text, record, 'symbol', 'text')
+                render: (text, record) => this.renderInput(text, record, 'symbol', 'text', record.tickerValidationStatus)
             },
             {
                 title: 'DATE',
@@ -62,9 +65,10 @@ export class AqStockTableCreatePortfolio extends React.Component {
         } 
     }
 
-    renderInput = (text, record, column, type) => {
+    renderInput = (text, record, column, type, validationStatus) => {
         return (
             <EditableCell 
+                    validationStatus={validationStatus}
                     type={type}
                     value={text}
                     onChange={value => this.handleRowChange(value, record, column)}
@@ -117,15 +121,55 @@ export class AqStockTableCreatePortfolio extends React.Component {
 
     handleRowChange = (value, record, column) => {
         const newData = [...this.state.data];
-        const target = newData.filter(item => item.key === record.key)[0];
+        let target = newData.filter(item => item.key === record.key)[0];
         if (target) {
             if (column === 'date') {
                 value = moment(value).format('YYYY-MM-DD');
+            } else if (column === 'symbol') {
+                target['tickerValidationStatus'] = value.length === 0 ? 'warning' : 'validating';
+                this.asyncGetTarget(value)
+                .then(response => {
+                    target = Object.assign(target, response);
+                    this.setState({data: newData});
+                    this.props.onChange(newData);
+                });
             }
             target[column] = value;
             this.setState({data: newData});
             this.props.onChange(newData);
+            if (this.isValidRow(target)) {
+                this.props.previewPortfolio();
+            }
         }
+    }
+
+    isValidRow = (row) => {
+        if (row['tickerValidationStatus'] === 'success' && row['date'] !== undefined && row['shares'] > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    asyncGetTarget = (ticker) => {
+        let validationStatus = 'error';
+        const target = {};
+        return new Promise((resolve, reject) => {
+            getStockData(ticker, 'latestDetail')
+            .then(response => {
+                const lastPrice = response.data.latestDetail.values.Close;
+                target['price'] = lastPrice;
+                target['tickerValidationStatus'] = 'success';
+                target['ticker'] = ticker;
+            })
+            .catch(error => {
+                target['tickerValidationStatus'] = 'error';
+                target['price'] = 0;
+            })
+            .finally(() => {
+                resolve(target);
+            });
+        });
     }
 
     render() {
@@ -143,6 +187,7 @@ export class AqStockTableCreatePortfolio extends React.Component {
                 </Col>
                 <Col span={24} style={{marginTop: 20}}>
                     <Table 
+                            size="small"
                             dataSource={this.state.data} 
                             columns={this.columns} 
                             pagination={false} 

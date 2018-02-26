@@ -8,3 +8,4 @@ export * from './CreatePortfolio';
 export * from './PortfolioDetail';
 export * from './UpdateAdvice';
 export * from './CreatePortfolioDialog';
+export * from './PortfolioAddTransactions';

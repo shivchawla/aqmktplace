@@ -69,7 +69,7 @@ export class DashboardImpl extends React.Component {
                     <AqLink to='/dashboard/createadvice' pageTitle='Create Advice'/>
                 </Col>
                 <Col span={24}>
-                    <Button onClick={this.createPortfolio}>Create Portfolio</Button>
+                    <AqLink to='/dashboard/createportfolio' pageTitle='Create Portfolio'/>
                 </Col>
                 <Col span={24}>
                     <CreatePortfolioDialog 

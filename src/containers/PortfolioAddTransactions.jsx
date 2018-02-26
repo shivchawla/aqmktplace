@@ -2,9 +2,9 @@ import * as React from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
-import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input} from 'antd';
+import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
-import {AdviceTransactionTable, AqStockTableTransaction} from '../components';
+import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod} from '../components';
 import {AdviceItem} from '../components/AdviceItem';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
@@ -15,18 +15,49 @@ const Option = Select.Option;
 const FormItem = Form.Item;
 const {investorId, aimsquantToken, requestUrl} = require('../localConfig.json');
 
-export class CreatePortfolioImpl extends React.Component {
+export class PortfolioAddTransactions extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            tickers: [],
+            toggleValue: 'advice',
             advices: [],
+            stockPositions: [],
             presentAdvices: [],
+            presentStocks: [],
             isSubscibedAdviceModalVisible: false,
             stockTransactions: [],
             cashTransactions: [],
             toggleValue: 'advice',
             selectedBenchmark: 'TCS'
-        }
+        };
+        this.columns = [
+            {
+                title: 'SYMBOL',
+                dataIndex: 'symbol',
+                key: 'symbol'
+            },
+            {
+                title: 'Shares',
+                dataIndex: 'shares',
+                key: 'shares'
+            },
+            {
+                title: 'Price',
+                dataIndex: 'price',
+                key: 'price'
+            },
+            {
+                title: 'Average Price',
+                dataIndex: 'avgPrice',
+                key: 'avgPrice'
+            }, 
+            {
+                title: 'Country',
+                dataIndex: 'country',
+                key: 'country'
+            }
+        ];
     }
 
     renderAdviceTransactions = () => {
@@ -55,12 +86,12 @@ export class CreatePortfolioImpl extends React.Component {
         );
     }
 
-    renderPresentAdviceTransactions = () => {
+    renderPreviewAdvicePositions = () => {
         return (
             <Row>
                 <Col span={24} style={{marginTop: 20}}>
                     {
-                        adviceTransactions.length > 0 
+                        this.state.presentAdvices.length > 0 
                         ? <AdviceTransactionTable preview advices={this.state.presentAdvices} />
                         : <h5>Please add advices to your portfolio</h5>
                     }
@@ -71,13 +102,31 @@ export class CreatePortfolioImpl extends React.Component {
 
     renderStockTransactions = () => {
         return (
-            <AqStockTableCreatePortfolio onChange={this.onStockTransactionChange}/>
+            <AqStockTableCreatePortfolio 
+                    onChange={this.onStockTransactionChange} 
+                    previewPortfolio={this.previewPortfolio} 
+            />
+        );
+    }
+
+    renderPreviewStockPositions = () => {
+        return (
+            <Table 
+                    size="small"
+                    pagination={false} 
+                    style={{marginTop: 20}} 
+                    columns={this.columns} 
+                    dataSource={this.state.presentStocks} 
+            />
         );
     }
 
     renderCashTransactions = () => {
         return (
-            <AqStockTableCashTransaction onChange={this.onCashTransactionChange}/>
+            <AqStockTableCashTransaction 
+                    onChange={this.onCashTransactionChange} 
+                    previewPortfolio={this.previewPortfolio} 
+            />
         );
     }
 
@@ -111,7 +160,9 @@ export class CreatePortfolioImpl extends React.Component {
     addAdvice = (advice) => {
         const advices = [...this.state.advices];
         advices.push(advice);
-        this.setState({advices});
+        this.setState({advices}, () => {
+            this.previewPortfolio();
+        });
     }
     
     deleteAdvice = (advice) => {
@@ -119,7 +170,7 @@ export class CreatePortfolioImpl extends React.Component {
         const adviceIndex = _.findIndex(advices, item => item.key === advice.key);
         advices.splice(adviceIndex, 1);
         this.setState({advices}, () => {
-            console.log(this.state.advices);
+            this.previewPortfolio();
         });
     }
 
@@ -133,39 +184,78 @@ export class CreatePortfolioImpl extends React.Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        const url = `${requestUrl}/investor/${investorId}/portfolio`;
+        const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}/transactions`;
+        console.log(url);
         const transactions = [
             ...this.processAdviceTransaction(this.state.advices),
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                const data = {
-                    name: values.name,
-                    benchmark: {
-                        ticker: this.state.selectedBenchmark,
-                        securityType: "EQ",
-                        country: "IN",
-                        exchange: "NSE"
-                    },
-                    transactions
-                };
-                console.log(data);
-                axios({
-                    url,
-                    method: 'POST',
-                    headers: {'aimsquant-token': aimsquantToken},
-                    data: data
-                })
-                .then(response => {
-                    message.success('Transactions Added');
-                })
-                .catch(error => {
-                    message.error(error.message);
+        const data = {
+            preview: false,
+            action: "add",
+            transactions
+        };
+        this.setState({
+            advices: [],
+            cashTransactions: [],
+            stockTransactions: []
+        })
+        axios({
+            url,
+            method: 'POST',
+            headers: {'aimsquant-token': aimsquantToken},
+            data: data
+        })
+        .then(response => {
+            console.log(response.data);
+            this.setState({
+                advices: [],
+                cashTransactions: [],
+                stockTransactions: []
+            })
+            message.success('Transactions Added');
+        })
+        .catch(error => {
+            message.error(error.message);
+        }); 
+        console.log(data);
+    }
+
+    previewPortfolio = () => {
+        const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}/transactions`;
+        const performanceUrl = `${requestUrl}/performance`;
+        const tickers = [...this.state.tickers];
+        const data = {
+            preview: true,
+            action: "add",
+            transactions: [
+                ...this.processAdviceTransaction(this.state.advices),
+                ...this.processCashTransaction(this.state.cashTransactions),
+                ...this.processStockTransaction(this.state.stockTransactions)
+            ]
+        };
+        axios({
+            url,
+            method: 'POST',
+            headers: {'aimsquant-token': aimsquantToken},
+            data: data
+        })
+        .then(response => {
+            console.log(response.data);
+            this.setState({
+                presentAdvices: this.processPreviewAdviceTransaction(response.data.detail.subPositions),
+                presentStocks: this.processPreviewStockTransction(response.data.detail.positions)
+            });
+        })
+        .catch(error => {
+            if (data.transactions.length < 1) {
+                this.setState({
+                    presentAdvices: [],
+                    presentStocks: []
+                }, () => {
+                    message.info("Empty Portfolio");
                 });
-            } else {
-                console.log(err);
             }
         });
     }
@@ -196,7 +286,7 @@ export class CreatePortfolioImpl extends React.Component {
         return transactions;
     }
 
-    processPresentAdviceTransaction = (adviceTransactions) => {
+    processPreviewAdviceTransaction = (adviceTransactions) => {
         const advices = [];
         adviceTransactions.map((item, index) => {
             const adviceIndex = _.findIndex(advices, advice => advice.id === item.advice);
@@ -241,11 +331,27 @@ export class CreatePortfolioImpl extends React.Component {
         return advices;
     }
 
+    processPreviewStockTransction = (stockTransactions) => {
+        const stockPositions = [...this.state.stockPositions];
+        stockTransactions.map((item, index) => {
+            stockPositions.push({
+                key: index,
+                symbol: item.security.ticker,
+                shares: item.quantity,
+                price: item.lastPrice,
+                avgPrice: item.avgPrice,
+                country: item.security.country,
+            });
+        });
+
+        return stockPositions;
+    }
+
     processStockTransaction = (stockTransactions) => {
         const transactions = [];
         stockTransactions.map((transaction, index) => {
             const {symbol = "", date = undefined, shares = 0, price = 0, commission = 0} = transaction;
-            if (symbol.length > 0 && date != undefined && shares != 0) {
+            if (symbol.length > 0 && date != undefined && price > 0) {
                 transactions.push({
                     security: {
                         ticker: symbol,
@@ -295,10 +401,6 @@ export class CreatePortfolioImpl extends React.Component {
         return transactions;
     }
 
-    toggleView = (e) => {
-        this.setState({toggleValue: e.target.value});
-    }
-
     handleBenchmarkChange = (value) => {
         this.setState({selectedBenchmark: value});
     }
@@ -325,47 +427,66 @@ export class CreatePortfolioImpl extends React.Component {
             </Row>
         );
     }
-    // componentWillMount() {
-    //     const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
-    //     axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
-    //     .then(response => {
-    //         console.log(this.processPresentAdviceTransaction(response.data.detail.subPositions));
-    //         this.setState({presentAdvices: this.processPresentAdviceTransaction(response.data.detail.subPositions)});
-    //     })
-    //     .catch(error => {
-    //         console.log(error.message);
-    //     })
-    // }
+
+    toggleView = (e) => {
+        this.setState({toggleValue: e.target.value});
+    }
+
+    renderPreview = () => {
+        return (
+            <Col span={24}>
+                <Tabs defaultActiveKey="2">
+                    <TabPane tab="Portfolio" key="2">
+                        <Row>
+                            <Col span={8} offset={16} style={{marginBottom: 20}}>
+                                <Radio.Group 
+                                        value={this.state.toggleValue} 
+                                        onChange={this.toggleView} 
+                                        style={{position: 'absolute', right: 0}}
+                                        size="small"
+                                >
+                                    <Radio.Button value="advice">Advice</Radio.Button>
+                                    <Radio.Button value="stock">Stock</Radio.Button>
+                                </Radio.Group>
+                            </Col>
+                        </Row>
+                        {
+                            this.state.toggleValue === 'advice'
+                            ? this.renderPreviewAdvicePositions()
+                            : this.renderPreviewStockPositions()
+                        }
+                    </TabPane>
+                    <TabPane tab="Performance" key="1">
+                        <Row>
+                            <Col span={24}>
+                                <AqHighChartMod tickers={this.state.tickers}/> 
+                            </Col>
+                        </Row>
+                    </TabPane>
+                </Tabs>
+            </Col>
+        );
+    }
+
+    componentWillMount() {
+        console.log(this.props.location.state);
+        const {advices, stocksPositions} = this.props.location.state;
+        this.setState({
+            presentAdvices: advices,
+            presentStocks: stocksPositions
+        });
+    }
 
     render() {
-        const {getFieldDecorator} = this.props.form;
-
         return (
             <Row>
                 {this.renderSubscribedAdviceModal()}
                 <Form>
                     <Col span={18} style={layoutStyle}>
-                        <Row type="flex">
-                            <Col span={5}>
-                                <FormItem>
-                                    {getFieldDecorator('name', {
-                                        rules: [{required: true, message: 'Please enter Portfolio Name'}]
-                                    })(
-                                        <Input style={inputStyle} placeholder="Portfolio Name"/>
-                                    )}
-                                </FormItem>
-                            </Col>
-                            <Col span={10} offset={1}>
-                                {this.renderSelect()}
-                            </Col>
-                            {/* <Col span={5}>
-                                <h5>Remaining Cash 10000</h5>
-                            </Col>
-                            <Col span={4}>
-                                <Checkbox>Link Cash</Checkbox>
-                            </Col> */}
-                        </Row>
                         <Row>
+                            <Col span={24}>
+                                <h3>Transactions</h3>
+                            </Col>
                             <Col span={24}>
                                 <Tabs defaultActiveKey="1">
                                     <TabPane tab="Stock Transaction" key="1">
@@ -380,6 +501,12 @@ export class CreatePortfolioImpl extends React.Component {
                                 </Tabs>
                             </Col>
                         </Row>
+                        <Row>
+                            <Col span={24} style={{marginTop: 20}}>
+                                <h3>Preview</h3>
+                            </Col>
+                            {this.renderPreview()}
+                        </Row>
                     </Col>
                     <Col span={5} offset={1}>
                         <Row type="flex">
@@ -389,7 +516,13 @@ export class CreatePortfolioImpl extends React.Component {
                                 </FormItem>
                             </Col>
                             <Col span={24} style={{marginTop: 10}}>
-                                <Button>Cancel</Button>
+                                <Button 
+                                        onClick={() => {
+                                            this.props.history.push(`/dashboard/portfolio/${this.props.match.params.id}`)
+                                        }}
+                                >
+                                    Cancel
+                                </Button>
                             </Col>
                         </Row>
                     </Col>
@@ -398,8 +531,6 @@ export class CreatePortfolioImpl extends React.Component {
         );
     }
 }
-
-export const CreatePortfolio = Form.create()(CreatePortfolioImpl);
 
 const inputStyle = {
     borderRadius: '0px'

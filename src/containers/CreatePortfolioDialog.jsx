@@ -1,5 +1,6 @@
 import * as React from 'react';
 import axios from 'axios';
+import moment from 'moment';
 import {Redirect, withRouter} from 'react-router';
 import {Form, Modal, Button, Row, Col, Input, Menu, Dropdown, Icon, message} from 'antd';
 
@@ -7,7 +8,6 @@ const FormItem = Form.Item;
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.json');
 
 class CreatePortfolioDialogImpl extends React.Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -44,6 +44,7 @@ class CreatePortfolioDialogImpl extends React.Component {
                 const requestData = {
                     name: values.name,
                     detail: {
+                        startDate: moment().format('YYYY-MM-DD'),
                         positions: [],
                         cash: parseInt(values.initialCash),
                     },
@@ -63,7 +64,7 @@ class CreatePortfolioDialogImpl extends React.Component {
                 .then(response => {
                     const portfolioId = response.data._id;
                     message.success("Portfolio Created successfully");
-                    this.props.history.push(`dashboard/createportfolio/${portfolioId}`);
+                    this.props.history.push(`/dashboard/createportfolio/${portfolioId}`);
                 })
                 .catch(error => {
                     message.error(error.message);

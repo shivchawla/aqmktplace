@@ -9,7 +9,7 @@ const addInitialTransactions = () => {
     for (let i=0; i < 3; i++) {
         data.push({
             cash: 0,
-            date: '2018-02-21',
+            date: undefined,
             type: 'deposit',
             notes: '',
             key: i
@@ -105,7 +105,18 @@ export class AqStockTableCashTransaction extends React.Component {
             }
             this.setState({data: newData});
             this.props.onChange(newData);
+            if (this.isValid(target)) {
+                this.props.previewPortfolio();
+            }
         }
+    }
+
+    isValid = (row) => {
+        if (row['date'] !== undefined && row['cash'] > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     getRowSelection = () => {
@@ -155,6 +166,7 @@ export class AqStockTableCashTransaction extends React.Component {
                 </Col>
                 <Col span={24} style={{marginTop: 20}}>
                     <Table 
+                            size="small"
                             dataSource={this.state.data} 
                             columns={this.columns} 
                             pagination={false} 

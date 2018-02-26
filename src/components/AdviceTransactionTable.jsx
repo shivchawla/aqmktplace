@@ -158,6 +158,11 @@ export class AdviceTransactionTable extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
+        let netAssetValue = 0;
+        advice.composition.map((item) => {
+            netAssetValue += item.price * item.shares;
+        });
+        
         if (!this.props.header) {
             return (
                 <Row type="flex" justify="end">
@@ -185,7 +190,7 @@ export class AdviceTransactionTable extends React.Component {
                         }
                     </Col>
                     <Col span={4} offset={2}>
-                        <MetricItem value={advice.netAssetValue} label="Net Asset Value" />
+                        <MetricItem value={netAssetValue} label="Net Asset Value" />
                     </Col>
                 </Row>
             );
