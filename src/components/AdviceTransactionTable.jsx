@@ -118,6 +118,7 @@ export class AdviceTransactionTable extends React.Component {
         const tickers = targetAdvice.composition.map(item => item.symbol); // Get the symbols from advice
         this.fetchLastPrice(tickers)
         .then(priceHistory => {
+            console.log(priceHistory);
             priceHistory.map((tickerItem, index) => {
                 const  compositionItem = targetAdvice.composition.filter(item => item.symbol === tickerItem.ticker)[0];
                 const selectedPrice = tickerItem.priceHistory.filter(item => {

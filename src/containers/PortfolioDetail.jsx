@@ -128,44 +128,88 @@ export class PortfolioDetail extends React.Component {
     processPresentAdviceTransaction = (adviceTransactions) => {
         const advices = [];
         adviceTransactions.map((item, index) => {
-            const adviceIndex = _.findIndex(advices, advice => advice.id === item.advice);
-            if (adviceIndex === -1) {
-                advices.push({
-                    id: item.advice,
-                    name: item.advice !== null ? `Sample Advice ${index}` : 'My Portfolio',
-                    key: index,
-                    netAssetValue: item.quantity * item.lastPrice,
-                    weight: '12.4%',
-                    profitLoss: '+12.4%',
-                    units: 1,
-                    composition: [
-                        {
-                            key: 1,
-                            adviceKey: index,
-                            symbol: item.security.ticker,
-                            shares: item.quantity,
-                            modifiedShares: item.quantity,
-                            price: item.lastPrice,
-                            costBasic: item.avgPrice,
-                            unrealizedPL: 1231,
-                            weight: '12%',
-                        }
-                    ]
-                });
+            if (item.advice === null) {
+                if (_.findIndex(advices, advice => advice.id === null) === -1) {
+                    advices.push({
+                        id: null,
+                        name: 'My Portfolio',
+                        key: index,
+                        weight: '12.4%',
+                        profitLoss: '+12.4%',
+                        units: 1,
+                        composition: [
+                            {
+                                key: 1,
+                                adviceKey: index,
+                                symbol: item.security.ticker,
+                                shares: item.quantity,
+                                modifiedShares: item.quantity,
+                                price: item.lastPrice,
+                                costBasic: item.avgPrice,
+                                unrealizedPL: 1231,
+                                weight: '12%',
+                            }
+                        ]
+                    })
+                } else {
+                    const adviceIndex = _.findIndex(advices, advice => advice.id === null);
+                    advices[adviceIndex].composition.push({
+                        key: index + 1,
+                        adviceKey: advices[adviceIndex].key,
+                        symbol: item.security.ticker,
+                        shares: item.quantity,
+                        modifiedShares: item.quantity,
+                        price: item.lastPrice,
+                        costBasic: item.avgPrice,
+                        unrealizedPL: 1231,
+                        weight: '12%',
+                    });
+                }
+                
             } else {
-                advices[adviceIndex].netAssetValue = advices[adviceIndex].netAssetValue + (item.quantity * item.lastPrice);
-                advices[adviceIndex].composition.push({
-                    key: index + 1,
-                    adviceKey: advices[adviceIndex].key,
-                    symbol: item.security.ticker,
-                    shares: item.quantity,
-                    modifiedShares: item.quantity,
-                    price: item.lastPrice,
-                    costBasic: item.avgPrice,
-                    unrealizedPL: 1231,
-                    weight: '12%',
+                const adviceIndex = _.findIndex(advices, advice => {
+                    if (item.advice !== null) {
+                        return advice.id === item.advice.name
+                    }
+                    return false;
                 });
+                if (adviceIndex === -1) {
+                    advices.push({
+                        id: item.advice !== null ? item.advice.name : null,
+                        name: item.advice !== null ? item.advice.name : 'My Portfolio',
+                        key: index,
+                        weight: '12.4%',
+                        profitLoss: '+12.4%',
+                        units: 1,
+                        composition: [
+                            {
+                                key: 1,
+                                adviceKey: index,
+                                symbol: item.security.ticker,
+                                shares: item.quantity,
+                                modifiedShares: item.quantity,
+                                price: item.lastPrice,
+                                costBasic: item.avgPrice,
+                                unrealizedPL: 1231,
+                                weight: '12%',
+                            }
+                        ]
+                    });
+                } else {
+                    advices[adviceIndex].composition.push({
+                        key: index + 1,
+                        adviceKey: advices[adviceIndex].key,
+                        symbol: item.security.ticker,
+                        shares: item.quantity,
+                        modifiedShares: item.quantity,
+                        price: item.lastPrice,
+                        costBasic: item.avgPrice,
+                        unrealizedPL: 1231,
+                        weight: '12%',
+                    });
+                }
             }
+            
         });
 
         return advices;
@@ -211,10 +255,12 @@ export class PortfolioDetail extends React.Component {
         const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${this.props.match.params.id}`;
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            tickers.push({
-                name: response.data.benchmark.ticker,
-                show: true
-            });
+            if (response.data.benchmark) {
+                tickers.push({
+                    name: response.data.benchmark.ticker,
+                    show: true
+                });
+            }   
             this.processPresentStockTransction(response.data.detail.positions);
             this.setState({
                 presentAdvices: this.processPresentAdviceTransaction(response.data.detail.subPositions),
@@ -233,11 +279,11 @@ export class PortfolioDetail extends React.Component {
             });
             const portfolioMetrics = response.data.current.metrics.portfolioPerformance;
             const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
-                return {name: item.ticker, data: [item.stockPerformance.pnl]}
+                return {name: item.ticker, data: [item.pnl]}
             });
             console.log(constituentDollarPerformance);
             const constituentPercentagePerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
-                return {name: item.ticker, data: [item.stockPerformance.pnl_pct]}
+                return {name: item.ticker, data: [item.pnl_pct]}
             });
             const portfolioComposition = response.data.current.metrics.portfolioComposition.map((item, index) =>{
                 return [item.ticker, Math.round(item.weight * 10000) / 100]

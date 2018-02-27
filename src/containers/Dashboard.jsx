@@ -55,8 +55,9 @@ export class DashboardImpl extends React.Component {
         return portfolios.map((portfolio, index) => {
             return (
                 <Col span={24} key={index}>
-                    <AqLink to={`/dashboard/portfolio/${portfolio.id}`} pageTitle = {portfolio.name} />
-                    {portfolio.id}
+                    <AqLink to={`/dashboard/portfolio/${portfolio.id}`} pageTitle = {portfolio.name}>
+                        {portfolio.name} - {portfolio.id}
+                    </AqLink> 
                 </Col>
             );
         })
