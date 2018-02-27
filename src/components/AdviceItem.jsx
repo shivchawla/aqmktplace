@@ -270,7 +270,7 @@ export class AdviceItem extends React.Component {
 
     render() {
         return (
-            <Collapse accordion>
+            <Collapse>
                 {this.renderAdvices()}
             </Collapse>
         );

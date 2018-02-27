@@ -202,7 +202,7 @@ export class AdviceTransactionTable extends React.Component {
 
     render() {
         return (
-            <Collapse bordered={false} accordion>
+            <Collapse bordered={false}>
                 {this.renderAdvices()}
             </Collapse>
         );
