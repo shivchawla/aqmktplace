@@ -8,7 +8,7 @@ import {adviceTransactions} from '../mockData/AdviceTransaction';
 const Panel = Collapse.Panel;
 const TabPane = Tabs.TabPane;
 
-const {requestUrl, aimsquantToken} = require('../localConfig.json');
+const {requestUrl, aimsquantToken} = require('../localConfig.js');
 
 const dateFormat = 'YYYY-MM-DD';
 

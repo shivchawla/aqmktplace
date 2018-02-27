@@ -8,7 +8,7 @@ import {CreatePortfolioDialog} from '../containers';
 import '../css/highstock.css';
 const ReactHighstock = require('react-highcharts/ReactHighstock.src');
 
-const {aimsquantToken, requestUrl, investorId} = require('../localConfig.json');
+const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
 
 export class DashboardImpl extends React.Component {
     constructor(props) {

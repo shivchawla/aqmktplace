@@ -9,7 +9,7 @@ import {AqTableMod, AqPortfolioTable, AqHighChartMod} from '../components';
 
 const TabPane = Tabs.TabPane;
 
-const {aimsquantToken, requestUrl, investorId} = require('../localConfig.json');
+const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
 const dateFormat = 'YYYY-MM-DD';
 
 export class AdviceDetail extends React.Component {

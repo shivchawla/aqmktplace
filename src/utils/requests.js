@@ -1,5 +1,5 @@
 import axios from 'axios';
-const localConfig = require('../localConfig.json');
+const localConfig = require('../localConfig.js');
 
 export const getStockData = (ticker, field='priceHistory') => {
     const {requestUrl, aimsquantToken} = localConfig;

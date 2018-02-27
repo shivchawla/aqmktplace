@@ -5,7 +5,7 @@ import {Redirect, withRouter} from 'react-router';
 import {Form, Modal, Button, Row, Col, Input, Menu, Dropdown, Icon, message} from 'antd';
 
 const FormItem = Form.Item;
-const {aimsquantToken, requestUrl, investorId} = require('../localConfig.json');
+const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
 
 class CreatePortfolioDialogImpl extends React.Component {
     constructor(props) {

@@ -13,7 +13,7 @@ import {layoutStyle} from '../constants';
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
 const FormItem = Form.Item;
-const {investorId, aimsquantToken, requestUrl} = require('../localConfig.json');
+const {investorId, aimsquantToken, requestUrl} = require('../localConfig.js');
 
 export class CreatePortfolioImpl extends React.Component {
     constructor(props) {

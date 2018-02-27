@@ -11,7 +11,7 @@ import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
 import {AqHighChart} from '../components/AqHighChart';
 
-const localConfig = require('../localConfig.json');
+const localConfig = require('../localConfig.js');
 
 const {TextArea} = Input;
 const FormItem = Form.Item;

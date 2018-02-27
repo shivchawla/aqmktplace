@@ -6,7 +6,7 @@ import _ from 'lodash';
 import {EditableCell} from './AqEditableCell';
 import {getUnixStockData, getStockData} from '../utils';
 
-const {aimsquantToken, requestUrl} = require('../localConfig.json');
+const {aimsquantToken, requestUrl} = require('../localConfig.js');
 
 const initialTransactions = () => {
     const data = [];

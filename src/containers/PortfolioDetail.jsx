@@ -10,7 +10,7 @@ import {CreatePortfolioDialog} from '../containers';
 const ReactHighcharts = require('react-highcharts');
 
 const TabPane = Tabs.TabPane;
-const {requestUrl, investorId, aimsquantToken} = require('../localConfig.json');
+const {requestUrl, investorId, aimsquantToken} = require('../localConfig.js');
 const metrics = [
     {value: 72000, label: 'Net Value'},
     {value: 2000, label: 'Cash'},
