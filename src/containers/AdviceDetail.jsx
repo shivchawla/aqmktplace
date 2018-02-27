@@ -4,7 +4,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal} from 'antd';
 import {layoutStyle} from '../constants';
-import {UpdateAdvice} from '../containers/UpdateAdvice';
+import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod} from '../components';
 
 const TabPane = Tabs.TabPane;
