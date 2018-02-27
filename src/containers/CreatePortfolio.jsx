@@ -142,6 +142,7 @@ export class CreatePortfolioImpl extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const data = {
+                    preview: false,
                     name: values.name,
                     benchmark: {
                         ticker: this.state.selectedBenchmark,

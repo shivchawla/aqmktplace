@@ -137,7 +137,7 @@ export class AqStockTableCreatePortfolio extends React.Component {
             target[column] = value;
             this.setState({data: newData});
             this.props.onChange(newData);
-            if (this.isValidRow(target)) {
+            if (this.props.previewPortfolio && this.isValidRow(target)) {
                 this.props.previewPortfolio();
             }
         }
