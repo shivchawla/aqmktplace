@@ -128,12 +128,7 @@ export class PortfolioDetail extends React.Component {
     processPresentAdviceTransaction = (adviceTransactions) => {
         let advices = [];
         adviceTransactions.map((item, index) => {
-            if (item.advice === null) {
-                advices = this.addToMyPortfolio(advices, item, index);
-            } else {
-                advices = this.addToAdvice(advices, item, index);
-            }
-            
+            advices = item.advice === null ? this.addToMyPortfolio(advices, item, index) : this.addToAdvice(advices, item, index);
         });
 
         return advices;
