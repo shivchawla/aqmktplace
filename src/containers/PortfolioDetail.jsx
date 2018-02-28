@@ -11,14 +11,6 @@ const ReactHighcharts = require('react-highcharts');
 
 const TabPane = Tabs.TabPane;
 const {requestUrl, investorId, aimsquantToken} = require('../localConfig.js');
-const metrics = [
-    {value: 72000, label: 'Net Value'},
-    {value: 2000, label: 'Cash'},
-    {value: 12000, label: 'Daily P/L'},
-    {value: '46.2%', label: 'Total'},
-    {value: 72000, label: 'Metric'},
-    {value: '42.6%', label: 'Total'},
-]
 
 export class PortfolioDetail extends React.Component {
     constructor(props) {
@@ -93,14 +85,14 @@ export class PortfolioDetail extends React.Component {
     }
 
     renderMetrics = () => {
-        return this.state.portfolioMetrics.map((item, index) => (
+        return this.state.portfolioMetrics.map((metric, index) => (
             <Col span={3} style={{marginRight: 30}} key={index}>
-                <MetricItem value={item.value} label={item.label} />
+                <MetricItem value={metric.value} label={metric.label} />
             </Col>
         ));
     }
 
-    renderPresentAdviceTransactions = () => {
+    renderAdviceTransactions = () => {
         return (
             <Row>
                 <Col span={24} style={{marginTop: 20}}>
@@ -114,7 +106,7 @@ export class PortfolioDetail extends React.Component {
         );
     }
 
-    renderPresentStockTransactions = () => {
+    renderStockTransactions = () => {
         return (
             <Table 
                     pagination={false} 
@@ -128,7 +120,9 @@ export class PortfolioDetail extends React.Component {
     processPresentAdviceTransaction = (adviceTransactions) => {
         let advices = [];
         adviceTransactions.map((item, index) => {
-            advices = item.advice === null ? this.addToMyPortfolio(advices, item, index) : this.addToAdvice(advices, item, index);
+            advices = item.advice === null 
+                            ? this.addToMyPortfolio(advices, item, index) 
+                            : this.addToAdvice(advices, item, index);
         });
 
         return advices;
@@ -136,7 +130,9 @@ export class PortfolioDetail extends React.Component {
 
     addToMyPortfolio = (advices, item, key) => {
         const adviceIndex = _.findIndex(advices, advice => advice.id === null);
-        return adviceIndex === -1 ? this.addAdvicePosition(advices, item, key) : this.addAdvicePosition(advices, item, key, adviceIndex);
+        return adviceIndex === -1 
+                        ? this.addAdvicePosition(advices, item, key) 
+                        : this.addAdvicePosition(advices, item, key, adviceIndex);
     }
 
     addToAdvice = (advices, item, key) => {
@@ -147,7 +143,9 @@ export class PortfolioDetail extends React.Component {
             return false;
         });
     
-        return adviceIndex === -1 ? this.addAdvicePosition(advices, item, key) : this.addAdvicePosition(advices, item, key, adviceIndex);
+        return adviceIndex === -1 
+                        ? this.addAdvicePosition(advices, item, key) 
+                        : this.addAdvicePosition(advices, item, key, adviceIndex);
     }
 
     addAdvicePosition = (advices, item, key, adviceIndex = null) => {
@@ -357,8 +355,8 @@ export class PortfolioDetail extends React.Component {
                                     </Row>
                                     {
                                         this.state.toggleValue === 'advice'
-                                        ? this.renderPresentAdviceTransactions()
-                                        : this.renderPresentStockTransactions()
+                                        ? this.renderAdviceTransactions()
+                                        : this.renderStockTransactions()
                                     }
                                 </TabPane>
                                 <TabPane tab="Performance" key="1">

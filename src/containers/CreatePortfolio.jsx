@@ -2,6 +2,7 @@ import * as React from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
+import {withRouter} from 'react-router'
 import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 import {AdviceTransactionTable, AqStockTableTransaction} from '../components';
@@ -390,7 +391,11 @@ export class CreatePortfolioImpl extends React.Component {
                                 </FormItem>
                             </Col>
                             <Col span={24} style={{marginTop: 10}}>
-                                <Button>Cancel</Button>
+                                <Button
+                                        onClick={() => this.props.history.goBack()}
+                                >
+                                    Cancel
+                                </Button>
                             </Col>
                         </Row>
                     </Col>
@@ -400,7 +405,7 @@ export class CreatePortfolioImpl extends React.Component {
     }
 }
 
-export const CreatePortfolio = Form.create()(CreatePortfolioImpl);
+export const CreatePortfolio = Form.create()(withRouter(CreatePortfolioImpl));
 
 const inputStyle = {
     borderRadius: '0px'

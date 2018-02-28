@@ -23,18 +23,21 @@ export class AdviceDetail extends React.Component {
                 heading: '',
                 advisor: {},
                 updatedDate: '',
-                followers: [],
+                followers: -1,
                 rating: 0,
-                subscribers: [],
+                subscribers: -1,
                 maxNotional: 300000,
                 rebalance: '',
-                isPublic: false
+                isPublic: false,
+                isOwner: false,
+                isSubscribed: false,
+                isFollowing: false
             },
             metrics: {
-                totalReturns: 0,
-                averageReturns:0,
-                dailyReturns: 0,
-                annualReturn: 0
+                totalReturns: -1,
+                averageReturns:-1,
+                dailyReturns: -1,
+                annualReturn: -1
             },
             portfolioArray: [],
             tickers: [],
@@ -73,7 +76,7 @@ export class AdviceDetail extends React.Component {
             }
         })
         .then((response) => {
-            const {name, description, heading, advisor, updatedDate, followers, rating, subscribers} = response.data;
+            const {name, description, heading, advisor, updatedDate, analytics, isSubscribed, isFollowing, isOwner} = response.data;
             this.setState({
                 adviceResponse: response.data,
                 adviceDetail: {
@@ -82,10 +85,13 @@ export class AdviceDetail extends React.Component {
                     description, 
                     heading,
                     advisor,
+                    subscribers: analytics[0].numSubscribers,
+                    isSubscribed,
+                    isOwner,
+                    isFollowing,
+                    followers: analytics[0].numFollowers,
                     updatedDate: moment(updatedDate).format(dateFormat),
-                    followers: followers.filter(item => item.active === true),
-                    rating: rating.length,
-                    subscribers: subscribers.filter(item => item.active === true),
+                    rating: analytics[0].rating,
                     isPublic: response.data.public
                 }
             });
@@ -93,16 +99,16 @@ export class AdviceDetail extends React.Component {
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then((response) => {
-            const {annualreturn, averagedailyreturn, dailyreturn, totalreturn} = response.data.analytics.returns;
-            this.setState({
-                metrics: {
-                    ...this.state.metrics,
-                    annualReturn: annualreturn,
-                    totalReturns: totalreturn,
-                    averageReturns: averagedailyreturn,
-                    dailyReturns: dailyreturn
-                }
-            });
+            // const {annualreturn, averagedailyreturn, dailyreturn, totalreturn} = response.data.analytics.returns;
+            // this.setState({
+            //     metrics: {
+            //         ...this.state.metrics,
+            //         annualReturn: annualreturn,
+            //         totalReturns: totalreturn,
+            //         averageReturns: averagedailyreturn,
+            //         dailyReturns: dailyreturn
+            //     }
+            // });
 
             return axios.get(`${url}/detail`, {headers: {'aimsquant-token': aimsquantToken}});
         })
@@ -115,6 +121,7 @@ export class AdviceDetail extends React.Component {
             const {maxNotional, rebalance} = response.data;
             subPositions.map((position, index) => {
                 portfolioArray.push({
+                    key: index,
                     no: index + 1,
                     shares: position.quantity,
                     symbol: position.security.ticker,
@@ -145,9 +152,9 @@ export class AdviceDetail extends React.Component {
         return (
             <Col span={18}>
                 <Row>
-                    <CardItem value={followers.length} label="Followers"/>
+                    <CardItem value={followers} label="Followers"/>
                     <CardItem value={rating} label="Average Rating"/>
-                    <CardItem value={subscribers.length} label="Subscribers"/>
+                    <CardItem value={subscribers} label="Subscribers"/>
                 </Row>
             </Col>
         );
@@ -225,7 +232,7 @@ export class AdviceDetail extends React.Component {
             >
                 <h3>
                     { 
-                        this.checkSubscriber()
+                        this.state.isSubscribed
                         ? "Are you sure you want to Unsubscribe"
                         : "Are you sure you want to Subscribe"
                     }
@@ -275,7 +282,7 @@ export class AdviceDetail extends React.Component {
                                 type="primary" 
                                 disabled={this.state.disableSubscribeButton}
                         >
-                            {!this.checkSubscriber() ? "Subscribe" : "Unsubscribe"}
+                            {!this.state.isSubscribed ? "Subscribe" : "Unsubscribe"}
                         </Button>
                     </Col>
                     <Col span={24}>
@@ -284,7 +291,7 @@ export class AdviceDetail extends React.Component {
                                 style={{width: 150, marginTop: 10}} 
                                 disabled={this.state.disableFollowButton}
                         >
-                            {!this.checkFollower() ? "Follow" : "Unfollow"}
+                            {!this.state.isFollowing ? "Follow" : "Unfollow"}
                         </Button>
                     </Col>
                 </Row>
@@ -303,20 +310,6 @@ export class AdviceDetail extends React.Component {
                 </Col>
             </Row>
         );  
-    };
-
-    checkSubscriber = () => {
-        const {subscribers} = this.state.adviceDetail;
-        return subscribers.filter(item => {
-                return item.investor === investorId && item.active === true;
-            }).length > 0;
-    };
-
-    checkFollower = () => {
-        const {followers} = this.state.adviceDetail;
-        return followers.filter(item => {
-                return item.investor === investorId && item.active === true;
-            }).length > 0;
     };
 
     render() { 
