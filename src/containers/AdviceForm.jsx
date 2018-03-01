@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Layout, Input, Row, Col, DatePicker, Form, Button, Table, message, Dropdown, Menu, Icon, Spin, Checkbox} from 'antd';
+import {withRouter} from 'react-router';
 import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
@@ -135,7 +136,7 @@ export class AdviceFormImpl extends React.Component {
         const {requestUrl, aimsquantToken} = localConfig;
         const {isUpdate, adviceId} = this.props;
         const url = isUpdate ? `${requestUrl}/advice/${adviceId}` : `${requestUrl}/advice`;
-        const method = isUpdate ? 'put' : 'post';
+        const method = isUpdate ? 'PUT' : 'POST';
         this.props.form.validateFields((err, values) => {
             let {name, description, headline, startDate} = values;
             startDate = moment(startDate).format('YYYY-MM-DD');
@@ -162,7 +163,7 @@ export class AdviceFormImpl extends React.Component {
                     },
                     rebalance: this.state.rebalancingFrequency,
                     maxNotional: this.state.maxNotional,
-                    public: this.state.public
+                    // public: this.state.public
                 };
 
                 console.log(requestData);
@@ -560,9 +561,16 @@ export class AdviceFormImpl extends React.Component {
                                 </Row>
                             </Col>
                         </Row>
-                        <FormItem>
-                            <Button style={{borderRadius: '0'}} type="primary" htmlType="submit">Save</Button>
-                        </FormItem>
+                        <Row>
+                            <Col span={6}>
+                                <FormItem>
+                                    <Button style={{borderRadius: '0'}} type="primary" htmlType="submit">Save</Button>
+                                </FormItem>    
+                            </Col>
+                            <Col span={6}>
+                                <Button onClick={() => {this.props.history.goBack()}}>Cancel</Button>
+                            </Col>
+                        </Row>
                     </Form>
                     {/* <Row>
                         <Col span={24}>
@@ -575,7 +583,7 @@ export class AdviceFormImpl extends React.Component {
     }
 }
 
-export const AdviceForm = Form.create()(AdviceFormImpl);
+export const AdviceForm = Form.create()(withRouter(AdviceFormImpl));
 
 const labelStyle = {
     color: '#898989'

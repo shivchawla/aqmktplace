@@ -1,8 +1,10 @@
 import * as React from 'react';
 import axios from 'axios';
+import SkyLight from 'react-skylight';
+import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal} from 'antd';
+import {Row, Col, Divider, Tabs, Button, Modal, message} from 'antd';
 import {layoutStyle} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod} from '../components';
@@ -66,7 +68,84 @@ export class AdviceDetail extends React.Component {
         });
     };
 
-    getAdviceDetail = () => {
+    getAdviceSummary = response => {
+        const {
+            name, 
+            description, 
+            heading, 
+            advisor, 
+            updatedDate, 
+            latestAnalytics, 
+            isSubscribed, 
+            isFollowing, 
+            isOwner
+        } = response.data;
+        this.setState({
+            adviceResponse: response.data,
+            adviceDetail: {
+                ...this.state.adviceDetail, 
+                name, 
+                description, 
+                heading,
+                advisor,
+                subscribers: latestAnalytics.numSubscribers,
+                isSubscribed,
+                isOwner,
+                isFollowing,
+                followers: latestAnalytics.numFollowers,
+                updatedDate: moment(updatedDate).format(dateFormat),
+                rating: latestAnalytics.rating,
+                isPublic: response.data.public
+            }
+        });
+    }
+
+    getAdviceDetail = response => {
+        const portfolioArray = [...this.state.portfolioArray]; 
+        const tickers = [...this.state.tickers];
+        const portfolio = {...this.state.portfolio};
+        const subPositions = response.data.portfolio.detail.subPositions;
+        const {maxNotional, rebalance} = response.data;
+        subPositions.map((position, index) => {
+            portfolioArray.push({
+                key: index,
+                no: index + 1,
+                shares: position.quantity,
+                symbol: position.security.ticker,
+                country: position.security.country,
+                exchange: position.security.exchange,
+                securityType: position.security.securityType
+            });
+            tickers.push({name: position.security.ticker});
+        });
+        this.setState({
+            portfolioArray, 
+            tickers,
+            adviceDetail: {
+                ...this.state.adviceDetail,
+                maxNotional,
+                rebalance
+            },
+            portfolio: response.data.portfolio
+        });
+    }
+
+    getAdvicePerformance = response => {
+        if (response.data.simulated) {
+            const {annualreturn, averagedailyreturn, dailyreturn, totalreturn} = response.data.simulated.metrics.portfolioPerformance.returns;
+            this.setState({
+                metrics: {
+                    ...this.state.metrics,
+                    annualReturn: annualreturn,
+                    totalReturns: totalreturn,
+                    averageReturns: averagedailyreturn,
+                    dailyReturns: dailyreturn
+                }
+            });
+        }
+    }
+
+    getAdviceData = () => {
         const adviceId = this.props.match.params.id;
         const url = `${requestUrl}/advice/${adviceId}`;
         const performanceUrl = `${requestUrl}/performance/advice/${adviceId}`
@@ -75,75 +154,20 @@ export class AdviceDetail extends React.Component {
                 'aimsquant-token': aimsquantToken
             }
         })
-        .then((response) => {
-            const {name, description, heading, advisor, updatedDate, analytics, isSubscribed, isFollowing, isOwner} = response.data;
-            this.setState({
-                adviceResponse: response.data,
-                adviceDetail: {
-                    ...this.state.adviceDetail, 
-                    name, 
-                    description, 
-                    heading,
-                    advisor,
-                    subscribers: analytics[0].numSubscribers,
-                    isSubscribed,
-                    isOwner,
-                    isFollowing,
-                    followers: analytics[0].numFollowers,
-                    updatedDate: moment(updatedDate).format(dateFormat),
-                    rating: analytics[0].rating,
-                    isPublic: response.data.public
-                }
-            });
-
-            return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
-        })
-        .then((response) => {
-            // const {annualreturn, averagedailyreturn, dailyreturn, totalreturn} = response.data.analytics.returns;
-            // this.setState({
-            //     metrics: {
-            //         ...this.state.metrics,
-            //         annualReturn: annualreturn,
-            //         totalReturns: totalreturn,
-            //         averageReturns: averagedailyreturn,
-            //         dailyReturns: dailyreturn
-            //     }
-            // });
-
+        .then(response => {
+            this.getAdviceSummary(response);
             return axios.get(`${url}/detail`, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
-            console.log(response.data);
-            const portfolioArray = [...this.state.portfolioArray]; 
-            const tickers = [...this.state.tickers];
-            const portfolio = {...this.state.portfolio};
-            const subPositions = response.data.portfolio.detail.subPositions;
-            const {maxNotional, rebalance} = response.data;
-            subPositions.map((position, index) => {
-                portfolioArray.push({
-                    key: index,
-                    no: index + 1,
-                    shares: position.quantity,
-                    symbol: position.security.ticker,
-                    country: position.security.country,
-                    exchange: position.security.exchange,
-                    securityType: position.security.securityType
-                });
-                tickers.push({name: position.security.ticker});
-            });
-            this.setState({
-                portfolioArray, 
-                tickers,
-                adviceDetail: {
-                    ...this.state.adviceDetail,
-                    maxNotional,
-                    rebalance
-                },
-                portfolio: response.data.portfolio
-            });
+            this.getAdviceDetail(response);
+            return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
+        })
+        .then(response => {
+            this.getAdvicePerformance(response);
         })
         .catch((error) => {
-            console.log(error.data);
+            console.log(error);
+            // message.error(error.response.data);
         });
     };
 
@@ -190,7 +214,7 @@ export class AdviceDetail extends React.Component {
         })
         .then(response => {
             this.toggleDialog();
-            this.getAdviceDetail();
+            this.getAdviceData();
         })
         .catch(error => {
             console.log(error.message);
@@ -208,7 +232,7 @@ export class AdviceDetail extends React.Component {
             headers: {'aimsquant-token': aimsquantToken}
         })
         .then(response => {
-            this.getAdviceDetail();
+            this.getAdviceData();
         })
         .catch(error => {
             console.log(error.message);
@@ -265,8 +289,9 @@ export class AdviceDetail extends React.Component {
     };
 
     componentWillMount() {
+        console.log(this.props);
         this.getUserData();
-        this.getAdviceDetail();
+        this.getAdviceData();
     } 
 
     renderActionButtons = () => {
@@ -306,7 +331,12 @@ export class AdviceDetail extends React.Component {
                         && <Button onClick={this.makeAdvicePublic} style={{width: 150}} type="primary">Publish</Button>}
                 </Col>
                 <Col span={24}>
-                    <Button onClick={this.toggleUpdateDialog} style={{width: 150, marginTop: 10}}>Update Portfolio</Button>
+                    <Button 
+                            onClick={() => this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`)} 
+                            style={{width: 150, marginTop: 10}}
+                    >
+                        Update Portfolio
+                    </Button>
                 </Col>
             </Row>
         );  

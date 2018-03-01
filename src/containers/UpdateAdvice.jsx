@@ -4,7 +4,7 @@ import {AdviceForm} from './AdviceForm';
 export class UpdateAdvice extends React.Component {
     render() {
         return (
-            <AdviceForm  isUpdate={true} adviceId={this.props.adviceId} />
+            <AdviceForm  isUpdate={true} adviceId={this.props.match.params.id} />
         );
     }
 }
