@@ -16,6 +16,7 @@ export class PortfolioDetail extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            name: '',
             presentAdvices: [],
             toggleValue: 'advice',
             togglePerformance: 'dollar',
@@ -228,6 +229,8 @@ export class PortfolioDetail extends React.Component {
         const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${this.props.match.params.id}`;
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => { // Getting details of portfolio
+            console.log(response.data);
+            console.log(response.data.name);
             if (response.data.benchmark) {
                 tickers.push({ // Pushing data to get the benchmark performance to performance graph
                     name: response.data.benchmark.ticker,
@@ -235,6 +238,7 @@ export class PortfolioDetail extends React.Component {
                 });
             }   
             this.setState({
+                name: response.data.name,
                 presentAdvices: this.processPresentAdviceTransaction(response.data.detail.subPositions),
                 stockPositions: this.processPresentStockTransction(response.data.detail.positions),
                 tickers
@@ -242,6 +246,7 @@ export class PortfolioDetail extends React.Component {
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => { // Getting Portfolio Performance
+            console.log(response.data);
             let performanceSeries = response.data.current.portfolioValues.map((item, index) => {
                 return [item.date * 1000, item.netValue];
             });
@@ -297,7 +302,7 @@ export class PortfolioDetail extends React.Component {
                 <Col span={18} style={layoutStyle}>
                     <Row>
                         <Col span={24}>
-                            <h3>Portfolio Name</h3>
+                            <h3>{this.state.name}</h3>
                         </Col>
                         <Col span={24}>
                             <h4>Metrics</h4>

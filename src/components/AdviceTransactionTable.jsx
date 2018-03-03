@@ -1,17 +1,22 @@
 import * as React from 'react';
 import moment from 'moment';
-import {Collapse, Row, Col, Table, Input, DatePicker} from 'antd';
+import axios from 'axios';
+import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker } from 'antd';
 import {EditableCell} from './AqEditableCell';
 import {getStockData} from '../utils';
 
 const Panel = Collapse.Panel;
+const dateFormat ='YYYY-MM-DD';
+
+const {requestUrl, aimsquantToken} = require('../localConfig');
 
 export class AdviceTransactionTable extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            advices: props.advices
+            advices: props.advices,
+            subscribedAdvices: props.subscribedAdvices
         }
         this.columns = [
             {
@@ -95,15 +100,19 @@ export class AdviceTransactionTable extends React.Component {
 
     handleInputChange = (e, advice) => {
         const advices = [...this.state.advices];
+        let netAssetValue = 0;
         let target = advices.filter(item => item.key === advice.key)[0];
-        target['units'] = e.target.value;
-        target = target.composition.map((item, index) => {
+        target['units'] = e.target.value; 
+        target.composition = target.composition.map((item, index) => {
             if (e.target.value.length > 0 && Number(e.target.value) > 0) {
                 item.modifiedShares = item.shares * Number(e.target.value);
+                netAssetValue += item.modifiedShares * item.price;
             } else {
                 item.modifiedShares = item.shares;
             }
+            return item;
         });
+        target['netAssetValue'] = netAssetValue;
         this.setState({advices});
     }
 
@@ -111,62 +120,55 @@ export class AdviceTransactionTable extends React.Component {
         e.stopPropagation();
     }
 
+    // improvement needed - this should be a common method
     handleDateChange = (date, advice) => {
+        const adviceId = advice.adviceId;
+        const subscribedAdvices = [...this.state.subscribedAdvices];
+        const advices = [...this.state.advices];
+
+        const targetSubscribedAdvice = subscribedAdvices.filter(advice => advice.id === adviceId)[0];
+        let targetAdvice = advices.filter(item => item.key === advice.key)[0];
+        
+        targetSubscribedAdvice.date = date.format(dateFormat);
+        targetAdvice.date = date.format(dateFormat);
+
+        const selectedDate = moment(date).format(dateFormat);
+        const url = `${requestUrl}/advice/${adviceId}/portfolio?date=${selectedDate}`;
+        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        .then(response =>{
+            const portfolio = response.data.detail;
+            if (portfolio) {
+                targetSubscribedAdvice.portfolio.detail = portfolio;
+                targetSubscribedAdvice.disabled = false;
+            } else {
+                targetSubscribedAdvice.portfolio.detail = null;
+                targetSubscribedAdvice.disabled = true;
+            }
+            targetAdvice.composition = this.props.processAdvice(targetSubscribedAdvice).composition;
+            this.setState({
+                subscribedAdvices,
+                advices
+            });
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
+
+    handleCheckBoxchange = (e, advice) => {
         const advices = [...this.state.advices];
         const targetAdvice = advices.filter(item => item.key === advice.key)[0];
-        targetAdvice.date = date.format('YYYY-MM-DD');
-        const tickers = targetAdvice.composition.map(item => item.symbol); // Get the symbols from advice
-        this.fetchLastPrice(tickers)
-        .then(priceHistory => {
-            console.log(priceHistory);
-            priceHistory.map((tickerItem, index) => {
-                const  compositionItem = targetAdvice.composition.filter(item => item.symbol === tickerItem.ticker)[0];
-                const selectedPrice = tickerItem.priceHistory.filter(item => {
-                    const newDate = moment(item.date * 1000).format('YYYY-MM-DD');
-                    const selectedDate = date.format('YYYY-MM-DD');
-                    return newDate === selectedDate;
-                })[0];
-                compositionItem.price = selectedPrice !== undefined ? selectedPrice.price.toFixed(2) : 15;
-                this.setState({advices});
-            });
-        });
-    }
-
-    fetchLastPrice = (tickers) => { // fetch last price by tickers
-        const priceData = [];
-        return new Promise((resolve, reject) => {
-            tickers.map(ticker => {
-                getStockData(ticker)
-                .then(response => {
-                    priceData.push({
-                        ticker,
-                        priceHistory: response.data.priceHistory.values
-                    });
-                    if (priceData.length === tickers.length) {
-                        resolve(priceData);
-                    }
-                })
-                .catch(error => {
-                    console.log(error.message);
-                });
-            });   
-        });
-    }
-
-    handleDateClick = (e) => {
-        alert("Date Clicked");
-        console.log(e);
+        targetAdvice.checked = e.target.checked;
+        this.setState({advices});
     }
 
     renderHeaderItem = (advice) => {
-        let netAssetValue = 0;
-        advice.composition.map((item) => {
-            netAssetValue += item.price * item.shares;
-        });
-        
         if (!this.props.header) {
             return (
                 <Row type="flex" justify="end">
+                    <Col span={4}>
+                        <Checkbox onChange={(e) => this.handleCheckBoxchange(e, advice)} checked={advice.checked} />
+                    </Col>
                     <Col span={4}>
                         <h5>{advice.name}</h5>
                     </Col>
@@ -187,11 +189,14 @@ export class AdviceTransactionTable extends React.Component {
                             !this.props.preview &&
                             <DatePicker
                                 onChange={date => this.handleDateChange(date, advice)}
+                                value={moment(advice.date, dateFormat)}
+                                format={dateFormat}
+                                // disabledDate={(current) => this.props.disabledDate(current, advice)}
                             />
                         }
                     </Col>
                     <Col span={4} offset={2}>
-                        <MetricItem value={netAssetValue} label="Net Asset Value" />
+                        <MetricItem value={advice.netAssetValue} label="Net Asset Value" />
                     </Col>
                 </Row>
             );

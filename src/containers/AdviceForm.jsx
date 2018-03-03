@@ -39,7 +39,7 @@ export class AdviceFormImpl extends React.Component {
             ],
             selectedBenchmark: 'TCS',
             tickers: [],
-            rebalancingFrequency: rebalancingFrequency[1],
+            rebalancingFrequency: rebalancingFrequency[0],
             maxNotional: maxNotional[0],
             adviceName: '',
             adviceDescription: '',
@@ -165,9 +165,6 @@ export class AdviceFormImpl extends React.Component {
                     maxNotional: this.state.maxNotional,
                     // public: this.state.public
                 };
-
-                console.log(requestData);
-                
                 axios({
                     method,
                     url,
@@ -179,6 +176,7 @@ export class AdviceFormImpl extends React.Component {
                 .then((response) => {
                     const successMessage = isUpdate ? 'Advice Updated successfully' : 'Advice Created successfully';
                     message.success(successMessage);
+                    this.props.history.goBack();
                 })
                 .catch((error) => {
                     message.error(error.message);
@@ -342,13 +340,22 @@ export class AdviceFormImpl extends React.Component {
         const adviceDetailUrl = `${adviceUrl}/detail`;
         axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            this.setState({isPublic: response.data.public})
-            const {name, description, heading} = response.data;
+            console.log('First Response', response.data);
+            const {name, description, heading, maxNotional, rebalance, portfolio} = response.data;
+            this.setState({
+                isPublic: response.data.public,
+                maxNotional: maxNotional.toString(),
+                rebalancingFrequency: rebalance,
+                selectedBenchmark: portfolio.benchmark.ticker
+            });
+            console.log(portfolio.benchmark.ticker);
             this.setFieldsValue({name, description, headline: heading});
             
             return axios.get(adviceDetailUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
+            console.log('Second Response', response.data);
+            console.log('Start Date', response.data.portfolio.detail.startDate);
             const positions = [];
             const portfolio = response.data.portfolio.detail.positions;
             portfolio.map((item, index) => {
@@ -357,6 +364,12 @@ export class AdviceFormImpl extends React.Component {
                     ticker: item.security.ticker
                 });
             });
+            const startDate = moment(response.data.portfolio.detail.startDate).format(dateFormat);
+            try {
+                this.props.form.setFieldsValue({startDate: moment(startDate, dateFormat)});
+            } catch(error) {
+                console.log(error);
+            }
             this.processData(positions);
         });
     }
@@ -446,17 +459,6 @@ export class AdviceFormImpl extends React.Component {
                                                 
                                             </FormItem>
                                         </Col>
-                                        {
-                                            this.props.isUpdate
-                                            ?   <Col span={6} offset={10}>
-                                                    <Checkbox 
-                                                            onChange={this.publicCheckboxChange}
-                                                    >
-                                                        Make advice public
-                                                    </Checkbox>
-                                                </Col>
-                                            : null
-                                        }
                                     </Row>
                                 }
                                 {   !this.state.isPublic &&
@@ -500,46 +502,45 @@ export class AdviceFormImpl extends React.Component {
                                         <h3 style={inputHeaderStyle}>Advice Portfolio</h3>
                                     </Col>
                                 </Row>
-                                {
-                                    !this.props.isUpdate
-                                    ? <Row type="flex" justify="space-between">
-                                            <Col span={6}>
-                                                <h4 style={labelStyle}>Max Notional</h4>
-                                                <AqDropDown 
-                                                        renderMenu={this.renderMaxNotionalMenu} 
-                                                        value={this.state.maxNotional} 
-                                                />
-                                            </Col>
-                                            <Col span={6}>
-                                                <h4>Rebalancing Frequency</h4>
-                                                <AqDropDown 
-                                                        renderMenu={this.renderRebalanceMenu} 
-                                                        value={this.state.rebalancingFrequency} 
-                                                />
-                                            </Col>
-                                            <Col span={6}>
-                                                <h4 style={labelStyle}>Start Date</h4>
-                                                <FormItem>
-                                                    {getFieldDecorator('startDate', {
-                                                        rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
-                                                    })(
-                                                        <DatePicker 
-                                                            onChange={this.onStartDateChange} 
-                                                            format={dateFormat}
-                                                            style={inputStyle} 
-                                                        /> 
-                                                    )}
-                                                </FormItem>
-                                            </Col>
-                                            <Col span={6}>
-                                                Benchmark: 
-                                                <AqDropDown 
-                                                        renderMenu={this.renderBenchmarkMenu} 
-                                                        value={this.state.selectedBenchmark} 
-                                                />
-                                            </Col>
-                                        </Row>
-                                    : null
+                                {   !this.state.isPublic &&
+                                    <Row type="flex" justify="space-between">
+                                        <Col span={6}>
+                                            <h4 style={labelStyle}>Max Notional</h4>
+                                            <AqDropDown 
+                                                    renderMenu={this.renderMaxNotionalMenu} 
+                                                    value={this.state.maxNotional} 
+                                            />
+                                        </Col>
+                                        <Col span={6}>
+                                            <h4>Rebalancing Frequency</h4>
+                                            <AqDropDown 
+                                                    renderMenu={this.renderRebalanceMenu} 
+                                                    value={this.state.rebalancingFrequency} 
+                                            />
+                                        </Col>
+                                        <Col span={6}>
+                                            <h4 style={labelStyle}>Start Date</h4>
+                                            <FormItem>
+                                                {getFieldDecorator('startDate', {
+                                                    rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
+                                                })(
+                                                    <DatePicker 
+                                                        onChange={this.onStartDateChange} 
+                                                        format={dateFormat}
+                                                        style={inputStyle}
+                                                        format={dateFormat}
+                                                    /> 
+                                                )}
+                                            </FormItem>
+                                        </Col>
+                                        <Col span={6}>
+                                            Benchmark: 
+                                            <AqDropDown 
+                                                    renderMenu={this.renderBenchmarkMenu} 
+                                                    value={this.state.selectedBenchmark} 
+                                            />
+                                        </Col>
+                                    </Row>
                                 }
                                 <Row type="flex" justify="end">
                                     <Col span={24}>

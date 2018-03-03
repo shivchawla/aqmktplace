@@ -22,6 +22,7 @@ export class PortfolioAddTransactions extends React.Component {
             tickers: [],
             toggleValue: 'advice',
             advices: [],
+            selectedAdvices: [],
             stockPositions: [],
             presentAdvices: [],
             presentStocks: [],
@@ -152,24 +153,30 @@ export class PortfolioAddTransactions extends React.Component {
                         investorId={investorId}
                         addAdvice={this.addAdvice}
                         deleteAdvice = {this.deleteAdvice}
+                        onOk={this.onOk}
                 />
             </Modal>
         );
     }
 
-    addAdvice = (advice) => {
+    onOk = () => {
         const advices = [...this.state.advices];
-        advices.push(advice);
-        this.setState({advices}, () => {
+        this.setState({advices: this.state.selectedAdvices});
+    }
+
+    addAdvice = (advice) => {
+        const selectedAdvices = [...this.state.selectedAdvices];
+        selectedAdvices.push(advice);
+        this.setState({selectedAdvices}, () => {
             this.previewPortfolio();
         });
     }
     
     deleteAdvice = (advice) => {
-        const advices = [...this.state.advices];
-        const adviceIndex = _.findIndex(advices, item => item.key === advice.key);
-        advices.splice(adviceIndex, 1);
-        this.setState({advices}, () => {
+        const selectedAdvices = [...this.state.selectedAdvices];
+        const adviceIndex = _.findIndex(selectedAdvices, item => item.key === advice.key);
+        selectedAdvices.splice(adviceIndex, 1);
+        this.setState({selectedAdvices}, () => {
             this.previewPortfolio();
         });
     }

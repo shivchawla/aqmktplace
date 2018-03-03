@@ -1,7 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
 import moment from 'moment';
-import {Collapse, Checkbox, Row, Col, Tabs, Table} from 'antd';
+import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker} from 'antd';
 import {AdviceTransactionTable} from '../components';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 
@@ -16,7 +16,7 @@ export class AdviceItem extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            advices: [],
+            advices: props.subscribedAdvices,
             selectedAdvices: []
         };
         this.columns = [
@@ -53,37 +53,42 @@ export class AdviceItem extends React.Component {
         ];
         this.adviceKey = 0;
     }
+
     componentWillMount() {
         const {investorId} = this.props;
-        const advices = [...this.state.advices];
+        let advices = [...this.state.advices];
         const url = `${requestUrl}/investor/${investorId}/detail`;
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             response.data.subscribedAdvices.map((advice, index) => {
                 if(advice.active) {
-                    const url = `${requestUrl}/advice/${advice.advice}/detail?fields=portfolio%20name%20updatedDate%20followers%20subscribers`;
-                    axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+                    const adviceUrl = `${requestUrl}/advice/${advice.advice}`;
+                    axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
                     .then(response => {
-                        const url = `${requestUrl}/performance/advice/${advice.advice}`;
-                        advices.push({
+                        const portfolioUrl = `${requestUrl}/advice/${advice.advice}/portfolio`;
+                        const newAdvice = {
                             id: advice.advice,
-                            portfolio: response.data.portfolio,
+                            portfolio: {detail: null},
                             name: response.data.name,
                             advisor: response.data.advisor,
                             updatedDate: moment(response.data.updatedDate).format(dateFormat),
                             performance: {},
-                            subscribers: response.data.subscribers,
-                            followers: response.data.followers
-                        });
-                        this.setState({advices});
+                            subscribers: response.data.numSubscribers,
+                            followers: response.data.numFollowers,
+                            isSelected: false,
+                            disabled: false,
+                            date: moment().format(dateFormat),
+                            createdDate: response.data.createdDate
+                        };
 
-                        return axios.get(url, {headers: {'aimsquant-token': aimsquantToken}});
+                        axios.get(portfolioUrl, {headers: {'aimsquant-token': aimsquantToken}})
+                        .then(response => {
+                            newAdvice.portfolio.detail = response.data.detail;
+                            advices.push(newAdvice);
+                            this.setState({advices});
+                            this.props.updateSubscribedAdvices(advices);
+                        })
                     })
-                    // .then(response => {
-                    //     const target = advices.filter(item => item.id === advice.advice)[0];
-                    //     target['performance'] = response.data;
-                    //     this.setState({advices});
-                    // })
                     .catch(error => {
                         console.log(error.message)
                     });
@@ -97,7 +102,7 @@ export class AdviceItem extends React.Component {
     }
 
     renderAdvices = () => {
-        const {advices} = this.state;
+        const {advices = []} = this.state;
 
         return advices.map((item, index) => {
             const data = this.processComposition(item);
@@ -106,7 +111,20 @@ export class AdviceItem extends React.Component {
                 <Panel header={this.renderHeaderItem(item)} key={index}>
                     <Tabs>
                         <TabPane tab="Composition" key="1">
-                            <Table size="small" columns={this.columns} dataSource={data} pagination={false}/>
+                            <Row>
+                                <Col span={6} offset={18}>
+                                    <DatePicker
+                                            style={{right: 0}}
+                                            onChange={date => {this.handleDateChange(date, item)}}
+                                            format={dateFormat}
+                                            value={moment(item.date, dateFormat)}
+                                            // disabledDate={current => this.props.disabledDate(current, item)}
+                                    />
+                                </Col>
+                                <Col span={24} style={{marginTop: 20}}>
+                                    <Table size="small" columns={this.columns} dataSource={data} pagination={false}/>
+                                </Col>
+                            </Row>
                         </TabPane>
                         <TabPane tab="Performance" key="2">
                             <h4>Performance</h4>
@@ -119,73 +137,75 @@ export class AdviceItem extends React.Component {
 
     processComposition = (advice) => {
         const compositions = [];
-        advice.portfolio.detail.positions.map((item, index) => {
-            compositions.push({
-                key: index,
-                symbol: item.security.ticker,
-                quantity: item.quantity,
-                lastPrice: 100,
-                costBasic: 200,
-                unrealizedPL: 200,
-                weight: 200
+        if(advice.portfolio.detail) {
+            advice.portfolio.detail.positions.map((item, index) => {
+                compositions.push({
+                    key: index,
+                    symbol: item.security.ticker,
+                    quantity: item.quantity,
+                    lastPrice: item.lastPrice,
+                    costBasic: 200,
+                    unrealizedPL: 200,
+                    weight: 200
+                });
             });
-        });
+        }
 
         return compositions;
     }  
     
     handleCheckboxChange = (e, advice) => {
-        if (e.target.checked) {
-            this.props.addAdvice(this.processAdvice(advice));
-        } else {
-            this.props.deleteAdvice(this.processAdvice(advice));
-        }
-        e.stopPropagation();
+        const advices = [...this.state.advices];
+        const targetAdvice = advices.filter(item => item.id === advice.id)[0];
+        targetAdvice.isSelected = e.target.checked;
+        this.setState({advices});
+        // if (e.target.checked) {
+        //     this.props.addAdvice(this.processAdvice(advice));
+        // } else {
+        //     this.props.deleteAdvice(this.processAdvice(advice));
+        // }
     }
 
-    processAdvice = (advice) => {
-        const key = this.adviceKey++;
-
-        return {
-            adviceId: advice.id,
-            name: advice.name,
-            netAssetValue: 1234,
-            weight: '12.4%',
-            profitLoss: '+12.4%',
-            units: 1,
-            key,
-            date: moment().format('YYYY-MM-DD'),
-            composition: this.processAdviceComposition(advice, key)
-        }
-    }
-
-    processAdviceComposition = (advice, key) => {
-        const composition = [];
-        advice.portfolio.detail.positions.map((item, index) => {
-            composition.push({
-                key: index,
-                adviceKey: key,
-                symbol: item.security.ticker,
-                shares: item.quantity,
-                modifiedShares: item.quantity,
-                price: 15,
-                costBasic: 12,
-                unrealizedPL: 1231,
-                weight: '12%',
-            });
+    handleDateChange = (date, advice) => {
+        const adviceId = advice.id;
+        const advices = [...this.state.advices];
+        const targetAdvice = advices.filter(item => item.id === adviceId)[0];
+        const url = `${requestUrl}/advice/${adviceId}/portfolio?date=${moment(date).format(dateFormat)}`;
+        
+        // improvement needed - this should be a common method
+        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        .then(response => {
+            const portfolio = response.data.detail;
+            targetAdvice.date = moment(date).format(dateFormat);
+            if (portfolio) {
+                targetAdvice.portfolio.detail = portfolio;
+                targetAdvice.disabled = false;
+            } else {
+                targetAdvice.disabled = true;
+                targetAdvice.portfolio.detail = null;
+            }
+            this.setState({advices});
+            this.props.updateSubscribedAdvices(advices);
+            
+        }).
+        catch(error => {
+            console.log(error);
         });
-
-        return composition;
     }
 
     renderHeaderItem = (advice) => {
         const performance = advice.performance.historicalPerformance;
+
         return (
             <Row>
                 <Col span={24}>
                     <Row>
                         <Col span={2}>
-                            <Checkbox onChange={(e) => this.handleCheckboxChange(e, advice)}/>
+                            <Checkbox 
+                                    checked={advice.isSelected} 
+                                    onChange={(e) => this.handleCheckboxChange(e, advice)}
+                                    disabled={advice.disabled}
+                            />
                         </Col>
                         <Col span={22}>
                             <Row>
@@ -201,13 +221,13 @@ export class AdviceItem extends React.Component {
                                     <Row>
                                         <Col span={4}>
                                             <MetricItem
-                                                    value={advice.subscribers.length}
+                                                    value={advice.subscribers}
                                                     label="Subscribers"
                                             />
                                         </Col>
                                         <Col span={4}>
                                             <MetricItem
-                                                    value={advice.followers.length}
+                                                    value={advice.followers}
                                                     label="Followers"
                                             />
                                         </Col>

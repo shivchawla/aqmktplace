@@ -78,7 +78,9 @@ export class AdviceDetail extends React.Component {
             latestAnalytics, 
             isSubscribed, 
             isFollowing, 
-            isOwner
+            isOwner,
+            numSubscribers,
+            numFollowers
         } = response.data;
         this.setState({
             adviceResponse: response.data,
@@ -88,11 +90,11 @@ export class AdviceDetail extends React.Component {
                 description, 
                 heading,
                 advisor,
-                subscribers: latestAnalytics.numSubscribers,
+                subscribers: numSubscribers,
                 isSubscribed,
                 isOwner,
                 isFollowing,
-                followers: latestAnalytics.numFollowers,
+                followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
                 rating: latestAnalytics.rating,
                 isPublic: response.data.public
@@ -155,6 +157,7 @@ export class AdviceDetail extends React.Component {
             }
         })
         .then(response => {
+            console.log(response.data);
             this.getAdviceSummary(response);
             return axios.get(`${url}/detail`, {headers: {'aimsquant-token': aimsquantToken}});
         })
@@ -289,7 +292,6 @@ export class AdviceDetail extends React.Component {
     };
 
     componentWillMount() {
-        console.log(this.props);
         this.getUserData();
         this.getAdviceData();
     } 
@@ -307,7 +309,7 @@ export class AdviceDetail extends React.Component {
                                 type="primary" 
                                 disabled={this.state.disableSubscribeButton}
                         >
-                            {!this.state.isSubscribed ? "Subscribe" : "Unsubscribe"}
+                            {!this.state.adviceDetail.isSubscribed ? "Subscribe" : "Unsubscribe"}
                         </Button>
                     </Col>
                     <Col span={24}>
@@ -316,7 +318,7 @@ export class AdviceDetail extends React.Component {
                                 style={{width: 150, marginTop: 10}} 
                                 disabled={this.state.disableFollowButton}
                         >
-                            {!this.state.isFollowing ? "Follow" : "Unfollow"}
+                            {!this.state.adviceDetail.isFollowing ? "Follow" : "Unfollow"}
                         </Button>
                     </Col>
                 </Row>

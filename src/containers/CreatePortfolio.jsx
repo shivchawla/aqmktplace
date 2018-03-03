@@ -21,21 +21,24 @@ export class CreatePortfolioImpl extends React.Component {
         super(props);
         this.state = {
             advices: [],
+            selectedAdvices: [],
             presentAdvices: [],
+            subscribedAdvices: [],
             isSubscibedAdviceModalVisible: false,
             stockTransactions: [],
             cashTransactions: [],
             toggleValue: 'advice',
             selectedBenchmark: 'TCS'
-        }
+        };
+        this.adviceKey = 0;
     }
 
     renderAdviceTransactions = () => {
-        const {advices} = this.state;
+        const {advices, subscribedAdvices} = this.state;
         return (
             <Row>
                 <Col span={4}>
-                    <Button>Delete Selected</Button>
+                    <Button onClick={this.deleteSelected}>Delete Selected</Button>
                 </Col>
                 <Col span={4} offset={16}>
                     <Button 
@@ -48,8 +51,14 @@ export class CreatePortfolioImpl extends React.Component {
                 <Col span={24} style={{marginTop: 20}}>
                     {
                         advices.length > 0 
-                        ? <AdviceTransactionTable advices={advices} />
-                        : <h5>Please add advices to your portfolio</h5>
+                        ?   <AdviceTransactionTable 
+                                    advices={advices} 
+                                    subscribedAdvices={subscribedAdvices}
+                                    updateAdvices={this.updateAdvices}
+                                    processAdvice={this.processAdvice}
+                                    disabledDate={this.disabledDate}
+                            />
+                        :   <h5>Please add advices to your portfolio</h5>
                     }
                 </Col>
             </Row>
@@ -92,7 +101,7 @@ export class CreatePortfolioImpl extends React.Component {
                     title="Add Advices"
                     visible={this.state.isSubscibedAdviceModalVisible}
                     onCancel={this.toggleSubscribedAdviceModal}
-                    onOk={this.toggleSubscribedAdviceModal}
+                    onOk={this.onOk}
                     width="80%"
                     bodyStyle={{
                         height: '600px',
@@ -104,24 +113,44 @@ export class CreatePortfolioImpl extends React.Component {
                         investorId={investorId}
                         addAdvice={this.addAdvice}
                         deleteAdvice = {this.deleteAdvice}
+                        subscribedAdvices={this.state.subscribedAdvices}
+                        updateSubscribedAdvices={this.updateSubscribedAdvices}
+                        disabledDate={this.disabledDate}
                 />
             </Modal>
         );
     }
 
-    addAdvice = (advice) => {
-        const advices = [...this.state.advices];
-        advices.push(advice);
+    updateSubscribedAdvices = (subscribedAdvices) => {
+        this.setState({subscribedAdvices});
+    }   
+
+    onOk = () => {
+        this.updateAdvices();
+        this.toggleSubscribedAdviceModal();
+    }
+
+    updateAdvices = () => {
+        const selectedAdvices = this.state.subscribedAdvices.filter(advice => {
+            return advice.isSelected === true;
+        });
+        const advices = selectedAdvices.map((advice, index) => {
+            return this.processAdvice(advice);
+        });
         this.setState({advices});
+    }
+
+    addAdvice = (advice) => {
+        const selectedAdvices = [...this.state.selectedAdvices];
+        selectedAdvices.push(advice);
+        this.setState({selectedAdvices});
     }
     
     deleteAdvice = (advice) => {
-        const advices = [...this.state.advices];
-        const adviceIndex = _.findIndex(advices, item => item.key === advice.key);
-        advices.splice(adviceIndex, 1);
-        this.setState({advices}, () => {
-            console.log(this.state.advices);
-        });
+        const selectedAdvices = [...this.state.selectedAdvices];
+        const adviceIndex = _.findIndex(selectedAdvices, item => item.key === advice.key);
+        selectedAdvices.splice(adviceIndex, 1);
+        this.setState({selectedAdvices});
     }
 
     onStockTransactionChange = (data) => {
@@ -140,6 +169,7 @@ export class CreatePortfolioImpl extends React.Component {
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
+        console.log(transactions);
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const data = {
@@ -153,7 +183,6 @@ export class CreatePortfolioImpl extends React.Component {
                     },
                     transactions
                 };
-                console.log(data);
                 axios({
                     url,
                     method: 'POST',
@@ -172,27 +201,77 @@ export class CreatePortfolioImpl extends React.Component {
         });
     }
 
+    processAdvice = (advice) => {
+        const key = this.adviceKey++;
+
+        return {
+            checked: false,
+            adviceId: advice.id,
+            name: advice.name,
+            netAssetValue: this.calculateNetAssetValue(advice),
+            weight: '12.4%',
+            profitLoss: '+12.4%',
+            units: 1,
+            key,
+            date: advice.date,
+            createdDate: advice.createdDate,
+            composition: this.processAdviceComposition(advice, key)
+        }
+    }
+
+    calculateNetAssetValue = (advice) => {
+        let netAssetValue = 0;
+        advice.portfolio.detail.positions.map(position => {
+            netAssetValue += position.lastPrice * position.quantity;
+        });
+
+        return netAssetValue;
+    }
+
+    processAdviceComposition = (advice, key) => {
+        const composition = [];
+        if (advice.portfolio.detail) {
+            advice.portfolio.detail.positions.map((item, index) => {
+                composition.push({
+                    key: index,
+                    adviceKey: key,
+                    symbol: item.security.ticker,
+                    shares: item.quantity,
+                    modifiedShares: item.quantity,
+                    price: item.lastPrice,
+                    costBasic: 12,
+                    unrealizedPL: 1231,
+                    weight: '12%',
+                });
+            });
+        }
+
+        return composition;
+    }
+
     processAdviceTransaction = (adviceTransactions) => {
         const transactions = [];
         adviceTransactions.map(transaction => {
-            transaction.composition.map(item => {
-                transactions.push({
-                    security: {
-                        ticker: item.symbol,
-                        securityType: "EQ",
-                        country: "IN",
-                        exchange: "NSE"
-                    },
-                    quantity: item.shares,
-                    price: Number(item.price),
-                    fee: 0,
-                    date: transaction.date,
-                    commission: 0,
-                    cashLinked: false,
-                    advice: transaction.adviceId,
-                    _id: ""
-                })
-            });
+            if (transaction.composition.length > 0) {
+                transaction.composition.map(item => {
+                    transactions.push({
+                        security: {
+                            ticker: item.symbol,
+                            securityType: "EQ",
+                            country: "IN",
+                            exchange: "NSE"
+                        },
+                        quantity: item.shares,
+                        price: Number(item.price),
+                        fee: 0,
+                        date: transaction.date,
+                        commission: 0,
+                        cashLinked: false,
+                        advice: transaction.adviceId,
+                        _id: ""
+                    })
+                });
+            }
         });
 
         return transactions;
@@ -327,6 +406,33 @@ export class CreatePortfolioImpl extends React.Component {
             </Row>
         );
     }
+
+    deleteSelected = () => {
+        let advices = [...this.state.advices];
+        let subscribedAdvices = [...this.state.subscribedAdvices];
+        const advicesToBeDeleted = this.state.advices.filter(item => item.checked === true);
+        console.log('Advices to be deleted', advicesToBeDeleted);
+        console.log('Subscribed Advices', subscribedAdvices);
+
+        subscribedAdvices = subscribedAdvices.map(subscribedAdvice => {
+            advicesToBeDeleted.map(advice => {
+                if (advice.adviceId === subscribedAdvice.id) {
+                    subscribedAdvice.isSelected = false;
+                }
+            });
+            return subscribedAdvice;
+        });
+        console.log(subscribedAdvices);
+
+
+        advices = _.pullAll(advices, advicesToBeDeleted);
+        this.setState({advices, subscribedAdvices});
+    }
+
+    disabledDate = (current, advice) => {
+        const createdDate = moment(advice.createdDate).subtract(2, 'days');
+        return (current && current > moment().endOf('day')) || (current && current < createdDate);
+    }
     // componentWillMount() {
     //     const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
     //     axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
@@ -338,7 +444,6 @@ export class CreatePortfolioImpl extends React.Component {
     //         console.log(error.message);
     //     })
     // }
-
     render() {
         const {getFieldDecorator} = this.props.form;
 
@@ -369,7 +474,7 @@ export class CreatePortfolioImpl extends React.Component {
                         </Row>
                         <Row>
                             <Col span={24}>
-                                <Tabs defaultActiveKey="1">
+                                <Tabs defaultActiveKey="2">
                                     <TabPane tab="Stock Transaction" key="1">
                                         {this.renderStockTransactions()}
                                     </TabPane> 
