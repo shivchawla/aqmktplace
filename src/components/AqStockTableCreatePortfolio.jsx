@@ -76,10 +76,15 @@ export class AqStockTableCreatePortfolio extends React.Component {
         );
     }
 
+    disabledDate = current => {
+        return current > moment().endOf('day');
+    }
+
     renderDatePicker = (text, record, column) => {
         return (
             <DatePicker 
                     onChange={(date) => this.handleRowChange(date, record, column)}
+                    disabledDate={this.disabledDate}
             />
         );
     }

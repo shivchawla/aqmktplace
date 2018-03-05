@@ -1,5 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
+import moment from 'moment';
 import Radium from 'radium';
 import axios from 'axios';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button} from 'antd';
@@ -246,9 +247,9 @@ export class PortfolioDetail extends React.Component {
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => { // Getting Portfolio Performance
-            console.log(response.data);
-            let performanceSeries = response.data.current.portfolioValues.map((item, index) => {
-                return [item.date * 1000, item.netValue];
+            console.log(response.data.simulated.portfolioValues);
+            let performanceSeries = response.data.simulated.portfolioValues.map((item, index) => {
+                return [moment(item.date).valueOf(), item.netValue];
             });
             tickers.push({ // Pushing advice performance to performance graph
                 name: 'Advice',
@@ -275,7 +276,8 @@ export class PortfolioDetail extends React.Component {
                 {value: portfolioMetrics.drawdown.maxdrawdown, label: 'Max Draw Down'},
             ];
             this.setState({
-                portfolioMetrics: metrics, tickers,
+                portfolioMetrics: metrics, 
+                tickers,
                 portfolioConfig: {
                     ...this.state.portfolioConfig, 
                     series
@@ -406,8 +408,6 @@ export class PortfolioDetail extends React.Component {
         );
     }
 }
-
-PortfolioDetail = Radium(PortfolioDetail);
 
 const MetricItem = ({value, label}) => {
     return (

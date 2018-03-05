@@ -118,7 +118,7 @@ export class AdviceItem extends React.Component {
                                             onChange={date => {this.handleDateChange(date, item)}}
                                             format={dateFormat}
                                             value={moment(item.date, dateFormat)}
-                                            // disabledDate={current => this.props.disabledDate(current, item)}
+                                            disabledDate={current => this.props.disabledDate(current, item)}
                                     />
                                 </Col>
                                 <Col span={24} style={{marginTop: 20}}>

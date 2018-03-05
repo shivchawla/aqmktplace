@@ -317,6 +317,7 @@ export class AqHighChartMod extends React.PureComponent {
 
     lodInitialBenchmarkPerformance = () => {
         const {tickers} = this.props;
+        console.log(tickers[0]);
         const {config, legendItems} = this.state;
 
         return new Promise((resolve, reject) => {

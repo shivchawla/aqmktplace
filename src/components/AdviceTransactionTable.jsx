@@ -166,9 +166,12 @@ export class AdviceTransactionTable extends React.Component {
         if (!this.props.header) {
             return (
                 <Row type="flex" justify="end">
-                    <Col span={4}>
-                        <Checkbox onChange={(e) => this.handleCheckBoxchange(e, advice)} checked={advice.checked} />
-                    </Col>
+                    {
+                        !this.props.preview
+                        &&  <Col span={4}>
+                                <Checkbox onChange={(e) => this.handleCheckBoxchange(e, advice)} checked={advice.checked} />
+                            </Col>
+                    }
                     <Col span={4}>
                         <h5>{advice.name}</h5>
                     </Col>
@@ -191,7 +194,7 @@ export class AdviceTransactionTable extends React.Component {
                                 onChange={date => this.handleDateChange(date, advice)}
                                 value={moment(advice.date, dateFormat)}
                                 format={dateFormat}
-                                // disabledDate={(current) => this.props.disabledDate(current, advice)}
+                                disabledDate={(current) => this.props.disabledDate(current, advice)}
                             />
                         }
                     </Col>

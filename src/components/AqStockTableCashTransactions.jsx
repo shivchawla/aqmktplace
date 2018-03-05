@@ -67,7 +67,10 @@ export class AqStockTableCashTransaction extends React.Component {
 
     renderDatePicker = (text, record, column) => {
         return (
-            <DatePicker onChange={date => this.handleRowChange(date, record, column)} size="small"/>
+            <DatePicker 
+                    onChange={date => this.handleRowChange(date, record, column)} size="small"
+                    disabledDate={this.disableDate}
+            />
         );
     }
 
@@ -109,6 +112,10 @@ export class AqStockTableCashTransaction extends React.Component {
                 this.props.previewPortfolio();
             }
         }
+    }
+
+    disableDate = current => {
+        return current > moment().endOf('day');
     }
 
     isValid = (row) => {

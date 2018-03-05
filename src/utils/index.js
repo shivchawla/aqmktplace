@@ -29,7 +29,7 @@ export const getStockPerformance = (tickerName) => {
             const data = performance.data.priceHistory.values;
             if (data.length > 0) { // Check if ticker is valid
                 const performanceArray = data.map((item, index) => {
-                    return [item.date * 1000, item.price]
+                    return [moment(item.date).valueOf(), item.price]
                 });
                 resolve(performanceArray);
             } else {
