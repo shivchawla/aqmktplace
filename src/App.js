@@ -14,7 +14,9 @@ import {
     CreatePortfolio,
     PortfolioDetail,
     UpdateAdvice,
-    PortfolioAddTransactions
+    PortfolioAddTransactions,
+    InvestorDashboard,
+    AdvisorProfile
 } from './containers'; 
 
 const {Header, Content} = Layout;
@@ -88,6 +90,8 @@ class App extends React.Component {
                         <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} />
                         <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} />
                         <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
+                        <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
+                        <Route exact={true} path='/advisorprofile' component={AdvisorProfile} />
                     </Content>
                 </Layout>
             </Layout>

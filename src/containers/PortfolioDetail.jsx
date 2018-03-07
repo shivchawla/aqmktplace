@@ -95,6 +95,8 @@ export class PortfolioDetail extends React.Component {
     }
 
     renderAdviceTransactions = () => {
+        console.log(this.state.presentAdvices);
+        
         return (
             <Row>
                 <Col span={24} style={{marginTop: 20}}>
