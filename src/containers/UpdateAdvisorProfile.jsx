@@ -77,6 +77,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
 
     updateUserProfile = () => {
         const url = `${requestUrl}/advisor/${this.props.advisorId}/profile`;
+        // console.log(this.processData());
         axios({
             method: 'PUT',
             url,
@@ -89,12 +90,11 @@ class UpdateAdvisorProfileImpl extends React.Component {
         .catch(error => {
             console.log(error);
         })
-        this.processData();
+        // this.processData();
     }
 
     processData = () => {
         const values = this.props.form.getFieldsValue();
-        console.log(this.props.form.getFieldsValue());
         const data = {
             webUrl: values.webUrl,
             address: {
@@ -142,12 +142,6 @@ class UpdateAdvisorProfileImpl extends React.Component {
                         {this.renderRadioGroup()}
                     </Col>
                 </Row>
-                {
-                    this.props.isCompany &&
-                    <FormItem>
-                        {getFieldDecorator('companyName')(<Input placeholder="Company Name" />)}
-                    </FormItem>
-                }
                 <Row>
                     <Col span={24}>
                         <Checkbox 

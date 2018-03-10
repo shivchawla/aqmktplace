@@ -84,13 +84,15 @@ export class AdviceFilterComponent extends React.Component {
         const maxNotional = selectedFilters.maxNotional.length > 0 ? _.join(selectedFilters.maxNotional, ',') : _.join(defaultFilters.maxNotional, ',');
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         approved = _.join(approved, ',');
-        const url = `${requestUrl}/advice?all=true&maxNotional=${maxNotional}&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}`;
+        const url = `${requestUrl}/advice?all=true&maxNotional=${maxNotional}&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
         this.props.updateAdviceUrl(url);
         return url;
     }
 
     handleClick = () => {
-        this.props.toggleModal();
+        if (this.props.toggleModal) {
+            this.props.toggleModal();
+        }
         this.getAdvices();
     }
 

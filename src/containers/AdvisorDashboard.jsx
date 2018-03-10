@@ -328,6 +328,7 @@ export class AdvisorDashboard extends React.Component {
                         updateAdvices={this.updateAdvices}
                         updateAdviceUrl={this.updateAdviceUrl}
                         toggleModal = {this.toggleFilterModal}
+                        orderParam={this.state.sortBy}
                 />
             </Modal>
         );

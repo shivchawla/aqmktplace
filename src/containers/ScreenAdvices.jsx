@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox} from 'antd';
-import {AdviceListItem} from '../components';
+import {AdviceListItem, AdviceFilterComponent} from '../components';
 import {layoutStyle} from '../constants';
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
@@ -32,6 +32,7 @@ export class ScreenAdvices extends React.Component {
         super(props);
         this.state = {
             spinning: false,
+            adviceUrl: `${requestUrl}/advice?all=true&trending=false&subscribed=false&following=false&order=-1`,
             advices: [],
             defaultFilters: filters,
             selectedFilters: filters,
@@ -40,7 +41,8 @@ export class ScreenAdvices extends React.Component {
             selectMaxNotionalAllFilters: true,
             selectRebalanceAllFilters: true,
             selectApprovedllFilters: true,
-            searchValue: ''
+            searchValue: '',
+            sortBy: 'rating'
         }
     }
 
@@ -68,8 +70,9 @@ export class ScreenAdvices extends React.Component {
         this.getAdvices();
     }
 
-    getAdvices = () => {
-        axios.get(this.processUrl(this.state.selectedTab), {headers: {'aimsquant-token': aimsquantToken}})
+    getAdvices = (adviceUrl) => {
+        const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
+        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             this.setState({
                 advices: this.processAdvices(response.data)
@@ -123,103 +126,23 @@ export class ScreenAdvices extends React.Component {
         return (
             <Collapse defaultActiveKey={['1']}>
                 <Panel header="Add Filters" key="1">
-                    <Row style={{marginTop: 30}}>
-                        <Col span={6}>
-                            <IconHeader 
-                                    icon="area-chart" 
-                                    label="Max Notional" 
-                                    checked={this.state.selectMaxNotionalAllFilters}
-                                    filterType="maxNotional"
-                                    onChange={this.handleFilterGroupCheckboxChange}
-                            />
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderMaxNotionalFilter()}
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col span={6}>
-                            <IconHeader 
-                                    icon="clock-circle-o" 
-                                    label="Rebalancing Frequency"
-                                    checked={this.state.selectRebalanceAllFilters}
-                                    filterType="rebalancingFrequency"
-                                    onChange={this.handleFilterGroupCheckboxChange}
-                            />
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderRebalancingFreqFilter()}
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col span={6}>
-                            <IconHeader 
-                                    icon="check-circle" 
-                                    label="Status"
-                                    checked={this.state.selectApprovedllFilters}
-                                    filterType="approved"
-                                    onChange={this.handleFilterGroupCheckboxChange}
-                            />
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderStatusFilter()}
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
+                    <AdviceFilterComponent 
+                            updateAdvices={this.updateAdvices}
+                            updateAdviceUrl={this.updateAdviceUrl}
+                            toggleModal = {this.toggleFilterModal}
+                            orderParam={this.state.sortBy}
+                    />
                 </Panel>
             </Collapse>
         );
     }
 
-    renderMaxNotionalFilter = () => (
-        <CheckboxGroup 
-                onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "maxNotional")} 
-                options={this.state.defaultFilters.maxNotional}  
-                value={this.state.selectedFilters.maxNotional} 
-        />
-    )
-
-    renderRebalancingFreqFilter = () => (
-        <CheckboxGroup 
-                onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "rebalancingFrequency")} 
-                options={this.state.defaultFilters.rebalancingFrequency} 
-                value={this.state.selectedFilters.rebalancingFrequency} 
-        />
-    )
-
-    renderStatusFilter = () => {
-        return <CheckboxGroup 
-                        onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "approved")} 
-                        options={this.state.defaultFilters.approved} 
-                        value={this.state.selectedFilters.approved} 
-                />
+    updateAdvices = (advices) => {
+        this.setState({advices: this.processAdvices(advices)});
     }
 
-    handleFilterCheckboxChange = (checkedValues, type) => {
-        this.setState({
-            selectedFilters: {
-                ...this.state.selectedFilters, 
-                [type]: checkedValues,
-            },
-            [kvp[type]]: checkedValues.length === this.state.defaultFilters[type].length
-        }, () => {
-            this.getAdvices();
-            console.log(checkedValues.length);
-        });
-    }
-
-    handleFilterGroupCheckboxChange = (e, filterType) => {
-        let arrray = [];
-        if (e.target.checked) {
-            arrray = filters[filterType];
-        }
-        this.setState({
-            selectedFilters: {...this.state.selectedFilters, [filterType]: arrray},
-            [kvp[filterType]]: e.target.checked
-        }, () => {
-            this.getAdvices();
-        });
+    updateAdviceUrl = (url) => {
+        this.setState({adviceUrl: url});
     }
 
     handleTabChange = (key) => {
@@ -235,6 +158,30 @@ export class ScreenAdvices extends React.Component {
                 this.getAdvices();
             }
         });
+    }
+
+    handleSortingMenuChange = (value) => {
+        console.log(value);
+        this.setState({sortBy: value}, () => {
+            const url = `${this.state.adviceUrl}&orderParam=${this.state.sortBy}`;
+            this.getAdvices(url);
+        });
+    }
+
+    renderSortingMenu = () => {
+        return (
+            <Select defaultValue={this.state.sortBy} style={{width: 200}} onChange={this.handleSortingMenuChange}>
+                <Option value="rating">Rating</Option>
+                <Option value="return">Return</Option>
+                <Option value="name">Name</Option>
+                <Option value="volatility">Volatility</Option>
+                <Option value="sharpe">Sharpe</Option>
+                <Option value="maxloss">Max Loss</Option>
+                <Option value="numFollowers">Number of Followers</Option>
+                <Option value="numSubscribers">Number of Subscribers</Option>
+                <Option value="createdDate">Created Date</Option>
+            </Select>
+        );
     }
 
     render() {
@@ -260,7 +207,9 @@ export class ScreenAdvices extends React.Component {
                                     onChange={this.handleInputChange}
                                     onPressEnter={this.getAdvices}
                             />
-                            <h5>{this.state.searchValue}</h5>
+                        </Col>
+                        <Col span={24}>
+                            {this.renderSortingMenu()}
                         </Col>
                     </Row>
                     <Row>
