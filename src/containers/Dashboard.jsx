@@ -67,10 +67,10 @@ export class DashboardImpl extends React.Component {
         return (
             <Row>
                 <Col span={24}>
-                    <AqLink to='/dashboard/createadvice' pageTitle='Create Advice'/>
+                    <AqLink to='/advisordashboard' pageTitle='Advisor Dashboard'/>
                 </Col>
                 <Col span={24}>
-                    <AqLink to='/dashboard/createportfolio' pageTitle='Create Portfolio'/>
+                    <AqLink to='/investordashboard' pageTitle='Investor Dashboard'/>
                 </Col>
                 <Col span={24}>
                     <CreatePortfolioDialog 

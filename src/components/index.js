@@ -11,3 +11,5 @@ export * from './AdviceTransactionTable';
 export * from './AdviceListItem';
 export * from './MetricItem';
 export * from './PortfolioListItem';
+export * from './AdviceFilterComponent';
+export * from './IconHeader';

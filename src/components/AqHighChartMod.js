@@ -102,9 +102,11 @@ export class AqHighChartMod extends React.PureComponent {
             if (tickers.length === 1) {
                 const ticker = tickers[0];
                 if (series.length == 0) { // empty array
+                    console.log(ticker);
                     this.addTickerToEmptyArray(ticker);
                 } else if (series.length == 1) { // series[0] should be updated
                     if (ticker.name.toUpperCase() !== legendItems[0].name) {
+                        console.log(ticker);
                         console.log('series[0] should be updated');
                         this.updateTicker(ticker);
                     }
@@ -148,20 +150,28 @@ export class AqHighChartMod extends React.PureComponent {
         const {config, legendItems} = this.state;
         const series = [...config.series];
         this.setState({spinning: true});
-        getStockPerformance(ticker.name)
-        .then(performance => {
-            series[0].data = performance;
+        if (ticker.data === undefined || ticker.data.length < 1) {
+            getStockPerformance(ticker.name)
+            .then(performance => {
+                series[0].data = performance;
+                series[0].name = ticker.name;
+                legendItems[0].name = ticker.name;
+                this.setState({config: {...this.state.config, series}});
+            })
+            .catch(error => {
+                message.error(error.message);
+                console.log(error);
+            }) 
+            .finally(() => {
+                this.setState({spinning: false});
+            });
+        } else {
+            series[0].data = ticker.data;
             series[0].name = ticker.name;
             legendItems[0].name = ticker.name;
             this.setState({config: {...this.state.config, series}});
-        })
-        .catch(error => {
-            message.error(error.message);
-            console.log(error);
-        }) 
-        .finally(() => {
-            this.setState({spinning: false});
-        });
+        }
+    
     }
 
     destroyAndAddTicker = (ticker) => {

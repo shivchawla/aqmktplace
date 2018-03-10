@@ -11,3 +11,5 @@ export * from './CreatePortfolioDialog';
 export * from './PortfolioAddTransactions';
 export * from './InvestorDashboard';
 export * from './AdvisorProfile';
+export * from './UpdateAdvisorProfile';
+export * from './AdvisorDashboard';

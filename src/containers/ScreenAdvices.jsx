@@ -19,7 +19,7 @@ const filters = {
     approved: ['Approved', 'UnApproved']
 };
 
-const kvp ={
+const kvp = {
     maxNotional: 'selectMaxNotionalAllFilters',
     rebalancingFrequency: 'selectRebalanceAllFilters',
     approved: 'selectApprovedllFilters'
@@ -94,6 +94,7 @@ export class ScreenAdvices extends React.Component {
     processAdvices = (responseAdvices) => {
         const advices = [];
         responseAdvices.map((advice, index) => {
+            console.log(advice);
             advices.push({
                 id: advice._id,
                 name: advice.name,
@@ -101,7 +102,7 @@ export class ScreenAdvices extends React.Component {
                 createdDate: advice.createdDate,
                 heading: advice.heading,
                 subscribers: advice.numSubscribers,
-                rating: advice.latestAnalytics.rating,
+                rating: advice.latestAnalytics !== undefined ? advice.latestAnalytics.rating : 0,
                 latestPerformance: advice.latestPerformance
             })
         });
