@@ -14,7 +14,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
         this.state = {
             picUrl: '',
             value: 1,
-            isRegistered: true
+            isRegistered: false
         };
     }
 
@@ -35,12 +35,13 @@ class UpdateAdvisorProfileImpl extends React.Component {
         console.log(this.props.advisor);
         const {advisor} = this.props;
         let value = 1;
-        const {webUrl, linkedIn, phone, isCompany} = advisor.profile;
+        const {webUrl, linkedIn, phone, isCompany, companyName, registrationNumber, facebook, twitter, isRegistered} = advisor.profile;
         const {line1, line2, line3, city, country, pincode, state} = advisor.profile.address;
         if (!isCompany) {
             value = 2;
         }
-        this.setState({value});
+        console.log(advisor.profile);
+        this.setState({value, isRegistered});
 
         this.props.form.setFieldsValue({
             webUrl,
@@ -52,13 +53,17 @@ class UpdateAdvisorProfileImpl extends React.Component {
             pincode,
             phone,
             linkedIn,
+            companyName,
+            registrationNumber,
+            facebook,
+            twitter
         })
     }
 
     callback = () => {
         window.IN.API.Profile("me").result(this.resultCallback);
     }
-    
+
     authenticateLN = () => {
         if (!window.IN.User.isAuthorized()) {
             window.IN.User.authorize(this.callback, '');
@@ -77,7 +82,6 @@ class UpdateAdvisorProfileImpl extends React.Component {
 
     updateUserProfile = () => {
         const url = `${requestUrl}/advisor/${this.props.advisorId}/profile`;
-        // console.log(this.processData());
         axios({
             method: 'PUT',
             url,
@@ -85,12 +89,11 @@ class UpdateAdvisorProfileImpl extends React.Component {
             data: this.processData()
         })
         .then(response => {
-            console.log(response.data);
+            this.props.toggleModal();
         })
         .catch(error => {
             console.log(error);
-        })
-        // this.processData();
+        });
     }
 
     processData = () => {
@@ -106,10 +109,14 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 pincode: Number(values.pincode),
                 country: "IN"
             },
-            isCompany: false,
-            isIndividual: true,
+            isCompany: this.state.value === 1 ? true: false,
+            isRegistered: this.state.isRegistered,
+            registrationNumber:  values.registrationNumber,
             phone: values.phone,
-            linkedIn: values.linkedIn
+            linkedIn: values.linkedIn,
+            companyName: values.companyName,
+            facebook: values.facebook,
+            twitter: values.twitter
         };
 
         return data;
@@ -144,14 +151,23 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <Checkbox 
-                                onChange={this.handleIsRegisteredChange} 
+                        <Checkbox
+                                onChange={this.handleIsRegisteredChange}
                                 checked={this.state.isRegistered}
                         >
                             Is Registered
                         </Checkbox>
                     </Col>
                 </Row>
+                <FormItem>
+                    {getFieldDecorator('registrationNumber')(
+                            <Input 
+                                    type="number" 
+                                    placeholder="Registration Number" 
+                                    disabled={!this.state.isRegistered}
+                            />
+                    )}
+                </FormItem>
                 <FormItem>
                     {getFieldDecorator('companyName')(<Input placeholder="Company Name" />)}
                 </FormItem>
@@ -185,7 +201,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
                     <Row>
                         <Col span={2}>
                             <Avatar
-                                    size="large" icon="user" 
+                                    size="large" icon="user"
                                     src={this.state.picUrl}
                             />
                         </Col>
