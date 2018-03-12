@@ -12,7 +12,16 @@ class AdviceListItemImpl extends React.Component {
     }
 
     render() {
-        const {name, advisor = null, createdDate = null, heading = null, subscribers, rating, latestPerformance, id} = this.props.advice;
+        const {
+            name, 
+            advisor = null, 
+            createdDate = null, 
+            heading = null, 
+            subscribers, 
+            rating, 
+            latestPerformance, 
+            id
+        } = this.props.advice;
 
         return (
             <Row style={cardStyle} onClick={() => this.handleClick(id)}>

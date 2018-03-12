@@ -1,9 +1,9 @@
 import * as React from 'react';
 import moment from 'moment';
 import axios from 'axios';
-import {Row, Col, Avatar, Rate, Button, Modal} from 'antd';
+import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select} from 'antd';
 import {Twitter} from 'twitter-node-client';
-import {MetricItem, AdviceListItem} from '../components';
+import {MetricItem, AdviceListItem, AdviceFilterComponent, AdviceSortingMenu} from '../components';
 import {UpdateAdvisorProfile} from '../containers';
 import {layoutStyle} from '../constants';
 
@@ -12,12 +12,14 @@ const dateFormat = 'YYYY-MM-DD';
 const clientId = '81udlgx5kk2aad';
 const clientSecret = 'mtF7xm8K81Ipyevk';
 const redirectUri = 'http://localhost:3000/advisorprofile';
+const Option = Select.Option;
 
 export class AdvisorProfile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             advices: [],
+            adviceUrl: `${requestUrl}/advice?all=true&trending=false&subscribed=false&following=false&order=-1&personal=1`,
             advisor: {},
             metrics: {
                 name: '',
@@ -30,7 +32,9 @@ export class AdvisorProfile extends React.Component {
             picUrl: "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
             ownProfile: false,
             updateModalVisible: false,
-            isCompany: false
+            isCompany: false,
+            filterModalVisible: false,
+            sortBy: 'rating'
         };
     }
 
@@ -168,6 +172,40 @@ export class AdvisorProfile extends React.Component {
         console.log(data);
     }
 
+    updateAdvices = (advices) => {
+        this.setState({advices: advices});
+    }
+
+    updateAdviceUrl = (url) => {
+        this.setState({adviceUrl: url});
+    }
+
+    toggleFilterModal = () => {
+        this.setState({filterModalVisible: !this.state.filterModalVisible});
+    }
+
+    renderFilterModal = () => {
+        return (
+            <Modal
+                    title="Apply Filters"
+                    visible={this.state.filterModalVisible}
+                    footer={null}
+                    onCancel={this.toggleFilterModal}
+            >
+                <AdviceFilterComponent 
+                        updateAdvices={this.updateAdvices}
+                        updateAdviceUrl={this.updateAdviceUrl}
+                        toggleModal = {this.toggleFilterModal}
+                        orderParam={this.state.sortBy}
+                />
+            </Modal>
+        );
+    }
+
+    updateSortBy = sortBy => {
+        this.setState({sortBy});
+    }
+
     componentWillMount() {
         this.getAdvisorDetail();
     }
@@ -176,6 +214,7 @@ export class AdvisorProfile extends React.Component {
         return (
             <Row>
                 {this.renderUpdateModal()}
+                {this.renderFilterModal()}
                 <Col span={18}>
                     Member Since {moment(this.state.memberSince).format(dateFormat)}
                 </Col>
@@ -188,7 +227,23 @@ export class AdvisorProfile extends React.Component {
                             <h3>Advisor Advices</h3>
                         </Col>
                         <Col span={24} style={{margin: '20px 0'}}>
-                            {this.renderAdvices()}
+                            <Row>
+                                <Col span={4}>
+                                    <Icon type="filter" onClick={this.toggleFilterModal}/>
+                                </Col>
+                                <Col span={8} offset={12}>
+                                    {/* {this.renderSortingMenu()}  */}
+                                    <AdviceSortingMenu 
+                                            updateAdvices={this.updateAdvices}
+                                            updateSortBy={this.updateSortBy}
+                                            adviceUrl={this.state.adviceUrl}
+                                            sortBy={this.state.sortBy}
+                                    />
+                                </Col>
+                                <Col span={24}>
+                                    {this.renderAdvices()}
+                                </Col>
+                            </Row>
                         </Col>
                     </Row>
                 </Col>

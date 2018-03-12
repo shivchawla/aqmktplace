@@ -28,11 +28,13 @@ export class ScreenAdvisors extends React.Component {
     
     renderAdvisors = () => {
         return this.state.advisors.map((advisor, index) => {
+            const {firstName, lastName} = advisor.user ? advisor.user : {firstName: 'John', lastName: 'Doe'};
+            const {numAdvices, numFollowers, rating} = advisor.latestAnalytics ? advisor.latestAnalytics : {numAdvices: 0, numFollowers: 0, rating: 0};
             const metrics = {
-                name: `${advisor.user.firstName} ${advisor.user.lastName}`,
-                numAdvices: advisor.latestAnalytics.numAdvices,
-                numFollowers: advisor.latestAnalytics.numFollowers,
-                rating: advisor.latestAnalytics.rating
+                name: `${firstName} ${lastName}`,
+                numAdvices,
+                numFollowers,
+                rating
             };
 
             return <AdvisorComponent key={index} metrics={metrics} advisorId={advisor._id}/>

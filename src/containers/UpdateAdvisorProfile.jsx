@@ -32,7 +32,6 @@ class UpdateAdvisorProfileImpl extends React.Component {
     }
 
     componentDidMount() {
-        console.log(this.props.advisor);
         const {advisor} = this.props;
         let value = 1;
         const {webUrl, linkedIn, phone, isCompany, companyName, registrationNumber, facebook, twitter, isRegistered} = advisor.profile;
@@ -40,7 +39,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
         if (!isCompany) {
             value = 2;
         }
-        console.log(advisor.profile);
+        // url, photoUrl, userId
         this.setState({value, isRegistered});
 
         this.props.form.setFieldsValue({

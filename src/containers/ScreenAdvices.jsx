@@ -72,6 +72,7 @@ export class ScreenAdvices extends React.Component {
 
     getAdvices = (adviceUrl) => {
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
+        console.log(url);
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             this.setState({
@@ -198,23 +199,18 @@ export class ScreenAdvices extends React.Component {
                                                     indicator={antIcon} 
                                                     spinning={this.state.spinning}
                                             />
-                                            <Button className="search-btn" size="large" type="primary" onClick={this.getAdvices}>
+                                            <Button className="search-btn" size="large" type="primary" onClick={() => this.getAdvices()}>
                                                 <Icon type="search" />
                                             </Button>
                                         </div>
                                     )}
                                     value={this.state.searchValue}
                                     onChange={this.handleInputChange}
-                                    onPressEnter={this.getAdvices}
+                                    onPressEnter={() => this.getAdvices()}
                             />
                         </Col>
                         <Col span={24}>
                             {this.renderSortingMenu()}
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col span={6} offset={18} style={{marginTop: 20}}>
-                            {/* {this.renderMenu()} */}
                         </Col>
                     </Row>
                     <Row>

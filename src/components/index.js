@@ -14,3 +14,5 @@ export * from './PortfolioListItem';
 export * from './AdviceFilterComponent';
 export * from './IconHeader';
 export * from './AdvisorComponent';
+export * from './AdviceSortingMenu';
+export * from './FilterSortComponent';
