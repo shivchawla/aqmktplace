@@ -4,7 +4,7 @@ import SkyLight from 'react-skylight';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal, message} from 'antd';
+import {Row, Col, Divider, Tabs, Button, Modal, message, Card} from 'antd';
 import {layoutStyle} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod} from '../components';
@@ -12,6 +12,7 @@ import {AqTableMod, AqPortfolioTable, AqHighChartMod} from '../components';
 const TabPane = Tabs.TabPane;
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
+const ReactHighcharts = require('react-highcharts');
 const dateFormat = 'YYYY-MM-DD';
 
 export class AdviceDetail extends React.Component {
@@ -49,7 +50,37 @@ export class AdviceDetail extends React.Component {
             adviceResponse: {},
             portfolio: {},
             disableSubscribeButton: false,
-            disableFollowButton: false
+            disableFollowButton: false,
+            portfolioConfig: {
+                chart: {
+                    type: 'pie',
+                    options3d: {
+                        enabled: true,
+                        alpha: 45
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        innerSize: 100,
+                        depth: 45
+                    }
+                },
+                series: [],
+                colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
+            },
+            performanceConfig: {
+                colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
+                chart: {
+                    type: 'bar'
+                },
+                xAxis: {
+                    categories: ['Performance']
+                },
+                credits: {
+                    enabled: false
+                },
+                series: []
+            }
         };
     }
 
@@ -157,7 +188,6 @@ export class AdviceDetail extends React.Component {
             }
         })
         .then(response => {
-            console.log(response.data);
             this.getAdviceSummary(response);
             return axios.get(`${url}/detail`, {headers: {'aimsquant-token': aimsquantToken}});
         })
@@ -166,11 +196,25 @@ export class AdviceDetail extends React.Component {
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
+            const series = [];
             this.getAdvicePerformance(response);
+            const portfolioComposition = response.data.current.metrics.portfolioComposition.map((item, index) =>{
+                return [item.ticker, Math.round(item.weight * 10000) / 100]
+            });
+            const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
+                return {name: item.ticker, data: [item.pnl]}
+            });
+            series.push({name: 'Composition', data: portfolioComposition});
+            this.setState({
+                portfolioConfig: {...this.state.portfolioConfig, series},
+                performanceConfig: {
+                    ...this.state.performanceConfig,
+                    series: constituentDollarPerformance
+                }
+            });
         })
         .catch((error) => {
             console.log(error);
-            // message.error(error.response.data);
         });
     };
 
@@ -204,7 +248,6 @@ export class AdviceDetail extends React.Component {
 
     toggleDialog = () => {
         const {adviceDetail} = this.state;
-        console.log(adviceDetail.advisor.user._id);
         this.setState({isDialogVisible: !this.state.isDialogVisible});
     };
 
@@ -388,6 +431,20 @@ export class AdviceDetail extends React.Component {
                     <Row>
                         <Col span={24}>
                                 <h3>Advice Summary</h3>
+                        </Col>
+                        <Col span={11}>
+                            <Card 
+                                    title="Portfolio Overview"
+                            >
+                                <ReactHighcharts config = {this.state.portfolioConfig} />
+                            </Card>
+                        </Col>
+                        <Col span={11} offset={2}>
+                            <Card 
+                                    title="Portfolio Overview"
+                            >
+                                <ReactHighcharts config = {this.state.performanceConfig} />
+                            </Card>
                         </Col>
                     </Row>
                     <Row>
