@@ -17,7 +17,8 @@ import {
     PortfolioAddTransactions,
     InvestorDashboard,
     AdvisorProfile,
-    AdvisorDashboard
+    AdvisorDashboard,
+    ScreenAdvisors
 } from './containers'; 
 
 const {Header, Content} = Layout;
@@ -94,6 +95,7 @@ class App extends React.Component {
                         <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
                         <Route exact={true} path='/advisorprofile/:id' component={AdvisorProfile} />
                         <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
+                        <Route exact={true} path='/screenadvisors' component={ScreenAdvisors} />
                     </Content>
                 </Layout>
             </Layout>

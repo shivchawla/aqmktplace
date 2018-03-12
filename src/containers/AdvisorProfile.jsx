@@ -44,6 +44,9 @@ export class AdvisorProfile extends React.Component {
                 <Col span={4}>
                     <MetricItem key="3" label="Followers" value={numFollowers} />
                 </Col>
+                <Col span={4}>
+                    <MetricItem key="3" label="Followers" value={numAdvices} />
+                </Col>
             </Row>
         );
     }
@@ -167,7 +170,6 @@ export class AdvisorProfile extends React.Component {
 
     componentWillMount() {
         this.getAdvisorDetail();
-        console.log(this.props.match.params.id);
     }
 
     render() {

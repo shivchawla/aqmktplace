@@ -337,7 +337,7 @@ export class AdviceFormImpl extends React.Component {
     getAdvice = (id) => {
         const {requestUrl, aimsquantToken} = localConfig;
         const adviceUrl =`${requestUrl}/advice/${id}`;
-        const adviceDetailUrl = `${adviceUrl}/detail`;
+        const advicePortfolioUrl = `${adviceUrl}/portfolio`;
         axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             console.log('First Response', response.data);
@@ -351,20 +351,18 @@ export class AdviceFormImpl extends React.Component {
             console.log(portfolio.benchmark.ticker);
             this.setFieldsValue({name, description, headline: heading});
             
-            return axios.get(adviceDetailUrl, {headers: {'aimsquant-token': aimsquantToken}});
+            return axios.get(advicePortfolioUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
-            console.log('Second Response', response.data);
-            console.log('Start Date', response.data.portfolio.detail.startDate);
             const positions = [];
-            const portfolio = response.data.portfolio.detail.positions;
+            const portfolio = response.data.detail.positions;
             portfolio.map((item, index) => {
                 positions.push({
                     quantity: item.quantity,
                     ticker: item.security.ticker
                 });
             });
-            const startDate = moment(response.data.portfolio.detail.startDate).format(dateFormat);
+            const startDate = moment(response.data.detail.startDate).format(dateFormat);
             try {
                 this.props.form.setFieldsValue({startDate: moment(startDate, dateFormat)});
             } catch(error) {

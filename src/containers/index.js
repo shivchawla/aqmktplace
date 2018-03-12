@@ -13,3 +13,4 @@ export * from './InvestorDashboard';
 export * from './AdvisorProfile';
 export * from './UpdateAdvisorProfile';
 export * from './AdvisorDashboard';
+export * from './ScreenAdvisors';

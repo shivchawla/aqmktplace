@@ -13,3 +13,4 @@ export * from './MetricItem';
 export * from './PortfolioListItem';
 export * from './AdviceFilterComponent';
 export * from './IconHeader';
+export * from './AdvisorComponent';

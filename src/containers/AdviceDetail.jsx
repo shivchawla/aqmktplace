@@ -137,7 +137,7 @@ export class AdviceDetail extends React.Component {
         const portfolioArray = [...this.state.portfolioArray]; 
         const tickers = [...this.state.tickers];
         const portfolio = {...this.state.portfolio};
-        const subPositions = response.data.portfolio.detail.subPositions;
+        const subPositions = response.data.detail.subPositions;
         const {maxNotional, rebalance} = response.data;
         subPositions.map((position, index) => {
             portfolioArray.push({
@@ -189,7 +189,7 @@ export class AdviceDetail extends React.Component {
         })
         .then(response => {
             this.getAdviceSummary(response);
-            return axios.get(`${url}/detail`, {headers: {'aimsquant-token': aimsquantToken}});
+            return axios.get(`${url}/portfolio`, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
             this.getAdviceDetail(response);
