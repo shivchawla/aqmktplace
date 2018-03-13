@@ -1,0 +1,31 @@
+.ant-collapse-borderless > .ant-collapse-item {
+    border: 1px solid #EAEAEA;
+    border-radius: 0;
+}
+
+.ant-collapse-content {
+    padding: 0;
+    border: none;
+}
+
+.ant-radio-group {
+    overflow: hidden;
+    border-radius: 100px;
+    border: 1px solid #eaeaea;
+}
+
+.ant-radio-button-wrapper {
+    border: none;
+}
+
+.ant-form-item {
+    margin: 0;
+}
+
+.ant-table-thead > tr > th {
+    padding-left: 40px !important;
+}
+
+.ant-table-tbody > tr > td {
+    padding: 10px 0 10px 40px !important;
+}

@@ -1,19 +1,20 @@
 import * as React from 'react';
+import * as Radium from 'radium';
 import _ from 'lodash';
 import moment from 'moment';
-import Radium from 'radium';
 import axios from 'axios';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button} from 'antd';
 import {layoutStyle} from '../constants';
-import {AdviceTransactionTable, AqHighChartMod} from '../components';
+import {AdviceTransactionTable, AqHighChartMod, MetricItem} from '../components';
 import {CreatePortfolioDialog} from '../containers';
+import '../css/portfolioDetail.css';
 
 const ReactHighcharts = require('react-highcharts');
 
 const TabPane = Tabs.TabPane;
 const {requestUrl, investorId, aimsquantToken} = require('../localConfig.js');
 
-export class PortfolioDetail extends React.Component {
+class PortfolioDetailImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -30,13 +31,18 @@ export class PortfolioDetail extends React.Component {
                     options3d: {
                         enabled: true,
                         alpha: 45
-                    }
+                    },
+                    width: 300,
+                    height: 300
                 },
                 plotOptions: {
                     pie: {
                         innerSize: 100,
                         depth: 45
                     }
+                },
+                title: {
+                    style:{display: 'none'}
                 },
                 series: [],
                 colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
@@ -46,13 +52,21 @@ export class PortfolioDetail extends React.Component {
             performanceConfig: {
                 colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
                 chart: {
-                    type: 'bar'
+                    type: 'bar',
+                    width: 300,
+                    height: 300
                 },
-                xAxis: {
-                    categories: ['Performance']
+                // xAxis: {
+                //     categories: ['Performance']
+                // },
+                legend: {
+                    enabled: false
                 },
                 credits: {
                     enabled: false
+                },
+                title: {
+                    style:{display: 'none'}
                 },
                 series: []
             }
@@ -89,14 +103,12 @@ export class PortfolioDetail extends React.Component {
     renderMetrics = () => {
         return this.state.portfolioMetrics.map((metric, index) => (
             <Col span={3} style={{marginRight: 30}} key={index}>
-                <MetricItem value={metric.value} label={metric.label} />
+                <MetricItem style={metricItemStyle} value={metric.value} label={metric.label} />
             </Col>
         ));
     }
 
     renderAdviceTransactions = () => {
-        console.log(this.state.presentAdvices);
-        
         return (
             <Row>
                 <Col span={24} style={{marginTop: 20}}>
@@ -114,7 +126,8 @@ export class PortfolioDetail extends React.Component {
         return (
             <Table 
                     pagination={false} 
-                    style={{marginTop: 20}} 
+                    size="middle"
+                    style={{marginTop: 20, border: '1px solid #EAEAEA'}} 
                     columns={this.columns} 
                     dataSource={this.state.stockPositions} 
             />
@@ -161,6 +174,7 @@ export class PortfolioDetail extends React.Component {
                 weight: '12.4%',
                 profitLoss: '+12.4%',
                 units: 1,
+                netAssetValue: item.lastPrice * item.quantity,
                 composition: [
                     {
                         key: 1,
@@ -176,6 +190,7 @@ export class PortfolioDetail extends React.Component {
                 ]
             });
         } else {
+            advices[adviceIndex].netAssetValue += item.lastPrice * item.quantity;
             advices[adviceIndex].composition.push({
                 key: key + 1,
                 adviceKey: advices[adviceIndex].key,
@@ -207,6 +222,15 @@ export class PortfolioDetail extends React.Component {
         return stockPositions;
     }
 
+    calculateNetAssetValue = (advice) => {
+        let netAssetValue = 0;
+        advice.portfolio.detail.positions.map(position => {
+            netAssetValue += position.lastPrice * position.quantity;
+        });
+
+        return netAssetValue;
+    }
+
     toggleView = (e) => {
         this.setState({toggleValue: e.target.value});
     }
@@ -232,8 +256,6 @@ export class PortfolioDetail extends React.Component {
         const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${this.props.match.params.id}`;
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => { // Getting details of portfolio
-            console.log(response.data);
-            console.log(response.data.name);
             if (response.data.benchmark) {
                 tickers.push({ // Pushing data to get the benchmark performance to performance graph
                     name: response.data.benchmark.ticker,
@@ -249,7 +271,6 @@ export class PortfolioDetail extends React.Component {
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => { // Getting Portfolio Performance
-            console.log(response.data.simulated.portfolioValues);
             let performanceSeries = response.data.simulated.portfolioValues.map((item, index) => {
                 return [moment(item.date).valueOf(), item.netValue];
             });
@@ -302,45 +323,43 @@ export class PortfolioDetail extends React.Component {
 
     render () {
         return (
-            <Row>
-                <Col span={18} style={layoutStyle}>
-                    <Row>
+            <Row style={{marginBottom: '20px'}}>
+                <Col span={18} xs={24} md={24} lg={18} style={{...layoutStyle, padding: '0'}}>
+                    <Row style={{padding: '20px 30px'}}>
                         <Col span={24}>
-                            <h3>{this.state.name}</h3>
+                            <h3 style={pageHeader}>{this.state.name}</h3>
                         </Col>
-                        <Col span={24}>
-                            <h4>Metrics</h4>
-                            <Row>
+                        <Col span={24} style={{marginTop: '10px'}}>
+                            <h4 style={metricsHeaderStyle}>Metrics</h4>
+                            <Row style={{marginTop: '10px'}}>
                                 {this.renderMetrics()}
                             </Row>
                         </Col>
                     </Row>
                     <Divider />
-                    <Row>
+                    <Row style={{padding: '0 30px 20px 30px'}}>
                         <Col span={24}>
-                            <h4>Summary</h4>
-                            <Row>
+                            <h3 style={metricsHeaderStyle}>Summary</h3>
+                            <Row style={{marginTop: '10px'}}>
                                 <Col span={11}>
-                                    <Card 
-                                            title="Portfolio Overview"
-                                    >
+                                    <Col span={24} style={{...portfolioOverviewStyle}}>
+                                        <h3 style={overviewHeaderStyle}>Portfolio Overview</h3>
                                         <ReactHighcharts config = {this.state.portfolioConfig} />
-                                    </Card>
+                                    </Col>
                                 </Col>
                                 <Col span={11} offset={2}>
-                                    <Card 
-                                            title="Performance Overview"
+                                    {/* <Radio.Group 
+                                        defaultValue={this.state.togglePerformance} 
+                                        onChange={this.handlePerformanceToggle} 
+                                        size="small"
                                     >
-                                        <Radio.Group 
-                                            defaultValue={this.state.togglePerformance} 
-                                            onChange={this.handlePerformanceToggle} 
-                                            size="small"
-                                        >
-                                            <Radio.Button value="dollar">Dollar</Radio.Button>
-                                            <Radio.Button value="percentage">Percentage</Radio.Button>
-                                        </Radio.Group>
+                                        <Radio.Button value="dollar">Dollar</Radio.Button>
+                                        <Radio.Button value="percentage">Percentage</Radio.Button>
+                                    </Radio.Group> */}
+                                    <Col span={24} style={{...performanceOverviewStyle}}>
+                                        <h3 style={overviewHeaderStyle}>Performance Overview</h3>
                                         <ReactHighcharts config = {this.state.performanceConfig} />
-                                    </Card>
+                                    </Col>
                                 </Col>
                             </Row>
                         </Col>
@@ -348,7 +367,7 @@ export class PortfolioDetail extends React.Component {
                     <Row>
                         <Col span={24}>
                             <Tabs defaultActiveKey="2">
-                                <TabPane tab="Portfolio" key="2">
+                                <TabPane tab="Portfolio" key="2" style={{padding: '20px 30px'}}>
                                     <Row>
                                         <Col span={8} offset={16} style={{marginBottom: 20}}>
                                             <Radio.Group 
@@ -368,7 +387,7 @@ export class PortfolioDetail extends React.Component {
                                         : this.renderStockTransactions()
                                     }
                                 </TabPane>
-                                <TabPane tab="Performance" key="1">
+                                <TabPane tab="Performance" key="1" style={{padding: '20px 30px'}}>
                                     <Row>
                                         <Col span={24}>
                                             <AqHighChartMod tickers={this.state.tickers}/> 
@@ -388,6 +407,7 @@ export class PortfolioDetail extends React.Component {
                                     onClick={() => this.props.history.push(
                                         '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
                                     )}
+                                    className="primary-btn"
                             >
                                 Create Portfolio
                             </Button>
@@ -402,6 +422,7 @@ export class PortfolioDetail extends React.Component {
                                             stocksPositions: this.state.stockPositions
                                         }
                                     )}
+                                    className="secondary-btn"
                             >Add Transactions</Button>
                         </Col>
                     </Row>
@@ -411,20 +432,40 @@ export class PortfolioDetail extends React.Component {
     }
 }
 
-const MetricItem = ({value, label}) => {
-    return (
-        <Row style={metricItemStyle}>
-            <Col span={24}><h5>{value}</h5></Col>
-            <Col><h5>{label}</h5></Col>
-        </Row>
-    );
-};
+export const PortfolioDetail =  Radium(PortfolioDetailImpl);
+
+const pageHeader = {
+    fontFamily: 'Lato, sans-serif',
+    fontSize: '20px'
+}
+
+const metricsHeaderStyle = {
+    fontFamily: 'Lato, sans-serif',
+    fontSize: '14px',
+    fontWeight: '700'
+}
 
 const metricItemStyle = {
-    padding: 10,
-    boxShadow: '0px 3px 8px rgba(0,0,0,0.2)'
-};
+    padding: '10px'
+}
 
 const newLayoutStyle = {
     border: '2px solid red'
+};
+
+const portfolioOverviewStyle = {
+    padding: '5px',
+    borderRadius: '4px',
+    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)'
+};
+
+const performanceOverviewStyle = {
+    padding: '5px',
+    borderRadius: '4px',
+    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)'
+};
+
+const overviewHeaderStyle = {
+    fontSize: '14px',
+    margin: '10px 0 0 10px'
 };

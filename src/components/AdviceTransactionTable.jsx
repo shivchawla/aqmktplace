@@ -2,8 +2,10 @@ import * as React from 'react';
 import moment from 'moment';
 import axios from 'axios';
 import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker } from 'antd';
+import {MetricItem} from '../components';
 import {EditableCell} from './AqEditableCell';
 import {getStockData} from '../utils';
+import '../css/adviceTransactionTable.css';
 
 const Panel = Collapse.Panel;
 const dateFormat ='YYYY-MM-DD';
@@ -50,6 +52,11 @@ export class AdviceTransactionTable extends React.Component {
     }
 
     renderInput = (text, record, column, type) => {
+        if (this.props.preview) {
+            return (
+                <span>{text}</span>
+            );
+        }   
         return (
             <EditableCell 
                     type={type}
@@ -74,7 +81,6 @@ export class AdviceTransactionTable extends React.Component {
 
     renderAdvices = () => {
         const {advices} = this.state;
-
         return advices.map((advice, index) => {
             return (
                 <Panel 
@@ -94,7 +100,13 @@ export class AdviceTransactionTable extends React.Component {
 
     renderComposition = (tickers) => {
         return (
-            <Table dataSource={tickers} columns={this.columns} pagination={false} size="small" />
+            <Table 
+                    dataSource={tickers} 
+                    columns={this.columns} 
+                    pagination={false} 
+                    size="middle"
+                    style={{marginTop: 20, border: 'none'}} 
+            />
         );
     }
 
@@ -163,9 +175,11 @@ export class AdviceTransactionTable extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
+        console.log(advice);
+        
         if (!this.props.header) {
             return (
-                <Row type="flex" justify="end">
+                <Row type="flex">
                     {
                         !this.props.preview
                         &&  <Col span={4}>
@@ -173,11 +187,18 @@ export class AdviceTransactionTable extends React.Component {
                             </Col>
                     }
                     <Col span={4}>
-                        <h5>{advice.name}</h5>
+                        <Row>
+                            <Col span={24}>
+                                <h3 style={adviceNameStyle}>{advice.name}</h3>
+                            </Col>
+                            <Col span={25}>
+                                <h5>Portfolio</h5>
+                            </Col>
+                        </Row>
                     </Col>
-                    <Col span={4} offset={1}>
-                        {
-                            !this.props.preview &&
+                    {
+                        !this.props.preview &&
+                        <Col span={4} offset={1}>
                             <Input 
                                 onClick={this.handleInputClick}
                                 value={advice.units} 
@@ -185,22 +206,50 @@ export class AdviceTransactionTable extends React.Component {
                                 placeholder="Units" 
                                 onChange={(e) => {this.handleInputChange(e, advice)}}
                             />
-                        }
-                    </Col>
-                    <Col span={4} offset={1}>
-                        {
-                            !this.props.preview &&
+                        </Col>
+                    }
+                    {
+                        !this.props.preview &&
+                        <Col span={4} offset={1}>
                             <DatePicker
                                 onChange={date => this.handleDateChange(date, advice)}
                                 value={moment(advice.date, dateFormat)}
                                 format={dateFormat}
                                 disabledDate={(current) => this.props.disabledDate(current, advice)}
                             />
-                        }
+                        </Col>
+                    }
+                    {
+                        this.props.preview &&
+                        <Col span={8}></Col>
+                    }
+                    <Col span={4}>
+                        <MetricItem 
+                                style={metricItemStyle} 
+                                value={advice.netAssetValue} 
+                                label="Net Asset Value" 
+                        />
                     </Col>
-                    <Col span={4} offset={2}>
-                        <MetricItem value={advice.netAssetValue} label="Net Asset Value" />
-                    </Col>
+                    {
+                        this.props.preview &&
+                        <Col span={4}>
+                            <MetricItem 
+                                    style={metricItemStyle} 
+                                    value={advice.weight} 
+                                    label="Weight" 
+                            />
+                        </Col>
+                    }
+                    {
+                        this.props.preview &&
+                        <Col span={4}>
+                            <MetricItem 
+                                    style={metricItemStyle} 
+                                    value={advice.profitLoss} 
+                                    label="Profit/Loss" 
+                            />
+                        </Col>
+                    }
                 </Row>
             );
         } else {
@@ -210,26 +259,23 @@ export class AdviceTransactionTable extends React.Component {
 
     render() {
         return (
-            <Collapse bordered={false}>
+            <Collapse accordion bordered={false}>
                 {this.renderAdvices()}
             </Collapse>
         );
     }
 }
 
-const MetricItem = (props) => {
-    return (
-        <Row>
-            <Col span={24}><h5>{props.value}</h5></Col>
-            <Col><h5>{props.label}</h5></Col>
-        </Row>
-    );
+const customPanelStyle = {
+    border: '1px solid #eaeaea',
 };
 
-const customPanelStyle = {
-    background: '#f7f7f7',
-    borderRadius: 4,
-    marginBottom: 24,
-    border: 0,
-    overflow: 'hidden',
+const adviceNameStyle = {
+    fontFamily: 'Lato, sans-serif',
+    fontSize: '16px'
+};
+
+const metricItemStyle = {
+    height: '50px',
+    border: 'none'
 };
