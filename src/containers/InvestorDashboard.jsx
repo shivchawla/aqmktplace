@@ -4,7 +4,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Tabs, Select, Table, Button} from 'antd';
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem} from '../components';
-import {layoutStyle} from '../constants';
+import {layoutStyle, pageHeaderStyle, metricsHeaderStyle} from '../constants';
 
 const {requestUrl, aimsquantToken, investorId} = require('../localConfig');
 const TabPane = Tabs.TabPane;
@@ -127,25 +127,13 @@ export class InvestorDashboard extends React.Component {
         const {beta, sharperatio, annualreturn, averagedailyreturn, dailyreturn, totalreturn} = this.state.metrics;
 
         return (
-            <Row type="flex" justify="space-between" style={metricStyle}>
-                <Col span={4}>
-                    <MetricItem label="Beta" value={beta} />
-                </Col>
-                <Col span={4}>
-                    <MetricItem label="Sharpe Ratio" value={sharperatio} />
-                </Col>
-                <Col span={4}>
-                    <MetricItem label="Annual Return" value={annualreturn} />
-                </Col>
-                <Col span={4}>
-                    <MetricItem label="Average Daily Return" value={averagedailyreturn} />
-                </Col>
-                <Col span={4}>
-                    <MetricItem label="Daily Return" value={dailyreturn} />
-                </Col>
-                <Col span={4}>
-                    <MetricItem label="Total Return" value={totalreturn} />
-                </Col>
+            <Row type="flex" justify="space-between" style={{paddingTop: '0px'}}>
+                <MetricItem label="Beta" value={beta} />
+                <MetricItem label="Sharpe Ratio" value={sharperatio} />
+                <MetricItem label="Annual Return" value={annualreturn} />
+                <MetricItem label="Avg Daily Return" value={averagedailyreturn} />
+                <MetricItem label="Daily Return" value={dailyreturn} />
+                <MetricItem label="Total Return" value={totalreturn} />
             </Row>
         );
     }
@@ -221,9 +209,6 @@ export class InvestorDashboard extends React.Component {
             <Tabs defaultKey="1">
                 <TabPane tab="Portfolios" key="1">
                     <Row>
-                        <Col span={6} offset={18} style={{marginBottom: 20}}>
-                            {this.renderPortfolioSortMenu()}
-                        </Col>
                         <Col span={24}>
                             {this.renderPortfolios()}
                         </Col>
@@ -231,9 +216,6 @@ export class InvestorDashboard extends React.Component {
                 </TabPane>
                 <TabPane tab="Subscribed Advices" key="2">
                     <Row>
-                        <Col span={6} offset={18} style={{marginBottom: 20}}>
-                            {this.renderAdvicesSortMenu()}
-                        </Col>
                         <Col span={24}>
                             {this.renderSubscribedAdvices()}
                         </Col>
@@ -289,7 +271,7 @@ export class InvestorDashboard extends React.Component {
         return (
             <Table 
                     pagination={false} 
-                    style={{marginTop: 20}} 
+                    style={{border: '1px solid #EAEAEA'}} 
                     columns={this.stockPositionColumns} 
                     dataSource={this.state.stockPositions} 
             />
@@ -304,24 +286,24 @@ export class InvestorDashboard extends React.Component {
         return(
             <Row>
                 <Col style={layoutStyle} span={18}>
-                    <Row>
+                    <Row className="row-container" style={{paddingBottom: '0px'}}>
                         <Col span={24}>
-                            <h3>Portfolio Overview</h3>
+                            <h3 style={pageHeaderStyle} >Portfolio Overview</h3>
                         </Col>
                     </Row>
-                    <Row>
+                    <Row className="row-container">
                         <Col span={24}>
-                            <h4>Metrics</h4>
+                            <h4 style={metricsHeaderStyle}>Metrics</h4>
                             {this.renderMetrics()}
                         </Col>
                     </Row>
                     <Row>
                         <Col span={24}>
                             <Tabs defaultKey="1">
-                                <TabPane tab="Performance" key="1">
+                                <TabPane tab="Performance" key="1" className="row-container">
                                     <AqHighChartMod tickers={this.state.tickers} />
                                 </TabPane>
-                                <TabPane tab="Composition" key="2">
+                                <TabPane tab="Composition" key="2" className="row-container">
                                     {this.renderStockTransactions()}
                                 </TabPane>
                             </Tabs>
@@ -331,9 +313,10 @@ export class InvestorDashboard extends React.Component {
                         {this.renderTabs()}
                     </Row>
                 </Col>
-                <Col span={6}>
+                <Col span={5} offset={1} style={{marginTop: '20px'}}>
                     <Button 
-                            type="primary" 
+                            type="primary"
+                            className="primary-btn" 
                             onClick={() => this.props.history.push('/dashboard/createportfolio')}
                     >
                         Create Portfolio
@@ -342,10 +325,4 @@ export class InvestorDashboard extends React.Component {
             </Row>
         );
     }
-}
-
-const metricStyle = {
-    backgroundColor: '#E1ECFB',
-    padding: '10px',
-    borderRadius: '4px'
 }

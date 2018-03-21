@@ -17,7 +17,7 @@
 }
   
   
-/**--- example styles ---**/
+/* *--- example styles ---*
 .container {
     padding: 20px;
     border: 1px solid #ccc;
@@ -34,4 +34,30 @@
 
 .container > button {
     margin-top: 20px;
+} */
+
+.ant-input-affix-wrapper .ant-input-suffix {
+    right: 0;
+}
+
+.search-btn {
+    height: 32px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+/* 
+.ant-select, .ant-select-open, .ant-select-enabled, .ant-select-focused {
+    border: none;
+}
+
+.ant-select-selection, .ant-select-selection--single {
+    border: none;
+} */
+
+.ant-row {
+    margin-top: 0;
+}
+
+.ant-collapse-content-box {
+    padding-top: 0;
 }

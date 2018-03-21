@@ -16,3 +16,5 @@ export * from './IconHeader';
 export * from './AdvisorComponent';
 export * from './AdviceSortingMenu';
 export * from './FilterSortComponent';
+export * from './AqCard';
+export * from './AdviceFilterSideComponent';

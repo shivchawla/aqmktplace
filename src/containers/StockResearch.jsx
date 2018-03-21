@@ -148,7 +148,7 @@ export class StockResearch extends React.Component {
                                     suffix={(
                                         <div>
                                             <Spin style={{marginRight: '20px'}} indicator={antIcon} spinning={this.state.spinning}/>
-                                            <Button className="search-btn" size="large" type="primary">
+                                            <Button size="large" type="primary">
                                                 <Icon type="search" />
                                             </Button>
                                         </div>

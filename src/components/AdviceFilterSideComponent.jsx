@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {Button, Checkbox, Row, Col, Icon, Slider, Divider} from 'antd';
 import {IconHeader} from './IconHeader';
 import {verticalLayout} from '../constants';
+import '../css/buttons.css';
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
 const CheckboxGroup = Checkbox.Group;
@@ -23,7 +24,7 @@ const kvp = {
     approved: 'selectApprovedllFilters'
 };
 
-export class AdviceFilterComponent extends React.Component {
+export class AdviceFilterSideComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -39,32 +40,22 @@ export class AdviceFilterComponent extends React.Component {
         this.setState({advices: nextProps.advices});
     }
 
-    renderMaxNotionalFilter = () => (
-        <CheckboxGroup 
-                // style={verticalLayout}
-                onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "maxNotional")} 
-                options={this.state.defaultFilters.maxNotional}  
-                value={this.state.selectedFilters.maxNotional} 
-        />
-    )
-
     renderRebalancingFreqFilter = () => (
         <CheckboxGroup 
-                style={verticalLayout}
                 onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "rebalancingFrequency")} 
                 options={this.state.defaultFilters.rebalancingFrequency} 
                 value={this.state.selectedFilters.rebalancingFrequency} 
         />
     )
 
-    renderStatusFilter = () => {
-        return <CheckboxGroup 
-                        style={verticalLayout}
-                        onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "approved")} 
-                        options={this.state.defaultFilters.approved} 
-                        value={this.state.selectedFilters.approved} 
-                />
-    }
+    renderStatusFilter = () => (
+        <CheckboxGroup 
+                // style={verticalLayout}
+                onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "approved")} 
+                options={this.state.defaultFilters.approved} 
+                value={this.state.selectedFilters.approved} 
+        />
+    )
 
     handleFilterCheckboxChange = (checkedValues, type) => {
         this.setState({
@@ -73,9 +64,11 @@ export class AdviceFilterComponent extends React.Component {
                 [type]: checkedValues,
             },
             [kvp[type]]: checkedValues.length === this.state.defaultFilters[type].length
+        }, () => {
+            this.props.updateAdviceUrl(this.processUrl());
         });
     }
-    
+
     getAdvices = () => {
         axios.get(this.processUrl(), {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
@@ -100,13 +93,6 @@ export class AdviceFilterComponent extends React.Component {
         return url;
     }
 
-    handleClick = () => {
-        if (this.props.toggleModal) {
-            this.props.toggleModal();
-        }
-        this.getAdvices();
-    }
-
     handleFilterGroupCheckboxChange = (e, filterType) => {
         let arrray = [];
         if (e.target.checked) {
@@ -115,6 +101,8 @@ export class AdviceFilterComponent extends React.Component {
         this.setState({
             selectedFilters: {...this.state.selectedFilters, [filterType]: arrray},
             [kvp[filterType]]: e.target.checked
+        }, () => {
+            this.props.updateAdviceUrl(this.processUrl());
         });
     }
 
@@ -135,7 +123,7 @@ export class AdviceFilterComponent extends React.Component {
     renderSliderFilters = (filterArray) => {
         return filterArray.map((filter, index) => {
             return (
-                <Col span={10} key={index} offset={index % 2 == 0 ? 0 : 2} style={{marginBottom: 40}}>
+                <Col span={24} key={index} style={{marginBottom: 20}}>
                     <IconHeader 
                             icon={filter.icon} 
                             label={filter.label}
@@ -162,55 +150,63 @@ export class AdviceFilterComponent extends React.Component {
         const {defaultFilters} = this.state;
         const filterArray = [
             {type: 'rating', label: 'Rating', range: defaultFilters.rating, min: 0, max: 10},
-            {type: 'sharpe', label: 'Sharpe Ratio', range: defaultFilters.sharpe, min: -100, max: 100, marks: {0: '0'}},
+            {type: 'sharpe', label: 'Sharpe Ratio', range: defaultFilters.sharpe, min: -100, max: 100},
             {type: 'netValue', label: 'Net Value', range: defaultFilters.netValue, min: 0, max: 100000000},
             {type: 'volatility', label: 'Volatility', range: defaultFilters.volatility, min: 0, max: 500},
-            {type: 'return', label: 'Return', range: defaultFilters.return, min: -100, max: 100, marks: {0: '0'}},
+            {type: 'return', label: 'Return', range: defaultFilters.return, min: -100, max: 100},
         ];
 
         return (
-            <Row style={{marginTop: 30}}>
-                <Col span={24}>
-                    <Row>
-                        <Col span={8}>
-                            <IconHeader 
-                                    icon="clock-circle-o" 
-                                    label="Rebalancing Frequency"
-                                    checked={this.state.selectRebalanceAllFilters}
-                                    filterType="rebalancingFrequency"
-                                    onChange={this.handleFilterGroupCheckboxChange}
-                            />
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderRebalancingFreqFilter()}
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col span={8}>
-                            <IconHeader 
-                                    icon="check-circle" 
-                                    label="Status"
-                                    checked={this.state.selectApprovedllFilters}
-                                    filterType="approved"
-                                    onChange={this.handleFilterGroupCheckboxChange}
-                            />
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderStatusFilter()}
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Col>
-                <Col span={24}>
-                    <Row>
-                        {this.renderSliderFilters(filterArray)}
-                    </Row>
-                </Col>
-                <Col span={24}>
-                    <Button onClick={this.handleClick}>Ok</Button>
-                </Col>
-            </Row>
+            <Col span={24} style={filterLayoutStyle}>
+                <Row>
+                    <Col span={24} style={{marginBottom: '20px'}}>
+                        <IconHeader 
+                                icon="clock-circle-o" 
+                                label="Rebalancing Frequency"
+                                checked={this.state.selectRebalanceAllFilters}
+                                filterType="rebalancingFrequency"
+                                onChange={this.handleFilterGroupCheckboxChange}
+                        />
+                        <Row>
+                            <Col span={24}>
+                                {this.renderRebalancingFreqFilter()}
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col span={24} style={{marginBottom: '20px'}}>
+                        <IconHeader 
+                                icon="check-circle" 
+                                label="Status"
+                                checked={this.state.selectApprovedllFilters}
+                                filterType="approved"
+                                onChange={this.handleFilterGroupCheckboxChange}
+                        />
+                        <Row>
+                            <Col span={24}>
+                                {this.renderStatusFilter()}
+                            </Col>
+                        </Row>
+                    </Col>
+                    {
+                        this.renderSliderFilters(filterArray)
+                    }
+                </Row>
+            </Col>
         );
     }
+}
+
+const filterHeader = {
+    fontSize: '14px',
+    color: '#444',
+    fontWeight: 700,
+    marginBottom: '10px'
+};
+
+const filterLayoutStyle = {
+    padding: '15px', 
+    overflow: 'hidden', 
+    overflowY: 'scroll', 
+    height: '600px',
+    layout_weight: '1'
 }

@@ -1,0 +1,21 @@
+.primary-btn { 
+    background-color: #23BEC3 !important;
+    border-radius: 2px;
+    color: #fff;
+    width: 150px;
+    border: none;
+    transition: all 0.4s ease;
+}
+
+.primary-btn:hover {
+    background-color: #26899A !important;
+    color: #fff !important;
+}
+
+.secondary-btn {
+    background-color: #fff;
+    border-radius: 2px;
+    color: #26899A;
+    border: 1px solid #26899A;
+    width: 150px;
+}

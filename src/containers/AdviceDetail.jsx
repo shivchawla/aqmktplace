@@ -5,15 +5,16 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card} from 'antd';
-import {layoutStyle} from '../constants';
+import {layoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqPortfolioTable, AqHighChartMod} from '../components';
+import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard} from '../components';
+import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
 const ReactHighcharts = require('react-highcharts');
-const dateFormat = 'YYYY-MM-DD';
+const dateFormat = 'Do MMMM YYYY';
 
 export class AdviceDetail extends React.Component {
     constructor(props) {
@@ -57,13 +58,22 @@ export class AdviceDetail extends React.Component {
                     options3d: {
                         enabled: true,
                         alpha: 45
-                    }
+                    },
+                    width: 300,
+                    height: 300
                 },
                 plotOptions: {
                     pie: {
                         innerSize: 100,
-                        depth: 45
+                        depth: 45,
+                        dataLabels: {
+                            enabled: false
+                        },
+                        showInLegend: true
                     }
+                },
+                title: {
+                    style:{display: 'none'}
                 },
                 series: [],
                 colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
@@ -71,7 +81,9 @@ export class AdviceDetail extends React.Component {
             performanceConfig: {
                 colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
                 chart: {
-                    type: 'bar'
+                    type: 'bar',
+                    width: 300,
+                    height: 300
                 },
                 xAxis: {
                     categories: ['Performance']
@@ -221,13 +233,11 @@ export class AdviceDetail extends React.Component {
     renderAdviceData = () => {
         const {followers, subscribers, rating} = this.state.adviceDetail;
         return (
-            <Col span={18}>
-                <Row>
-                    <CardItem value={followers} label="Followers"/>
-                    <CardItem value={rating} label="Average Rating"/>
-                    <CardItem value={subscribers} label="Subscribers"/>
-                </Row>
-            </Col>
+            <Row>
+                <MetricItem value={followers} label="Followers" style={{border: 'none'}} />
+                <MetricItem value={rating} label="Average Rating" style={{border: 'none'}} />
+                <MetricItem value={subscribers} label="Subscribers" style={{border: 'none'}} />
+            </Row>
         );
     };
 
@@ -235,14 +245,12 @@ export class AdviceDetail extends React.Component {
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
         
         return (
-            <Col span={24}>
-                <Row>
-                    <CardItem value={totalReturns} label="Total Returns"/>
-                    <CardItem value={averageReturns} label="Average Daily Return"/>
-                    <CardItem value={annualReturn} label="Annual Return"/>
-                    <CardItem value={dailyReturns} label="Daily Return"/>
-                </Row>
-            </Col>
+            <Row>
+                <MetricItem value={totalReturns} label="Total Returns" style={metricItemStyle} />
+                <MetricItem value={averageReturns} label="Average Daily Return" style={metricItemStyle} />
+                <MetricItem value={annualReturn} label="Annual Return" style={metricItemStyle} />
+                <MetricItem value={dailyReturns} label="Daily Return" style={metricItemStyle} />
+            </Row>
         );
     };
 
@@ -350,6 +358,7 @@ export class AdviceDetail extends React.Component {
                                 onClick={this.toggleDialog} 
                                 style={{width: 150}} 
                                 type="primary" 
+                                className="primary-btn"
                                 disabled={this.state.disableSubscribeButton}
                         >
                             {!this.state.adviceDetail.isSubscribed ? "Subscribe" : "Unsubscribe"}
@@ -359,6 +368,7 @@ export class AdviceDetail extends React.Component {
                         <Button 
                                 onClick={this.followAdvice} 
                                 style={{width: 150, marginTop: 10}} 
+                                className="secondary-btn"
                                 disabled={this.state.disableFollowButton}
                         >
                             {!this.state.adviceDetail.isFollowing ? "Follow" : "Unfollow"}
@@ -396,64 +406,62 @@ export class AdviceDetail extends React.Component {
                {this.renderModal()}
                {this.renderUpdateModal()}
                <Col span={18} style={layoutStyle}>
-                    <Row>
+                    <Row className="row-container">
                         <Col span={18}>
-                            <h1 style={headerStyle}>{name}</h1>
+                            <h1 style={pageHeaderStyle}>{name}</h1>
                             {
                                 advisor.user &&
-                                <h5>By {advisor.user.firstName} {advisor.user.lastName} - {updatedDate}</h5>
+                                <h5 style={userStyle}>
+                                    By {advisor.user.firstName} {advisor.user.lastName} 
+                                    <span style={dateStyle}>{updatedDate}</span>
+                                </h5>
                             }
-                            <h5>{heading}</h5>
+                            <h5 style={textStyle}>{heading}</h5>
                         </Col>
-                        <Col span={6}>
+                        <Col span={4} offset={2}>
                             {this.renderActionButtons()}
                         </Col>
                     </Row>
-                    <Row>
+                    <Row className="row-container">
                         {this.renderAdviceData()}
                     </Row>
-                    <DividerItem />
-                    <Row>
+                    <Divider style={{...dividerNoMargin, marginTop: '-20px'}}/>
+                    <Row className="row-container">
                         <Col span={24}>
-                            <h3 style={labelStyle}>Description</h3>
-                            <h5>{description}</h5>
+                            <h3 style={metricsHeaderStyle}>Description</h3>
+                            <h5 style={{...textStyle, marginTop: '5px'}}>{description}</h5>
                         </Col>
                     </Row>
-                    <DividerItem />
-                    <Row>
+                    <Divider style={dividerNoMargin} />
+                    <Row className="row-container">
                         <Col span={24}>
-                            <h3 style={labelStyle}>Metrics</h3>
+                            <h3 style={metricsHeaderStyle}>Metrics</h3>
                         </Col>
-                        <h3>{}</h3>
-                        {this.renderAdviceMetrics()}
+                        <Col span={24} style={{marginTop: '10px', marginBottom: '10px'}}>
+                            {this.renderAdviceMetrics()}
+                        </Col>
                     </Row>
-                    <DividerItem />
-                    <Row>
+                    <Divider style={dividerNoMargin} />
+                    <Row className="row-container">
                         <Col span={24}>
-                                <h3>Advice Summary</h3>
+                            <h3 style={metricsHeaderStyle}>Advice Summary</h3>
                         </Col>
-                        <Col span={11}>
-                            <Card 
-                                    title="Portfolio Overview"
-                            >
+                        <Col span={24} style={{marginTop: '20px'}}>
+                            <AqCard title="Portfolio Overview">
                                 <ReactHighcharts config = {this.state.portfolioConfig} />
-                            </Card>
-                        </Col>
-                        <Col span={11} offset={2}>
-                            <Card 
-                                    title="Portfolio Overview"
-                            >
+                            </AqCard>
+                            <AqCard title="Performance Overview" offset={2}>
                                 <ReactHighcharts config = {this.state.performanceConfig} />
-                            </Card>
+                            </AqCard>
                         </Col>
                     </Row>
-                    <Row>
+                    <Row style={{marginTop: '30px'}}>
                         <Col span={24}>
                             <Tabs>
-                                <TabPane tab="Performance" key="1">
+                                <TabPane tab="Performance" key="1" className="row-container">
                                     <AqHighChartMod tickers={this.state.tickers} />
                                 </TabPane>
-                                <TabPane tab="Portfolio" key="2">
+                                <TabPane tab="Portfolio" key="2" className="row-container">
                                     <AqPortfolioTable data={this.state.portfolioArray} />
                                 </TabPane>
                             </Tabs>
@@ -465,31 +473,27 @@ export class AdviceDetail extends React.Component {
     }
 }
 
-const CardItem = (props) => {
-    return (
-        <Col span={6}>
-            <h2>{props.value}</h2>
-            <h5>{props.label}</h5>
-        </Col>
-    );
-};
-
-const DividerItem = () => (
-    <Row>
-        <Col span={24}>
-            <Divider />
-        </Col>
-    </Row>
-);
-
-const headerStyle = {
-    fontSize: '20px'
-};
-
-const labelStyle = {
-    fontsize: '18px'
-};
-
 const cardItemStyle = {
     border: '1px solid #444'
 };
+
+const metricItemStyle = {
+    padding: '10px'
+};
+
+const userStyle = {
+    fontWeight: 700,
+    fontSize: '12px',
+    color: '#595959'
+};
+
+const textStyle = {
+    fontSize: '14px',
+    marginTop: '10px'
+};
+
+const dateStyle = {
+    color: '#757474',
+    fontWeight: 500,
+    marginLeft: '10px'
+}

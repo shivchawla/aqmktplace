@@ -37,19 +37,26 @@ export class AqHighChartMod extends React.PureComponent {
                     }
                 },
                 title: {
-                    text: 'Stock Graph'
+                    text: 'Stock Graph',
+                    style: {
+                        display: 'none'
+                    }
                 },
                 legend: {
                     enabled: false,
                 },
                 navigator: {
-                    outlineColor: '#F86C6C'
+                    outlineColor: '#F86C6C',
+                    enabled: false
                 },
                 series: [],
                 plotOptions: this.getPlotOptions(),
                 yAxis: defaultYAxis,
                 tooltip: {
-                    enabled: false
+                    enabled: !props.showLegend
+                },
+                chart: {
+                    height: props.height === undefined ? 350 : props.height
                 }
             },
             legendItems: [],
@@ -359,17 +366,21 @@ export class AqHighChartMod extends React.PureComponent {
     }
 
     render() {
+        const showLegend = this.props.showLegend === undefined ? true : this.props.showLegend;
         return (
             <div>
                 <Row>
-                    <Col span={12}>
-                        <Row>
-                            {this.renderLegendBox()}
-                        </Row>
-                    </Col>
-                    <Col span={6} offset={6}>
+                    {
+                        showLegend &&
+                        <Col span={12}>
+                            <Row>
+                                {this.renderLegendBox()}
+                            </Row>
+                        </Col>
+                    }
+                    {/* <Col span={6} offset={6}>
                         <Spin indicator={antIcon} spinning={this.state.spinning}/>
-                    </Col>
+                    </Col> */}
                 </Row>
                 <ReactHighstock ref='chart' isPureConfig={true} config={this.state.config} />
             </div>

@@ -2,6 +2,8 @@ import moment from 'moment';
 import _ from 'lodash';
 import {getStockData} from './requests';
 
+export const dateFormat = 'Do MMMM YYYY';
+
 export const getUnixTimeSeries = (data) => {
     return new Promise((resolve, reject) => {
         const benchmarkArray = _.toPairs(data).sort();

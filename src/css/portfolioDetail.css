@@ -20,21 +20,6 @@
     color: '#444';
 }
 
-.ant-tabs-nav-scroll {
-    border-top: 1px solid #eaeaea;
-    border-bottom: 1px solid #eaeaea;
-}
-
-.ant-tabs-nav-wrap { 
-    background-color: #f7f7f7;
-    border-top: 1px solid 'red';
-    border-bottom: 1px solid #f9f9f9;
-}
-
-.ant-tabs-nav {
-    margin-bottom: -1px;
-}
-
 .ant-radio-button-wrapper-checked {
     background-color: #1890ff;
     color: #fff;

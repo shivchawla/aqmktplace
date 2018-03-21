@@ -4,8 +4,8 @@ import _ from 'lodash';
 import moment from 'moment';
 import axios from 'axios';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button} from 'antd';
-import {layoutStyle} from '../constants';
-import {AdviceTransactionTable, AqHighChartMod, MetricItem} from '../components';
+import {layoutStyle, metricsHeaderStyle, pageHeaderStyle} from '../constants';
+import {AdviceTransactionTable, AqHighChartMod, MetricItem, AqCard} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import '../css/portfolioDetail.css';
 
@@ -38,7 +38,11 @@ class PortfolioDetailImpl extends React.Component {
                 plotOptions: {
                     pie: {
                         innerSize: 100,
-                        depth: 45
+                        depth: 45,
+                        dataLabels: {
+                            enabled: false
+                        },
+                        showInLegend: true
                     }
                 },
                 title: {
@@ -59,9 +63,6 @@ class PortfolioDetailImpl extends React.Component {
                 // xAxis: {
                 //     categories: ['Performance']
                 // },
-                legend: {
-                    enabled: false
-                },
                 credits: {
                     enabled: false
                 },
@@ -102,9 +103,7 @@ class PortfolioDetailImpl extends React.Component {
 
     renderMetrics = () => {
         return this.state.portfolioMetrics.map((metric, index) => (
-            <Col span={3} style={{marginRight: 30}} key={index}>
-                <MetricItem style={metricItemStyle} value={metric.value} label={metric.label} />
-            </Col>
+            <MetricItem key={index} style={metricItemStyle} value={metric.value} label={metric.label} />
         ));
     }
 
@@ -293,7 +292,7 @@ class PortfolioDetailImpl extends React.Component {
             const metrics = [
                 {value: portfolioMetrics.portfoliostats.netvalue, label: 'Net Value'},
                 {value: portfolioMetrics.returns.annualreturn, label: 'Annual Return'},
-                {value: portfolioMetrics.returns.averagedailyreturn, label: 'Average Daily Return'},
+                {value: portfolioMetrics.returns.averagedailyreturn, label: 'Avg Daily Return'},
                 {value: portfolioMetrics.returns.peaktotalreturn, label: 'Peak Total Return'},
                 {value: portfolioMetrics.returns.totalreturn, label: 'Total Return'},
                 {value: portfolioMetrics.drawdown.maxdrawdown, label: 'Max Draw Down'},
@@ -327,7 +326,7 @@ class PortfolioDetailImpl extends React.Component {
                 <Col span={18} xs={24} md={24} lg={18} style={{...layoutStyle, padding: '0'}}>
                     <Row style={{padding: '20px 30px'}}>
                         <Col span={24}>
-                            <h3 style={pageHeader}>{this.state.name}</h3>
+                            <h3 style={pageHeaderStyle}>{this.state.name}</h3>
                         </Col>
                         <Col span={24} style={{marginTop: '10px'}}>
                             <h4 style={metricsHeaderStyle}>Metrics</h4>
@@ -341,26 +340,20 @@ class PortfolioDetailImpl extends React.Component {
                         <Col span={24}>
                             <h3 style={metricsHeaderStyle}>Summary</h3>
                             <Row style={{marginTop: '10px'}}>
-                                <Col span={11}>
-                                    <Col span={24} style={{...portfolioOverviewStyle}}>
-                                        <h3 style={overviewHeaderStyle}>Portfolio Overview</h3>
-                                        <ReactHighcharts config = {this.state.portfolioConfig} />
-                                    </Col>
-                                </Col>
-                                <Col span={11} offset={2}>
-                                    {/* <Radio.Group 
-                                        defaultValue={this.state.togglePerformance} 
-                                        onChange={this.handlePerformanceToggle} 
-                                        size="small"
-                                    >
-                                        <Radio.Button value="dollar">Dollar</Radio.Button>
-                                        <Radio.Button value="percentage">Percentage</Radio.Button>
-                                    </Radio.Group> */}
-                                    <Col span={24} style={{...performanceOverviewStyle}}>
-                                        <h3 style={overviewHeaderStyle}>Performance Overview</h3>
-                                        <ReactHighcharts config = {this.state.performanceConfig} />
-                                    </Col>
-                                </Col>
+                                <AqCard title="Portfolio Overview">
+                                    <ReactHighcharts config = {this.state.portfolioConfig} />    
+                                </AqCard>        
+                                {/* <Radio.Group 
+                                    defaultValue={this.state.togglePerformance} 
+                                    onChange={this.handlePerformanceToggle} 
+                                    size="small"
+                                >
+                                    <Radio.Button value="dollar">Dollar</Radio.Button>
+                                    <Radio.Button value="percentage">Percentage</Radio.Button>
+                                </Radio.Group> */}
+                                <AqCard title="Performance Overview" offset={2}>
+                                    <ReactHighcharts config = {this.state.performanceConfig} />
+                                </AqCard>
                             </Row>
                         </Col>
                     </Row>
@@ -434,38 +427,10 @@ class PortfolioDetailImpl extends React.Component {
 
 export const PortfolioDetail =  Radium(PortfolioDetailImpl);
 
-const pageHeader = {
-    fontFamily: 'Lato, sans-serif',
-    fontSize: '20px'
-}
-
-const metricsHeaderStyle = {
-    fontFamily: 'Lato, sans-serif',
-    fontSize: '14px',
-    fontWeight: '700'
-}
-
 const metricItemStyle = {
     padding: '10px'
 }
 
 const newLayoutStyle = {
     border: '2px solid red'
-};
-
-const portfolioOverviewStyle = {
-    padding: '5px',
-    borderRadius: '4px',
-    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)'
-};
-
-const performanceOverviewStyle = {
-    padding: '5px',
-    borderRadius: '4px',
-    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)'
-};
-
-const overviewHeaderStyle = {
-    fontSize: '14px',
-    margin: '10px 0 0 10px'
 };

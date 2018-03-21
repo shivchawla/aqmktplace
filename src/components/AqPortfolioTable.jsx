@@ -36,14 +36,16 @@ export class AqPortfolioTable extends React.Component {
                 key: 'securityType'
             }
         ];
-        this.state = {
-
-        }
     }
 
     render() {
         return (
-            <Table pagination={false} columns={this.columns} dataSource={this.props.data}/>
+            <Table 
+                    pagination={false} 
+                    columns={this.columns} 
+                    style={{marginTop: 20, border: '1px solid #EAEAEA'}} 
+                    dataSource={this.props.data}
+            />
         );
     }
 }

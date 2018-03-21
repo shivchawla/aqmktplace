@@ -2,9 +2,10 @@ import * as React from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
-import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox} from 'antd';
-import {AdviceListItem, AdviceFilterComponent} from '../components';
+import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal} from 'antd';
+import {AdviceListItem, AdviceFilterComponent, AdviceFilterSideComponent} from '../components';
 import {layoutStyle} from '../constants';
+import '../css/screenAdvices.css';
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
 const Option = Select.Option;
@@ -42,7 +43,10 @@ export class ScreenAdvices extends React.Component {
             selectRebalanceAllFilters: true,
             selectApprovedllFilters: true,
             searchValue: '',
-            sortBy: 'rating'
+            sortBy: 'rating',
+            activeFilterPanel: [],
+            filterModalVisible: false,
+            loading: true
         }
     }
 
@@ -68,9 +72,11 @@ export class ScreenAdvices extends React.Component {
 
     componentWillMount() {
         this.getAdvices();
+        this.toggleFilter();
     }
 
     getAdvices = (adviceUrl) => {
+        this.setState({loading: true});
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         console.log(url);
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
@@ -81,6 +87,9 @@ export class ScreenAdvices extends React.Component {
         })
         .catch(error => {
             console.log(error);
+        })
+        .finally(() => {
+            this.setState({loading: false});
         });
     }
 
@@ -92,14 +101,14 @@ export class ScreenAdvices extends React.Component {
         const maxNotional = selectedFilters.maxNotional.length > 0 ? _.join(selectedFilters.maxNotional, ',') : _.join(defaultFilters.maxNotional, ',');
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         approved = _.join(approved, ',');
-        return `${requestUrl}/advice?search=${this.state.searchValue}&${type}=true&maxNotional=${maxNotional}&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}`;
+        return `${requestUrl}/advice?search=${this.state.searchValue}&${type}=true&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}`;
     }
 
     processAdvices = (responseAdvices) => {
         const advices = [];
         responseAdvices.map((advice, index) => {
-            console.log(advice);
             advices.push({
+                isFollowing: advice.isFollowing,
                 id: advice._id,
                 name: advice.name,
                 advisor: advice.advisor,
@@ -125,17 +134,27 @@ export class ScreenAdvices extends React.Component {
 
     renderFilter = () => {
         return (
-            <Collapse defaultActiveKey={['1']}>
-                <Panel header="Add Filters" key="1">
-                    <AdviceFilterComponent 
-                            updateAdvices={this.updateAdvices}
-                            updateAdviceUrl={this.updateAdviceUrl}
-                            toggleModal = {this.toggleFilterModal}
-                            orderParam={this.state.sortBy}
-                    />
-                </Panel>
-            </Collapse>
+            <Modal
+                    title="Apply Filters"
+                    visible={this.state.filterModalVisible}
+                    onCancel={this.toggleFilterModal}
+                    footer={null}
+                    width={700}
+            >
+                <AdviceFilterComponent 
+                        personal="0,1"
+                        updateAdvices={this.updateAdvices}
+                        updateAdviceUrl={this.updateAdviceUrl}
+                        toggleModal = {this.toggleFilterModal}
+                        orderParam={this.state.sortBy}
+                        toggleFilter={this.toggleFilter}
+                />
+            </Modal>
         );
+    }
+
+    toggleFilterModal = () => {
+        this.setState({filterModalVisible: !this.state.filterModalVisible});
     }
 
     updateAdvices = (advices) => {
@@ -171,69 +190,153 @@ export class ScreenAdvices extends React.Component {
 
     renderSortingMenu = () => {
         return (
-            <Select defaultValue={this.state.sortBy} style={{width: 200}} onChange={this.handleSortingMenuChange}>
+            <Select 
+                    defaultValue={this.state.sortBy} 
+                    onChange={this.handleSortingMenuChange} 
+                    style={{fontSize: '14px', width: '120px'}}
+            >
                 <Option value="rating">Rating</Option>
                 <Option value="return">Return</Option>
                 <Option value="name">Name</Option>
                 <Option value="volatility">Volatility</Option>
                 <Option value="sharpe">Sharpe</Option>
                 <Option value="maxloss">Max Loss</Option>
-                <Option value="numFollowers">Number of Followers</Option>
-                <Option value="numSubscribers">Number of Subscribers</Option>
+                <Option value="numFollowers">Followers</Option>
+                <Option value="numSubscribers">Subscribers</Option>
                 <Option value="createdDate">Created Date</Option>
             </Select>
         );
     }
 
+    toggleFilter = () => {
+        let activeFilterPanel = [...this.state.activeFilterPanel];
+        if (!activeFilterPanel.length) {
+            activeFilterPanel.push("1");
+        } else {
+            activeFilterPanel = [];
+        }
+        this.setState({activeFilterPanel}, () => {
+            this.state.activeFilterPanel;
+        });
+    }
+
     render() {
+        const antIcon = <Icon type="loading" style={{ fontSize: 36 }} spin />;
+
         return (
             <Row>
-                <Col span={18} style={layoutStyle}>
-                    <Row>
+                {this.renderFilter()}
+                <Col lg={17} xs={24} md={24} style={{...layoutStyle, padding: 0}}>
+                    <Row className="row-container">
                         <Col span={24}>
                             <Input
                                     suffix={(
                                         <div>
-                                            <Spin 
+                                            {/* <Spin 
                                                     style={{marginRight: '20px'}} 
                                                     indicator={antIcon} 
                                                     spinning={this.state.spinning}
-                                            />
-                                            <Button className="search-btn" size="large" type="primary" onClick={() => this.getAdvices()}>
+                                            /> */}
+                                            <Button 
+                                                    className="search-btn" 
+                                                    size="large" 
+                                                    type="primary" 
+                                                    style={{backgroundColor: '#23bec3', border: '1px solid #23bec3'}}
+                                                    onClick={() => this.getAdvices()}
+                                            >
                                                 <Icon type="search" />
                                             </Button>
                                         </div>
                                     )}
+                                    placeholder="Enter advice here"
                                     value={this.state.searchValue}
                                     onChange={this.handleInputChange}
                                     onPressEnter={() => this.getAdvices()}
                             />
                         </Col>
-                        <Col span={24}>
-                            {this.renderSortingMenu()}
+                        <Col span={24} style={filterSortContainerStyle}>
+                            <Row type="flex" align="middle" justify="end">
+                                <Col xs={3} md={3} lg={0}>
+                                {/* <Col span={6}> */}
+                                    <Row type="flex" align="middle">
+                                        <Col span={4}>
+                                            <Icon 
+                                                    type="bars" 
+                                                    onClick={this.toggleFilter} 
+                                                    style={{ fontSize: 20, cursor: 'pointer'}}
+                                            />
+                                        </Col>
+                                        <Col span={14}>
+                                            <h5 onClick={this.toggleFilterModal} style={{cursor: 'pointer'}}>Apply Filters</h5>  
+                                        </Col>
+                                    </Row>
+                                </Col>
+                                <Col span={6}>
+                                    <Row type="flex" align="middle">
+                                        <Col span={8}>
+                                            {/* <Icon 
+                                                    type="filter" 
+                                                    onClick={this.toggleFilter} 
+                                                    style={{ fontSize: 20}}
+                                            /> */}
+                                            <h5>Sort By</h5>
+                                        </Col>
+                                        <Col span={6}>
+                                            {this.renderSortingMenu()}
+                                        </Col>
+                                    </Row>
+                                    
+                                </Col>
+                            </Row>
+                            
                         </Col>
                     </Row>
                     <Row>
-                        <Col span={24} style={{marginTop: 20, marginBottom: 20}}>
-                            {this.renderFilter()}
-                        </Col>
-                    </Row>
-                    <Row>
                         <Col span={24}>
-                            <Tabs defaultActiveKey="all" onChange={this.handleTabChange}>
+                            <Tabs type="card" defaultActiveKey="all" onChange={this.handleTabChange}>
                                 <TabPane tab="All" key="all">
-                                    {this.renderAdvices()}
+                                    <Spin size="large" spinning={this.state.loading}>
+                                        {this.renderAdvices()}
+                                    </Spin>
                                 </TabPane>
                                 <TabPane tab="Trending" key="trending">
-                                    {this.renderAdvices()}
+                                    <Spin size="large" spinning={this.state.loading}>
+                                        {this.renderAdvices()}
+                                    </Spin>
                                 </TabPane>
                                 <TabPane tab="Subscribed" key="subscribed">
-                                    {this.renderAdvices()}
+                                    <Spin size="large" spinning={this.state.loading}>
+                                        {this.renderAdvices()}
+                                    </Spin>
                                 </TabPane>
                                 <TabPane tab="Wishlist" key="following">
-                                    {this.renderAdvices()}
+                                    <Spin size="large" spinning={this.state.loading}>
+                                        {this.renderAdvices()}
+                                    </Spin>
                                 </TabPane>
                             </Tabs>
+                        </Col>
+                    </Row>                  
+                </Col>
+                <Col span={6} offset={1} style={{...layoutStyle, padding: '0'}}>
+                    <Row>
+                        <Col span={8}>
+                            <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>
+                        </Col>
+                        <Col span={6} offset={9}>
+                            <Button style={filterBtnStyle} onClick={() => this.getAdvices(this.state.adviceUrl)}>Update</Button>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={24}>
+                            <AdviceFilterSideComponent 
+                                    personal="0,1"
+                                    updateAdvices={this.updateAdvices}
+                                    updateAdviceUrl={this.updateAdviceUrl}
+                                    toggleModal = {this.toggleFilterModal}
+                                    orderParam={this.state.sortBy}
+                                    toggleFilter={this.toggleFilter}
+                            />
                         </Col>
                     </Row>
                 </Col>
@@ -256,4 +359,26 @@ const IconHeader = ({icon, label, checked, filterType, onChange}) => {
             </Col>
         </Row>
     );
-}
+};
+
+const filterSortContainerStyle = {
+    marginTop: '20px'
+};
+
+const searchInputStyle = {
+    borderRadius: '2px'
+};
+
+const filterHeaderStyle = {
+    fontSize: '14px'
+};
+
+const filterBtnStyle = {
+    border: '1px solid #eaeaea',
+    backgroundColor: '#23BEC3',
+    fontSize: '12px',
+    padding: '0 !important',
+    height: '22px',
+    marginTop: '8px',
+    color: '#fff'
+};

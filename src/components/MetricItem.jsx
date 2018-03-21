@@ -5,22 +5,23 @@ import '../css/metricItem.css';
 
 const MetricItemImpl = (props) => {
     const {style = {}} = props;
+    const height = !props.bordered ? 'fit-content' : '70px';
+    const border = props.bordered ? '1px solid #eaeaea' : 'none';
+    const padding = props.bordered ? '10px' : 0;
     return (
-        <Row style={{...containerStyle, ...style}}>
-            <Col span={24} style={valueStyle}><h5>{props.value}</h5></Col>
-            <Col><h5 style={labelStyle} value={labelStyle}>{props.label}</h5></Col>
-        </Row>
+        <Col span={3} style={{marginRight: 30}}>
+            <Row style={{...containerStyle, ...style, height, border, padding}}>
+                <Col span={24} style={valueStyle}><h5>{props.value}</h5></Col>
+                <Col><h5 style={labelStyle} value={labelStyle}>{props.label}</h5></Col>
+            </Row>
+        </Col>
     );
 };
 
 export const MetricItem = Radium(MetricItemImpl);
 
 const containerStyle = {
-    // boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
-    // padding: '10px',
-    border: '1px solid #eaeaea',
     width: '130px',
-    height: '70px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     ':hover': {
@@ -29,12 +30,13 @@ const containerStyle = {
 };
 
 const valueStyle = {
-    fontSize: '18px',
+    fontSize: '20px',
     fontWeight: '700',
+    color: '#1F1F1F'
 };
 
 const labelStyle = {
     fontWeight: '400',
-    fontSize: '12px',
-    color: '#8C8C8C',
+    fontSize: '14px',
+    color: '#515151',
 };
