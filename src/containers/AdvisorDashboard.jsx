@@ -3,8 +3,8 @@ import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate} from 'antd';
-import {AqHighChartMod, AdviceFilterComponent, AdviceListItem} from '../components';
-import {layoutStyle} from '../constants';
+import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem} from '../components';
+import {newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle} from '../constants';
 import {dateFormat} from '../utils';
 
 const RadioGroup = Radio.Group;
@@ -492,10 +492,13 @@ export class AdvisorDashboard extends React.Component {
     renderAdvices = () => {
         const advices = this.state.rawAdvices;
         return advices.map((advice, index) => {
-            console.log(advice.latestPerformance.return);
             const returnColor = advice.latestPerformance.return < 0 ? '#ED4D4D' : '#3DC66B';
             return (
-                <Row key={index} style={{marginBottom: '10px', padding: '0 20px'}}>
+                <Row 
+                        key={index} 
+                        style={{marginBottom: '10px', padding: '0 20px', cursor: 'pointer'}}
+                        onClick={() => this.props.history.push(`/advice/${advice._id}`)}
+                >
                     <Col span={7}>
                         <ListMetricItem label="Name" value={advice.name} />
                     </Col>
@@ -604,12 +607,6 @@ export class AdvisorDashboard extends React.Component {
     }
 }
 
-const newLayoutStyle = {
-    borderRadius: '4px',
-    boxShadow: '0 2px 4px rgba(171, 171, 171, 50)',
-    overflow: 'hidden'
-};
-
 const StatsMetricItem = ({label, value}) => {
     return (
         <Col span={14} offset={10} style={{textAlign: 'right', marginBottom: '10px'}}>
@@ -617,29 +614,6 @@ const StatsMetricItem = ({label, value}) => {
             <h3 style={metricLabelStyle}>{label}</h3>
         </Col>
     );
-};
-
-const ListMetricItem = ({label, value, labelColor = listMetricItemLabelStyle.color, valueColor = listMetricItemValueStyle.color}) => {
-    return (
-        <Row>
-            <Col span={24}>
-                <h3 style={{...listMetricItemValueStyle, color: valueColor}}>{value}</h3>
-            </Col>
-            <Col span={24}>
-                <h3 style={{...listMetricItemLabelStyle, color: labelColor}}>{label}</h3>
-            </Col>
-        </Row>
-    );
-}
-
-const listMetricItemLabelStyle = {
-    fontSize: '14px',
-    color: '#868686'
-};
-
-const listMetricItemValueStyle = {
-    fontSize: '16px',
-    color: '#565656'
 };
 
 const cardHeaderStyle = {

@@ -3,8 +3,8 @@ import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal} from 'antd';
-import {AdviceListItem, AdviceFilterComponent, AdviceFilterSideComponent} from '../components';
-import {layoutStyle} from '../constants';
+import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent} from '../components';
+import {newLayoutStyle} from '../constants';
 import '../css/screenAdvices.css';
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
@@ -28,7 +28,7 @@ const kvp = {
 
 const sortValues = ['name', 'updatedAt desc', 'subscribers', 'followers', 'rating'];
 
-export class ScreenAdvices extends React.Component {
+export class ScreenAdvices extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -58,7 +58,7 @@ export class ScreenAdvices extends React.Component {
         const options = ['name', 'rating', 'followers', 'subscribers'];
 
         return (
-            <Select defaultValue={options[0]} style={{width: 120}} onChange={this.handleSelectChange}>
+            <Select size="small" defaultValue={options[0]} style={{width: 120}} onChange={this.handleSelectChange}>
                 {
                     options.map((item, index) => {
                         return (
@@ -127,7 +127,7 @@ export class ScreenAdvices extends React.Component {
         const {advices} = this.state;
         return advices.map((advice, index) => {
             return (
-                <AdviceListItem key={index} advice={advice}/>
+                <AdviceListItemMod key={index} advice={advice}/>
             );
         })
     }
@@ -224,9 +224,9 @@ export class ScreenAdvices extends React.Component {
         const antIcon = <Icon type="loading" style={{ fontSize: 36 }} spin />;
 
         return (
-            <Row>
+            <Row style={{paddingBottom: '20px'}}>
                 {this.renderFilter()}
-                <Col lg={17} xs={24} md={24} style={{...layoutStyle, padding: 0}}>
+                <Col lg={17} xs={24} md={24} style={{...newLayoutStyle, padding: 0}}>
                     <Row className="row-container">
                         <Col span={24}>
                             <Input
@@ -285,7 +285,6 @@ export class ScreenAdvices extends React.Component {
                                             {this.renderSortingMenu()}
                                         </Col>
                                     </Row>
-                                    
                                 </Col>
                             </Row>
                             
@@ -293,7 +292,7 @@ export class ScreenAdvices extends React.Component {
                     </Row>
                     <Row>
                         <Col span={24}>
-                            <Tabs type="card" defaultActiveKey="all" onChange={this.handleTabChange}>
+                            <Tabs animated={false} defaultActiveKey="all" onChange={this.handleTabChange}>
                                 <TabPane tab="All" key="all">
                                     <Spin size="large" spinning={this.state.loading}>
                                         {this.renderAdvices()}
@@ -318,7 +317,7 @@ export class ScreenAdvices extends React.Component {
                         </Col>
                     </Row>                  
                 </Col>
-                <Col span={6} offset={1} style={{...layoutStyle, padding: '0'}}>
+                <Col span={6} offset={1} style={{...newLayoutStyle, padding: '0'}}>
                     <Row>
                         <Col span={8}>
                             <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>

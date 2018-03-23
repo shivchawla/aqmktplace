@@ -17,6 +17,12 @@ export const layoutStyle = {
     marginBottom: '20px'
 };
 
+export const newLayoutStyle = {
+    borderRadius: '4px',
+    boxShadow: '0 2px 4px rgba(171, 171, 171, 50)',
+    overflow: 'hidden'
+};
+
 export const labelStyle = {
     color: '#898989'
 };
@@ -39,4 +45,14 @@ export const dividerNoMargin = {
 export const verticalLayout = {
     display: 'flex',
     flexDirection: 'column'
+};
+
+export const listMetricItemLabelStyle = {
+    fontSize: '14px',
+    color: '#868686'
+};
+
+export const listMetricItemValueStyle = {
+    fontSize: '16px',
+    color: '#565656'
 };

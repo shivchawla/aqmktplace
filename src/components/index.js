@@ -18,3 +18,5 @@ export * from './AdviceSortingMenu';
 export * from './FilterSortComponent';
 export * from './AqCard';
 export * from './AdviceFilterSideComponent';
+export * from './ListMetricItem';
+export * from './AdviceListeItemMod';

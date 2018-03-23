@@ -118,7 +118,7 @@ export class AdviceDetail extends React.Component {
             heading, 
             advisor, 
             updatedDate, 
-            latestAnalytics, 
+            latestPerformance, 
             isSubscribed, 
             isFollowing, 
             isOwner,
@@ -139,7 +139,7 @@ export class AdviceDetail extends React.Component {
                 isFollowing,
                 followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
-                rating: latestAnalytics.rating,
+                rating: latestPerformance.rating,
                 isPublic: response.data.public
             }
         });

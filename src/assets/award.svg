@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="16px" height="24px" viewBox="0 0 16 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="19px" height="28px" viewBox="0 0 19 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 49.1 (51147) - http://www.bohemiancoding.com/sketch -->
-    <title>award</title>
+    <title>Group 9</title>
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
-        <g id="iPad-all-advices" transform="translate(-638.000000, -494.000000)" fill="#4A90E2" stroke="#1B64B9" stroke-width="1.2">
-            <g id="Group-5" transform="translate(12.000000, 485.000000)">
-                <g id="Group-7" transform="translate(627.000000, 5.000000)">
-                    <g id="award" transform="translate(0.000000, 5.000000)">
-                        <polyline id="Shape" points="3.21 12.89 2 22 7 19 12 22 10.79 12.88"></polyline>
-                        <circle id="Oval" cx="7" cy="7" r="7"></circle>
+        <g id="Dashboard-Portfolio-Copy-8" transform="translate(-771.000000, -366.000000)" stroke="#000000" stroke-width="2.16">
+            <g id="Group-21" transform="translate(27.000000, 279.000000)">
+                <g id="Group-20">
+                    <g id="Group-14" transform="translate(746.000000, 89.000000)">
+                        <g id="Group-13">
+                            <g id="Group-9">
+                                <g id="award">
+                                    <ellipse id="Oval" cx="7.6" cy="7.63636364" rx="7.6" ry="7.63636364"></ellipse>
+                                    <polyline id="Shape" points="3.48514286 14.0618182 2.17142857 24 7.6 20.7272727 13.0285714 24 11.7148571 14.0509091"></polyline>
+                                </g>
+                            </g>
+                        </g>
                     </g>
                 </g>
             </g>

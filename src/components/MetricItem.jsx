@@ -11,8 +11,8 @@ const MetricItemImpl = (props) => {
     return (
         <Col span={3} style={{marginRight: 30}}>
             <Row style={{...containerStyle, ...style, height, border, padding}}>
-                <Col span={24} style={valueStyle}><h5>{props.value}</h5></Col>
-                <Col><h5 style={labelStyle} value={labelStyle}>{props.label}</h5></Col>
+                <Col span={24}><h5 style={{...valueStyle, ...props.valueStyle}}>{props.value}</h5></Col>
+                <Col><h5 style={{...labelStyle, ...props.labelStyle}} value={labelStyle}>{props.label}</h5></Col>
             </Row>
         </Col>
     );
