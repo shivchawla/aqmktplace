@@ -20,6 +20,7 @@ import {
     AdvisorDashboard,
     ScreenAdvisors
 } from './containers'; 
+import {HocExample} from './containers/HocExample';
 
 const {Header, Content} = Layout;
 const firstChild = props => {
@@ -96,6 +97,7 @@ class App extends React.Component {
                         <Route exact={true} path='/advisorprofile/:id' component={AdvisorProfile} />
                         <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
                         <Route exact={true} path='/screenadvisors' component={ScreenAdvisors} />
+                        <Route exact={true} path='/hoc' component={HocExample} />
                     </Content>
                 </Layout>
             </Layout>

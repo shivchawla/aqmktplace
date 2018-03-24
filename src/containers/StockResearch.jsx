@@ -1,7 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
-import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs} from 'antd';
+import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio} from 'antd';
 import {List} from 'immutable';
 import {AqLink} from '../components';
 import {newLayoutStyle} from '../constants';
@@ -9,6 +9,8 @@ import {getStockData} from '../utils';
 import {AqHighChartMod} from '../components/AqHighChartMod';
 import '../css/stockResearch.css';
 
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
 const Option = AutoComplete.Option;
 const TabPane = Tabs.TabPane;
 
@@ -34,7 +36,8 @@ export class StockResearch extends React.Component {
                 low_52w: 0,
                 high_52w:0
             },
-            rollingPerformance: {}
+            rollingPerformance: {},
+            selectedPerformanceScreen: '10y'
         };
     }
 
@@ -113,15 +116,16 @@ export class StockResearch extends React.Component {
                 {label: 'Calmarratio', value: dataObject.calmarratio},
                 {label: 'Information Ratio', value: dataObject.informationratio},
                 {label: 'Sharpe Ratio', value: dataObject.sharperatio},
-                {label: 'Sortino Ratio', value: dataObject.sortinoratio},
-                {label: 'Stability', value: dataObject.stability},
-                {label: 'Treynor Ratio', value: dataObject.treynorratio},
-            ]
+            ];
 
             return this.renderPriceMetrics(metricsData);
         }
 
         return <h3>No Data</h3>;
+    }
+
+    handlePerformanceScreenChange = e => {
+        this.setState({selectedPerformanceScreen: e.target.value});
     }
 
     componentWillMount() {
@@ -139,6 +143,26 @@ export class StockResearch extends React.Component {
         });
     }
 
+    renderPriceMetricsTimeline = timelineArray => (
+        <RadioGroup 
+                onChange={this.handlePerformanceScreenChange} 
+                defaultValue={timelineArray[0]}
+                size="small"
+                style={{fontSize: '12px', height: '22px'}}
+        >
+            {
+                timelineArray.map((item, index) => (
+                    <RadioButton key={index} value={item}>{item}</RadioButton>
+                ))
+            }
+        </RadioGroup>
+    )
+
+    renderPerformanceMetrics =() => {
+        const selectedScreen = this.state.selectedPerformanceScreen;
+        return this.renderRollingPerformanceData(selectedScreen);
+    }
+
     render() {
         const {dataSource, latestDetail} = this.state;
         const priceMetrics = [
@@ -148,6 +172,8 @@ export class StockResearch extends React.Component {
             {label: '52W High', value: latestDetail.high_52w},
             {label: '52W Low', value: latestDetail.low_52w},
         ];
+        const performanceMetricsTimeline = ['10y', 'ytd', '1y', '5y', '2y', 'mtd'];
+        const percentageColor = latestDetail.change < 0 ? '#FA4747' : '#3EBB72';
         
         return (
             <Row>
@@ -170,30 +196,26 @@ export class StockResearch extends React.Component {
                     <Row style={metricStyle} type="flex" justify="space-between">
                         <Col span={7} style={cardStyle}>
                             <h1 style={tickerNameStyle}>{latestDetail.ticker} : {latestDetail.exchange}</h1>
-                            <h3 style={lastPriceStyle}>{latestDetail.closePrice} <span style={changeStyle}>% {latestDetail.change}</span></h3>
-                            <h5 style={{fontSize: '18px', fontWeight: 400, color: '#585858'}}>Least Close Price</h5>
+                            <h3 style={lastPriceStyle}>{latestDetail.closePrice} <span style={{...changeStyle, color: percentageColor}}>{latestDetail.change} %</span></h3>
+                            <h5 style={{fontSize: '18px', fontWeight: 400, color: '#585858'}}>Last Close Price</h5>
                         </Col>
-                        <Col span={7} style={cardStyle}>
-                            <h3>Price Metrics</h3>
+                        <Col span={6} style={cardStyle}>
+                            <h3 style={cardHeaderStyle}>Price Metrics</h3>
                             {this.renderPriceMetrics(priceMetrics)}
                         </Col>
-                        <Col span={9} style={cardStyle}>
-                            <Col span={24}>
-                                <h3>Performance Metrics</h3>
+                        <Col span={10} style={cardStyle}>
+                            <Col span={10}>
+                                <h3 style={cardHeaderStyle}>Performance Metrics</h3>
+                            </Col>
+                            <Col span={14} style={{textAlign: 'right'}}>
+                                {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
                             </Col>
                             <Col span={24}>
-                                <Tabs defaultActiveKey="1" size="small">
-                                    <TabPane tab="10 Y" key="1">{this.renderRollingPerformanceData('10y')}</TabPane>
-                                    <TabPane tab="YTD" key="2">{this.renderRollingPerformanceData('ytd')}</TabPane>
-                                    <TabPane tab="1 Y" key="3">{this.renderRollingPerformanceData('1y')}</TabPane>
-                                    <TabPane tab="5 Y" key="4">{this.renderRollingPerformanceData('5y')}</TabPane>
-                                    <TabPane tab="2 Y" key="5">{this.renderRollingPerformanceData('2y')}</TabPane>
-                                    <TabPane tab="MTD" key="6">{this.renderRollingPerformanceData('mtd')}</TabPane>
-                                </Tabs>
+                                {this.renderPerformanceMetrics()}
                             </Col>
                         </Col>
                     </Row>
-                    <Row style={{...metricStyle, marginTop: '20px'}}>  
+                    <Row style={metricStyle}>  
                         <Col span={24} style={{fontSize: '16px', color: '#565656', fontWeight: '700', marginBottom: '10px'}}>Performance</Col>
                         <Col span={8}>
                             <AutoComplete
@@ -253,4 +275,8 @@ const cardStyle = {
     border: '1px solid #eaeaea',
     padding: '10px',
     borderRadius: '4px',
-}
+};
+
+const cardHeaderStyle = {
+    marginBottom: '5px'
+};
