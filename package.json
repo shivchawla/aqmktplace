@@ -13,6 +13,7 @@
     "debounce": "1.1.0",
     "debounce-promise": "3.0.2",
     "gsap": "1.20.4",
+    "highcharts": "^6.0.7",
     "highcharts-exporting": "^0.1.7",
     "highcharts-more": "^0.1.7",
     "highcharts-solid-gauge": "^0.1.7",

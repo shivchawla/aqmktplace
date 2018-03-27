@@ -1,51 +1,85 @@
 import * as React from 'react';
-import {myHoc} from './Hoc';
+import _ from 'lodash';
 import {getStockPerformance} from '../utils';
-import {MyChart} from './MyChart';
+import {MyChartNew} from './MyChartNew';
+import {myHoc} from '../hoc/highChart';
 
-class HocExampleImpl extends React.Component {
+export class HocExampleImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            series: [
-                {
-                    name: 'Installation',
-                    data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
-                }
-            ]
-        }
+            series: [{
+                name: 'HDFC'
+            }],
+            tickerName: 'YESBANK'
+        };
     }
-    
-    updateBenchmark = () => {
-        const tickers = [...this.props.tickers];
-        tickers[0] = {name: 'AimsQuant', value: 100};
-        this.props.updateTickers(tickers);
+   
+    addTicker = () => {
+        const {tickerName} = this.state;
+        const series = [...this.state.series];
+        getStockPerformance(tickerName)
+        .then(performance => {
+            series.push({
+                name: tickerName,
+                data: performance
+            });
+            this.setState({series, tickerName: ''});
+        });
+    } 
+
+    renderTickers = () => {
+        return this.state.series.map((item, index) => {
+            return <li key={index} onClick={(e) => this.handleListItemClick(item)}>{item.name}</li>
+        });
+    }
+
+    handleListItemClick = (item) => {
+        const series = [...this.state.series];
+        const index = _.findIndex(series, seriesItem => seriesItem.name === item.name);
+        series.splice(index, 1);
+        this.setState({series});
+    }
+
+    clearAllExceptOne = () => {
+        let series = [...this.state.series];
+        series = series.filter(item => item.name === 'HDFC');
+        this.setState({series});
+    }
+
+    updateTickers = () => {
+        let series = [...this.state.series];
+        getStockPerformance('SAIL')
+        .then(performance => {
+            series[0] = {
+                name: 'SAIL',
+                data: performance
+            };
+            series[2] = {
+                name: 'ICICIBANK',
+                data: performance
+            };
+            this.setState({series, tickerName: ''});
+        });
     }
 
     onChange = e => {
-        this.setState({username: e.target.value});
-    }
-
-    getSeries = (series) => {
-        return series.length >= 2 ? [] : [...series];
-    }
-
-    addItem = () => {
-        const series = [...this.state.series];
-        series.push({
-            name: 'Manufacturing',
-            data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
-        })
-        this.setState({series});
+        this.setState({tickerName: e.target.value});
     }
 
     render() {
         return (
             <div>
-                <h1>{this.state.username}</h1>
-                <input value={this.props.username} onChange={this.state.onChange} />
-                <button onClick={this.addItem}>Update Tickers</button>
-                <MyChart series = {this.state.series} />
+                <h1>{this.state.tickerName}</h1>
+                <input value={this.state.tickerName} onChange={this.onChange} />
+                <button onClick={this.addTicker}>Add Ticker</button>
+                <button onClick={this.clearAllExceptOne}>Clear all except one</button>
+                <button onClick={this.updateTickers}>Simulate Benchmark Change</button>
+                <ul>
+                    {this.renderTickers()}
+                </ul>
+                <MyChartNew series = {this.state.series} />
+
             </div>
         );
     }

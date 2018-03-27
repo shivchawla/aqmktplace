@@ -7,10 +7,10 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 import {inputHeaderStyle, layoutStyle} from '../constants';
 import {EditableCell, AqStockTable, AqDropDown, AqHighChartMod} from '../components';
-import {getUnixStockData, getStockData} from '../utils';
+import {getUnixStockData, getStockData, getStockPerformance} from '../utils';
 import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
-import {AqHighChart} from '../components/AqHighChart';
+import {MyChart} from '../containers/MyChart';
 
 const localConfig = require('../localConfig.js');
 
@@ -38,7 +38,9 @@ export class AdviceFormImpl extends React.Component {
                 'HDFC'
             ],
             selectedBenchmark: 'TCS',
-            tickers: [],
+            tickers: [
+
+            ],
             rebalancingFrequency: rebalancingFrequency[0],
             maxNotional: maxNotional[0],
             adviceName: '',
@@ -253,7 +255,11 @@ export class AdviceFormImpl extends React.Component {
             const tickerIndex = _.findIndex(tickers, item.symbol);
             if (tickerIndex === -1) {
                 if (item.tickerValidationStatus === 'success') {
-                    tickers.push({name: item.symbol});
+                    tickers.push({
+                        name: item.symbol,
+                        show: true,
+                        color: 'red'
+                    });
                 }
             }
             if(item.tickerValidationStatus === 'success') {
@@ -264,7 +270,7 @@ export class AdviceFormImpl extends React.Component {
         this.setState({
             data: _.cloneDeep(data), 
             remainingCash,
-            tickers: [...tickers]
+            tickers
         });
     }
 
@@ -286,8 +292,12 @@ export class AdviceFormImpl extends React.Component {
 
     onBenchmarkSelected = (ticker) => {
         const tickers = [...this.state.tickers];
-        tickers[0].name = ticker;
-        this.setState({tickers, selectedBenchmark: ticker});
+        getStockPerformance(ticker)
+        .then(performance => {
+            tickers[0].name = ticker;
+            tickers[0].data = performance;
+            this.setState({tickers, selectedBenchmark: ticker});
+        });
     }
 
     handleRebalanceMenuClick = (frequency) => {
@@ -426,7 +436,7 @@ export class AdviceFormImpl extends React.Component {
         if (this.props.isUpdate) {
             this.getAdvice(this.props.adviceId);
         }
-        tickers.push({name: selectedBenchmark, disbled: true, show: true, type: 'Benchmark'});
+        tickers.push({name: selectedBenchmark, show: true, color: '#444'});
         this.setState({tickers});
     } 
 
@@ -571,11 +581,11 @@ export class AdviceFormImpl extends React.Component {
                             </Col>
                         </Row>
                     </Form>
-                    {/* <Row>
+                    <Row>
                         <Col span={24}>
-                            <AqHighChartMod tickers={this.state.tickers}/>
+                            <MyChart series={this.state.tickers}/>
                         </Col>
-                    </Row> */}
+                    </Row>
                 </Col>
             </Row>
         );

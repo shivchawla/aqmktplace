@@ -6,7 +6,7 @@ import {List} from 'immutable';
 import {AqLink} from '../components';
 import {newLayoutStyle} from '../constants';
 import {getStockData} from '../utils';
-import {AqHighChartMod} from '../components/AqHighChartMod';
+import {MyChart} from '../containers/MyChart';
 import '../css/stockResearch.css';
 
 const RadioButton = Radio.Button;
@@ -64,11 +64,11 @@ export class StockResearch extends React.Component {
     }
 
     onSelect = (value) => {
-        const {latestDetail, tickers} = this.state;
-        let newTickers = [];
-        newTickers.push({name: value, show: true, disabled: true});
+        const {latestDetail} = this.state;
+        let tickers = [];
+        tickers.push({name: value, show: true, disabled: true, color: 'green'});
         this.setState(prevState => {
-            return Object.assign({}, {tickers: newTickers});
+            return Object.assign({}, {tickers});
         });
         getStockData(value, 'latestDetail')
         .then(response => {
@@ -94,7 +94,7 @@ export class StockResearch extends React.Component {
 
     onCompareSelect = (value) => {
         const tickers = [...this.state.tickers];
-        tickers.push({name: value, show: false, data: []});
+        tickers.push({name: value, show: false, data: [], color: '#444'});
         this.setState({tickers});
     }
 
@@ -233,7 +233,7 @@ export class StockResearch extends React.Component {
                             </AutoComplete>
                         </Col>
                         <Col span={24} style={{marginTop: '10px'}}>
-                            <AqHighChartMod tickers={this.state.tickers}/> 
+                            <MyChart series={this.state.tickers}/> 
                         </Col>
                     </Row>
                 </Col>

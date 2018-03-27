@@ -17,7 +17,7 @@ const defaultYAxis = {
     }
 };
 
-export class AqHighChartMod extends React.PureComponent {
+export class AqHighChartMod extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
