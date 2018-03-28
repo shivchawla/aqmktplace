@@ -6,7 +6,7 @@ import {List} from 'immutable';
 import {AqLink} from '../components';
 import {newLayoutStyle} from '../constants';
 import {getStockData} from '../utils';
-import {MyChart} from '../containers/MyChart';
+import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
 
 const RadioButton = Radio.Button;
@@ -41,10 +41,16 @@ export class StockResearch extends React.Component {
         };
     }
 
-    addItem = () => {
-        const {tickerName} = this.state;
+    addItem = (tickerName = this.state.tickerName) => {
         const tickers = [...this.state.tickers];
         tickers.push({name: tickerName, show: true, data: []});
+        this.setState({tickers});
+    }
+
+    deleteItem = (name) => {
+        const tickers = [...this.state.tickers];
+        const index = _.findIndex(tickers, item => item.name === name);
+        tickers.splice(index, 1);
         this.setState({tickers});
     }
 
@@ -66,7 +72,7 @@ export class StockResearch extends React.Component {
     onSelect = (value) => {
         const {latestDetail} = this.state;
         let tickers = [];
-        tickers.push({name: value, show: true, disabled: true, color: 'green'});
+        tickers.push({name: value, destroy: true});
         this.setState(prevState => {
             return Object.assign({}, {tickers});
         });
@@ -90,12 +96,6 @@ export class StockResearch extends React.Component {
         .finally(() => {
             this.setState({loadingData: false});
         });
-    }
-
-    onCompareSelect = (value) => {
-        const tickers = [...this.state.tickers];
-        tickers.push({name: value, show: false, data: [], color: '#444'});
-        this.setState({tickers});
     }
 
     renderOption = (item) => {
@@ -195,7 +195,10 @@ export class StockResearch extends React.Component {
                     </Row>
                     <Row style={metricStyle} type="flex" justify="space-between">
                         <Col span={7} style={cardStyle}>
-                            <h1 style={tickerNameStyle}>{latestDetail.ticker} : {latestDetail.exchange}</h1>
+                            <h1 style={tickerNameStyle}>
+                                    {latestDetail.ticker}
+                                    <span style={{fontSize: '18px', marginLeft: '10px'}}>{latestDetail.exchange}</span>
+                            </h1>
                             <h3 style={lastPriceStyle}>{latestDetail.closePrice} <span style={{...changeStyle, color: percentageColor}}>{latestDetail.change} %</span></h3>
                             <h5 style={{fontSize: '18px', fontWeight: 400, color: '#585858'}}>Last Close Price</h5>
                         </Col>
@@ -217,23 +220,13 @@ export class StockResearch extends React.Component {
                     </Row>
                     <Row style={metricStyle}>  
                         <Col span={24} style={{fontSize: '16px', color: '#565656', fontWeight: '700', marginBottom: '10px'}}>Performance</Col>
-                        <Col span={8}>
-                            <AutoComplete
-                                disabled={!this.state.tickers.length}
-                                className="global-search"
-                                size="large"
-                                style={{ width: '100%' }}
-                                dataSource={dataSource.map(this.renderOption)}
-                                onSelect={this.onCompareSelect}
-                                onSearch={this.handleSearch}
-                                placeholder="Type stocks to compare"
-                                optionLabelProp="name"
-                            >
-                                <Input suffix={<Icon style={searchIconStyle} type="search" />} />
-                            </AutoComplete>
-                        </Col>
                         <Col span={24} style={{marginTop: '10px'}}>
-                            <MyChart series={this.state.tickers}/> 
+                            <MyChartNew 
+                                    series = {this.state.tickers} 
+                                    deleteItem = {this.deleteItem}
+                                    addItem = {this.addItem}
+                                    verticalLegend = {true}
+                            /> 
                         </Col>
                     </Row>
                 </Col>

@@ -60,3 +60,9 @@ h1, h2, h3, h4, h5 {
 .highcharts-credits { 
 	display: none;
 }
+
+.div-span {
+	display: block;
+	width: 200px;
+	background-color: green !important;
+}

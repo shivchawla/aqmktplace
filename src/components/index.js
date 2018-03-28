@@ -20,3 +20,4 @@ export * from './AqCard';
 export * from './AdviceFilterSideComponent';
 export * from './ListMetricItem';
 export * from './AdviceListeItemMod';
+export * from './ChartTickerItem';
