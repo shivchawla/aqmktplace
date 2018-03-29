@@ -1,10 +1,12 @@
 import * as React from 'react';
-import {Table, Button} from 'antd';
 import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
+import {Table, Button, Row, Col} from 'antd';
+import {AutoCompleteEditableCell} from './AutoCompleteEditableCell';
 import {EditableCell} from './AqEditableCell';
-import {getUnixStockData, getStockData} from '../utils';
+import {getStockData} from '../utils';
+import '../css/stockTableMod.css';
 
 const {aimsquantToken, requestUrl} = require('../localConfig.js');
 
@@ -20,7 +22,8 @@ const initialTransactions = () => {
             tickerValidationStatus: "warning",
             sharesValidationStatus: "success",
             sharesDisabledStatus: true,
-            priceHistory: []
+            priceHistory: [],
+            weight: 0
         });
     }
     return data;
@@ -34,7 +37,9 @@ export class AqStockTableMod extends React.Component {
                 title: 'Symbol',
                 dataIndex: 'symbol',
                 key: 'symbol',
-                render: (text, record) => this.renderColumns(text, record, 'symbol', 'text', record.tickerValidationStatus)
+                render: (text, record) => this.renderAutoCompleteColumn(text, record, 'symbol', 'text', record.tickerValidationStatus),
+                width: 120,
+                className: 'stock-table-col'
             },
             {
                 title: 'Shares',
@@ -47,17 +52,30 @@ export class AqStockTableMod extends React.Component {
                         'number', 
                         record.sharesValidationStatus,
                         record.sharesDisabledStatus
-                    )
+                    ),
+                width: 100,
+                className: 'stock-table-col'
             },
             {
-                title: 'Last Price',
+                title: 'Price',
                 dataIndex: 'lastPrice',
-                key: 'lastPrice'
+                key: 'lastPrice',
+                width: 80,
+                className: 'stock-table-col'
             },
             {
                 title: 'Total Value',
                 dataIndex: 'totalValue',
-                key: 'totalValue'
+                key: 'totalValue',
+                width: 80,
+                className: 'stock-table-col'
+            },
+            {
+                title: 'Weight',
+                dataIndex: 'weight',
+                key: 'weight',
+                width: 80,
+                className: 'stock-table-col'
             }
         ];
         this.state = {
@@ -67,13 +85,22 @@ export class AqStockTableMod extends React.Component {
         };
     }
 
+    renderAutoCompleteColumn = (text, record, column, type, validationStatus, disabled = false) => {
+        return (
+            <AutoCompleteEditableCell 
+                    onSelect={value => {this.handlePressEnter(value, record.key, column)}}
+                    handleAutoCompleteChange={value => this.handleAutoCompleteChange(value, record.key, column)}
+            />
+        );
+    }
+
     renderColumns = (text, record, column, type, validationStatus, disabled = false) => {
         return (
             <EditableCell 
                     validationStatus={validationStatus}
                     type={type}
                     value={text}
-                    onChange={value => this.handleRowChange(value, record.key, column)}
+                    onChange={value => {this.handleRowChange(value, record.key, column)}}
                     disabled={disabled}
             />
         );
@@ -81,21 +108,57 @@ export class AqStockTableMod extends React.Component {
 
     handleRowChange = (value, key, column) => {
         const newData = [...this.state.data];
+        console.log(newData);
         let target = newData.filter(item => item.key === key)[0];
-        if(target) {
+        if (target) {
+            target[column] = value;
+            if (value.length > 0) {
+                target['totalValue'] = Number((value * target['lastPrice']).toFixed(2));
+                this.updateAllWeights(newData);
+                target['weight'] = Number((target['totalValue'] / this.getTotalValueSummation(newData)).toFixed(2));
+                this.setState({data: newData});
+            }
+            this.setState({data: newData});
+            this.props.onChange(newData);
+        }
+    }
+
+    updateAllWeights = (data) => {
+        const totalSummation = Number(this.getTotalValueSummation(newData).toFixed(2));
+        const newData = data.map((item, index) => {
+            item['weight'] = Number((item['totalValue'] / totalSummation).toFixed(2));
+            return item;
+        });
+    }
+
+    handlePressEnter = (value, key, column) => {
+        const newData = [...this.state.data];
+        let target = newData.filter(item => item.key === key)[0];
+        if (target) {
             target[column] = value;
             if(column === 'symbol') {
-                target['tickerValidationStatus'] = value.length === 0 ? 'warning' : 'validating';
-                _.throttle(() => {
-                    return this.asyncGetTarget(value)
-                    .then(response => {
-                        target = Object.assign(target, response);
-                        this.setState({data: newData});
-                        this.props.onChange(newData);
-                    });
-                }, 5000)();
-            } else {
-                target['totalValue'] = value * target['lastPrice'];
+                // target['tickerValidationtarget['shares'] = 1;
+                this.asyncGetTarget(value)
+                .then(response => {
+                    target = Object.assign(target, response);
+                    this.setState({data: newData});
+                    this.props.onChange(newData);
+                });
+            }
+        }
+    }
+    
+    handleAutoCompleteChange = (value, key, column) => {
+        const newData = [...this.state.data];
+        let target = newData.filter(item => item.key === key)[0];
+        if (target) {
+            if (value.length < 1) {
+                target[column] = value;
+                target['shares'] = 0;
+                target['lastPrice'] = 0;
+                target['totalValue'] = 0;
+                target['weight'] = 0;
+                this.updateAllWeights(newData);
             }
             this.setState({data: newData});
             this.props.onChange(newData);
@@ -162,6 +225,16 @@ export class AqStockTableMod extends React.Component {
         });
     }
 
+    getTotalValueSummation = () => {
+        const {data} = this.state;
+        let totalValue = 0;
+        data.map(item => {
+            totalValue += item.totalValue;
+        });
+
+        return totalValue;
+    }
+
     componentWillReceiveProps(nextProps) {
         let data = [];
         if (this.props.data !== nextProps.data) {
@@ -179,7 +252,15 @@ export class AqStockTableMod extends React.Component {
 
     render() {
         return (
-            <div>
+            <Col span={24}>
+                <Row style={{marginBottom: '20px'}}>
+                    <Col span={4}>
+                        <Button onClick={this.deleteItems}>Delete Selected</Button>
+                    </Col>
+                    <Col span={4} offset={16} style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        <Button type="primary" onClick={this.addItem}>Add Position</Button>
+                    </Col>
+                </Row>
                 <Table 
                         rowSelection={this.getRowSelection()} 
                         pagination={false} 
@@ -187,9 +268,7 @@ export class AqStockTableMod extends React.Component {
                         columns={this.columns} 
                         size="small"
                 />
-                <Button onClick={this.deleteItems}>Delete Selected</Button>
-                <Button onClick={this.addItem}>Add Position</Button>
-            </div>
+            </Col>
         );
     }
 }

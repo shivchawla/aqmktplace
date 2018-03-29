@@ -95,11 +95,10 @@ export class MyChartNew extends React.Component {
             legendItems: [],
             selectedDate: moment().format(dateFormat),
             dataSource: []
-        }
+        };
     }
 
     updatePoints = points => {
-        console.log(points);
         const legendItems = [...this.state.legendItems];
         points.map(point => {
             const item = legendItems.filter(item => item.name === point.series.name)[0];
@@ -162,7 +161,7 @@ export class MyChartNew extends React.Component {
     updateSeries = (series) => {
         let legendItems = [...this.state.legendItems];
         if (series.length == 1 && series[0].destroy) { // Items needs to be destroyed
-            console.log("Items will be destroyed");
+            // console.log("Items will be destroyed");
             const item = series[0];
             if (item.data === undefined || item.data.length < 1) {
                 getStockPerformance(item.name.toUpperCase())
@@ -174,19 +173,24 @@ export class MyChartNew extends React.Component {
             }
         } else {
             if (series.length > legendItems.length) { // Item needs to be added
-                console.log("Items will be added");
+                // console.log("Items will be added");
+                
                 series.map(item => {
-                    if (item.data === undefined || item.data.length < 1) { // When no data is passed
-                        getStockPerformance(item.name)
-                        .then(performance => {
-                            this.addItemToSeries(item.name, performance);
-                        });
-                    } else {
-                        this.addItemToSeries(item.name, item.data);
+                    const seriesIndex = _.findIndex(this.chart.series, seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
+                    if (seriesIndex === -1) {
+                        if (item.data === undefined || item.data.length < 1) { // When no data is passed
+                            // console.log('Network call required', item.name);
+                            getStockPerformance(item.name)
+                            .then(performance => {
+                                this.addItemToSeries(item.name, performance);
+                            });
+                        } else {
+                            this.addItemToSeries(item.name, item.data);
+                        }
                     }
                 });
             } else if (series.length < legendItems.length) { // Item needs to be deleted
-                console.log("Items will be deleted");
+                // console.log("Items will be deleted");
                 this.chart.series.map((item, index) => {
                     const seriesIndex = _.findIndex(series, seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
                     if (seriesIndex === -1) {
@@ -207,17 +211,17 @@ export class MyChartNew extends React.Component {
                 series.map((item, index) => {
                     const seriesIndex = _.findIndex(this.chart.series, 
                                 seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
-                    if (seriesIndex === -1) {
+                    // if (seriesIndex === -1) {
                         if (item.data === undefined || item.data.length < 1) { // When no data is passed
                             getStockPerformance(item.name.toUpperCase())
                             .then(performance => {
-                                console.log('Updating index', index);
+                                // console.log('Updating index', index);
                                 this.updateItemInSeries(index, item.name, performance);
                             });
                         } else {
                             this.updateItemInSeries(index, item.name, item.data);
                         }
-                    }
+                    // }
                 });
             }
         }
@@ -277,7 +281,9 @@ export class MyChartNew extends React.Component {
 
     deleteTicker = name => {
         const legendItems = [...this.state.legendItems];
-        this.props.deleteItem(name);
+        if (this.props.deleteItem) {
+            this.props.deleteItem(name);
+        }
         const legendIndex = _.findIndex(legendItems, item => item.name === name);
         legendItems.splice(legendIndex, 1);
         this.updateSeries(legendItems);
@@ -305,7 +311,9 @@ export class MyChartNew extends React.Component {
     onCompareSelect = tickerName => {
         const series = [...this.state.series];
         series.push({name: tickerName});
-        this.props.addItem(tickerName);
+        if (this.props.addItem) {
+            this.props.addItem(tickerName);
+        }
         this.setState({series}, () => {
             this.updateSeries(this.state.series);
         });
@@ -332,6 +340,10 @@ export class MyChartNew extends React.Component {
         );
     }
 
+    renderPortfolioList = () => {
+
+    }
+
     renderHorizontalLegendList = () => {
         const {legendItems} = this.state;
         return (
@@ -341,19 +353,21 @@ export class MyChartNew extends React.Component {
                         const changeColor = legend.change < 0 ? '#F44336' : '#00C853';
 
                         return (
-                            <Col span={6} key={index}>
+                            <Col span={8} key={index}>
                                 <Row type="flex" align="middle"> 
                                     <Col span={2}>
                                         <Checkbox checked={legend.checked} onChange={e => this.onCheckboxChange(e, legend)} />
                                     </Col>
-                                    <Col span={10}>
-                                        <h3 style={{fontSize: '14px'}}>
+                                    <Col span={22}>
+                                        <h3 style={{fontSize: '12px'}}>
                                             <span style={{color: legend.color}}>{legend.name}</span>
-                                            <span style={{marginLeft: '10px', fontSize: '14px', fontWeight: '700'}}>{legend.y}</span>
+                                            <span 
+                                                    style={{marginLeft: '10px', fontSize: '12px', fontWeight: '400'}}
+                                            >
+                                                {(legend.y).toFixed(2)}
+                                            </span>
+                                            <span style={{fontSize: '12px', color: changeColor, marginLeft: '5px'}}>({legend.change} %)</span>
                                         </h3>
-                                    </Col>
-                                    <Col span={8}>
-                                        <h3 style={{fontSize: '16px', color: changeColor}}>{legend.change} %</h3>
                                     </Col>
                                 </Row>
                             </Col>
@@ -385,7 +399,6 @@ export class MyChartNew extends React.Component {
                                 onSelect={this.onCompareSelect}
                                 onSearch={this.handleSearch}
                                 placeholder="Search Stocks"
-                                optionLabelProp="name"
                                 style={{width: '100%'}}
                             >
                                 <Input suffix={<Icon style={searchIconStyle} type="search" />} />

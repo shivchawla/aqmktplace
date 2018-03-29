@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Menu, Dropdown, Icon} from 'antd';
+import {Menu, Dropdown, Icon, Button} from 'antd';
 
 export class AqDropDown extends React.Component {
     render () {
@@ -7,9 +7,10 @@ export class AqDropDown extends React.Component {
 
         return (
             <Dropdown overlay={renderMenu()} trigger={['click']}>
-                <a className="ant-dropdown-link" href="#">
+                {/* <a className="ant-dropdown-link" href="#">
                     {value}<Icon type="down" />
-                </a>
+                </a> */}
+                <Button>{value}</Button>
             </Dropdown>
         );
     }

@@ -10,19 +10,15 @@ export class EditableCell extends React.Component {
     }
 
     render() {
-        const {value, onChange, type, validationStatus, disabled = false} = this.props;
+        const {value, onChange, type, validationStatus, disabled = false, onEnter, width = '60px'} = this.props;
 
         return (
-            <FormItem
-                hasFeedback
-                validateStatus={validationStatus}
-            >
+            <FormItem>
                 <Input 
-                        style={{borderRadius: '0'}}
+                        style={{width}}
                         type={type} 
                         value={value} 
                         onChange={e => onChange(e.target.value)} 
-                        disabled={disabled}
                         size="small"
                 />
             </FormItem>
