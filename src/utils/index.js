@@ -28,7 +28,7 @@ export const getStockPerformance = (tickerName) => {
     return new Promise((resolve, reject) => {
         getStockData(tickerName)
         .then(performance => {
-            const data = performance.data.priceHistory.values;
+            const data = performance.data.priceHistory;
             if (data.length > 0) { // Check if ticker is valid
                 const performanceArray = data.map((item, index) => {
                     return [moment(item.date).valueOf(), item.price]

@@ -53,8 +53,8 @@ export class AdviceFormImpl extends React.Component {
             remainingCash: 100000,
             initialCash: 100000,
             benchmarks: [
-                'NIFTY_50',
                 'TCS',
+                'NIFTY_50',
                 'HDFC'
             ],
             selectedBenchmark: 'TCS',
@@ -512,10 +512,8 @@ export class AdviceFormImpl extends React.Component {
         const tickers = [...this.state.tickers];
         getStockPerformance(this.state.selectedBenchmark)
         .then(performance => {
-            // tickers[0].name = ticker;
-            // tickers[0].data = performance;
             tickers.push({
-                name: this.state.selectedBenchmark,
+                name: `BENCHMARK`,
                 data: performance
             });
             this.setState({tickers});
@@ -642,13 +640,20 @@ export class AdviceFormImpl extends React.Component {
                 </Col>
                 <Col span={6} style={{marginTop: '20px'}}>
                     <Row>
-                        <Col span={6}>
+                        <Col span={24}>
                             <FormItem>
-                                <Button type="primary" onClick={this.handleSubmit} htmlType="submit">Save</Button>
+                                <Button 
+                                        style={buttonStyle} 
+                                        type="primary" 
+                                        onClick={this.handleSubmit} 
+                                        htmlType="submit"
+                                >
+                                    Save
+                                </Button>
                             </FormItem>    
                         </Col>
-                        <Col span={6}>
-                            <Button style={{width: '100px'}} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
+                        <Col span={24}>
+                            <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
                         </Col>
                     </Row>
                 </Col>
@@ -666,4 +671,10 @@ const labelStyle = {
 
 const inputStyle = {
     marginBottom: '20px'
+};
+
+const buttonStyle = {
+    width: '100px',
+    marginBottom: '10px',
+    marginLeft: '20px'
 };

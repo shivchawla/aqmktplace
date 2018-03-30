@@ -57,7 +57,7 @@ export class HighChartNew extends React.Component {
                 })
             },
             load: () => {
-                console.log('Successfully loaded');
+                // console.log('Successfully loaded');
             }
         }
     })
@@ -67,12 +67,12 @@ export class HighChartNew extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextState) {
-        console.log(nextProps.series);
+        // console.log(nextProps.series);
         if (nextProps.series !== this.props.series) {
-            console.log('Data Changed');
+            // console.log('Data Changed');
             this.updateSeries(nextProps.series);
         } else {
-            console.log('Data Same');
+            // console.log('Data Same');
         }
     }
 

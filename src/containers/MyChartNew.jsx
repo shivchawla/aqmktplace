@@ -101,18 +101,22 @@ export class MyChartNew extends React.Component {
     updatePoints = points => {
         const legendItems = [...this.state.legendItems];
         points.map(point => {
-            const item = legendItems.filter(item => item.name === point.series.name)[0];
-            item.y = point.y;
-            item.change = Number(point.point.change.toFixed(2));
+            console.log(point.series.name);
+            try{
+                const item = legendItems.filter(item => item.name === point.series.name)[0];
+                console.log(item);
+                item.y = point.y;
+                item.change = Number(point.point.change.toFixed(2));
+                this.setState({legendItems, selectedDate: moment(points[0].x).format(dateFormat)});
+            }
+            catch(err) {
+                console.log(err);
+            }
         });
-        this.setState({legendItems, selectedDate: moment(points[0].x).format(dateFormat)});
     }
 
     componentDidMount() {
         this.initializeChart();
-        this.setState({series: this.props.series}, () => {
-            this.updateSeries(this.state.series);
-        });
     }
 
     componentWillReceiveProps(nextProps, nextState) {
@@ -130,24 +134,29 @@ export class MyChartNew extends React.Component {
         const legendItems = destroy ? [] : [...this.state.legendItems];
         const seriesIndex = _.findIndex(this.chart.series, seriesItem => seriesItem.name.toUpperCase() === name.toUpperCase());
         const legendIndex = _.findIndex(legendItems, legendItem => legendItem.name.toUpperCase() === name.toUpperCase());
-        if (legendIndex === -1 && seriesIndex === -1) {
+        if (seriesIndex === -1) {
             this.chart.addSeries({
                 name: name.toUpperCase(),
                 data,
                 visible: this.chart.series.length < 5,
                 selected: true
             });
-            legendItems.push({
-                name: name.toUpperCase(),
-                x: '1994-16-02',
-                y: 0,
-                change: 0,
-                disabled: destroy,
-                checked: legendItems.length < 5 ,
-                color: this.chart.series[this.chart.series.length - 1].color
+        }
+        if (legendIndex === -1) {
+            this.setState(prevState => {
+                return {
+                    legendItems: [...prevState.legendItems, {
+                        name: name.toUpperCase(),
+                        x: '1994-16-02',
+                        y: 0,
+                        change: 0,
+                        disabled: destroy,
+                        checked: legendItems.length < 5 ,
+                        color: this.chart.series[this.chart.series.length - 1].color
+                    }]
+                }
             });
         }   
-        this.setState({legendItems});
     }
 
     updateItemInSeries = (index, name, data) => {
@@ -161,7 +170,7 @@ export class MyChartNew extends React.Component {
     updateSeries = (series) => {
         let legendItems = [...this.state.legendItems];
         if (series.length == 1 && series[0].destroy) { // Items needs to be destroyed
-            // console.log("Items will be destroyed");
+            console.log("Items will be destroyed");
             const item = series[0];
             if (item.data === undefined || item.data.length < 1) {
                 getStockPerformance(item.name.toUpperCase())
@@ -173,13 +182,13 @@ export class MyChartNew extends React.Component {
             }
         } else {
             if (series.length > legendItems.length) { // Item needs to be added
-                // console.log("Items will be added");
+                console.log("Items will be added");
                 
                 series.map(item => {
                     const seriesIndex = _.findIndex(this.chart.series, seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
                     if (seriesIndex === -1) {
                         if (item.data === undefined || item.data.length < 1) { // When no data is passed
-                            // console.log('Network call required', item.name);
+                            console.log('Network call required', item.name);
                             getStockPerformance(item.name)
                             .then(performance => {
                                 this.addItemToSeries(item.name, performance);
@@ -190,7 +199,7 @@ export class MyChartNew extends React.Component {
                     }
                 });
             } else if (series.length < legendItems.length) { // Item needs to be deleted
-                // console.log("Items will be deleted");
+                console.log("Items will be deleted");
                 this.chart.series.map((item, index) => {
                     const seriesIndex = _.findIndex(series, seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
                     if (seriesIndex === -1) {
@@ -215,7 +224,7 @@ export class MyChartNew extends React.Component {
                         if (item.data === undefined || item.data.length < 1) { // When no data is passed
                             getStockPerformance(item.name.toUpperCase())
                             .then(performance => {
-                                // console.log('Updating index', index);
+                                console.log('Updating index', index);
                                 this.updateItemInSeries(index, item.name, performance);
                             });
                         } else {
@@ -240,6 +249,10 @@ export class MyChartNew extends React.Component {
 
     initializeChart() {
         this.chart = new HighStock['StockChart']('highchart-container', this.state.config);
+        console.log(this.props.series);
+        this.setState({series: this.props.series}, () => {
+            this.updateSeries(this.state.series);
+        });
     }
 
     onCheckboxChange = (e, ticker) => {
