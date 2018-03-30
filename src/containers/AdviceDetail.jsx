@@ -4,13 +4,15 @@ import SkyLight from 'react-skylight';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal, message, Card} from 'antd';
+import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
 import {layoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard} from '../components';
+import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew} from '../components';
+import {MyChartNew} from './MyChartNew';
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
+const Panel = Collapse.Panel;
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
 const ReactHighcharts = require('react-highcharts');
@@ -78,6 +80,7 @@ export class AdviceDetail extends React.Component {
                 series: [],
                 colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
             },
+            series: [],
             performanceConfig: {
                 colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
                 chart: {
@@ -112,20 +115,25 @@ export class AdviceDetail extends React.Component {
     };
 
     getAdviceSummary = response => {
+        const tickers = [...this.state.tickers];
         const {
             name, 
             description, 
             heading, 
             advisor, 
             updatedDate, 
-            latestPerformance, 
+            rating, 
             isSubscribed, 
             isFollowing, 
             isOwner,
             numSubscribers,
-            numFollowers
+            numFollowers,
+            portfolio
         } = response.data;
+        const benchmark = portfolio.benchmark.ticker;
+        tickers.push({name: benchmark});
         this.setState({
+            tickers,
             adviceResponse: response.data,
             adviceDetail: {
                 ...this.state.adviceDetail, 
@@ -139,17 +147,17 @@ export class AdviceDetail extends React.Component {
                 isFollowing,
                 followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
-                rating: latestPerformance.rating,
+                rating: Number(rating.current.toFixed(2)),
                 isPublic: response.data.public
             }
         });
     }
 
     getAdviceDetail = response => {
+        console.log('Advice Detail Reponse', response.data);
         const portfolioArray = [...this.state.portfolioArray]; 
-        const tickers = [...this.state.tickers];
         const portfolio = {...this.state.portfolio};
-        const subPositions = response.data.detail.subPositions;
+        const subPositions = response.data.detail.positions;
         const {maxNotional, rebalance} = response.data;
         subPositions.map((position, index) => {
             portfolioArray.push({
@@ -161,11 +169,9 @@ export class AdviceDetail extends React.Component {
                 exchange: position.security.exchange,
                 securityType: position.security.securityType
             });
-            tickers.push({name: position.security.ticker});
         });
         this.setState({
             portfolioArray, 
-            tickers,
             adviceDetail: {
                 ...this.state.adviceDetail,
                 maxNotional,
@@ -176,8 +182,19 @@ export class AdviceDetail extends React.Component {
     }
 
     getAdvicePerformance = response => {
+        const tickers = [...this.state.tickers];
         if (response.data.simulated) {
-            const {annualreturn, averagedailyreturn, dailyreturn, totalreturn} = response.data.simulated.metrics.portfolioPerformance.returns;
+            const {
+                annualreturn, 
+                averagedailyreturn, 
+                dailyreturn, 
+                totalreturn
+            } = response.data.simulated.metrics.portfolioPerformance.returns;
+            // const data = response.data.simulated.portfolioValues;
+            tickers.push({
+                name: 'ADVICE',
+                data: this.processPerformanceData(response.data.simulated.portfolioValues)
+            })
             this.setState({
                 metrics: {
                     ...this.state.metrics,
@@ -185,9 +202,16 @@ export class AdviceDetail extends React.Component {
                     totalReturns: totalreturn,
                     averageReturns: averagedailyreturn,
                     dailyReturns: dailyreturn
-                }
+                },
+                tickers
             });
         }
+    }
+
+    processPerformanceData = performanceData => {
+        return performanceData.map(item => {
+            return ([moment(item.date).valueOf(), item.netValue])
+        })
     }
 
     getAdviceData = () => {
@@ -210,7 +234,7 @@ export class AdviceDetail extends React.Component {
         .then(response => {
             const series = [];
             this.getAdvicePerformance(response);
-            const portfolioComposition = response.data.current.metrics.portfolioComposition.map((item, index) =>{
+            const portfolioComposition = response.data.current.metrics.portfolioMetrics.composition.map((item, index) =>{
                 return [item.ticker, Math.round(item.weight * 10000) / 100]
             });
             const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
@@ -218,7 +242,7 @@ export class AdviceDetail extends React.Component {
             });
             series.push({name: 'Composition', data: portfolioComposition});
             this.setState({
-                portfolioConfig: {...this.state.portfolioConfig, series},
+                series,
                 performanceConfig: {
                     ...this.state.performanceConfig,
                     series: constituentDollarPerformance
@@ -243,13 +267,16 @@ export class AdviceDetail extends React.Component {
 
     renderAdviceMetrics = () => {
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
-        
+        const {followers, subscribers, rating} = this.state.adviceDetail;
+
         return (
             <Row>
-                <MetricItem value={totalReturns} label="Total Returns" style={metricItemStyle} />
-                <MetricItem value={averageReturns} label="Average Daily Return" style={metricItemStyle} />
-                <MetricItem value={annualReturn} label="Annual Return" style={metricItemStyle} />
-                <MetricItem value={dailyReturns} label="Daily Return" style={metricItemStyle} />
+                <MetricItem valueStyle = {valueStyle} labelStyle={labelStyle} value={subscribers} label="Subscribers" style={{border: 'none'}} />
+                <MetricItem valueStyle = {valueStyle} labelStyle={labelStyle} value={followers} label="Followers" style={{border: 'none'}} />
+                <MetricItem valueStyle = {valueStyle} labelStyle={labelStyle} value={totalReturns} label="Total Returns" style={metricItemStyle} />
+                <MetricItem valueStyle = {valueStyle} labelStyle={labelStyle} value={averageReturns} label="Average Daily Return" style={metricItemStyle} />
+                <MetricItem valueStyle = {valueStyle} labelStyle={labelStyle} value={annualReturn} label="Annual Return" style={metricItemStyle} />
+                <MetricItem valueStyle = {valueStyle} labelStyle={labelStyle} value={dailyReturns} label="Daily Return" style={metricItemStyle} />
             </Row>
         );
     };
@@ -400,7 +427,7 @@ export class AdviceDetail extends React.Component {
     render() { 
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
-
+   
         return (
            <Row>
                {this.renderModal()}
@@ -408,7 +435,7 @@ export class AdviceDetail extends React.Component {
                <Col span={18} style={layoutStyle}>
                     <Row className="row-container">
                         <Col span={18}>
-                            <h1 style={pageHeaderStyle}>{name}</h1>
+                            <h1 style={adviceNameStyle}>{name}</h1>
                             {
                                 advisor.user &&
                                 <h5 style={userStyle}>
@@ -416,57 +443,76 @@ export class AdviceDetail extends React.Component {
                                     <span style={dateStyle}>{updatedDate}</span>
                                 </h5>
                             }
-                            <h5 style={textStyle}>{heading}</h5>
+                            <Rate value={5}/>
+                            {/* <h5 style={textStyle}>{heading}</h5> */}
                         </Col>
                         <Col span={4} offset={2}>
                             {this.renderActionButtons()}
                         </Col>
                     </Row>
                     <Row className="row-container">
-                        {this.renderAdviceData()}
+                        {this.renderAdviceMetrics()}
                     </Row>
-                    <Divider style={{...dividerNoMargin, marginTop: '-20px'}}/>
-                    <Row className="row-container">
-                        <Col span={24}>
-                            <h3 style={metricsHeaderStyle}>Description</h3>
-                            <h5 style={{...textStyle, marginTop: '5px'}}>{description}</h5>
-                        </Col>
+                    <Row>
+                        <Col span={24} style={dividerStyle}></Col>
                     </Row>
-                    <Divider style={dividerNoMargin} />
-                    <Row className="row-container">
-                        <Col span={24}>
-                            <h3 style={metricsHeaderStyle}>Metrics</h3>
-                        </Col>
-                        <Col span={24} style={{marginTop: '10px', marginBottom: '10px'}}>
-                            {this.renderAdviceMetrics()}
-                        </Col>
-                    </Row>
-                    <Divider style={dividerNoMargin} />
-                    <Row className="row-container">
-                        <Col span={24}>
-                            <h3 style={metricsHeaderStyle}>Advice Summary</h3>
-                        </Col>
-                        <Col span={24} style={{marginTop: '20px'}}>
-                            <AqCard title="Portfolio Overview">
-                                <ReactHighcharts config = {this.state.portfolioConfig} />
-                            </AqCard>
-                            <AqCard title="Performance Overview" offset={2}>
-                                <ReactHighcharts config = {this.state.performanceConfig} />
-                            </AqCard>
-                        </Col>
-                    </Row>
-                    <Row style={{marginTop: '30px'}}>
-                        <Col span={24}>
-                            <Tabs>
-                                <TabPane tab="Performance" key="1" className="row-container">
-                                    <AqHighChartMod tickers={this.state.tickers} />
-                                </TabPane>
-                                <TabPane tab="Portfolio" key="2" className="row-container">
-                                    <AqPortfolioTable data={this.state.portfolioArray} />
-                                </TabPane>
-                            </Tabs>
-                        </Col>
-                    </Row>
+                    <Collapse bordered={false} defaultActiveKey={["2"]}>
+                        <Panel 
+                                key="1"
+                                style={customPanelStyle} 
+                                header={<h3 style={metricsHeaderStyle}>Description</h3>}
+                        >
+                            <Row className="row-container">
+                                <Col span={24}>
+                                    <h5 style={{...textStyle, marginTop: '-10px', marginLeft: '20px'}}>{description}</h5>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col span={24} style={dividerStyle}></Col>
+                            </Row>
+                        </Panel>
+                        <Panel
+                                key="2"
+                                style={customPanelStyle} 
+                                header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
+                        >
+                            <Row className="row-container">
+                                <Col span={24}>
+                                    <AqCard title="Portfolio Overview">
+                                        {/* {
+                                            this.state.series.length > 0 &&
+                                            <HighChartNew series = {this.state.series} />
+                                        } */}
+                                        <HighChartNew series = {this.state.series} />
+                                    </AqCard>
+                                    <AqCard title="Performance Overview" offset={2}>
+                                        <ReactHighcharts config = {this.state.performanceConfig} />
+                                    </AqCard>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col span={24} style={dividerStyle}></Col>
+                            </Row>
+                        </Panel>
+                        <Panel
+                                key="3"
+                                style={customPanelStyle} 
+                                header={<h3 style={metricsHeaderStyle}>Overview</h3>}
+                        >
+                            <Row>
+                                <Col span={24}>
+                                    <Tabs animated={false}>
+                                        <TabPane tab="Performance" key="1" className="row-container">
+                                            <MyChartNew series={this.state.tickers} />
+                                        </TabPane>
+                                        <TabPane tab="Portfolio" key="2" className="row-container">
+                                            <AqPortfolioTable data={this.state.portfolioArray} />
+                                        </TabPane>
+                                    </Tabs>
+                                </Col>
+                            </Row>
+                        </Panel>
+                    </Collapse>
                </Col>
            </Row>
         );
@@ -496,4 +542,31 @@ const dateStyle = {
     color: '#757474',
     fontWeight: 500,
     marginLeft: '10px'
-}
+};
+
+const dividerStyle = {
+    backgroundColor: '#E0E0E0',
+    height: '1px'
+};
+
+const labelStyle = {
+    fontSize: '12px'
+};
+
+const valueStyle = {
+    fontSize: '14px',
+    color: '#555454'
+};
+
+const adviceNameStyle = {
+    fontSize: '20px',
+    color: '#353535'
+};
+
+const customPanelStyle = {
+    background: 'transparent',
+    borderRadius: 4,
+    // marginBottom: 24,
+    border: 0,
+    overflow: 'hidden',
+};

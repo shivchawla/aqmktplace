@@ -81,6 +81,7 @@ export class ScreenAdvices extends React.PureComponent {
         console.log(url);
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
+            console.log(response.data);
             this.setState({
                 advices: this.processAdvices(response.data)
             });
@@ -116,7 +117,7 @@ export class ScreenAdvices extends React.PureComponent {
                 heading: advice.heading,
                 subscribers: advice.numSubscribers,
                 rating: advice.latestAnalytics !== undefined ? advice.latestAnalytics.rating : 0,
-                latestPerformance: advice.latestPerformance
+                performanceSummary: advice.performanceSummary
             })
         });
 

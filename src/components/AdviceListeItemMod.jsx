@@ -263,14 +263,15 @@ class AdviceListItemImpl extends React.PureComponent {
             heading = null, 
             subscribers, 
             rating, 
-            latestPerformance, 
+            performanceSummary, 
             id,
             isFollowing
         } = this.props.advice;
-        const sectors = latestPerformance.industries;
+        const sectors = performanceSummary.current.industries;
+        console.log(performanceSummary);
 
         return (
-            <Row type="flex" style={cardStyle} align="top">
+            <Row type="flex" style={cardStyle} align="top" onClick={e => this.handleClick(id)}>
                 <Col span={8}>
                     <Row>
                         <Col span={24}>
@@ -293,7 +294,7 @@ class AdviceListItemImpl extends React.PureComponent {
                             <Col span={8}>
                                 <MetricItem 
                                         style={{border: 'none'}} 
-                                        value={`${(latestPerformance.maxLoss * 100).toFixed(2)} %`} 
+                                        value={`${(performanceSummary.current.maxLoss * 100).toFixed(2)} %`} 
                                         label="Max Loss"
                                         valueStyle={{fontSize: '16px', fontWeight: '400', color: '#3B3737'}}
                                         labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E'}}
@@ -314,10 +315,10 @@ class AdviceListItemImpl extends React.PureComponent {
                                     {this.renderDiversityChart()}
                                 </Col>
                                 <Col span={8}>
-                                    {this.renderBetaChart(latestPerformance.beta)}
+                                    {this.renderBetaChart(performanceSummary.current.beta)}
                                 </Col>
                                 <Col span={8}>
-                                    {this.renderVolatilityChart(latestPerformance.volatility)}
+                                    {this.renderVolatilityChart(performanceSummary.current.volatility)}
                                 </Col>
                             </Row>
                         </Col>
@@ -329,7 +330,7 @@ class AdviceListItemImpl extends React.PureComponent {
                             <Row type="flex" align="bottom" style={{textAlign: 'center'}}>
                                 <Col span={6}>
                                     <MetricItem 
-                                            value={latestPerformance.netValue} 
+                                            value={performanceSummary.current.netValue} 
                                             label="Net Value" 
                                             valueStyle={netValueStyle} 
                                             labelStyle={netLabelStyle}
@@ -341,10 +342,10 @@ class AdviceListItemImpl extends React.PureComponent {
                                             <MetricItem 
                                                     valueStyle={{
                                                         ...returnValueStyle, 
-                                                        color: latestPerformance.return < 0 ? '#FA4747' : '#3EBB72'
+                                                        color: performanceSummary.current.totalReturn < 0 ? '#FA4747' : '#3EBB72'
                                                     }} 
                                                     labelStyle={returnLabelStyle} 
-                                                    value={latestPerformance.return.toFixed(2)} 
+                                                    value={performanceSummary.current.totalReturn.toFixed(2)} 
                                                     label="Total Return"
                                             />
                                         </Col>
@@ -352,10 +353,10 @@ class AdviceListItemImpl extends React.PureComponent {
                                             <MetricItem 
                                                     valueStyle={{
                                                         ...returnValueStyle,
-                                                        color: latestPerformance.dailyChange < 0 ? '#FA4747' : '#3EBB72'
+                                                        color: performanceSummary.current.dailyChange < 0 ? '#FA4747' : '#3EBB72'
                                                     }} 
                                                     labelStyle={returnLabelStyle} 
-                                                    value={latestPerformance.dailyChange.toFixed(3)} 
+                                                    value={performanceSummary.current.dailyChange.toFixed(3)} 
                                                     label="Daily Return"
                                             />
                                         </Col>

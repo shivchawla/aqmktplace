@@ -13,7 +13,7 @@ export class HighChartNew extends React.Component {
                     height: 280,
                 },
                 title: {
-                    text: 'Hello World',
+                    text: '',
                     align: 'center',
                     verticalAlign: 'middle',
                     y: -5,
@@ -55,9 +55,6 @@ export class HighChartNew extends React.Component {
                         text: `${e.point.name}<br>${e.point.y}`
                     }
                 })
-            },
-            load: () => {
-                // console.log('Successfully loaded');
             }
         }
     })
@@ -67,12 +64,8 @@ export class HighChartNew extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextState) {
-        // console.log(nextProps.series);
         if (nextProps.series !== this.props.series) {
-            // console.log('Data Changed');
             this.updateSeries(nextProps.series);
-        } else {
-            // console.log('Data Same');
         }
     }
 
@@ -87,17 +80,20 @@ export class HighChartNew extends React.Component {
     }
 
     updateSeries = series => {
-        this.clearSeries();
-        series.map((item, index) => {
-            this.chart.addSeries({
-                name: item.name,
-                data: item.data
+        if (series.length > 0) {
+            this.clearSeries();
+            series.map((item, index) => {
+                this.chart.addSeries({
+                    name: item.name,
+                    data: item.data
+                });
             });
-        });
-        this.updateTitle(series);
+            this.updateTitle(series);
+        }
     }
 
     updateTitle = series => {
+        console.log(series);
         this.chart.update({
             title: {
                 text: `${series[0].data[0].name}<br>${series[0].data[0].y}`
