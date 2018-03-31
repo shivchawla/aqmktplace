@@ -40,10 +40,11 @@ export class AdviceDetail extends React.Component {
                 isFollowing: false
             },
             metrics: {
-                totalReturns: 0,
-                averageReturns: 0,
-                dailyReturns: 0,
-                annualReturn: 0
+                annualReturn: 0,
+                dailyChange: 0,
+                netValue: 0,
+                totalReturn: 0,
+                netValue: 0
             },
             portfolioArray: [],
             tickers: [],
@@ -133,8 +134,10 @@ export class AdviceDetail extends React.Component {
             isOwner,
             numSubscribers,
             numFollowers,
-            portfolio
+            portfolio,
+            performanceSummary
         } = response.data;
+        const {annualReturn, dailyChange, netValue, totalReturn} = performanceSummary.current;
         const benchmark = portfolio.benchmark.ticker;
         tickers.push({name: benchmark});
         this.setState({
@@ -154,6 +157,13 @@ export class AdviceDetail extends React.Component {
                 updatedDate: moment(updatedDate).format(dateFormat),
                 rating: Number(rating.current.toFixed(0)),
                 isPublic: response.data.public
+            },
+            metrics: {
+                ...this.state.metrics,
+                annualReturn,
+                totalReturn,
+                dailyChange,
+                netValue
             }
         });
     }
@@ -210,31 +220,18 @@ export class AdviceDetail extends React.Component {
     getAdvicePerformance = response => {
         const tickers = [...this.state.tickers];
         if (response.data.simulated) {
-            const {
-                annualreturn, 
-                averagedailyreturn, 
-                dailyreturn, 
-                totalreturn
-            } = response.data.current.metrics.portfolioPerformance.returns;
             tickers.push({
                 name: 'ADVICE SIM',
                 data: this.processPerformanceData(response.data.simulated.portfolioValues)
             });
+        }
+        if (response.data.current) {
             tickers.push({
                 name: 'ADVICE CURR',
                 data: this.processPerformanceData(response.data.current.portfolioValues)
             });
-            this.setState({
-                metrics: {
-                    ...this.state.metrics,
-                    annualReturn: annualreturn,
-                    totalReturns: totalreturn,
-                    averageReturns: averagedailyreturn,
-                    dailyReturns: dailyreturn
-                },
-                tickers
-            });
         }
+        this.setState({tickers});
     }
 
     processPerformanceData = performanceData => {
@@ -295,18 +292,17 @@ export class AdviceDetail extends React.Component {
     };
 
     renderAdviceMetrics = () => {
-        let {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
-        console.log(this.state.metrics);
+        const {annualReturn, dailyChange, netValue, totalReturn} = this.state.metrics;
         const {followers, subscribers, rating} = this.state.adviceDetail;
         const positiveColor = '#8BC34A';
         const negativeColor = '#F44336';
         const metricsItems = [
             {value: subscribers, label: 'Subscribers', valueColor: '#353535'},
             {value: followers, label: 'Followers', valueColor: '#353535'},
-            {value: totalReturns, label: 'Total Returns', valueColor: totalReturns >= 0 ? positiveColor : negativeColor, percentage: true},
-            {value: averageReturns, label: 'Avg Daily Returns', valueColor: averageReturns >= 0 ? positiveColor : negativeColor, percentage: true},
+            {value: netValue, label: 'Net Value', valueColor: '#353535'},
+            {value: dailyChange, label: 'Daily Change', valueColor: dailyChange >= 0 ? positiveColor : negativeColor, percentage: true},
+            {value: totalReturn, label: 'Total Return', valueColor: totalReturn >= 0 ? positiveColor : negativeColor, percentage: true},
             {value: annualReturn, label: 'Annual Return', valueColor: annualReturn >= 0 ? positiveColor : negativeColor, percentage: true},
-            // {value: dailyreturns, label: 'Daily Returns', valueColor: dailyreturns > 0 ? positiveColor : negativeColor},
         ]
 
         return (
@@ -535,7 +531,7 @@ export class AdviceDetail extends React.Component {
                                     <span style={dateStyle}>{updatedDate}</span>
                                 </h5>
                             }
-                            <Rate value={this.state.rating} disabled allowHalf/>
+                            <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
                         </Col>
                         <Col span={4} offset={2}>
                             {this.renderActionButtons()}
