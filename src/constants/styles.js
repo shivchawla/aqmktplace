@@ -1,6 +1,7 @@
 export const inputStyle = {
     borderRadius: '0px'
 };
+
 export const inputHeaderStyle = {
     fontSize: '14px',
     color: '#6B6B6B',
@@ -55,4 +56,19 @@ export const listMetricItemLabelStyle = {
 export const listMetricItemValueStyle = {
     fontSize: '16px',
     color: '#565656'
+};
+
+export const metricsLabelStyle = {
+    fontSize: '13px'
+};
+
+export const metricsValueStyle = {
+    fontSize: '16px',
+    fontWeight: '400',
+    color: '#555454'
+};
+
+export const dividerStyle = {
+    backgroundColor: '#E0E0E0',
+    height: '1px'
 };

@@ -75,7 +75,6 @@ export class HighChartNew extends React.Component {
 
     initializeChart = () => {
         const {series} = this.props;
-        console.log('series', series);
         this.chart = new HighChart['Chart']('chart-container', this.state.config);
         this.updateSeries(series);
     }

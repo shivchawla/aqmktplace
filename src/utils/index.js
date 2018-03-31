@@ -43,4 +43,8 @@ export const getStockPerformance = (tickerName) => {
         });
     });
 }
+
+export const convertToPercentage = value => {
+    return Number((100 * value).toFixed(2));
+}
 export * from './requests';

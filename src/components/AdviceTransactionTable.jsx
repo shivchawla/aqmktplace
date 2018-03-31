@@ -3,6 +3,7 @@ import moment from 'moment';
 import axios from 'axios';
 import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker } from 'antd';
 import {MetricItem} from '../components';
+import {metricsValueStyle, metricsLabelStyle} from '../constants';
 import {EditableCell} from './AqEditableCell';
 import {getStockData} from '../utils';
 import '../css/adviceTransactionTable.css';
@@ -225,18 +226,20 @@ export class AdviceTransactionTable extends React.Component {
                     }
                     <Col span={4}>
                         <MetricItem 
-                                style={metricItemStyle} 
                                 value={advice.netAssetValue} 
                                 label="Net Asset Value" 
+                                valueStyle={metricsValueStyle}
+                                labelStyle={metricsLabelStyle}
                         />
                     </Col>
                     {
                         this.props.preview &&
                         <Col span={4}>
                             <MetricItem 
-                                    style={metricItemStyle} 
                                     value={advice.weight} 
                                     label="Weight" 
+                                    valueStyle={metricsValueStyle}
+                                    labelStyle={metricsLabelStyle}
                             />
                         </Col>
                     }
@@ -244,9 +247,10 @@ export class AdviceTransactionTable extends React.Component {
                         this.props.preview &&
                         <Col span={4}>
                             <MetricItem 
-                                    style={metricItemStyle} 
                                     value={advice.profitLoss} 
                                     label="Profit/Loss" 
+                                    valueStyle={metricsValueStyle}
+                                    labelStyle={metricsLabelStyle}
                             />
                         </Col>
                     }
@@ -273,9 +277,4 @@ const customPanelStyle = {
 const adviceNameStyle = {
     fontFamily: 'Lato, sans-serif',
     fontSize: '16px'
-};
-
-const metricItemStyle = {
-    height: '50px',
-    border: 'none'
 };

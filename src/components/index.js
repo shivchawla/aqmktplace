@@ -23,3 +23,5 @@ export * from './AdviceListeItemMod';
 export * from './ChartTickerItem';
 export * from './AutoCompleteEditableCell';
 export * from './HighChartNew';
+export * from './HighChartBar';
+export * from './AdviceMetricsItems';

@@ -7,7 +7,7 @@ import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
 import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew} from '../components';
+import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems} from '../components';
 import {MyChartNew} from './MyChartNew';
 import '../css/adviceDetail.css';
 
@@ -15,7 +15,6 @@ const TabPane = Tabs.TabPane;
 const Panel = Collapse.Panel;
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
-const ReactHighcharts = require('react-highcharts');
 const dateFormat = 'Do MMMM YYYY';
 
 export class AdviceDetail extends React.Component {
@@ -46,7 +45,6 @@ export class AdviceDetail extends React.Component {
                 totalReturn: 0,
                 netValue: 0
             },
-            portfolioArray: [],
             tickers: [],
             isDialogVisible: false,
             isUpdateDialogVisible: false,
@@ -56,51 +54,8 @@ export class AdviceDetail extends React.Component {
             disableSubscribeButton: false,
             disableFollowButton: false,
             series: [],
-            performanceConfig: {
-                colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
-                chart: {
-                    type: 'bar',
-                    // width: 300,
-                    height: 280
-                },
-                yAxis: {
-                    labels: {
-                        enabled: true
-                    },
-                    title: {
-                        enabled: false
-                    },
-                    gridLineColor: 'transparent',
-                },
-                xAxis: {
-                    title: {
-                        enabled: false
-                    },
-                    gridLineColor: 'transparent',
-                },
-                title: {
-                    style: {
-                        display: 'none'
-                    }
-                },
-                legend: {
-                    layout: 'vertical',
-                    align: 'right',
-                    itemDistance: '30px',
-                    itemStyle: {
-                        color: '#444',
-                        fontSize:'12px',
-                        fontWeight: '400',
-                    },
-                    itemWidth: 100,
-                    verticalAlign: 'middle',
-                    itemMarginBottom:10
-                },
-                credits: {
-                    enabled: false
-                },
-                series: []
-            }
+            barSeries: [],
+            positions: []
         };
     }
 
@@ -170,24 +125,11 @@ export class AdviceDetail extends React.Component {
 
     getAdviceDetail = response => {
         console.log('Advice Detail Reponse', response.data);
-        let portfolioArray = [...this.state.portfolioArray]; 
         const portfolio = {...this.state.portfolio};
-        const subPositions = response.data.detail.positions;
+        const positions = response.data.detail.positions;
         const {maxNotional, rebalance} = response.data;
-        subPositions.map((position, index) => {
-            portfolioArray.push({
-                key: index,
-                name: position.security.detail.Nse_Name,
-                weight: 0,
-                sector: position.security.detail.Sector,
-                price: position.lastPrice.toFixed(2),
-                shares: position.quantity,
-                symbol: position.security.ticker,
-            });
-        });
-        portfolioArray = this.updateWeights(portfolioArray);
         this.setState({
-            portfolioArray, 
+            positions, 
             adviceDetail: {
                 ...this.state.adviceDetail,
                 maxNotional,
@@ -195,26 +137,6 @@ export class AdviceDetail extends React.Component {
             },
             portfolio: response.data.portfolio
         });
-    }
-
-    updateWeights = portfolioArray => {
-        return portfolioArray.map(item => {
-            const price = Number(item.price);
-            const shares = Number(item.shares);
-            return {
-                ...item,
-                weight: Number(((price * shares) / this.getTotalWeight(portfolioArray)).toFixed(2))
-            }
-        });
-    }
-
-    getTotalWeight = portfolioArray => {
-        let totalWeight = 0;
-        portfolioArray.map(item => {
-            totalWeight += Number(item.price) * Number(item.shares);
-        });
-
-        return totalWeight;
     }
 
     getAdvicePerformance = response => {
@@ -269,10 +191,7 @@ export class AdviceDetail extends React.Component {
             series.push({name: 'Composition', data: portfolioComposition});
             this.setState({
                 series,
-                performanceConfig: {
-                    ...this.state.performanceConfig,
-                    series: constituentDollarPerformance
-                }
+                barSeries: constituentDollarPerformance
             });
         })
         .catch((error) => {
@@ -297,74 +216,15 @@ export class AdviceDetail extends React.Component {
         const positiveColor = '#8BC34A';
         const negativeColor = '#F44336';
         const metricsItems = [
-            {value: subscribers, label: 'Subscribers', valueColor: '#353535'},
-            {value: followers, label: 'Followers', valueColor: '#353535'},
-            {value: netValue, label: 'Net Value', valueColor: '#353535'},
-            {value: dailyChange, label: 'Daily Change', valueColor: dailyChange >= 0 ? positiveColor : negativeColor, percentage: true},
-            {value: totalReturn, label: 'Total Return', valueColor: totalReturn >= 0 ? positiveColor : negativeColor, percentage: true},
-            {value: annualReturn, label: 'Annual Return', valueColor: annualReturn >= 0 ? positiveColor : negativeColor, percentage: true},
+            {value: subscribers, label: 'Subscribers'},
+            {value: followers, label: 'Followers'},
+            {value: netValue, label: 'Net Value'},
+            {value: dailyChange, label: 'Daily Change', percentage: true},
+            {value: totalReturn, label: 'Total Return', percentage: true},
+            {value: annualReturn, label: 'Annual Return', percentage: true},
         ]
 
-        return (
-            <Row>
-                {
-                    metricsItems.map((item, index) => {
-                        const value = item.percentage ? `${(item.value * 100).toFixed(2)} %` : item.value;
-                        return (
-                            <MetricItem 
-                                    valueStyle = {{...valueStyle, color: item.valueColor}} 
-                                    labelStyle={labelStyle} 
-                                    value={value} 
-                                    label={item.label} 
-                                    style={metricItemStyle} 
-                            />
-                        );
-                    })
-                }
-                {/* <MetricItem 
-                        valueStyle = {valueStyle} 
-                        labelStyle={labelStyle} 
-                        value={subscribers} 
-                        label="Subscribers" 
-                        style={{border: 'none'}} 
-                />
-                <MetricItem 
-                        valueStyle = {valueStyle} 
-                        labelStyle={labelStyle} 
-                        value={followers} 
-                        label="Followers" 
-                        style={{border: 'none'}} 
-                />
-                <MetricItem 
-                        valueStyle = {valueStyle} 
-                        labelStyle={labelStyle} 
-                        value={totalReturns} 
-                        label="Total Returns" 
-                        style={metricItemStyle} 
-                />
-                <MetricItem 
-                        valueStyle = {valueStyle} 
-                        labelStyle={labelStyle} 
-                        value={averageReturns} 
-                        label="Average Daily Return" 
-                        style={metricItemStyle} 
-                />
-                <MetricItem 
-                        valueStyle = {valueStyle} 
-                        labelStyle={labelStyle} 
-                        value={annualReturn} 
-                        label="Annual Return" 
-                        style={metricItemStyle} 
-                />
-                <MetricItem 
-                        valueStyle = {valueStyle} 
-                        labelStyle={labelStyle} 
-                        value={dailyReturns} 
-                        label="Daily Return" 
-                        style={metricItemStyle} 
-                /> */}
-            </Row>
-        );
+        return <AdviceMetricsItems metrics={metricsItems} />
     };
 
     toggleDialog = () => {
@@ -543,7 +403,7 @@ export class AdviceDetail extends React.Component {
                     <Row>
                         <Col span={24} style={dividerStyle}></Col>
                     </Row>
-                    <Collapse bordered={false} defaultActiveKey={["3"]}>
+                    <Collapse bordered={false} defaultActiveKey={["2"]}>
                         <Panel 
                                 key="1"
                                 style={customPanelStyle} 
@@ -568,7 +428,8 @@ export class AdviceDetail extends React.Component {
                                             <HighChartNew series = {this.state.series} />
                                         </AqCard>
                                         <AqCard title="Performance Summary" offset={2}>
-                                            <ReactHighcharts config = {this.state.performanceConfig} />
+                                            {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
+                                            <HighChartBar series={this.state.barSeries} />
                                         </AqCard>
                                     </Col>
                                 </Row>
@@ -588,7 +449,7 @@ export class AdviceDetail extends React.Component {
                                                 <MyChartNew series={this.state.tickers} />
                                             </TabPane>
                                             <TabPane tab="Portfolio" key="2" className="row-container">
-                                                <AqPortfolioTable data={this.state.portfolioArray} />
+                                                <AqPortfolioTable positions={this.state.positions} />
                                             </TabPane>
                                         </Tabs>
                                     </Col>
