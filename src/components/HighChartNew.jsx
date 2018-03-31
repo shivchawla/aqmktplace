@@ -75,6 +75,7 @@ export class HighChartNew extends React.Component {
 
     initializeChart = () => {
         const {series} = this.props;
+        console.log('series', series);
         this.chart = new HighChart['Chart']('chart-container', this.state.config);
         this.updateSeries(series);
     }
@@ -93,12 +94,23 @@ export class HighChartNew extends React.Component {
     }
 
     updateTitle = series => {
-        console.log(series);
+        const titlIndex = this.getValidTitle(series);
         this.chart.update({
             title: {
-                text: `${series[0].data[0].name}<br>${series[0].data[0].y}`
+                text: `${series[0].data[titlIndex].name}<br>${series[0].data[titlIndex].y}`
             }
         });
+    }
+
+    getValidTitle = series => {
+        const dataArray = series[0].data;
+        let i = 0;
+        for(i < dataArray.length; i++;) {
+            if (dataArray[i].y > 0){ 
+                break;
+            }
+        }
+        return i;
     }
 
     clearSeries = () => {

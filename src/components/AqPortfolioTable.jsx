@@ -6,9 +6,9 @@ export class AqPortfolioTable extends React.Component {
         super(props);
         this.columns = [
             {
-                title: 'NO',
-                dataIndex: 'no',
-                key: 'no'
+                title: 'NAME',
+                dataIndex: 'name',
+                key: 'name'
             },
             {
                 title: 'SYMBOL',
@@ -16,24 +16,23 @@ export class AqPortfolioTable extends React.Component {
                 key: 'symbol'
             },
             {
-                title: 'Country',
-                dataIndex: 'country',
-                key: 'country'
-            },
-            {
-                title: 'Shares',
+                title: 'SHARES',
                 dataIndex: 'shares',
                 key: 'shares'
             },
             {
-                title: 'Exchange',
-                dataIndex: 'exchange',
-                key: 'exchange'
-            }, 
+                title: 'PRICE',
+                dataIndex: 'price',
+                key: 'price'
+            },
             {
-                title: 'Security Type',
-                dataIndex: 'securityType',
-                key: 'securityType'
+                title: 'SECTOR',
+                dataIndex: 'sector',
+                key: 'sector'
+            }, {
+                title: 'WEIGHT',
+                dataIndex: 'weight',
+                key: 'weight'
             }
         ];
     }
@@ -41,9 +40,10 @@ export class AqPortfolioTable extends React.Component {
     render() {
         return (
             <Table 
+                    size="small"
                     pagination={false} 
                     columns={this.columns} 
-                    style={{marginTop: 20, border: '1px solid #EAEAEA'}} 
+                    // style={{marginTop: 20, border: '1px solid #EAEAEA'}} 
                     dataSource={this.props.data}
             />
         );

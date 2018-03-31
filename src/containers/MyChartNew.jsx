@@ -32,7 +32,7 @@ export class MyChartNew extends React.Component {
                     inputBoxHeight: 0,
                     labelStyle: {
                         display: 'none'
-                    }
+                    },
                 },
                 title: {
                     text: 'Stock Graph',
@@ -360,7 +360,7 @@ export class MyChartNew extends React.Component {
     renderHorizontalLegendList = () => {
         const {legendItems} = this.state;
         return (
-            <Row>
+            <Row style={{bottom: '-34px', zIndex:'20', marginTop: '-25px'}}>
                 {
                     legendItems.map((legend, index) => {
                         const changeColor = legend.change < 0 ? '#F44336' : '#00C853';
@@ -432,7 +432,7 @@ export class MyChartNew extends React.Component {
                         Date <span style={{fontWeight: '700', color: '#555454'}}>{this.state.selectedDate}</span>
                     </h2>
                 </Col>
-                <Col span={24}>
+                <Col span={18}>
                     {this.renderHorizontalLegendList()}
                 </Col>
                 <Col span={24} id="highchart-container"></Col>
