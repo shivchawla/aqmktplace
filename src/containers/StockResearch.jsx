@@ -10,6 +10,7 @@ import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
 
 const RadioButton = Radio.Button;
+const {aimsquantToken, requestUrl} = require('../localConfig');
 const RadioGroup = Radio.Group;
 const Option = AutoComplete.Option;
 const TabPane = Tabs.TabPane;
@@ -60,13 +61,23 @@ export class StockResearch extends React.Component {
 
     handleSearch = (query) => {
         this.setState({spinning: true});
-        axios.get(`http://localhost:3001/tickers?q=${query}`)
+        const url = `${requestUrl}/stock?search=${query}`;
+        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            this.setState({dataSource: response.data})
+            this.setState({dataSource: this.processSearchResponseData(response.data)})
         })
         .finally(() => {
             this.setState({spinning: false});
         });
+    }
+
+    processSearchResponseData = data => {
+        return data.map((item, index) => {
+            return {
+                id: index,
+                name: item.ticker,
+            }
+        })
     }
 
     onSelect = (value) => {

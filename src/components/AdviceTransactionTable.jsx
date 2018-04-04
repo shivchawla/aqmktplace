@@ -3,7 +3,7 @@ import moment from 'moment';
 import axios from 'axios';
 import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker } from 'antd';
 import {MetricItem} from '../components';
-import {metricsValueStyle, metricsLabelStyle} from '../constants';
+import {metricsValueStyle, metricsLabelStyle, nameEllipsisStyle} from '../constants';
 import {EditableCell} from './AqEditableCell';
 import {getStockData} from '../utils';
 import '../css/adviceTransactionTable.css';
@@ -23,6 +23,12 @@ export class AdviceTransactionTable extends React.Component {
         }
         this.columns = [
             {
+                title: 'NAME',
+                dataIndex: 'name',
+                key: 'name',
+                render: text => <h3 style={nameEllipsisStyle}>{text}</h3>
+            },
+            {
                 title: 'SYMBOL',
                 dataIndex: 'symbol',
                 key: 'symbol'
@@ -33,15 +39,20 @@ export class AdviceTransactionTable extends React.Component {
                 key: 'shares'
             },
             {
-                title: 'PRICE',
+                title: 'LAST PRICE',
                 dataIndex: 'price',
                 key: 'price',
                 render: (text, record) => this.renderInput(text, record, 'price', 'text')
             },
             {
-                title: 'COST BASIC',
+                title: 'AVG. PRICE',
                 dataIndex: 'costBasic',
                 key: 'costBasic'
+            }, 
+            {
+                title: 'SECTOR',
+                dataIndex: 'sector',
+                key: 'sector'
             }
         ]
     }
@@ -105,8 +116,8 @@ export class AdviceTransactionTable extends React.Component {
                     dataSource={tickers} 
                     columns={this.columns} 
                     pagination={false} 
-                    size="middle"
-                    style={{marginTop: 20, border: 'none'}} 
+                    size="small"
+                    style={{margin: '20px 20px'}} 
             />
         );
     }
@@ -164,7 +175,7 @@ export class AdviceTransactionTable extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
         });
     }
 
@@ -176,26 +187,22 @@ export class AdviceTransactionTable extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
-        console.log(advice);
-        
         if (!this.props.header) {
             return (
                 <Row type="flex">
                     {
-                        !this.props.preview
-                        &&  <Col span={4}>
-                                <Checkbox onChange={(e) => this.handleCheckBoxchange(e, advice)} checked={advice.checked} />
-                            </Col>
+                        !this.props.preview &&  
+                        <Col span={2}>
+                            <Checkbox onChange={(e) => this.handleCheckBoxchange(e, advice)} checked={advice.checked} />
+                        </Col>
                     }
                     <Col span={4}>
-                        <Row>
-                            <Col span={24}>
-                                <h3 style={adviceNameStyle}>{advice.name}</h3>
-                            </Col>
-                            <Col span={25}>
-                                <h5>Portfolio</h5>
-                            </Col>
-                        </Row>
+                        <MetricItem 
+                                value={advice.name} 
+                                label="Portfolio" 
+                                valueStyle={metricsValueStyle}
+                                labelStyle={metricsLabelStyle}
+                        />
                     </Col>
                     {
                         !this.props.preview &&
@@ -207,6 +214,7 @@ export class AdviceTransactionTable extends React.Component {
                                 placeholder="Units" 
                                 onChange={(e) => {this.handleInputChange(e, advice)}}
                             />
+                            <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Units</h3>
                         </Col>
                     }
                     {
@@ -218,13 +226,14 @@ export class AdviceTransactionTable extends React.Component {
                                 format={dateFormat}
                                 disabledDate={(current) => this.props.disabledDate(current, advice)}
                             />
+                            <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Date</h3>
                         </Col>
                     }
                     {
                         this.props.preview &&
                         <Col span={8}></Col>
                     }
-                    <Col span={4}>
+                    <Col span={4} offset={this.props.preview ? 0 : 2}>
                         <MetricItem 
                                 value={advice.netAssetValue} 
                                 label="Net Asset Value" 

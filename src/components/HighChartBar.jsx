@@ -1,17 +1,31 @@
 import * as React from 'react';
-import {Col} from 'antd';
+import {Col, Row, Radio} from 'antd';
 import HighChart from 'highcharts';
+
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+
 
 export class HighChartBar extends React.Component {
     constructor(props) {
         super(props);
-        this.chart = null;
+        this.dollarChart = null;
+        this.percentageChart = null;
         this.state = {
             config: {
-                colors: ["#e91e63", "#444", "#90ed7d", "#f7a35c", "#8085e9"],
                 chart: {
-                    type: 'bar',
+                    type: 'column',
                     height: 280
+                },
+                plotOptions: {
+                    column: {
+                        dataLabels: {
+                            enabled: true,
+                            crop: false,
+                            overflow: 'none',
+                            color: '#555454'
+                        }
+                    }
                 },
                 yAxis: {
                     labels: {
@@ -49,8 +63,12 @@ export class HighChartBar extends React.Component {
                 credits: {
                     enabled: false
                 },
+                tooltip: {
+                    enabled: false
+                },
                 series: []
-            }
+            },
+            dollarVisible: true
         }
     }
 
@@ -59,43 +77,94 @@ export class HighChartBar extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextState) {
-        if (nextProps.series !== this.props.series) {
-            this.updateSeries(nextProps.series);
+        console.log('Next Props', nextProps);
+        if (nextProps.dollarSeries !== this.props.dollarSeries) {
+            try {
+                this.updateDollarSeries(nextProps.dollarSeries);
+                this.updatePercentageSeries(nextProps.percentageSeries)
+            } catch(err) {
+                console.log(err);
+            }
         }
     }
 
     componentWillUnmount() {
-        this.chart.destroy();
+        this.dollarChart.destroy();
+        this.percentageChart.destroy();
     }
 
     initializeChart = () => {
-        const {series} = this.props;
-        console.log(series);
-        this.chart = new HighChart['Chart']('bar-chart', this.state.config);
-        this.updateSeries(series);
+        const {dollarSeries, percentageSeries} = this.props;
+        this.dollarChart = new HighChart['Chart']('bar-chart-dollar', this.state.config);
+        this.percentageChart = new HighChart['Chart']('bar-chart-percentage', this.state.config);
+        try {
+            this.updateDollarSeries(dollarSeries);
+            this.updatePercentageSeries(percentageSeries)
+        } catch(err) {
+            console.log(err);
+        } 
     }
 
-    updateSeries = series => {
+    updateDollarSeries = series => {
+        console.log('Dollar Series', series);
         if (series.length > 0) {
-            this.clearSeries();
+            this.clearDollarSeries();
             series.map((item, index) => {
-                this.chart.addSeries({
+                this.dollarChart.addSeries({
                     name: item.name,
-                    data: item.data
+                    data: item.data,
+                    color: item.color
                 });
             });
         }
     }
 
-    clearSeries = () => {
-        while (this.chart.series.length) {
-            this.chart.series[0].remove();
+    updatePercentageSeries = series => {
+        console.log('Percentage Series', series);
+        if (series.length > 0) {
+            this.clearPercentageSeries();
+            series.map((item, index) => {
+                this.percentageChart.addSeries({
+                    name: item.name,
+                    data: item.data,
+                    color: item.color
+                });
+            });
         }
     }
 
+    clearDollarSeries = () => {
+        while (this.dollarChart.series.length) {
+            this.dollarChart.series[0].remove();
+        }
+    }
+
+    clearPercentageSeries = () => {
+        while (this.percentageChart.series.length) {
+            this.percentageChart.series[0].remove();
+        }
+    }
+
+    handleRadioGroupChange = e => {
+        this.setState({dollarVisible: e.target.value === 'dollarPerformance' ? true : false});
+    }
+
     render() {
+        const chartPercentageStyle = !this.state.dollarVisible ? {display: 'block'} : {display: 'none'};
+        const chartDollarStyle = this.state.dollarVisible ? {display: 'block'} : {display: 'none'};
+        const {alignLegend = 'right'} = this.props;
+
         return (
-            <Col span={24} style={{textAlign: 'center'}} id='bar-chart'></Col>
+            <Row style={{height: '320px'}}>
+                <Col span={24} style={{textAlign: alignLegend}}>
+                    <RadioGroup size="small" defaultValue="dollarPerformance" style={{marginRight: '10px', marginTop: '10px'}} onChange={this.handleRadioGroupChange}>
+                        <RadioButton value="dollarPerformance">Dollar</RadioButton>
+                        <RadioButton value="percentagePerformance">Percentage</RadioButton>
+                    </RadioGroup>
+                </Col>
+                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle, marginTop: '-5px'}} id='bar-chart-dollar'></Col>
+                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle, marginTop: '-5px'}} id='bar-chart-percentage'></Col>
+            </Row>
         );
     }
 }

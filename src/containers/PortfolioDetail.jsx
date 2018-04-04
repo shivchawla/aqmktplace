@@ -153,6 +153,8 @@ class PortfolioDetailImpl extends React.Component {
                         costBasic: item.avgPrice,
                         unrealizedPL: 1231,
                         weight: '12%',
+                        name: item.security.detail.Nse_Name,
+                        sector: item.security.detail.Sector
                     }
                 ]
             });
@@ -168,6 +170,8 @@ class PortfolioDetailImpl extends React.Component {
                 costBasic: item.avgPrice,
                 unrealizedPL: 1231,
                 weight: '12%',
+                name: item.security.detail.Nse_Name,
+                sector: item.security.detail.Sector
             });
         }
 
@@ -204,12 +208,9 @@ class PortfolioDetailImpl extends React.Component {
         const totalWeight = this.getTotalAdviceWeight(advices);
         const adviceNetValue = this.getNetValue(advices);
         return advices.map(advice => {
-            console.log(advice);
-            // const profitLoss = `${((advice.price - advice.costBasic) / adviceNetValue).toFixed(2)} %`
             return {
                 ...advice,
                 weight: `${((advice.netAssetValue / totalWeight) * 100).toFixed(2)} %`,
-                // profitLoss
             }
         })
     }
@@ -217,7 +218,6 @@ class PortfolioDetailImpl extends React.Component {
     getNetValue = advices => {
         let netValue = 0;
         advices.map(item => {
-            console.log(item.name, this.getNetValueForAdvice(item))
             netValue += this.getNetValueForAdvice(item);
         });
 
@@ -322,13 +322,13 @@ class PortfolioDetailImpl extends React.Component {
                     <Row>
                         <Col span={24} style={dividerStyle}></Col>
                     </Row>
-                    <Collapse bordered={false} defaultActiveKey={['1', '2']}>
+                    <Collapse bordered={false} defaultActiveKey={["2"]}>
                         <Panel 
-                                key='1'
+                                key="1"
                                 style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Summary</h3>}
+                                header={<h3 style={metricsHeaderStyle}>Description</h3>}
                         >   
-                            <Row style={{padding: '0 30px 20px 30px'}}>
+                            <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
                                 <Col span={24}>
                                     <Row style={{marginTop: '10px'}}>
                                         <AqCard title="Portfolio Summary">
@@ -350,15 +350,15 @@ class PortfolioDetailImpl extends React.Component {
                             </Row>
                         </Panel>
                         <Panel
-                                key='2'
+                                key="2"
                                 style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Detail</h3>}
+                                header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
                         >
                             <Row>
                                 <Col span={24}>
                                     <Tabs animated={false}>
                                         <TabPane tab="Portfolio" key="1" style={{padding: '20px 30px'}}>
-                                            <Row>
+                                            <Row className="row-container">
                                                 <Col span={8} offset={16} style={{marginBottom: 20}}>
                                                     <Radio.Group 
                                                             value={this.state.toggleValue} 

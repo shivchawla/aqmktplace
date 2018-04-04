@@ -34,15 +34,15 @@ export class AqStockTableMod extends React.Component {
         super(props);
         this.columns = [
             {
-                title: 'Symbol',
+                title: 'SYMBOL',
                 dataIndex: 'symbol',
                 key: 'symbol',
                 render: (text, record) => this.renderAutoCompleteColumn(text, record, 'symbol', 'text', record.tickerValidationStatus),
-                width: 120,
+                width: 80,
                 className: 'stock-table-col'
             },
             {
-                title: 'Shares',
+                title: 'SHARES',
                 dataIndex: 'shares',
                 key: 'shares',
                 render: (text, record) => this.renderColumns(
@@ -53,25 +53,25 @@ export class AqStockTableMod extends React.Component {
                         record.sharesValidationStatus,
                         record.sharesDisabledStatus
                     ),
-                width: 100,
+                width: 60,
                 className: 'stock-table-col'
             },
             {
-                title: 'Price',
+                title: 'PRICE',
                 dataIndex: 'lastPrice',
                 key: 'lastPrice',
                 width: 80,
                 className: 'stock-table-col'
             },
             {
-                title: 'Total Value',
+                title: 'TOTAL VALUE',
                 dataIndex: 'totalValue',
                 key: 'totalValue',
                 width: 80,
                 className: 'stock-table-col'
             },
             {
-                title: 'Weight',
+                title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
                 width: 80,
@@ -189,6 +189,7 @@ export class AqStockTableMod extends React.Component {
     getRowSelection = () => {
         return {
             onChange: (selectedRowKeys, selectedRows) => {
+                console.log(selectedRows);
                 this.setState((prevState) => {
                     return {
                         selectedRows
@@ -201,7 +202,8 @@ export class AqStockTableMod extends React.Component {
     deleteItems = () => {
         let data = [...this.state.data];
         data = _.pull(data, ...this.state.selectedRows);
-        this.setState({data}, () => {
+        this.setState({data, selectedRows: []}, () => {
+            console.log(this.state.selectedRows);
             this.props.onChange(data);
         });
     }

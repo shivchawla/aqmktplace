@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Table} from 'antd';
+import {nameEllipsisStyle} from '../constants';
 
 export class AqPortfolioTable extends React.Component {
     constructor(props) {
@@ -10,7 +11,7 @@ export class AqPortfolioTable extends React.Component {
                 dataIndex: 'name',
                 key: 'name',
                 fixed: true,
-                width: '250px'
+                render: text => <h3 style={nameEllipsisStyle}>{text}</h3>
             },
             {
                 title: 'SYMBOL',

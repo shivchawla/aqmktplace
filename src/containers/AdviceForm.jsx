@@ -4,7 +4,7 @@ import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {inputHeaderStyle, newLayoutStyle} from '../constants';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle} from '../constants';
 import {EditableCell, AqStockTable, AqDropDown, AqHighChartMod, HighChartNew} from '../components';
 import {getUnixStockData, getStockPerformance} from '../utils';
 import {store} from '../store';
@@ -68,7 +68,7 @@ export class AdviceFormImpl extends React.Component {
             positions: [],
             public: false,
             isPublic: false,
-            addTickerModalVisible: false,
+            addTickerModalVisible: true,
         };
         this.columns = [
             {
@@ -402,7 +402,7 @@ export class AdviceFormImpl extends React.Component {
     renderAddTickerModal = () => {
         return (
             <Modal
-                    title="Add Items"
+                    title="Add Positions"
                     visible={this.state.addTickerModalVisible}
                     onOk={this.toggleAddTickerModal}
                     onCancel={this.toggleAddTickerModal}
@@ -671,10 +671,4 @@ const labelStyle = {
 
 const inputStyle = {
     marginBottom: '20px'
-};
-
-const buttonStyle = {
-    width: '100px',
-    marginBottom: '10px',
-    marginLeft: '20px'
 };

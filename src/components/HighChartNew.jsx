@@ -11,6 +11,9 @@ export class HighChartNew extends React.Component {
                 chart: {
                     type: 'pie',
                     height: 280,
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
                 },
                 title: {
                     text: '',
@@ -28,6 +31,7 @@ export class HighChartNew extends React.Component {
                     pie: {
                         innerSize: 150,
                         cursor: 'pointer',
+                        // allowPointSelect: true,
                         dataLabels: {
                             enabled: false,
                             format: '{point.name} {point.percentage:.1f}%',
@@ -42,7 +46,6 @@ export class HighChartNew extends React.Component {
                     },
                 },
                 series: [],
-                colors: ["#76DDFB", "#53A8E2", "#2C82BE", "#DBECF8", "#2C9BBE"],
             }
         }
     }
@@ -52,7 +55,10 @@ export class HighChartNew extends React.Component {
             click: e => {
                 this.chart.update({
                     title: {
-                        text: `${e.point.name}<br>${e.point.y}`
+                        text: `${e.point.name}<br>${e.point.y} %`,
+                        style: {
+                            color: e.point.color,
+                        }
                     }
                 })
             }
@@ -85,7 +91,9 @@ export class HighChartNew extends React.Component {
             series.map((item, index) => {
                 this.chart.addSeries({
                     name: item.name,
-                    data: item.data
+                    data: item.data,
+                    // sliced: true,
+                    selected: true,
                 });
             });
             this.updateTitle(series);
@@ -93,21 +101,30 @@ export class HighChartNew extends React.Component {
     }
 
     updateTitle = series => {
-        const titlIndex = this.getValidTitle(series);
-        this.chart.update({
-            title: {
-                text: `${series[0].data[titlIndex].name}<br>${series[0].data[titlIndex].y}`
-            }
-        });
+        const titleIndex = this.getValidTitle(series);
+        try {
+            this.chart.update({
+                title: {
+                    text: `${series[0].data[titleIndex].name}<br>${series[0].data[titleIndex].y} %`,
+                    style: {
+                        color: series[0].data[titleIndex].color,
+                        fontSize: '14px'
+                    }
+                }
+            });
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     getValidTitle = series => {
         const dataArray = series[0].data;
         let i = 0;
-        for(i < dataArray.length; i++;) {
+        while(i < dataArray.length) {
             if (dataArray[i].y > 0){ 
                 break;
             }
+            i++;
         }
         return i;
     }
@@ -120,7 +137,7 @@ export class HighChartNew extends React.Component {
 
     render() {
         return(
-            <Col span={24} style={{textAlign: 'center'}} id="chart-container"></Col>
+            <Col span={24} style={{textAlign: 'center', height: '320px'}} id="chart-container"></Col>
         );
     }
 }

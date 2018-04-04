@@ -10,6 +10,7 @@ import '../css/myChart.css';
 
 const TabPane = Tabs.TabPane;
 const Option = AutoComplete.Option;
+const {aimsquantToken, requestUrl} = require('../localConfig');
 
 export class MyChartNew extends React.Component {
     constructor(props) {
@@ -64,25 +65,33 @@ export class MyChartNew extends React.Component {
                 dataLabels: {
                     enabled: true
                 },
-                tooltip: {
-                    enabled: true,
-                    backgroundColor: '#f9f9f9',
-                    borderWidth: 0,
-                    borderRadius: 0,
-                    shared: true,
-                    headerFormat: '{point.key} ',
-                    pointFormat: '<br><span class="myToolTip" style="color:{series.color}">{series.name}</span>: <b>{point.y}</b>',
-                    formatter: function() {
-                        var s = [];
-                        self.updatePoints(this.points);
-                    },
-                    positioner: function () {
-                        return { x: -100, y: 35 };
-                    },
-                    backgroundColor: 'transparent',
-                    shadow: false,
-                    split: false,
-                    useHTML: true
+                tooltip: !props.hideLegend ? 
+                    {
+                        enabled: true,
+                        backgroundColor: '#f9f9f9',
+                        borderWidth: 0,
+                        borderRadius: 0,
+                        shared: true,
+                        headerFormat: '{point.key} ',
+                        pointFormat: '<br><span class="myToolTip" style="color:{series.color}">{series.name}</span>: <b>{point.y}</b>',
+                        formatter: function() {
+                            var s = [];
+                            self.updatePoints(this.points);
+                        },
+                        positioner: function () {
+                            return { x: -100, y: 35 };
+                        },
+                        backgroundColor: 'transparent',
+                        shadow: false,
+                        split: false,
+                        useHTML: true
+                    }
+                    : {
+                        split: true,
+                        crosshair: {
+                            enabled: true
+                        },
+                        shared: true
                 },
                 chart: {
                     height: 350 
@@ -312,9 +321,10 @@ export class MyChartNew extends React.Component {
 
     handleSearch = query => {
         // this.setState({spinning: true});
-        axios.get(`http://localhost:3001/tickers?q=${query}`)
+        const url = `${requestUrl}/stock?search=${query}`;
+        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            this.setState({dataSource: response.data})
+            this.setState({dataSource: this.processSearchResponseData(response.data)})
         })
         .finally(() => {
             // this.setState({spinning: false});
@@ -353,10 +363,6 @@ export class MyChartNew extends React.Component {
         );
     }
 
-    renderPortfolioList = () => {
-
-    }
-
     renderHorizontalLegendList = () => {
         const {legendItems} = this.state;
         return (
@@ -366,7 +372,7 @@ export class MyChartNew extends React.Component {
                         const changeColor = legend.change < 0 ? '#F44336' : '#00C853';
 
                         return (
-                            <Col span={8} key={index}>
+                            <Col span={12} key={index}>
                                 <Row type="flex" align="middle"> 
                                     <Col span={2}>
                                         <Checkbox checked={legend.checked} onChange={e => this.onCheckboxChange(e, legend)} />
@@ -427,17 +433,32 @@ export class MyChartNew extends React.Component {
     renderHorizontalLegend = () => {
         return (
             <Row>
-                <Col span={24}>
-                    <h2 style={{fontSize: '12px', margin: '0'}}>
-                        Date <span style={{fontWeight: '700', color: '#555454'}}>{this.state.selectedDate}</span>
-                    </h2>
-                </Col>
-                <Col span={18}>
-                    {this.renderHorizontalLegendList()}
-                </Col>
+                {
+                    !this.props.hideLegend &&
+                    <Col span={24}>
+                        <h2 style={{fontSize: '12px', margin: '0'}}>
+                            Date <span style={{fontWeight: '700', color: '#555454'}}>{this.state.selectedDate}</span>
+                        </h2>
+                    </Col>
+                }
+                {
+                    !this.props.hideLegend &&
+                    <Col span={18}>
+                        {this.renderHorizontalLegendList()}
+                    </Col>
+                }
                 <Col span={24} id="highchart-container"></Col>
             </Row>
         );
+    }
+
+    processSearchResponseData = data => {
+        return data.map((item, index) => {
+            return {
+                id: index,
+                name: item.ticker,
+            }
+        })
     }
 
     render() {

@@ -1,8 +1,10 @@
 import * as React from 'react';
 import moment from 'moment';
 import _ from 'lodash';
-import {Table, DatePicker, Menu, Dropdown, Icon, Row, Col, Button} from 'antd';
+import {Table, DatePicker, Menu, Dropdown, Icon, Row, Col, Button, Select} from 'antd';
 import {EditableCell} from './AqEditableCell';
+
+const Option = Select.Option;
 
 const addInitialTransactions = () => {
     const data = [];
@@ -25,28 +27,25 @@ export class AqStockTableCashTransaction extends React.Component {
         super(props);
         this.columns = [
             {
-                title: 'Cash',
+                title: 'CASH',
                 dataIndex: 'cash',
                 key: 'cash',
+                width: 200,
                 render: (text, record) => this.renderInput(text, record, 'cash', 'text')
             },
             {
-                title: 'Date',
+                title: 'DATE',
                 dataIndex: 'date',
                 key: 'date',
+                width: 200,
                 render: (text, record) => this.renderDatePicker(text, record, 'date')
             },
             {
-                title: 'Type',
+                title: 'TYPE',
                 dataIndex: 'type',
                 key: 'type',
-                render: (text, record) => this.renderDropDown(record, 'type')
-            },
-            {
-                title: 'Notes',
-                dataIndex: 'notes',
-                key: 'notes',
-                render: (text, record) => this.renderInput(text, record, 'notes', 'text')
+                width: 200,
+                render: (text, record) => this.renderSelect(record, 'type')
             }
         ];
         this.state = {
@@ -74,10 +73,27 @@ export class AqStockTableCashTransaction extends React.Component {
         );
     }
 
+    renderSelect = (record, column) => {
+        return (
+            <Select 
+                    defaultValue="deposit" 
+                    style={{width: 120}} 
+                    onChange={value => this.handleRowChange(value, record, column)}
+            >
+                 <Option value="deposit">Deposit</Option>
+                 <Option value="withdraw">Withdraw</Option>
+            </Select>
+        );
+    }
+
     renderDropDown = (record, column) => {
         return (
-            <Dropdown overlay={this.renderMenu(record, column)} trigger={['click']}>
-                <a className="ant-dropdown-link" href="#">
+            <Dropdown style={{width: '120px'}} overlay={this.renderMenu(record, column)} trigger={['click']}>
+                <a 
+                        className="ant-dropdown-link" 
+                        href="#" 
+                        style={{border: '1px solid #eaeaea', padding: '10px', borderRadius: '4px'}}
+                >
                     {record.type}<Icon type="down" />
                 </a>
             </Dropdown>
@@ -139,7 +155,7 @@ export class AqStockTableCashTransaction extends React.Component {
     deleteItems = () => {
         let data = [...this.state.data];
         data = _.pull(data, ...this.state.selectedRows);
-        this.setState({data}, () => {
+        this.setState({data, selectedRows: []}, () => {
             this.props.onChange(data);
         });
     }
@@ -164,14 +180,25 @@ export class AqStockTableCashTransaction extends React.Component {
                 <Col span={24}>
                     <Row>
                         <Col span={4}>
-                            <Button onClick={this.deleteItems}>Delete Selected</Button>
+                            <Button 
+                                    onClick={this.deleteItems} 
+                                    style={{left: '20px'}}
+                                    disabled={this.state.selectedRows.length > 0 ? false : true}
+                            >
+                                Delete Selected
+                            </Button>
                         </Col>
                         <Col span={4} offset={16}>
-                            <Button onClick={this.addItem}>Add Transaction</Button>
+                            <Button 
+                                    onClick={this.addItem}
+                                    style={{position: 'absolute', right: '20px'}}
+                            >
+                                Add Transaction
+                            </Button>
                         </Col>
                     </Row>
                 </Col>
-                <Col span={24} style={{marginTop: 20}}>
+                <Col span={24} style={{marginTop: '20px', padding: '0 20px'}}>
                     <Table 
                             size="small"
                             dataSource={this.state.data} 

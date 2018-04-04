@@ -57,42 +57,40 @@ export class AdviceItem extends React.Component {
     componentWillMount() {
         const {investorId} = this.props;
         let advices = [...this.state.advices];
-        const url = `${requestUrl}/investor/${investorId}/detail`;
+        const url = `${requestUrl}/advice?subscribed=true`;
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            response.data.subscribedAdvices.map((advice, index) => {
-                if(advice.active) {
-                    const adviceUrl = `${requestUrl}/advice/${advice.advice}`;
-                    axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
+            response.data.map((advice, index) => {
+                const adviceUrl = `${requestUrl}/advice/${advice._id}`;
+                axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
+                .then(response => {
+                    const portfolioUrl = `${requestUrl}/advice/${advice._id}/portfolio`;
+                    const newAdvice = {
+                        id: advice._id,
+                        portfolio: {detail: null},
+                        name: response.data.name,
+                        advisor: response.data.advisor,
+                        updatedDate: moment(response.data.updatedDate).format(dateFormat),
+                        performance: {},
+                        subscribers: response.data.numSubscribers,
+                        followers: response.data.numFollowers,
+                        isSelected: false,
+                        disabled: false,
+                        date: moment().format(dateFormat),
+                        createdDate: response.data.createdDate
+                    };
+                    axios.get(portfolioUrl, {headers: {'aimsquant-token': aimsquantToken}})
                     .then(response => {
-                        const portfolioUrl = `${requestUrl}/advice/${advice.advice}/portfolio`;
-                        const newAdvice = {
-                            id: advice.advice,
-                            portfolio: {detail: null},
-                            name: response.data.name,
-                            advisor: response.data.advisor,
-                            updatedDate: moment(response.data.updatedDate).format(dateFormat),
-                            performance: {},
-                            subscribers: response.data.numSubscribers,
-                            followers: response.data.numFollowers,
-                            isSelected: false,
-                            disabled: false,
-                            date: moment().format(dateFormat),
-                            createdDate: response.data.createdDate
-                        };
-
-                        axios.get(portfolioUrl, {headers: {'aimsquant-token': aimsquantToken}})
-                        .then(response => {
-                            newAdvice.portfolio.detail = response.data.detail;
-                            advices.push(newAdvice);
-                            this.setState({advices});
-                            this.props.updateSubscribedAdvices(advices);
-                        })
+                        newAdvice.portfolio.detail = response.data.detail;
+                        advices.push(newAdvice);
+                        this.setState({advices});
+                        this.props.updateSubscribedAdvices(advices);
                     })
-                    .catch(error => {
-                        console.log(error.message)
-                    });
-                }
+                })
+                .catch(error => {
+                    console.log(error.message)
+                });
+                
             });
         })
         .catch(error => {

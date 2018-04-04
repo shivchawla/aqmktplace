@@ -5,6 +5,7 @@ import {getStockData} from '../utils';
 import _ from 'lodash';
 import {Table, Button, Input, DatePicker, Row, Col} from 'antd';
 import {EditableCell} from './AqEditableCell';
+import {AutoCompleteEditableCell} from './AutoCompleteEditableCell';
 
 const addInititalTransaction = () => {
     const transactions = [];
@@ -32,7 +33,7 @@ export class AqStockTableCreatePortfolio extends React.Component {
                 title: 'SYMBOL',
                 dataIndex: 'symbol',
                 key: 'symbol',
-                render: (text, record) => this.renderInput(text, record, 'symbol', 'text', record.tickerValidationStatus)
+                render: (text, record) => this.renderAutoCompleteColumn(text, record, 'symbol', 'text', record.tickerValidationStatus),
             },
             {
                 title: 'DATE',
@@ -76,6 +77,47 @@ export class AqStockTableCreatePortfolio extends React.Component {
         );
     }
 
+    renderAutoCompleteColumn = (text, record, column, type, validationStatus, disabled = false) => {
+        return (
+            <AutoCompleteEditableCell 
+                    onSelect={value => {this.handlePressEnter(value, record.key, column)}}
+                    handleAutoCompleteChange={value => this.handleAutoCompleteChange(value, record.key, column)}
+            />
+        );
+    }
+
+    handlePressEnter = (value, key, column) => {
+        const newData = [...this.state.data];
+        let target = newData.filter(item => item.key === key)[0];
+        if (target) {
+            target[column] = value;
+            if(column === 'symbol') {
+                this.asyncGetTarget(value)
+                .then(response => {
+                    target = Object.assign(target, response);
+                    this.setState({data: newData});
+                    this.props.onChange(newData);
+                });
+            }
+        }
+    }
+    
+    handleAutoCompleteChange = (value, key, column) => {
+        const newData = [...this.state.data];
+        let target = newData.filter(item => item.key === key)[0];
+        if (target) {
+            if (value.length < 1) {
+                target[column] = value;
+                target['shares'] = 0;
+                target['lastPrice'] = 0;
+                target['totalValue'] = 0;
+                target['weight'] = 0;
+            }
+            this.setState({data: newData});
+            this.props.onChange(newData);
+        }
+    }
+
     disabledDate = current => {
         return current > moment().endOf('day');
     }
@@ -104,7 +146,7 @@ export class AqStockTableCreatePortfolio extends React.Component {
     deleteItems = () => {
         let data = [...this.state.data];
         data = _.pull(data, ...this.state.selectedRows);
-        this.setState({data}, () => {
+        this.setState({data, selectedRows: []}, () => {
             this.props.onChange(data);
         });
     }
@@ -132,14 +174,14 @@ export class AqStockTableCreatePortfolio extends React.Component {
                 value = moment(value).format('YYYY-MM-DD');
             } else if (column === 'symbol') {
                 target['tickerValidationStatus'] = value.length === 0 ? 'warning' : 'validating';
-                this.asyncGetTarget(value)
+                this.asyncGetTarget(value.toUpperCase())
                 .then(response => {
                     target = Object.assign(target, response);
                     this.setState({data: newData});
                     this.props.onChange(newData);
                 });
             }
-            target[column] = value;
+            target[column] = column === 'symbol' ? value.toUpperCase() : value; 
             this.setState({data: newData});
             this.props.onChange(newData);
             if (this.props.previewPortfolio && this.isValidRow(target)) {
@@ -183,14 +225,20 @@ export class AqStockTableCreatePortfolio extends React.Component {
                 <Col span={24}>
                     <Row>
                         <Col span={4}>
-                            <Button onClick={this.deleteItems}>Delete Selected</Button>
+                            <Button 
+                                    onClick={this.deleteItems} 
+                                    style={{left: '20px'}} 
+                                    disabled={this.state.selectedRows.length > 0 ? false : true}
+                            >
+                                Delete Selected
+                            </Button>
                         </Col>
                         <Col span={4} offset={16}>
-                            <Button onClick={this.addItem}>Add Transaction</Button>
+                            <Button onClick={this.addItem} style={{right: '20px', position: 'absolute'}}>Add Transaction</Button>
                         </Col>
                     </Row>
                 </Col>
-                <Col span={24} style={{marginTop: 20}}>
+                <Col span={24} style={{marginTop: 20, padding: '0 20px'}}>
                     <Table 
                             size="small"
                             dataSource={this.state.data} 

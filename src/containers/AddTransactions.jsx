@@ -6,10 +6,12 @@ import {withRouter} from 'react-router'
 import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod} from '../components';
+import {MyChartNew} from './MyChartNew';
 import {AdviceItem} from '../components/AdviceItem';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
-import {layoutStyle} from '../constants';
+import {newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle} from '../constants';
+import { MetricItem } from '../components/MetricItem';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -29,6 +31,7 @@ class AddTransactionsImpl extends React.Component {
             presentStocks: [],
             subscribedAdvices: [],
             isSubscibedAdviceModalVisible: false,
+            isPreviewModalVisible: false,
             stockTransactions: [],
             cashTransactions: [],
             toggleValue: 'advice',
@@ -36,44 +39,49 @@ class AddTransactionsImpl extends React.Component {
         };
         this.columns = [
             {
+                title: 'NAME',
+                dataIndex: 'name',
+                key: 'name'
+            },
+            {
                 title: 'SYMBOL',
                 dataIndex: 'symbol',
                 key: 'symbol'
             },
             {
-                title: 'Shares',
+                title: 'SHARES',
                 dataIndex: 'shares',
                 key: 'shares'
             },
             {
-                title: 'Price',
+                title: 'PRICE',
                 dataIndex: 'price',
                 key: 'price'
             },
             {
-                title: 'Average Price',
-                dataIndex: 'avgPrice',
-                key: 'avgPrice'
-            }, 
-            {
-                title: 'Country',
-                dataIndex: 'country',
-                key: 'country'
+                title: 'SECTOR',
+                dataIndex: 'sector',
+                key: 'sector'
             }
         ];
         this.adviceKey = 0;
     }
 
-
     renderAdviceTransactions = () => {
         const {advices, subscribedAdvices} = this.state;
+        const advicesToBeDeleted = this.state.advices.filter(item => item.checked === true);
 
         return (
             <Row>
-                <Col span={4}>
-                    <Button onClick={this.deleteSelected}>Delete Selected</Button>
+                <Col span={4} style={{left: '20px'}}>
+                    <Button 
+                            onClick={this.deleteSelected}
+                            // disabled={advicesToBeDeleted.length > 0 ? false : tr}
+                    >
+                        Delete Selected
+                    </Button>
                 </Col>
-                <Col span={4} offset={16}>
+                <Col span={4} offset={16} style={{position: 'absolute', right: '20px'}}>
                     <Button 
                             onClick={this.toggleSubscribedAdviceModal} 
                             style={{right: 0, position: 'absolute'}}
@@ -81,7 +89,7 @@ class AddTransactionsImpl extends React.Component {
                         Browse Advice
                     </Button>
                 </Col>
-                <Col span={24} style={{marginTop: 20}}>
+                <Col span={24} style={{marginTop: 20, padding: '0 20px'}}>
                     {
                         advices.length > 0 
                         ?   <AdviceTransactionTable 
@@ -92,7 +100,11 @@ class AddTransactionsImpl extends React.Component {
                                     disabledDate={this.disabledDate}
                                     previewPortfolio={this.previewPortfolio}
                             />
-                        :   <h5>Please add advices to your portfolio</h5>
+                        :   <h5 
+                                style={{textAlign: 'center', fontSize: '16px'}}
+                            >
+                                Please add advices to your portfolio
+                            </h5>
                     }
                 </Col>
             </Row>
@@ -147,6 +159,45 @@ class AddTransactionsImpl extends React.Component {
         );
     }
 
+    renderPreviewModal = () => {
+        return (
+            <Modal
+                    title="Preview"
+                    visible={this.state.isPreviewModalVisible}
+                    width="80%"
+                    onCancel={this.togglePreviewModal}
+                    footer={[
+                        <Button key="back" onClick={this.togglePreviewModal}>Cancel</Button>,
+                        <Button key="submit" type="primary" onClick={this.handleSubmit}>
+                          Save
+                        </Button>,
+                    ]}
+            >
+                <Row>
+                    <Col span={24}>
+                        <MetricItem 
+                            label="Name"
+                            value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : 'undefined'}
+                            valueStyle={{...metricsValueStyle, fontWeight: 700}}
+                            labelStyle={metricsLabelStyle}
+                        />
+                        <MetricItem 
+                            label="Benchmark"
+                            value={this.state.selectedBenchmark}
+                            valueStyle={{...metricsValueStyle, fontWeight: 700}}
+                            labelStyle={metricsLabelStyle}
+                        />
+                    </Col>
+                    {this.renderPreview()}
+                </Row>
+            </Modal>
+        );
+    }
+
+    togglePreviewModal = () => {
+        this.setState({isPreviewModalVisible: !this.state.isPreviewModalVisible});
+    }
+
     updateSubscribedAdvices = (subscribedAdvices) => {
         this.setState({subscribedAdvices});
     }   
@@ -199,7 +250,6 @@ class AddTransactionsImpl extends React.Component {
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
-        console.log(transactions);
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const additionalData = !this.props.portfolioId 
@@ -233,7 +283,7 @@ class AddTransactionsImpl extends React.Component {
                     message.error(error.message);
                 });
             } else {
-                console.log(err);
+                message.error('Please provide a valid name');
             }
         });
     }
@@ -248,82 +298,84 @@ class AddTransactionsImpl extends React.Component {
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
-        this.props.form.validateFields((err, values) => {
-            const additionalData = !this.props.portfolioId 
-                    ?   {
-                            name: "Yo",
-                            benchmark: {
-                                ticker: this.state.selectedBenchmark,
-                                securityType: "EQ",
-                                country: "IN",
-                                exchange: "NSE"
-                            }
+        const additionalData = !this.props.portfolioId 
+                ?   {
+                        name: "Yo",
+                        benchmark: {
+                            ticker: this.state.selectedBenchmark,
+                            securityType: "EQ",
+                            country: "IN",
+                            exchange: "NSE"
                         }
-                    :   {
-                            action: "add"
-                        };
-            const data = {
-                preview: true,
-                transactions,
-                ...additionalData
-            };
-            axios({
-                url,
-                method: 'POST',
-                headers: {'aimsquant-token': aimsquantToken},
-                data: data
-            })
-            .then(response => {
-                console.log('Preview', response.data);
-                const performanceData = {
-                    name: "",
-                    detail: {
-                        startDate: moment().subtract(1, 'years').format(dateFormat),
-                        endDate: moment().format(dateFormat),
-                        positions: transactions,
-                        cash: 0
-                    },
-                    benchmark: {
-                        ticker: this.state.selectedBenchmark,
-                        securityType: "EQ",
-                        country: "IN",
-                        exchange: "NSE"
                     }
-                };
-                console.log(response.data);
-                this.setState({
-                    presentAdvices: this.processPreviewAdviceTransaction(response.data.detail.subPositions),
-                    presentStocks: this.processPreviewStockTransction(response.data.detail.positions)
-                });
-                return axios({
-                    url: `${requestUrl}/performance`,
-                    method: 'POST',
-                    data: performanceData,
-                    headers: {'aimsquant-token': aimsquantToken}
-                });
-            })
-            .then(response => {
-                let performanceSeries = response.data.portfolioPerformance.portfolioValues.map((item, index) => {
-                    return [moment(item.date).valueOf(), item.netValue];
-                });
+                :   {
+                        action: "add"
+                    };
+        const data = {
+            preview: true,
+            transactions,
+            ...additionalData
+        };
+        axios({
+            url,
+            method: 'POST',
+            headers: {'aimsquant-token': aimsquantToken},
+            data: data
+        })
+        .then(response => {
+            console.log('Preview', response.data);
+            const performanceData = {
+                name: "",
+                detail: {
+                    startDate: moment().subtract(1, 'years').format(dateFormat),
+                    endDate: moment().format(dateFormat),
+                    positions: transactions,
+                    cash: 0
+                },
+                benchmark: {
+                    ticker: this.state.selectedBenchmark,
+                    securityType: "EQ",
+                    country: "IN",
+                    exchange: "NSE"
+                }
+            };
+            console.log(response.data);
+            this.setState({
+                presentAdvices: this.processPreviewAdviceTransaction(response.data.detail.subPositions),
+                presentStocks: this.processPreviewStockTransction(response.data.detail.positions)
+            });
+            return axios({
+                url: `${requestUrl}/performance`,
+                method: 'POST',
+                data: performanceData,
+                headers: {'aimsquant-token': aimsquantToken}
+            });
+        })
+        .then(response => {
+            let performanceSeries = response.data.portfolioPerformance.portfolioValues.map((item, index) => {
+                return [moment(item.date).valueOf(), item.netValue];
+            });
+            if (tickers.length < 2) {
                 tickers.push({
                     name: 'Portfolio',
                     show: true,
                     data: performanceSeries
                 });
-                this.setState({tickers});
-            })
-            .catch(error => {
-                console.log(error);
-            });
+            } else{
+                tickers[1].data = performanceSeries;
+            }
+            this.setState({tickers});
+        })
+        .catch(error => {
+            console.log(error);
         });
     }
 
     renderPreview = () => {
         return (
             <Col span={24}>
-                <Tabs defaultActiveKey="2">
-                    <TabPane tab="Portfolio" key="2">
+                <Tabs defaultActiveKey="2" animated={false}>
+                    <TabPane tab="Portfolio" key="2" style={{padding: '0 20px 20px 20px'}}>
                         <Row>
                             <Col span={8} offset={16} style={{marginBottom: 20}}>
                                 <Radio.Group 
@@ -343,10 +395,10 @@ class AddTransactionsImpl extends React.Component {
                             : this.renderPreviewStockPositions()
                         }
                     </TabPane>
-                    <TabPane tab="Performance" key="1">
+                    <TabPane tab="Performance" key="1" style={{padding: '0 20px 20px 20px'}}>
                         <Row>
                             <Col span={24}>
-                                <AqHighChartMod tickers={this.state.tickers}/> 
+                                <MyChartNew series={this.state.tickers}/> 
                             </Col>
                         </Row>
                     </TabPane>
@@ -360,12 +412,18 @@ class AddTransactionsImpl extends React.Component {
             <Row>
                 <Col span={24} style={{marginTop: 20}}>
                     {
-                        this.state.presentAdvices.length > 0 
+                        // this.state.presentAdvices.length > 0 
+                        this.state.advices.length > 0
                         ? <AdviceTransactionTable
                                 preview 
-                                advices={this.state.presentAdvices} 
+                                // advices={this.state.presentAdvices} 
+                                advices={this.state.advices} 
                         />
-                        : <h5>Please add advices to your portfolio</h5>
+                        :   <h5 
+                                style={{textAlign: 'center', fontSize: '16px'}}
+                            >
+                                Please add advices to your portfolio
+                            </h5>
                     }
                 </Col>
             </Row>
@@ -412,13 +470,15 @@ class AddTransactionsImpl extends React.Component {
     }
 
     processAdviceComposition = (advice, key) => {
-        const composition = [];
+        let composition = [];
         if (advice.portfolio.detail) {
             advice.portfolio.detail.positions.map((item, index) => {
                 composition.push({
                     key: index,
                     adviceKey: key,
                     symbol: item.security.ticker,
+                    name: item.security.detail.Nse_Name,
+                    sector: item.security.detail.Sector,
                     shares: item.quantity,
                     modifiedShares: item.quantity,
                     price: item.lastPrice,
@@ -519,7 +579,15 @@ class AddTransactionsImpl extends React.Component {
     }
 
     handleBenchmarkChange = (value) => {
-        this.setState({selectedBenchmark: value});
+        const tickers = [...this.state.tickers];
+        if (tickers.length < 1) {
+            tickers.push({
+                name: value
+            });
+        } else {
+            tickers[0].name = value;
+        }
+        this.setState({selectedBenchmark: value, tickers});
     }
 
     renderSelect = () => {
@@ -527,11 +595,13 @@ class AddTransactionsImpl extends React.Component {
 
         return (
             <Row>
-                <Col span={6}>
-                    <h4>Benchmark</h4>
-                </Col>
-                <Col span={6}>
-                    <Select defaultValue={this.state.selectedBenchmark} style={{width: 120}} onChange={this.handleBenchmarkChange}>
+                <Col span={12}>
+                    <h4 style={labelStyle}>Benchmark</h4>
+                    <Select 
+                            defaultValue={this.state.selectedBenchmark} 
+                            style={{width: 120}} 
+                            onChange={this.handleBenchmarkChange}
+                    >
                         {
                             benchmarkArray.map((item, index) => {
                                 return (
@@ -549,9 +619,6 @@ class AddTransactionsImpl extends React.Component {
         let advices = [...this.state.advices];
         let subscribedAdvices = [...this.state.subscribedAdvices];
         const advicesToBeDeleted = this.state.advices.filter(item => item.checked === true);
-        console.log('Advices to be deleted', advicesToBeDeleted);
-        console.log('Subscribed Advices', subscribedAdvices);
-
         subscribedAdvices = subscribedAdvices.map(subscribedAdvice => {
             advicesToBeDeleted.map(advice => {
                 if (advice.adviceId === subscribedAdvice.id) {
@@ -560,9 +627,6 @@ class AddTransactionsImpl extends React.Component {
             });
             return subscribedAdvice;
         });
-        console.log(subscribedAdvices);
-
-
         advices = _.pullAll(advices, advicesToBeDeleted);
         this.setState({advices, subscribedAdvices});
     }
@@ -636,10 +700,20 @@ class AddTransactionsImpl extends React.Component {
                 price: item.lastPrice,
                 avgPrice: item.avgPrice,
                 country: item.security.country,
+                name: item.security.detail.Nse_Name,
+                sector: item.security.detail.Sector,
             });
         });
 
         return stockPositions;
+    }
+
+    componentWillMount() {
+        const tickers = [...this.state.tickers];
+        tickers.push({
+            name: this.state.selectedBenchmark
+        });
+        this.setState({tickers});
     }
 
     render() {
@@ -649,63 +723,87 @@ class AddTransactionsImpl extends React.Component {
         return (
             <Row>
                 {this.renderSubscribedAdviceModal()}
+                {this.renderPreviewModal()}
                 <Form>
-                    <Col span={18} style={layoutStyle}>
+                    <Col lg={18} md={24} style={{...newLayoutStyle}}>
                         {
                             !portfolioId && 
-                            <Row type="flex">
-                                <Col span={5}>
+                            <Row type="flex" align="middle" style={{marginTop: '20px'}}>
+                                <Col span={5} style={{marginLeft: '20px'}}>
+                                    <h4 style={{...labelStyle, marginTop: '-4px'}}>Portfolio Name</h4>
                                     <FormItem>
                                         {getFieldDecorator('name', {
                                             rules: [{required: true, message: 'Please enter Portfolio Name'}]
                                         })(
-                                            <Input style={inputStyle} placeholder="Portfolio Name"/>
+                                            <Input placeholder="Portfolio Name"/>
                                         )}
                                     </FormItem>
                                 </Col>
                                 <Col span={10} offset={1}>
                                     {this.renderSelect()}
                                 </Col>
-                                {/* <Col span={5}>
-                                    <h5>Remaining Cash 10000</h5>
+                                <Col lg={0} md={7}>
+                                    <Row style={{position: 'absolute', right: 40}}>
+                                        <Col span={12}>
+                                            <Button 
+                                                    type="primary" 
+                                                    onClick={this.togglePreviewModal} 
+                                                    htmlType="submit"
+                                                    style={{position: 'absolute', right: '10px'}}
+                                            >
+                                                Preview
+                                            </Button>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Button
+                                                    onClick={() => this.props.history.goBack()}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </Col>
+                                    </Row>
                                 </Col>
-                                <Col span={4}>
-                                    <Checkbox>Link Cash</Checkbox>
-                                </Col> */}
                             </Row>
                         }
-                        <Row>
+                        <Row style={{marginLeft: '20px', marginTop: '10px'}}>
                             <Col span={24}>
-                                <Tabs defaultActiveKey="1">
-                                    <TabPane tab="Stock Transaction" key="1">
+                                <Checkbox>Make Default Portfolio</Checkbox>
+                            </Col>
+                        </Row>
+                        <Row style={{marginTop: '5px'}}>
+                            <Col span={24}>
+                                <Tabs defaultActiveKey="1" animated={false} style={{paddingBottom: '20px'}}>
+                                    <TabPane tab="Stock Transaction" key="1" style={{minHeight: '250px'}}>
                                         {this.renderStockTransactions()}
                                     </TabPane> 
-                                    <TabPane tab="Advice Transaction" key="2">
+                                    <TabPane tab="Advice Transaction" key="2" style={{minHeight: '250px'}}>
                                         {this.renderAdviceTransactions()}
                                     </TabPane> 
-                                    <TabPane tab="Cash Transaction" key="3">
+                                    <TabPane tab="Cash Transaction" key="3" style={{minHeight: '250px'}}>
                                         {this.renderCashTransactions()}
                                     </TabPane> 
                                 </Tabs>
                             </Col>
                         </Row>
-                        <Row>
-                            <Col span={24} style={{marginTop: 20}}>
-                                <h3>Preview</h3>
-                            </Col>
-                            {this.renderPreview()}
-                        </Row>
                     </Col>
-                    <Col span={5} offset={1}>
+                    <Col lg={5} md={0} offset={1}>
                         <Row type="flex">
                             <Col span={24}>
                                 <FormItem>
-                                    <Button type="primary" onClick={this.handleSubmit} htmlType="submit">Save</Button>
+                                    <Button 
+                                            type="primary" 
+                                            onClick={this.togglePreviewModal} 
+                                            htmlType="submit"
+                                            style={buttonStyle}
+                                    >
+                                        Preview
+                                    </Button>
                                 </FormItem>
                             </Col>
                             <Col span={24} style={{marginTop: 10}}>
                                 <Button
                                         onClick={() => this.props.history.goBack()}
+                                        style={buttonStyle}
                                 >
                                     Cancel
                                 </Button>
@@ -720,6 +818,7 @@ class AddTransactionsImpl extends React.Component {
 
 export const AddTransactions = withRouter(Form.create()(AddTransactionsImpl));
 
-const inputStyle = {
-    borderRadius: '0px'
+const labelStyle = {
+    color: '#898989',
+    marginBottom: '5px'
 };

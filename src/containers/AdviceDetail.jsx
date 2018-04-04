@@ -9,6 +9,7 @@ import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin} fr
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems} from '../components';
 import {MyChartNew} from './MyChartNew';
+import {generateColorData} from '../utils';
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
@@ -54,7 +55,8 @@ export class AdviceDetail extends React.Component {
             disableSubscribeButton: false,
             disableFollowButton: false,
             series: [],
-            barSeries: [],
+            barDollarSeries: [],
+            barPercentageSeries: [],
             positions: []
         };
     }
@@ -165,7 +167,8 @@ export class AdviceDetail extends React.Component {
     getAdviceData = () => {
         const adviceId = this.props.match.params.id;
         const url = `${requestUrl}/advice/${adviceId}`;
-        const performanceUrl = `${requestUrl}/performance/advice/${adviceId}`
+        const performanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
+        let positions = [];
         axios.get(url, {
             headers: {
                 'aimsquant-token': aimsquantToken
@@ -177,21 +180,28 @@ export class AdviceDetail extends React.Component {
         })
         .then(response => {
             this.getAdviceDetail(response);
+            positions = response.data.detail.positions.map(item => item.security.ticker);
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
             const series = [];
+            const colorData = generateColorData(positions);
             this.getAdvicePerformance(response);
             const portfolioComposition = response.data.current.metrics.portfolioMetrics.composition.map((item, index) =>{
-                return {name: item.ticker, y: Math.round(item.weight * 10000) / 100};
+                console.log(`Color ${item.ticker} ${colorData['TCS']}`);
+                return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
             });
             const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
-                return {name: item.ticker, data: [item.pnl]}
+                return {name: item.ticker, data: [item.pnl], color: colorData[item.ticker]}
+            });
+            const constituentPercentagePerformance = response.data.current.metrics.constituentPerformance.map(item => {
+                return {name: item.ticker, data: [item.pnl_pct], color: colorData[item.ticker]};
             });
             series.push({name: 'Composition', data: portfolioComposition});
             this.setState({
                 series,
-                barSeries: constituentDollarPerformance
+                barDollarSeries: constituentDollarPerformance,
+                barPercentageSeries: constituentPercentagePerformance
             });
         })
         .catch((error) => {
@@ -375,7 +385,7 @@ export class AdviceDetail extends React.Component {
     render() { 
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
-   
+
         return (
            <Row style={{marginTop: '20px'}}>
                {this.renderModal()}
@@ -429,7 +439,10 @@ export class AdviceDetail extends React.Component {
                                         </AqCard>
                                         <AqCard title="Performance Summary" offset={2}>
                                             {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
-                                            <HighChartBar series={this.state.barSeries} />
+                                            <HighChartBar 
+                                                    dollarSeries={this.state.barDollarSeries} 
+                                                    percentageSeries={this.state.barPercentageSeries}
+                                            />
                                         </AqCard>
                                     </Col>
                                 </Row>

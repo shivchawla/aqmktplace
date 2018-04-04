@@ -1,16 +1,20 @@
 import * as React from 'react';
 import axios from 'axios';
-import {Input, InputNumber, Form, AutoComplete, Icon} from 'antd';
+import {Input, InputNumber, Form, AutoComplete, Icon, Spin} from 'antd';
 
 const Option = AutoComplete.Option;
 const FormItem = Form.Item;
+const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
+
+const {requestUrl, aimsquantToken} = require('../localConfig');
 
 export class AutoCompleteEditableCell extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             dataSource: [],
-            inputValue: 'TCS'
+            inputValue: 'TCS',
+            spinning: false
         };
     }
 
@@ -23,14 +27,24 @@ export class AutoCompleteEditableCell extends React.Component {
     }
 
     handleSearch = query => {
-        // this.setState({spinning: true});
-        axios.get(`http://localhost:3001/tickers?q=${query}`)
+        this.setState({spinning: true});
+        const url = `${requestUrl}/stock?search=${query}`;
+        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            this.setState({dataSource: response.data})
+            this.setState({dataSource: this.processSearchResponseData(response.data)});
         })
         .finally(() => {
-            // this.setState({spinning: false});
+            this.setState({spinning: false});
         });
+    }
+
+    processSearchResponseData = data => {
+        return data.map((item, index) => {
+            return {
+                id: index,
+                name: item.ticker,
+            }
+        })
     }
 
     onCompareSelect = tickerName => {
@@ -55,7 +69,13 @@ export class AutoCompleteEditableCell extends React.Component {
                     onSearch={this.handleSearch}
                     placeholder="Search Stocks"
                     onChange={this.handleChange}
-            />
+            >
+                <Input
+                        suffix={(
+                            <Spin indicator={spinIcon} spinning={this.state.spinning}/>
+                        )}
+                />
+            </AutoComplete>
         );
     }
 }

@@ -21,7 +21,8 @@ export const layoutStyle = {
 export const newLayoutStyle = {
     borderRadius: '4px',
     boxShadow: '0 2px 4px rgba(171, 171, 171, 50)',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    border: '1px solid #eaeaea'
 };
 
 export const labelStyle = {
@@ -71,4 +72,18 @@ export const metricsValueStyle = {
 export const dividerStyle = {
     backgroundColor: '#E0E0E0',
     height: '1px'
+};
+
+export const nameEllipsisStyle = {
+    fontSize: '14px', 
+    overflow: 'hidden', 
+    textOverflow: 'ellipsis', 
+    whiteSpace: 'nowrap', 
+    width: '200px'
+};
+
+export const buttonStyle = {
+    width: '100px',
+    marginBottom: '10px',
+    marginLeft: '20px'
 };

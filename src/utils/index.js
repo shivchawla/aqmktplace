@@ -1,5 +1,6 @@
 import moment from 'moment';
 import _ from 'lodash';
+import {graphColors} from '../constants';
 import {getStockData} from './requests';
 
 export const dateFormat = 'Do MMMM YYYY';
@@ -47,4 +48,13 @@ export const getStockPerformance = (tickerName) => {
 export const convertToPercentage = value => {
     return Number((100 * value).toFixed(2));
 }
+
+export const generateColorData = (tickers => {
+    let obj = {};
+    tickers.map((ticker, index) => {
+        obj[ticker] = graphColors[index];
+    });
+
+    return obj;
+});
 export * from './requests';
