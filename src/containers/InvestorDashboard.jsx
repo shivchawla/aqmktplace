@@ -144,11 +144,12 @@ export class InvestorDashboard extends React.Component {
             const portfolioMetrics = response.data.defaultPerformance.current.metrics.portfolioMetrics;
             const composition = this.processTransactionsForChart(portfolioMetrics.composition);
             const concentration = portfolioMetrics.concentration;
-            const performance = response.data.defaultPerformance.current.metrics.portfolioPerformance;
+            const performance = response.data.defaultPerformance.current.metrics.portfolioPerformance.true;
             const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${response.data.defaultPortfolio._id}`;
             const performanceData = response.data.defaultPerformance.simulated.portfolioValues.map(item => [moment(item.date).valueOf(), item.netValue]);
             const pieChartTitle = `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
             const summary = response.data.defaultPerformance.summary.current;
+            console.log('Performance', performance);
             tickers.push({
                 name: 'Portfolio',
                 data: performanceData,
