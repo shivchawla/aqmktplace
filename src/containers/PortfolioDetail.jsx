@@ -7,7 +7,7 @@ import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse} from 'ant
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
 import '../css/portfolioDetail.css';
-import {convertToPercentage} from '../utils';
+import {convertToPercentage, generateColorData} from '../utils';
 import {
     AdviceTransactionTable, 
     AqHighChartMod, 
@@ -46,7 +46,6 @@ class PortfolioDetailImpl extends React.Component {
             performanceDollarSeries: [],
             performancepercentageSeries: [],
             pieSeries: [],
-            barSeries: []
         };
         this.columns = [
             {
@@ -244,6 +243,7 @@ class PortfolioDetailImpl extends React.Component {
 
     componentWillMount() {
         const series = [];
+        let positions = [];
         const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
         const tickers = [...this.state.tickers];
         const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${this.props.match.params.id}`;
@@ -255,6 +255,7 @@ class PortfolioDetailImpl extends React.Component {
                 });
             }   
             const advices = this.updateAdvices(this.processPresentAdviceTransaction(response.data.detail.subPositions));
+            positions = response.data.detail.positions.map(item => item.security.ticker);
             this.setState({
                 name: response.data.name,
                 presentAdvices: advices,
@@ -264,6 +265,7 @@ class PortfolioDetailImpl extends React.Component {
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => { // Getting Portfolio Performance
+            const colorData = generateColorData(positions);
             let performanceSeries = response.data.simulated.portfolioValues.map((item, index) => {
                 return [moment(item.date).valueOf(), item.netValue];
             });
@@ -273,13 +275,13 @@ class PortfolioDetailImpl extends React.Component {
             });
             const portfolioMetrics = response.data.summary.current;
             const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
-                return {name: item.ticker, data: [item.pnl]}
+                return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
             });
             const constituentPercentagePerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
-                return {name: item.ticker, data: [item.pnl_pct]}
+                return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]}
             });
             const portfolioComposition = response.data.current.metrics.portfolioMetrics.composition.map((item, index) =>{
-                return {name: item.ticker, y: Math.round(item.weight * 10000) / 100};
+                return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
             });
             series.push({name: 'Composition', data: portfolioComposition});
             const metrics = [
@@ -296,7 +298,6 @@ class PortfolioDetailImpl extends React.Component {
                 performanceDollarSeries: constituentDollarPerformance,
                 performancepercentageSeries: constituentPercentagePerformance,
                 pieSeries: series,
-                barSeries: constituentDollarPerformance
             });
         })
         .catch(error => {
@@ -334,16 +335,11 @@ class PortfolioDetailImpl extends React.Component {
                                         <AqCard title="Portfolio Summary">
                                             <HighChartNew series={this.state.pieSeries} />
                                         </AqCard>        
-                                        {/* <Radio.Group 
-                                            defaultValue={this.state.togglePerformance} 
-                                            onChange={this.handlePerformanceToggle} 
-                                            size="small"
-                                        >
-                                            <Radio.Button value="dollar">Dollar</Radio.Button>
-                                            <Radio.Button value="percentage">Percentage</Radio.Button>
-                                        </Radio.Group> */}
                                         <AqCard title="Performance Summary" offset={2}>
-                                            <HighChartBar series={this.state.barSeries} />
+                                            <HighChartBar 
+                                                    dollarSeries={this.state.performanceDollarSeries} 
+                                                    percentageSeries={this.state.performancepercentageSeries}
+                                            />
                                         </AqCard>
                                     </Row>
                                 </Col>

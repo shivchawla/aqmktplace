@@ -188,7 +188,6 @@ export class AdviceDetail extends React.Component {
             const colorData = generateColorData(positions);
             this.getAdvicePerformance(response);
             const portfolioComposition = response.data.current.metrics.portfolioMetrics.composition.map((item, index) =>{
-                console.log(`Color ${item.ticker} ${colorData['TCS']}`);
                 return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
             });
             const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
