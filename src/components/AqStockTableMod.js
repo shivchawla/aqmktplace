@@ -38,8 +38,8 @@ export class AqStockTableMod extends React.Component {
                 dataIndex: 'symbol',
                 key: 'symbol',
                 render: (text, record) => this.renderAutoCompleteColumn(text, record, 'symbol', 'text', record.tickerValidationStatus),
-                width: 80,
-                className: 'stock-table-col'
+                className: 'stock-table-col',
+                width: 200
             },
             {
                 title: 'SHARES',
@@ -64,7 +64,7 @@ export class AqStockTableMod extends React.Component {
                 className: 'stock-table-col'
             },
             {
-                title: 'TOTAL VALUE',
+                title: 'TOTAL',
                 dataIndex: 'totalValue',
                 key: 'totalValue',
                 width: 80,
@@ -137,6 +137,7 @@ export class AqStockTableMod extends React.Component {
         let target = newData.filter(item => item.key === key)[0];
         if (target) {
             target[column] = value;
+            console.log('Target', target);
             if(column === 'symbol') {
                 // target['tickerValidationtarget['shares'] = 1;
                 this.asyncGetTarget(value)

@@ -306,7 +306,7 @@ export class AdviceDetail extends React.Component {
     renderUpdateModal = () => {
         return (
             <Modal
-                    title="Update Portfolio"
+                    title="Update Advice"
                     visible={this.state.isUpdateDialogVisible}
                     onOk={this.toggleUpdateDialog}
                     onCancel={this.toggleUpdateDialog}
@@ -374,7 +374,7 @@ export class AdviceDetail extends React.Component {
                             onClick={() => this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`)} 
                             style={{width: 150, marginTop: 10}}
                     >
-                        Update Portfolio
+                        Update Advice
                     </Button>
                 </Col>
             </Row>

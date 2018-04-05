@@ -149,7 +149,6 @@ export class InvestorDashboard extends React.Component {
             const performanceData = response.data.defaultPerformance.simulated.portfolioValues.map(item => [moment(item.date).valueOf(), item.netValue]);
             const pieChartTitle = `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
             const summary = response.data.defaultPerformance.summary.current;
-            console.log('Performance', performance);
             tickers.push({
                 name: 'Portfolio',
                 data: performanceData,
@@ -672,107 +671,110 @@ export class InvestorDashboard extends React.Component {
 
     render() {
         return(
-            <Row>
-                {/* <Col span={24} style={emptyPortfolioStyle}>
-                    <h1>You have not created any portfolio yet. Get started by creating One</h1>
-                    <Button 
-                            type="primary" 
-                            onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                            style={{marginTop: '20px'}}
-                    >
-                        Create Portfolio
-                    </Button>
-                </Col> */}
-                <Col span={24} style={{textAlign: 'right'}}>
-                    <Button 
-                            type="primary" 
-                            onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                            style={{marginRight: '20px'}}
-                    >
-                        Create Portfolio
-                    </Button>
-                    <Button 
-                            type="secondary" 
-                            onClick={() => this.props.history.push('/advisordashboard')}
-                    >
-                        Advisor Dashboard
-                    </Button>
-                </Col>
-                <Col span={24}>
-                    <Row style={{marginTop: '20px'}}>
-                        <Col xl={12} lg={24} style={{paddingRight: '5px'}}>
-                            <Tabs 
-                                    defaultActiveKey={"1"} 
-                                    animated={false} 
-                                    style={{...newLayoutStyle, height: '365px'}}
-                                    size="small"
-                            >
-                                <TabPane tab="Overview" key="1">
-                                    <Row>
-                                        <Col span={12}>{this.renderOverviewPieChart()}</Col>
-                                        <Col span={12}>{this.renderOverviewMetrics()}</Col>
-                                    </Row>
-                                </TabPane>
-                                <TabPane tab="Summary" key="2">
-                                    <Row>
-                                        <Col span={16} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
-                                        <Col span={8}>{this.renderSummaryMetrics()}</Col>
-                                    </Row>
-                                </TabPane>
-                            </Tabs>
-                        </Col>
-                        <Col xl={12} lg={24} style={{paddingLeft: '5px'}}>
-                            <Tabs 
-                                    animated={false} 
-                                    defaultActiveKey="1" 
-                                    size="small"
-                                    style={{...newLayoutStyle, height: '365px'}}
-                            >
-                                <TabPane 
-                                        tab="Performance" 
-                                        key="1" 
-                                        style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
+            this.state.positions.length < 1
+            ?   <Row>
+                    <Col span={24} style={emptyPortfolioStyle}>
+                        <h1>You have not created any portfolio yet. Get started by creating One</h1>
+                        <Button 
+                                type="primary" 
+                                onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                                style={{marginTop: '20px'}}
+                        >
+                            Create Portfolio
+                        </Button>
+                    </Col>
+                </Row>
+            :   <Row>
+                    <Col span={24} style={{textAlign: 'right'}}>
+                        <Button 
+                                type="primary" 
+                                onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                                style={{marginRight: '20px'}}
+                        >
+                            Create Portfolio
+                        </Button>
+                        <Button 
+                                type="secondary" 
+                                onClick={() => this.props.history.push('/advisordashboard')}
+                        >
+                            Advisor Dashboard
+                        </Button>
+                    </Col>
+                    <Col span={24}>
+                        <Row style={{marginTop: '20px'}}>
+                            <Col xl={12} lg={24} style={{paddingRight: '5px'}}>
+                                <Tabs 
+                                        defaultActiveKey={"1"} 
+                                        animated={false} 
+                                        style={{...newLayoutStyle, height: '365px'}}
+                                        size="small"
                                 >
-                                    <Col span={24} style={{paddingBottom: '20px', paddingLeft: '10px'}}>
-                                        <MyChartNew series={this.state.tickers} hideLegend={true}/>
-                                    </Col>
-                                </TabPane>
-                                <TabPane 
-                                        tab="Composition" 
-                                        key="2" 
-                                        style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
+                                    <TabPane tab="Overview" key="1">
+                                        <Row>
+                                            <Col span={12}>{this.renderOverviewPieChart()}</Col>
+                                            <Col span={12}>{this.renderOverviewMetrics()}</Col>
+                                        </Row>
+                                    </TabPane>
+                                    <TabPane tab="Summary" key="2">
+                                        <Row>
+                                            <Col span={16} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
+                                            <Col span={8}>{this.renderSummaryMetrics()}</Col>
+                                        </Row>
+                                    </TabPane>
+                                </Tabs>
+                            </Col>
+                            <Col xl={12} lg={24} style={{paddingLeft: '5px'}}>
+                                <Tabs 
+                                        animated={false} 
+                                        defaultActiveKey="1" 
+                                        size="small"
+                                        style={{...newLayoutStyle, height: '365px'}}
                                 >
-                                    <Col span={24}>
-                                        {this.renderStockTransactions()}
+                                    <TabPane 
+                                            tab="Performance" 
+                                            key="1" 
+                                            style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
+                                    >
+                                        <Col span={24} style={{paddingBottom: '20px', paddingLeft: '10px'}}>
+                                            <MyChartNew series={this.state.tickers} hideLegend={true}/>
+                                        </Col>
+                                    </TabPane>
+                                    <TabPane 
+                                            tab="Composition" 
+                                            key="2" 
+                                            style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
+                                    >
+                                        <Col span={24}>
+                                            {this.renderStockTransactions()}
+                                        </Col>
+                                    </TabPane>
+                                </Tabs>
+                            </Col>
+                        </Row>
+                        <Row style={{margin: '10px 0'}}>
+                            <Col xl={12} lg={24} style={{paddingRight: '5px'}}>
+                                <Row style={{...newLayoutStyle, overflow: 'hidden', overflowY: 'scroll', height: '365px'}}>
+                                    <Col span={24} style={{marginTop: '10px'}}>
+                                        <h3 style={{marginLeft: '20px'}}>My Portfolios</h3>
                                     </Col>
-                                </TabPane>
-                            </Tabs>
-                        </Col>
-                    </Row>
-                    <Row style={{margin: '10px 0'}}>
-                        <Col xl={12} lg={24} style={{paddingRight: '5px'}}>
-                            <Row style={{...newLayoutStyle, overflow: 'hidden', overflowY: 'scroll', height: '365px'}}>
-                                <Col span={24} style={{marginTop: '10px'}}>
-                                    <h3 style={{marginLeft: '20px'}}>My Portfolios</h3>
-                                </Col>
-                                <Col span={24} style={{paddingTop: '20px'}}>
-                                    {this.renderPortfolios()}
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col xl={12} lg={24} style={{paddingLeft: '5px'}}>
-                            <Row style={{...newLayoutStyle, height: '365px', overflow: 'hidden', overflowY: 'scroll'}}>
-                                <Col span={24} style={{marginTop: '10px'}}>
-                                        <h3 style={{marginLeft: '20px'}}>Advices</h3>
-                                </Col>
-                                <Col span={24} style={{marginTop: '10px'}}>
-                                    {this.renderSubscribedAdvices()}
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>  
+                                    <Col span={24} style={{paddingTop: '20px'}}>
+                                        {this.renderPortfolios()}
+                                    </Col>
+                                </Row>
+                            </Col>
+                            <Col xl={12} lg={24} style={{paddingLeft: '5px'}}>
+                                <Row style={{...newLayoutStyle, height: '365px', overflow: 'hidden', overflowY: 'scroll'}}>
+                                    <Col span={24} style={{marginTop: '10px'}}>
+                                            <h3 style={{marginLeft: '20px'}}>Advices</h3>
+                                    </Col>
+                                    <Col span={24} style={{marginTop: '10px'}}>
+                                        {this.renderSubscribedAdvices()}
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>  
         );
     }
 }

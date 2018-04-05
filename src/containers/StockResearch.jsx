@@ -25,7 +25,7 @@ export class StockResearch extends React.Component {
             tickerName: '',
             dataSource: [],
             spinning: false,
-            loadingData: false,
+            loadingData: true,
             latestDetail: {
                 ticker: '',
                 exchange: '',
@@ -35,7 +35,8 @@ export class StockResearch extends React.Component {
                 low: 0,
                 close: 0,
                 low_52w: 0,
-                high_52w:0
+                high_52w:0,
+                name: ''
             },
             rollingPerformance: {},
             selectedPerformanceScreen: '10y'
@@ -75,7 +76,8 @@ export class StockResearch extends React.Component {
         return data.map((item, index) => {
             return {
                 id: index,
-                name: item.ticker,
+                symbol: item.ticker,
+                name: item.detail !== undefined ? item.detail.Nse_Name : item.ticker
             }
         })
     }
@@ -84,12 +86,11 @@ export class StockResearch extends React.Component {
         const {latestDetail} = this.state;
         let tickers = [];
         tickers.push({name: value, destroy: true});
-        this.setState(prevState => {
-            return Object.assign({}, {tickers});
-        });
+        this.setState({tickers});
         getStockData(value, 'latestDetail')
         .then(response => {
             const {data} = response;
+            console.log(data);
             latestDetail.ticker = data.security.ticker;
             latestDetail.exchange = data.security.exchange;
             latestDetail.closePrice = data.latestDetail.values.Close;
@@ -98,6 +99,7 @@ export class StockResearch extends React.Component {
             latestDetail.low_52w = data.latestDetail.values.Low_52w;
             latestDetail.high_52w = data.latestDetail.values.High_52w;
             latestDetail.change = data.latestDetail.values.Change;
+            latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
             this.setState({latestDetail});
             return getStockData(value, 'rollingPerformance');
         })
@@ -107,14 +109,6 @@ export class StockResearch extends React.Component {
         .finally(() => {
             this.setState({loadingData: false});
         });
-    }
-
-    renderOption = (item) => {
-        return (
-            <Option key={item.name}>
-              {item.name}
-            </Option>
-        );
     }
 
     renderRollingPerformanceData = (key) => {
@@ -169,13 +163,30 @@ export class StockResearch extends React.Component {
         </RadioGroup>
     )
 
-    renderPerformanceMetrics =() => {
+    renderPerformanceMetrics = () => {
         const selectedScreen = this.state.selectedPerformanceScreen;
         return this.renderRollingPerformanceData(selectedScreen);
     }
 
+    renderOption = item => {
+        return (
+            <Option key={item.id} value={item.symbol}>
+                <Row style={{marginBottom: '10px'}}>
+                    <Col span={8}>
+                        <span style={{textAlign: 'left', fontSize: '14px'}}>{item.symbol}</span>
+                    </Col>
+                    <Col span={8} offset={6}>
+                        <span style={{textAlign: 'left', fontSize: '14px'}}>{item.name}</span>
+                    </Col>
+                </Row>
+            </Option>
+        );
+    }
+
     render() {
         const {dataSource, latestDetail} = this.state;
+        console.log(latestDetail);
+        // const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
         const priceMetrics = [
             {label: 'High', value: latestDetail.high},
             {label: 'Low', value: latestDetail.low},
@@ -185,10 +196,11 @@ export class StockResearch extends React.Component {
         ];
         const performanceMetricsTimeline = ['10y', 'ytd', '1y', '5y', '2y', 'mtd'];
         const percentageColor = latestDetail.change < 0 ? '#FA4747' : '#3EBB72';
-        
+        const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
+
         return (
             <Row>
-                <Col span={18} style={{...newLayoutStyle, marginTop: '20px'}}>
+                <Col xl={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
                     <Row style={metricStyle}>
                         <Col span={24}>
                             <AutoComplete
@@ -198,20 +210,36 @@ export class StockResearch extends React.Component {
                                 onSelect={this.onSelect}
                                 onSearch={this.handleSearch}
                                 placeholder="Search stocks"
-                                optionLabelProp="name"
+                                optionLabelProp="value"
                             >
-                                <Input suffix={<Icon style={searchIconStyle} type="search" />} />
+                                <Input 
+                                        suffix={(
+                                            <div>
+                                                <Spin indicator={spinIcon} spinning={this.state.spinning}/>
+                                                <Icon style={searchIconStyle} type="search" />
+                                            </div>
+                                        )} 
+                                />
                             </AutoComplete>
                         </Col>
                     </Row>
                     <Row style={metricStyle} type="flex" justify="space-between">
                         <Col span={7} style={cardStyle}>
-                            <h1 style={tickerNameStyle}>
+                            <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
+                            <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
+                                    <span 
+                                            style={{fontSize: '18px', fontWeight: '700'}}>
+                                        {latestDetail.exchange}:
+                                    </span>
                                     {latestDetail.ticker}
-                                    <span style={{fontSize: '18px', marginLeft: '10px'}}>{latestDetail.exchange}</span>
                             </h1>
-                            <h3 style={lastPriceStyle}>{latestDetail.closePrice} <span style={{...changeStyle, color: percentageColor}}>{latestDetail.change} %</span></h3>
-                            <h5 style={{fontSize: '18px', fontWeight: 400, color: '#585858'}}>Last Close Price</h5>
+                            <h3 style={lastPriceStyle}>
+                                {latestDetail.closePrice} 
+                                <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
+                            </h3>
+                            <h5 style={{fontSize: '12px', fontWeight: 400, color: '#F44336', position: 'absolute', bottom: '10px'}}>
+                                * Data is updated every 1 min, delayed by 15 min
+                            </h5>
                         </Col>
                         <Col span={6} style={cardStyle}>
                             <h3 style={cardHeaderStyle}>Price Metrics</h3>
@@ -241,9 +269,6 @@ export class StockResearch extends React.Component {
                         </Col>
                     </Row>
                 </Col>
-                <Col>
-                    <Spin size="large" spinning={this.state.loadingData}/>
-                </Col>
             </Row>
         );
     }
@@ -255,9 +280,9 @@ const metricStyle = {
 };
 
 const tickerNameStyle = {
-    fontSize: '40px',
+    fontSize: '18px',
     color: '#3B3737',
-    fontWeight: 700
+    fontWeight: 400
 };
 
 const lastPriceStyle = {
@@ -267,7 +292,7 @@ const lastPriceStyle = {
 };
 
 const changeStyle = {
-    fontSize: '20px'
+    fontSize: '16px'
 };
 
 const searchIconStyle = {

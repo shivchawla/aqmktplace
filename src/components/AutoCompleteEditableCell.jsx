@@ -1,6 +1,6 @@
 import * as React from 'react';
 import axios from 'axios';
-import {Input, InputNumber, Form, AutoComplete, Icon, Spin} from 'antd';
+import {Input, InputNumber, Form, AutoComplete, Icon, Spin, Row, Col} from 'antd';
 
 const Option = AutoComplete.Option;
 const FormItem = Form.Item;
@@ -18,14 +18,7 @@ export class AutoCompleteEditableCell extends React.Component {
         };
     }
 
-    renderOption = item => {
-        return (
-            <Option key={item.name} text={item.name}>
-              {item.name}
-            </Option>
-        );
-    }
-
+  
     handleSearch = query => {
         this.setState({spinning: true});
         const url = `${requestUrl}/stock?search=${query}`;
@@ -42,7 +35,8 @@ export class AutoCompleteEditableCell extends React.Component {
         return data.map((item, index) => {
             return {
                 id: index,
-                name: item.ticker,
+                symbol: item.ticker,
+                name: item.detail !== undefined ? item.detail.Nse_Name : item.ticker
             }
         })
     }
@@ -56,20 +50,32 @@ export class AutoCompleteEditableCell extends React.Component {
             this.props.handleAutoCompleteChange(value);
         }
     }
+    
+    renderOption = item => {
+        return (
+            <Option key={item.id} text={item.symbol} value={item.symbol}>
+                <div>
+                    <span>{item.symbol}</span><br></br>
+                    <span style={{fontSize: '10px'}}>{item.name}</span>
+                </div>
+            </Option>
+        );
+    }
 
     render() {
-        const {value, onChange, type, validationStatus, disabled = false, onEnter} = this.props;
+        const {value = 'TCS', onChange, type, validationStatus, disabled = false, onEnter} = this.props;
         const {dataSource} = this.state;
 
         return (
             <AutoComplete
-                    style={{ width: 120 }}
+                    style={{ width: 200 }}
                     dataSource={dataSource.map(this.renderOption)}
                     onSelect={this.onCompareSelect}
                     onSearch={this.handleSearch}
                     placeholder="Search Stocks"
                     onChange={this.handleChange}
                     defaultValue={value}
+                    optionLabelProp="value"
             >
                 <Input
                         suffix={(

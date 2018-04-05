@@ -37,10 +37,10 @@ export class ChartTickerItem extends React.Component {
                 <Col span={2}>
                     <Checkbox disabled={disabled} checked={checked} onChange={this.props.onChange}/>
                 </Col>
-                <Col span={8}>
+                <Col span={10}>
                     <h4 style={{fontSize: '12px'}}>{name}</h4>
                 </Col>
-                <Col span={6}>
+                <Col span={5}>
                     <MetricItem 
                             label="Price"
                             value={y}
@@ -48,7 +48,7 @@ export class ChartTickerItem extends React.Component {
                             valueStyle={{fontSize: '13px', fontWeight: 400}}
                     />
                 </Col>
-                <Col span={6}>
+                <Col span={5}>
                     <MetricItem 
                             value={`${change} %`}
                             label="Change"

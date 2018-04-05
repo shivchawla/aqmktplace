@@ -68,7 +68,7 @@ export class AdviceFormImpl extends React.Component {
             positions: [],
             public: false,
             isPublic: false,
-            addTickerModalVisible: false,
+            addTickerModalVisible: true,
             compositionSeries: []
         };
         this.columns = [
@@ -360,7 +360,7 @@ export class AdviceFormImpl extends React.Component {
     )
 
     renderMenu = (options, handleClick, defaultValue = options[0]) => (
-        <Select value={defaultValue} style={{width: 150}} onChange={handleClick}>
+        <Select value={defaultValue} style={{width: 150}} onChange={handleClick} disabled={this.state.isPublic}>
             {
                 options.map((item, index) => <Option key={index} value={item}>{item}</Option>)
             }
@@ -491,7 +491,9 @@ export class AdviceFormImpl extends React.Component {
                 adviceDescription: description, 
                 adviceHeading: heading, 
                 selectedBenchmark: response.data.portfolio.benchmark.ticker,
-                rebalancingFrequency: response.data.rebalance
+                rebalancingFrequency: response.data.rebalance,
+                isPublic: response.data['public'],
+                maxNotional: response.data.maxNotional
             }, () => {
                 console.log('Selected Benchmark', response.data.portfolio.benchmark.ticker);
                 getStockPerformance(response.data.portfolio.benchmark.ticker)
@@ -549,7 +551,7 @@ export class AdviceFormImpl extends React.Component {
         return totalValue;
     }
 
-    componentWillMount() {
+    componentDidMount() {
         if (this.props.isUpdate) {
             this.getAdvice(this.props.adviceId);
         } else {
@@ -579,7 +581,6 @@ export class AdviceFormImpl extends React.Component {
                             <Col span={24} style={{...newLayoutStyle, padding: '20px', margin: '20px 0', border: '1px solid #eaeaea'}}>
                                 <Row>
                                     <Col span={12}>
-                                        {   !this.state.isPublic &&
                                         <Row>
                                             <Col span={24}>
                                                 <h3 style={inputHeaderStyle}>
@@ -591,49 +592,48 @@ export class AdviceFormImpl extends React.Component {
                                                     {getFieldDecorator('name', {
                                                         rules: [{required: true, message: 'Please enter Advice Name'}]
                                                     })(
-                                                        <Input style={inputStyle}/>
+                                                        <Input style={inputStyle} disabled={this.state.isPublic}/>
                                                     )}
                                                     
                                                 </FormItem>
                                             </Col>
                                         </Row>
-                                        }
-                                        {   !this.state.isPublic &&
-                                            <Row>
-                                                <Col span={24}>
-                                                    <h3 style={inputHeaderStyle}>
-                                                        Headline
-                                                    </h3>
-                                                </Col>
-                                                <Col span={24}>
-                                                    <FormItem>
-                                                        {getFieldDecorator('headline', {
-                                                            rules: [{required: true, message: 'Please enter Headline'}]
-                                                        })(
-                                                            <Input style={inputStyle}/>
-                                                        )}
-                                                    </FormItem>
-                                                </Col>
-                                            </Row>
-                                        }
-                                        {   !this.state.isPublic &&
-                                            <Row>
-                                                <Col span={24}>
-                                                    <h3 style={inputHeaderStyle}>
-                                                        Description
-                                                    </h3>
-                                                </Col>
-                                                <Col span={24}>
-                                                    <FormItem>
-                                                        {getFieldDecorator('description', {
-                                                            rules: [{required: true, message: 'Please enter Description'}]
-                                                        })(
-                                                            <TextArea style={inputStyle} autosize={{minRows: 3, maxRows: 6}}/>
-                                                        )}
-                                                    </FormItem>
-                                                </Col>
-                                            </Row>
-                                        }
+                                        <Row>
+                                            <Col span={24}>
+                                                <h3 style={inputHeaderStyle}>
+                                                    Headline
+                                                </h3>
+                                            </Col>
+                                            <Col span={24}>
+                                                <FormItem>
+                                                    {getFieldDecorator('headline', {
+                                                        rules: [{required: true, message: 'Please enter Headline'}]
+                                                    })(
+                                                        <Input style={inputStyle} disabled={this.state.isPublic}/>
+                                                    )}
+                                                </FormItem>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col span={24}>
+                                                <h3 style={inputHeaderStyle}>
+                                                    Description
+                                                </h3>
+                                            </Col>
+                                            <Col span={24}>
+                                                <FormItem>
+                                                    {getFieldDecorator('description', {
+                                                        rules: [{required: true, message: 'Please enter Description'}]
+                                                    })(
+                                                        <TextArea 
+                                                                style={inputStyle} 
+                                                                autosize={{minRows: 3, maxRows: 6}}
+                                                                disabled={this.state.isPublic}
+                                                        />
+                                                    )}
+                                                </FormItem>
+                                            </Col>
+                                        </Row>
                                     </Col>
                                     <Col span={11} offset={1}>
                                         <Row>
@@ -641,48 +641,53 @@ export class AdviceFormImpl extends React.Component {
                                                 <h3 style={{...inputHeaderStyle, marginTop: '20px'}}>Settings</h3>
                                             </Col>
                                         </Row>
-                                        {   !this.state.isPublic &&
-                                            <Row type="flex" justify="space-between">
-                                                <Col span={11} style={{marginTop: '10px'}}>
-                                                    <h4 style={labelStyle}>Max Notional</h4>
-                                                    {this.renderMenu(maxNotional, this.handleMaxNotionalClick)}
-                                                </Col>
-                                                <Col span={11} offset={2} style={{marginTop: '10px'}}>
-                                                    <h4 style={labelStyle}>Rebalancing Frequency</h4>
-                                                    {
-                                                        this.renderMenu(
-                                                            rebalancingFrequency, 
-                                                            this.handleRebalanceMenuClick,
-                                                            this.state.rebalancingFrequency
-                                                        )
-                                                    }
-                                                </Col>
-                                                <Col span={11} style={{marginTop: '20px'}}>
-                                                    <h4 style={labelStyle}>Start Date</h4>
-                                                    <FormItem>
-                                                        {getFieldDecorator('startDate', {
-                                                            rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
-                                                        })(
-                                                            <DatePicker 
-                                                                // onChange={this.onStartDateChange} 
-                                                                format={dateFormat}
-                                                                style={{...inputStyle, width: 150}}
-                                                            /> 
-                                                        )}
-                                                    </FormItem>
-                                                </Col>
-                                                <Col span={11} offset={2} style={{marginTop: '20px'}}>
-                                                    <h4 style={labelStyle}>Benchmark</h4>
-                                                    {
-                                                        this.renderMenu(
-                                                            this.state.benchmarks, 
-                                                            this.onBenchmarkSelected, 
-                                                            this.state.selectedBenchmark
-                                                        )
-                                                    }
-                                                </Col>
-                                            </Row>
-                                        }
+                                        <Row type="flex" justify="space-between">
+                                            <Col span={11} style={{marginTop: '10px'}}>
+                                                <h4 style={labelStyle}>Max Notional</h4>
+                                                {
+                                                    this.renderMenu(
+                                                        maxNotional, 
+                                                        this.handleMaxNotionalClick,
+                                                        this.state.maxNotional
+                                                    )
+                                                }
+                                            </Col>
+                                            <Col span={11} offset={2} style={{marginTop: '10px'}}>
+                                                <h4 style={labelStyle}>Rebalancing Frequency</h4>
+                                                {
+                                                    this.renderMenu(
+                                                        rebalancingFrequency, 
+                                                        this.handleRebalanceMenuClick,
+                                                        this.state.rebalancingFrequency
+                                                    )
+                                                }
+                                            </Col>
+                                            <Col span={11} style={{marginTop: '20px'}}>
+                                                <h4 style={labelStyle}>Start Date</h4>
+                                                <FormItem>
+                                                    {getFieldDecorator('startDate', {
+                                                        rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
+                                                    })(
+                                                        <DatePicker 
+                                                            // onChange={this.onStartDateChange} 
+                                                            format={dateFormat}
+                                                            style={{...inputStyle, width: 150}}
+                                                            disabled={this.state.isPublic}
+                                                        /> 
+                                                    )}
+                                                </FormItem>
+                                            </Col>
+                                            <Col span={11} offset={2} style={{marginTop: '20px'}}>
+                                                <h4 style={labelStyle}>Benchmark</h4>
+                                                {
+                                                    this.renderMenu(
+                                                        this.state.benchmarks, 
+                                                        this.onBenchmarkSelected, 
+                                                        this.state.selectedBenchmark
+                                                    )
+                                                }
+                                            </Col>
+                                        </Row>
                                     </Col>
                                 </Row>
                                 <Col span={24} style={{padding: '10px', border: '1px solid #eaeaea', borderRadius: '4px'}}>

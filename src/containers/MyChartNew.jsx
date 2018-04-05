@@ -135,7 +135,7 @@ export class MyChartNew extends React.Component {
         if (destroy) {
             this.clearSeries();
         }
-        const legendItems = destroy ? [] : [...this.state.legendItems];
+        const legendItems = [...this.state.legendItems];
         const seriesIndex = _.findIndex(this.chart.series, seriesItem => seriesItem.name.toUpperCase() === name.toUpperCase());
         const legendIndex = _.findIndex(legendItems, legendItem => legendItem.name.toUpperCase() === name.toUpperCase());
         if (seriesIndex === -1) {
@@ -148,16 +148,32 @@ export class MyChartNew extends React.Component {
         }
         if (legendIndex === -1) {
             this.setState(prevState => {
-                return {
-                    legendItems: [...prevState.legendItems, {
-                        name: name.toUpperCase(),
-                        x: '1994-16-02',
-                        y: 0,
-                        change: 0,
-                        disabled: destroy,
-                        checked: legendItems.length < 5 ,
-                        color: this.chart.series[this.chart.series.length - 1].color
-                    }]
+                if (destroy) {
+                    return {
+                        legendItems: [
+                            {
+                                name: name.toUpperCase(),
+                                x: '1994-16-02',
+                                y: 0,
+                                change: 0,
+                                disabled: destroy,
+                                checked: legendItems.length < 5 ,
+                                color: this.chart.series[this.chart.series.length - 1].color
+                            }
+                        ]
+                    }
+                } else {
+                    return {
+                        legendItems: [...prevState.legendItems, {
+                            name: name.toUpperCase(),
+                            x: '1994-16-02',
+                            y: 0,
+                            change: 0,
+                            disabled: destroy,
+                            checked: legendItems.length < 5 ,
+                            color: this.chart.series[this.chart.series.length - 1].color
+                        }]
+                    }
                 }
             });
         }   
@@ -174,7 +190,7 @@ export class MyChartNew extends React.Component {
     updateSeries = (series) => {
         let legendItems = [...this.state.legendItems];
         if (series.length == 1 && series[0].destroy) { // Items needs to be destroyed
-            // console.log("Items will be destroyed");
+            console.log("Items will be destroyed");
             const item = series[0];
             if (item.data === undefined || item.data.length < 1) {
                 getStockPerformance(item.name.toUpperCase())
@@ -186,8 +202,7 @@ export class MyChartNew extends React.Component {
             }
         } else {
             if (series.length > legendItems.length) { // Item needs to be added
-                // console.log("Items will be added");
-                
+                console.log("Items will be added");
                 series.map(item => {
                     const seriesIndex = _.findIndex(this.chart.series, seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
                     if (seriesIndex === -1) {
@@ -203,7 +218,7 @@ export class MyChartNew extends React.Component {
                     }
                 });
             } else if (series.length < legendItems.length) { // Item needs to be deleted
-                // console.log("Items will be deleted");
+                console.log("Items will be deleted");
                 this.chart.series.map((item, index) => {
                     const seriesIndex = _.findIndex(series, seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
                     if (seriesIndex === -1) {
@@ -220,7 +235,7 @@ export class MyChartNew extends React.Component {
                     }
                 });
             } else { // Items need to be updated
-                // console.log("Items will be updated");
+                console.log("Items will be updated");
                 series.map((item, index) => {
                     const seriesIndex = _.findIndex(this.chart.series, 
                                 seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
@@ -307,22 +322,26 @@ export class MyChartNew extends React.Component {
     }
 
     renderOption = item => {
+        console.log(item);
         return (
-            <Option key={item.name}>
-              {item.name}
+            <Option key={item.id} text={item.symbol} value={item.symbol}>
+                <div>
+                    <span>{item.symbol}</span><br></br>
+                    <span style={{fontSize: '10px'}}>{item.name}</span>
+                </div>
             </Option>
         );
     }
 
     handleSearch = query => {
-        // this.setState({spinning: true});
+        this.setState({spinning: true});
         const url = `${requestUrl}/stock?search=${query}`;
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             this.setState({dataSource: this.processSearchResponseData(response.data)})
         })
         .finally(() => {
-            // this.setState({spinning: false});
+            this.setState({spinning: false});
         });
     }
 
@@ -414,6 +433,7 @@ export class MyChartNew extends React.Component {
                                 onSearch={this.handleSearch}
                                 placeholder="Search Stocks"
                                 style={{width: '100%'}}
+                                optionLabelProp="value"
                             >
                                 <Input suffix={<Icon style={searchIconStyle} type="search" />} />
                             </AutoComplete>
@@ -451,7 +471,8 @@ export class MyChartNew extends React.Component {
         return data.map((item, index) => {
             return {
                 id: index,
-                name: item.ticker,
+                symbol: item.ticker,
+                name: item.detail !== undefined ? item.detail.Nse_Name : item.ticker
             }
         })
     }
