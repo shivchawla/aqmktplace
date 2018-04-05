@@ -87,3 +87,5 @@ export const buttonStyle = {
     marginBottom: '10px',
     marginLeft: '20px'
 };
+
+export const tabBackgroundColor = '#fbfbfc';

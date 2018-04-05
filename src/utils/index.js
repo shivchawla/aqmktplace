@@ -49,6 +49,7 @@ export const convertToPercentage = value => {
     return Number((100 * value).toFixed(2));
 }
 
+// tickers = ['TCS', 'WIPRO', 'LT']
 export const generateColorData = (tickers => {
     let obj = {};
     tickers.map((ticker, index) => {

@@ -26,3 +26,4 @@ export * from './HighChartNew';
 export * from './HighChartBar';
 export * from './AdviceMetricsItems';
 export * from './HighChartSpline';
+export * from './DashboardCard';

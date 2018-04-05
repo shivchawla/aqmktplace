@@ -4,9 +4,10 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio} from 'antd';
-import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar} from '../components';
-import {layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle} from '../constants';
+import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard} from '../components';
+import {layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
+import {generateColorData} from '../utils';
 
 const {requestUrl, aimsquantToken, investorId} = require('../localConfig');
 const RadioButton = Radio.Button;
@@ -141,8 +142,10 @@ export class InvestorDashboard extends React.Component {
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             const positions = response.data.defaultPortfolio.detail.positions;
+            const positionModdedForColors = positions.map(item => item.security.ticker);
+            const colorData = generateColorData(positionModdedForColors);
             const portfolioMetrics = response.data.defaultPerformance.current.metrics.portfolioMetrics;
-            const composition = this.processTransactionsForChart(portfolioMetrics.composition);
+            const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
             const concentration = portfolioMetrics.concentration;
             const performance = response.data.defaultPerformance.current.metrics.portfolioPerformance.true;
             const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${response.data.defaultPortfolio._id}`;
@@ -160,10 +163,10 @@ export class InvestorDashboard extends React.Component {
             });
             const constituentPerformance = response.data.defaultPerformance.current.metrics.constituentPerformance || [];
             const dollarPerformance = constituentPerformance.map(item => {
-                return {name: item.ticker, data: [Number(item.pnl.toFixed(2))]};
+                return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]};
             });
             const percentagePerformance = constituentPerformance.map(item => {
-                return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))]};
+                return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]};
             });
             this.setState({
                 positions,
@@ -422,15 +425,17 @@ export class InvestorDashboard extends React.Component {
         return stockPositions;
     }
 
-    processTransactionsForChart = composition => {
+    processTransactionsForChart = (composition, colorData) => {
         const chartData = [];
         const seriesData = [];
+        const positions = composition.map(item => item.ticker);
         composition.map(item => {
             const weight = Number((item.weight * 100).toFixed(2));
             if (weight > 0) {
                 chartData.push({
                     name: item.ticker,
                     y: Number((item.weight * 100).toFixed(2)),
+                    color: colorData[item.ticker]
                 });
             }   
         });
@@ -527,13 +532,13 @@ export class InvestorDashboard extends React.Component {
     renderSummaryMetrics = () => {
         const {totalreturn, dailyreturn, volatility} = this.state.metrics;
         console.log('Metrics', this.state.metrics);
-        const colStyle = {marginBottom: '40px'};
+        const colStyle = {marginBottom: '0px'};
 
         return(
-            <Row style={{height: '345px'}}>
-                <Col span={24} style={{height: '93%', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+            <Row>
+                <Col span={24} style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                     <Row style={{textAlign: 'center', paddingLeft: '15px'}}> 
-                        <Col span={24} style={colStyle}>
+                        <Col span={6} style={colStyle}>
                             <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
@@ -541,7 +546,7 @@ export class InvestorDashboard extends React.Component {
                                     value={`${Number(totalreturn * 100).toFixed(2)} %`}
                             />
                         </Col>
-                        <Col span={24} style={colStyle}>
+                        <Col span={6} style={colStyle}>
                             <MetricItem 
                                 valueStyle={valueStyle} 
                                 labelStyle={labelStyle} 
@@ -549,7 +554,7 @@ export class InvestorDashboard extends React.Component {
                                     value={`${Number(dailyreturn * 100).toFixed(2)} %`}
                             />
                         </Col>
-                        <Col span={24} style={colStyle}>
+                        <Col span={6} style={colStyle}>
                             <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
@@ -657,9 +662,10 @@ export class InvestorDashboard extends React.Component {
         const percentageSeries = this.state.percentagePerformance;
         console.log(dollarSeries, percentageSeries);
         return <HighChartBar
-                alignLegend='center' 
+                alignLegend='right' 
                 dollarSeries={dollarSeries} 
                 percentageSeries={percentageSeries} 
+                legendStyle={{top: '0px'}}
         />;
     }
 
@@ -671,20 +677,21 @@ export class InvestorDashboard extends React.Component {
 
     render() {
         return(
-            this.state.positions.length < 1
-            ?   <Row>
-                    <Col span={24} style={emptyPortfolioStyle}>
-                        <h1>You have not created any portfolio yet. Get started by creating One</h1>
-                        <Button 
-                                type="primary" 
-                                onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                                style={{marginTop: '20px'}}
-                        >
-                            Create Portfolio
-                        </Button>
-                    </Col>
-                </Row>
-            :   <Row>
+            // this.state.positions.length < 1
+            // ?   <Row>
+            //         <Col span={24} style={emptyPortfolioStyle}>
+            //             <h1>You have not created any portfolio yet. Get started by creating One</h1>
+            //             <Button 
+            //                     type="primary" 
+            //                     onClick={() => this.props.history.push('/dashboard/createportfolio')}
+            //                     style={{marginTop: '20px'}}
+            //             >
+            //                 Create Portfolio
+            //             </Button>
+            //         </Col>
+            //     </Row>
+            // :   <Row>
+                <Row>
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button 
                                 type="primary" 
@@ -701,13 +708,14 @@ export class InvestorDashboard extends React.Component {
                         </Button>
                     </Col>
                     <Col span={24}>
-                        <Row style={{marginTop: '20px'}}>
+                        <Row style={{marginTop: '22px'}}>
                             <Col xl={12} lg={24} style={{paddingRight: '5px'}}>
                                 <Tabs 
-                                        defaultActiveKey={"1"} 
+                                        defaultActiveKey={"2"} 
                                         animated={false} 
-                                        style={{...newLayoutStyle, height: '365px'}}
+                                        style={{...newLayoutStyle, height: '395px'}}
                                         size="small"
+                                        tabBarStyle={{backgroundColor: tabBackgroundColor}}
                                 >
                                     <TabPane tab="Overview" key="1">
                                         <Row>
@@ -717,8 +725,8 @@ export class InvestorDashboard extends React.Component {
                                     </TabPane>
                                     <TabPane tab="Summary" key="2">
                                         <Row>
-                                            <Col span={16} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
-                                            <Col span={8}>{this.renderSummaryMetrics()}</Col>
+                                            <Col span={24} >{this.renderSummaryMetrics()}</Col>
+                                            <Col span={24} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
                                         </Row>
                                     </TabPane>
                                 </Tabs>
@@ -728,7 +736,8 @@ export class InvestorDashboard extends React.Component {
                                         animated={false} 
                                         defaultActiveKey="1" 
                                         size="small"
-                                        style={{...newLayoutStyle, height: '365px'}}
+                                        style={{...newLayoutStyle, height: '395'}}
+                                        tabBarStyle={{backgroundColor: tabBackgroundColor}}
                                 >
                                     <TabPane 
                                             tab="Performance" 
@@ -752,26 +761,12 @@ export class InvestorDashboard extends React.Component {
                             </Col>
                         </Row>
                         <Row style={{margin: '10px 0'}}>
-                            <Col xl={12} lg={24} style={{paddingRight: '5px'}}>
-                                <Row style={{...newLayoutStyle, overflow: 'hidden', overflowY: 'scroll', height: '365px'}}>
-                                    <Col span={24} style={{marginTop: '10px'}}>
-                                        <h3 style={{marginLeft: '20px'}}>My Portfolios</h3>
-                                    </Col>
-                                    <Col span={24} style={{paddingTop: '20px'}}>
-                                        {this.renderPortfolios()}
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col xl={12} lg={24} style={{paddingLeft: '5px'}}>
-                                <Row style={{...newLayoutStyle, height: '365px', overflow: 'hidden', overflowY: 'scroll'}}>
-                                    <Col span={24} style={{marginTop: '10px'}}>
-                                            <h3 style={{marginLeft: '20px'}}>Advices</h3>
-                                    </Col>
-                                    <Col span={24} style={{marginTop: '10px'}}>
-                                        {this.renderSubscribedAdvices()}
-                                    </Col>
-                                </Row>
-                            </Col>
+                            <DashboardCard title="My Portfolios" cardStyle={{paddingRight: '5px'}}>
+                                {this.renderPortfolios()}
+                            </DashboardCard>
+                            <DashboardCard title="Advices" cardStyle={{paddingLeft: '5px'}}>
+                                {this.renderSubscribedAdvices()}
+                            </DashboardCard>
                         </Row>
                     </Col>
                 </Row>  
@@ -797,4 +792,16 @@ const emptyPortfolioStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center'
-}
+};
+
+const headerStyle = {
+    backgroundColor: tabBackgroundColor, 
+    padding: '5px 10px',
+};
+
+const contentStyle = {
+    paddingTop: '20px', 
+    height: '340px', 
+    overflow: 'hidden', 
+    overflowY: 'scroll'
+};

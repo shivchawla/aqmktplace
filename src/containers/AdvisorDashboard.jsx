@@ -3,8 +3,8 @@ import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate} from 'antd';
-import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline} from '../components';
-import {newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle} from '../constants';
+import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard} from '../components';
+import {newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor} from '../constants';
 import {dateFormat} from '../utils';
 import '../css/advisorDashboard.css';
 
@@ -323,9 +323,9 @@ export class AdvisorDashboard extends React.Component {
         return (
             <Row>
                 <Col span={24}>
-                    <Tabs defaultActiveKey="1" size="small" animated={false}>
+                    <Tabs defaultActiveKey="1" size="small" animated={false} tabBarStyle={{backgroundColor: tabBackgroundColor}}>
                         <TabPane tab="Total Subscribers" key="1" style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                            <Col span={12}>
+                            <Col span={24}>
                                 <HighChartSpline 
                                         id="subsriber-rating-chart" 
                                         xAxisTitle="Subscribers"
@@ -362,7 +362,7 @@ export class AdvisorDashboard extends React.Component {
             return (
                 <Select 
                         defaultValue={advices[0].name} 
-                        style={{width: 120, position: 'absolute', right, top}}
+                        style={{width: 160, position: 'absolute', right, top}}
                         onChange={handleSelect}
                         size="small"
                 >
@@ -579,39 +579,19 @@ export class AdvisorDashboard extends React.Component {
                 </Col>
                 <Col span={24} style={{marginTop: '10px'}}>
                     <Row>
-                        <Col xl={12} md={24} style={{paddingRight: '5px'}}>
-                            <Row style={{...newLayoutStyle,  maxHeight: '380px'}}>
-                                <Col span={8}>
-                                    <h3 style={{...cardHeaderStyle, marginLeft: '20px', marginTop: '20px'}}>Advices</h3>
-                                </Col>
-                                <Col span={6} offset={10} style={{marginTop: '15px'}}>
-                                    {this.renderSortingMenu()}
-                                </Col>
-                                <Col span={24} style={{height: '340px',overflow: 'hidden', overflowY: 'scroll', marginTop: '20px'}}>
+                        <DashboardCard cardStyle={{paddingRight: '5px'}} title=" My Advices" menu={this.renderSortingMenu()}>
                                     {this.renderAdvices()}
-                                </Col>
-                                {/* <Col span={4}>
-                                    <Icon type="filter" onClick={this.toggleFilterModal}/>
-                                </Col> */}
-                            </Row>
-                        </Col>
-                        <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
-                            <Row style={{...newLayoutStyle, maxHeight: '380px'}}>
-                                <Col span={8}>
-                                    <h3 style={{...cardHeaderStyle,marginTop: '20px'}}>Advice Performance</h3>
-                                </Col>
-                                <Col span={6} offset={10} style={{marginTop: '15px'}}>
-                                    {this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,20)}
-                                </Col>
-                                <Col span={24}>
+                        </DashboardCard>
+                        <DashboardCard 
+                                cardStyle={{paddingLeft: '5px'}} 
+                                title="Advice Performance" menu={this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
+                        >
                                     <AqHighChartMod 
                                             tickers={this.state.tickers} 
                                             navigationEnabled={false}
                                             showLegend={false}
                                     />
-                                </Col>
-                            </Row>
-                        </Col>
+                        </DashboardCard>
                     </Row>
                     <Row style={{marginTop: '10px'}}>
                         <Col xl={12} md={24} style={{paddingRight: '5px'}} >
@@ -624,7 +604,7 @@ export class AdvisorDashboard extends React.Component {
                         <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
                             <Row style={{height: '380px', ...newLayoutStyle}}>
                                 <Col span={24}>
-                                    <Tabs defaultActiveKey="1" animated={false}>
+                                    <Tabs size="small" defaultActiveKey="1" animated={false} tabBarStyle={{backgroundColor: tabBackgroundColor}}>
                                         <TabPane key="1" tab="Advice Rating">
                                             {/* <Row type="flex" align="middle">
                                                 <Col span={6} offset={18}>

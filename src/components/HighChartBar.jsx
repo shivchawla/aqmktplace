@@ -11,6 +11,7 @@ export class HighChartBar extends React.Component {
         super(props);
         this.dollarChart = null;
         this.percentageChart = null;
+        const {legendEnabled = true} = props; 
         this.state = {
             config: {
                 chart: {
@@ -20,7 +21,7 @@ export class HighChartBar extends React.Component {
                 plotOptions: {
                     column: {
                         dataLabels: {
-                            enabled: true,
+                            enabled: legendEnabled,
                             crop: false,
                             overflow: 'none',
                             color: '#555454'
@@ -53,18 +54,25 @@ export class HighChartBar extends React.Component {
                     itemDistance: '30px',
                     itemStyle: {
                         color: '#444',
-                        fontSize:'12px',
+                        fontSize:'10px',
                         fontWeight: '400',
+                        width: '200'
                     },
+                    labelFormatter: function() {
+                        console.log('Legend Data', this);
+                        return `<h3>${this.name} - <span style="color: #353535">${this.yData[0]}</span></h3>`;
+                    },
+                    x: -20,
                     itemWidth: 100,
                     verticalAlign: 'middle',
-                    itemMarginBottom:10
+                    itemMarginBottom:10,
+                    useHTML: true
                 },
                 credits: {
                     enabled: false
                 },
                 tooltip: {
-                    enabled: false
+                    enabled: true
                 },
                 series: []
             },
@@ -149,12 +157,17 @@ export class HighChartBar extends React.Component {
     render() {
         const chartPercentageStyle = !this.state.dollarVisible ? {display: 'block'} : {display: 'none'};
         const chartDollarStyle = this.state.dollarVisible ? {display: 'block'} : {display: 'none'};
-        const {alignLegend = 'right'} = this.props;
+        const {alignLegend = 'right', legendStyle = {}} = this.props;
 
         return (
             <Row style={{height: '320px'}}>
-                <Col span={24} style={{textAlign: alignLegend}}>
-                    <RadioGroup size="small" defaultValue="dollarPerformance" style={{marginRight: '10px', marginTop: '10px'}} onChange={this.handleRadioGroupChange}>
+                <Col span={24} style={{textAlign: alignLegend, ...legendStyle}}>
+                    <RadioGroup 
+                            size="small" 
+                            defaultValue="dollarPerformance" 
+                            style={{marginRight: '10px'}} 
+                            onChange={this.handleRadioGroupChange}
+                    >
                         <RadioButton value="dollarPerformance">Dollar</RadioButton>
                         <RadioButton value="percentagePerformance">Percentage</RadioButton>
                     </RadioGroup>

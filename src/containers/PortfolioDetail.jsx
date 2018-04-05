@@ -378,6 +378,7 @@ class PortfolioDetailImpl extends React.Component {
                                             <HighChartBar 
                                                     dollarSeries={this.state.performanceDollarSeries} 
                                                     percentageSeries={this.state.performancepercentageSeries}
+                                                    legendEnabled={false}
                                             />
                                         </AqCard>
                                     </Row>
