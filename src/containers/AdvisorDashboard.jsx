@@ -3,9 +3,10 @@ import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate} from 'antd';
-import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem} from '../components';
+import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline} from '../components';
 import {newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle} from '../constants';
 import {dateFormat} from '../utils';
+import '../css/advisorDashboard.css';
 
 const RadioGroup = Radio.Group;
 const RadioButton = Radio.Button;
@@ -59,52 +60,6 @@ export class AdvisorDashboard extends React.Component {
                 series: [],
                 colors: ["#76DDFB", "#53A8E2", "#2C82BE", "#DBECF8", "#2C9BBE"],
             },
-            subsTotalConfig: {
-                chart: {
-                    type: 'spline',
-                    height: 300,
-                    width: 400
-                },
-                title: {
-                    style: {
-                        display: 'none'
-                    }
-                },
-                xAxis: {
-                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                },
-                yAxis: {
-                    title: {
-                        text: 'Subscribers'
-                    }
-                },
-                legend: {
-                    enabled: false
-                },
-                series: []
-            },
-            ratingsConfig: {
-                chart: {
-                    type: 'spline',
-                    height: 300,
-                    width: 400
-                },
-                title: {
-                    style: {display: 'none'}
-                },
-                xAxis: {
-                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                },
-                yAxis: {
-                    title: {
-                        text: 'Subscribers'
-                    }
-                },
-                legend: {
-                    enabled: false
-                },
-                series: []
-            },
             selectedAdvice: '',
             subscribeScreen: 'total',
             tickers: [],
@@ -116,12 +71,14 @@ export class AdvisorDashboard extends React.Component {
             },
             ratingStats: {
                 currentRating: 4.7,
-                averageRating: 5
+                simulatedRating: 5
             },
-            totalSubscriberStats: {
-                totalSubscribers: 0,
-                newSubscribers: 0
-            }
+            advisorRatingStat: 0,
+            totalSubscribers: 0,
+            newSubscribers: 0,
+            adviceRating: [],
+            advisorRating: [],
+            subscriberRating: []
         };
         this.adviceColumns = [
             {
@@ -163,7 +120,7 @@ export class AdvisorDashboard extends React.Component {
                 ...this.state.subsPerAdviceConfig, 
                 title: {
                     ...this.state.subsPerAdviceConfig.title,
-                    text: `${data.name} <br> ${Number(data.percentage).toFixed(2)}`
+                    text: `${data.name} <br> ${Number(data.percentage).toFixed(2)} %`
                 }
             }
     }
@@ -177,6 +134,8 @@ export class AdvisorDashboard extends React.Component {
         const subsPerAdviceSeries = [];
         const subsTotalSeries = [];
         const ratingSeries = [];
+        const advisorRating = [];
+        let subscriberRating = {};
         let totalSubscribers = 0;
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
@@ -185,8 +144,31 @@ export class AdvisorDashboard extends React.Component {
                 name: 'Browser share',
                 data: this.processSubsPerAdvice(response.data.advices)
             });
-            subsTotalSeries.push({name: 'Total Subscribers', data: this.processTotalSubscribers(response.data.analytics)});
-            ratingSeries.push({name: response.data.advices[0].name, data: this.processRatingByAdvice(response.data.advices[0])});
+            const currentRating = response.data.advices[0].analytics[response.data.advices[0].analytics.length - 1].rating.current.toFixed(2);
+            const simulatedRating = response.data.advices[0].analytics[response.data.advices[0].analytics.length - 1].rating.simulated.toFixed(2);
+            const advisorRatingStat = response.data.analytics[response.data.analytics.length - 1].rating.current.toFixed(2);
+            const advisorSubscribers = response.data.analytics[response.data.analytics.length - 1].numFollowers;
+            subscriberRating = {name: 'Total Subscribers', data: this.processTotalSubscribers(response.data.analytics)};
+            subsTotalSeries.push({
+                name: 'Total Subscribers', 
+                data: this.processTotalSubscribers(response.data.analytics),
+                color: '#536DFE'
+            });
+            ratingSeries.push({
+                name: 'Current Rating', 
+                data: this.processRatingByAdvice(response.data.advices[0]),
+                color: '#607D8B'
+            });
+            ratingSeries.push({
+                name: 'Simulated Rating', 
+                data: this.processRatingByAdvice(response.data.advices[0], 'simulated'),
+                color: '#FF9800'
+            });
+            advisorRating.push({
+                name: 'Advisor Analytics', 
+                data: this.processAdvisorRating(response.data.analytics),
+                color: '#607D8B'
+            });
             subsPerAdviceSeries[0].data.map(obj => {
                 totalSubscribers += obj.y;
             });
@@ -203,12 +185,20 @@ export class AdvisorDashboard extends React.Component {
                         percentage: Number((subsPerAdviceSeries[0].data[0].y / totalSubscribers) * 100).toFixed(2)
                     }).title
                 },
-                subsTotalConfig: {...this.state.subsTotalConfig, series: subsTotalSeries},
                 ratingsConfig: {...this.state.ratingsConfig, series: ratingSeries},
+                adviceRating: ratingSeries,
+                advisorRating,
+                subscriberRating: subsTotalSeries,
                 subscriberStats: {
                     selectedAdviceSubscribers: subsPerAdviceSeries[0].data[0].y, 
                     totalSubscribers
-                }
+                },
+                ratingStats: {
+                    currentRating,
+                    simulatedRating
+                },
+                advisorRatingStat,
+                totalSubscribers: advisorSubscribers
             });
         })
         .catch(error => {
@@ -290,7 +280,28 @@ export class AdvisorDashboard extends React.Component {
         
     }
 
-    processRatingByAdvice = advice => {
+    processAdvisorRating = advisorAnalytics => {
+        if (advisorAnalytics.length > 0) {
+            const monthData = [];
+            for (let i=0; i < 12; i++) {
+                monthData.push(null);
+            };
+            advisorAnalytics.map((item, index) => {
+                const month = moment(item.date).format('M');
+                if (item.rating.current) {
+                    monthData[month - 1] = Number(item.rating.current.toFixed(2));
+                } else {
+                    monthData[month - 1] = 0;
+                }
+            });
+
+            return monthData;
+        } else {
+            return [];
+        }
+    }
+
+    processRatingByAdvice = (advice, type='current') => {
         const monthData = [];
          // Initializing month's data to null
         for (let i=0; i < 12; i++) {
@@ -298,7 +309,8 @@ export class AdvisorDashboard extends React.Component {
         };
         advice.analytics.map((item, index) => {
             const month = moment(item.date).format('M');
-            monthData[month - 1] = item.rating;
+            const rating = type === 'current' ? item.rating.current : item.rating.simulated;
+            monthData[month - 1] = rating !== undefined ? Number(rating.toFixed(2)) : 0;
         });
 
         return monthData;
@@ -309,17 +321,20 @@ export class AdvisorDashboard extends React.Component {
         const {totalSubscribers, selectedAdviceSubscribers} = subscriberStats;
 
         return (
-            <Row style={{height: '380px'}}>
+            <Row>
                 <Col span={24}>
                     <Tabs defaultActiveKey="1" size="small" animated={false}>
                         <TabPane tab="Total Subscribers" key="1" style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <Col span={12}>
-                                <ReactHighcharts config = {this.state.subsTotalConfig} />
+                                <HighChartSpline 
+                                        id="subsriber-rating-chart" 
+                                        xAxisTitle="Subscribers"
+                                        series={this.state.subscriberRating}
+                                />
                             </Col>
                             <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
                                 <Row type="flex" align="middle">
-                                    <StatsMetricItem label="Subscribers" value={this.state.totalSubscriberStats.totalSubscribers}/>
-                                    <StatsMetricItem label="New" value={this.state.totalSubscriberStats.newSubscribers}/>
+                                    <StatsMetricItem label="Subscribers" value={this.state.totalSubscribers}/>
                                 </Row>
                             </Col>
                         </TabPane>
@@ -340,14 +355,14 @@ export class AdvisorDashboard extends React.Component {
         );
     }
 
-    renderAdvicesMenu = (handleSelect) => {
+    renderAdvicesMenu = (handleSelect, top = 0, right = 0) => {
         const advices = this.state.rawAdvices;
 
         if(advices.length > 0) {
             return (
                 <Select 
                         defaultValue={advices[0].name} 
-                        style={{width: 120}}
+                        style={{width: 120, position: 'absolute', right, top}}
                         onChange={handleSelect}
                         size="small"
                 >
@@ -371,10 +386,21 @@ export class AdvisorDashboard extends React.Component {
 
     handleSelectAdvice = value => {
         const advices = this.state.rawAdvices;
+        const ratingSeries = [];
         const series = this.state.ratingsConfig.series;
         const advice = advices.filter(item => item._id === value)[0];
-        series[0] = {name: advice.name, data: this.processRatingByAdvice(advice)};
-        this.setState({ratingsConfig: {...this.state.ratingsConfig, series}});
+        const currentRating = advice.analytics[advice.analytics.length - 1].rating.current.toFixed(2);
+        const simulatedRating = advice.analytics[advice.analytics.length - 1].rating.simulated.toFixed(2);    
+
+        ratingSeries.push({name: 'Current Rating', data: this.processRatingByAdvice(advice), color: '#607D8B'});
+        ratingSeries.push({name: 'Simulated Rating', data: this.processRatingByAdvice(advice, 'simulated'), color: '#FF9800'});
+        this.setState({
+            adviceRating: ratingSeries,
+            ratingStats: {
+                currentRating,
+                simulatedRating
+            }
+        });
     }
 
     handleSelectAdvicePerformance = value => {
@@ -388,7 +414,8 @@ export class AdvisorDashboard extends React.Component {
                 name: advice.name,
                 data,
                 show: true,
-                disabled: true
+                disabled: true,
+                color: 'green'
             });
             this.setState({tickers: newTickers});
         })
@@ -491,30 +518,31 @@ export class AdvisorDashboard extends React.Component {
     renderAdvices = () => {
         const advices = this.state.rawAdvices;
         return advices.map((advice, index) => {
-            const returnColor = advice.latestPerformance.return < 0 ? '#ED4D4D' : '#3DC66B';
+            const returnColor = advice.performanceSummary.current.totalReturn < 0 ? '#ED4D4D' : '#3DC66B';
             return (
                 <Row 
                         key={index} 
-                        style={{marginBottom: '10px', padding: '0 20px', cursor: 'pointer'}}
+                        style={{padding: '0 20px', cursor: 'pointer', paddingBottom: '20px'}}
                         onClick={() => this.props.history.push(`/advice/${advice._id}`)}
+                        className='advice-row'
                 >
                     <Col span={7}>
                         <ListMetricItem label="Name" value={advice.name} />
                     </Col>
-                    <Col span={5}>
-                        <ListMetricItem value={advice.latestPerformance.netValue} label="Net Value" />
-                    </Col>
                     <Col span={6}>
+                        <ListMetricItem value={advice.performanceSummary.current.netValue.toFixed(2)} label="Net Value" />
+                    </Col>
+                    <Col span={4}>
                         <ListMetricItem 
                                 valueColor={returnColor} 
-                                value={Number(advice.latestPerformance.return).toFixed(2)} 
+                                value={`${Number((advice.performanceSummary.current.totalReturn * 100).toFixed(2))} %`} 
                                 label="Return" 
                         />
                     </Col>
-                    <Col span={6}>
+                    <Col span={7}>
                         <Row>
                             <Col span={24}>
-                                <Rate disabled value={advice.latestAnalytics.rating / 2} />
+                                <Rate disabled value={advice.rating.current} />
                             </Col>
                             <Col span={24}>
                                 <h3 style={listMetricItemLabelStyle}>Rating</h3>
@@ -532,72 +560,107 @@ export class AdvisorDashboard extends React.Component {
         const {radioValue} = this.state;
 
         return(
-            <Row style={{paddingBottom: '20px'}}>
+            <Row style={{paddingBottom: '40px'}}>
                 {this.renderFilterModal()}
-                <Col span={24}>
+                <Col span={24} style={{textAlign: 'right'}}>
+                    <Button 
+                            type="primary" 
+                            style={{marginRight: '20px'}}
+                            onClick={() => this.props.history.push('/dashboard/createadvice')}
+                    >
+                        Create Advice
+                    </Button>
+                    <Button 
+                            type="secondary" 
+                            onClick={() => this.props.history.push('/investordashboard')}
+                    >
+                        Investor Dashboard
+                    </Button>
+                </Col>
+                <Col span={24} style={{marginTop: '10px'}}>
                     <Row>
-                        <Col span={11} style={newLayoutStyle}>
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderSubscriberStatsView()}
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col span={11} offset={1} style={{...newLayoutStyle, height: '380px'}}>
-                            <Row type="flex" align="middle">
-                                <Col span={8}>
-                                    <h3 style={{...cardHeaderStyle, marginBottom: '20px'}}>Ratings</h3>
-                                </Col>
-                                <Col span={6} offset={10}>
-                                    {this.renderAdvicesMenu(this.handleSelectAdvice)}
-                                </Col>
-                            </Row>
-                            <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                <Col span={12}>
-                                    <ReactHighcharts config = {this.state.ratingsConfig} />
-                                </Col>
-                                <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
-                                    <Row type="flex" align="middle">
-                                        <StatsMetricItem label="Rating" value={this.state.ratingStats.currentRating}/>
-                                        <StatsMetricItem label="Average Rating" value={this.state.ratingStats.averageRating}/>
-                                    </Row>
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                    <Row style={{marginTop: '20px'}}>
-                        <Col span={11} style={{...newLayoutStyle, height: '380px'}}>
-                            <Row>
+                        <Col xl={12} md={24} style={{paddingRight: '5px'}}>
+                            <Row style={{...newLayoutStyle,  maxHeight: '380px'}}>
                                 <Col span={8}>
                                     <h3 style={{...cardHeaderStyle, marginLeft: '20px', marginTop: '20px'}}>Advices</h3>
                                 </Col>
                                 <Col span={6} offset={10} style={{marginTop: '15px'}}>
                                     {this.renderSortingMenu()}
                                 </Col>
+                                <Col span={24} style={{height: '340px',overflow: 'hidden', overflowY: 'scroll', marginTop: '20px'}}>
+                                    {this.renderAdvices()}
+                                </Col>
                                 {/* <Col span={4}>
                                     <Icon type="filter" onClick={this.toggleFilterModal}/>
                                 </Col> */}
                             </Row>
-                            <Row>
-                                <Col span={24} style={{height: '340px',overflow: 'hidden', overflowY: 'scroll', marginTop: '20px'}}>
-                                    {this.renderAdvices()}
-                                </Col>
-                            </Row>
                         </Col>
-                        <Col span={11} offset={1} style={{...newLayoutStyle, height: '380px'}}>
-                            <Row type="flex" align="middle">
+                        <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
+                            <Row style={{...newLayoutStyle, maxHeight: '380px'}}>
                                 <Col span={8}>
                                     <h3 style={{...cardHeaderStyle,marginTop: '20px'}}>Advice Performance</h3>
                                 </Col>
                                 <Col span={6} offset={10} style={{marginTop: '15px'}}>
-                                    {this.renderAdvicesMenu(this.handleSelectAdvicePerformance)}
+                                    {this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,20)}
+                                </Col>
+                                <Col span={24}>
+                                    <AqHighChartMod 
+                                            tickers={this.state.tickers} 
+                                            navigationEnabled={false}
+                                            showLegend={false}
+                                    />
                                 </Col>
                             </Row>
-                            <AqHighChartMod 
-                                    tickers={this.state.tickers} 
-                                    navigationEnabled={false}
-                                    showLegend={false}
-                            />
+                        </Col>
+                    </Row>
+                    <Row style={{marginTop: '10px'}}>
+                        <Col xl={12} md={24} style={{paddingRight: '5px'}} >
+                            <Row style={{height: '380px', ...newLayoutStyle}}>
+                                <Col span={24}>
+                                    {this.renderSubscriberStatsView()}
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
+                            <Row style={{height: '380px', ...newLayoutStyle}}>
+                                <Col span={24}>
+                                    <Tabs defaultActiveKey="1" animated={false}>
+                                        <TabPane key="1" tab="Advice Rating">
+                                            {/* <Row type="flex" align="middle">
+                                                <Col span={6} offset={18}>
+                                                    {this.renderAdvicesMenu(this.handleSelectAdvice)}
+                                                </Col>
+                                            </Row> */}
+                                            <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                <Col span={12}>
+                                                    <HighChartSpline id="advice-rating-chart" series={this.state.adviceRating}/>
+                                                </Col>
+                                                <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
+                                                    <Row type="flex" align="middle">
+                                                        <Col span={24}>
+                                                            {this.renderAdvicesMenu(this.handleSelectAdvice, -20)}
+                                                        </Col>
+                                                        <StatsMetricItem style={{marginTop: '30px'}} label="Current Rating" value={this.state.ratingStats.currentRating}/>
+                                                        <StatsMetricItem label="Simulated Rating" value={this.state.ratingStats.simulatedRating}/>
+                                                    </Row>
+                                                </Col>
+                                            </Row>
+                                        </TabPane>
+                                        <TabPane key="2" tab="Advisor Rating">
+                                            <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                <Col span={12}>
+                                                    <HighChartSpline id="advisor-rating-chart" series={this.state.advisorRating}/>
+                                                </Col>
+                                                <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
+                                                    <Row type="flex" align="middle">
+                                                        <StatsMetricItem label="Rating" value={this.state.advisorRatingStat}/>
+                                                    </Row>
+                                                </Col>
+                                            </Row>
+                                        </TabPane>
+                                    </Tabs>
+                                </Col>
+                            </Row>
                         </Col>
                     </Row>
                 </Col>
@@ -606,9 +669,9 @@ export class AdvisorDashboard extends React.Component {
     }
 }
 
-const StatsMetricItem = ({label, value}) => {
+const StatsMetricItem = ({label, value, style}) => {
     return (
-        <Col span={14} offset={10} style={{textAlign: 'right', marginBottom: '10px'}}>
+        <Col span={14} offset={10} style={{textAlign: 'right', marginBottom: '10px', ...style}}>
             <h3 style={metricValueStyle}>{value}</h3>
             <h3 style={metricLabelStyle}>{label}</h3>
         </Col>

@@ -69,6 +69,7 @@ export class AutoCompleteEditableCell extends React.Component {
                     onSearch={this.handleSearch}
                     placeholder="Search Stocks"
                     onChange={this.handleChange}
+                    defaultValue={value}
             >
                 <Input
                         suffix={(

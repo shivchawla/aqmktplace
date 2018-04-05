@@ -57,7 +57,7 @@ export class AdviceDetail extends React.Component {
             series: [],
             barDollarSeries: [],
             barPercentageSeries: [],
-            positions: []
+            positions: [],
         };
     }
 
@@ -380,6 +380,10 @@ export class AdviceDetail extends React.Component {
             </Row>
         );  
     };
+
+    handleChange = value => {
+        this.setState({selectedValue: value});
+    }
 
     render() { 
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;

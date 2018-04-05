@@ -70,8 +70,13 @@ export class HighChartNew extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextState) {
+        console.log('Old Series', this.props.series);
+        console.log('Next Series', nextProps.series);
         if (nextProps.series !== this.props.series) {
             this.updateSeries(nextProps.series);
+            console.log('Different');
+        } else {
+            console.log('Same');
         }
     }
 

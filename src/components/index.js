@@ -25,3 +25,4 @@ export * from './AutoCompleteEditableCell';
 export * from './HighChartNew';
 export * from './HighChartBar';
 export * from './AdviceMetricsItems';
+export * from './HighChartSpline';

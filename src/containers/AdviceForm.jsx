@@ -5,7 +5,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle} from '../constants';
-import {EditableCell, AqStockTable, AqDropDown, AqHighChartMod, HighChartNew} from '../components';
+import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew} from '../components';
 import {getUnixStockData, getStockPerformance} from '../utils';
 import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
@@ -68,7 +68,8 @@ export class AdviceFormImpl extends React.Component {
             positions: [],
             public: false,
             isPublic: false,
-            addTickerModalVisible: true,
+            addTickerModalVisible: false,
+            compositionSeries: []
         };
         this.columns = [
             {
@@ -222,7 +223,19 @@ export class AdviceFormImpl extends React.Component {
         .then(response => {
             let performance = response.data.portfolioPerformance.portfolioValues.map(
                 item => {
-                    return [moment(item.date).valueOf(), item.netValue]
+                    return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))]
+                }
+            );
+            let series = [];
+            series.push(
+                {
+                    name: 'First Series',
+                    data: this.getVerifiedTransactions().map(item => {
+                        return {
+                            name: item.symbol,
+                            y: item.weight
+                        }
+                    })
                 }
             );
             if (tickers.length < 2) {
@@ -233,7 +246,7 @@ export class AdviceFormImpl extends React.Component {
             } else {
                 tickers[1].data = performance;
             }
-            this.setState({tickers});
+            this.setState({tickers, compositionSeries: series});
         })
         .catch(error => {
             console.log(error.message);
@@ -303,21 +316,6 @@ export class AdviceFormImpl extends React.Component {
   
     onChange = (data) => {
         let totalCash = 0;
-        // const newTickers = this.state.tickers.splice(0, 1);
-        // const tickers = [...newTickers];
-        // data.map((item) => {
-        //     const tickerIndex = _.findIndex(newTickers, tickerItem => item.symbol === tickerItem.name);
-        //     if (tickerIndex === -1) {
-        //         if (item.symbol.length > 1) {
-        //             tickers.push({
-        //                 name: item.symbol
-        //             });
-        //         }
-        //     }
-        //     if(item.tickerValidationStatus === 'success') {
-        //         totalCash += item.totalValue;
-        //     }
-        // });
         const remainingCash = this.state.initialCash - totalCash;
         this.setState({
             data: _.cloneDeep(data), 
@@ -333,9 +331,7 @@ export class AdviceFormImpl extends React.Component {
         .then(performance => {
             tickers[0].name = ticker;
             tickers[0].data = performance;
-            this.setState({tickers, selectedBenchmark: ticker}, () => {
-                console.log(this.state.tickers);
-            });
+            this.setState({tickers, selectedBenchmark: ticker});
         });
     }
 
@@ -363,29 +359,13 @@ export class AdviceFormImpl extends React.Component {
         </Menu>
     )
 
-    renderMenu = (options, handleClick) => (
-        <Select defaultValue={options[0]} style={{width: 150}} onChange={handleClick}>
+    renderMenu = (options, handleClick, defaultValue = options[0]) => (
+        <Select value={defaultValue} style={{width: 150}} onChange={handleClick}>
             {
                 options.map((item, index) => <Option key={index} value={item}>{item}</Option>)
             }
         </Select>
     )   
-
-    renderBenchmarkMenu = () => {
-        return (
-            <Menu>
-                {
-                    this.state.benchmarks.map((item, index) => {
-                        return (
-                            <Menu.Item key={index}>
-                                <a onClick={() => this.onBenchmarkSelected(item)}>{item}</a>
-                            </Menu.Item>
-                        );
-                    })
-                }
-            </Menu>
-        );
-    }
 
     setFieldsValue = ({name, description, headline}) => {
         this.props.form.setFieldsValue({name, description, headline});
@@ -406,7 +386,7 @@ export class AdviceFormImpl extends React.Component {
                     visible={this.state.addTickerModalVisible}
                     onOk={this.toggleAddTickerModal}
                     onCancel={this.toggleAddTickerModal}
-                    width={900}
+                    width={980}
                     footer={null}
             >
                 <Row type="flex">
@@ -418,10 +398,12 @@ export class AdviceFormImpl extends React.Component {
                                 onChange = {this.onChange}
                                 setFieldsValue = {this.setFieldsValue}
                                 data={this.state.data}
+                                toggleModal={this.toggleAddTickerModal}
                             />
                         :   <AqStockTableMod 
                                 onChange = {this.onChange}
                                 setFieldsValue = {this.setFieldsValue}
+                                toggleModal={this.toggleAddTickerModal}
                             />
                     }
                 </Row>
@@ -432,19 +414,7 @@ export class AdviceFormImpl extends React.Component {
     renderPortfolioDetailsTabs = () => {
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
         const editOperations = <Button onClick={this.toggleAddTickerModal}>{buttonText}</Button>;
-        const verifiedTransactions = [...this.getVerifiedTransactions()];
-        const series = [
-            {
-                name: 'First Series',
-                data: verifiedTransactions.map(item => {
-                    return {
-                        name: item.symbol,
-                        y: item.weight
-                    }
-                })
-            }
-        ];
-
+        const series = [...this.state.compositionSeries];
         return (
             <Tabs animated={false} defaultActiveKey="1" tabBarExtraContent={editOperations}>
                 <TabPane key="1" tab="Overview">
@@ -462,8 +432,8 @@ export class AdviceFormImpl extends React.Component {
                                     </Row>
                                     <Row justfy="center" type="flex" style={{marginLeft: '10px'}}>
                                         {
-                                            series[0].data.length > 0 && series[0].data[0].y > 0 &&
-                                            <HighChartNew series={[...series]}/>
+                                            series.length > 0 &&series[0].data.length > 0 && series[0].data[0].y > 0 &&
+                                            <HighChartNew series={series}/>
                                         }
                                     </Row>
                                 </Col>
@@ -508,16 +478,92 @@ export class AdviceFormImpl extends React.Component {
         );
     }
 
-    componentWillMount() {
+    getAdvice = (id) => {
+        const {requestUrl, aimsquantToken} = localConfig;
+        const adviceUrl =`${requestUrl}/advice/${id}`;
+        const adviceDetailUrl = `${adviceUrl}/detail`;
         const tickers = [...this.state.tickers];
-        getStockPerformance(this.state.selectedBenchmark)
-        .then(performance => {
-            tickers.push({
-                name: `BENCHMARK`,
-                data: performance
+        axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
+        .then(response => {
+            const {name, description, heading} = response.data;
+            this.setState({
+                adviceName: name, 
+                adviceDescription: description, 
+                adviceHeading: heading, 
+                selectedBenchmark: response.data.portfolio.benchmark.ticker,
+                rebalancingFrequency: response.data.rebalance
+            }, () => {
+                console.log('Selected Benchmark', response.data.portfolio.benchmark.ticker);
+                getStockPerformance(response.data.portfolio.benchmark.ticker)
+                .then(performance => {
+                    tickers.push({
+                        name: `BENCHMARK`,
+                        data: performance
+                    });
+                    this.setState({tickers});
+                });
             });
-            this.setState({tickers});
+            this.props.form.setFieldsValue({name, description, headline: heading});
+            
+            return axios.get(adviceDetailUrl, {headers: {'aimsquant-token': aimsquantToken}});
+        })
+        .then(response => {
+            const positions = [...this.state.positions];
+            const portfolio = response.data.portfolio.detail.positions;
+            portfolio.map((item, index) => {
+                positions.push({
+                    key: index,
+                    lastPrice: item.lastPrice,
+                    shares: item.quantity,
+                    symbol: item.security.ticker,
+                    ticker: item.security.ticker,
+                    totalValue: Number((item.quantity * item.lastPrice).toFixed(2))
+                });
+            });
+            this.updateAllWeights(positions);
+            this.setState({data: positions, startDate: response.data.portfolio.detail.startDate}, () => {
+                this.getPortfolioPerformance();
+                this.props.form.setFieldsValue({startDate: moment(this.state.startDate)});
+            });
+        })
+        .catch(err => {
+            console.log(err);
         });
+    }
+
+    updateAllWeights = (data) => {
+        const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
+        return data.map((item, index) => {
+            item['weight'] = Number((item['totalValue'] / totalSummation).toFixed(2));
+            return item;
+        });
+    }
+
+    getTotalValueSummation = data => {
+        let totalValue = 0;
+        data.map(item => {
+            totalValue += item.totalValue;
+        });
+        console.log(totalValue);
+
+        return totalValue;
+    }
+
+    componentWillMount() {
+        if (this.props.isUpdate) {
+            this.getAdvice(this.props.adviceId);
+        } else {
+            const tickers = [...this.state.tickers];
+            getStockPerformance(this.state.selectedBenchmark)
+            .then(performance => {
+                tickers.push({
+                    name: `BENCHMARK`,
+                    data: performance
+                });
+                this.setState({tickers});
+            });
+        }
+        
     }
 
     render() {
@@ -603,7 +649,13 @@ export class AdviceFormImpl extends React.Component {
                                                 </Col>
                                                 <Col span={11} offset={2} style={{marginTop: '10px'}}>
                                                     <h4 style={labelStyle}>Rebalancing Frequency</h4>
-                                                    {this.renderMenu(rebalancingFrequency, this.handleRebalanceMenuClick)}
+                                                    {
+                                                        this.renderMenu(
+                                                            rebalancingFrequency, 
+                                                            this.handleRebalanceMenuClick,
+                                                            this.state.rebalancingFrequency
+                                                        )
+                                                    }
                                                 </Col>
                                                 <Col span={11} style={{marginTop: '20px'}}>
                                                     <h4 style={labelStyle}>Start Date</h4>
@@ -612,17 +664,22 @@ export class AdviceFormImpl extends React.Component {
                                                             rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
                                                         })(
                                                             <DatePicker 
-                                                                onChange={this.onStartDateChange} 
+                                                                // onChange={this.onStartDateChange} 
                                                                 format={dateFormat}
                                                                 style={{...inputStyle, width: 150}}
-                                                                format={dateFormat}
                                                             /> 
                                                         )}
                                                     </FormItem>
                                                 </Col>
                                                 <Col span={11} offset={2} style={{marginTop: '20px'}}>
                                                     <h4 style={labelStyle}>Benchmark</h4>
-                                                    {this.renderMenu(this.state.benchmarks, this.onBenchmarkSelected)}
+                                                    {
+                                                        this.renderMenu(
+                                                            this.state.benchmarks, 
+                                                            this.onBenchmarkSelected, 
+                                                            this.state.selectedBenchmark
+                                                        )
+                                                    }
                                                 </Col>
                                             </Row>
                                         }

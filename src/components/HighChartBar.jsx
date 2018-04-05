@@ -77,7 +77,6 @@ export class HighChartBar extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextState) {
-        console.log('Next Props', nextProps);
         if (nextProps.dollarSeries !== this.props.dollarSeries) {
             try {
                 this.updateDollarSeries(nextProps.dollarSeries);
@@ -106,7 +105,6 @@ export class HighChartBar extends React.Component {
     }
 
     updateDollarSeries = series => {
-        console.log('Dollar Series', series);
         if (series.length > 0) {
             this.clearDollarSeries();
             series.map((item, index) => {
@@ -120,7 +118,6 @@ export class HighChartBar extends React.Component {
     }
 
     updatePercentageSeries = series => {
-        console.log('Percentage Series', series);
         if (series.length > 0) {
             this.clearPercentageSeries();
             series.map((item, index) => {

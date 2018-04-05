@@ -152,8 +152,8 @@ class PortfolioDetailImpl extends React.Component {
                         costBasic: item.avgPrice,
                         unrealizedPL: 1231,
                         weight: '12%',
-                        name: item.security.detail.Nse_Name,
-                        sector: item.security.detail.Sector
+                        name: item.security.detail ? item.security.detail.Nse_Name : 'undefined',
+                        sector: item.security.detail ? item.security.detail.Sector : 'undefined'
                     }
                 ]
             });
@@ -169,8 +169,8 @@ class PortfolioDetailImpl extends React.Component {
                 costBasic: item.avgPrice,
                 unrealizedPL: 1231,
                 weight: '12%',
-                name: item.security.detail.Nse_Name,
-                sector: item.security.detail.Sector
+                name: item.security.detail ? item.security.detail.Nse_Name : 'undefined',
+                sector: item.security.detail ? item.security.detail.Sector : 'undefined'
             });
         }
 
@@ -266,9 +266,17 @@ class PortfolioDetailImpl extends React.Component {
         })
         .then(response => { // Getting Portfolio Performance
             const colorData = generateColorData(positions);
-            let performanceSeries = response.data.simulated.portfolioValues.map((item, index) => {
-                return [moment(item.date).valueOf(), item.netValue];
-            });
+            let performanceSeries = [];
+            if (response.data.simulated !== undefined) {
+                performanceSeries = response.data.simulated.portfolioValues.map((item, index) => {
+                    return [moment(item.date).valueOf(), item.netValue];
+                });
+            } else {
+                performanceSeries = response.data.current.portfolioValues.map((item, index) => {
+                    return [moment(item.date).valueOf(), item.netValue];
+                });
+            }
+            
             tickers.push({ // Pushing advice performance to performance graph
                 name: 'Portfolio',
                 data: performanceSeries
@@ -308,10 +316,41 @@ class PortfolioDetailImpl extends React.Component {
     render () {
         return (
             <Row style={{margin: '20px 0'}}>
-                <Col span={18} xs={24} md={24} lg={18} style={{...newLayoutStyle, padding: '0'}}>
+                <Col xl={18} md={24} style={{...newLayoutStyle, padding: '0'}}>
                     <Row style={{padding: '20px 30px'}}>
                         <Col span={24}>
-                            <h3 style={pageHeaderStyle}>{this.state.name}</h3>
+                            <Row>
+                                <Col span={10}>
+                                    <h3 style={pageHeaderStyle}>{this.state.name}</h3>
+                                </Col>
+                                <Col xl={0} md={14} style={{textAlign: 'right'}}>
+                                    <Button 
+                                            type="primary" 
+                                            style={{marginBottom: 20}} 
+                                            onClick={() => this.props.history.push(
+                                                '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
+                                            )}
+                                            className="primary-btn"
+                                    >
+                                        Create Portfolio
+                                    </Button>
+                                
+                                    <Button
+                                            onClick={() => this.props.history.push(
+                                                `/dashboard/portfolio/transactions/${this.props.match.params.id}`, 
+                                                {
+                                                    pageTitle: 'Add Transactions',
+                                                    advices: this.state.presentAdvices,
+                                                    stocksPositions: this.state.stockPositions
+                                                }
+                                            )}
+                                            className="secondary-btn"
+                                            style = {{marginLeft: '20px'}}
+                                    >
+                                        Add Transactions
+                                    </Button>
+                                </Col>
+                            </Row>
                         </Col>
                         <Col span={24} style={{marginTop: '10px'}}>
                             <h4 style={metricsHeaderStyle}>Metrics</h4>
@@ -386,7 +425,7 @@ class PortfolioDetailImpl extends React.Component {
                         </Panel>
                     </Collapse>
                 </Col>
-                <Col span={5} offset={1}>
+                <Col xl={5} md={0} offset={1}>
                     <Row>
                         <Col span={24}>
                             <Button 

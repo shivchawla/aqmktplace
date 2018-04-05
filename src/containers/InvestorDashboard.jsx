@@ -687,8 +687,15 @@ export class InvestorDashboard extends React.Component {
                     <Button 
                             type="primary" 
                             onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                            style={{marginRight: '20px'}}
                     >
                         Create Portfolio
+                    </Button>
+                    <Button 
+                            type="secondary" 
+                            onClick={() => this.props.history.push('/advisordashboard')}
+                    >
+                        Advisor Dashboard
                     </Button>
                 </Col>
                 <Col span={24}>

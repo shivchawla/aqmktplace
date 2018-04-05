@@ -19,7 +19,7 @@ export const layoutStyle = {
 };
 
 export const newLayoutStyle = {
-    borderRadius: '4px',
+    borderRadius: '2px',
     boxShadow: '0 2px 4px rgba(171, 171, 171, 50)',
     overflow: 'hidden',
     border: '1px solid #eaeaea'

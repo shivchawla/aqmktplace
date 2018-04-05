@@ -90,6 +90,7 @@ export class AqStockTableMod extends React.Component {
             <AutoCompleteEditableCell 
                     onSelect={value => {this.handlePressEnter(value, record.key, column)}}
                     handleAutoCompleteChange={value => this.handleAutoCompleteChange(value, record.key, column)}
+                    value={text}
             />
         );
     }
@@ -119,13 +120,13 @@ export class AqStockTableMod extends React.Component {
                 this.setState({data: newData});
             }
             this.setState({data: newData});
-            this.props.onChange(newData);
+            // this.props.onChange(newData);
         }
     }
 
     updateAllWeights = (data) => {
-        const totalSummation = Number(this.getTotalValueSummation(newData).toFixed(2));
-        const newData = data.map((item, index) => {
+        const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
+        return data.map((item, index) => {
             item['weight'] = Number((item['totalValue'] / totalSummation).toFixed(2));
             return item;
         });
@@ -141,8 +142,9 @@ export class AqStockTableMod extends React.Component {
                 this.asyncGetTarget(value)
                 .then(response => {
                     target = Object.assign(target, response);
+                    target['totalValue'] = target['shares'] * response.lastPrice;
                     this.setState({data: newData});
-                    this.props.onChange(newData);
+                    // this.props.onChange(newData);
                 });
             }
         }
@@ -161,7 +163,7 @@ export class AqStockTableMod extends React.Component {
                 this.updateAllWeights(newData);
             }
             this.setState({data: newData});
-            this.props.onChange(newData);
+            // this.props.onChange(newData);
         }
     }
 
@@ -203,14 +205,12 @@ export class AqStockTableMod extends React.Component {
         let data = [...this.state.data];
         data = _.pull(data, ...this.state.selectedRows);
         this.setState({data, selectedRows: []}, () => {
-            console.log(this.state.selectedRows);
             this.props.onChange(data);
         });
     }
 
     addItem = () => {
         const data = [...this.state.data];
-        console.log(data);
         data.push({
             symbol: '',
             key: data.length,
@@ -227,14 +227,18 @@ export class AqStockTableMod extends React.Component {
         });
     }
 
-    getTotalValueSummation = () => {
-        const {data} = this.state;
+    getTotalValueSummation = data => {
         let totalValue = 0;
         data.map(item => {
             totalValue += item.totalValue;
         });
 
         return totalValue;
+    }
+
+    handleDoneClick = () => {
+        this.props.onChange(this.state.data);
+        this.props.toggleModal();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -249,6 +253,8 @@ export class AqStockTableMod extends React.Component {
         if (!this.props.isUpdate) {
             const data = initialTransactions();
             this.setState({data});
+        } else {
+            this.setState({data: this.props.data});
         }
     }
 
@@ -257,7 +263,12 @@ export class AqStockTableMod extends React.Component {
             <Col span={24}>
                 <Row style={{marginBottom: '20px'}}>
                     <Col span={4}>
-                        <Button onClick={this.deleteItems}>Delete Selected</Button>
+                        <Button 
+                                disabled={this.state.selectedRows.length > 0 ? false : true} 
+                                onClick={this.deleteItems}
+                        >
+                            Delete Selected
+                        </Button>
                     </Col>
                     <Col span={4} offset={16} style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
                         <Button type="primary" onClick={this.addItem}>Add Position</Button>
@@ -270,6 +281,12 @@ export class AqStockTableMod extends React.Component {
                         columns={this.columns} 
                         size="small"
                 />
+                <Row style={{marginTop: '20px'}}>
+                    <Col span={24} style={{textAlign: 'right'}}>
+                        <Button style={{marginRight: '20px'}} onClick={this.props.toggleModal}>Cancel</Button>
+                        <Button type="primary" onClick={this.handleDoneClick}>Done</Button>
+                    </Col>
+                </Row>
             </Col>
         );
     }
