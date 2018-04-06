@@ -6,14 +6,12 @@ import {Row, Col, Icon, Tag, Rate} from 'antd';
 import {MetricItem} from './MetricItem';
 import medalIcon from '../assets/award.svg';
 import trendingUpIcon from '../assets/trending-up.svg';
+import sunrise from '../assets/sunrise.svg';
+import pie from '../assets/pie.svg';
+import barChart from '../assets/bar-chart-2.svg';
+import totalReturnIcon from '../assets/totalReturn.svg';
 
 const dateFormat = 'Do MMMM YYYY';
-const ReactHighcharts = require('react-highcharts');
-const HighchartsMore = require('highcharts-more');
-const SolidGauge = require("highcharts-solid-gauge");
-
-HighchartsMore(ReactHighcharts.Highcharts);
-SolidGauge(ReactHighcharts.Highcharts);
 
 class AdviceListItemImpl extends React.PureComponent {
     constructor(props) {
@@ -205,11 +203,11 @@ class AdviceListItemImpl extends React.PureComponent {
 
     renderDiversityChart = () => {
         return (
-            <Row style={{textAlign: 'center'}} type="flex" justify="center">
+            <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                    <ReactHighcharts config = {this.state.diversityConfig} /> 
+                    <img style={iconStyle} src={pie} />
                 </Col>
-                <Col span={24} style={{marginTop: '-20px', marginLeft: '-25px'}}>
+                <Col span={24} style={{fontSize: '16px'}}>
                     <h5>Diversity <span style={{fontSize: "14px"}}>80%</span></h5>
                 </Col>
             </Row>
@@ -217,58 +215,136 @@ class AdviceListItemImpl extends React.PureComponent {
     }
 
     renderBetaChart = (beta) => {
-        const series = [...this.state.betaConfig.series];
-        series.push({name: 'Advice', data: [beta * 100]})
-        const betaConfig = {
-            ...this.state.betaConfig,
-            series
-        };
-        console.log(betaConfig)
-
         return (
-            <Row style={{textAlign: 'center'}} type="flex" justify="center">
+            <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                    <ReactHighcharts config = {betaConfig} /> 
+                    <img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />
                 </Col>
-                <Col span={24} style={{marginTop: '-15px', marginLeft: '-15px'}}>
-                    <h5>Beta <span style={{fontSize: "14px"}}>{beta * 100} %</span></h5>
+                <Col span={24} style={{marginTop: '6px'}}>
+                    <h5>Beta <span style={{fontSize: "16px"}}>{(beta * 100).toFixed(2)}</span></h5>
+                </Col>
+            </Row>
+        );
+    }
+
+    renderTotalReturnIcon = totalReturn => {
+        return (
+            <Row style={{textAlign: 'center', marginTop: '8px'}}>
+                <Col span={24}>
+                    <img style={{transform: 'scale(0.8, 0.8)'}} src={totalReturnIcon} />
+                </Col>
+                <Col span={24}>
+                    <h5>Total Ret <span style={{fontSize: "16px"}}>{(totalReturn * 100).toFixed(2)} %</span></h5>
                 </Col>
             </Row>
         );
     }
 
     renderVolatilityChart = (volatility) => {
-        // const series = [...this.state.volatilityConfig.series];
-        // series.push({
-        //     name: 'Advice',
-        //     data: 
-        // })
         return (
-            <Row style={{textAlign: 'center'}} type="flex" justify="center">
+            <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                    <ReactHighcharts config = {this.state.volatilityConfig} /> 
+                <img style={iconStyle} src={sunrise} />
                 </Col>
-                <Col span={24} style={{marginTop: '-10px'}}>
-                    <h5>Volatility <span style={{fontSize: "14px"}}>{Number((volatility * 100).toFixed(2))}</span></h5>
+                <Col span={24}>
+                    <h5>Volatility <span style={{fontSize: "16px"}}>{Number((volatility * 100).toFixed(2))} %</span></h5>
+                </Col>
+            </Row>
+        );
+    }
+
+    renderTrendingApprovedIcon = () => {
+        return (
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginLeft: '-7px'}}>
+                <div>
+                    <IconItem 
+                            src={medalIcon} 
+                            imageStyle={{transform: 'scale(0.7, 0.7)'}} 
+                            labelStyle={{marginLeft: '5px'}}
+                            label="Approved"
+                    />
+                </div>
+                <div span={10} style={{marginLeft: '5px'}}>
+                    <IconItem src={trendingUpIcon} imageStyle={{transform: 'scale(0.7, 0.7)'}} label="Trending" labelStyle={{marginLeft: "10px"}}/>
+                </div>
+            </div>
+        );
+    }
+
+    renderMetricIcons = performanceSummary => {
+        return (
+            <Row>
+                <Col span={6}>
+                    {this.renderDiversityChart()}
+                </Col>
+                {
+                    performanceSummary.current && 
+                    <Col span={6}>
+                        {this.renderBetaChart(performanceSummary.current.beta)}
+                    </Col>
+                }
+                {
+                    performanceSummary.current && 
+                    <Col span={6}>
+                        {this.renderVolatilityChart(performanceSummary.current.volatility)}
+                    </Col>
+                }
+                {
+                    performanceSummary.current && 
+                    <Col span={6}>
+                        {this.renderTotalReturnIcon(performanceSummary.current.totalReturn)}
+                    </Col>
+                }
+            </Row>
+        );
+    }
+
+    renderNetValueChange = performanceSummary => {
+        return (
+            <Row type="flex" align="bottom">
+                <Col span={24}>
+                    <h3
+                            style={netValueStyle}
+                    >
+                        {`Rs ${performanceSummary.current.netValue.toFixed(2)}`}
+                    </h3>
+                </Col>
+                <Col span={24}>
+                    <h3 
+                            style={{
+                                fontSize: '18px',
+                                marginRight: '25px',
+                                textAlign: 'right', color: performanceSummary.current.dailyChange < 0 ? '#FA4747' : '#3EBB72'
+                            }}
+                    >
+                        {(performanceSummary.current.totalReturn * 100).toFixed(2)} ({(performanceSummary.current.dailyChangePct * 100).toFixed(2)} %)
+                    </h3>
+                </Col>
+                <Col span={24}>
+                    <h3 
+                            style={{fontSize: '12px', textAlign: 'right',marginRight: '25px'}}
+                    >
+                        Daily PnL. | Daily Chg
+                    </h3>
                 </Col>
             </Row>
         );
     }
 
     render() {
-        const {
+        let {
             name, 
             advisor = null, 
             createdDate = null, 
             heading = null, 
             subscribers, 
+            followers,
             rating, 
             performanceSummary = {}, 
             id,
             isFollowing
         } = this.props.advice;
         let sectors = [];
-        
         if (performanceSummary && performanceSummary.current) {
             sectors = performanceSummary.current.sectors;
         }
@@ -278,7 +354,7 @@ class AdviceListItemImpl extends React.PureComponent {
                 <Col span={8}>
                     <Row>
                         <Col span={24}>
-                            <h3>{name}</h3>
+                            <h3 style={{fontSize: '18px'}}>{name}</h3>
                         </Col>
                         {
                             sectors.length > 0 && sectors &&
@@ -286,7 +362,7 @@ class AdviceListItemImpl extends React.PureComponent {
                                 {this.renderSectors(sectors)}
                             </Col>
                         }
-                        <Col span={24}>
+                        <Col span={24} style={{marginTop: '20px'}}>
                             <Row>
                             <Col span={8}>
                                 <MetricItem 
@@ -302,8 +378,8 @@ class AdviceListItemImpl extends React.PureComponent {
                                 <Col span={8}>
                                     <MetricItem 
                                             style={{border: 'none'}} 
-                                            value={`${(performanceSummary.current.maxLoss * 100).toFixed(2)} %`} 
-                                            label="Max Loss"
+                                            value={followers} 
+                                            label="Followers"
                                             valueStyle={{fontSize: '16px', fontWeight: '400', color: '#3B3737'}}
                                             labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E'}}
                                     />
@@ -313,82 +389,19 @@ class AdviceListItemImpl extends React.PureComponent {
                         </Col>
                     </Row>
                 </Col>
-                <Col span={8}>
-                    <Row style={{left: '-20px'}}>
-                        <Col span={24} style={{textAlign: 'center'}}>
-                            <Rate disabled value={rating}/>
+                <Col span={16}>
+                    <Row>
+                        <Col span={22} offset={2}>
+                            {this.renderMetricIcons(performanceSummary)}
                         </Col>
-                        <Col span={24}>
+                        <Col span={24} style={{marginTop: '15px'}}>
                             <Row>
-                                <Col span={8}>
-                                    {this.renderDiversityChart()}
+                                <Col span={12} style={{textAlign: 'center'}}>
+                                    <Rate disabled value={rating}/>
+                                    {this.renderTrendingApprovedIcon()}
                                 </Col>
-                                {
-                                    performanceSummary.current && 
-                                    <Col span={8}>
-                                        {this.renderBetaChart(performanceSummary.current.beta)}
-                                    </Col>
-                                }
-                                {
-                                    performanceSummary.current && 
-                                    <Col span={8}>
-                                        {this.renderVolatilityChart(performanceSummary.current.volatility)}
-                                    </Col>
-                                }
-                            </Row>
-                        </Col>
-                    </Row>
-                </Col>
-                <Col span={7} offset={1}>
-                    <Row type="flex" justify="end">
-                        <Col span={24}>
-                            {
-                                performanceSummary.current &&
-                                <Row type="flex" align="bottom" style={{textAlign: 'center'}}>
-                                    <Col span={6}>
-                                        <MetricItem 
-                                                value={performanceSummary.current.netValue} 
-                                                label="Net Value" 
-                                                valueStyle={netValueStyle} 
-                                                labelStyle={netLabelStyle}
-                                        />
-                                    </Col>
-                                    <Col span={18}>
-                                        <Row>
-                                            <Col span={8} offset={2}>
-                                                <MetricItem 
-                                                        valueStyle={{
-                                                            ...returnValueStyle, 
-                                                            color: performanceSummary.current.totalReturn < 0 ? '#FA4747' : '#3EBB72'
-                                                        }} 
-                                                        labelStyle={returnLabelStyle} 
-                                                        value={performanceSummary.current.totalReturn.toFixed(2)} 
-                                                        label="Total Return"
-                                                />
-                                            </Col>
-                                            <Col span={8} offset={1}>
-                                                <MetricItem 
-                                                        valueStyle={{
-                                                            ...returnValueStyle,
-                                                            color: performanceSummary.current.dailyChange < 0 ? '#FA4747' : '#3EBB72'
-                                                        }} 
-                                                        labelStyle={returnLabelStyle} 
-                                                        value={performanceSummary.current.dailyChange.toFixed(3)} 
-                                                        label="Daily Return"
-                                                />
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                </Row>
-                            }
-                        </Col>
-                        <Col span={24} style={{marginTop: '25px'}}>
-                            <Row type="flex" justify="end">
-                                <Col span={10}>
-                                    <IconItem src={medalIcon} imageStyle={{transform: 'scale(0.7, 0.7)'}} label="Approved"/>
-                                </Col>
-                                <Col span={10}>
-                                    <IconItem src={trendingUpIcon} imageStyle={{transform: 'scale(0.7, 0.7)'}} label="Trending" labelStyle={{marginLeft: "10px"}}/>
+                                <Col span={11} offset={1}>
+                                    {this.renderNetValueChange(performanceSummary)}
                                 </Col>
                             </Row>
                         </Col>
@@ -421,7 +434,7 @@ const iconItemImageStyle = {
 };
 
 const iconItemLabelStyle = {
-
+    fontSize: '14px'
 };
 
 const cardStyle = {
@@ -455,14 +468,17 @@ const headingStyle = {
 };
 
 const netValueStyle = {
-    fontSize: '20px',
+    fontSize: '22px',
     fontWeight: 400,
-    color: '#3B3737'
+    color: '#3B3737',
+    textAlign: 'right',
+    marginRight: '25px'
 };
 
 const netLabelStyle = {
     fontSize: '14px',
-    color: '#716E6E'
+    color: '#716E6E',
+    textAlign: 'right',
 };
 
 const returnValueStyle = {
@@ -475,4 +491,8 @@ const returnLabelStyle = {
     fontSize: '14px',
     color: '#716E6E',
     fontSize: '10px'
+};
+
+const iconStyle = {
+    transform: 'scale(0.6, 0.6)'
 };

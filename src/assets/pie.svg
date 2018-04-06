@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49.3 (51167) - http://www.bohemiancoding.com/sketch -->
+    <title>pie</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <circle id="path-1" cx="16.6698" cy="16.6698" r="16.6698"></circle>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Dashboard-Portfolio-Copy-8" transform="translate(-386.000000, -335.000000)">
+            <g id="Group-21" transform="translate(27.000000, 279.000000)">
+                <g id="Group-20">
+                    <g id="Group-19" transform="translate(326.000000, 15.000000)">
+                        <g id="Group-18" transform="translate(0.000000, 41.000000)">
+                            <g id="Group-15">
+                                <g id="pie" transform="translate(29.000000, 0.000000)">
+                                    <g id="Group-2" transform="translate(6.191640, 0.000000)">
+                                        <mask id="mask-2" fill="white">
+                                            <use xlink:href="#path-1"></use>
+                                        </mask>
+                                        <use id="Oval-16" fill="#4D94C6" xlink:href="#path-1"></use>
+                                    </g>
+                                    <path d="M24.925901,27.7859362 C24.8748387,27.8066988 24.8236605,27.8272332 24.7723676,27.8475382 C22.7259671,28.6576341 20.4970571,29.1025549 18.1648826,29.1025549 C13.0949745,29.1025549 8.51307654,26.9999348 5.23331045,23.6139596 L18.1724426,10.9412301 L16.3322022,5.93033608 C17.5351768,8.37242342 18.485797,10.091896 18.485797,10.091896 L24.925901,27.7859362 Z" id="Oval-15" fill="#FBB976" transform="translate(15.079606, 17.516446) rotate(-303.000000) translate(-15.079606, -17.516446) "></path>
+                                    <path d="M15.0584965,5.92289333 C16.8548193,5.25782303 18.7965756,4.89465487 20.8227739,4.89465487 C30.0282631,4.89465487 37.4907866,12.3907933 37.4907866,21.6377487 C37.4907866,28.9180547 32.8649802,35.1130789 26.4047224,37.418893 L20.8227739,21.6377487 L15.0584965,5.92289333 Z" id="Oval-15" fill="#7053E2" transform="translate(26.274642, 21.156774) rotate(-303.000000) translate(-26.274642, -21.156774) "></path>
+                                    <path d="M18.8884441,32.8524928 L22.9342339,16.6698 L22.6748121,0.00194704668 C22.7611246,0.000650547513 22.8476001,-2.84217094e-14 22.9342339,-2.84217094e-14 C32.0679163,-2.84217094e-14 39.53124,7.46332368 39.53124,16.7425939 C39.53124,25.8762763 32.0679163,33.3396 22.9342339,33.3396 C21.5381188,33.3396 20.1831109,33.1706543 18.8884441,32.8524928 Z" id="Oval-15" fill="#42BE2C"></path>
+                                    <text id="60%" font-family=".SFNSText, .SF NS Text" font-size="2.06388" font-weight="normal" letter-spacing="-0.0123832796" fill="#FFFFFF">
+                                        <tspan x="33.8034859" y="18.51104">60%</tspan>
+                                    </text>
+                                    <text id="20%" font-family=".SFNSText, .SF NS Text" font-size="2.06388" font-weight="normal" letter-spacing="-0.0123832796" fill="#FFFFFF">
+                                        <tspan x="13.5164695" y="7.71536">20%</tspan>
+                                    </text>
+                                    <text id="16%" font-family=".SFNSText, .SF NS Text" font-size="2.06388" font-weight="normal" letter-spacing="-0.0123832796" fill="#FFFFFF">
+                                        <tspan x="7.61812465" y="21.845">16%</tspan>
+                                    </text>
+                                    <text id="4%" font-family=".SFNSText, .SF NS Text" font-size="2.06388" font-weight="normal" letter-spacing="-0.0123832796" fill="#FFFFFF">
+                                        <tspan x="15.7070651" y="29.30672">4%</tspan>
+                                    </text>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

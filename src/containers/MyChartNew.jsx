@@ -18,6 +18,7 @@ export class MyChartNew extends React.Component {
         const self = this;
         this.state = {
             config: {
+                colors: ["#1DE9B6", "#f44336", "#00B0FF", "#009688", "#FFEA00", "#76DDFB", "#53A8E2", "#2C82BE", "#DBECF8", "#2C9BBE"],
                 rangeSelector: {
                     selected: 0,
                     labelStyle: {

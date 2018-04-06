@@ -3,7 +3,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import moment from 'moment';
 import {Link} from 'react-router-dom';
-import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio} from 'antd';
+import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard} from '../components';
 import {layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
@@ -42,7 +42,12 @@ export class InvestorDashboard extends React.Component {
             composition: [],
             defaultComposition: [],
             dollarPerformance: [],
-            percentagePerformance: []
+            percentagePerformance: [],
+            portfolioLoading: false,
+            subscribedAdvicesLoading: false,
+            defaultPortfolioLoading: false,
+            showEmptyScreen: false,
+            showAdvisorDashboardToggle: false
         };
         this.stockPositionColumns = [
             {
@@ -139,6 +144,7 @@ export class InvestorDashboard extends React.Component {
     getDefaultPortfolioData = () => {
         const url = `${requestUrl}/investor/${investorId}`;
         const tickers = [...this.state.tickers];
+        this.setState({defaultPortfolioLoading: true});
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             const positions = response.data.defaultPortfolio.detail.positions;
@@ -170,6 +176,7 @@ export class InvestorDashboard extends React.Component {
             });
             this.setState({
                 positions,
+                showEmptyScreen: positions.length > 0 ? false : true,
                 composition,
                 defaultComposition: composition,
                 stockPositions: this.processPresentStockTransction(positions),
@@ -190,11 +197,16 @@ export class InvestorDashboard extends React.Component {
         })
         .catch(error => {
             console.log(error);
+            this.setState({showEmptyScreen: true})
+        })
+        .finally(() => {
+            this.setState({defaultPortfolioLoading: false});
         });
     }
 
     getInvestorPortfolios = () => {
         const investorPortfolioUrl = `${requestUrl}/investor/${investorId}/portfolio`;
+        this.setState({portfolioLoading: true});
         axios.get(investorPortfolioUrl, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             const subscribedAdvicesUrl = `${requestUrl}/advice?subscribed=true`;
@@ -202,12 +214,16 @@ export class InvestorDashboard extends React.Component {
         })
         .catch(error => {
             console.log(error);
+        })
+        .finally(() => {
+            this.setState({portfolioLoading: false});
         });
     }
 
     getInvestorSubscribedAdvices = () => {
         const subscribedAdvicesUrl = `${requestUrl}/advice?subscribed=true`;
         const followingAdviceUrl = `${requestUrl}/advice?following=true`;
+        this.setState({subscribedAdvicesLoading: true});
         axios.get(subscribedAdvicesUrl, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             this.setState({subscribedAdvices: this.processSubscribedAdvices(response.data)});
@@ -237,6 +253,9 @@ export class InvestorDashboard extends React.Component {
         })
         .catch(error => {
             console.log(error);
+        })
+        .finally(() => {
+            this.setState({subscribedAdvicesLoading: false});
         });
     }
 
@@ -531,7 +550,6 @@ export class InvestorDashboard extends React.Component {
 
     renderSummaryMetrics = () => {
         const {totalreturn, dailyreturn, volatility} = this.state.metrics;
-        console.log('Metrics', this.state.metrics);
         const colStyle = {marginBottom: '0px'};
 
         return(
@@ -677,21 +695,20 @@ export class InvestorDashboard extends React.Component {
 
     render() {
         return(
-            // this.state.positions.length < 1
-            // ?   <Row>
-            //         <Col span={24} style={emptyPortfolioStyle}>
-            //             <h1>You have not created any portfolio yet. Get started by creating One</h1>
-            //             <Button 
-            //                     type="primary" 
-            //                     onClick={() => this.props.history.push('/dashboard/createportfolio')}
-            //                     style={{marginTop: '20px'}}
-            //             >
-            //                 Create Portfolio
-            //             </Button>
-            //         </Col>
-            //     </Row>
-            // :   <Row>
-                <Row>
+            this.state.showEmptyScreen
+            ?   <Row>
+                    <Col span={24} style={emptyPortfolioStyle}>
+                        <h1>You have not created any portfolio yet. Get started by creating One</h1>
+                        <Button 
+                                type="primary" 
+                                onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                                style={{marginTop: '20px'}}
+                        >
+                            Create Portfolio
+                        </Button>
+                    </Col>
+                </Row>
+            :   <Row>
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button 
                                 type="primary" 
@@ -700,71 +717,86 @@ export class InvestorDashboard extends React.Component {
                         >
                             Create Portfolio
                         </Button>
-                        <Button 
-                                type="secondary" 
-                                onClick={() => this.props.history.push('/advisordashboard')}
-                        >
-                            Advisor Dashboard
-                        </Button>
+                        {
+                            this.state.showAdvisorDashboardToggle &&
+                            <Button 
+                                    type="secondary" 
+                                    onClick={() => this.props.history.push('/advisordashboard')}
+                            >
+                                Advisor Dashboard
+                            </Button>
+                        }
                     </Col>
                     <Col span={24}>
                         <Row style={{marginTop: '22px'}}>
                             <Col xl={12} lg={24} style={{paddingRight: '5px'}}>
-                                <Tabs 
-                                        defaultActiveKey={"2"} 
-                                        animated={false} 
-                                        style={{...newLayoutStyle, height: '395px'}}
-                                        size="small"
-                                        tabBarStyle={{backgroundColor: tabBackgroundColor}}
-                                >
-                                    <TabPane tab="Overview" key="1">
-                                        <Row>
-                                            <Col span={12}>{this.renderOverviewPieChart()}</Col>
-                                            <Col span={12}>{this.renderOverviewMetrics()}</Col>
-                                        </Row>
-                                    </TabPane>
-                                    <TabPane tab="Summary" key="2">
-                                        <Row>
-                                            <Col span={24} >{this.renderSummaryMetrics()}</Col>
-                                            <Col span={24} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
-                                        </Row>
-                                    </TabPane>
-                                </Tabs>
+                                <Spin spinning={this.state.defaultPortfolioLoading}>
+                                    <Tabs 
+                                            defaultActiveKey={"2"} 
+                                            animated={false} 
+                                            style={{...newLayoutStyle, height: '395px'}}
+                                            size="small"
+                                            tabBarStyle={{backgroundColor: tabBackgroundColor}}
+                                    >
+                                        <TabPane tab="Overview" key="1">
+                                            <Row>
+                                                <Col span={12}>{this.renderOverviewPieChart()}</Col>
+                                                <Col span={12}>{this.renderOverviewMetrics()}</Col>
+                                            </Row>
+                                        </TabPane>
+                                        <TabPane tab="Summary" key="2">
+                                            <Row>
+                                                <Col span={24} >{this.renderSummaryMetrics()}</Col>
+                                                <Col span={24} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
+                                            </Row>
+                                        </TabPane>
+                                    </Tabs>
+                                </Spin>
                             </Col>
                             <Col xl={12} lg={24} style={{paddingLeft: '5px'}}>
-                                <Tabs 
-                                        animated={false} 
-                                        defaultActiveKey="1" 
-                                        size="small"
-                                        style={{...newLayoutStyle, height: '395'}}
-                                        tabBarStyle={{backgroundColor: tabBackgroundColor}}
-                                >
-                                    <TabPane 
-                                            tab="Performance" 
-                                            key="1" 
-                                            style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
+                                <Spin spinning={this.state.defaultPortfolioLoading}>
+                                    <Tabs 
+                                            animated={false} 
+                                            defaultActiveKey="1" 
+                                            size="small"
+                                            style={{...newLayoutStyle, height: '395'}}
+                                            tabBarStyle={{backgroundColor: tabBackgroundColor}}
                                     >
-                                        <Col span={24} style={{paddingBottom: '20px', paddingLeft: '10px'}}>
-                                            <MyChartNew series={this.state.tickers} hideLegend={true}/>
-                                        </Col>
-                                    </TabPane>
-                                    <TabPane 
-                                            tab="Composition" 
-                                            key="2" 
-                                            style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
-                                    >
-                                        <Col span={24}>
-                                            {this.renderStockTransactions()}
-                                        </Col>
-                                    </TabPane>
-                                </Tabs>
+                                        <TabPane 
+                                                tab="Performance" 
+                                                key="1" 
+                                                style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
+                                        >
+                                            <Col span={24} style={{paddingBottom: '20px', paddingLeft: '10px'}}>
+                                                <MyChartNew series={this.state.tickers} hideLegend={true}/>
+                                            </Col>
+                                        </TabPane>
+                                        <TabPane 
+                                                tab="Composition" 
+                                                key="2" 
+                                                style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
+                                        >
+                                            <Col span={24}>
+                                                {this.renderStockTransactions()}
+                                            </Col>
+                                        </TabPane>
+                                    </Tabs>
+                                </Spin>
                             </Col>
                         </Row>
                         <Row style={{margin: '10px 0'}}>
-                            <DashboardCard title="My Portfolios" cardStyle={{paddingRight: '5px'}}>
+                            <DashboardCard 
+                                    title="My Portfolios" 
+                                    cardStyle={{paddingRight: '5px'}} 
+                                    loading={this.state.portfolioLoading}
+                            >
                                 {this.renderPortfolios()}
                             </DashboardCard>
-                            <DashboardCard title="Advices" cardStyle={{paddingLeft: '5px'}}>
+                            <DashboardCard 
+                                    title="Advices" 
+                                    cardStyle={{paddingLeft: '5px'}}
+                                    loading={this.state.subscribedAdvicesLoading}
+                            >
                                 {this.renderSubscribedAdvices()}
                             </DashboardCard>
                         </Row>

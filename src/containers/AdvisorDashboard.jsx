@@ -2,7 +2,7 @@ import * as React from 'react';
 import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
-import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate} from 'antd';
+import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} from 'antd';
 import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard} from '../components';
 import {newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor} from '../constants';
 import {dateFormat} from '../utils';
@@ -78,7 +78,11 @@ export class AdvisorDashboard extends React.Component {
             newSubscribers: 0,
             adviceRating: [],
             advisorRating: [],
-            subscriberRating: []
+            subscriberRating: [],
+            myAdvicesLoading: false,
+            advicePerformanceLoading: false,
+            dashboardDataLoading: false,
+            showEmptyScreen: false
         };
         this.adviceColumns = [
             {
@@ -137,6 +141,7 @@ export class AdvisorDashboard extends React.Component {
         const advisorRating = [];
         let subscriberRating = {};
         let totalSubscribers = 0;
+        this.setState({dashboardDataLoading: true, myAdvicesLoading: true});
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             subsPerAdviceSeries.push({
@@ -176,6 +181,7 @@ export class AdvisorDashboard extends React.Component {
             this.setState({
                 selectedAdvice: response.data.advices[0].name,
                 rawAdvices: response.data.advices,
+                showEmptyScreen: response.data.advices.length > 0 ? false : true,
                 advices: this.processAdvices(this.sortAdvices(response.data.advices)),
                 subsPerAdviceConfig: {
                     ...this.state.subsPerAdviceConfig, 
@@ -203,6 +209,10 @@ export class AdvisorDashboard extends React.Component {
         })
         .catch(error => {
             console.log(error);
+            this.setState({showEmptyScreen: true});
+        })
+        .finally(() => {
+            this.setState({dashboardDataLoading: false, myAdvicesLoading: false});
         })
     }
 
@@ -321,37 +331,39 @@ export class AdvisorDashboard extends React.Component {
         const {totalSubscribers, selectedAdviceSubscribers} = subscriberStats;
 
         return (
-            <Row>
-                <Col span={24}>
-                    <Tabs defaultActiveKey="1" size="small" animated={false} tabBarStyle={{backgroundColor: tabBackgroundColor}}>
-                        <TabPane tab="Total Subscribers" key="1" style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                            <Col span={24}>
-                                <HighChartSpline 
-                                        id="subsriber-rating-chart" 
-                                        xAxisTitle="Subscribers"
-                                        series={this.state.subscriberRating}
-                                />
-                            </Col>
-                            <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
-                                <Row type="flex" align="middle">
-                                    <StatsMetricItem label="Subscribers" value={this.state.totalSubscribers}/>
-                                </Row>
-                            </Col>
-                        </TabPane>
-                        <TabPane tab="Subscribers / Advice" key="2" style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                            <Col span={12}>
-                                <ReactHighcharts config = {this.state.subsPerAdviceConfig} />
-                            </Col>
-                            <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
-                                <Row type="flex" align="middle">
-                                    <StatsMetricItem label="Subscribers" value={selectedAdviceSubscribers}/>
-                                    <StatsMetricItem label="Total Subscribers" value={totalSubscribers}/>
-                                </Row>
-                            </Col>
-                        </TabPane>
-                    </Tabs>
-                </Col>
-            </Row>
+            <Spin spinning={this.state.dashboardDataLoading}>
+                <Row>
+                    <Col span={24}>
+                        <Tabs defaultActiveKey="1" size="small" animated={false} tabBarStyle={{backgroundColor: tabBackgroundColor}}>
+                            <TabPane tab="Total Subscribers" key="1" style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                <Col span={24}>
+                                    <HighChartSpline 
+                                            id="subsriber-rating-chart" 
+                                            xAxisTitle="Subscribers"
+                                            series={this.state.subscriberRating}
+                                    />
+                                </Col>
+                                <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
+                                    <Row type="flex" align="middle">
+                                        <StatsMetricItem label="Subscribers" value={this.state.totalSubscribers}/>
+                                    </Row>
+                                </Col>
+                            </TabPane>
+                            <TabPane tab="Subscribers / Advice" key="2" style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                <Col span={12}>
+                                    <ReactHighcharts config = {this.state.subsPerAdviceConfig} />
+                                </Col>
+                                <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
+                                    <Row type="flex" align="middle">
+                                        <StatsMetricItem label="Subscribers" value={selectedAdviceSubscribers}/>
+                                        <StatsMetricItem label="Total Subscribers" value={totalSubscribers}/>
+                                    </Row>
+                                </Col>
+                            </TabPane>
+                        </Tabs>
+                    </Col>
+                </Row>
+            </Spin>
         );
     }
 
@@ -404,29 +416,14 @@ export class AdvisorDashboard extends React.Component {
     }
 
     handleSelectAdvicePerformance = value => {
-        const newTickers = [];
         const advice = this.state.rawAdvices.filter(item => item._id === value)[0];
-        const url = `${requestUrl}/performance/advice/${advice._id}`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
-        .then(response => {
-            const data = response.data.simulated.portfolioValues.map(item => [moment(item.date).valueOf(), item.netValue]);
-            newTickers.push({
-                name: advice.name,
-                data,
-                show: true,
-                disabled: true,
-                color: 'green'
-            });
-            this.setState({tickers: newTickers});
-        })
-        .catch(error => {
-            console.log(error);
-        });
+        this.getAdvicePerformance(advice);
     }
 
     getAdvicePerformance = advice => {
         const newTickers = [];
         const url = `${requestUrl}/performance/advice/${advice._id}`;
+        this.setState({advicePerformanceLoading: true});
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             const data = response.data.simulated.portfolioValues.map(item => [moment(item.date).valueOf(), item.netValue]);
@@ -440,6 +437,9 @@ export class AdvisorDashboard extends React.Component {
         })
         .catch(error => {
             console.log(error);
+        })
+        .finally(() => {
+            this.setState({advicePerformanceLoading: false});
         });
     }
 
@@ -481,12 +481,16 @@ export class AdvisorDashboard extends React.Component {
     }
 
     getAdvices = (url) => {
+        this.setState({myAdvicesLoading: true});
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             this.setState({advices: response.data, rawAdvices: response.data});
         })
         .catch(error => {
             console.log(error);
+        })
+        .finally(() => {
+            this.setState({myAdvicesLoading: false});
         });
     }
 
@@ -560,91 +564,113 @@ export class AdvisorDashboard extends React.Component {
         const {radioValue} = this.state;
 
         return(
-            <Row style={{paddingBottom: '40px'}}>
-                {this.renderFilterModal()}
-                <Col span={24} style={{textAlign: 'right'}}>
-                    <Button 
-                            type="primary" 
-                            style={{marginRight: '20px'}}
-                            onClick={() => this.props.history.push('/dashboard/createadvice')}
-                    >
-                        Create Advice
-                    </Button>
-                    <Button 
-                            type="secondary" 
-                            onClick={() => this.props.history.push('/investordashboard')}
-                    >
-                        Investor Dashboard
-                    </Button>
-                </Col>
-                <Col span={24} style={{marginTop: '10px'}}>
-                    <Row>
-                        <DashboardCard cardStyle={{paddingRight: '5px'}} title=" My Advices" menu={this.renderSortingMenu()}>
-                                    {this.renderAdvices()}
-                        </DashboardCard>
-                        <DashboardCard 
-                                cardStyle={{paddingLeft: '5px'}} 
-                                title="Advice Performance" menu={this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
+            this.state.showEmptyScreen
+            ?   <Row>
+                    <Col span={24} style={emptyPortfolioStyle}>
+                        <h1>You have not created any advices yet. Get started by creating One</h1>
+                        <Button 
+                                type="primary" 
+                                onClick={() => this.props.history.push('/dashboard/createdashboard')}
+                                style={{marginTop: '20px'}}
                         >
+                            Create Advice
+                        </Button>
+                    </Col>
+                </Row>
+            :   <Row style={{paddingBottom: '40px'}}>
+                        {this.renderFilterModal()}
+                        <Col span={24} style={{textAlign: 'right'}}>
+                            <Button 
+                                    type="primary" 
+                                    style={{marginRight: '20px'}}
+                                    onClick={() => this.props.history.push('/dashboard/createadvice')}
+                            >
+                                Create Advice
+                            </Button>
+                            <Button 
+                                    type="secondary" 
+                                    onClick={() => this.props.history.push('/investordashboard')}
+                            >
+                                Investor Dashboard
+                            </Button>
+                        </Col>
+                        <Col span={24} style={{marginTop: '10px'}}>
+                            <Row>
+                                <DashboardCard 
+                                        cardStyle={{paddingRight: '5px'}} 
+                                        title=" My Advices" 
+                                        menu={this.renderSortingMenu()}
+                                        loading={this.state.myAdvicesLoading}
+                                >
+                                    {this.renderAdvices()}
+                                </DashboardCard>
+                                <DashboardCard 
+                                        cardStyle={{paddingLeft: '5px'}} 
+                                        title="Advice Performance" 
+                                        menu={this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
+                                        loading={this.state.advicePerformanceLoading}
+                                >
                                     <AqHighChartMod 
                                             tickers={this.state.tickers} 
                                             navigationEnabled={false}
                                             showLegend={false}
                                     />
-                        </DashboardCard>
-                    </Row>
-                    <Row style={{marginTop: '10px'}}>
-                        <Col xl={12} md={24} style={{paddingRight: '5px'}} >
-                            <Row style={{height: '380px', ...newLayoutStyle}}>
-                                <Col span={24}>
-                                    {this.renderSubscriberStatsView()}
+                                </DashboardCard>
+                            </Row>
+                            <Row style={{marginTop: '10px'}}>
+                                <Col xl={12} md={24} style={{paddingRight: '5px'}} >
+                                    <Row style={{height: '380px', ...newLayoutStyle}}>
+                                        <Col span={24}>
+                                            {this.renderSubscriberStatsView()}
+                                        </Col>
+                                    </Row>
+                                </Col>
+                                <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
+                                    <Spin spinning={this.state.dashboardDataLoading}>
+                                        <Row style={{height: '380px', ...newLayoutStyle}}>
+                                            <Col span={24}>
+                                                <Tabs size="small" defaultActiveKey="1" animated={false} tabBarStyle={{backgroundColor: tabBackgroundColor}}>
+                                                    <TabPane key="1" tab="Advice Rating">
+                                                        {/* <Row type="flex" align="middle">
+                                                            <Col span={6} offset={18}>
+                                                                {this.renderAdvicesMenu(this.handleSelectAdvice)}
+                                                            </Col>
+                                                        </Row> */}
+                                                        <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                            <Col span={12}>
+                                                                <HighChartSpline id="advice-rating-chart" series={this.state.adviceRating}/>
+                                                            </Col>
+                                                            <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
+                                                                <Row type="flex" align="middle">
+                                                                    <Col span={24}>
+                                                                        {this.renderAdvicesMenu(this.handleSelectAdvice, -20)}
+                                                                    </Col>
+                                                                    <StatsMetricItem style={{marginTop: '30px'}} label="Current Rating" value={this.state.ratingStats.currentRating}/>
+                                                                    <StatsMetricItem label="Simulated Rating" value={this.state.ratingStats.simulatedRating}/>
+                                                                </Row>
+                                                            </Col>
+                                                        </Row>
+                                                    </TabPane>
+                                                    <TabPane key="2" tab="Advisor Rating">
+                                                        <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                            <Col span={12}>
+                                                                <HighChartSpline id="advisor-rating-chart" series={this.state.advisorRating}/>
+                                                            </Col>
+                                                            <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
+                                                                <Row type="flex" align="middle">
+                                                                    <StatsMetricItem label="Rating" value={this.state.advisorRatingStat}/>
+                                                                </Row>
+                                                            </Col>
+                                                        </Row>
+                                                    </TabPane>
+                                                </Tabs>
+                                            </Col>
+                                        </Row>
+                                    </Spin>
                                 </Col>
                             </Row>
                         </Col>
-                        <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
-                            <Row style={{height: '380px', ...newLayoutStyle}}>
-                                <Col span={24}>
-                                    <Tabs size="small" defaultActiveKey="1" animated={false} tabBarStyle={{backgroundColor: tabBackgroundColor}}>
-                                        <TabPane key="1" tab="Advice Rating">
-                                            {/* <Row type="flex" align="middle">
-                                                <Col span={6} offset={18}>
-                                                    {this.renderAdvicesMenu(this.handleSelectAdvice)}
-                                                </Col>
-                                            </Row> */}
-                                            <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                                <Col span={12}>
-                                                    <HighChartSpline id="advice-rating-chart" series={this.state.adviceRating}/>
-                                                </Col>
-                                                <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
-                                                    <Row type="flex" align="middle">
-                                                        <Col span={24}>
-                                                            {this.renderAdvicesMenu(this.handleSelectAdvice, -20)}
-                                                        </Col>
-                                                        <StatsMetricItem style={{marginTop: '30px'}} label="Current Rating" value={this.state.ratingStats.currentRating}/>
-                                                        <StatsMetricItem label="Simulated Rating" value={this.state.ratingStats.simulatedRating}/>
-                                                    </Row>
-                                                </Col>
-                                            </Row>
-                                        </TabPane>
-                                        <TabPane key="2" tab="Advisor Rating">
-                                            <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                                <Col span={12}>
-                                                    <HighChartSpline id="advisor-rating-chart" series={this.state.advisorRating}/>
-                                                </Col>
-                                                <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
-                                                    <Row type="flex" align="middle">
-                                                        <StatsMetricItem label="Rating" value={this.state.advisorRatingStat}/>
-                                                    </Row>
-                                                </Col>
-                                            </Row>
-                                        </TabPane>
-                                    </Tabs>
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>  
+                    </Row>  
         );
     }
 }
@@ -672,4 +698,12 @@ const metricValueStyle = {
 const metricLabelStyle = {
     color: '#6C6C6C',
     fontSize: '19px'
+};
+
+const emptyPortfolioStyle = {
+    height: '600px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center'
 };

@@ -116,7 +116,8 @@ export class ScreenAdvices extends React.PureComponent {
                 createdDate: advice.createdDate,
                 heading: advice.heading,
                 subscribers: advice.numSubscribers,
-                rating: advice.latestAnalytics !== undefined ? advice.latestAnalytics.rating : 0,
+                followers: advice.numFollowers,
+                rating: advice.rating !== undefined ? Number(advice.rating.current.toFixed(2)) : 0,
                 performanceSummary: advice.performanceSummary
             })
         });
@@ -127,6 +128,8 @@ export class ScreenAdvices extends React.PureComponent {
     renderAdvices = () => {
         const {advices} = this.state;
         return advices.map((advice, index) => {
+            console.log('Advice', advice);
+
             return (
                 <AdviceListItemMod key={index} advice={advice}/>
             );
@@ -232,22 +235,10 @@ export class ScreenAdvices extends React.PureComponent {
                         <Col span={24}>
                             <Input
                                     suffix={(
-                                        <div>
-                                            {/* <Spin 
-                                                    style={{marginRight: '20px'}} 
-                                                    indicator={antIcon} 
-                                                    spinning={this.state.spinning}
-                                            /> */}
-                                            <Button 
-                                                    className="search-btn" 
-                                                    size="large" 
-                                                    type="primary" 
-                                                    style={{backgroundColor: '#23bec3', border: '1px solid #23bec3'}}
-                                                    onClick={() => this.getAdvices()}
-                                            >
-                                                <Icon type="search" />
-                                            </Button>
-                                        </div>
+                                        <Icon 
+                                                type="search" 
+                                                style={{fontSize: '16px', marginRight: '10px', fontWeight: '600'}}
+                                        />
                                     )}
                                     placeholder="Enter advice here"
                                     value={this.state.searchValue}
@@ -272,15 +263,14 @@ export class ScreenAdvices extends React.PureComponent {
                                         </Col>
                                     </Row>
                                 </Col>
-                                <Col span={6}>
+                                <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                     <Row type="flex" align="middle">
                                         <Col span={8}>
-                                            {/* <Icon 
-                                                    type="filter" 
-                                                    onClick={this.toggleFilter} 
-                                                    style={{ fontSize: 20}}
-                                            /> */}
-                                            <h5>Sort By</h5>
+                                            <h5 
+                                                    style={{fontSize: '14px', color: '#6C6C6C', textAlign: 'right', marginRight: '10px'}}
+                                            >
+                                                Sort By
+                                            </h5>
                                         </Col>
                                         <Col span={6}>
                                             {this.renderSortingMenu()}
