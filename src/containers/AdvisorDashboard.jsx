@@ -570,7 +570,7 @@ export class AdvisorDashboard extends React.Component {
                         <h1>You have not created any advices yet. Get started by creating One</h1>
                         <Button 
                                 type="primary" 
-                                onClick={() => this.props.history.push('/dashboard/createdashboard')}
+                                onClick={() => this.props.history.push('/dashboard/createadvice')}
                                 style={{marginTop: '20px'}}
                         >
                             Create Advice

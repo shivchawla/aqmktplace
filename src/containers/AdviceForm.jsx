@@ -68,7 +68,7 @@ export class AdviceFormImpl extends React.Component {
             positions: [],
             public: false,
             isPublic: false,
-            addTickerModalVisible: true,
+            addTickerModalVisible: false,
             compositionSeries: []
         };
         this.columns = [

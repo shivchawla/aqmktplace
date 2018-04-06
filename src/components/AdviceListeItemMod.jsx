@@ -208,7 +208,7 @@ class AdviceListItemImpl extends React.PureComponent {
                     <img style={iconStyle} src={pie} />
                 </Col>
                 <Col span={24} style={{fontSize: '16px'}}>
-                    <h5>Diversity <span style={{fontSize: "14px"}}>80%</span></h5>
+                    <h5>Diversification <span style={{fontSize: "14px"}}>80%</span></h5>
                 </Col>
             </Row>
         );

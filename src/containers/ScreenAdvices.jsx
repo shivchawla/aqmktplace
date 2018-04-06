@@ -230,7 +230,7 @@ export class ScreenAdvices extends React.PureComponent {
         return (
             <Row style={{paddingBottom: '20px'}}>
                 {this.renderFilter()}
-                <Col lg={17} xs={24} md={24} style={{...newLayoutStyle, padding: 0}}>
+                <Col xl={17} md={24} style={{...newLayoutStyle, padding: 0}}>
                     <Row className="row-container">
                         <Col span={24}>
                             <Input
@@ -246,9 +246,9 @@ export class ScreenAdvices extends React.PureComponent {
                                     onPressEnter={() => this.getAdvices()}
                             />
                         </Col>
-                        <Col span={24} style={filterSortContainerStyle}>
+                        <Col span={24} style={{filterSortContainerStyle}}>
                             <Row type="flex" align="middle" justify="end">
-                                <Col xs={3} md={3} lg={0}>
+                                <Col xs={6} md={6} xl={6} style={{}}>
                                 {/* <Col span={6}> */}
                                     <Row type="flex" align="middle">
                                         <Col span={4}>
@@ -308,7 +308,7 @@ export class ScreenAdvices extends React.PureComponent {
                         </Col>
                     </Row>                  
                 </Col>
-                <Col span={6} offset={1} style={{...newLayoutStyle, padding: '0'}}>
+                <Col xl={6} md={0} offset={1} style={{...newLayoutStyle, padding: '0'}}>
                     <Row>
                         <Col span={8}>
                             <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>
@@ -352,7 +352,7 @@ const IconHeader = ({icon, label, checked, filterType, onChange}) => {
 };
 
 const filterSortContainerStyle = {
-    marginTop: '20px'
+    marginTop: '20px',
 };
 
 const searchInputStyle = {
