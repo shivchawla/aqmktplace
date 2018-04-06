@@ -15,11 +15,11 @@ export class EditableCell extends React.Component {
         return (
             <FormItem>
                 <Input 
-                        style={{width}}
                         type={type} 
                         value={value} 
                         onChange={e => onChange(e.target.value)} 
                         size="small"
+                        min={0}
                 />
             </FormItem>
         );

@@ -6,7 +6,6 @@ import {Table, Button, Row, Col} from 'antd';
 import {AutoCompleteEditableCell} from './AutoCompleteEditableCell';
 import {EditableCell} from './AqEditableCell';
 import {getStockData} from '../utils';
-import '../css/stockTableMod.css';
 
 const {aimsquantToken, requestUrl} = require('../localConfig.js');
 
@@ -38,8 +37,7 @@ export class AqStockTableMod extends React.Component {
                 dataIndex: 'symbol',
                 key: 'symbol',
                 render: (text, record) => this.renderAutoCompleteColumn(text, record, 'symbol', 'text', record.tickerValidationStatus),
-                rowClassName: 'stock-table-col',
-                width: 180
+                width: 200
             },
             {
                 title: 'SHARES',
@@ -53,29 +51,25 @@ export class AqStockTableMod extends React.Component {
                         record.sharesValidationStatus,
                         record.sharesDisabledStatus
                     ),
-                width: 100,
-                className: 'stock-table-col'
+                width: 150,
             },
             {
                 title: 'PRICE',
                 dataIndex: 'lastPrice',
                 key: 'lastPrice',
-                width: 80,
-                className: 'stock-table-col'
+                width: 150,
             },
             {
                 title: 'TOTAL',
                 dataIndex: 'totalValue',
                 key: 'totalValue',
-                width: 80,
-                className: 'stock-table-col'
+                width: 150,
             },
             {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
-                width: 80,
-                className: 'stock-table-col'
+                width: 150,
             }
         ];
         this.state = {
@@ -101,24 +95,27 @@ export class AqStockTableMod extends React.Component {
                     validationStatus={validationStatus}
                     type={type}
                     value={text}
-                    onChange={value => {this.handleRowChange(value, record.key, column)}}
+                    onChange={value => {this.handleRowChange(value, record.key, column, type)}}
                     disabled={disabled}
                     width={120}
             />
         );
     }
 
-    handleRowChange = (value, key, column) => {
+    handleRowChange = (value, key, column, type='text') => {
         const newData = [...this.state.data];
-        console.log(newData);
         let target = newData.filter(item => item.key === key)[0];
         if (target) {
-            target[column] = value;
+            if (type === 'number') {
+                target[column] = value >= 0 ? value : 0;
+            } else {
+                target[column] = value;
+            }   
             if (value.length > 0) {
-                target['totalValue'] = Number((value * target['lastPrice']).toFixed(2));
+                target['totalValue'] = value >= 0 ? Number((value * target['lastPrice']).toFixed(2)) : 0;
                 this.updateAllWeights(newData);
                 const totalSummation = this.getTotalValueSummation(newData);
-                target['weight'] = totalSummation === 0 ? 0 : Number((target['totalValue'] / this.getTotalValueSummation(newData)).toFixed(2));
+                target['weight'] = value >= 0 ? (totalSummation === 0 ? 0 : Number((target['totalValue'] / this.getTotalValueSummation(newData)).toFixed(2))) : 0;
                 this.setState({data: newData});
             }
             this.setState({data: newData});
@@ -224,7 +221,8 @@ export class AqStockTableMod extends React.Component {
             tickerValidationStatus: "warning",
             sharesValidationStatus: "success",
             sharesDisabledStatus: true,
-            priceHistory: []
+            priceHistory: [],
+            weight: 0
         });
         this.setState({data}, () => {
             this.props.onChange(data);
@@ -283,7 +281,9 @@ export class AqStockTableMod extends React.Component {
                         pagination={false} 
                         dataSource={this.state.data} 
                         columns={this.columns} 
-                        size="small"
+                        scroll={{y: 300, x: true}}
+                        size="middle"
+                        rowClassName="stock-table-col"
                 />
                 <Row style={{marginTop: '20px'}}>
                     <Col span={24} style={{textAlign: 'right'}}>

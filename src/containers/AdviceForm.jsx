@@ -5,7 +5,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle} from '../constants';
-import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew} from '../components';
+import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard} from '../components';
 import {getUnixStockData, getStockPerformance} from '../utils';
 import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
@@ -68,7 +68,7 @@ export class AdviceFormImpl extends React.Component {
             positions: [],
             public: false,
             isPublic: false,
-            addTickerModalVisible: true,
+            addTickerModalVisible: false,
             compositionSeries: []
         };
         this.columns = [
@@ -413,16 +413,16 @@ export class AdviceFormImpl extends React.Component {
     
     renderPortfolioDetailsTabs = () => {
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
-        const editOperations = <Button onClick={this.toggleAddTickerModal}>{buttonText}</Button>;
+        // const editOperations = <Button onClick={this.toggleAddTickerModal} style={{marginRight: '10px'}}>{buttonText}</Button>;
         const series = [...this.state.compositionSeries];
         return (
-            <Tabs animated={false} defaultActiveKey="1" tabBarExtraContent={editOperations}>
-                <TabPane key="1" tab="Overview">
+            <Tabs animated={false} defaultActiveKey="1">
+                <TabPane key="1" tab="Overview" style={{padding: '0 10px'}}>
                     {
                         this.getVerifiedTransactions().length > 0
                         ?   <Row type="flex" justfy="center" align="middle">
                                 <Col span={16}>
-                                    <MyChartNew series={this.state.tickers} />
+                                    <MyChartNew series={this.state.tickers} hideLegend={true}/>
                                 </Col>
                                 <Col span={8}>
                                     <Row>
@@ -441,7 +441,7 @@ export class AdviceFormImpl extends React.Component {
                         : this.renderEmptyAdviceBox()
                     }
                 </TabPane>
-                <TabPane key="2" tab="Portfolio">
+                <TabPane key="2" tab="Portfolio" style={{padding: '0 15px 20px 15px'}}>
                     <Col span={24}>
                         {
                             this.getVerifiedTransactions().length > 0 
@@ -461,13 +461,14 @@ export class AdviceFormImpl extends React.Component {
                     columns={this.columns} 
                     dataSource={this.getVerifiedTransactions()}
                     pagination={false}
+                    style={{marginBottom: '20px'}}
             />
         );
     }
 
     renderEmptyAdviceBox = () => {
         return (
-            <Row type="flex" align="middle" justify="center">
+            <Row type="flex" align="middle" justify="center" style={{marginBottom: '20px'}}>
                 <Col style={{textAlign: 'center'}} span={24}>
                     <h4>Please add positions in your advice</h4>
                 </Col>
@@ -571,6 +572,7 @@ export class AdviceFormImpl extends React.Component {
     render() {
         const {startDate, endDate} = this.state;
         const {getFieldDecorator} = this.props.form;
+        const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
         
         return (
             <Row>
@@ -598,23 +600,7 @@ export class AdviceFormImpl extends React.Component {
                                                 </FormItem>
                                             </Col>
                                         </Row>
-                                        {/* <Row>
-                                            <Col span={24}>
-                                                <h3 style={inputHeaderStyle}>
-                                                    Headline
-                                                </h3>
-                                            </Col>
-                                            <Col span={24}>
-                                                <FormItem>
-                                                    {getFieldDecorator('headline', {
-                                                        rules: [{required: true, message: 'Please enter Headline'}]
-                                                    })(
-                                                        <Input style={inputStyle} disabled={this.state.isPublic}/>
-                                                    )}
-                                                </FormItem>
-                                            </Col>
-                                        </Row> */}
-                                        <Row>
+                                        <Row style={{marginTop: '10px'}}>
                                             <Col span={24}>
                                                 <h3 style={inputHeaderStyle}>
                                                     Description
@@ -638,7 +624,7 @@ export class AdviceFormImpl extends React.Component {
                                     <Col span={11} offset={1}>
                                         <Row>
                                             <Col span={24}>
-                                                <h3 style={{...inputHeaderStyle, marginTop: '20px'}}>Settings</h3>
+                                                <h3 style={inputHeaderStyle}>Settings</h3>
                                             </Col>
                                         </Row>
                                         <Row type="flex" justify="space-between">
@@ -690,12 +676,24 @@ export class AdviceFormImpl extends React.Component {
                                         </Row>
                                     </Col>
                                 </Row>
-                                <Col span={24} style={{padding: '10px', border: '1px solid #eaeaea', borderRadius: '4px'}}>
-                                    <h4 style={{color: '#555454'}}>Preview</h4>
-                                    {
-                                        this.renderPortfolioDetailsTabs()
-                                    }
-                                </Col>
+                                <Row style={{marginBottom: '10px'}}>
+                                    <Col span={24} >
+                                        <Button onClick={this.toggleAddTickerModal}>
+                                            {buttonText}
+                                        </Button>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <DashboardCard 
+                                            title="Preview" xl={24} 
+                                            contentStyle={{boxShadow: '0 0 0 rgba(0,0,0,1)', height: '100%'}}
+
+                                    >
+                                        {
+                                            this.renderPortfolioDetailsTabs()
+                                        }
+                                    </DashboardCard>
+                                </Row>
                             </Col>
                         </Row>
                     </Form>
@@ -732,5 +730,5 @@ const labelStyle = {
 };
 
 const inputStyle = {
-    marginBottom: '20px'
+    // marginTop: '20px'
 };

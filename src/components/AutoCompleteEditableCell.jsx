@@ -68,7 +68,6 @@ export class AutoCompleteEditableCell extends React.Component {
 
         return (
             <AutoComplete
-                    style={{ width: 200 }}
                     dataSource={dataSource.map(this.renderOption)}
                     onSelect={this.onCompareSelect}
                     onSearch={this.handleSearch}

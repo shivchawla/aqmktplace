@@ -4,7 +4,7 @@ export const inputStyle = {
 
 export const inputHeaderStyle = {
     fontSize: '14px',
-    color: '#6B6B6B',
+    color: '#000',
     fontWeight: 400
 }
 

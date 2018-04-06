@@ -354,7 +354,7 @@ export class InvestorDashboard extends React.Component {
             return (
                 <Row 
                         key={index} 
-                        style={{marginBottom: '10px', padding: '0 20px', cursor: 'pointer'}} 
+                        style={{marginBottom: '10px', padding: '0 20px', cursor: 'pointer', marginTop: '10px'}} 
                         onClick={(e) => this.props.history.push(`/dashboard/portfolio/${portfolio.id}`)}
                 >
                     <Col span={7}>
@@ -372,7 +372,7 @@ export class InvestorDashboard extends React.Component {
                     </Col>
                     <Col span={6}>
                         <ListMetricItem 
-                                value={portfolio.volatility} 
+                                value={`${portfolio.volatility} %`} 
                                 label="Volatility" 
                         />
                     </Col>
@@ -390,7 +390,7 @@ export class InvestorDashboard extends React.Component {
                 name: portfolio.name.length < 1 ? 'Undefined' : portfolio.name,
                 netValue: portfolio.performance.netValue,
                 return: Number(portfolio.performance.totalReturn).toFixed(2),
-                volatility: portfolio.performance.volatility
+                volatility: (portfolio.performance.volatility).toFixed(2)
             }
         });
     }
