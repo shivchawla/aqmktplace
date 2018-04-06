@@ -246,9 +246,9 @@ export class ScreenAdvices extends React.PureComponent {
                                     onPressEnter={() => this.getAdvices()}
                             />
                         </Col>
-                        <Col span={24} style={{filterSortContainerStyle}}>
+                        <Col span={24} style={filterSortContainerStyle}>
                             <Row type="flex" align="middle" justify="end">
-                                <Col xs={6} md={6} xl={6} style={{}}>
+                                <Col xs={6} md={6} xl={0} style={{}}>
                                 {/* <Col span={6}> */}
                                     <Row type="flex" align="middle">
                                         <Col span={4}>

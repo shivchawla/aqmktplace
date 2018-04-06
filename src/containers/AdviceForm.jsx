@@ -68,7 +68,7 @@ export class AdviceFormImpl extends React.Component {
             positions: [],
             public: false,
             isPublic: false,
-            addTickerModalVisible: false,
+            addTickerModalVisible: true,
             compositionSeries: []
         };
         this.columns = [
@@ -598,7 +598,7 @@ export class AdviceFormImpl extends React.Component {
                                                 </FormItem>
                                             </Col>
                                         </Row>
-                                        <Row>
+                                        {/* <Row>
                                             <Col span={24}>
                                                 <h3 style={inputHeaderStyle}>
                                                     Headline
@@ -613,7 +613,7 @@ export class AdviceFormImpl extends React.Component {
                                                     )}
                                                 </FormItem>
                                             </Col>
-                                        </Row>
+                                        </Row> */}
                                         <Row>
                                             <Col span={24}>
                                                 <h3 style={inputHeaderStyle}>

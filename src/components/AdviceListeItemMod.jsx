@@ -300,13 +300,20 @@ class AdviceListItemImpl extends React.PureComponent {
     }
 
     renderNetValueChange = performanceSummary => {
+        let netValue = 0, dailyChange = 0, dailyChangePct = 0, totalReturn;
+        if (performanceSummary && performanceSummary.current) {
+            netValue = performanceSummary.current.netValue;
+            dailyChange = performanceSummary.current.dailyChange;
+            dailyChangePct = performanceSummary.current.dailyChangePct;
+            totalReturn = performanceSummary.current.totalReturn;
+        }
         return (
             <Row type="flex" align="bottom">
                 <Col span={24}>
                     <h3
                             style={netValueStyle}
                     >
-                        {`Rs ${performanceSummary.current.netValue.toFixed(2)}`}
+                        {`Rs ${netValue.toFixed(2)}`}
                     </h3>
                 </Col>
                 <Col span={24}>
@@ -314,10 +321,10 @@ class AdviceListItemImpl extends React.PureComponent {
                             style={{
                                 fontSize: '18px',
                                 marginRight: '25px',
-                                textAlign: 'right', color: performanceSummary.current.dailyChange < 0 ? '#FA4747' : '#3EBB72'
+                                textAlign: 'right', color: dailyChange < 0 ? '#FA4747' : '#3EBB72'
                             }}
                     >
-                        {(performanceSummary.current.totalReturn * 100).toFixed(2)} ({(performanceSummary.current.dailyChangePct * 100).toFixed(2)} %)
+                        {(totalReturn * 100).toFixed(2)} ({(dailyChangePct * 100).toFixed(2)} %)
                     </h3>
                 </Col>
                 <Col span={24}>

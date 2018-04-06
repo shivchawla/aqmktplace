@@ -38,8 +38,8 @@ export class AqStockTableMod extends React.Component {
                 dataIndex: 'symbol',
                 key: 'symbol',
                 render: (text, record) => this.renderAutoCompleteColumn(text, record, 'symbol', 'text', record.tickerValidationStatus),
-                className: 'stock-table-col',
-                width: 200
+                rowClassName: 'stock-table-col',
+                width: 180
             },
             {
                 title: 'SHARES',
@@ -53,7 +53,7 @@ export class AqStockTableMod extends React.Component {
                         record.sharesValidationStatus,
                         record.sharesDisabledStatus
                     ),
-                width: 60,
+                width: 100,
                 className: 'stock-table-col'
             },
             {
@@ -103,6 +103,7 @@ export class AqStockTableMod extends React.Component {
                     value={text}
                     onChange={value => {this.handleRowChange(value, record.key, column)}}
                     disabled={disabled}
+                    width={120}
             />
         );
     }
@@ -116,7 +117,8 @@ export class AqStockTableMod extends React.Component {
             if (value.length > 0) {
                 target['totalValue'] = Number((value * target['lastPrice']).toFixed(2));
                 this.updateAllWeights(newData);
-                target['weight'] = Number((target['totalValue'] / this.getTotalValueSummation(newData)).toFixed(2));
+                const totalSummation = this.getTotalValueSummation(newData);
+                target['weight'] = totalSummation === 0 ? 0 : Number((target['totalValue'] / this.getTotalValueSummation(newData)).toFixed(2));
                 this.setState({data: newData});
             }
             this.setState({data: newData});
@@ -127,7 +129,8 @@ export class AqStockTableMod extends React.Component {
     updateAllWeights = (data) => {
         const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
         return data.map((item, index) => {
-            item['weight'] = Number((item['totalValue'] / totalSummation).toFixed(2));
+            const weight = totalSummation === 0 ? 0 : Number((item['totalValue'] / totalSummation).toFixed(2));
+            item['weight'] = weight;
             return item;
         });
     }
@@ -233,7 +236,7 @@ export class AqStockTableMod extends React.Component {
         data.map(item => {
             totalValue += item.totalValue;
         });
-
+        
         return totalValue;
     }
 
