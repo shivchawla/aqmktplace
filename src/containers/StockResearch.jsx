@@ -112,7 +112,7 @@ export class StockResearch extends React.Component {
         });
     }
 
-    renderRollingPerformanceData = (key) => {
+    renderRollingPerformanceData = key => {
         const {rollingPerformance} = this.state;
         if(rollingPerformance[key]) {
             const ratios = rollingPerformance[key].ratios;
@@ -154,7 +154,7 @@ export class StockResearch extends React.Component {
 
     renderPerformanceMetricsItems = metrics => {
         return (
-            <Row>
+            <Row style={{marginTop: '10px'}}>
                 {
                     metrics.map((item, index) => {
                         return (
@@ -188,7 +188,8 @@ export class StockResearch extends React.Component {
 
     renderPerformanceMetrics = () => {
         const selectedScreen = this.state.selectedPerformanceScreen;
-        return this.renderRollingPerformanceData(selectedScreen);
+        
+        return this.renderRollingPerformanceData(selectedScreen.toLowerCase());
     }
 
     renderOption = item => {
@@ -265,19 +266,19 @@ export class StockResearch extends React.Component {
                                 * Data is delayed by 15 min
                             </h5>
                         </Col>
-                        <Col span={5} style={cardStyle}>
+                        <Col span={6} style={cardStyle}>
                             <h3 style={cardHeaderStyle}>Price Metrics</h3>
                             {this.renderPriceMetrics(priceMetrics)}
                         </Col>
-                        <Col span={11} style={cardStyle}>
+                        <Col span={10} style={cardStyle}>
                             <Row>
-                                <Col span={11}>
+                                <Col span={24}>
                                     <h3 style={cardHeaderStyle}>Performance Metrics</h3>
                                 </Col>
-                                <Col span={13} style={{textAlign: 'right'}}>
+                                <Col span={24} style={{textAlign: 'right'}}>
                                     {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
                                 </Col>
-                                <Col span={24} style={{marginTop: '20px'}}>
+                                <Col span={24}>
                                     {this.renderPerformanceMetrics()}
                                 </Col>
                             </Row>

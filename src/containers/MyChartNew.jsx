@@ -3,7 +3,7 @@ import HighStock from 'highcharts/highstock';
 import _ from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
-import {Row, Col, Checkbox, message, Tabs, AutoComplete, Input, Icon} from 'antd';
+import {Row, Col, Checkbox, message, Tabs, AutoComplete, Input, Icon, Spin} from 'antd';
 import {ChartTickerItem} from '../components';
 import {getStockPerformance, dateFormat} from '../utils';
 import '../css/myChart.css';
@@ -100,7 +100,8 @@ export class MyChartNew extends React.Component {
             series: [],
             legendItems: [],
             selectedDate: moment().format(dateFormat),
-            dataSource: []
+            dataSource: [],
+            loading: false
         };
     }
 
@@ -195,15 +196,30 @@ export class MyChartNew extends React.Component {
         
     }
 
+    showLoader = () => {
+        this.setState({loading: true});
+    }
+
+    hideLoader = () => {
+        this.setState({loading: false});
+    }
+
     updateSeries = (series) => {
         let legendItems = [...this.state.legendItems];
         if (series.length == 1 && series[0].destroy) { // Items needs to be destroyed
             console.log("Items will be destroyed");
             const item = series[0];
             if (item.data === undefined || item.data.length < 1) {
+                this.showLoader();
                 getStockPerformance(item.name.toUpperCase())
                 .then(performance => {
                     this.addItemToSeries(item.name, performance, true);
+                })
+                .catch(err => {
+                    console.log(err);
+                })
+                .finally(() => {
+                    this.hideLoader();
                 })
             } else {
                 this.addItemToSeries(item.name, item.data, true);
@@ -216,9 +232,16 @@ export class MyChartNew extends React.Component {
                     if (seriesIndex === -1) {
                         if (item.data === undefined || item.data.length < 1) { // When no data is passed
                             // console.log('Network call required', item.name);
+                            this.showLoader();
                             getStockPerformance(item.name)
                             .then(performance => {
                                 this.addItemToSeries(item.name, performance);
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            })
+                            .finally(() => {
+                                this.hideLoader();
                             });
                         } else {
                             this.addItemToSeries(item.name, item.data);
@@ -249,10 +272,17 @@ export class MyChartNew extends React.Component {
                                 seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
                     // if (seriesIndex === -1) {
                         if (item.data === undefined || item.data.length < 1) { // When no data is passed
+                            this.showLoader();
                             getStockPerformance(item.name.toUpperCase())
                             .then(performance => {
                                 // console.log('Updating index', index);
                                 this.updateItemInSeries(index, item.name, performance);
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            })
+                            .finally(() => {
+                                this.hideLoader();
                             });
                         } else {
                             this.updateItemInSeries(index, item.name, item.data);
@@ -423,31 +453,33 @@ export class MyChartNew extends React.Component {
 
         return (
             <Row>
-                <Col span={14} id="highchart-container" style={{borderRight: '1px solid #DCD6D6', paddingRight: '20px'}}></Col>
-                <Col span={9} style={{marginLeft: '20px'}}>
-                    <Row type="flex" align="middle">
-                        <Col span={12}>
-                            <h2 style={{fontSize: '12px', margin: '0'}}>
-                                Date <span style={{fontWeight: '700', color: '#555454'}}>{this.state.selectedDate}</span>
-                            </h2>
-                        </Col>
-                        <Col span={12} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                            <AutoComplete
-                                // disabled={!this.state.tickers.length}
-                                className="global-search"
-                                dataSource={dataSource.map(this.renderOption)}
-                                onSelect={this.onCompareSelect}
-                                onSearch={this.handleSearch}
-                                placeholder="Search Stocks"
-                                style={{width: '100%'}}
-                                optionLabelProp="value"
-                            >
-                                <Input suffix={<Icon style={searchIconStyle} type="search" />} />
-                            </AutoComplete>
-                        </Col>
-                    </Row>
-                    {this.renderVerticalLegendList()}
-                </Col>
+                <Spin spinning={this.state.loading}>
+                    <Col span={14} id="highchart-container" style={{borderRight: '1px solid #DCD6D6', paddingRight: '20px'}}></Col>
+                    <Col span={9} style={{marginLeft: '20px'}}>
+                        <Row type="flex" align="middle">
+                            <Col span={12}>
+                                <h2 style={{fontSize: '12px', margin: '0'}}>
+                                    Date <span style={{fontWeight: '700', color: '#555454'}}>{this.state.selectedDate}</span>
+                                </h2>
+                            </Col>
+                            <Col span={12} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                <AutoComplete
+                                    // disabled={!this.state.tickers.length}
+                                    className="global-search"
+                                    dataSource={dataSource.map(this.renderOption)}
+                                    onSelect={this.onCompareSelect}
+                                    onSearch={this.handleSearch}
+                                    placeholder="Search Stocks"
+                                    style={{width: '100%'}}
+                                    optionLabelProp="value"
+                                >
+                                    <Input suffix={<Icon style={searchIconStyle} type="search" />} />
+                                </AutoComplete>
+                            </Col>
+                        </Row>
+                        {this.renderVerticalLegendList()}
+                    </Col>
+                </Spin>
             </Row>
         );
     }

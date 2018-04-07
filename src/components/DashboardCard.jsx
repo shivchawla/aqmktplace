@@ -4,7 +4,7 @@ import {newLayoutStyle, tabBackgroundColor} from '../constants';
 
 export class DashboardCard extends React.Component {
     render() {
-        const {cardStyle, children, title, menu = null, loading = false, xl=12, lg=24, contentStyle} = this.props;
+        const {cardStyle, children, title, menu = null, loading = false, xl=12, lg=24, contentStyle, headerSpan=8, menuSpan=16} = this.props;
 
         return (
             <Col xl={xl} lg={lg} style={cardStyle}>
@@ -12,10 +12,10 @@ export class DashboardCard extends React.Component {
                     <Row style={{...newLayoutStyle, height: '365px', ...contentStyle }}>
                         <Col span={24} style={{...headerStyle, ...this.props.headerStyle}}>
                             <Row>
-                                <Col span={8}>
+                                <Col span={headerSpan}>
                                     <h3 style={{marginLeft: '20px'}}>{title}</h3>
                                 </Col>
-                                <Col span={16} style={{textAlign: 'right'}}>
+                                <Col span={menuSpan} style={{textAlign: 'right'}}>
                                     {menu}
                                 </Col>
                             </Row>
