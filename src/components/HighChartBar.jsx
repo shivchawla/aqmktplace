@@ -38,10 +38,8 @@ export class HighChartBar extends React.Component {
                     gridLineColor: 'transparent',
                 },
                 xAxis: {
-                    title: {
-                        enabled: false
-                    },
                     gridLineColor: 'transparent',
+                    // categories: props.categories || null
                 },
                 title: {
                     style: {
@@ -59,7 +57,6 @@ export class HighChartBar extends React.Component {
                         width: '200'
                     },
                     labelFormatter: function() {
-                        console.log('Legend Data', this);
                         return `<h3>${this.name} - <span style="color: #353535">${this.yData[0]}</span></h3>`;
                     },
                     x: -20,
@@ -76,12 +73,20 @@ export class HighChartBar extends React.Component {
                 },
                 series: []
             },
-            dollarVisible: true
+            dollarVisible: true,
         }
     }
 
+    getCategories = () => {
+        if (this.dollarChart !== null) {
+            return this.dollarChart.series.map(item => item.name)
+        }
+        return [];
+    };
+
     componentDidMount() {
         this.initializeChart();
+        console.log('Categories', this.props.categories);
     }
 
     componentWillReceiveProps(nextProps, nextState) {
@@ -115,6 +120,8 @@ export class HighChartBar extends React.Component {
     updateDollarSeries = series => {
         if (series.length > 0) {
             this.clearDollarSeries();
+            const categories = series.map(item => item.name);
+            console.log('Categories', categories);
             series.map((item, index) => {
                 this.dollarChart.addSeries({
                     name: item.name,
@@ -122,6 +129,12 @@ export class HighChartBar extends React.Component {
                     color: item.color
                 });
             });
+            this.dollarChart.update({
+                xAxis: {
+                    gridLineColor: 'transparent',
+                    categories: series.map(item => item.name)
+                }
+            })
         }
     }
 
@@ -168,8 +181,8 @@ export class HighChartBar extends React.Component {
                             style={{marginRight: '10px'}} 
                             onChange={this.handleRadioGroupChange}
                     >
-                        <RadioButton value="dollarPerformance">Dollar</RadioButton>
-                        <RadioButton value="percentagePerformance">Percentage</RadioButton>
+                        <RadioButton value="dollarPerformance" style={{fontSize: '18px'}}>&#x20b9;</RadioButton>
+                        <RadioButton value="percentagePerformance" style={{fontSize: '18px'}}>%</RadioButton>
                     </RadioGroup>
                 </Col>
                 <Col span={24} style={{textAlign: 'center', ...chartDollarStyle, marginTop: '-5px'}} id='bar-chart-dollar'></Col>

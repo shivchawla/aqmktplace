@@ -21,7 +21,7 @@ export class ChartTickerItem extends React.Component {
     }
 
     render() {
-        const {name = 'HDFCBANK', y = 1388, checked = false, change=0, disabled = false} = this.props.legend;
+        const {name = 'HDFCBANK', y = 1388, checked = false, change=0, disabled = false, color='#585858'} = this.props.legend;
         const iconScale = this.state.focused ? 'scale(1,1)' : 'scale(0, 0)';
         const changeColor = change < 0 ? '#F44336' : '#00C853';
 
@@ -38,7 +38,7 @@ export class ChartTickerItem extends React.Component {
                     <Checkbox disabled={disabled} checked={checked} onChange={this.props.onChange}/>
                 </Col>
                 <Col span={10}>
-                    <h4 style={{fontSize: '12px'}}>{name}</h4>
+                    <h4 style={{fontSize: '12px', color}}>{name}</h4>
                 </Col>
                 <Col span={5}>
                     <MetricItem 

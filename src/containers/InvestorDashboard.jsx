@@ -15,6 +15,7 @@ const RadioGroup = Radio.Group;
 const TabPane = Tabs.TabPane;
 const ReactHighcharts = require('react-highcharts');
 const Option = Select.Option;
+const dateFormat = 'YYYY-MM-DD';
 
 export class InvestorDashboard extends React.Component {
     constructor(props) {
@@ -47,7 +48,8 @@ export class InvestorDashboard extends React.Component {
             subscribedAdvicesLoading: false,
             defaultPortfolioLoading: false,
             showEmptyScreen: false,
-            showAdvisorDashboardToggle: false
+            showAdvisorDashboardToggle: false,
+            defaultPortfolioName: 'Default Portfolio'
         };
         this.stockPositionColumns = [
             {
@@ -155,7 +157,9 @@ export class InvestorDashboard extends React.Component {
             const concentration = portfolioMetrics.concentration;
             const performance = response.data.defaultPerformance.current.metrics.portfolioPerformance.true;
             const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${response.data.defaultPortfolio._id}`;
-            const performanceData = response.data.defaultPerformance.simulated.portfolioValues.map(item => [moment(item.date).valueOf(), item.netValue]);
+            const performanceData = response.data.defaultPerformance.simulated.portfolioValues.map(item => {
+                        return [moment(item.date, dateFormat).valueOf(), item.netValue]
+            });
             const pieChartTitle = `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
             const summary = response.data.defaultPerformance.summary.current;
             tickers.push({
@@ -175,6 +179,7 @@ export class InvestorDashboard extends React.Component {
                 return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]};
             });
             this.setState({
+                defaultPortfolioName: response.data.defaultPortfolio.name,
                 positions,
                 showEmptyScreen: positions.length > 0 ? false : true,
                 composition,
@@ -423,7 +428,7 @@ export class InvestorDashboard extends React.Component {
                     dataSource={this.state.subscribedAdvices} 
                     pagination={false}
                     size="small"
-                    style={{margin: '0 20px'}}
+                    style={{margin: '10px 20px'}}
             />
         );
     }
@@ -661,15 +666,15 @@ export class InvestorDashboard extends React.Component {
     renderOverviewPieChart = () => {
         return (
             <Row>
-                <Col span={24} style={{textAlign: 'center', marginTop: '0px'}}>
+                <Col span={24}>
+                    <HighChartNew series = {this.state.composition} />
+                </Col>
+                <Col span={24} style={{textAlign: 'center', marginTop: '-40px'}}>
                     <RadioGroup onChange={this.handleOverviewSelectChange} defaultValue="stocks" size="small">
                         <RadioButton value="stocks">Stocks</RadioButton>
                         <RadioButton value="sectors">Sectors</RadioButton>
                         <RadioButton value="industries">Industries</RadioButton>
                     </RadioGroup>
-                </Col>
-                <Col span={24}>
-                    <HighChartNew series = {this.state.composition} />
                 </Col>
             </Row>
         );
@@ -678,13 +683,26 @@ export class InvestorDashboard extends React.Component {
     renderOverviewBarChart = () => {
         const dollarSeries = this.state.dollarPerformance;
         const percentageSeries = this.state.percentagePerformance;
-        console.log(dollarSeries, percentageSeries);
         return <HighChartBar
+                categories={dollarSeries.map(item => item.name)}
                 alignLegend='right' 
                 dollarSeries={dollarSeries} 
                 percentageSeries={percentageSeries} 
                 legendStyle={{top: '0px'}}
         />;
+    }
+
+    renderPortfolioMenu = () => {
+        return (
+            <Select 
+                    value={this.state.defaultPortfolioName} 
+                    style={{width: 150, marginTop: '5px'}} 
+                    size="small"
+                    
+            >
+                <Option value={this.state.defaultPortfolioName}>{this.state.defaultPortfolioName}</Option>
+            </Select>
+        );
     }
 
     componentWillMount() {
@@ -729,66 +747,75 @@ export class InvestorDashboard extends React.Component {
                     </Col>
                     <Col span={24}>
                         <Row style={{marginTop: '22px'}}>
-                            <Col xl={12} lg={24} style={{paddingRight: '5px'}}>
-                                <Spin spinning={this.state.defaultPortfolioLoading}>
-                                    <Tabs 
-                                            defaultActiveKey={"2"} 
-                                            animated={false} 
-                                            style={{...newLayoutStyle, height: '395px'}}
-                                            size="small"
-                                            tabBarStyle={{backgroundColor: tabBackgroundColor}}
+                            <DashboardCard 
+                                    title="Overview" 
+                                    loading={this.state.defaultPortfolioLoading} 
+                                    cardStyle={{paddingRight: '5px'}} 
+                                    contentStyle={{height: '425px'}}
+                                    menu={this.renderPortfolioMenu()}
+                            >
+                                <Tabs 
+                                        defaultActiveKey={"1"} 
+                                        animated={false} 
+                                        // style={{...newLayoutStyle, height: '395px'}}
+                                        size="small"
+                                        tabBarStyle={{backgroundColor: tabBackgroundColor}}
+                                >
+                                    <TabPane tab="Performance" key="1">
+                                        <Row>
+                                            <Col span={24} >{this.renderSummaryMetrics()}</Col>
+                                            <Col span={24} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
+                                        </Row>
+                                    </TabPane>
+                                    <TabPane tab="Portfolio" key="2">
+                                        <Row>
+                                            <Col span={12}>{this.renderOverviewPieChart()}</Col>
+                                            <Col span={12}>{this.renderOverviewMetrics()}</Col>
+                                        </Row>
+                                    </TabPane>
+                                </Tabs>
+                            </DashboardCard>
+                            <DashboardCard 
+                                    title="Detail" 
+                                    loading={this.state.defaultPortfolioLoading} 
+                                    cardStyle={{paddingLeft: '5px'}}
+                                    contentStyle={{height: '425px'}}
+                                    menu={this.renderPortfolioMenu()}
+                            >
+                                <Tabs 
+                                        animated={false} 
+                                        defaultActiveKey="1" 
+                                        size="small"
+                                        tabBarStyle={{backgroundColor: tabBackgroundColor}}
+                                >
+                                    <TabPane 
+                                            tab="Performance" 
+                                            key="1" 
+                                            style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
                                     >
-                                        <TabPane tab="Overview" key="1">
-                                            <Row>
-                                                <Col span={12}>{this.renderOverviewPieChart()}</Col>
-                                                <Col span={12}>{this.renderOverviewMetrics()}</Col>
-                                            </Row>
-                                        </TabPane>
-                                        <TabPane tab="Summary" key="2">
-                                            <Row>
-                                                <Col span={24} >{this.renderSummaryMetrics()}</Col>
-                                                <Col span={24} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
-                                            </Row>
-                                        </TabPane>
-                                    </Tabs>
-                                </Spin>
-                            </Col>
-                            <Col xl={12} lg={24} style={{paddingLeft: '5px'}}>
-                                <Spin spinning={this.state.defaultPortfolioLoading}>
-                                    <Tabs 
-                                            animated={false} 
-                                            defaultActiveKey="1" 
-                                            size="small"
-                                            style={{...newLayoutStyle, height: '395'}}
-                                            tabBarStyle={{backgroundColor: tabBackgroundColor}}
+                                        <Col span={24} style={{paddingBottom: '20px', paddingLeft: '10px'}}>
+                                            <MyChartNew series={this.state.tickers} hideLegend={true}/>
+                                        </Col>
+                                    </TabPane>
+                                    <TabPane 
+                                            tab="Portfolio" 
+                                            key="2" 
+                                            style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
                                     >
-                                        <TabPane 
-                                                tab="Performance" 
-                                                key="1" 
-                                                style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
-                                        >
-                                            <Col span={24} style={{paddingBottom: '20px', paddingLeft: '10px'}}>
-                                                <MyChartNew series={this.state.tickers} hideLegend={true}/>
-                                            </Col>
-                                        </TabPane>
-                                        <TabPane 
-                                                tab="Composition" 
-                                                key="2" 
-                                                style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
-                                        >
-                                            <Col span={24}>
-                                                {this.renderStockTransactions()}
-                                            </Col>
-                                        </TabPane>
-                                    </Tabs>
-                                </Spin>
-                            </Col>
+                                        <Col span={24}>
+                                            {this.renderStockTransactions()}
+                                        </Col>
+                                    </TabPane>
+                                </Tabs>
+                            </DashboardCard>
+                            
                         </Row>
                         <Row style={{margin: '10px 0'}}>
                             <DashboardCard 
                                     title="My Portfolios" 
                                     cardStyle={{paddingRight: '5px'}} 
                                     loading={this.state.portfolioLoading}
+                                    headerStyle={headerStyle}
                             >
                                 {this.renderPortfolios()}
                             </DashboardCard>
@@ -796,6 +823,7 @@ export class InvestorDashboard extends React.Component {
                                     title="Advices" 
                                     cardStyle={{paddingLeft: '5px'}}
                                     loading={this.state.subscribedAdvicesLoading}
+                                    headerStyle={headerStyle}
                             >
                                 {this.renderSubscribedAdvices()}
                             </DashboardCard>
@@ -808,13 +836,13 @@ export class InvestorDashboard extends React.Component {
 
 const valueStyle = {
     color: '#1F9CC4',
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: '400'
 };
 
 const labelStyle = {
     color: '#707070',
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: '400'
 };
 
@@ -827,8 +855,7 @@ const emptyPortfolioStyle = {
 };
 
 const headerStyle = {
-    backgroundColor: tabBackgroundColor, 
-    padding: '5px 10px',
+    borderBottom: '1px solid #eaeaea'
 };
 
 const contentStyle = {

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import axios from 'axios';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio} from 'antd';
 import {List} from 'immutable';
-import {AqLink} from '../components';
+import {AqLink, DashboardCard} from '../components';
 import {newLayoutStyle} from '../constants';
 import {getStockData} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
@@ -39,7 +39,7 @@ export class StockResearch extends React.Component {
                 name: ''
             },
             rollingPerformance: {},
-            selectedPerformanceScreen: '10y'
+            selectedPerformanceScreen: '10y',
         };
     }
 
@@ -104,6 +104,7 @@ export class StockResearch extends React.Component {
             return getStockData(value, 'rollingPerformance');
         })
         .then(response => {
+            console.log('Rolling Performance', response.data);
             this.setState({rollingPerformance: response.data.rollingPerformance.detail});
         })
         .finally(() => {
@@ -114,16 +115,19 @@ export class StockResearch extends React.Component {
     renderRollingPerformanceData = (key) => {
         const {rollingPerformance} = this.state;
         if(rollingPerformance[key]) {
-            const dataObject = rollingPerformance[key].ratios;
+            const ratios = rollingPerformance[key].ratios;
+            const returns = rollingPerformance[key].returns;
+            const deviation = rollingPerformance[key].deviation;
             const metricsData = [
-                {label: 'Alpha', value: dataObject.alpha},
-                {label: 'Beta', value: dataObject.beta},
-                {label: 'Calmarratio', value: dataObject.calmarratio},
-                {label: 'Information Ratio', value: dataObject.informationratio},
-                {label: 'Sharpe Ratio', value: dataObject.sharperatio},
+                {label: 'Alpha', value: `${(ratios.alpha * 100).toFixed(2)} %`},
+                {label: 'Beta', value: ratios.beta},
+                {label: 'Ann. Return', value: `${(returns.annualreturn * 100).toFixed(2)} %`},
+                {label: 'Stability', value: `${(ratios.stability * 100).toFixed(2)} %`},
+                {label: 'Volatility', value: `${(deviation.annualstandarddeviation * 100).toFixed(2)} %`},
+                {label: 'Sharpe Ratio', value: ratios.sharperatio},
             ];
 
-            return this.renderPriceMetrics(metricsData);
+            return this.renderPerformanceMetricsItems(metricsData);
         }
 
         return <h3>No Data</h3>;
@@ -141,11 +145,30 @@ export class StockResearch extends React.Component {
         return metrics.map((item, index) => {
             return (
                 <Row key={index} style={{marginBottom: '5px'}}>
-                    <Col span={8}>{item.label}</Col>
-                    <Col span={8} offset={8} style={{color: '#3B3737', fontWeight: 700}}>{item.value}</Col>
+                    <Col span={16}>{item.label}</Col>
+                    <Col span={8} style={{color: '#3B3737', fontWeight: 700}}>{item.value}</Col>
                 </Row>
             );
         });
+    }
+
+    renderPerformanceMetricsItems = metrics => {
+        return (
+            <Row>
+                {
+                    metrics.map((item, index) => {
+                        return (
+                            <Col span={12} key={index} style={{marginBottom: '10px'}}>
+                                <Row>
+                                    <Col span={14}>{item.label}</Col>
+                                    <Col span={10} style={{color: '#3B3737', fontWeight: 700}}>{item.value}</Col>
+                                </Row>
+                            </Col>
+                        );
+                    })
+                }
+            </Row>
+        );
     }
 
     renderPriceMetricsTimeline = timelineArray => (
@@ -185,7 +208,6 @@ export class StockResearch extends React.Component {
 
     render() {
         const {dataSource, latestDetail} = this.state;
-        console.log(latestDetail);
         // const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
         const priceMetrics = [
             {label: 'High', value: latestDetail.high},
@@ -194,7 +216,7 @@ export class StockResearch extends React.Component {
             {label: '52W High', value: latestDetail.high_52w},
             {label: '52W Low', value: latestDetail.low_52w},
         ];
-        const performanceMetricsTimeline = ['10y', 'ytd', '1y', '5y', '2y', 'mtd'];
+        const performanceMetricsTimeline = ['MTD', 'YTD', '1Y', '2Y', '5Y', '10Y'];
         const percentageColor = latestDetail.change < 0 ? '#FA4747' : '#3EBB72';
         const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
 
@@ -237,28 +259,45 @@ export class StockResearch extends React.Component {
                                 {latestDetail.closePrice} 
                                 <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
                             </h3>
-                            <h5 style={{fontSize: '12px', fontWeight: 400, color: '#F44336', position: 'absolute', bottom: '10px'}}>
-                                * Data is updated every 1 min, delayed by 15 min
+                            <h5 
+                                    style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
+                            >
+                                * Data is delayed by 15 min
                             </h5>
                         </Col>
-                        <Col span={6} style={cardStyle}>
+                        <Col span={5} style={cardStyle}>
                             <h3 style={cardHeaderStyle}>Price Metrics</h3>
                             {this.renderPriceMetrics(priceMetrics)}
                         </Col>
-                        <Col span={10} style={cardStyle}>
-                            <Col span={10}>
-                                <h3 style={cardHeaderStyle}>Performance Metrics</h3>
-                            </Col>
-                            <Col span={14} style={{textAlign: 'right'}}>
-                                {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
-                            </Col>
-                            <Col span={24}>
-                                {this.renderPerformanceMetrics()}
-                            </Col>
+                        <Col span={11} style={cardStyle}>
+                            <Row>
+                                <Col span={11}>
+                                    <h3 style={cardHeaderStyle}>Performance Metrics</h3>
+                                </Col>
+                                <Col span={13} style={{textAlign: 'right'}}>
+                                    {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
+                                </Col>
+                                <Col span={24} style={{marginTop: '20px'}}>
+                                    {this.renderPerformanceMetrics()}
+                                </Col>
+                            </Row>
                         </Col>
                     </Row>
                     <Row style={metricStyle}>  
-                        <Col span={24} style={{fontSize: '16px', color: '#565656', fontWeight: '700', marginBottom: '10px'}}>Performance</Col>
+                        <DashboardCard 
+                                xl={24} 
+                                title="Performance" 
+                                headerStyle={{borderBottom: '1px solid #eaeaea'}}
+                                contentStyle={{height: '405px', marginTop: '10px'}}
+                        >
+                            <MyChartNew 
+                                    series = {this.state.tickers} 
+                                    deleteItem = {this.deleteItem}
+                                    addItem = {this.addItem}
+                                    verticalLegend = {true}
+                            /> 
+                        </DashboardCard>
+                        {/* <Col span={24} style={{fontSize: '16px', color: '#565656', fontWeight: '700', marginBottom: '10px'}}>Performance</Col>
                         <Col span={24} style={{marginTop: '10px'}}>
                             <MyChartNew 
                                     series = {this.state.tickers} 
@@ -266,7 +305,7 @@ export class StockResearch extends React.Component {
                                     addItem = {this.addItem}
                                     verticalLegend = {true}
                             /> 
-                        </Col>
+                        </Col> */}
                     </Row>
                 </Col>
             </Row>

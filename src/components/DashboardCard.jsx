@@ -10,7 +10,7 @@ export class DashboardCard extends React.Component {
             <Col xl={xl} lg={lg} style={cardStyle}>
                 <Spin spinning={loading}>
                     <Row style={{...newLayoutStyle, height: '365px', ...contentStyle }}>
-                        <Col span={24} style={headerStyle}>
+                        <Col span={24} style={{...headerStyle, ...this.props.headerStyle}}>
                             <Row>
                                 <Col span={8}>
                                     <h3 style={{marginLeft: '20px'}}>{title}</h3>
@@ -33,7 +33,6 @@ export class DashboardCard extends React.Component {
 const headerStyle = {
     backgroundColor: tabBackgroundColor, 
     padding: '5px 10px',
-    borderBottom: '1px solid #eaeaea'
 };
 
 const contentStyle = {

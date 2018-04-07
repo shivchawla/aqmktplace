@@ -110,7 +110,7 @@ export class MyChartNew extends React.Component {
             // console.log(point.series.name);
             try{
                 const item = legendItems.filter(item => item.name === point.series.name)[0];
-                item.y = point.y;
+                item.y = point.y.toFixed(2);
                 item.change = Number(point.point.change.toFixed(2));
                 this.setState({legendItems, selectedDate: moment(points[0].x).format(dateFormat)});
             }
@@ -182,10 +182,17 @@ export class MyChartNew extends React.Component {
 
     updateItemInSeries = (index, name, data) => {
         const legendItems = [...this.state.legendItems];
-        this.chart.series[index].update({name: name.toUpperCase(), data}, false);
-        legendItems[index].name = name.toUpperCase();
-        this.setState({legendItems});
-        this.chart.redraw();
+        try {
+            if (this.chart.series[index] !== undefined) {
+                this.chart.series[index].update({name: name.toUpperCase(), data}, false);
+                legendItems[index].name = name.toUpperCase();
+                this.setState({legendItems});
+                this.chart.redraw();
+            }
+        } catch(err) {
+            console.log(err);
+        }
+        
     }
 
     updateSeries = (series) => {
@@ -323,7 +330,6 @@ export class MyChartNew extends React.Component {
     }
 
     renderOption = item => {
-        console.log(item);
         return (
             <Option key={item.id} text={item.symbol} value={item.symbol}>
                 <div>

@@ -10,8 +10,12 @@
 
 .ant-radio-group {
     overflow: hidden;
-    border-radius: 100px;
+    border-radius: 4px;
     border: 1px solid #eaeaea;
+}
+
+.ant-radio-button-wrapper:first-child {
+    border-left: 1px solid transparent;
 }
 
 .ant-radio-button-wrapper {
@@ -20,12 +24,4 @@
 
 .ant-form-item {
     margin: 0;
-}
-
-.ant-table-thead > tr > th {
-    padding-left: 40px !important;
-}
-
-.ant-table-tbody > tr > td {
-    padding: 10px 0 10px 40px !important;
 }
