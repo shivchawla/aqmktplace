@@ -13,7 +13,6 @@ const {requestUrl, aimsquantToken, investorId} = require('../localConfig');
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 const TabPane = Tabs.TabPane;
-const ReactHighcharts = require('react-highcharts');
 const Option = Select.Option;
 const dateFormat = 'YYYY-MM-DD';
 
@@ -470,14 +469,16 @@ export class InvestorDashboard extends React.Component {
 
     processSectorsForChart = (positions, composition) => {
         const sectorData = [];
-        positions.map(position => {
+        const colors = ['#0091EA', '#FFEB3B', '#FFC107', '#FF9800', '#795548', '#FF5722', '#607D8B', '#3D5AFE', '#7C4DFF'];
+        positions.map((position, positionIndex) => {
             const sectorName = position.security.detail.Sector;
             const index = _.findIndex(sectorData, sector => sector.name === sectorName);
             const compositonIndex = _.findIndex(composition, item => item.name === position.security.ticker);
             if (index === -1 ) {
                 sectorData.push({
                     name: sectorName,
-                    y: composition[compositonIndex].y
+                    y: composition[compositonIndex].y,
+                    color: colors[positionIndex]
                 });
             } else {
                 const weight = composition[compositonIndex].y;
@@ -491,14 +492,16 @@ export class InvestorDashboard extends React.Component {
 
     processIndustriesForChart = (positions, composition) => {
         const industryData = [];
-        positions.map(position => {
+        const colors = ['#F44336', '#9C27B0', '#3F51B5', '#3F51B5', '#009688', '#8BC34A', '#8BC34A', '#CDDC39', '#00BFA5'];
+        positions.map((position, positionIndex) => {
             const industryName = position.security.detail.Industry;
             const index = _.findIndex(industryData, sector => sector.name === industryName);
             const compositonIndex = _.findIndex(composition, item => item.name === position.security.ticker);
             if (index === -1 ) {
                 industryData.push({
                     name: industryName,
-                    y: composition[compositonIndex].y
+                    y: composition[compositonIndex].y,
+                    color: colors[positionIndex]
                 });
             } else {
                 const weight = composition[compositonIndex].y;
@@ -735,15 +738,15 @@ export class InvestorDashboard extends React.Component {
                         >
                             Create Portfolio
                         </Button>
-                        {
-                            this.state.showAdvisorDashboardToggle &&
+                        {/* {
+                            this.state.showAdvisorDashboardToggle && */}
                             <Button 
                                     type="secondary" 
                                     onClick={() => this.props.history.push('/advisordashboard')}
                             >
                                 Advisor Dashboard
                             </Button>
-                        }
+                        {/* } */}
                     </Col>
                     <Col span={24}>
                         <Row style={{marginTop: '22px'}}>

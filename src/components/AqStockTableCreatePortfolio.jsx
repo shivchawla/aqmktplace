@@ -34,30 +34,35 @@ export class AqStockTableCreatePortfolio extends React.Component {
                 dataIndex: 'symbol',
                 key: 'symbol',
                 render: (text, record) => this.renderAutoCompleteColumn(text, record, 'symbol', 'text', record.tickerValidationStatus),
+                width: 150
             },
             {
                 title: 'DATE',
                 dataIndex: 'date',
                 key: 'date',
-                render: (text, record) => this.renderDatePicker(text, record, 'date')
+                render: (text, record) => this.renderDatePicker(text, record, 'date'),
+                width: 150
             },
             {
                 title: 'SHARES',
                 dataIndex: 'shares',
                 key: 'shares',
-                render: (text, record) => this.renderInput(text, record, 'shares', 'number')
+                render: (text, record) => this.renderInput(text, record, 'shares', 'number'),
+                width: 100
             },
             {
                 title: 'PRICE',
                 dataIndex: 'price',
                 key: 'price',
-                render: (text, record) => this.renderInput(text, record, 'price', 'number')
+                render: (text, record) => this.renderInput(text, record, 'price', 'number'),
+                width: 100
             },
             {
                 title: 'COMMISSION',
                 dataIndex: 'commission',
                 key: 'commission',
-                render: (text, record) => this.renderInput(text, record, 'commission')
+                render: (text, record) => this.renderInput(text, record, 'commission'),
+                width: 100
             }
         ];
         this.state = {
@@ -245,6 +250,7 @@ export class AqStockTableCreatePortfolio extends React.Component {
                             columns={this.columns} 
                             pagination={false} 
                             rowSelection={this.getRowSelection()} 
+                            scroll={{y: 250, x: true}}
                     />
                 </Col>
             </Row>

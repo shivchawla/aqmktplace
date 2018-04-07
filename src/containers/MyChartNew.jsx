@@ -88,7 +88,9 @@ export class MyChartNew extends React.Component {
                         useHTML: true
                     }
                     : {
-                        shared: true
+                        shared: true,
+                        split: false,
+                        userHTML: true
                 },
                 chart: {
                     height: 350 
@@ -434,7 +436,7 @@ export class MyChartNew extends React.Component {
                                             <span 
                                                     style={{marginLeft: '10px', fontSize: '12px', fontWeight: '400'}}
                                             >
-                                                {(legend.y).toFixed(2)}
+                                                {Number(legend.y).toFixed(2)}
                                             </span>
                                             <span style={{fontSize: '12px', color: changeColor, marginLeft: '5px'}}>({legend.change} %)</span>
                                         </h3>

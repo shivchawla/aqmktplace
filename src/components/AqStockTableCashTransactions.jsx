@@ -205,6 +205,7 @@ export class AqStockTableCashTransaction extends React.Component {
                             columns={this.columns} 
                             pagination={false} 
                             rowSelection={this.getRowSelection()} 
+                            scroll={{y: 250, x: true}}
                     />
                 </Col>
             </Row>

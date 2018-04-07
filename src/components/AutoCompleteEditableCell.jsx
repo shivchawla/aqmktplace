@@ -63,7 +63,7 @@ export class AutoCompleteEditableCell extends React.Component {
     }
 
     render() {
-        const {value = 'TCS', onChange, type, validationStatus, disabled = false, onEnter} = this.props;
+        const {value, onChange, type, validationStatus, disabled = false, onEnter} = this.props;
         const {dataSource} = this.state;
 
         return (

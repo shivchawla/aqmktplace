@@ -80,10 +80,41 @@ export class DashboardImpl extends React.Component {
                             history={this.props.history}
                     />
                 </Col>
-                {this.renderPortfolios()}
+                <Col span={24}>
+                    <div style={divBackground}>
+                        <Row gutter={24}>
+                            <Col style={gutterBox} span={6}>
+                                <div className="gutter-box">col-6</div>
+                            </Col>
+                            <Col style={gutterBox} span={6}>
+                                <div className="gutter-box">col-6</div>
+                            </Col>
+                            <Col style={gutterBox} span={6}>
+                                <div className="gutter-box">col-6</div>
+                            </Col>
+                            <Col style={gutterBox} span={6}>
+                                <div className="gutter-box">col-6</div>
+                            </Col>
+                        </Row>
+                    </div>
+                </Col>
             </Row>
         );
     }
+}
+
+const boxStyle = {
+    backgroundColor: 'blue'
+};
+
+const gutterBox = {
+    background: '#00A0E9',
+    padding: '5px 0'
+};
+
+const divBackground = {
+    background: 'transparent',
+    border: 0
 }
 
 export const Dashboard = withRouter(DashboardImpl);

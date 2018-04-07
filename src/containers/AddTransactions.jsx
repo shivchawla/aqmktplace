@@ -30,11 +30,11 @@ class AddTransactionsImpl extends React.Component {
             presentAdvices: [],
             presentStocks: [],
             subscribedAdvices: [],
-            isSubscibedAdviceModalVisible: false,
             isPreviewModalVisible: false,
+            isSubscibedAdviceModalVisible: false,
             stockTransactions: [],
             cashTransactions: [],
-            toggleValue: 'advice',
+            toggleValue: 'stock',
             selectedBenchmark: 'TCS'
         };
         this.columns = [
@@ -195,6 +195,7 @@ class AddTransactionsImpl extends React.Component {
     }
 
     togglePreviewModal = () => {
+        console.log("HOla");
         this.setState({isPreviewModalVisible: !this.state.isPreviewModalVisible});
     }
 
@@ -353,7 +354,7 @@ class AddTransactionsImpl extends React.Component {
         })
         .then(response => {
             let performanceSeries = response.data.portfolioPerformance.portfolioValues.map((item, index) => {
-                return [moment(item.date).valueOf(), item.netValue];
+                return [moment(item.date, dateFormat).valueOf(), item.netValue];
             });
             if (tickers.length < 2) {
                 tickers.push({
@@ -725,7 +726,21 @@ class AddTransactionsImpl extends React.Component {
                 {this.renderSubscribedAdviceModal()}
                 {this.renderPreviewModal()}
                 <Form>
-                    <Col xl={18} md={24} style={{...newLayoutStyle}}>
+                    <Col xl={0} xs={24} md={24} style={{textAlign: 'right'}}>
+                        <Button 
+                                type="primary" 
+                                onClick={this.togglePreviewModal} 
+                                style={{marginRight: '20px'}}
+                        >
+                            Preview
+                        </Button>
+                        <Button
+                                onClick={() => this.props.history.goBack()}
+                        >
+                            Cancel
+                        </Button>
+                    </Col>
+                    <Col xl={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
                         {
                             !portfolioId && 
                             <Row type="flex" align="middle" style={{marginTop: '20px'}}>
@@ -739,29 +754,8 @@ class AddTransactionsImpl extends React.Component {
                                         )}
                                     </FormItem>
                                 </Col>
-                                <Col span={10} offset={1}>
+                                <Col span={18} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                     {this.renderSelect()}
-                                </Col>
-                                <Col xl={0} md={7}>
-                                    <Row style={{position: 'absolute', right: 40}}>
-                                        <Col span={12}>
-                                            <Button 
-                                                    type="primary" 
-                                                    onClick={this.togglePreviewModal} 
-                                                    htmlType="submit"
-                                                    style={{position: 'absolute', right: '10px'}}
-                                            >
-                                                Preview
-                                            </Button>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Button
-                                                    onClick={() => this.props.history.goBack()}
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </Col>
-                                    </Row>
                                 </Col>
                             </Row>
                         }
@@ -786,19 +780,16 @@ class AddTransactionsImpl extends React.Component {
                             </Col>
                         </Row>
                     </Col>
-                    <Col xl={5} md={0} offset={1}>
+                    <Col xl={5} md={0} sm={0} xs={0} offset={1} style={{marginTop: '20px'}}>
                         <Row type="flex">
                             <Col span={24}>
-                                <FormItem>
-                                    <Button 
-                                            type="primary" 
-                                            onClick={this.togglePreviewModal} 
-                                            htmlType="submit"
-                                            style={buttonStyle}
-                                    >
-                                        Preview
-                                    </Button>
-                                </FormItem>
+                                <Button 
+                                        type="primary" 
+                                        onClick={this.togglePreviewModal} 
+                                        style={buttonStyle}
+                                >
+                                    Preview
+                                </Button>
                             </Col>
                             <Col span={24} style={{marginTop: 10}}>
                                 <Button
