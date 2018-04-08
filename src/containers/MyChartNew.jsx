@@ -18,7 +18,9 @@ export class MyChartNew extends React.Component {
         const self = this;
         this.state = {
             config: {
-                colors: ["#1DE9B6", "#f44336", "#00B0FF", "#009688", "#FFEA00", "#76DDFB", "#53A8E2", "#2C82BE", "#DBECF8", "#2C9BBE"],
+                //colors: ["#1DE9B6", "#f44336", "#00B0FF", "#009688", "#FFEA00", "#76DDFB", "#53A8E2", "#2C82BE", "#DBECF8", "#2C9BBE"],
+                //colors: ["#00B0FF", "#0375b4", "#cc6666", "#FFAA1D", "#007849", "#6e2667", "#fc4a1a"],
+                colors: ['#0082c8','#e6194b','#3cb44b','#ffe119','#f58231','#911eb4','#46f0f0','#f032e6','#d2f53c','#fabebe','#008080','#e6beff','#aa6e28','#fffac8','#800000','#aaffc3','#808000','#ffd8b1','#000080', '#808080'],
                 rangeSelector: {
                     selected: 0,
                     labelStyle: {
@@ -35,6 +37,39 @@ export class MyChartNew extends React.Component {
                     labelStyle: {
                         display: 'none'
                     },
+                    buttons: [{
+                        type: 'month',
+                        count: 1,
+                        text: '1m'
+                    }, {
+                        type: 'month',
+                        count: 3,
+                        text: '3m'
+                    }, {
+                        type: 'month',
+                        count: 6,
+                        text: '6m'
+                    }, {
+                        type: 'ytd',
+                        text: 'YTD'
+                    }, {
+                        type: 'year',
+                        count: 1,
+                        text: '1y'
+                    }, {
+                        type: 'all',
+                        text: 'All'
+                    }],
+                    buttonTheme: { // styles for the buttons
+                        fill: 'none',
+                        stroke: 'none',
+                        'stroke-width': 0,
+                        r: 8,
+                        style: {
+                            color: '#039',
+                            fontWeight: 'bold'
+                        },
+                    }
                 },
                 title: {
                     text: 'Stock Graph',
@@ -56,7 +91,7 @@ export class MyChartNew extends React.Component {
                     }
                 },
                 yAxis: {
-                    gridLineColor: 'transparent',
+                    //gridLineColor: 'transparent',
                     labels: {
                         formatter: function () {
                             return (this.value > 0 ? ' + ' : '') + this.value + '%';
@@ -144,7 +179,7 @@ export class MyChartNew extends React.Component {
         const legendIndex = _.findIndex(legendItems, legendItem => legendItem.name.toUpperCase() === name.toUpperCase());
         if (seriesIndex === -1) {
             this.chart.addSeries({
-                name: name.toUpperCase(),
+                name: name, //name.toUpperCase(),
                 data,
                 visible: this.chart.series.length < 5,
                 selected: true
@@ -425,7 +460,7 @@ export class MyChartNew extends React.Component {
                         const changeColor = legend.change < 0 ? '#F44336' : '#00C853';
 
                         return (
-                            <Col span={12} key={index}>
+                            <Col span={10} key={index}>
                                 <Row type="flex" align="middle"> 
                                     <Col span={2}>
                                         <Checkbox checked={legend.checked} onChange={e => this.onCheckboxChange(e, legend)} />
@@ -503,7 +538,7 @@ export class MyChartNew extends React.Component {
                         {this.renderHorizontalLegendList()}
                     </Col>
                 }
-                <Col span={24} id="highchart-container"></Col>
+                <Col id="highchart-container" style={{margin: '20px'}}></Col>
             </Row>
         );
     }

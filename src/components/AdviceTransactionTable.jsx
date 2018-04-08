@@ -19,7 +19,7 @@ export class AdviceTransactionTable extends React.Component {
         super(props);
         this.state = {
             advices: props.advices,
-            subscribedAdvices: props.subscribedAdvices
+            subscribedAdvices: props.subscribedAdvices,
         }
         this.columns = [
             {
@@ -273,7 +273,7 @@ export class AdviceTransactionTable extends React.Component {
 
     render() {
         return (
-            <Collapse accordion bordered={false}>
+            <Collapse bordered={false} defaultActiveKey={'0'}>
                 {this.renderAdvices()}
             </Collapse>
         );

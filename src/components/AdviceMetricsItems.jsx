@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Row} from 'antd';
+import {Row, Col} from 'antd';
 import {metricsLabelStyle, metricsValueStyle} from '../constants';
 import {MetricItem} from '../components';
 
@@ -12,10 +12,12 @@ export class AdviceMetricsItems extends React.Component {
                 {
                     metrics.map((item, index) => {
                         const neutralColor = '#353535';
-                        const positiveColor = '#8BC34A';
+                        const positiveColor = '#00b300';//'#8BC34A';
                         const negativeColor = '#F44336';
-                        const valueColor = item.percentage ? (item.value >= 0 ? positiveColor : negativeColor) : neutralColor;
-                        const value = item.percentage ? `${(item.value * 100).toFixed(2)} %` : item.value;
+                        const valueColor = item.color ? item.value > 0 ? positiveColor : item.value < 0 ? negativeColor : neutralColor: neutralColor;
+                        var dirArrow = ""; //item.direction ? item.value > 0 ? '▲' : item.value < 0 ? '▼' : "" : ""; 
+                        const value = `${(item.percentage ? `${(item.value * 100).toFixed(2)} %` : item.value)} ${dirArrow}`;
+                        
                         return (
                             <MetricItem 
                                     key={index}

@@ -7,25 +7,23 @@ export class DashboardCard extends React.Component {
         const {cardStyle, children, title, menu = null, loading = false, xl=12, lg=24, contentStyle, headerSpan=8, menuSpan=16} = this.props;
 
         return (
-            <Col xl={xl} lg={lg} style={cardStyle}>
+            <Col style={cardStyle}>
                 <Spin spinning={loading}>
                     <Row style={{...newLayoutStyle, height: '365px', ...contentStyle }}>
-                        <Col span={24} style={{...headerStyle, ...this.props.headerStyle}}>
-                            <Row>
-                                <Col span={headerSpan}>
-                                    <h3 style={{marginLeft: '20px'}}>{title}</h3>
-                                </Col>
-                                <Col span={menuSpan} style={{textAlign: 'right'}}>
-                                    {menu}
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col span={24} style={contentStyle}>
+                        <Row style={{...headerStyle, ...this.props.headerStyle}}>
+                            <Col span={headerSpan}>
+                                <h3 style={{marginLeft: '20px'}}>{title}</h3>
+                            </Col>
+                            <Col span={menuSpan} style={{textAlign: 'right'}}>
+                                {menu}
+                            </Col>
+                        </Row>
+                        <Row style={contentStyle}>
                             {children}
-                        </Col>
+                        </Row>
                     </Row>
                 </Spin>
-            </Col> 
+            </Col>
         );
     }
 }
@@ -37,7 +35,7 @@ const headerStyle = {
 
 const contentStyle = {
     paddingTop: '20px', 
-    height: '340px', 
+    height: '350px', 
     overflow: 'hidden', 
     overflowY: 'scroll'
 };

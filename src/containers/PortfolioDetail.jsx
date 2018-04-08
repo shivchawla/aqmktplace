@@ -46,7 +46,11 @@ class PortfolioDetailImpl extends React.Component {
             performanceDollarSeries: [],
             performancepercentageSeries: [],
             pieSeries: [],
+            activeKey:['.$2']
         };
+
+        this.handleChange = this.handleChange.bind(this);
+
         this.columns = [
             {
                 title: 'SYMBOL',
@@ -305,11 +309,11 @@ class PortfolioDetailImpl extends React.Component {
             });
             series.push({name: 'Composition', data: portfolioComposition});
             const metrics = [
-                {value: portfolioMetrics.annualReturn.toFixed(2), label: 'Annual Return', percentage: true},
-                {value: portfolioMetrics.totalReturn.toFixed(2), label: 'Total Return', percentage: true},
+                {value: portfolioMetrics.annualReturn.toFixed(2), label: 'Annual Return', percentage: true, color:true},
+                {value: portfolioMetrics.totalReturn.toFixed(2), label: 'Total Return', percentage: true,},
                 {value: portfolioMetrics.volatility.toFixed(2), label: 'Volatility', percentage: true},
-                {value: portfolioMetrics.dailyChange.toFixed(2), label: 'Daily Change (Rs)'},
-                {value: portfolioMetrics.dailyChangePct.toFixed(2), label: 'Daily Change (%)', percentage: true},
+                {value: portfolioMetrics.dailyChange.toFixed(2), label: `Daily PnL (\u20B9)`, color:true, direction:true},
+                {value: portfolioMetrics.dailyChangePct.toFixed(2), label: 'Daily PnL (%)', percentage: true, color: true, direction:true},
                 {
                     value: portfolioMetrics.netValue.toFixed(2), 
                     label: 'Net Value', 
@@ -326,7 +330,11 @@ class PortfolioDetailImpl extends React.Component {
         })
         .catch(error => {
             console.log(error.message);
-        });
+        })
+    }
+
+    handleChange(activeKey) {
+        this.setState({activeKey: activeKey});
     }
 
     render () {
@@ -337,7 +345,7 @@ class PortfolioDetailImpl extends React.Component {
                         <Col span={24}>
                             <Row>
                                 <Col span={10}>
-                                    <h3 style={pageHeaderStyle}>{this.state.name}</h3>
+                                    <h2 style={pageHeaderStyle}>{this.state.name}</h2>
                                 </Col>
                                 <Col xl={0} md={14} style={{textAlign: 'right'}}>
                                     <Button 
@@ -377,11 +385,11 @@ class PortfolioDetailImpl extends React.Component {
                     <Row>
                         <Col span={24} style={dividerStyle}></Col>
                     </Row>
-                    <Collapse bordered={false} defaultActiveKey={["2"]}>
-                        <Panel 
-                                key="1"
-                                style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Summary</h3>}
+                    <Collapse bordered={false} activeKey={this.state.activeKey} onChange={this.handleChange}>
+                        <Panel  key='1'
+                            style={customPanelStyle} 
+                            header={<h3 style={metricsHeaderStyle}>Summary</h3>}
+                            forceRender={true}
                         >   
                             <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
                                 <Col span={24}>
@@ -401,23 +409,36 @@ class PortfolioDetailImpl extends React.Component {
                             </Row>
                         </Panel>
                         <Panel
-                                key="2"
-                                style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Detail</h3>}
-                        >
-                            <Row>
+                            key='2'
+                            style={customPanelStyle} 
+                            header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
+                            <Row style={{padding: '0 30px'}}>
                                 <Col span={24}>
-                                    <Tabs animated={false}>
-                                        <TabPane tab="Advices" key="1" style={{padding: '0 30px'}}>
+                                    <MyChartNew series={this.state.tickers}/> 
+                                </Col>
+                            </Row>
+
+                        </Panel>
+                        <Panel 
+                            key='3'
+                            style={customPanelStyle} 
+                            header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
+                             <Row style={{padding: '0 30px'}}>
+                                <Col span={24}>
+                                    {/*<Tabs 
+                                        animated={false} 
+                                        tabBarStyle={{ width: '300px', marginLeft: '30px'}}>
+                                    <TabPane tab="Portfolio" key="1" style={{padding: '0 30px'}}>*/}
                                             <Row className="row-container">
                                                 <Col span={8} offset={16} style={{marginBottom: 10, marginTop: '-10px'}}>
                                                     <Radio.Group 
                                                             value={this.state.toggleValue} 
                                                             onChange={this.toggleView} 
-                                                            style={{position: 'absolute', right: 0}}
+                                                            style={{margin: '0 auto 0 auto'}} 
+                                                            //position: 'absolute', right: 0}}
                                                             size="small"
                                                     >
-                                                        <Radio.Button value="advice">Advices</Radio.Button>
+                                                        <Radio.Button value="advice">Advice</Radio.Button>
                                                         <Radio.Button value="stock">Stock</Radio.Button>
                                                     </Radio.Group>
                                                 </Col>
@@ -427,7 +448,7 @@ class PortfolioDetailImpl extends React.Component {
                                                 ? this.renderAdviceTransactions()
                                                 : this.renderStockTransactions()
                                             }
-                                        </TabPane>
+                                        {/*</TabPane>
                                         <TabPane tab="Performance" key="2" style={{padding: '20px 30px'}}>
                                             <Row>
                                                 <Col span={24}>
@@ -435,7 +456,7 @@ class PortfolioDetailImpl extends React.Component {
                                                 </Col>
                                             </Row>
                                         </TabPane>
-                                    </Tabs>
+                                        </Tabs>*/}
                                 </Col>
                             </Row>
                         </Panel>

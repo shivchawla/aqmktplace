@@ -1,6 +1,9 @@
 import * as React from 'react';
 import {Col} from 'antd';
+import _ from 'lodash';
 import HighChart from 'highcharts';
+import VariablePie from 'highcharts/modules/variable-pie'
+VariablePie(HighChart); 
 
 export class HighChartNew extends React.Component {
     constructor(props) {
@@ -8,9 +11,11 @@ export class HighChartNew extends React.Component {
         this.chart = null;
         this.state = {
             config: {
+                colors: ['#f58231','#911eb4','#3cb44b','#ffe119','#46f0f0','#f032e6','#d2f53c','#fabebe','#008080','#e6beff','#aa6e28','#fffac8','#800000','#aaffc3','#808000','#ffd8b1','#000080', '#808080'],
                 chart: {
-                    type: 'pie',
+                    type: 'variablepie',
                     height: 280,
+                    animation:false,
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
                     plotShadow: false,
@@ -28,10 +33,28 @@ export class HighChartNew extends React.Component {
                     enabled: false
                 },
                 plotOptions: {
-                    pie: {
+                    variablepie: {
                         innerSize: 150,
                         cursor: 'pointer',
-                        // allowPointSelect: true,
+                        zMin:0,
+                        zMax:1,
+                        minPointSize:30,
+                        point:{
+                            events:{
+                                click: function(){
+                                    this.series.points.forEach(item => {
+                                        item.update({z:0});
+                                    });
+
+                                    this.update({z:1});
+                                }
+                            }
+                        },
+                        states: {
+                            hover: {
+                                enabled:  false
+                            }
+                        },
                         dataLabels: {
                             enabled: false,
                             format: '{point.name} {point.percentage:.1f}%',
@@ -70,7 +93,7 @@ export class HighChartNew extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextState) {
-        if (nextProps.series !== this.props.series) {
+        if (!_.isEqual(nextProps.series,this.props.series)) {
             this.updateSeries(nextProps.series);
             console.log('Different');
         } else {
@@ -95,7 +118,6 @@ export class HighChartNew extends React.Component {
                 this.chart.addSeries({
                     name: item.name,
                     data: item.data,
-                    // sliced: true,
                     selected: true,
                 });
             });

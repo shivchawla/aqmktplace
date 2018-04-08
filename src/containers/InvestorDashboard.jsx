@@ -34,7 +34,8 @@ export class InvestorDashboard extends React.Component {
                 annualreturn: -1,
                 averagedailyreturn: -1,
                 dailyreturn: -1,
-                totalreturn: -1
+                totalreturn: -1,
+                netValue: -1,
             },
             sectorSeries: [],
             industySeries: [],
@@ -191,8 +192,8 @@ export class InvestorDashboard extends React.Component {
                     averagedailyreturn: performance.returns.averagedailyreturn,
                     dailyreturn: performance.returns.dailyreturn,
                     totalreturn: performance.returns.totalreturn,
-                    concentration,
-                    volatility: summary.volatility
+                    volatility: summary.volatility,
+                    netValue: summary.netValue
                 },
                 dollarPerformance,
                 percentagePerformance,
@@ -557,38 +558,42 @@ export class InvestorDashboard extends React.Component {
     }
 
     renderSummaryMetrics = () => {
-        const {totalreturn, dailyreturn, volatility} = this.state.metrics;
+        const {totalreturn, dailyreturn, volatility, netValue} = this.state.metrics;
         const colStyle = {marginBottom: '0px'};
 
         return(
-            <Row>
-                <Col span={24} style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                    <Row style={{textAlign: 'center', paddingLeft: '15px'}}> 
-                        <Col span={6} style={colStyle}>
-                            <MetricItem 
-                                    valueStyle={valueStyle} 
-                                    labelStyle={labelStyle} 
-                                    label="Total Return" 
-                                    value={`${Number(totalreturn * 100).toFixed(2)} %`}
-                            />
-                        </Col>
-                        <Col span={6} style={colStyle}>
-                            <MetricItem 
-                                valueStyle={valueStyle} 
-                                labelStyle={labelStyle} 
-                                    label="Daily Return" 
-                                    value={`${Number(dailyreturn * 100).toFixed(2)} %`}
-                            />
-                        </Col>
-                        <Col span={6} style={colStyle}>
-                            <MetricItem 
-                                    valueStyle={valueStyle} 
-                                    labelStyle={labelStyle} 
-                                    label="Volatility" 
-                                    value={`${Number(volatility * 100).toFixed(2)} %`}
-                            />
-                        </Col>
-                    </Row>
+            <Row type="flex" justify="space-around"> 
+                <Col span={5} style={colStyle}>
+                    <MetricItem 
+                        valueStyle={valueStyle} 
+                        labelStyle={labelStyle} 
+                        label="Total Return" 
+                        value={`${Number(totalreturn * 100).toFixed(2)} %`}
+                    />
+                </Col>
+                <Col span={5} style={colStyle}>
+                    <MetricItem 
+                        valueStyle={valueStyle} 
+                        labelStyle={labelStyle} 
+                        label="Daily Return" 
+                        value={`${Number(dailyreturn * 100).toFixed(2)} %`}
+                    />
+                </Col>
+                <Col span={5} style={colStyle}>
+                    <MetricItem 
+                        valueStyle={valueStyle} 
+                        labelStyle={labelStyle} 
+                        label="Volatility" 
+                        value={`${Number(volatility * 100).toFixed(2)} %`}
+                    />
+                </Col>
+                <Col span={5} style={colStyle}>
+                    <MetricItem 
+                        valueStyle={valueStyle} 
+                        labelStyle={labelStyle} 
+                        label="NetValue" 
+                        value={`${Number(netValue).toFixed(2)}`}
+                    />
                 </Col>
             </Row>
         );
@@ -627,14 +632,14 @@ export class InvestorDashboard extends React.Component {
                                     value={Number(concentration).toFixed(2)}
                             />
                         </Col>
-                        <Col span={12} style={colStyle}>
+                        {/*<Col span={12} style={colStyle}>
                             <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
                                     label="No. of Industries" 
                                     value={nIndustries}
                             />
-                        </Col>
+        </Col>*/}
                     
                         <Col span={12} style={colStyle}>
                             <MetricItem 
@@ -644,7 +649,7 @@ export class InvestorDashboard extends React.Component {
                                     value={maxPosSize.y}
                             />
                         </Col>
-                        <Col span={12} style={colStyle}>
+                        {/*<Col span={12} style={colStyle}>
                             <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
@@ -659,7 +664,7 @@ export class InvestorDashboard extends React.Component {
                                     label="Min. Position Size" 
                                     value={minPosSize.y}
                             />
-                        </Col>
+    </Col>*/}
                     </Row>
                 </Col>
             </Row>
@@ -730,109 +735,86 @@ export class InvestorDashboard extends React.Component {
                     </Col>
                 </Row>
             :   <Row>
-                    <Col span={24} style={{textAlign: 'right'}}>
-                        <Button 
-                                type="primary" 
-                                onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                                style={{marginRight: '20px'}}
-                        >
-                            Create Portfolio
-                        </Button>
-                        {/* {
-                            this.state.showAdvisorDashboardToggle && */}
+                <Col>
+                    <Row type="flex" justify="end">
+                        <Col>
+                            <Button 
+                                    type="primary" 
+                                    onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                                    style={{marginRight: '20px'}}
+                            >
+                                Create Portfolio
+                            </Button>
+                            {/* {
+                                this.state.showAdvisorDashboardToggle && */}
                             <Button 
                                     type="secondary" 
                                     onClick={() => this.props.history.push('/advisordashboard')}
                             >
                                 Advisor Dashboard
                             </Button>
-                        {/* } */}
-                    </Col>
-                    <Col span={24}>
-                        <Row style={{marginTop: '22px'}}>
+                        </Col>
+                    </Row>
+                    <Row gutter={12}>
+                        <Col xl={{span:12}} lg={{span:24}}>
                             <DashboardCard 
-                                    title="Overview" 
-                                    loading={this.state.defaultPortfolioLoading} 
-                                    cardStyle={{paddingRight: '5px'}} 
-                                    contentStyle={{height: '425px'}}
-                                    menu={this.renderPortfolioMenu()}
-                            >
-                                <Tabs 
-                                        defaultActiveKey={"1"} 
-                                        animated={false} 
-                                        // style={{...newLayoutStyle, height: '395px'}}
-                                        size="small"
-                                        tabBarStyle={{backgroundColor: tabBackgroundColor}}
-                                >
-                                    <TabPane tab="Performance" key="1">
-                                        <Row>
-                                            <Col span={24} >{this.renderSummaryMetrics()}</Col>
-                                            <Col span={24} style={{marginTop: '-10px'}}>{this.renderOverviewBarChart()}</Col>
-                                        </Row>
-                                    </TabPane>
-                                    <TabPane tab="Portfolio" key="2">
-                                        <Row>
-                                            <Col span={12}>{this.renderOverviewPieChart()}</Col>
-                                            <Col span={12}>{this.renderOverviewMetrics()}</Col>
-                                        </Row>
-                                    </TabPane>
-                                </Tabs>
-                            </DashboardCard>
-                            <DashboardCard 
-                                    title="Detail" 
-                                    loading={this.state.defaultPortfolioLoading} 
-                                    cardStyle={{paddingLeft: '5px'}}
-                                    contentStyle={{height: '425px'}}
-                                    menu={this.renderPortfolioMenu()}
-                            >
-                                <Tabs 
-                                        animated={false} 
-                                        defaultActiveKey="1" 
-                                        size="small"
-                                        tabBarStyle={{backgroundColor: tabBackgroundColor}}
-                                >
-                                    <TabPane 
-                                            tab="Performance" 
-                                            key="1" 
-                                            style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
-                                    >
-                                        <Col span={24} style={{paddingBottom: '20px', paddingLeft: '10px'}}>
-                                            <MyChartNew series={this.state.tickers} hideLegend={true}/>
-                                        </Col>
-                                    </TabPane>
-                                    <TabPane 
-                                            tab="Portfolio" 
-                                            key="2" 
-                                            style={{paddingBottom: '20px', height: '350px', overflow: 'hidden', overflowY: 'scroll'}}
-                                    >
-                                        <Col span={24}>
-                                            {this.renderStockTransactions()}
-                                        </Col>
-                                    </TabPane>
-                                </Tabs>
-                            </DashboardCard>
+                                title="PERFORMANCE" 
+                                loading={this.state.defaultPortfolioLoading}
+                                cardStyle={{marginTop:'10px'}}
+                                contentStyle={{height: '450px'}}
+                                headerStyle={headerStyle}
+                                menu={this.renderPortfolioMenu()}>
+
+                                    <Row type="flex" justify="space-around" style={{marginTop: '10px', marginBottom: '10px'}}>
+                                        <Col span={20}>{this.renderSummaryMetrics()}</Col>
+                                    </Row>
+
+                                    <Col><MyChartNew series={this.state.tickers} hideLegend={true}/></Col>
                             
-                        </Row>
-                        <Row style={{margin: '10px 0'}}>
+                            </DashboardCard>
+                        </Col>
+
+                        <Col xl={{span:12}} lg={{span:24}}>
                             <DashboardCard 
-                                    title="My Portfolios" 
-                                    cardStyle={{paddingRight: '5px'}} 
+                                title="PORTFOLIO" 
+                                loading={this.state.defaultPortfolioLoading}
+                                cardStyle={{marginTop:'10px'}} 
+                                contentStyle={{height: '450px'}}
+                                headerStyle={headerStyle}
+                                menu={this.renderPortfolioMenu()}>
+                                    <Row>
+                                        <Col span={12}>{this.renderOverviewPieChart()}</Col>
+                                        <Col span={12}>{this.renderOverviewMetrics()}</Col>
+                                    </Row>
+                            </DashboardCard>
+                        </Col>
+                    </Row>
+                    
+                    <Row gutter={12}>
+                        <Col xl={{span:12}} lg={{span:24}}>
+                            <DashboardCard 
+                                    title="MY PORTFOLIOS" 
+                                    cardStyle={{marginTop:'10px'}}
                                     loading={this.state.portfolioLoading}
                                     headerStyle={headerStyle}
                             >
                                 {this.renderPortfolios()}
                             </DashboardCard>
+                        </Col>
+
+                        <Col xl={{span:12}} lg={{span:24}}>
                             <DashboardCard 
-                                    title="Advices" 
-                                    cardStyle={{paddingLeft: '5px'}}
+                                    title="MY ADVICES" 
+                                    cardStyle={{marginTop:'10px'}}
                                     loading={this.state.subscribedAdvicesLoading}
                                     headerStyle={headerStyle}
                             >
                                 {this.renderSubscribedAdvices()}
                             </DashboardCard>
-                        </Row>
-                    </Col>
-                </Row>  
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
         );
     }
 }

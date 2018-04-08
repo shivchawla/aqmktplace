@@ -37,7 +37,7 @@ export const metricsHeaderStyle = {
 
 export const pageHeaderStyle = {
     fontFamily: 'Lato, sans-serif',
-    fontSize: '16px'
+    fontSize: '28px'
 };
 
 export const dividerNoMargin = {
