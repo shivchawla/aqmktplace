@@ -79,7 +79,7 @@ export const nameEllipsisStyle = {
     overflow: 'hidden', 
     textOverflow: 'ellipsis', 
     whiteSpace: 'nowrap', 
-    width: '200px'
+    width: '150px'
 };
 
 export const buttonStyle = {

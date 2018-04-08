@@ -115,7 +115,8 @@ export class AqStockTableMod extends React.Component {
                 target['totalValue'] = value >= 0 ? Number((value * target['lastPrice']).toFixed(2)) : 0;
                 this.updateAllWeights(newData);
                 const totalSummation = this.getTotalValueSummation(newData);
-                target['weight'] = value >= 0 ? (totalSummation === 0 ? 0 : Number((target['totalValue'] / this.getTotalValueSummation(newData)).toFixed(2))) : 0;
+                const weight = value >= 0 ? (totalSummation === 0 ? 0 : Number(((target['totalValue'] / this.getTotalValueSummation(newData) * 100)).toFixed(2))) : 0;
+                target['weight'] = weight;
                 this.setState({data: newData});
             }
             this.setState({data: newData});
@@ -126,7 +127,7 @@ export class AqStockTableMod extends React.Component {
     updateAllWeights = (data) => {
         const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
         return data.map((item, index) => {
-            const weight = totalSummation === 0 ? 0 : Number((item['totalValue'] / totalSummation).toFixed(2));
+            const weight = totalSummation === 0 ? 0 : Number(((item['totalValue'] / totalSummation * 100)).toFixed(2));
             item['weight'] = weight;
             return item;
         });

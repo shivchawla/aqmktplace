@@ -187,9 +187,10 @@ export class AdviceTransactionTable extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
+        const profitOrLossColor = advice.profitLoss < 0 ? '#F44336' : '#4CAF50';
         if (!this.props.header) {
             return (
-                <Row type="flex">
+                <Row type="flex" justify={this.props.preview ? "space-between" : null}>
                     {
                         !this.props.preview &&  
                         <Col span={2}>
@@ -199,7 +200,7 @@ export class AdviceTransactionTable extends React.Component {
                     <Col span={4}>
                         <MetricItem 
                                 value={advice.name} 
-                                label="Portfolio" 
+                                label="Advice" 
                                 valueStyle={metricsValueStyle}
                                 labelStyle={metricsLabelStyle}
                         />
@@ -229,10 +230,10 @@ export class AdviceTransactionTable extends React.Component {
                             <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Date</h3>
                         </Col>
                     }
-                    {
+                    {/* {
                         this.props.preview &&
                         <Col span={8}></Col>
-                    }
+                    } */}
                     <Col span={4} offset={this.props.preview ? 0 : 2}>
                         <MetricItem 
                                 value={advice.netAssetValue} 
@@ -256,9 +257,9 @@ export class AdviceTransactionTable extends React.Component {
                         this.props.preview &&
                         <Col span={4}>
                             <MetricItem 
-                                    value={advice.profitLoss} 
+                                    value={`${advice.profitLoss} %`} 
                                     label="Profit/Loss" 
-                                    valueStyle={metricsValueStyle}
+                                    valueStyle={{...metricsValueStyle, color: profitOrLossColor}}
                                     labelStyle={metricsLabelStyle}
                             />
                         </Col>

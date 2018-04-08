@@ -455,11 +455,18 @@ export class AdviceFormImpl extends React.Component {
     }
 
     renderPortfolioTable = () => {
+        const data = this.getVerifiedTransactions().map(transaction => {
+            return {
+                ...transaction,
+                weight: `${transaction.weight} %`
+            }
+        });
+
         return (
             <Table 
                     size="small" 
                     columns={this.columns} 
-                    dataSource={this.getVerifiedTransactions()}
+                    dataSource={data}
                     pagination={false}
                     style={{marginBottom: '20px'}}
             />
@@ -473,7 +480,7 @@ export class AdviceFormImpl extends React.Component {
                     <h4>Please add positions in your advice</h4>
                 </Col>
                 <Col style={{textAlign: 'center', marginTop: '20px'}} span={24}>
-                    <Button onClick={this.toggleAddTickerModal}>Add Positions</Button>
+                    <Button type="primary" onClick={this.toggleAddTickerModal}>Add Positions</Button>
                 </Col>
             </Row>
         );
@@ -552,6 +559,13 @@ export class AdviceFormImpl extends React.Component {
         return totalValue;
     }
 
+    getDisabeldDate = current => {
+        if (current) {
+            console.log(current.weekday());
+        }
+        return current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
+    }
+
     componentDidMount() {
         if (this.props.isUpdate) {
             this.getAdvice(this.props.adviceId);
@@ -577,7 +591,17 @@ export class AdviceFormImpl extends React.Component {
         return (
             <Row>
                 {this.renderAddTickerModal()}
-                <Col span={18}>
+                <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
+                    <Button 
+                            style={buttonStyle} 
+                            type="primary" 
+                            onClick={this.handleSubmit} 
+                    >
+                        Save
+                    </Button>
+                    <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
+                </Col>
+                <Col xl={18} lg={18} md={24}>
                     <Form onSubmit={this.handleSubmit}>
                         <Row>
                             <Col span={24} style={{...newLayoutStyle, padding: '20px', margin: '20px 0', border: '1px solid #eaeaea'}}>
@@ -639,7 +663,7 @@ export class AdviceFormImpl extends React.Component {
                                                 }
                                             </Col>
                                             <Col span={11} offset={2} style={{marginTop: '10px'}}>
-                                                <h4 style={labelStyle}>Rebalancing Frequency</h4>
+                                                <h4 style={labelStyle}>Rebalancing Freq.</h4>
                                                 {
                                                     this.renderMenu(
                                                         rebalancingFrequency, 
@@ -659,6 +683,7 @@ export class AdviceFormImpl extends React.Component {
                                                             format={dateFormat}
                                                             style={{...inputStyle, width: 150}}
                                                             disabled={this.state.isPublic}
+                                                            disabledDate={this.getDisabeldDate}
                                                         /> 
                                                     )}
                                                 </FormItem>
@@ -676,9 +701,9 @@ export class AdviceFormImpl extends React.Component {
                                         </Row>
                                     </Col>
                                 </Row>
-                                <Row style={{marginBottom: '10px'}}>
-                                    <Col span={24} >
-                                        <Button onClick={this.toggleAddTickerModal}>
+                                <Row style={{marginBottom: '10px', marginTop: '20px'}}>
+                                    <Col span={24} style={{textAlign: 'right'}}>
+                                        <Button onClick={this.toggleAddTickerModal} type="primary">
                                             {buttonText}
                                         </Button>
                                     </Col>
@@ -698,19 +723,16 @@ export class AdviceFormImpl extends React.Component {
                         </Row>
                     </Form>
                 </Col>
-                <Col span={6} style={{marginTop: '20px'}}>
+                <Col xl={6} lg={6} md={0} sm={0} xs={0} style={{marginTop: '20px'}}>
                     <Row>
                         <Col span={24}>
-                            <FormItem>
-                                <Button 
-                                        style={buttonStyle} 
-                                        type="primary" 
-                                        onClick={this.handleSubmit} 
-                                        htmlType="submit"
-                                >
-                                    Save
-                                </Button>
-                            </FormItem>    
+                            <Button 
+                                    style={buttonStyle} 
+                                    type="primary" 
+                                    onClick={this.handleSubmit} 
+                            >
+                                Save
+                            </Button>
                         </Col>
                         <Col span={24}>
                             <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>

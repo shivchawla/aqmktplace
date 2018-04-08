@@ -27,7 +27,7 @@ import {
     dividerStyle
 } from '../constants';
 
-
+const dateFormat = 'YYYY-MM-DD';
 const Panel = Collapse.Panel;
 const TabPane = Tabs.TabPane;
 const {requestUrl, investorId, aimsquantToken} = require('../localConfig.js');
@@ -100,25 +100,26 @@ class PortfolioDetailImpl extends React.Component {
         );
     }
 
-    processPresentAdviceTransaction = (adviceTransactions) => {
+    processPresentAdviceTransaction = (adviceTransactions, advicePerformance) => {
         let advices = [];
+        console.log('Advice Performance', advicePerformance);
         adviceTransactions.map((item, index) => {
             advices = item.advice === null 
-                            ? this.addToMyPortfolio(advices, item, index) 
-                            : this.addToAdvice(advices, item, index);
+                            ? this.addToMyPortfolio(advices, advicePerformance, item, index) 
+                            : this.addToAdvice(advices, advicePerformance, item, index);
         });
 
         return advices;
     }
 
-    addToMyPortfolio = (advices, item, key) => {
+    addToMyPortfolio = (advices, advicePerformance, item, key) => {
         const adviceIndex = _.findIndex(advices, advice => advice.id === null);
         return adviceIndex === -1 
-                        ? this.addAdvicePosition(advices, item, key) 
-                        : this.addAdvicePosition(advices, item, key, adviceIndex);
+                        ? this.addAdvicePosition(advices, advicePerformance, item, key) 
+                        : this.addAdvicePosition(advices, advicePerformance, item, key, adviceIndex);
     }
 
-    addToAdvice = (advices, item, key) => {
+    addToAdvice = (advices, advicePerformance, item, key) => {
         const adviceIndex = _.findIndex(advices, advice => {
             if (item.advice !== null) {
                 return advice.id === item.advice._id
@@ -127,20 +128,28 @@ class PortfolioDetailImpl extends React.Component {
         });
     
         return adviceIndex === -1 
-                        ? this.addAdvicePosition(advices, item, key) 
-                        : this.addAdvicePosition(advices, item, key, adviceIndex);
+                        ? this.addAdvicePosition(advices, advicePerformance, item, key) 
+                        : this.addAdvicePosition(advices, advicePerformance, item, key, adviceIndex);
     }
 
-    addAdvicePosition = (advices, item, key, adviceIndex = null) => {
+    addAdvicePosition = (advices, advicePerformance, item, key, adviceIndex = null) => {
+        const advice = advicePerformance.filter(adviceItem => {
+            if (item.advice !== null) {
+                return item.advice._id === adviceItem.advice;
+            } else {
+                return adviceItem.advice === "";
+            }
+        })[0];
+
         if (adviceIndex === null) {
             advices.push({
                 id: item.advice ? item.advice._id : null,
                 name: item.advice ? item.advice.name : 'My Portfolio',
                 key,
-                weight: '12.4%',
-                profitLoss: '+12.4%',
+                weight: Number((advice.personal.weightInPortfolio * 100).toFixed(2)),
+                profitLoss: (advice.personal.pnlPct).toFixed(2),
                 units: 1,
-                netAssetValue: item.lastPrice * item.quantity,
+                netAssetValue: Number((advice.personal.netValue).toFixed(2)),
                 composition: [
                     {
                         key: 1,
@@ -158,7 +167,7 @@ class PortfolioDetailImpl extends React.Component {
                 ]
             });
         } else {
-            advices[adviceIndex].netAssetValue += item.lastPrice * item.quantity;
+            // advices[adviceIndex].netAssetValue += item.lastPrice * item.quantity;
             advices[adviceIndex].composition.push({
                 key: key + 1,
                 adviceKey: advices[adviceIndex].key,
@@ -254,7 +263,10 @@ class PortfolioDetailImpl extends React.Component {
                     name: response.data.benchmark.ticker,
                 });
             }   
-            const advices = this.updateAdvices(this.processPresentAdviceTransaction(response.data.detail.subPositions));
+            const advicePerformance = response.data.advicePerformance;
+            const subPositions = response.data.detail.subPositions;
+            // const advices = this.updateAdvices(this.processPresentAdviceTransaction(subPositions, advicePerformance));
+            const advices = this.processPresentAdviceTransaction(subPositions, advicePerformance);
             positions = response.data.detail.positions.map(item => item.security.ticker);
             this.setState({
                 name: response.data.name,
@@ -269,11 +281,11 @@ class PortfolioDetailImpl extends React.Component {
             let performanceSeries = [];
             if (response.data.simulated !== undefined) {
                 performanceSeries = response.data.simulated.portfolioValues.map((item, index) => {
-                    return [moment(item.date).valueOf(), item.netValue];
+                    return [moment(item.date, dateFormat).valueOf(), item.netValue];
                 });
             } else {
                 performanceSeries = response.data.current.portfolioValues.map((item, index) => {
-                    return [moment(item.date).valueOf(), item.netValue];
+                    return [moment(item.date, dateFormat).valueOf(), item.netValue];
                 });
             }
             
@@ -293,12 +305,16 @@ class PortfolioDetailImpl extends React.Component {
             });
             series.push({name: 'Composition', data: portfolioComposition});
             const metrics = [
-                {value: portfolioMetrics.netValue, label: 'Net Value'},
-                {value: portfolioMetrics.dailyChange, label: 'Daily Change', percentage: true},
-                {value: portfolioMetrics.annualReturn, label: 'Annual Return', percentage: true},
-                {value: portfolioMetrics.totalReturn, label: 'Total Return', percentage: true},
-                {value: portfolioMetrics.volatility, label: 'Volatility', percentage: true},
-                {value: portfolioMetrics.currentLoss, label: 'Current Loss', percentage: true},
+                {value: portfolioMetrics.annualReturn.toFixed(2), label: 'Annual Return', percentage: true},
+                {value: portfolioMetrics.totalReturn.toFixed(2), label: 'Total Return', percentage: true},
+                {value: portfolioMetrics.volatility.toFixed(2), label: 'Volatility', percentage: true},
+                {value: portfolioMetrics.dailyChange.toFixed(2), label: 'Daily Change (Rs)'},
+                {value: portfolioMetrics.dailyChangePct.toFixed(2), label: 'Daily Change (%)', percentage: true},
+                {
+                    value: portfolioMetrics.netValue.toFixed(2), 
+                    label: 'Net Value', 
+                    isNetValue: true, 
+                }
             ];
             this.setState({
                 portfolioMetrics: metrics, 
@@ -353,8 +369,7 @@ class PortfolioDetailImpl extends React.Component {
                             </Row>
                         </Col>
                         <Col span={24} style={{marginTop: '10px'}}>
-                            <h4 style={metricsHeaderStyle}>Metrics</h4>
-                            <Row style={{marginTop: '10px'}}>
+                            <Row>
                                 {this.renderMetrics()}
                             </Row>
                         </Col>
@@ -366,7 +381,7 @@ class PortfolioDetailImpl extends React.Component {
                         <Panel 
                                 key="1"
                                 style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Description</h3>}
+                                header={<h3 style={metricsHeaderStyle}>Summary</h3>}
                         >   
                             <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
                                 <Col span={24}>
@@ -388,21 +403,21 @@ class PortfolioDetailImpl extends React.Component {
                         <Panel
                                 key="2"
                                 style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
+                                header={<h3 style={metricsHeaderStyle}>Detail</h3>}
                         >
                             <Row>
                                 <Col span={24}>
                                     <Tabs animated={false}>
-                                        <TabPane tab="Portfolio" key="1" style={{padding: '20px 30px'}}>
+                                        <TabPane tab="Advices" key="1" style={{padding: '0 30px'}}>
                                             <Row className="row-container">
-                                                <Col span={8} offset={16} style={{marginBottom: 20}}>
+                                                <Col span={8} offset={16} style={{marginBottom: 10, marginTop: '-10px'}}>
                                                     <Radio.Group 
                                                             value={this.state.toggleValue} 
                                                             onChange={this.toggleView} 
                                                             style={{position: 'absolute', right: 0}}
                                                             size="small"
                                                     >
-                                                        <Radio.Button value="advice">Advice</Radio.Button>
+                                                        <Radio.Button value="advice">Advices</Radio.Button>
                                                         <Radio.Button value="stock">Stock</Radio.Button>
                                                     </Radio.Group>
                                                 </Col>
@@ -451,7 +466,9 @@ class PortfolioDetailImpl extends React.Component {
                                         }
                                     )}
                                     className="secondary-btn"
-                            >Add Transactions</Button>
+                            >
+                                Add Transactions
+                            </Button>
                         </Col>
                     </Row>
                 </Col>

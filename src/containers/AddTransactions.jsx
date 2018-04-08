@@ -726,7 +726,7 @@ class AddTransactionsImpl extends React.Component {
                 {this.renderSubscribedAdviceModal()}
                 {this.renderPreviewModal()}
                 <Form>
-                    <Col xl={0} xs={24} md={24} style={{textAlign: 'right'}}>
+                    <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
                         <Button 
                                 type="primary" 
                                 onClick={this.togglePreviewModal} 
@@ -740,7 +740,7 @@ class AddTransactionsImpl extends React.Component {
                             Cancel
                         </Button>
                     </Col>
-                    <Col xl={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
+                    <Col xl={18} lg={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
                         {
                             !portfolioId && 
                             <Row type="flex" align="middle" style={{marginTop: '20px'}}>
@@ -780,7 +780,7 @@ class AddTransactionsImpl extends React.Component {
                             </Col>
                         </Row>
                     </Col>
-                    <Col xl={5} md={0} sm={0} xs={0} offset={1} style={{marginTop: '20px'}}>
+                    <Col xl={5} lg={5} md={0} sm={0} xs={0} offset={1} style={{marginTop: '20px'}}>
                         <Row type="flex">
                             <Col span={24}>
                                 <Button 

@@ -19,11 +19,14 @@ export class AdviceMetricsItems extends React.Component {
                         return (
                             <MetricItem 
                                     key={index}
-                                    valueStyle = {{...metricsValueStyle, color: valueColor}} 
+                                    valueStyle = {{...metricsValueStyle, color: valueColor, fontSize: '20px'}} 
                                     labelStyle={metricsLabelStyle} 
                                     value={value} 
                                     label={item.label} 
                                     style={metricItemStyle} 
+                                    isNetValue={item.isNetValue}
+                                    dailyChange={item.dailyChange || null}
+                                    dailyChangePct={item.dailyChangePct || null}
                             />
                         );
                     })
