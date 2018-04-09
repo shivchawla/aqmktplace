@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as Radium from 'radium';
 import {Row, Col} from 'antd';
+import {metricColor} from '../constants';
 import '../css/metricItem.css';
 
 const MetricItemImpl = (props) => {
@@ -9,7 +10,7 @@ const MetricItemImpl = (props) => {
     const border = props.bordered ? '1px solid #eaeaea' : 'none';
     const padding = props.bordered ? '10px' : 0;
     const change = props.dailyChange, changePct = props.dailyChangePct;
-    const changeColor = changePct < 0 ? '#F44336' : '#4CAF50';
+    const changeColor = changePct < 0 ? metricColor.positive : metricColor.negative;
     // const fontSize = props.isNetValue ? {fontSize: '30px' } : {};
 
     return (

@@ -3,6 +3,7 @@ import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} from 'antd';
+import {MyChartNew} from './MyChartNew';
 import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard} from '../components';
 import {newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor} from '../constants';
 import {dateFormat} from '../utils';
@@ -429,9 +430,7 @@ export class AdvisorDashboard extends React.Component {
             const data = response.data.simulated.portfolioValues.map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
                 name: advice.name,
-                data,
-                show: true,
-                disabled: true
+                data
             });
             this.setState({tickers: newTickers});
         })
@@ -595,29 +594,34 @@ export class AdvisorDashboard extends React.Component {
                             </Button>
                         </Col>
                         <Col span={24} style={{marginTop: '10px'}}>
-                            <Row>
-                                <DashboardCard 
-                                        cardStyle={{paddingRight: '5px'}} 
-                                        title=" My Advices" 
-                                        menu={this.renderSortingMenu()}
-                                        loading={this.state.myAdvicesLoading}
-                                >
-                                    {this.renderAdvices()}
-                                </DashboardCard>
-                                <DashboardCard 
-                                        cardStyle={{paddingLeft: '5px'}} 
-                                        title="Advice Performance" 
-                                        menu={this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
-                                        loading={this.state.advicePerformanceLoading}
-                                >
-                                    <AqHighChartMod 
-                                            tickers={this.state.tickers} 
-                                            navigationEnabled={false}
-                                            showLegend={false}
-                                    />
-                                </DashboardCard>
+                            <Row gutter={12}>
+                                <Col span={12}>
+                                    <DashboardCard 
+                                            headerStyle={headerStyle}
+                                            title=" My Advices" 
+                                            menu={this.renderSortingMenu()}
+                                            loading={this.state.myAdvicesLoading}
+                                            contentStyle={{paddingBottom: '20px'}}
+                                    >
+                                        {this.renderAdvices()}
+                                    </DashboardCard>
+                                </Col>
+                                <Col span={12}>
+                                    <DashboardCard 
+                                            headerStyle={headerStyle}
+                                            title="Advice Performance" 
+                                            menu={this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
+                                            loading={this.state.advicePerformanceLoading}
+                                    >
+                                        <Col
+                                                style={{paddingLeft: '20px', paddingTop: '10px'}}
+                                        >
+                                            <MyChartNew series={this.state.tickers} />
+                                        </Col>
+                                    </DashboardCard>
+                                </Col>
                             </Row>
-                            <Row style={{marginTop: '10px'}}>
+                            <Row style={{marginTop: '12px'}}>
                                 <Col xl={12} md={24} style={{paddingRight: '5px'}} >
                                     <Row style={{height: '380px', ...newLayoutStyle}}>
                                         <Col span={24}>
@@ -706,4 +710,8 @@ const emptyPortfolioStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center'
+};
+
+const headerStyle = {
+    borderBottom: '1px solid #eaeaea'
 };

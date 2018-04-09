@@ -67,7 +67,8 @@ export class MyChartNew extends React.Component {
                         r: 8,
                         style: {
                             color: '#039',
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            zIndex: 20
                         },
                     }
                 },
@@ -101,31 +102,25 @@ export class MyChartNew extends React.Component {
                 dataLabels: {
                     enabled: true
                 },
-                tooltip: !props.hideLegend ? 
-                    {
-                        enabled: true,
-                        backgroundColor: '#f9f9f9',
-                        borderWidth: 0,
-                        borderRadius: 0,
-                        shared: true,
-                        headerFormat: '{point.key} ',
-                        pointFormat: '<br><span class="myToolTip" style="color:{series.color}">{series.name}</span>: <b>{point.y}</b>',
-                        formatter: function() {
-                            var s = [];
-                            self.updatePoints(this.points);
-                        },
-                        positioner: function () {
-                            return { x: -100, y: 35 };
-                        },
-                        backgroundColor: 'transparent',
-                        shadow: false,
-                        split: false,
-                        useHTML: true
-                    }
-                    : {
-                        shared: true,
-                        split: false,
-                        userHTML: true
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: '#f9f9f9',
+                    borderWidth: 0,
+                    borderRadius: 0,
+                    shared: true,
+                    headerFormat: '{point.key} ',
+                    pointFormat: '<br><span class="myToolTip" style="color:{series.color}">{series.name}</span>: <b>{point.y}</b>',
+                    formatter: function() {
+                        var s = [];
+                        self.updatePoints(this.points);
+                    },
+                    positioner: function () {
+                        return { x: -100, y: 35 };
+                    },
+                    backgroundColor: 'transparent',
+                    shadow: false,
+                    split: false,
+                    useHTML: true
                 },
                 chart: {
                     height: 350 
@@ -147,13 +142,13 @@ export class MyChartNew extends React.Component {
         points.map(point => {
             // console.log(point.series.name);
             try{
-                const item = legendItems.filter(item => item.name === point.series.name)[0];
+                const item = legendItems.filter(item => item.name.toUpperCase() === point.series.name.toUpperCase())[0];
                 item.y = point.y.toFixed(2);
                 item.change = Number(point.point.change.toFixed(2));
                 this.setState({legendItems, selectedDate: moment(points[0].x).format(dateFormat)});
             }
             catch(err) {
-                // console.log(err);
+                console.log(err);
             }
         });
     }
@@ -170,7 +165,7 @@ export class MyChartNew extends React.Component {
         }
     }
 
-    addItemToSeries = (name, data, destroy = false) => {
+    addItemToSeries = (name, data, color = null, destroy = false) => {
         if (destroy) {
             this.clearSeries();
         }
@@ -182,7 +177,8 @@ export class MyChartNew extends React.Component {
                 name: name, //name.toUpperCase(),
                 data,
                 visible: this.chart.series.length < 5,
-                selected: true
+                selected: true,
+                color
             });
         }
         if (legendIndex === -1) {
@@ -250,7 +246,7 @@ export class MyChartNew extends React.Component {
                 this.showLoader();
                 getStockPerformance(item.name.toUpperCase())
                 .then(performance => {
-                    this.addItemToSeries(item.name, performance, true);
+                    this.addItemToSeries(item.name, performance, item.color, true);
                 })
                 .catch(err => {
                     console.log(err);
@@ -259,7 +255,7 @@ export class MyChartNew extends React.Component {
                     this.hideLoader();
                 })
             } else {
-                this.addItemToSeries(item.name, item.data, true);
+                this.addItemToSeries(item.name, item.data, item.color, true);
             }
         } else {
             if (series.length > legendItems.length) { // Item needs to be added
@@ -272,7 +268,7 @@ export class MyChartNew extends React.Component {
                             this.showLoader();
                             getStockPerformance(item.name)
                             .then(performance => {
-                                this.addItemToSeries(item.name, performance);
+                                this.addItemToSeries(item.name, performance, item.color);
                             })
                             .catch(err => {
                                 console.log(err);
@@ -281,7 +277,7 @@ export class MyChartNew extends React.Component {
                                 this.hideLoader();
                             });
                         } else {
-                            this.addItemToSeries(item.name, item.data);
+                            this.addItemToSeries(item.name, item.data, item.color);
                         }
                     }
                 });
@@ -454,13 +450,13 @@ export class MyChartNew extends React.Component {
     renderHorizontalLegendList = () => {
         const {legendItems} = this.state;
         return (
-            <Row style={{bottom: '-34px', zIndex:'20', marginTop: '-25px'}}>
+            <Row style={{ zIndex:'20'}}>
                 {
                     legendItems.map((legend, index) => {
                         const changeColor = legend.change < 0 ? '#F44336' : '#00C853';
 
                         return (
-                            <Col span={10} key={index}>
+                            <Col span={12} key={index}>
                                 <Row type="flex" align="middle"> 
                                     <Col span={2}>
                                         <Checkbox checked={legend.checked} onChange={e => this.onCheckboxChange(e, legend)} />

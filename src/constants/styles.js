@@ -89,3 +89,10 @@ export const buttonStyle = {
 };
 
 export const tabBackgroundColor = '#fbfbfc';
+
+export const metricColor = {
+    positive: '#4CAF50',
+    negative: '#f44335'
+};
+
+export const benchmarkColor = '#D50000';

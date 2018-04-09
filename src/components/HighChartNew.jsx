@@ -118,7 +118,6 @@ export class HighChartNew extends React.Component {
                 this.chart.addSeries({
                     name: item.name,
                     data: item.data,
-                    selected: true,
                 });
             });
             this.updateTitle(series);

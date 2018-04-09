@@ -1,6 +1,6 @@
 import moment from 'moment';
 import _ from 'lodash';
-import {graphColors} from '../constants';
+import {graphColors, metricColor} from '../constants';
 import {getStockData} from './requests';
 
 export const dateFormat = 'Do MMMM YYYY';
@@ -58,4 +58,8 @@ export const generateColorData = (tickers => {
 
     return obj;
 });
+
+export const getMetricColor = metricValue => {
+    return metricValue < 0 ? metricColor.negative : metricColor.positive;
+}
 export * from './requests';

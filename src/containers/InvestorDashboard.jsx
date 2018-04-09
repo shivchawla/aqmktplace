@@ -5,9 +5,9 @@ import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard} from '../components';
-import {layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor} from '../constants';
+import {layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
-import {generateColorData} from '../utils';
+import {generateColorData, getMetricColor} from '../utils';
 
 const {requestUrl, aimsquantToken, investorId} = require('../localConfig');
 const RadioButton = Radio.Button;
@@ -47,7 +47,12 @@ export class InvestorDashboard extends React.Component {
             portfolioLoading: false,
             subscribedAdvicesLoading: false,
             defaultPortfolioLoading: false,
-            showEmptyScreen: false,
+            showEmptyScreen: {
+                status: false,
+                error: 'no_error',
+                messageText: '',
+                errorCode: ''
+            },
             showAdvisorDashboardToggle: false,
             defaultPortfolioName: 'Default Portfolio'
         };
@@ -163,12 +168,13 @@ export class InvestorDashboard extends React.Component {
             const pieChartTitle = `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
             const summary = response.data.defaultPerformance.summary.current;
             tickers.push({
-                name: 'Portfolio',
-                data: performanceData,
-                show: true
+                name: response.data.defaultPortfolio.benchmark.ticker,
+                show: true,
+                color: benchmarkColor
             });
             tickers.push({
-                name: response.data.defaultPortfolio.benchmark.ticker,
+                name: 'Portfolio',
+                data: performanceData,
                 show: true
             });
             const constituentPerformance = response.data.defaultPerformance.current.metrics.constituentPerformance || [];
@@ -181,7 +187,7 @@ export class InvestorDashboard extends React.Component {
             this.setState({
                 defaultPortfolioName: response.data.defaultPortfolio.name,
                 positions,
-                showEmptyScreen: positions.length > 0 ? false : true,
+                showEmptyScreen: {...this.state.showEmptyScreen, status: positions.length > 0 ? false : true},
                 composition,
                 defaultComposition: composition,
                 stockPositions: this.processPresentStockTransction(positions),
@@ -202,7 +208,15 @@ export class InvestorDashboard extends React.Component {
         })
         .catch(error => {
             console.log(error);
-            this.setState({showEmptyScreen: true})
+            let messageText = '', errorCode = '';
+            if (error.message === 'Network Error') {
+                messageText = 'You are disconnected from the internet';
+                errorCode = 'no_network';
+            } else {
+                messageText = 'You have not created any portfolio yet. Get started by creating One';
+                errorCode = 'empty_portfolio';
+            }
+            this.setState({showEmptyScreen: {error: error.message, status: true, messageText, errorCode}});
         })
         .finally(() => {
             this.setState({defaultPortfolioLoading: false});
@@ -354,7 +368,7 @@ export class InvestorDashboard extends React.Component {
     renderPortfolios = () => {
         const portfolios = this.state.investorPortfolios;
         return portfolios.map((portfolio, index) => {
-            const returnColor = portfolio.return < 0 ? '#ED4D4D' : '#3DC66B';
+            const returnColor = portfolio.return < 0 ? metricColor.negative : metricColor.positive;
 
             return (
                 <Row 
@@ -453,13 +467,15 @@ export class InvestorDashboard extends React.Component {
         const chartData = [];
         const seriesData = [];
         const positions = composition.map(item => item.ticker);
-        composition.map(item => {
+        composition.map((item, index) => {
             const weight = Number((item.weight * 100).toFixed(2));
+            const z = index === 0 ? 1 : 0; 
             if (weight > 0) {
                 chartData.push({
                     name: item.ticker,
                     y: Number((item.weight * 100).toFixed(2)),
-                    color: colorData[item.ticker]
+                    color: colorData[item.ticker],
+                    z
                 });
             }   
         });
@@ -560,12 +576,13 @@ export class InvestorDashboard extends React.Component {
     renderSummaryMetrics = () => {
         const {totalreturn, dailyreturn, volatility, netValue} = this.state.metrics;
         const colStyle = {marginBottom: '0px'};
+        
 
         return(
             <Row type="flex" justify="space-around"> 
                 <Col span={5} style={colStyle}>
                     <MetricItem 
-                        valueStyle={valueStyle} 
+                        valueStyle={{...valueStyle, color: getMetricColor(totalreturn)}} 
                         labelStyle={labelStyle} 
                         label="Total Return" 
                         value={`${Number(totalreturn * 100).toFixed(2)} %`}
@@ -573,7 +590,7 @@ export class InvestorDashboard extends React.Component {
                 </Col>
                 <Col span={5} style={colStyle}>
                     <MetricItem 
-                        valueStyle={valueStyle} 
+                        valueStyle={{...valueStyle, color: getMetricColor(dailyreturn)}} 
                         labelStyle={labelStyle} 
                         label="Daily Return" 
                         value={`${Number(dailyreturn * 100).toFixed(2)} %`}
@@ -581,7 +598,7 @@ export class InvestorDashboard extends React.Component {
                 </Col>
                 <Col span={5} style={colStyle}>
                     <MetricItem 
-                        valueStyle={valueStyle} 
+                        valueStyle={{...valueStyle, color: getMetricColor(volatility)}} 
                         labelStyle={labelStyle} 
                         label="Volatility" 
                         value={`${Number(volatility * 100).toFixed(2)} %`}
@@ -602,7 +619,7 @@ export class InvestorDashboard extends React.Component {
     renderOverviewMetrics = () => {
         const {positions, defaultComposition} = this.state;
         const {concentration = 0} = this.state.metrics;
-        const colStyle = {marginBottom: '40px'};
+        const colStyle = {marginBottom: '20px'};
         let nStocks = 0, nSectors = 0, nIndustries = 0, maxPosSize = {y: 0}, minPosSize = {y: 0};
         if (defaultComposition.length){
             nStocks = defaultComposition[0].data.length;
@@ -614,9 +631,9 @@ export class InvestorDashboard extends React.Component {
 
         return (
             <Row style={{height: '345px'}}>
-                <Col span={24} style={{height: '93%', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                    <Row style={{textAlign: 'center', paddingLeft: '15px'}}> 
-                        <Col span={12} style={colStyle}>
+                <Col span={24}>
+                    <Row> 
+                        <Col span={24} style={colStyle}>
                             <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
@@ -624,7 +641,7 @@ export class InvestorDashboard extends React.Component {
                                     value={nStocks}
                             />
                         </Col>
-                        <Col span={12} style={colStyle}>
+                        <Col span={24} style={colStyle}>
                             <MetricItem 
                                 valueStyle={valueStyle} 
                                 labelStyle={labelStyle} 
@@ -632,16 +649,7 @@ export class InvestorDashboard extends React.Component {
                                     value={Number(concentration).toFixed(2)}
                             />
                         </Col>
-                        {/*<Col span={12} style={colStyle}>
-                            <MetricItem 
-                                    valueStyle={valueStyle} 
-                                    labelStyle={labelStyle} 
-                                    label="No. of Industries" 
-                                    value={nIndustries}
-                            />
-        </Col>*/}
-                    
-                        <Col span={12} style={colStyle}>
+                        <Col span={24} style={colStyle}>
                             <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
@@ -649,22 +657,6 @@ export class InvestorDashboard extends React.Component {
                                     value={maxPosSize.y}
                             />
                         </Col>
-                        {/*<Col span={12} style={colStyle}>
-                            <MetricItem 
-                                    valueStyle={valueStyle} 
-                                    labelStyle={labelStyle} 
-                                    label="No. of Sectors" 
-                                    value={nSectors}
-                            />
-                        </Col>
-                        <Col span={12} style={colStyle}>
-                            <MetricItem 
-                                    valueStyle={valueStyle} 
-                                    labelStyle={labelStyle} 
-                                    label="Min. Position Size" 
-                                    value={minPosSize.y}
-                            />
-    </Col>*/}
                     </Row>
                 </Col>
             </Row>
@@ -674,10 +666,10 @@ export class InvestorDashboard extends React.Component {
     renderOverviewPieChart = () => {
         return (
             <Row>
-                <Col span={24}>
+                <Col span={24} style={{marginTop: '-10px'}}>
                     <HighChartNew series = {this.state.composition} />
                 </Col>
-                <Col span={24} style={{textAlign: 'center', marginTop: '-40px'}}>
+                <Col span={24} style={{textAlign: 'center', marginTop: '-60px'}}>
                     <RadioGroup onChange={this.handleOverviewSelectChange} defaultValue="stocks" size="small">
                         <RadioButton value="stocks">Stocks</RadioButton>
                         <RadioButton value="sectors">Sectors</RadioButton>
@@ -721,21 +713,27 @@ export class InvestorDashboard extends React.Component {
 
     render() {
         return(
-            this.state.showEmptyScreen
+            this.state.showEmptyScreen.status
             ?   <Row>
                     <Col span={24} style={emptyPortfolioStyle}>
-                        <h1>You have not created any portfolio yet. Get started by creating One</h1>
-                        <Button 
-                                type="primary" 
-                                onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                                style={{marginTop: '20px'}}
-                        >
-                            Create Portfolio
-                        </Button>
+                        {
+                            this.state.showEmptyScreen.errorCode === 'empty_portfolio'
+                            ?   <div style={{textAlign: 'center'}}>
+                                    <h1>{this.state.showEmptyScreen.messageText}</h1>
+                                    <Button 
+                                            type="primary" 
+                                            onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                                            style={{marginTop: '20px'}}
+                                    >
+                                        Create Portfolio
+                                    </Button>
+                                </div>
+                            : <h1>{this.state.showEmptyScreen.messageText}</h1>
+                        }
                     </Col>
                 </Row>
             :   <Row>
-                <Col>
+                <Col style={{paddingBottom: '20px'}}>
                     <Row type="flex" justify="end" style={{marginTop: '-40px'}}>
                         <Col>
                             <Button 
@@ -756,37 +754,41 @@ export class InvestorDashboard extends React.Component {
                         </Col>
                     </Row>
                     <Row gutter={12}>
-                        
-                         <Col xl={{span:12}} lg={{span:24}}>
+                        <Col xl={12} lg={24}>
                             <DashboardCard 
-                                title="SUMMARY" 
-                                loading={this.state.defaultPortfolioLoading}
-                                cardStyle={{marginTop:'10px'}} 
-                                contentStyle={{height: '400px'}}
-                                headerStyle={headerStyle}
-                                menu={this.renderPortfolioMenu()}>
-                                    
+                                    title="SUMMARY" 
+                                    loading={this.state.defaultPortfolioLoading}
+                                    cardStyle={{marginTop:'10px'}} 
+                                    contentStyle={{height: '400px'}}
+                                    headerStyle={headerStyle}
+                                    menu={this.renderPortfolioMenu()}
+                            >
                                     <Row type="flex" justify="space-around" style={{marginTop: '10px', marginBottom: '10px'}}>
                                         <Col span={20}>{this.renderSummaryMetrics()}</Col>
                                     </Row>
 
-                                    <Row>
-                                        <Col span={12}>{this.renderOverviewPieChart()}</Col>
-                                        <Col span={12}>{this.renderOverviewMetrics()}</Col>
+                                    <Row type="flex">
+                                        <Col style={{left: '20%'}} span={12}>{this.renderOverviewPieChart()}</Col>
+                                        <Col style={{left: '20%', marginTop: '5%'}} span={12}>{this.renderOverviewMetrics()}</Col>
                                     </Row>
                             </DashboardCard>
                         </Col>
                         
-                        <Col xl={{span:12}} lg={{span:24}}>
+                        <Col xl={12} lg={24}>
                             <DashboardCard 
-                                title="PERFORMANCE CHART" 
-                                loading={this.state.defaultPortfolioLoading}
-                                cardStyle={{marginTop:'10px'}}
-                                contentStyle={{height: '400px'}}
-                                headerStyle={headerStyle}
-                                menu={this.renderPortfolioMenu()}>
+                                    title="PERFORMANCE CHART" 
+                                    loading={this.state.defaultPortfolioLoading}
+                                    cardStyle={{marginTop:'10px'}} 
+                                    contentStyle={{height: '400px'}}
+                                    headerStyle={headerStyle}
+                                    menu={this.renderPortfolioMenu()}
+                            >
 
-                                    <Col><MyChartNew series={this.state.tickers} hideLegend={true}/></Col>
+                                    <Col 
+                                            style={{paddingLeft: '20px', paddingTop: '10px'}}
+                                    >
+                                        <MyChartNew series={this.state.tickers} />
+                                    </Col>
                             
                             </DashboardCard>
                         </Col>
@@ -795,21 +797,21 @@ export class InvestorDashboard extends React.Component {
                     </Row>
 
                     <Row gutter={12}>
-                        <Col xl={{span:12}} lg={{span:24}}>
+                        <Col xl={12} lg={24}>
                             <DashboardCard 
                                     title="MY PORTFOLIOS" 
-                                    cardStyle={{marginTop:'10px'}}
                                     loading={this.state.portfolioLoading}
                                     headerStyle={headerStyle}
+                                    cardStyle={{marginTop:'12px'}} 
                             >
                                 {this.renderPortfolios()}
                             </DashboardCard>
                         </Col>
 
-                        <Col xl={{span:12}} lg={{span:24}}>
+                        <Col xl={12} lg={24}>
                             <DashboardCard 
                                     title="MY ADVICES" 
-                                    cardStyle={{marginTop:'10px'}}
+                                    cardStyle={{marginTop:'12px'}}
                                     loading={this.state.subscribedAdvicesLoading}
                                     headerStyle={headerStyle}
                             >
@@ -824,14 +826,14 @@ export class InvestorDashboard extends React.Component {
 }
 
 const valueStyle = {
-    color: '#1F9CC4',
-    fontSize: '18px',
+    color: '#585858',
+    fontSize: '20px',
     fontWeight: '400'
 };
 
 const labelStyle = {
     color: '#707070',
-    fontSize: '16px',
+    fontSize: '12px',
     fontWeight: '400'
 };
 
