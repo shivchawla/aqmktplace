@@ -1,11 +1,12 @@
 import * as React from 'react';
 import axios from 'axios';
 import SkyLight from 'react-skylight';
+import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
-import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin} from '../constants';
+import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -58,6 +59,7 @@ export class AdviceDetail extends React.Component {
             barDollarSeries: [],
             barPercentageSeries: [],
             positions: [],
+            show: false
         };
     }
 
@@ -126,7 +128,6 @@ export class AdviceDetail extends React.Component {
     }
 
     getAdviceDetail = response => {
-        console.log('Advice Detail Reponse', response.data);
         const portfolio = {...this.state.portfolio};
         const positions = response.data.detail.positions;
         const {maxNotional, rebalance} = response.data;
@@ -160,7 +161,7 @@ export class AdviceDetail extends React.Component {
 
     processPerformanceData = performanceData => {
         return performanceData.map(item => {
-            return ([moment(item.date).valueOf(), item.netValue])
+            return ([moment(item.date).valueOf(), Number(item.netValue.toFixed(2))])
         })
     }
 
@@ -169,6 +170,7 @@ export class AdviceDetail extends React.Component {
         const url = `${requestUrl}/advice/${adviceId}`;
         const performanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
         let positions = [];
+        this.setState({show: true});
         axios.get(url, {
             headers: {
                 'aimsquant-token': aimsquantToken
@@ -191,7 +193,7 @@ export class AdviceDetail extends React.Component {
                 return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
             });
             const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
-                return {name: item.ticker, data: [item.pnl], color: colorData[item.ticker]}
+                return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
             });
             const constituentPercentagePerformance = response.data.current.metrics.constituentPerformance.map(item => {
                 return {name: item.ticker, data: [item.pnl_pct], color: colorData[item.ticker]};
@@ -205,6 +207,9 @@ export class AdviceDetail extends React.Component {
         })
         .catch((error) => {
             console.log(error);
+        })
+        .finally(() => {
+            this.setState({show: false});
         });
     };
 
@@ -227,10 +232,10 @@ export class AdviceDetail extends React.Component {
         const metricsItems = [
             {value: subscribers, label: 'Subscribers'},
             {value: followers, label: 'Followers'},
-            {value: netValue, label: 'Net Value'},
-            {value: dailyChange, label: 'Daily Change', percentage: true},
-            {value: totalReturn, label: 'Total Return', percentage: true},
-            {value: annualReturn, label: 'Annual Return', percentage: true},
+            {value: Number(netValue.toFixed(2)), label: 'Net Value'},
+            {value: dailyChange, label: 'Daily Change'},
+            {value: totalReturn, label: 'Total Return', percentage: true, color: true},
+            {value: annualReturn, label: 'Annual Return', percentage: true, color:true},
         ]
 
         return <AdviceMetricsItems metrics={metricsItems} />
@@ -385,95 +390,113 @@ export class AdviceDetail extends React.Component {
         this.setState({selectedValue: value});
     }
 
-    render() { 
+    renderPageContent = () => {
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
 
         return (
-           <Row style={{marginTop: '20px'}}>
-               {this.renderModal()}
-               {this.renderUpdateModal()}
-               <Col span={18} style={newLayoutStyle}>
-                    <Row className="row-container">
-                        <Col span={18}>
-                            <h1 style={adviceNameStyle}>{name}</h1>
-                            {
-                                advisor.user &&
-                                <h5 style={userStyle}>
-                                    By {advisor.user.firstName} {advisor.user.lastName} 
-                                    <span style={dateStyle}>{updatedDate}</span>
-                                </h5>
-                            }
-                            <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
-                        </Col>
-                        <Col span={4} offset={2}>
-                            {this.renderActionButtons()}
-                        </Col>
-                    </Row>
-                    <Row className="row-container">
-                        {this.renderAdviceMetrics()}
-                    </Row>
-                    <Row>
-                        <Col span={24} style={dividerStyle}></Col>
-                    </Row>
-                    <Collapse bordered={false} defaultActiveKey={["2"]}>
-                        <Panel 
-                                key="1"
+            <Col span={18} style={newLayoutStyle}>
+                <Row className="row-container">
+                    <Col span={18}>
+                        <h1 style={adviceNameStyle}>{name}</h1>
+                        {
+                            advisor.user &&
+                            <h5 style={userStyle}>
+                                By {advisor.user.firstName} {advisor.user.lastName} 
+                                <span style={dateStyle}>{updatedDate}</span>
+                            </h5>
+                        }
+                        <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
+                    </Col>
+                    <Col span={4} offset={2}>
+                        {this.renderActionButtons()}
+                    </Col>
+                </Row>
+                <Row className="row-container">
+                    {this.renderAdviceMetrics()}
+                </Row>
+                <Row>
+                    <Col span={24} style={dividerStyle}></Col>
+                </Row>
+                <Collapse bordered={false} defaultActiveKey={["2"]}>
+                    <Panel 
+                            key="1"
+                            style={customPanelStyle} 
+                            header={<h3 style={metricsHeaderStyle}>Description</h3>}
+                    >
+                        <Row className="row-container">
+                            <Col span={24}>
+                                <h5 style={{...textStyle, marginTop: '-10px', marginLeft: '20px'}}>{description}</h5>
+                            </Col>
+                        </Row>
+                    </Panel>
+                    {
+                        (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
+                        <Panel
+                                key="2"
                                 style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Description</h3>}
+                                header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
                         >
                             <Row className="row-container">
                                 <Col span={24}>
-                                    <h5 style={{...textStyle, marginTop: '-10px', marginLeft: '20px'}}>{description}</h5>
-                                </Col>
-                            </Row>
-                        </Panel>
-                        {
-                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
-                            <Panel
-                                    key="2"
-                                    style={customPanelStyle} 
-                                    header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
-                            >
-                                <Row className="row-container">
-                                    <Col span={24}>
-                                        <AqCard title="Portfolio Summary">
-                                            <HighChartNew series = {this.state.series} />
-                                        </AqCard>
-                                        <AqCard title="Performance Summary" offset={2}>
-                                            {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
+                                    <AqCard title="Portfolio Summary">
+                                        <HighChartNew series = {this.state.series} />
+                                    </AqCard>
+                                    <AqCard title="Performance Summary" offset={2}>
+                                        {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
+                                        <Col span={24} style={{paddingTop: '10px'}}>
                                             <HighChartBar 
                                                     dollarSeries={this.state.barDollarSeries} 
                                                     percentageSeries={this.state.barPercentageSeries}
                                             />
-                                        </AqCard>
-                                    </Col>
-                                </Row>
-                            </Panel>
-                        }
-                        {
-                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
-                            <Panel
-                                    key="3"
-                                    style={customPanelStyle} 
-                                    header={<h3 style={metricsHeaderStyle}>Detail</h3>}
-                            >
-                                <Row>
-                                    <Col span={24}>
-                                        <Tabs animated={false} defaultActiveKey="1">
-                                            <TabPane tab="Performance" key="1" className="row-container">
-                                                <MyChartNew series={this.state.tickers} />
-                                            </TabPane>
-                                            <TabPane tab="Portfolio" key="2" className="row-container">
-                                                <AqPortfolioTable positions={this.state.positions} />
-                                            </TabPane>
-                                        </Tabs>
-                                    </Col>
-                                </Row>
-                            </Panel>
-                        }
-                    </Collapse>
-               </Col>
+                                        </Col>
+                                    </AqCard>
+                                </Col>
+                            </Row>
+                        </Panel>
+                    }
+                    {
+                        (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
+                        <Panel
+                                key="3"
+                                style={customPanelStyle} 
+                                header={<h3 style={metricsHeaderStyle}>Detail</h3>}
+                        >
+                            <Row>
+                                <Col span={24}>
+                                    <Tabs animated={false} defaultActiveKey="1">
+                                        <TabPane tab="Performance" key="1" className="row-container">
+                                            <MyChartNew series={this.state.tickers} />
+                                        </TabPane>
+                                        <TabPane tab="Portfolio" key="2" className="row-container">
+                                            <AqPortfolioTable positions={this.state.positions} />
+                                        </TabPane>
+                                    </Tabs>
+                                </Col>
+                            </Row>
+                        </Panel>
+                    }
+                </Collapse>
+            </Col>
+        );
+    }
+
+    render() { 
+        return (
+           <Row style={{marginTop: '20px'}}>
+                <Loading
+                    show={this.state.show}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+               {this.renderModal()}
+               {this.renderUpdateModal()}
+               {
+                    !this.state.show &&
+                    this.renderPageContent()
+               }
+               
            </Row>
         );
     }

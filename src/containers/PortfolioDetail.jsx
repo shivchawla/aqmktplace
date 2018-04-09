@@ -1,11 +1,13 @@
 import * as React from 'react';
 import * as Radium from 'radium';
 import _ from 'lodash';
+import Loading from 'react-loading-bar';
 import moment from 'moment';
 import axios from 'axios';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse} from 'antd';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
+import {loadingColor} from '../constants';
 import '../css/portfolioDetail.css';
 import {convertToPercentage, generateColorData} from '../utils';
 import {
@@ -46,7 +48,8 @@ class PortfolioDetailImpl extends React.Component {
             performanceDollarSeries: [],
             performancepercentageSeries: [],
             pieSeries: [],
-            activeKey:['.$2']
+            activeKey:['.$2'],
+            show: false
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -260,6 +263,7 @@ class PortfolioDetailImpl extends React.Component {
         const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
         const tickers = [...this.state.tickers];
         const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${this.props.match.params.id}`;
+        this.setState({show: true});
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => { // Getting details of portfolio
             if (response.data.benchmark) {
@@ -277,6 +281,8 @@ class PortfolioDetailImpl extends React.Component {
                 presentAdvices: advices,
                 stockPositions: response.data.detail.positions,
                 tickers
+            }, () => {
+                console.log(this.state.tickers);
             });
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
@@ -292,7 +298,6 @@ class PortfolioDetailImpl extends React.Component {
                     return [moment(item.date, dateFormat).valueOf(), item.netValue];
                 });
             }
-            
             tickers.push({ // Pushing advice performance to performance graph
                 name: 'Portfolio',
                 data: performanceSeries
@@ -326,18 +331,23 @@ class PortfolioDetailImpl extends React.Component {
                 performanceDollarSeries: constituentDollarPerformance,
                 performancepercentageSeries: constituentPercentagePerformance,
                 pieSeries: series,
+            }, () => {
+                console.log(this.state.tickers);
             });
         })
         .catch(error => {
             console.log(error.message);
         })
+        .finally(() => {
+            this.setState({show: false});
+        });
     }
 
     handleChange(activeKey) {
         this.setState({activeKey: activeKey});
     }
 
-    render () {
+    renderPageContent = () => {
         return (
             <Row style={{margin: '20px 0'}}>
                 <Col xl={18} md={24} style={{...newLayoutStyle, padding: '0'}}>
@@ -494,6 +504,23 @@ class PortfolioDetailImpl extends React.Component {
                     </Row>
                 </Col>
             </Row>
+        );
+    }
+
+    render () {
+        return (
+            <React.Fragment>
+                <Loading
+                    show={this.state.show}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+                {
+                    !this.state.show &&
+                    this.renderPageContent()
+                }
+            </React.Fragment>
         );
     }
 }

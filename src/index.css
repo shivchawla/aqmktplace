@@ -67,3 +67,8 @@ h1, h2, h3, h4, h5 {
 .highcharts-button .highcharts-button-normal{
 	z-index: 20;
 }
+
+.main-loader div{
+	position: relative;
+	margin-top: '200px'
+}

@@ -1,9 +1,8 @@
 import * as React from 'react';
 import {Layout, Menu, Row, Col} from 'antd';
-import {Route, withRouter} from 'react-router-dom';
+import {Route, withRouter, Link} from 'react-router-dom';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import AqBreadCrumb from './components/AqBreadCrumb';
-import {AqNavLink, AqLink} from './components';
 import {
     Dashboard, 
     QuantResearch, 
@@ -53,9 +52,9 @@ class App extends React.Component {
                 <Header style={headerStyle}>
                     <Row type="flex">
                         <Col span={4}>
-                            <AqLink to='/' pageTitle='Home'>
+                            <Link to='/' pageTitle='Home'>
                                 <h1 style={headerColor}>AIMSQUANT</h1>
-                            </AqLink>
+                            </Link>
                         </Col>
                         <Col span={10} offset={10}>
                             <Menu 
@@ -63,19 +62,19 @@ class App extends React.Component {
                                 defaultSelectedKeys={['1']}
                                 style={{lineHeight: '64px'}}
                             >
-                            <Menu.Item key={1}>
-                                <AqNavLink to='/dashboard' pageTitle='Dashboard' />
-                            </Menu.Item>
-                            <Menu.Item key={2}>
-                                <AqNavLink to='/advice' pageTitle='Screen Advices' />
-                            </Menu.Item>
-                            <Menu.Item key={3}>
-                                <AqNavLink to='/stockresearch' pageTitle='Stock Research' />
-                            </Menu.Item>
-                            <Menu.Item key={4}>
-                                <AqNavLink to='/quantresearch' pageTitle='Quant Research' />
-                            </Menu.Item>
-                        </Menu>
+                                <Menu.Item key={1}>
+                                    <Link to='/dashboard' pageTitle='Dashboard'>Dashboard</Link>
+                                </Menu.Item>
+                                <Menu.Item key={2}>
+                                    <Link to='/advice' pageTitle='Screen Advices'>Screen Advices</Link>
+                                </Menu.Item>
+                                <Menu.Item key={3}>
+                                    <Link to='/stockresearch' pageTitle='Stock Research' >Stock Research</Link>
+                                </Menu.Item>
+                                <Menu.Item key={4}>
+                                    <Link to='/quantresearch' pageTitle='Quant Research' >Quant Research</Link>
+                                </Menu.Item>
+                            </Menu>
                         </Col> 
                     </Row>
                 </Header>

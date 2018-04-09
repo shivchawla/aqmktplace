@@ -95,4 +95,8 @@ export const metricColor = {
     negative: '#f44335'
 };
 
+export const loadingColor = {
+    color: '#e91e63'
+}
+
 export const benchmarkColor = '#D50000';

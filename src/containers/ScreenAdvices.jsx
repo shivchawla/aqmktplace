@@ -283,7 +283,11 @@ export class ScreenAdvices extends React.PureComponent {
                     </Row>
                     <Row>
                         <Col span={24}>
-                            <Tabs animated={false} defaultActiveKey="all" onChange={this.handleTabChange}>
+                            <Tabs 
+                                    animated={false} 
+                                    defaultActiveKey="all" 
+                                    onChange={this.handleTabChange}
+                            >
                                 <TabPane tab="All" key="all">
                                     <Spin size="large" spinning={this.state.loading}>
                                         {this.renderAdvices()}

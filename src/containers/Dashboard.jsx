@@ -1,10 +1,12 @@
 import * as React from 'react';
 import axios from 'axios';
+import Loading from 'react-loading-bar';
 import {Link} from 'react-router-dom';
 import {Button, Row, Col} from 'antd';
 import {withRouter} from 'react-router';
 import {AqLink} from '../components';
 import {CreatePortfolioDialog} from '../containers';
+import {loadingColor} from '../constants';
 import '../css/highstock.css';
 const ReactHighstock = require('react-highcharts/ReactHighstock.src');
 
@@ -15,7 +17,8 @@ export class DashboardImpl extends React.Component {
         super(props);
         this.state = {
             visible: false,
-            portfolios: []
+            portfolios: [],
+            show: false
         }
     }
 
@@ -63,9 +66,34 @@ export class DashboardImpl extends React.Component {
         })
     }
 
+    onShow = ()=> {
+        this.setState({ show: true })
+      }
+  
+      onHide = ()=> {
+        this.setState({ show: false })
+      }
+
     render() {
         return (
             <Row>
+                <Loading
+                    show={this.state.show}
+                    color={loadingColor}
+                    className="main-loader"
+                />
+
+                <button
+                    type="button"
+                    onClick={this.onShow}>
+                    show
+                </button>
+
+                <button
+                    type="button"
+                    onClick={this.onHide}>
+                    hide
+                </button>
                 <Col span={24}>
                     <AqLink to='/advisordashboard' pageTitle='Advisor Dashboard'/>
                 </Col>

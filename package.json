@@ -31,6 +31,7 @@
     "react-highcharts": "^16.0.1",
     "react-linkedin-login": "^1.0.3",
     "react-linkedin-sdk": "^1.0.8",
+    "react-loading-bar": "0.0.7",
     "react-redux": "5.0.6",
     "react-router": "4.2.0",
     "react-router-dom": "4.2.2",

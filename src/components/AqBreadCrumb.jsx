@@ -5,6 +5,7 @@ import {withBreadcrumbs} from 'react-router-breadcrumbs-hoc';
 import {routesNew} from '../routes';
 
 const BreadCrumbs = ({breadcrumbs}) => {
+    console.log(breadcrumbs);
     return <Breadcrumb style={{background: '#fff'}}>
         {
             breadcrumbs.map(({breadcrumb, path, match}) => {

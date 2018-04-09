@@ -1,4 +1,5 @@
 import * as React from 'react';
+import _ from 'lodash';
 import moment from 'moment';
 import Radium from 'radium';
 import {withRouter} from 'react-router';
@@ -302,10 +303,10 @@ class AdviceListItemImpl extends React.PureComponent {
     renderNetValueChange = performanceSummary => {
         let netValue = 0, dailyChange = 0, dailyChangePct = 0, totalReturn;
         if (performanceSummary && performanceSummary.current) {
-            netValue = performanceSummary.current.netValue;
-            dailyChange = performanceSummary.current.dailyChange;
-            dailyChangePct = performanceSummary.current.dailyChangePct;
-            totalReturn = performanceSummary.current.totalReturn;
+            netValue = _.get(performanceSummary, 'performanceSummary.current.netValue', 0);
+            dailyChange = _.get(performanceSummary, 'performanceSummary.current.dailyChange', 0);
+            dailyChangePct = _.get(performanceSummary, performanceSummary.current.dailyChangePct, 0);
+            totalReturn = _.get(performanceSummary, performanceSummary.current.dailyChangePct, 0);
         }
         return (
             <Row type="flex" align="bottom">

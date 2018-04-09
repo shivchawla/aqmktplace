@@ -1,13 +1,15 @@
 import * as React from 'react';
 import axios from 'axios';
+import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard} from '../components';
-import {layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
+import {loadingColor, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {generateColorData, getMetricColor} from '../utils';
+import 'react-loading-bar/dist/index.css'
 
 const {requestUrl, aimsquantToken, investorId} = require('../localConfig');
 const RadioButton = Radio.Button;
@@ -54,7 +56,8 @@ export class InvestorDashboard extends React.Component {
                 errorCode: ''
             },
             showAdvisorDashboardToggle: false,
-            defaultPortfolioName: 'Default Portfolio'
+            defaultPortfolioName: 'Default Portfolio',
+            topLoader: false
         };
         this.stockPositionColumns = [
             {
@@ -711,8 +714,8 @@ export class InvestorDashboard extends React.Component {
         this.getInvestorSubscribedAdvices();
     }
 
-    render() {
-        return(
+    renderPageContent = () => {
+        return (
             this.state.showEmptyScreen.status
             ?   <Row>
                     <Col span={24} style={emptyPortfolioStyle}>
@@ -768,7 +771,7 @@ export class InvestorDashboard extends React.Component {
                                     </Row>
 
                                     <Row type="flex">
-                                        <Col style={{left: '20%'}} span={12}>{this.renderOverviewPieChart()}</Col>
+                                        <Col span={12}>{this.renderOverviewPieChart()}</Col>
                                         <Col style={{left: '20%', marginTop: '5%'}} span={12}>{this.renderOverviewMetrics()}</Col>
                                     </Row>
                             </DashboardCard>
@@ -821,6 +824,23 @@ export class InvestorDashboard extends React.Component {
                     </Row>
                 </Col>
             </Row>
+        );
+    }
+
+    render() {
+        return(
+            <Col span={24}>
+                <Loading 
+                    show={this.state.defaultPortfolioLoading}
+                    color={this.state.loadingColor}
+                    showSpinner={false}
+                    className="main-loader"
+                />
+               {
+                   !this.state.defaultPortfolioLoading &&
+                   this.renderPageContent()
+               }
+            </Col>
         );
     }
 }
