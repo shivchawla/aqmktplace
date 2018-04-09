@@ -316,7 +316,8 @@ export class StockResearch extends React.Component {
 
 const metricStyle = {
     // marginTop: '20px',
-    padding: '20px'
+    padding: '7px 20px 7px 20px',
+    //paddingBottom:'0px',
 };
 
 const tickerNameStyle = {

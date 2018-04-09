@@ -4,13 +4,13 @@ import {newLayoutStyle, tabBackgroundColor} from '../constants';
 
 export class DashboardCard extends React.Component {
     render() {
-        const {cardStyle, children, title, menu = null, loading = false, xl=12, lg=24, contentStyle, headerSpan=8, menuSpan=16} = this.props;
+        const {cardStyle, children, title, menu = null, loading = false, xl=12, lg=24, contentStyle, headerSpan=10, menuSpan=12} = this.props;
 
         return (
             <Col style={cardStyle}>
                 <Spin spinning={loading}>
                     <Row style={{...newLayoutStyle, height: '365px', ...contentStyle }}>
-                        <Row style={{...headerStyle, ...this.props.headerStyle}}>
+                        <Row style={{...headerStyle, ...this.props.headerStyle}} type="flex" justify="space-between">
                             <Col span={headerSpan}>
                                 <h3 style={{marginLeft: '20px'}}>{title}</h3>
                             </Col>
@@ -30,7 +30,7 @@ export class DashboardCard extends React.Component {
 
 const headerStyle = {
     backgroundColor: tabBackgroundColor, 
-    padding: '5px 10px',
+    padding: '10px 10px 5px 5px',
 };
 
 const contentStyle = {

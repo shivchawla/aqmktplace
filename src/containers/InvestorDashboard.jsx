@@ -736,7 +736,7 @@ export class InvestorDashboard extends React.Component {
                 </Row>
             :   <Row>
                 <Col>
-                    <Row type="flex" justify="end">
+                    <Row type="flex" justify="end" style={{marginTop: '-40px'}}>
                         <Col>
                             <Button 
                                     type="primary" 
@@ -756,40 +756,44 @@ export class InvestorDashboard extends React.Component {
                         </Col>
                     </Row>
                     <Row gutter={12}>
-                        <Col xl={{span:12}} lg={{span:24}}>
+                        
+                         <Col xl={{span:12}} lg={{span:24}}>
                             <DashboardCard 
-                                title="PERFORMANCE" 
+                                title="SUMMARY" 
                                 loading={this.state.defaultPortfolioLoading}
-                                cardStyle={{marginTop:'10px'}}
-                                contentStyle={{height: '450px'}}
+                                cardStyle={{marginTop:'10px'}} 
+                                contentStyle={{height: '400px'}}
                                 headerStyle={headerStyle}
                                 menu={this.renderPortfolioMenu()}>
-
+                                    
                                     <Row type="flex" justify="space-around" style={{marginTop: '10px', marginBottom: '10px'}}>
                                         <Col span={20}>{this.renderSummaryMetrics()}</Col>
                                     </Row>
 
-                                    <Col><MyChartNew series={this.state.tickers} hideLegend={true}/></Col>
-                            
-                            </DashboardCard>
-                        </Col>
-
-                        <Col xl={{span:12}} lg={{span:24}}>
-                            <DashboardCard 
-                                title="PORTFOLIO" 
-                                loading={this.state.defaultPortfolioLoading}
-                                cardStyle={{marginTop:'10px'}} 
-                                contentStyle={{height: '450px'}}
-                                headerStyle={headerStyle}
-                                menu={this.renderPortfolioMenu()}>
                                     <Row>
                                         <Col span={12}>{this.renderOverviewPieChart()}</Col>
                                         <Col span={12}>{this.renderOverviewMetrics()}</Col>
                                     </Row>
                             </DashboardCard>
                         </Col>
+                        
+                        <Col xl={{span:12}} lg={{span:24}}>
+                            <DashboardCard 
+                                title="PERFORMANCE CHART" 
+                                loading={this.state.defaultPortfolioLoading}
+                                cardStyle={{marginTop:'10px'}}
+                                contentStyle={{height: '400px'}}
+                                headerStyle={headerStyle}
+                                menu={this.renderPortfolioMenu()}>
+
+                                    <Col><MyChartNew series={this.state.tickers} hideLegend={true}/></Col>
+                            
+                            </DashboardCard>
+                        </Col>
+
+                        
                     </Row>
-                    
+
                     <Row gutter={12}>
                         <Col xl={{span:12}} lg={{span:24}}>
                             <DashboardCard 
