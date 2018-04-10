@@ -157,21 +157,20 @@ export class InvestorDashboard extends React.Component {
         this.setState({defaultPortfolioLoading: true});
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            const positions = response.data.defaultPortfolio.detail.positions;
+            const positions = _.get(response.data, 'defaultPortfolio.detail.positions', []);
             const positionModdedForColors = positions.map(item => item.security.ticker);
             const colorData = generateColorData(positionModdedForColors);
-            const portfolioMetrics = response.data.defaultPerformance.current.metrics.portfolioMetrics;
-            const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
-            const concentration = portfolioMetrics.concentration;
-            const performance = response.data.defaultPerformance.current.metrics.portfolioPerformance.true;
+            const portfolioMetrics = _.get(response.data, 'defaultPerformance.current.metrics.portfolioMetrics', {});
+            const composition = this.processTransactionsForChart(_.get(portfolioMetrics, 'composition', []), colorData);
+            const performance = _.get(response.data, 'defaultPerformance.current.metrics.portfolioPerformance.true', {});
             const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${response.data.defaultPortfolio._id}`;
-            const performanceData = response.data.defaultPerformance.simulated.portfolioValues.map(item => {
+            const performanceData = _.get(response.data, 'defaultPerformance.simulated.portfolioValues', []).map(item => {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue]
             });
             const pieChartTitle = `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
-            const summary = response.data.defaultPerformance.summary.current;
+            const summary = _.get(response.data, 'defaultPerformance.summary.current', {});
             tickers.push({
-                name: response.data.defaultPortfolio.benchmark.ticker,
+                name: _.get(response.data, 'defaultPortfolio.benchmark.ticker', ''),
                 show: true,
                 color: benchmarkColor
             });
@@ -180,7 +179,7 @@ export class InvestorDashboard extends React.Component {
                 data: performanceData,
                 show: true
             });
-            const constituentPerformance = response.data.defaultPerformance.current.metrics.constituentPerformance || [];
+            const constituentPerformance = _.get(response.data, 'defaultPerformance.current.metrics.constituentPerformance', []);
             const dollarPerformance = constituentPerformance.map(item => {
                 return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]};
             });
@@ -188,7 +187,7 @@ export class InvestorDashboard extends React.Component {
                 return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]};
             });
             this.setState({
-                defaultPortfolioName: response.data.defaultPortfolio.name,
+                defaultPortfolioName: _.get(response.data, 'defaultPortfolio.name', ''),
                 positions,
                 showEmptyScreen: {...this.state.showEmptyScreen, status: positions.length > 0 ? false : true},
                 composition,
@@ -410,9 +409,9 @@ export class InvestorDashboard extends React.Component {
             return {
                 id: portfolio._id,
                 name: portfolio.name.length < 1 ? 'Undefined' : portfolio.name,
-                netValue: portfolio.performance.netValue,
-                return: Number(portfolio.performance.totalReturn).toFixed(2),
-                volatility: (portfolio.performance.volatility).toFixed(2)
+                netValue: _.get(portfolio, 'performance.netValue', 0),
+                return: Number(_.get(portfolio, 'performance.totalReturn', 0)).toFixed(2),
+                volatility: ((_.get(portfolio, 'performance.volatility', 0))).toFixed(2)
             }
         });
     }
@@ -426,9 +425,9 @@ export class InvestorDashboard extends React.Component {
                     id: advice._id,
                     key: index,
                     name: advice.name,
-                    return: Number(performanceSummary.current.totalReturn * 100).toFixed(2),
-                    netValue: performanceSummary.current.netValue,
-                    rating: advice.rating.current,
+                    return: Number(_.get(performanceSummary, 'current.totalReturn', 0) * 100).toFixed(2),
+                    netValue: _.get(performanceSummary, 'current.netValue', 0),
+                    rating: _.get(advice, 'rating.current', 0),
                     isSubscribed,
                     isFollowing
                 };
@@ -455,12 +454,12 @@ export class InvestorDashboard extends React.Component {
         stockTransactions.map((item, index) => {
             stockPositions.push({
                 key: index,
-                symbol: item.security.ticker,
-                name: item.security.detail.Nse_Name,
-                shares: item.quantity,
-                price: item.lastPrice,
-                avgPrice: item.avgPrice,
-                country: item.security.country,
+                symbol: _.get(item, 'security.ticker', ''),
+                name: _.get(item, 'security.detail.Nse_Name', ''),
+                shares: item.quantity || 0,
+                price: item.lastPrice || 0,
+                avgPrice: item.avgPrice || 0,
+                country: _.get(item, 'security.country', ''),
             });
         });
         return stockPositions;
@@ -490,47 +489,55 @@ export class InvestorDashboard extends React.Component {
     processSectorsForChart = (positions, composition) => {
         const sectorData = [];
         const colors = ['#0091EA', '#FFEB3B', '#FFC107', '#FF9800', '#795548', '#FF5722', '#607D8B', '#3D5AFE', '#7C4DFF'];
-        positions.map((position, positionIndex) => {
-            const sectorName = position.security.detail.Sector;
-            const index = _.findIndex(sectorData, sector => sector.name === sectorName);
-            const compositonIndex = _.findIndex(composition, item => item.name === position.security.ticker);
-            if (index === -1 ) {
-                sectorData.push({
-                    name: sectorName,
-                    y: composition[compositonIndex].y,
-                    color: colors[positionIndex]
-                });
-            } else {
-                const weight = composition[compositonIndex].y;
-                sectorData[index].y = Number((sectorData[index].y + weight).toFixed(2));
-
-            }
-        });
+        try {
+            positions.map((position, positionIndex) => {
+                const sectorName = _.get(position, 'security.detail.Sector', 0);
+                const index = _.findIndex(sectorData, sector => sector.name === sectorName);
+                const compositonIndex = _.findIndex(composition, item => item.name === position.security.ticker);
+                if (index === -1 ) {
+                    sectorData.push({
+                        name: sectorName,
+                        y: composition[compositonIndex].y,
+                        color: colors[positionIndex]
+                    });
+                } else {
+                    const weight = composition[compositonIndex].y;
+                    sectorData[index].y = Number((sectorData[index].y + weight).toFixed(2));
+    
+                }
+            });
+            return [{name: 'Chart Data', data: sectorData}];
+        } catch(err) {
+            console.log(err);
+        }
         
-        return [{name: 'Chart Data', data: sectorData}];
     }
 
     processIndustriesForChart = (positions, composition) => {
         const industryData = [];
         const colors = ['#F44336', '#9C27B0', '#3F51B5', '#3F51B5', '#009688', '#8BC34A', '#8BC34A', '#CDDC39', '#00BFA5'];
-        positions.map((position, positionIndex) => {
-            const industryName = position.security.detail.Industry;
-            const index = _.findIndex(industryData, sector => sector.name === industryName);
-            const compositonIndex = _.findIndex(composition, item => item.name === position.security.ticker);
-            if (index === -1 ) {
-                industryData.push({
-                    name: industryName,
-                    y: composition[compositonIndex].y,
-                    color: colors[positionIndex]
-                });
-            } else {
-                const weight = composition[compositonIndex].y;
-                industryData[index].y = Number((industryData[index].y + weight).toFixed(2));
-
-            }
-        });
-
-        return [{name: 'Chart Data', data: industryData}];
+        try {
+            positions.map((position, positionIndex) => {
+                const industryName = _.get(position, 'security.detail.Industry', '');
+                const index = _.findIndex(industryData, sector => sector.name === industryName);
+                const compositonIndex = _.findIndex(composition, item => item.name === position.security.ticker);
+                if (index === -1 ) {
+                    industryData.push({
+                        name: industryName,
+                        y: composition[compositonIndex].y,
+                        color: colors[positionIndex]
+                    });
+                } else {
+                    const weight = composition[compositonIndex].y;
+                    industryData[index].y = Number((industryData[index].y + weight).toFixed(2));
+    
+                }
+            });
+    
+            return [{name: 'Chart Data', data: industryData}];
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     renderStockTransactions = () => {

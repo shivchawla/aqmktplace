@@ -150,40 +150,40 @@ export class AdvisorDashboard extends React.Component {
                 name: 'Browser share',
                 data: this.processSubsPerAdvice(response.data.advices)
             });
-            const currentRating = response.data.advices[0].analytics[response.data.advices[0].analytics.length - 1].rating.current.toFixed(2);
-            const simulatedRating = response.data.advices[0].analytics[response.data.advices[0].analytics.length - 1].rating.simulated.toFixed(2);
-            const advisorRatingStat = response.data.analytics[response.data.analytics.length - 1].rating.current.toFixed(2);
-            const advisorSubscribers = response.data.analytics[response.data.analytics.length - 1].numFollowers;
-            subscriberRating = {name: 'Total Subscribers', data: this.processTotalSubscribers(response.data.analytics)};
+            const currentRating = _.get(response.data, 'advices[0].analytics[response.data.advices[0].analytics.length - 1].rating.current', 0).toFixed(2);
+            const simulatedRating = _.get(response.data, 'advices[0].analytics[response.data.advices[0].analytics.length - 1].rating.simulated', 0).toFixed(2);
+            const advisorRatingStat = _.get(response.data, 'analytics[response.data.analytics.length - 1].rating.current', 0).toFixed(2);
+            const advisorSubscribers = _.get(response.data, 'analytics[response.data.analytics.length - 1].numFollowers', 0);
+            subscriberRating = {name: 'Total Subscribers', data: this.processTotalSubscribers(_.get(response.data, 'analytics', []))};
             subsTotalSeries.push({
                 name: 'Total Subscribers', 
-                data: this.processTotalSubscribers(response.data.analytics),
+                data: this.processTotalSubscribers(_.get(response.data, 'analytics', [])),
                 color: '#536DFE'
             });
             ratingSeries.push({
                 name: 'Current Rating', 
-                data: this.processRatingByAdvice(response.data.advices[0]),
+                data: this.processRatingByAdvice(_.get(response.data, 'advices[0]', [])),
                 color: '#607D8B'
             });
             ratingSeries.push({
                 name: 'Simulated Rating', 
-                data: this.processRatingByAdvice(response.data.advices[0], 'simulated'),
+                data: this.processRatingByAdvice(_.get(response.data, 'advices[0]', []), 'simulated'),
                 color: '#FF9800'
             });
             advisorRating.push({
                 name: 'Advisor Analytics', 
-                data: this.processAdvisorRating(response.data.analytics),
+                data: this.processAdvisorRating(_.get(response.data, 'analytics', [])),
                 color: '#607D8B'
             });
             subsPerAdviceSeries[0].data.map(obj => {
                 totalSubscribers += obj.y;
             });
-            this.getAdvicePerformance(response.data.advices[0]);
+            this.getAdvicePerformance(_.get(response.data, 'advices[0]', []));
             this.setState({
-                selectedAdvice: response.data.advices[0].name,
-                rawAdvices: response.data.advices,
-                showEmptyScreen: response.data.advices.length > 0 ? false : true,
-                advices: this.processAdvices(this.sortAdvices(response.data.advices)),
+                selectedAdvice: _.get(response.data, 'advices[0].name', ''),
+                rawAdvices: _.get(response.data, 'advices', []),
+                showEmptyScreen: _.get(response.data, 'advices', []).length > 0 ? false : true,
+                advices: this.processAdvices(this.sortAdvices(_.get(response.data, 'advices', []))),
                 subsPerAdviceConfig: {
                     ...this.state.subsPerAdviceConfig, 
                     series: subsPerAdviceSeries, 
@@ -222,7 +222,7 @@ export class AdvisorDashboard extends React.Component {
         return advices.map((advice, index) => {
             return {
                 name: advice.name,
-                rating: advice.latestAnalytics.rating,
+                rating: _.get(advice, 'latestAnalytics.rating', 0),
                 key: index,
                 id: advice._id
             }
@@ -248,7 +248,7 @@ export class AdvisorDashboard extends React.Component {
     }
 
     sortAdvices = (advices) => {
-        return _.sortBy(advices, advice => advice.latestAnalytics.rating);
+        return _.sortBy(advices, advice => _.get(advice, 'latestAnalytics.rating', {}));
     }
 
     calculateRating = advice => {
@@ -257,7 +257,7 @@ export class AdvisorDashboard extends React.Component {
             rating += item.rating;
         });
 
-        return (rating/advice.analytics.length);
+        return (rating / advice.analytics.length);
     }
 
     processSubsPerAdvice = advices => {
@@ -265,7 +265,7 @@ export class AdvisorDashboard extends React.Component {
             if (advice.analytics.length > 0) {
                 return {
                     name: advice.name,
-                    y: advice.analytics[advice.analytics.length - 1].numSubscribers,
+                    y: _.get(advice, 'analytics[advice.analytics.length - 1].numSubscribers', 0),
                 }
             }
         });
@@ -402,8 +402,8 @@ export class AdvisorDashboard extends React.Component {
         const ratingSeries = [];
         const series = this.state.ratingsConfig.series;
         const advice = advices.filter(item => item._id === value)[0];
-        const currentRating = advice.analytics[advice.analytics.length - 1].rating.current.toFixed(2);
-        const simulatedRating = advice.analytics[advice.analytics.length - 1].rating.simulated.toFixed(2);    
+        const currentRating = _.get(advice, 'analytics[advice.analytics.length - 1].rating.current', 0).toFixed(2);
+        const simulatedRating = _.get(advice, '.analytics[advice.analytics.length - 1].rating.simulated', 0).toFixed(2);    
 
         ratingSeries.push({name: 'Current Rating', data: this.processRatingByAdvice(advice), color: '#607D8B'});
         ratingSeries.push({name: 'Simulated Rating', data: this.processRatingByAdvice(advice, 'simulated'), color: '#FF9800'});
@@ -427,7 +427,7 @@ export class AdvisorDashboard extends React.Component {
         this.setState({advicePerformanceLoading: true});
         axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
-            const data = response.data.simulated.portfolioValues.map(item => [moment(item.date).valueOf(), item.netValue]);
+            const data = _.get(response.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
                 name: advice.name,
                 data
@@ -521,7 +521,7 @@ export class AdvisorDashboard extends React.Component {
     renderAdvices = () => {
         const advices = this.state.rawAdvices;
         return advices.map((advice, index) => {
-            const returnColor = advice.performanceSummary.current.totalReturn < 0 ? '#ED4D4D' : '#3DC66B';
+            const returnColor = _.get(advice, 'performanceSummary.current.totalReturn', 0) < 0 ? '#ED4D4D' : '#3DC66B';
             return (
                 <Row 
                         key={index} 
@@ -533,12 +533,12 @@ export class AdvisorDashboard extends React.Component {
                         <ListMetricItem label="Name" value={advice.name} />
                     </Col>
                     <Col span={6}>
-                        <ListMetricItem value={advice.performanceSummary.current.netValue.toFixed(2)} label="Net Value" />
+                        <ListMetricItem value={_.get(advice, 'performanceSummary.current.netValue', 0).toFixed(2)} label="Net Value" />
                     </Col>
                     <Col span={4}>
                         <ListMetricItem 
                                 valueColor={returnColor} 
-                                value={`${Number((advice.performanceSummary.current.totalReturn * 100).toFixed(2))} %`} 
+                                value={`${Number((_.get(advice, 'performanceSummary.current.totalReturn', 0) * 100).toFixed(2))} %`} 
                                 label="Return" 
                         />
                     </Col>

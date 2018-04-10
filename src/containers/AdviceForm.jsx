@@ -116,24 +116,8 @@ export class AdviceFormImpl extends React.Component {
         }
     }
 
-    onEndDateChange = (date) => {
-        const endDate = moment(date).format(dateFormat);
-        this.setState({endDate});
-    }
-
     disabledStartDate = (current) => {
         return current && current < moment().startOf('day');
-    }
-
-    disabledEndDate = (current) => {
-        const modifiedStartDate = moment(this.state.startDate, dateFormat).add(dateOffset, 'days');
-        return current && moment(current, dateFormat).isBefore(modifiedStartDate);
-    }
-
-    renderData = () => {
-        return this.state.data.map((item, index) => (
-            <li key={index}>{item.symbol} - {item.lastPrice} - {item.tickerValidationStatus}</li>
-        ));
     }
 
     handleSubmit = (e) => {
@@ -221,7 +205,7 @@ export class AdviceFormImpl extends React.Component {
             url
         })
         .then(response => {
-            let performance = response.data.portfolioPerformance.portfolioValues.map(
+            let performance = _.get(response.data, 'portfolioPerformance.portfolioValues', []).map(
                 item => {
                     return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))]
                 }
@@ -495,16 +479,16 @@ export class AdviceFormImpl extends React.Component {
         .then(response => {
             const {name, description, heading} = response.data;
             this.setState({
-                adviceName: name, 
-                adviceDescription: description, 
-                adviceHeading: heading, 
-                selectedBenchmark: response.data.portfolio.benchmark.ticker,
-                rebalancingFrequency: response.data.rebalance,
+                adviceName: name || '', 
+                adviceDescription: description || '', 
+                adviceHeading: heading || '', 
+                selectedBenchmark: _.get(response.data, 'portfolio.benchmark.ticker', ''),
+                rebalancingFrequency: response.data.rebalance || 0,
                 isPublic: response.data['public'],
-                maxNotional: response.data.maxNotional
+                maxNotional: response.data.maxNotional || 0 
             }, () => {
-                console.log('Selected Benchmark', response.data.portfolio.benchmark.ticker);
-                getStockPerformance(response.data.portfolio.benchmark.ticker)
+                // console.log('Selected Benchmark', response.data.portfolio.benchmark.ticker);
+                getStockPerformance(_.get(response.data, 'portfolio.benchmark.ticker', ''))
                 .then(performance => {
                     tickers.push({
                         name: `BENCHMARK`,
@@ -519,7 +503,7 @@ export class AdviceFormImpl extends React.Component {
         })
         .then(response => {
             const positions = [...this.state.positions];
-            const portfolio = response.data.portfolio.detail.positions;
+            const portfolio = _.get(response.data, 'portfolio.detail.positions', []);
             portfolio.map((item, index) => {
                 positions.push({
                     key: index,

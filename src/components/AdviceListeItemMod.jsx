@@ -302,11 +302,11 @@ class AdviceListItemImpl extends React.PureComponent {
 
     renderNetValueChange = performanceSummary => {
         let netValue = 0, dailyChange = 0, dailyChangePct = 0, totalReturn;
-        if (performanceSummary && performanceSummary.current) {
-            netValue = _.get(performanceSummary, 'performanceSummary.current.netValue', 0);
-            dailyChange = _.get(performanceSummary, 'performanceSummary.current.dailyChange', 0);
-            dailyChangePct = _.get(performanceSummary, performanceSummary.current.dailyChangePct, 0);
-            totalReturn = _.get(performanceSummary, performanceSummary.current.dailyChangePct, 0);
+        if (performanceSummary ) {
+            netValue = _.get(performanceSummary, 'current.netValue', NaN);
+            dailyChange = _.get(performanceSummary, 'current.dailyChange', NaN);
+            dailyChangePct = _.get(performanceSummary, 'current.dailyChangePct', NaN);
+            totalReturn = _.get(performanceSummary, 'current.dailyChangePct', NaN);
         }
         return (
             <Row type="flex" align="bottom">
@@ -352,10 +352,7 @@ class AdviceListItemImpl extends React.PureComponent {
             id,
             isFollowing
         } = this.props.advice;
-        let sectors = [];
-        if (performanceSummary && performanceSummary.current) {
-            sectors = performanceSummary.current.sectors;
-        }
+        let sectors = _.get(performanceSummary, 'current.sectors', []);
 
         return (
             <Row type="flex" style={cardStyle} align="top" onClick={e => this.handleClick(id)}>

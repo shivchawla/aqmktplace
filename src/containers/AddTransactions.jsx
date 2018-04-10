@@ -340,10 +340,9 @@ class AddTransactionsImpl extends React.Component {
                     exchange: "NSE"
                 }
             };
-            console.log(response.data);
             this.setState({
-                presentAdvices: this.processPreviewAdviceTransaction(response.data.detail.subPositions),
-                presentStocks: this.processPreviewStockTransction(response.data.detail.positions)
+                presentAdvices: this.processPreviewAdviceTransaction(_.get(response.data, 'detail.subPositions', [])),
+                presentStocks: this.processPreviewStockTransction(_.get(response.data, 'detail.positions', []))
             });
             return axios({
                 url: `${requestUrl}/performance`,
@@ -353,7 +352,7 @@ class AddTransactionsImpl extends React.Component {
             });
         })
         .then(response => {
-            let performanceSeries = response.data.portfolioPerformance.portfolioValues.map((item, index) => {
+            let performanceSeries = _.get(response.data, 'portfolio.detail.positions', []).map((item, index) => {
                 return [moment(item.date, dateFormat).valueOf(), item.netValue];
             });
             if (tickers.length < 2) {
@@ -473,16 +472,16 @@ class AddTransactionsImpl extends React.Component {
     processAdviceComposition = (advice, key) => {
         let composition = [];
         if (advice.portfolio.detail) {
-            advice.portfolio.detail.positions.map((item, index) => {
+            _.get(advice, 'portfolio.detail.positions', []).map((item, index) => {
                 composition.push({
                     key: index,
                     adviceKey: key,
-                    symbol: item.security.ticker,
-                    name: item.security.detail.Nse_Name,
-                    sector: item.security.detail.Sector,
-                    shares: item.quantity,
-                    modifiedShares: item.quantity,
-                    price: item.lastPrice,
+                    symbol: _.get(item, 'security.ticker', ''),
+                    name: _.get(item, 'security.detail.Nse_Name', ''),
+                    sector: _.get(item, 'security.detail.Sector', ''),
+                    shares: item.quantity || 0,
+                    modifiedShares: item.quantity || 0,
+                    price: item.lastPrice || 0,
                     costBasic: 12,
                     unrealizedPL: 1231,
                     weight: '12%',

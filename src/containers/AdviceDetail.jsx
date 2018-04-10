@@ -96,8 +96,8 @@ export class AdviceDetail extends React.Component {
             portfolio,
             performanceSummary
         } = response.data;
-        const {annualReturn, dailyChange, netValue, totalReturn} = performanceSummary.current;
-        const benchmark = portfolio.benchmark.ticker;
+        const {annualReturn, dailyChange, netValue, totalReturn} = _.get(performanceSummary, 'current', {});
+        const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         tickers.push({name: benchmark});
         this.setState({
             tickers,
@@ -129,7 +129,7 @@ export class AdviceDetail extends React.Component {
 
     getAdviceDetail = response => {
         const portfolio = {...this.state.portfolio};
-        const positions = response.data.detail.positions;
+        const positions = _.get(response.data, 'detail.positions', []);
         const {maxNotional, rebalance} = response.data;
         this.setState({
             positions, 
@@ -147,13 +147,13 @@ export class AdviceDetail extends React.Component {
         if (response.data.simulated) {
             tickers.push({
                 name: 'ADVICE SIM',
-                data: this.processPerformanceData(response.data.simulated.portfolioValues)
+                data: this.processPerformanceData(_.get(response.data, 'simulated.portfolioValues', []))
             });
         }
         if (response.data.current) {
             tickers.push({
                 name: 'ADVICE CURR',
-                data: this.processPerformanceData(response.data.current.portfolioValues)
+                data: this.processPerformanceData(_.get(response.data, 'current.portfolioValues', []))
             });
         }
         this.setState({tickers});
@@ -182,20 +182,20 @@ export class AdviceDetail extends React.Component {
         })
         .then(response => {
             this.getAdviceDetail(response);
-            positions = response.data.detail.positions.map(item => item.security.ticker);
+            positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
             return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
         })
         .then(response => {
             const series = [];
             const colorData = generateColorData(positions);
             this.getAdvicePerformance(response);
-            const portfolioComposition = response.data.current.metrics.portfolioMetrics.composition.map((item, index) =>{
+            const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition', []).map((item, index) =>{
                 return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
             });
-            const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
+            const constituentDollarPerformance = _.get(response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
                 return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
             });
-            const constituentPercentagePerformance = response.data.current.metrics.constituentPerformance.map(item => {
+            const constituentPercentagePerformance = _.get(response.data, 'current.metrics.constituentPerformance', []).map(item => {
                 return {name: item.ticker, data: [item.pnl_pct], color: colorData[item.ticker]};
             });
             series.push({name: 'Composition', data: portfolioComposition});

@@ -109,7 +109,6 @@ class PortfolioDetailImpl extends React.Component {
 
     processPresentAdviceTransaction = (adviceTransactions, advicePerformance) => {
         let advices = [];
-        console.log('Advice Performance', advicePerformance);
         adviceTransactions.map((item, index) => {
             advices = item.advice === null 
                             ? this.addToMyPortfolio(advices, advicePerformance, item, index) 
@@ -153,10 +152,10 @@ class PortfolioDetailImpl extends React.Component {
                 id: item.advice ? item.advice._id : null,
                 name: item.advice ? item.advice.name : 'My Portfolio',
                 key,
-                weight: Number((advice.personal.weightInPortfolio * 100).toFixed(2)),
-                profitLoss: (advice.personal.pnlPct).toFixed(2),
+                weight: Number((_.get(advice, 'personal.weightInPortfolio', 0) * 100).toFixed(2)),
+                profitLoss: (_.get(advice, 'personal.pnlPct', 0)).toFixed(2),
                 units: 1,
-                netAssetValue: Number((advice.personal.netValue).toFixed(2)),
+                netAssetValue: Number((_.get(advice, 'personal.netValue', 0)).toFixed(2)),
                 composition: [
                     {
                         key: 1,
@@ -275,11 +274,11 @@ class PortfolioDetailImpl extends React.Component {
             const subPositions = response.data.detail.subPositions;
             // const advices = this.updateAdvices(this.processPresentAdviceTransaction(subPositions, advicePerformance));
             const advices = this.processPresentAdviceTransaction(subPositions, advicePerformance);
-            positions = response.data.detail.positions.map(item => item.security.ticker);
+            positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
             this.setState({
                 name: response.data.name,
                 presentAdvices: advices,
-                stockPositions: response.data.detail.positions,
+                stockPositions: _.get(response.data, 'detail.positions', []),
                 tickers
             }, () => {
                 console.log(this.state.tickers);
@@ -290,11 +289,11 @@ class PortfolioDetailImpl extends React.Component {
             const colorData = generateColorData(positions);
             let performanceSeries = [];
             if (response.data.simulated !== undefined) {
-                performanceSeries = response.data.simulated.portfolioValues.map((item, index) => {
+                performanceSeries = _.get(response.data, 'simulated.portfolioValues', []).map((item, index) => {
                     return [moment(item.date, dateFormat).valueOf(), item.netValue];
                 });
             } else {
-                performanceSeries = response.data.current.portfolioValues.map((item, index) => {
+                performanceSeries = _.get(response.data, 'current.portfolioValues', []).map((item, index) => {
                     return [moment(item.date, dateFormat).valueOf(), item.netValue];
                 });
             }
@@ -302,25 +301,28 @@ class PortfolioDetailImpl extends React.Component {
                 name: 'Portfolio',
                 data: performanceSeries
             });
-            const portfolioMetrics = response.data.summary.current;
-            const constituentDollarPerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
+            const portfolioMetrics = _.get(response.data, 'summary.current', {});
+            const constituentDollarPerformance = _.get(
+                        response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
                 return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
             });
-            const constituentPercentagePerformance = response.data.current.metrics.constituentPerformance.map((item, index) => {
+            const constituentPercentagePerformance = _.get(response.data, 'current.metrics.constituentPerformance')
+                    .map((item, index) => {
                 return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]}
             });
-            const portfolioComposition = response.data.current.metrics.portfolioMetrics.composition.map((item, index) =>{
+            const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition')
+                    .map((item, index) =>{
                 return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
             });
             series.push({name: 'Composition', data: portfolioComposition});
             const metrics = [
-                {value: portfolioMetrics.annualReturn.toFixed(2), label: 'Annual Return', percentage: true, color:true},
-                {value: portfolioMetrics.totalReturn.toFixed(2), label: 'Total Return', percentage: true,},
-                {value: portfolioMetrics.volatility.toFixed(2), label: 'Volatility', percentage: true},
-                {value: portfolioMetrics.dailyChange.toFixed(2), label: `Daily PnL (\u20B9)`, color:true, direction:true},
-                {value: portfolioMetrics.dailyChangePct.toFixed(2), label: 'Daily PnL (%)', percentage: true, color: true, direction:true},
+                {value: _.get(portfolioMetrics, 'annualReturn', 0).toFixed(2), label: 'Annual Return', percentage: true, color:true},
+                {value: _.get(portfolioMetrics, 'totalReturn', 0).toFixed(2), label: 'Total Return', percentage: true,},
+                {value: _.get(portfolioMetrics, 'volatility', 0).toFixed(2), label: 'Volatility', percentage: true},
+                {value: _.get(portfolioMetrics, 'dailyChange', 0).toFixed(2), label: `Daily PnL (\u20B9)`, color:true, direction:true},
+                {value: _.get(portfolioMetrics, 'dailyChangePct', 0).toFixed(2), label: 'Daily PnL (%)', percentage: true, color: true, direction:true},
                 {
-                    value: portfolioMetrics.netValue.toFixed(2), 
+                    value: _.get(portfolioMetrics, 'netValue', 0).toFixed(2), 
                     label: 'Net Value', 
                     isNetValue: true, 
                 }

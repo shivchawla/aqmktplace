@@ -109,15 +109,15 @@ export class ScreenAdvices extends React.PureComponent {
         const advices = [];
         responseAdvices.map((advice, index) => {
             advices.push({
-                isFollowing: advice.isFollowing,
-                id: advice._id,
-                name: advice.name,
-                advisor: advice.advisor,
-                createdDate: advice.createdDate,
-                heading: advice.heading,
-                subscribers: advice.numSubscribers,
-                followers: advice.numFollowers,
-                rating: advice.rating !== undefined ? Number(advice.rating.current.toFixed(2)) : 0,
+                isFollowing: advice.isFollowing || false,
+                id: advice._id || 0,
+                name: advice.name || '',
+                advisor: advice.advisor || {},
+                createdDate: advice.createdDate || '',
+                heading: advice.heading || '',
+                subscribers: advice.numSubscribers || 0,
+                followers: advice.numFollowers || 0,
+                rating: _.get(advice, 'rating.current', 0).toFixed(2),
                 performanceSummary: advice.performanceSummary
             })
         });
