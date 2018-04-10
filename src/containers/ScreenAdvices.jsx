@@ -245,7 +245,7 @@ export class ScreenAdvices extends React.PureComponent {
                                                 style={{fontSize: '16px', marginRight: '10px', fontWeight: '600'}}
                                         />
                                     )}
-                                    placeholder="Enter advice here"
+                                    placeholder="Search Advice"
                                     value={this.state.searchValue}
                                     onChange={this.handleInputChange}
                                     onPressEnter={() => this.getAdvices()}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Col} from 'antd';
+import {Row,Col} from 'antd';
 import _ from 'lodash';
 import HighChart from 'highcharts';
 import VariablePie from 'highcharts/modules/variable-pie'
@@ -14,11 +14,12 @@ export class HighChartNew extends React.Component {
                 colors: ['#f58231','#911eb4','#3cb44b','#ffe119','#46f0f0','#f032e6','#d2f53c','#fabebe','#008080','#e6beff','#aa6e28','#fffac8','#800000','#aaffc3','#808000','#ffd8b1','#000080', '#808080'],
                 chart: {
                     type: 'variablepie',
-                    height: 280,
+                    height: 230,
                     animation:false,
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
                     plotShadow: false,
+                    
                 },
                 title: {
                     text: '',
@@ -32,13 +33,22 @@ export class HighChartNew extends React.Component {
                 tooltip: {
                     enabled: false
                 },
+                legend:{
+                    align:'right',
+                    layout:'vertical',
+                    verticalAlign:'center',
+                    y:100,
+                    x:20
+                },
                 plotOptions: {
                     variablepie: {
+                        //center: [160, 100],
                         innerSize: 150,
                         cursor: 'pointer',
                         zMin:0,
                         zMax:1,
                         minPointSize:30,
+                        //showInLegend:true,
                         point:{
                             events:{
                                 click: function(){
@@ -58,7 +68,7 @@ export class HighChartNew extends React.Component {
                         dataLabels: {
                             enabled: false,
                             format: '{point.name} {point.percentage:.1f}%',
-                            distance: -15,
+                            distance: -100,
                             filter: {
                                 property: 'percentage',
                                 operator: '>',
@@ -162,7 +172,7 @@ export class HighChartNew extends React.Component {
 
     render() {
         return(
-            <Col span={24} style={{textAlign: 'center', height: '320px'}} id="chart-container"></Col>
+            <Row style={{height: '320px'}} id="chart-container"></Row>
         );
     }
 }

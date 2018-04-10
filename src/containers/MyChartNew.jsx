@@ -450,14 +450,13 @@ export class MyChartNew extends React.Component {
     renderHorizontalLegendList = () => {
         const {legendItems} = this.state;
         return (
-            <Row style={{ zIndex:'20'}}>
+            <Col style={{ zIndex:'20'}} span={14} >
                 {
                     legendItems.map((legend, index) => {
                         const changeColor = legend.change < 0 ? '#F44336' : '#00C853';
 
                         return (
-                            <Col span={12} key={index}>
-                                <Row type="flex" align="middle"> 
+                                <Row key={index} type="flex" align="middle"> 
                                     <Col span={2}>
                                         <Checkbox checked={legend.checked} onChange={e => this.onCheckboxChange(e, legend)} />
                                     </Col>
@@ -473,11 +472,10 @@ export class MyChartNew extends React.Component {
                                         </h3>
                                     </Col>
                                 </Row>
-                            </Col>
                         );
                     })
                 }
-            </Row>
+            </Col>
         );
     }
 
@@ -519,23 +517,22 @@ export class MyChartNew extends React.Component {
 
     renderHorizontalLegend = () => {
         return (
-            <Row>
+            <Col>
                 {
                     !this.props.hideLegend &&
-                    <Col span={24}>
+                    <Row>
                         <h2 style={{fontSize: '12px', margin: '0'}}>
                             Date <span style={{fontWeight: '700', color: '#555454'}}>{this.state.selectedDate}</span>
                         </h2>
-                    </Col>
+                    </Row>
                 }
                 {
                     !this.props.hideLegend &&
-                    <Col span={18}>
-                        {this.renderHorizontalLegendList()}
-                    </Col>
+                    
+                    <Row style={{position:'absolute', width: '400px'}}>{this.renderHorizontalLegendList()}</Row>
                 }
-                <Col id="highchart-container" style={{margin: '20px'}}></Col>
-            </Row>
+                <Row id="highchart-container"></Row>
+            </Col>
         );
     }
 

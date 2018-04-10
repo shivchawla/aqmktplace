@@ -17,7 +17,7 @@ export class DashboardCard extends React.Component {
                             {menu}
                         </Col>
                     </Row>
-                    <Row style={contentStyle}>
+                    <Row style={{...contentStyle, ...this.props.contentStyle}}>
                         {children}
                     </Row>
                 </Col>
@@ -32,7 +32,7 @@ const headerStyle = {
 };
 
 const contentStyle = {
-    height: '350px', 
+    //height: '350px', 
     overflow: 'hidden', 
     overflowY: 'scroll'
 };

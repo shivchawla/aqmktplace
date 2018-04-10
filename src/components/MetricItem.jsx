@@ -14,18 +14,16 @@ const MetricItemImpl = (props) => {
     // const fontSize = props.isNetValue ? {fontSize: '30px' } : {};
 
     return (
-        <Col span={4}>
-            <Row style={{...containerStyle, ...style, height, border, padding}}>
-                <Col span={24}>
-                    <h5 style={{...valueStyle, ...props.valueStyle}}>
-                        {props.value}
-                        {props.isNetValue && change !== null && <span style={{fontSize: '14px', marginLeft: '4px', color: changeColor}}>{change}</span>}
-                        {props.isNetValue && changePct !== null &&<span style={{fontSize: '14px', marginLeft: '4px', color: changeColor}}>({changePct}) %</span>}
-                    </h5>
-                </Col>
-                <Col><h5 style={{...labelStyle, ...props.labelStyle}} value={labelStyle}>{props.label}</h5></Col>
-            </Row>
-        </Col>
+        <Row style={{...containerStyle, ...style, height, border, padding}}>
+            <Col span={24}>
+                <h5 style={{...valueStyle, ...props.valueStyle}}>
+                    {props.value}
+                    {props.isNetValue && change !== null && <span style={{fontSize: '14px', marginLeft: '4px', color: changeColor}}>{change}</span>}
+                    {props.isNetValue && changePct !== null &&<span style={{fontSize: '14px', marginLeft: '4px', color: changeColor}}>({changePct}) %</span>}
+                </h5>
+            </Col>
+            <Col><h5 style={{...labelStyle, ...props.labelStyle}} value={labelStyle}>{props.label}</h5></Col>
+        </Row>
     );
 };
 
@@ -37,7 +35,7 @@ const containerStyle = {
     ':hover': {
         backgroundColor: '#44'
     },
-    width: '200px'
+    width: '100%'
 };
 
 const valueStyle = {
