@@ -27,3 +27,6 @@ export * from './HighChartBar';
 export * from './AdviceMetricsItems';
 export * from './HighChartSpline';
 export * from './DashboardCard';
+export * from './PageNotFound';
+export * from './NoIternetAccess';
+export * from './ForbiddenAccess';

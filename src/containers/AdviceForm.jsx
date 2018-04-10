@@ -2,10 +2,11 @@ import * as React from 'react';
 import {withRouter} from 'react-router';
 import moment from 'moment';
 import axios from 'axios';
+import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle} from '../constants';
-import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard} from '../components';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor} from '../constants';
+import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess} from '../components';
 import {getUnixStockData, getStockPerformance} from '../utils';
 import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
@@ -68,8 +69,10 @@ export class AdviceFormImpl extends React.Component {
             positions: [],
             public: false,
             isPublic: false,
+            isOwner: false,
             addTickerModalVisible: false,
-            compositionSeries: []
+            compositionSeries: [],
+            show: false
         };
         this.columns = [
             {
@@ -137,7 +140,7 @@ export class AdviceFormImpl extends React.Component {
                 requestData = {
                     name,
                     description,
-                    heading: headline,
+                    heading: 'headline',
                     portfolio: {
                         name,
                         detail: {
@@ -471,13 +474,15 @@ export class AdviceFormImpl extends React.Component {
     }
 
     getAdvice = (id) => {
-        const {requestUrl, aimsquantToken} = localConfig;
+        const {requestUrl, aimsquantToken, userId} = localConfig;
         const adviceUrl =`${requestUrl}/advice/${id}`;
         const adviceDetailUrl = `${adviceUrl}/detail`;
         const tickers = [...this.state.tickers];
+        this.setState({show: true});
         axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
         .then(response => {
             const {name, description, heading} = response.data;
+            const isOwner = _.get(response.data, 'isOwner', false);
             this.setState({
                 adviceName: name || '', 
                 adviceDescription: description || '', 
@@ -485,21 +490,29 @@ export class AdviceFormImpl extends React.Component {
                 selectedBenchmark: _.get(response.data, 'portfolio.benchmark.ticker', ''),
                 rebalancingFrequency: response.data.rebalance || 0,
                 isPublic: response.data['public'],
-                maxNotional: response.data.maxNotional || 0 
+                maxNotional: response.data.maxNotional || 0 ,
+                isOwner
             }, () => {
-                // console.log('Selected Benchmark', response.data.portfolio.benchmark.ticker);
-                getStockPerformance(_.get(response.data, 'portfolio.benchmark.ticker', ''))
-                .then(performance => {
-                    tickers.push({
-                        name: `BENCHMARK`,
-                        data: performance
+                if (this.state.isOwner) {
+                    getStockPerformance(_.get(response.data, 'portfolio.benchmark.ticker', ''))
+                    .then(performance => {
+                        tickers.push({
+                            name: `BENCHMARK`,
+                            data: performance
+                        });
+                        this.setState({tickers});
                     });
-                    this.setState({tickers});
-                });
+                }
             });
-            this.props.form.setFieldsValue({name, description, headline: heading});
-            
-            return axios.get(adviceDetailUrl, {headers: {'aimsquant-token': aimsquantToken}});
+            if (isOwner) {
+                this.setState({show: false}, () => {
+                    this.props.form.setFieldsValue({name, description, headline: heading});
+                });
+                return axios.get(adviceDetailUrl, {headers: {'aimsquant-token': aimsquantToken}});
+            } else {
+                this.setState({show: false});
+                return null;
+            }
         })
         .then(response => {
             const positions = [...this.state.positions];
@@ -515,7 +528,7 @@ export class AdviceFormImpl extends React.Component {
                 });
             });
             this.updateAllWeights(positions);
-            this.setState({data: positions, startDate: response.data.portfolio.detail.startDate}, () => {
+            this.setState({data: positions, startDate: response.data.portfolio.detail.startDate, show: false}, () => {
                 this.getPortfolioPerformance();
                 this.props.form.setFieldsValue({startDate: moment(this.state.startDate)});
             });
@@ -567,162 +580,181 @@ export class AdviceFormImpl extends React.Component {
         
     }
 
-    render() {
+    renderPageContent = () => {
         const {startDate, endDate} = this.state;
         const {getFieldDecorator} = this.props.form;
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
         
         return (
-            <Row>
-                {this.renderAddTickerModal()}
-                <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
-                    <Button 
-                            style={buttonStyle} 
-                            type="primary" 
-                            onClick={this.handleSubmit} 
-                    >
-                        Save
-                    </Button>
-                    <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
-                </Col>
-                <Col xl={18} lg={18} md={24}>
-                    <Form onSubmit={this.handleSubmit}>
-                        <Row>
-                            <Col span={24} style={{...newLayoutStyle, padding: '20px', margin: '20px 0', border: '1px solid #eaeaea'}}>
-                                <Row>
-                                    <Col span={12}>
-                                        <Row>
-                                            <Col span={24}>
-                                                <h3 style={inputHeaderStyle}>
-                                                    Advice Name
-                                                </h3>
-                                            </Col>
-                                            <Col span={24}>
-                                                <FormItem>
-                                                    {getFieldDecorator('name', {
-                                                        rules: [{required: true, message: 'Please enter Advice Name'}]
-                                                    })(
-                                                        <Input style={inputStyle} disabled={this.state.isPublic}/>
-                                                    )}
-                                                    
-                                                </FormItem>
-                                            </Col>
-                                        </Row>
-                                        <Row style={{marginTop: '10px'}}>
-                                            <Col span={24}>
-                                                <h3 style={inputHeaderStyle}>
-                                                    Description
-                                                </h3>
-                                            </Col>
-                                            <Col span={24}>
-                                                <FormItem>
-                                                    {getFieldDecorator('description', {
-                                                        rules: [{required: true, message: 'Please enter Description'}]
-                                                    })(
-                                                        <TextArea 
-                                                                style={inputStyle} 
-                                                                autosize={{minRows: 3, maxRows: 6}}
+            this.state.isOwner
+            ?   <React.Fragment>
+                    <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
+                        <Button 
+                                style={buttonStyle} 
+                                type="primary" 
+                                onClick={this.handleSubmit} 
+                        >
+                            Save
+                        </Button>
+                        <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
+                    </Col>
+                    <Col xl={18} lg={18} md={24}>
+                        <Form onSubmit={this.handleSubmit}>
+                            <Row>
+                                <Col span={24} style={{...newLayoutStyle, padding: '20px', margin: '20px 0', border: '1px solid #eaeaea'}}>
+                                    <Row>
+                                        <Col span={12}>
+                                            <Row>
+                                                <Col span={24}>
+                                                    <h3 style={inputHeaderStyle}>
+                                                        Advice Name
+                                                    </h3>
+                                                </Col>
+                                                <Col span={24}>
+                                                    <FormItem>
+                                                        {getFieldDecorator('name', {
+                                                            rules: [{required: true, message: 'Please enter Advice Name'}]
+                                                        })(
+                                                            <Input style={inputStyle} disabled={this.state.isPublic}/>
+                                                        )}
+                                                        
+                                                    </FormItem>
+                                                </Col>
+                                            </Row>
+                                            <Row style={{marginTop: '10px'}}>
+                                                <Col span={24}>
+                                                    <h3 style={inputHeaderStyle}>
+                                                        Description
+                                                    </h3>
+                                                </Col>
+                                                <Col span={24}>
+                                                    <FormItem>
+                                                        {getFieldDecorator('description', {
+                                                            rules: [{required: true, message: 'Please enter Description'}]
+                                                        })(
+                                                            <TextArea 
+                                                                    style={inputStyle} 
+                                                                    autosize={{minRows: 3, maxRows: 6}}
+                                                                    disabled={this.state.isPublic}
+                                                            />
+                                                        )}
+                                                    </FormItem>
+                                                </Col>
+                                            </Row>
+                                        </Col>
+                                        <Col span={11} offset={1}>
+                                            <Row>
+                                                <Col span={24}>
+                                                    <h3 style={inputHeaderStyle}>Settings</h3>
+                                                </Col>
+                                            </Row>
+                                            <Row type="flex" justify="space-between">
+                                                <Col span={11} style={{marginTop: '10px'}}>
+                                                    <h4 style={labelStyle}>Max Notional</h4>
+                                                    {
+                                                        this.renderMenu(
+                                                            maxNotional, 
+                                                            this.handleMaxNotionalClick,
+                                                            this.state.maxNotional
+                                                        )
+                                                    }
+                                                </Col>
+                                                <Col span={11} offset={2} style={{marginTop: '10px'}}>
+                                                    <h4 style={labelStyle}>Rebalancing Freq.</h4>
+                                                    {
+                                                        this.renderMenu(
+                                                            rebalancingFrequency, 
+                                                            this.handleRebalanceMenuClick,
+                                                            this.state.rebalancingFrequency
+                                                        )
+                                                    }
+                                                </Col>
+                                                <Col span={11} style={{marginTop: '20px'}}>
+                                                    <h4 style={labelStyle}>Start Date</h4>
+                                                    <FormItem>
+                                                        {getFieldDecorator('startDate', {
+                                                            rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
+                                                        })(
+                                                            <DatePicker 
+                                                                // onChange={this.onStartDateChange} 
+                                                                format={dateFormat}
+                                                                style={{...inputStyle, width: 150}}
                                                                 disabled={this.state.isPublic}
-                                                        />
-                                                    )}
-                                                </FormItem>
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                    <Col span={11} offset={1}>
-                                        <Row>
-                                            <Col span={24}>
-                                                <h3 style={inputHeaderStyle}>Settings</h3>
-                                            </Col>
-                                        </Row>
-                                        <Row type="flex" justify="space-between">
-                                            <Col span={11} style={{marginTop: '10px'}}>
-                                                <h4 style={labelStyle}>Max Notional</h4>
-                                                {
-                                                    this.renderMenu(
-                                                        maxNotional, 
-                                                        this.handleMaxNotionalClick,
-                                                        this.state.maxNotional
-                                                    )
-                                                }
-                                            </Col>
-                                            <Col span={11} offset={2} style={{marginTop: '10px'}}>
-                                                <h4 style={labelStyle}>Rebalancing Freq.</h4>
-                                                {
-                                                    this.renderMenu(
-                                                        rebalancingFrequency, 
-                                                        this.handleRebalanceMenuClick,
-                                                        this.state.rebalancingFrequency
-                                                    )
-                                                }
-                                            </Col>
-                                            <Col span={11} style={{marginTop: '20px'}}>
-                                                <h4 style={labelStyle}>Start Date</h4>
-                                                <FormItem>
-                                                    {getFieldDecorator('startDate', {
-                                                        rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
-                                                    })(
-                                                        <DatePicker 
-                                                            // onChange={this.onStartDateChange} 
-                                                            format={dateFormat}
-                                                            style={{...inputStyle, width: 150}}
-                                                            disabled={this.state.isPublic}
-                                                            disabledDate={this.getDisabeldDate}
-                                                        /> 
-                                                    )}
-                                                </FormItem>
-                                            </Col>
-                                            <Col span={11} offset={2} style={{marginTop: '20px'}}>
-                                                <h4 style={labelStyle}>Benchmark</h4>
-                                                {
-                                                    this.renderMenu(
-                                                        this.state.benchmarks, 
-                                                        this.onBenchmarkSelected, 
-                                                        this.state.selectedBenchmark
-                                                    )
-                                                }
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                </Row>
-                                <Row style={{marginBottom: '10px', marginTop: '20px'}}>
-                                    <Col span={24} style={{textAlign: 'right'}}>
-                                        <Button onClick={this.toggleAddTickerModal} type="primary">
-                                            {buttonText}
-                                        </Button>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <DashboardCard 
-                                            title="Preview" xl={24} 
-                                            contentStyle={{boxShadow: '0 0 0 rgba(0,0,0,1)', height: '100%'}}
+                                                                disabledDate={this.getDisabeldDate}
+                                                            /> 
+                                                        )}
+                                                    </FormItem>
+                                                </Col>
+                                                <Col span={11} offset={2} style={{marginTop: '20px'}}>
+                                                    <h4 style={labelStyle}>Benchmark</h4>
+                                                    {
+                                                        this.renderMenu(
+                                                            this.state.benchmarks, 
+                                                            this.onBenchmarkSelected, 
+                                                            this.state.selectedBenchmark
+                                                        )
+                                                    }
+                                                </Col>
+                                            </Row>
+                                        </Col>
+                                    </Row>
+                                    <Row style={{marginBottom: '10px', marginTop: '20px'}}>
+                                        <Col span={24} style={{textAlign: 'right'}}>
+                                            <Button onClick={this.toggleAddTickerModal} type="primary">
+                                                {buttonText}
+                                            </Button>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <DashboardCard 
+                                                title="Preview" xl={24} 
+                                                contentStyle={{boxShadow: '0 0 0 rgba(0,0,0,1)', height: '100%'}}
 
-                                    >
-                                        {
-                                            this.renderPortfolioDetailsTabs()
-                                        }
-                                    </DashboardCard>
-                                </Row>
+                                        >
+                                            {
+                                                this.renderPortfolioDetailsTabs()
+                                            }
+                                        </DashboardCard>
+                                    </Row>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Col>
+                    <Col xl={6} lg={6} md={0} sm={0} xs={0} style={{marginTop: '20px'}}>
+                        <Row>
+                            <Col span={24}>
+                                <Button 
+                                        style={buttonStyle} 
+                                        type="primary" 
+                                        onClick={this.handleSubmit} 
+                                >
+                                    Save
+                                </Button>
+                            </Col>
+                            <Col span={24}>
+                                <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
                             </Col>
                         </Row>
-                    </Form>
-                </Col>
-                <Col xl={6} lg={6} md={0} sm={0} xs={0} style={{marginTop: '20px'}}>
-                    <Row>
-                        <Col span={24}>
-                            <Button 
-                                    style={buttonStyle} 
-                                    type="primary" 
-                                    onClick={this.handleSubmit} 
-                            >
-                                Save
-                            </Button>
-                        </Col>
-                        <Col span={24}>
-                            <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
-                        </Col>
-                    </Row>
-                </Col>
+                    </Col>
+                </React.Fragment>
+            :   <ForbiddenAccess />
+        );
+    }
+
+    render() {
+        return (
+            <Row>
+                {this.renderAddTickerModal()}
+                <Loading
+                    show={this.state.show}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+                {
+                    !this.state.show && 
+                    this.renderPageContent()
+                }
             </Row>
         );
     }

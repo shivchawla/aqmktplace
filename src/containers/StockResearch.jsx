@@ -1,10 +1,11 @@
 import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
+import Loading from 'react-loading-bar';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio} from 'antd';
 import {List} from 'immutable';
 import {AqLink, DashboardCard} from '../components';
-import {newLayoutStyle} from '../constants';
+import {newLayoutStyle, loadingColor} from '../constants';
 import {getStockData} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
@@ -40,6 +41,7 @@ export class StockResearch extends React.Component {
             },
             rollingPerformance: {},
             selectedPerformanceScreen: '10y',
+            show: false
         };
     }
 
@@ -86,11 +88,10 @@ export class StockResearch extends React.Component {
         const {latestDetail} = this.state;
         let tickers = [];
         tickers.push({name: value, destroy: true});
-        this.setState({tickers});
+        this.setState({tickers, show: true});
         getStockData(value, 'latestDetail')
         .then(response => {
             const {data} = response;
-            console.log(data);
             latestDetail.ticker = data.security.ticker;
             latestDetail.exchange = data.security.exchange;
             latestDetail.closePrice = data.latestDetail.values.Close;
@@ -108,7 +109,7 @@ export class StockResearch extends React.Component {
             this.setState({rollingPerformance: response.data.rollingPerformance.detail});
         })
         .finally(() => {
-            this.setState({loadingData: false});
+            this.setState({loadingData: false, show: false});
         });
     }
 
@@ -207,7 +208,7 @@ export class StockResearch extends React.Component {
         );
     }
 
-    render() {
+    renderPageContent = () => {
         const {dataSource, latestDetail} = this.state;
         // const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
         const priceMetrics = [
@@ -220,96 +221,111 @@ export class StockResearch extends React.Component {
         const performanceMetricsTimeline = ['MTD', 'YTD', '1Y', '2Y', '5Y', '10Y'];
         const percentageColor = latestDetail.change < 0 ? '#FA4747' : '#3EBB72';
         const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
-
+        
         return (
-            <Row>
-                <Col xl={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
-                    <Row style={metricStyle}>
-                        <Col span={24}>
-                            <AutoComplete
-                                size="large"
-                                style={{ width: '100%' }}
-                                dataSource={dataSource.map(this.renderOption)}
-                                onSelect={this.onSelect}
-                                onSearch={this.handleSearch}
-                                placeholder="Search stocks"
-                                optionLabelProp="value"
-                            >
-                                <Input 
-                                        suffix={(
-                                            <div>
-                                                <Spin indicator={spinIcon} spinning={this.state.spinning}/>
-                                                <Icon style={searchIconStyle} type="search" />
-                                            </div>
-                                        )} 
-                                />
-                            </AutoComplete>
-                        </Col>
-                    </Row>
-                    <Row style={metricStyle} type="flex" justify="space-between">
-                        <Col span={7} style={cardStyle}>
-                            <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
-                            <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
-                                    <span 
-                                            style={{fontSize: '18px', fontWeight: '700'}}>
-                                        {latestDetail.exchange}:
-                                    </span>
-                                    {latestDetail.ticker}
-                            </h1>
-                            <h3 style={lastPriceStyle}>
-                                {latestDetail.closePrice} 
-                                <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
-                            </h3>
-                            <h5 
-                                    style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
-                            >
-                                * Data is delayed by 15 min
-                            </h5>
-                        </Col>
-                        <Col span={6} style={cardStyle}>
-                            <h3 style={cardHeaderStyle}>Price Metrics</h3>
-                            {this.renderPriceMetrics(priceMetrics)}
-                        </Col>
-                        <Col span={10} style={cardStyle}>
-                            <Row>
-                                <Col span={24}>
-                                    <h3 style={cardHeaderStyle}>Performance Metrics</h3>
-                                </Col>
-                                <Col span={24} style={{textAlign: 'right'}}>
-                                    {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
-                                </Col>
-                                <Col span={24}>
-                                    {this.renderPerformanceMetrics()}
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                    <Row style={metricStyle}>  
-                        <DashboardCard 
-                                xl={24} 
-                                title="Performance" 
-                                headerStyle={{borderBottom: '1px solid #eaeaea'}}
-                                contentStyle={{height: '405px', marginTop: '10px'}}
+            <Col xl={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
+                <Row style={metricStyle}>
+                    <Col span={24}>
+                        <AutoComplete
+                            size="large"
+                            style={{ width: '100%' }}
+                            dataSource={dataSource.map(this.renderOption)}
+                            onSelect={this.onSelect}
+                            onSearch={this.handleSearch}
+                            placeholder="Search stocks"
+                            optionLabelProp="value"
                         >
-                            <MyChartNew 
-                                    series = {this.state.tickers} 
-                                    deleteItem = {this.deleteItem}
-                                    addItem = {this.addItem}
-                                    verticalLegend = {true}
-                            /> 
-                        </DashboardCard>
-                        {/* <Col span={24} style={{fontSize: '16px', color: '#565656', fontWeight: '700', marginBottom: '10px'}}>Performance</Col>
-                        <Col span={24} style={{marginTop: '10px'}}>
-                            <MyChartNew 
-                                    series = {this.state.tickers} 
-                                    deleteItem = {this.deleteItem}
-                                    addItem = {this.addItem}
-                                    verticalLegend = {true}
-                            /> 
-                        </Col> */}
-                    </Row>
-                </Col>
-            </Row>
+                            <Input 
+                                    suffix={(
+                                        <div>
+                                            <Spin indicator={spinIcon} spinning={this.state.spinning}/>
+                                            <Icon style={searchIconStyle} type="search" />
+                                        </div>
+                                    )} 
+                            />
+                        </AutoComplete>
+                    </Col>
+                </Row>
+                <Row style={metricStyle} type="flex" justify="space-between">
+                    <Col span={7} style={cardStyle}>
+                        <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
+                        <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
+                                <span 
+                                        style={{fontSize: '18px', fontWeight: '700'}}>
+                                    {latestDetail.exchange}:
+                                </span>
+                                {latestDetail.ticker}
+                        </h1>
+                        <h3 style={lastPriceStyle}>
+                            {latestDetail.closePrice} 
+                            <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
+                        </h3>
+                        <h5 
+                                style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
+                        >
+                            * Data is delayed by 15 min
+                        </h5>
+                    </Col>
+                    <Col span={6} style={cardStyle}>
+                        <h3 style={cardHeaderStyle}>Price Metrics</h3>
+                        {this.renderPriceMetrics(priceMetrics)}
+                    </Col>
+                    <Col span={10} style={cardStyle}>
+                        <Row>
+                            <Col span={24}>
+                                <h3 style={cardHeaderStyle}>Performance Metrics</h3>
+                            </Col>
+                            <Col span={24} style={{textAlign: 'right'}}>
+                                {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
+                            </Col>
+                            <Col span={24}>
+                                {this.renderPerformanceMetrics()}
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+                <Row style={metricStyle}>  
+                    <DashboardCard 
+                            xl={24} 
+                            title="Performance" 
+                            headerStyle={{borderBottom: '1px solid #eaeaea'}}
+                            contentStyle={{height: '405px', marginTop: '10px'}}
+                    >
+                        <MyChartNew 
+                                series = {this.state.tickers} 
+                                deleteItem = {this.deleteItem}
+                                addItem = {this.addItem}
+                                verticalLegend = {true}
+                        /> 
+                    </DashboardCard>
+                    {/* <Col span={24} style={{fontSize: '16px', color: '#565656', fontWeight: '700', marginBottom: '10px'}}>Performance</Col>
+                    <Col span={24} style={{marginTop: '10px'}}>
+                        <MyChartNew 
+                                series = {this.state.tickers} 
+                                deleteItem = {this.deleteItem}
+                                addItem = {this.addItem}
+                                verticalLegend = {true}
+                        /> 
+                    </Col> */}
+                </Row>
+            </Col>
+        );
+    }
+
+    render() {
+        return (
+            <React.Fragment>
+                <Loading
+                    show={this.state.show}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+                {
+                    !this.state.show &&
+                    this.renderPageContent()
+                }
+            </React.Fragment>
         );
     }
 }

@@ -6,7 +6,7 @@ import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} f
 import {MyChartNew} from './MyChartNew';
 import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard} from '../components';
 import {newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor} from '../constants';
-import {dateFormat} from '../utils';
+import {dateFormat, Utils} from '../utils';
 import '../css/advisorDashboard.css';
 
 const RadioGroup = Radio.Group;
@@ -143,7 +143,7 @@ export class AdvisorDashboard extends React.Component {
         let subscriberRating = {};
         let totalSubscribers = 0;
         this.setState({dashboardDataLoading: true, myAdvicesLoading: true});
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             subsPerAdviceSeries.push({
                 type: 'pie',
@@ -209,7 +209,7 @@ export class AdvisorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             this.setState({showEmptyScreen: true});
         })
         .finally(() => {
@@ -425,7 +425,7 @@ export class AdvisorDashboard extends React.Component {
         const newTickers = [];
         const url = `${requestUrl}/performance/advice/${advice._id}`;
         this.setState({advicePerformanceLoading: true});
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const data = _.get(response.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
@@ -435,7 +435,7 @@ export class AdvisorDashboard extends React.Component {
             this.setState({tickers: newTickers});
         })
         .catch(error => {
-            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({advicePerformanceLoading: false});
@@ -481,12 +481,12 @@ export class AdvisorDashboard extends React.Component {
 
     getAdvices = (url) => {
         this.setState({myAdvicesLoading: true});
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({advices: response.data, rawAdvices: response.data});
         })
         .catch(error => {
-            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({myAdvicesLoading: false});

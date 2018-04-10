@@ -1,16 +1,17 @@
 import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
+import Loading from 'react-loading-bar';
 import moment from 'moment';
 import {withRouter} from 'react-router'
 import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
-import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod} from '../components';
+import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceItem} from '../components/AdviceItem';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
-import {newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle} from '../constants';
+import {newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor} from '../constants';
 import { MetricItem } from '../components/MetricItem';
 
 const TabPane = Tabs.TabPane;
@@ -35,7 +36,9 @@ class AddTransactionsImpl extends React.Component {
             stockTransactions: [],
             cashTransactions: [],
             toggleValue: 'stock',
-            selectedBenchmark: 'TCS'
+            selectedBenchmark: 'TCS',
+            notAuthorized: false,
+            show: false
         };
         this.columns = [
             {
@@ -352,9 +355,10 @@ class AddTransactionsImpl extends React.Component {
             });
         })
         .then(response => {
-            let performanceSeries = _.get(response.data, 'portfolio.detail.positions', []).map((item, index) => {
+            let performanceSeries = _.get(response.data, 'portfolioPerformance.portfolioValues', []).map((item, index) => {
                 return [moment(item.date, dateFormat).valueOf(), item.netValue];
             });
+            console.log('Performance Series', performanceSeries);
             if (tickers.length < 2) {
                 tickers.push({
                     name: 'Portfolio',
@@ -709,98 +713,135 @@ class AddTransactionsImpl extends React.Component {
     }
 
     componentWillMount() {
-        const tickers = [...this.state.tickers];
-        tickers.push({
-            name: this.state.selectedBenchmark
-        });
-        this.setState({tickers});
+        if (this.props.portfolioId) {
+            // Check if the user is authorized to access this page
+            this.setState({show: true});
+            const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
+            axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+            .then(response => {
+                const tickers = [...this.state.tickers];
+                tickers.push({
+                    name: this.state.selectedBenchmark
+                });
+                this.setState({tickers, notAuthorized: false});
+            })
+            .catch(err => {
+                if (err.response.status === 400) {
+                    this.setState({notAuthorized: true});
+                }
+            })
+            .finally(() => {
+                this.setState({show: false});
+            });
+        }
     }
 
-    render() {
+    renderPageContent = () => {
         const {getFieldDecorator} = this.props.form;
         const {portfolioId} = this.props;
 
         return (
             <Row>
-                {this.renderSubscribedAdviceModal()}
-                {this.renderPreviewModal()}
-                <Form>
-                    <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
-                        <Button 
-                                type="primary" 
-                                onClick={this.togglePreviewModal} 
-                                style={{marginRight: '20px'}}
-                        >
-                            Preview
-                        </Button>
-                        <Button
-                                onClick={() => this.props.history.goBack()}
-                        >
-                            Cancel
-                        </Button>
-                    </Col>
-                    <Col xl={18} lg={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
-                        {
-                            !portfolioId && 
-                            <Row type="flex" align="middle" style={{marginTop: '20px'}}>
-                                <Col span={5} style={{marginLeft: '20px'}}>
-                                    <h4 style={{...labelStyle, marginTop: '-4px'}}>Portfolio Name</h4>
-                                    <FormItem>
-                                        {getFieldDecorator('name', {
-                                            rules: [{required: true, message: 'Please enter Portfolio Name'}]
-                                        })(
-                                            <Input placeholder="Portfolio Name"/>
-                                        )}
-                                    </FormItem>
-                                </Col>
-                                <Col span={18} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                                    {this.renderSelect()}
-                                </Col>
-                            </Row>
-                        }
-                        <Row style={{marginLeft: '20px', marginTop: '10px'}}>
-                            <Col span={24}>
-                                <Checkbox>Make Default Portfolio</Checkbox>
-                            </Col>
-                        </Row>
-                        <Row style={{marginTop: '5px'}}>
-                            <Col span={24}>
-                                <Tabs defaultActiveKey="1" animated={false} style={{paddingBottom: '20px'}}>
-                                    <TabPane tab="Stock Transaction" key="1" style={{minHeight: '250px'}}>
-                                        {this.renderStockTransactions()}
-                                    </TabPane> 
-                                    <TabPane tab="Advice Transaction" key="2" style={{minHeight: '250px'}}>
-                                        {this.renderAdviceTransactions()}
-                                    </TabPane> 
-                                    <TabPane tab="Cash Transaction" key="3" style={{minHeight: '250px'}}>
-                                        {this.renderCashTransactions()}
-                                    </TabPane> 
-                                </Tabs>
-                            </Col>
-                        </Row>
-                    </Col>
-                    <Col xl={5} lg={5} md={0} sm={0} xs={0} offset={1} style={{marginTop: '20px'}}>
-                        <Row type="flex">
-                            <Col span={24}>
+                {
+                    this.state.notAuthorized 
+                    ?   <ForbiddenAccess />
+                    :   <Form>
+                            <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
                                 <Button 
                                         type="primary" 
                                         onClick={this.togglePreviewModal} 
-                                        style={buttonStyle}
+                                        style={{marginRight: '20px'}}
                                 >
                                     Preview
                                 </Button>
-                            </Col>
-                            <Col span={24} style={{marginTop: 10}}>
                                 <Button
                                         onClick={() => this.props.history.goBack()}
-                                        style={buttonStyle}
                                 >
                                     Cancel
                                 </Button>
                             </Col>
-                        </Row>
-                    </Col>
-                </Form>
+                            <Col xl={18} lg={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
+                                {
+                                    !portfolioId && 
+                                    <Row type="flex" align="middle" style={{marginTop: '20px'}}>
+                                        <Col span={5} style={{marginLeft: '20px'}}>
+                                            <h4 style={{...labelStyle, marginTop: '-4px'}}>Portfolio Name</h4>
+                                            <FormItem>
+                                                {getFieldDecorator('name', {
+                                                    rules: [{required: true, message: 'Please enter Portfolio Name'}]
+                                                })(
+                                                    <Input placeholder="Portfolio Name"/>
+                                                )}
+                                            </FormItem>
+                                        </Col>
+                                        <Col span={18} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                            {this.renderSelect()}
+                                        </Col>
+                                    </Row>
+                                }
+                                <Row style={{marginLeft: '20px', marginTop: '10px'}}>
+                                    <Col span={24}>
+                                        <Checkbox>Make Default Portfolio</Checkbox>
+                                    </Col>
+                                </Row>
+                                <Row style={{marginTop: '5px'}}>
+                                    <Col span={24}>
+                                        <Tabs defaultActiveKey="1" animated={false} style={{paddingBottom: '20px'}}>
+                                            <TabPane tab="Stock Transaction" key="1" style={{minHeight: '250px'}}>
+                                                {this.renderStockTransactions()}
+                                            </TabPane> 
+                                            <TabPane tab="Advice Transaction" key="2" style={{minHeight: '250px'}}>
+                                                {this.renderAdviceTransactions()}
+                                            </TabPane> 
+                                            <TabPane tab="Cash Transaction" key="3" style={{minHeight: '250px'}}>
+                                                {this.renderCashTransactions()}
+                                            </TabPane> 
+                                        </Tabs>
+                                    </Col>
+                                </Row>
+                            </Col>
+                            <Col xl={5} lg={5} md={0} sm={0} xs={0} offset={1} style={{marginTop: '20px'}}>
+                                <Row type="flex">
+                                    <Col span={24}>
+                                        <Button 
+                                                type="primary" 
+                                                onClick={this.togglePreviewModal} 
+                                                style={buttonStyle}
+                                        >
+                                            Preview
+                                        </Button>
+                                    </Col>
+                                    <Col span={24} style={{marginTop: 10}}>
+                                        <Button
+                                                onClick={() => this.props.history.goBack()}
+                                                style={buttonStyle}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Form>
+                }
+            </Row>
+        );
+    }
+
+    render() {
+        return (
+            <Row>
+                {this.renderSubscribedAdviceModal()}
+                {this.renderPreviewModal()}
+                <Loading
+                    show={this.state.show}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+                {
+                    !this.state.show &&
+                    this.renderPageContent()
+                }
             </Row>
         );
     }

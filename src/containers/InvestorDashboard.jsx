@@ -8,7 +8,7 @@ import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} 
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard} from '../components';
 import {loadingColor, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
-import {generateColorData, getMetricColor} from '../utils';
+import {generateColorData, getMetricColor, Utils} from '../utils';
 import 'react-loading-bar/dist/index.css'
 
 const {requestUrl, aimsquantToken, investorId} = require('../localConfig');
@@ -155,19 +155,20 @@ export class InvestorDashboard extends React.Component {
         const url = `${requestUrl}/investor/${investorId}`;
         const tickers = [...this.state.tickers];
         this.setState({defaultPortfolioLoading: true});
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
+            console.log(response.data);
             const positions = _.get(response.data, 'defaultPortfolio.detail.positions', []);
             const positionModdedForColors = positions.map(item => item.security.ticker);
             const colorData = generateColorData(positionModdedForColors);
             const portfolioMetrics = _.get(response.data, 'defaultPerformance.current.metrics.portfolioMetrics', {});
-            const composition = this.processTransactionsForChart(_.get(portfolioMetrics, 'composition', []), colorData);
+            const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
             const performance = _.get(response.data, 'defaultPerformance.current.metrics.portfolioPerformance.true', {});
             const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${response.data.defaultPortfolio._id}`;
             const performanceData = _.get(response.data, 'defaultPerformance.simulated.portfolioValues', []).map(item => {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue]
             });
-            const pieChartTitle = `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
+            const pieChartTitle = composition[0].data.length > 1 && `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
             const summary = _.get(response.data, 'defaultPerformance.summary.current', {});
             tickers.push({
                 name: _.get(response.data, 'defaultPortfolio.benchmark.ticker', ''),
@@ -209,7 +210,7 @@ export class InvestorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             let messageText = '', errorCode = '';
             if (error.message === 'Network Error') {
                 messageText = 'You are disconnected from the internet';
@@ -228,13 +229,13 @@ export class InvestorDashboard extends React.Component {
     getInvestorPortfolios = () => {
         const investorPortfolioUrl = `${requestUrl}/investor/${investorId}/portfolio`;
         this.setState({portfolioLoading: true});
-        axios.get(investorPortfolioUrl, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(investorPortfolioUrl, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const subscribedAdvicesUrl = `${requestUrl}/advice?subscribed=true`;
             this.setState({investorPortfolios: this.processPortfolios(response.data)});
         })
         .catch(error => {
-            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({portfolioLoading: false});
@@ -245,7 +246,7 @@ export class InvestorDashboard extends React.Component {
         const subscribedAdvicesUrl = `${requestUrl}/advice?subscribed=true`;
         const followingAdviceUrl = `${requestUrl}/advice?following=true`;
         this.setState({subscribedAdvicesLoading: true});
-        axios.get(subscribedAdvicesUrl, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(subscribedAdvicesUrl, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({subscribedAdvices: this.processSubscribedAdvices(response.data)});
             return axios.get(followingAdviceUrl, {headers: {'aimsquant-token': aimsquantToken}});
@@ -273,7 +274,7 @@ export class InvestorDashboard extends React.Component {
             this.setState({subscribedAdvices: advices});
         })
         .catch(error => {
-            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({subscribedAdvicesLoading: false});
@@ -409,9 +410,9 @@ export class InvestorDashboard extends React.Component {
             return {
                 id: portfolio._id,
                 name: portfolio.name.length < 1 ? 'Undefined' : portfolio.name,
-                netValue: _.get(portfolio, 'performance.netValue', 0),
-                return: Number(_.get(portfolio, 'performance.totalReturn', 0)).toFixed(2),
-                volatility: ((_.get(portfolio, 'performance.volatility', 0))).toFixed(2)
+                netValue: _.get(portfolio, 'performance.netValue', 0) || 0,
+                return: (_.get(portfolio, 'performance.totalReturn', 0) || 0).toFixed(2),
+                volatility: (_.get(portfolio, 'performance.volatility', 0) || 0).toFixed(2)
             }
         });
     }
@@ -469,15 +470,14 @@ export class InvestorDashboard extends React.Component {
         const chartData = [];
         const seriesData = [];
         const positions = composition.map(item => item.ticker);
+        console.log('PieChart positions', positions);
         composition.map((item, index) => {
             const weight = Number((item.weight * 100).toFixed(2));
-            const z = index === 0 ? 1 : 0; 
             if (weight > 0) {
                 chartData.push({
                     name: item.ticker,
                     y: Number((item.weight * 100).toFixed(2)),
                     color: colorData[item.ticker],
-                    z
                 });
             }   
         });
@@ -628,49 +628,54 @@ export class InvestorDashboard extends React.Component {
 
     renderOverviewMetrics = () => {
         const {positions, defaultComposition} = this.state;
+        console.log(defaultComposition);
         const {concentration = 0} = this.state.metrics;
         const colStyle = {marginBottom: '20px'};
         let nStocks = 0, nSectors = 0, nIndustries = 0, maxPosSize = {y: 0}, minPosSize = {y: 0};
-        if (defaultComposition.length){
-            nStocks = defaultComposition[0].data.length;
-            nSectors = this.processSectorsForChart(positions, defaultComposition[0].data)[0].data.length;
-            nIndustries = this.processIndustriesForChart(positions, defaultComposition[0].data)[0].data.length;
-            maxPosSize = _.maxBy(defaultComposition[0].data, item => item.y);
-            minPosSize = _.minBy(defaultComposition[0].data, item => item.y);
+        try {
+            if (defaultComposition.length){
+                nStocks = defaultComposition[0].data.length;
+                nSectors = this.processSectorsForChart(positions, defaultComposition[0].data)[0].data.length;
+                nIndustries = this.processIndustriesForChart(positions, defaultComposition[0].data)[0].data.length;
+                maxPosSize = _.maxBy(defaultComposition[0].data, item => item.y);
+                minPosSize = _.minBy(defaultComposition[0].data, item => item.y);
+            }
+    
+            return (
+                <Row style={{height: '345px'}}>
+                    <Col span={24}>
+                        <Row> 
+                            <Col span={24} style={colStyle}>
+                                <MetricItem 
+                                        valueStyle={valueStyle} 
+                                        labelStyle={labelStyle} 
+                                        label="No. of Stocks" 
+                                        value={nStocks}
+                                />
+                            </Col>
+                            <Col span={24} style={colStyle}>
+                                <MetricItem 
+                                    valueStyle={valueStyle} 
+                                    labelStyle={labelStyle} 
+                                        label="Concentration" 
+                                        value={Number(concentration).toFixed(2)}
+                                />
+                            </Col>
+                            <Col span={24} style={colStyle}>
+                                <MetricItem 
+                                        valueStyle={valueStyle} 
+                                        labelStyle={labelStyle} 
+                                        label="Max. Position Size" 
+                                        value={maxPosSize.y}
+                                />
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+            );
+        } catch(err) {
+            console.log(err);
         }
-
-        return (
-            <Row style={{height: '345px'}}>
-                <Col span={24}>
-                    <Row> 
-                        <Col span={24} style={colStyle}>
-                            <MetricItem 
-                                    valueStyle={valueStyle} 
-                                    labelStyle={labelStyle} 
-                                    label="No. of Stocks" 
-                                    value={nStocks}
-                            />
-                        </Col>
-                        <Col span={24} style={colStyle}>
-                            <MetricItem 
-                                valueStyle={valueStyle} 
-                                labelStyle={labelStyle} 
-                                    label="Concentration" 
-                                    value={Number(concentration).toFixed(2)}
-                            />
-                        </Col>
-                        <Col span={24} style={colStyle}>
-                            <MetricItem 
-                                    valueStyle={valueStyle} 
-                                    labelStyle={labelStyle} 
-                                    label="Max. Position Size" 
-                                    value={maxPosSize.y}
-                            />
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
-        );
     }
 
     renderOverviewPieChart = () => {

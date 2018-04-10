@@ -3,6 +3,8 @@ import {Layout, Menu, Row, Col} from 'antd';
 import {Route, withRouter, Link} from 'react-router-dom';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import AqBreadCrumb from './components/AqBreadCrumb';
+import {LoginModal} from './components/LoginModal'; 
+import {AuthRoute} from './components/AuthRoute';
 import {
     Dashboard, 
     QuantResearch, 
@@ -19,6 +21,7 @@ import {
     AdvisorDashboard,
     ScreenAdvisors
 } from './containers'; 
+import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
 
 const {Header, Content} = Layout;
@@ -80,22 +83,24 @@ class App extends React.Component {
                 </Header>
                 <Layout style={contentLayoutStyle}>
                     <h1 style={pageTitleStyle}>{this.state.pageTitle}</h1>
-                    <AqBreadCrumb />
+                    {/* <AqBreadCrumb /> */}
                     <Content>
                         <Route exact={true} path='/dashboard' component={Dashboard} />
                         <Route exact={true} path='/advice' component={ScreenAdvices} />
                         <Route exact={true} path='/stockresearch' component={StockResearch} />
-                        <Route exact={true} path='/quantresearch' component={QuantResearch} />
-                        <Route exact={true} path='/advice/:id' component={AdviceDetail} />
-                        <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} />
-                        <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} />
-                        <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} />
-                        <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} />
-                        <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
-                        <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
-                        <Route exact={true} path='/advisorprofile/:id' component={AdvisorProfile} />
-                        <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
-                        <Route exact={true} path='/screenadvisors' component={ScreenAdvisors} />
+                        <Route exact={true} path='/login' component={LoginModal} />
+                        {/* <Route exact={true} path='/quantresearch' component={QuantResearch} /> */}
+                        <AuthRoute path='/quantresearch' component={QuantResearch}/>
+                        <AuthRoute path='/advice/:id' component={AdviceDetail} />
+                        <AuthRoute path='/dashboard/createadvice' component={CreateAdvice} />
+                        <AuthRoute path='/dashboard/createportfolio' component={CreatePortfolio} />
+                        <AuthRoute path='/dashboard/updateadvice/:id' component={UpdateAdvice} />
+                        <AuthRoute path='/dashboard/portfolio/:id' component={PortfolioDetail} />
+                        <AuthRoute path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
+                        <AuthRoute path='/investordashboard' component={InvestorDashboard} />
+                        <AuthRoute path='/advisorprofile/:id' component={AdvisorProfile} />
+                        <AuthRoute path='/advisordashboard' component={AdvisorDashboard} />
+                        <AuthRoute path='/screenadvisors' component={ScreenAdvisors} />
                         <Route exact={true} path='/hoc' component={HocExample} />
                     </Content>
                 </Layout>

@@ -5,6 +5,7 @@ import Loading from 'react-loading-bar';
 import moment from 'moment';
 import axios from 'axios';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse} from 'antd';
+import {ForbiddenAccess} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
 import {loadingColor} from '../constants';
@@ -49,7 +50,8 @@ class PortfolioDetailImpl extends React.Component {
             performancepercentageSeries: [],
             pieSeries: [],
             activeKey:['.$2'],
-            show: false
+            show: false,
+            notAuthorized: false
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -316,11 +318,11 @@ class PortfolioDetailImpl extends React.Component {
             });
             series.push({name: 'Composition', data: portfolioComposition});
             const metrics = [
-                {value: _.get(portfolioMetrics, 'annualReturn', 0).toFixed(2), label: 'Annual Return', percentage: true, color:true},
-                {value: _.get(portfolioMetrics, 'totalReturn', 0).toFixed(2), label: 'Total Return', percentage: true,},
-                {value: _.get(portfolioMetrics, 'volatility', 0).toFixed(2), label: 'Volatility', percentage: true},
-                {value: _.get(portfolioMetrics, 'dailyChange', 0).toFixed(2), label: `Daily PnL (\u20B9)`, color:true, direction:true},
-                {value: _.get(portfolioMetrics, 'dailyChangePct', 0).toFixed(2), label: 'Daily PnL (%)', percentage: true, color: true, direction:true},
+                {value: (_.get(portfolioMetrics, 'annualReturn', 0) || 0).toFixed(2), label: 'Annual Return', percentage: true, color:true},
+                {value: _.get(portfolioMetrics, 'totalReturn', 0).toFixed(2) || 0, label: 'Total Return', percentage: true,},
+                {value: (_.get(portfolioMetrics, 'volatility', 0) || 0).toFixed(2), label: 'Volatility', percentage: true},
+                {value: (_.get(portfolioMetrics, 'dailyChange', 0) || 0).toFixed(2), label: `Daily PnL (\u20B9)`, color:true, direction:true},
+                {value: (_.get(portfolioMetrics, 'dailyChangePct', 0) || 0).toFixed(2), label: 'Daily PnL (%)', percentage: true, color: true, direction:true},
                 {
                     value: _.get(portfolioMetrics, 'netValue', 0).toFixed(2), 
                     label: 'Net Value', 
@@ -338,6 +340,9 @@ class PortfolioDetailImpl extends React.Component {
             });
         })
         .catch(error => {
+            if (error.response.status === 400) {
+                this.setState({notAuthorized: true});
+            }
             console.log(error.message);
         })
         .finally(() => {
@@ -351,161 +356,163 @@ class PortfolioDetailImpl extends React.Component {
 
     renderPageContent = () => {
         return (
-            <Row style={{margin: '20px 0'}}>
-                <Col xl={18} md={24} style={{...newLayoutStyle, padding: '0'}}>
-                    <Row style={{padding: '20px 30px'}}>
-                        <Col span={24}>
-                            <Row>
-                                <Col span={10}>
-                                    <h2 style={pageHeaderStyle}>{this.state.name}</h2>
-                                </Col>
-                                <Col xl={0} md={14} style={{textAlign: 'right'}}>
-                                    <Button 
-                                            type="primary" 
-                                            style={{marginBottom: 20}} 
-                                            onClick={() => this.props.history.push(
-                                                '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
-                                            )}
-                                            className="primary-btn"
-                                    >
-                                        Create Portfolio
-                                    </Button>
-                                
-                                    <Button
-                                            onClick={() => this.props.history.push(
-                                                `/dashboard/portfolio/transactions/${this.props.match.params.id}`, 
-                                                {
-                                                    pageTitle: 'Add Transactions',
-                                                    advices: this.state.presentAdvices,
-                                                    stocksPositions: this.state.stockPositions
-                                                }
-                                            )}
-                                            className="secondary-btn"
-                                            style = {{marginLeft: '20px'}}
-                                    >
-                                        Add Transactions
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col span={24} style={{marginTop: '10px'}}>
-                            <Row>
-                                {this.renderMetrics()}
-                            </Row>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col span={24} style={dividerStyle}></Col>
-                    </Row>
-                    <Collapse bordered={false} activeKey={this.state.activeKey} onChange={this.handleChange}>
-                        <Panel  key='1'
-                            style={customPanelStyle} 
-                            header={<h3 style={metricsHeaderStyle}>Summary</h3>}
-                            forceRender={true}
-                        >   
-                            <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
-                                <Col span={24}>
-                                    <Row style={{marginTop: '10px'}}>
-                                        <AqCard title="Portfolio Summary">
-                                            <HighChartNew series={this.state.pieSeries} />
-                                        </AqCard>        
-                                        <AqCard title="Performance Summary" offset={2}>
-                                            <HighChartBar 
-                                                    dollarSeries={this.state.performanceDollarSeries} 
-                                                    percentageSeries={this.state.performancepercentageSeries}
-                                                    legendEnabled={false}
-                                            />
-                                        </AqCard>
-                                    </Row>
-                                </Col>
-                            </Row>
-                        </Panel>
-                        <Panel
-                            key='2'
-                            style={customPanelStyle} 
-                            header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
-                            <Row style={{padding: '0 30px'}}>
-                                <Col span={24}>
-                                    <MyChartNew series={this.state.tickers}/> 
-                                </Col>
-                            </Row>
+            this.state.notAuthorized 
+            ?   <ForbiddenAccess />
+            :   <Row style={{margin: '20px 0'}}>
+                    <Col xl={18} md={24} style={{...newLayoutStyle, padding: '0'}}>
+                        <Row style={{padding: '20px 30px'}}>
+                            <Col span={24}>
+                                <Row>
+                                    <Col span={10}>
+                                        <h2 style={pageHeaderStyle}>{this.state.name}</h2>
+                                    </Col>
+                                    <Col xl={0} md={14} style={{textAlign: 'right'}}>
+                                        <Button 
+                                                type="primary" 
+                                                style={{marginBottom: 20}} 
+                                                onClick={() => this.props.history.push(
+                                                    '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
+                                                )}
+                                                className="primary-btn"
+                                        >
+                                            Create Portfolio
+                                        </Button>
+                                    
+                                        <Button
+                                                onClick={() => this.props.history.push(
+                                                    `/dashboard/portfolio/transactions/${this.props.match.params.id}`, 
+                                                    {
+                                                        pageTitle: 'Add Transactions',
+                                                        advices: this.state.presentAdvices,
+                                                        stocksPositions: this.state.stockPositions
+                                                    }
+                                                )}
+                                                className="secondary-btn"
+                                                style = {{marginLeft: '20px'}}
+                                        >
+                                            Add Transactions
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </Col>
+                            <Col span={24} style={{marginTop: '10px'}}>
+                                <Row>
+                                    {this.renderMetrics()}
+                                </Row>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={24} style={dividerStyle}></Col>
+                        </Row>
+                        <Collapse bordered={false} activeKey={this.state.activeKey} onChange={this.handleChange}>
+                            <Panel  key='1'
+                                style={customPanelStyle} 
+                                header={<h3 style={metricsHeaderStyle}>Summary</h3>}
+                                forceRender={true}
+                            >   
+                                <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
+                                    <Col span={24}>
+                                        <Row style={{marginTop: '10px'}}>
+                                            <AqCard title="Portfolio Summary">
+                                                <HighChartNew series={this.state.pieSeries} />
+                                            </AqCard>        
+                                            <AqCard title="Performance Summary" offset={2}>
+                                                <HighChartBar 
+                                                        dollarSeries={this.state.performanceDollarSeries} 
+                                                        percentageSeries={this.state.performancepercentageSeries}
+                                                        legendEnabled={false}
+                                                />
+                                            </AqCard>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            </Panel>
+                            <Panel
+                                key='2'
+                                style={customPanelStyle} 
+                                header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
+                                <Row style={{padding: '0 30px'}}>
+                                    <Col span={24}>
+                                        <MyChartNew series={this.state.tickers}/> 
+                                    </Col>
+                                </Row>
 
-                        </Panel>
-                        <Panel 
-                            key='3'
-                            style={customPanelStyle} 
-                            header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
-                             <Row style={{padding: '0 30px'}}>
-                                <Col span={24}>
-                                    {/*<Tabs 
-                                        animated={false} 
-                                        tabBarStyle={{ width: '300px', marginLeft: '30px'}}>
-                                    <TabPane tab="Portfolio" key="1" style={{padding: '0 30px'}}>*/}
-                                            <Row className="row-container">
-                                                <Col span={8} offset={16} style={{marginBottom: 10, marginTop: '-10px'}}>
-                                                    <Radio.Group 
-                                                            value={this.state.toggleValue} 
-                                                            onChange={this.toggleView} 
-                                                            style={{margin: '0 auto 0 auto'}} 
-                                                            //position: 'absolute', right: 0}}
-                                                            size="small"
-                                                    >
-                                                        <Radio.Button value="advice">Advice</Radio.Button>
-                                                        <Radio.Button value="stock">Stock</Radio.Button>
-                                                    </Radio.Group>
-                                                </Col>
-                                            </Row>
+                            </Panel>
+                            <Panel 
+                                key='3'
+                                style={customPanelStyle} 
+                                header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
+                                <Row style={{padding: '0 30px'}}>
+                                    <Col span={24}>
+                                        {/*<Tabs 
+                                            animated={false} 
+                                            tabBarStyle={{ width: '300px', marginLeft: '30px'}}>
+                                        <TabPane tab="Portfolio" key="1" style={{padding: '0 30px'}}>*/}
+                                                <Row className="row-container">
+                                                    <Col span={8} offset={16} style={{marginBottom: 10, marginTop: '-10px'}}>
+                                                        <Radio.Group 
+                                                                value={this.state.toggleValue} 
+                                                                onChange={this.toggleView} 
+                                                                style={{margin: '0 auto 0 auto'}} 
+                                                                //position: 'absolute', right: 0}}
+                                                                size="small"
+                                                        >
+                                                            <Radio.Button value="advice">Advice</Radio.Button>
+                                                            <Radio.Button value="stock">Stock</Radio.Button>
+                                                        </Radio.Group>
+                                                    </Col>
+                                                </Row>
+                                                {
+                                                    this.state.toggleValue === 'advice'
+                                                    ? this.renderAdviceTransactions()
+                                                    : this.renderStockTransactions()
+                                                }
+                                            {/*</TabPane>
+                                            <TabPane tab="Performance" key="2" style={{padding: '20px 30px'}}>
+                                                <Row>
+                                                    <Col span={24}>
+                                                        <MyChartNew series={this.state.tickers}/> 
+                                                    </Col>
+                                                </Row>
+                                            </TabPane>
+                                            </Tabs>*/}
+                                    </Col>
+                                </Row>
+                            </Panel>
+                        </Collapse>
+                    </Col>
+                    <Col xl={5} md={0} offset={1}>
+                        <Row>
+                            <Col span={24}>
+                                <Button 
+                                        type="primary" 
+                                        style={{marginBottom: 20}} 
+                                        onClick={() => this.props.history.push(
+                                            '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
+                                        )}
+                                        className="primary-btn"
+                                >
+                                    Create Portfolio
+                                </Button>
+                            </Col>
+                            <Col span={24}>
+                                <Button
+                                        onClick={() => this.props.history.push(
+                                            `/dashboard/portfolio/transactions/${this.props.match.params.id}`, 
                                             {
-                                                this.state.toggleValue === 'advice'
-                                                ? this.renderAdviceTransactions()
-                                                : this.renderStockTransactions()
+                                                pageTitle: 'Add Transactions',
+                                                advices: this.state.presentAdvices,
+                                                stocksPositions: this.state.stockPositions
                                             }
-                                        {/*</TabPane>
-                                        <TabPane tab="Performance" key="2" style={{padding: '20px 30px'}}>
-                                            <Row>
-                                                <Col span={24}>
-                                                    <MyChartNew series={this.state.tickers}/> 
-                                                </Col>
-                                            </Row>
-                                        </TabPane>
-                                        </Tabs>*/}
-                                </Col>
-                            </Row>
-                        </Panel>
-                    </Collapse>
-                </Col>
-                <Col xl={5} md={0} offset={1}>
-                    <Row>
-                        <Col span={24}>
-                            <Button 
-                                    type="primary" 
-                                    style={{marginBottom: 20}} 
-                                    onClick={() => this.props.history.push(
-                                        '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
-                                    )}
-                                    className="primary-btn"
-                            >
-                                Create Portfolio
-                            </Button>
-                        </Col>
-                        <Col span={24}>
-                            <Button
-                                    onClick={() => this.props.history.push(
-                                        `/dashboard/portfolio/transactions/${this.props.match.params.id}`, 
-                                        {
-                                            pageTitle: 'Add Transactions',
-                                            advices: this.state.presentAdvices,
-                                            stocksPositions: this.state.stockPositions
-                                        }
-                                    )}
-                                    className="secondary-btn"
-                            >
-                                Add Transactions
-                            </Button>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
+                                        )}
+                                        className="secondary-btn"
+                                >
+                                    Add Transactions
+                                </Button>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
         );
     }
 
