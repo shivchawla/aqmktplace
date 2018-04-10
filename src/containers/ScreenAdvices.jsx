@@ -5,6 +5,7 @@ import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal} from 'antd';
 import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent} from '../components';
 import {newLayoutStyle} from '../constants';
+import {Utils} from '../utils';
 import '../css/screenAdvices.css';
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
@@ -71,8 +72,12 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     componentWillMount() {
-        this.getAdvices();
-        this.toggleFilter();
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            this.getAdvices();
+            this.toggleFilter();
+        }
     }
 
     getAdvices = (adviceUrl) => {

@@ -7,7 +7,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess} from '../components';
-import {getUnixStockData, getStockPerformance} from '../utils';
+import {getUnixStockData, getStockPerformance, Utils} from '../utils';
 import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
 import {MyChartNew} from '../containers/MyChartNew';
@@ -564,20 +564,23 @@ export class AdviceFormImpl extends React.Component {
     }
 
     componentDidMount() {
-        if (this.props.isUpdate) {
-            this.getAdvice(this.props.adviceId);
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            const tickers = [...this.state.tickers];
-            getStockPerformance(this.state.selectedBenchmark)
-            .then(performance => {
-                tickers.push({
-                    name: `BENCHMARK`,
-                    data: performance
+            if (this.props.isUpdate) {
+                this.getAdvice(this.props.adviceId);
+            } else {
+                const tickers = [...this.state.tickers];
+                getStockPerformance(this.state.selectedBenchmark)
+                .then(performance => {
+                    tickers.push({
+                        name: `BENCHMARK`,
+                        data: performance
+                    });
+                    this.setState({tickers});
                 });
-                this.setState({tickers});
-            });
+            }
         }
-        
     }
 
     renderPageContent = () => {

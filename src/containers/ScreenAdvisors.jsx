@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {Row, Col, Select} from 'antd';
 import {AdvisorComponent} from '../components';
 import {layoutStyle} from '../constants';
+import {Utils} from '../utils';
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
 const Option = Select.Option;
@@ -68,7 +69,11 @@ export class ScreenAdvisors extends React.Component {
     }
 
     componentWillMount() {
-        this.getAdvisors();
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            this.getAdvisors();
+        }
     }
 
     render(){

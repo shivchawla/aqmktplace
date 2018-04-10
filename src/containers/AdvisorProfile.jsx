@@ -6,6 +6,7 @@ import {Twitter} from 'twitter-node-client';
 import {MetricItem, AdviceListItem, AdviceFilterComponent, AdviceSortingMenu} from '../components';
 import {UpdateAdvisorProfile} from '../containers';
 import {layoutStyle} from '../constants';
+import {Utils} from '../utils';
 
 const {requestUrl, investorId, advisorId, aimsquantToken} = require('../localConfig');
 const dateFormat = 'YYYY-MM-DD';
@@ -207,7 +208,11 @@ export class AdvisorProfile extends React.Component {
     }
 
     componentWillMount() {
-        this.getAdvisorDetail();
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            this.getAdvisorDetail();
+        }
     }
 
     render() {

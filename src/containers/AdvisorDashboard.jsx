@@ -515,7 +515,11 @@ export class AdvisorDashboard extends React.Component {
     }
 
     componentWillMount() {
-        this.getUserDashboardData();
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            this.getUserDashboardData();
+        }
     }
 
     renderAdvices = () => {

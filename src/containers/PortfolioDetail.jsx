@@ -4,13 +4,14 @@ import _ from 'lodash';
 import Loading from 'react-loading-bar';
 import moment from 'moment';
 import axios from 'axios';
+import {withRouter} from 'react-router';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse} from 'antd';
 import {ForbiddenAccess} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
 import {loadingColor} from '../constants';
 import '../css/portfolioDetail.css';
-import {convertToPercentage, generateColorData} from '../utils';
+import {convertToPercentage, generateColorData, Utils} from '../utils';
 import {
     AdviceTransactionTable, 
     AqHighChartMod, 
@@ -33,7 +34,7 @@ import {
 const dateFormat = 'YYYY-MM-DD';
 const Panel = Collapse.Panel;
 const TabPane = Tabs.TabPane;
-const {requestUrl, investorId, aimsquantToken} = require('../localConfig.js');
+const {requestUrl, investorId} = require('../localConfig.js');
 
 class PortfolioDetailImpl extends React.Component {
     constructor(props) {
@@ -259,95 +260,101 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     componentWillMount() {
-        const series = [];
-        let positions = [];
-        const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
-        const tickers = [...this.state.tickers];
-        const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${this.props.match.params.id}`;
-        this.setState({show: true});
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
-        .then(response => { // Getting details of portfolio
-            if (response.data.benchmark) {
-                tickers.push({ // Pushing data to get the benchmark performance to performance graph
-                    name: response.data.benchmark.ticker,
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            const series = [];
+            let positions = [];
+            const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
+            const tickers = [...this.state.tickers];
+            const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${this.props.match.params.id}`;
+            this.setState({show: true});
+            console.log('Header', Utils.getAuthTokenHeader());
+            axios.get(url, {headers: Utils.getAuthTokenHeader()})
+            .then(response => { // Getting details of portfolio
+                if (response.data.benchmark) {
+                    tickers.push({ // Pushing data to get the benchmark performance to performance graph
+                        name: response.data.benchmark.ticker,
+                    });
+                }   
+                const advicePerformance = response.data.advicePerformance;
+                const subPositions = response.data.detail.subPositions;
+                // const advices = this.updateAdvices(this.processPresentAdviceTransaction(subPositions, advicePerformance));
+                const advices = this.processPresentAdviceTransaction(subPositions, advicePerformance);
+                positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
+                this.setState({
+                    name: response.data.name,
+                    presentAdvices: advices,
+                    stockPositions: _.get(response.data, 'detail.positions', []),
+                    tickers
+                }, () => {
+                    console.log(this.state.tickers);
                 });
-            }   
-            const advicePerformance = response.data.advicePerformance;
-            const subPositions = response.data.detail.subPositions;
-            // const advices = this.updateAdvices(this.processPresentAdviceTransaction(subPositions, advicePerformance));
-            const advices = this.processPresentAdviceTransaction(subPositions, advicePerformance);
-            positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
-            this.setState({
-                name: response.data.name,
-                presentAdvices: advices,
-                stockPositions: _.get(response.data, 'detail.positions', []),
-                tickers
-            }, () => {
-                console.log(this.state.tickers);
-            });
-            return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
-        })
-        .then(response => { // Getting Portfolio Performance
-            const colorData = generateColorData(positions);
-            let performanceSeries = [];
-            if (response.data.simulated !== undefined) {
-                performanceSeries = _.get(response.data, 'simulated.portfolioValues', []).map((item, index) => {
-                    return [moment(item.date, dateFormat).valueOf(), item.netValue];
-                });
-            } else {
-                performanceSeries = _.get(response.data, 'current.portfolioValues', []).map((item, index) => {
-                    return [moment(item.date, dateFormat).valueOf(), item.netValue];
-                });
-            }
-            tickers.push({ // Pushing advice performance to performance graph
-                name: 'Portfolio',
-                data: performanceSeries
-            });
-            const portfolioMetrics = _.get(response.data, 'summary.current', {});
-            const constituentDollarPerformance = _.get(
-                        response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
-                return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
-            });
-            const constituentPercentagePerformance = _.get(response.data, 'current.metrics.constituentPerformance')
-                    .map((item, index) => {
-                return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]}
-            });
-            const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition')
-                    .map((item, index) =>{
-                return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
-            });
-            series.push({name: 'Composition', data: portfolioComposition});
-            const metrics = [
-                {value: (_.get(portfolioMetrics, 'annualReturn', 0) || 0).toFixed(2), label: 'Annual Return', percentage: true, color:true},
-                {value: _.get(portfolioMetrics, 'totalReturn', 0).toFixed(2) || 0, label: 'Total Return', percentage: true,},
-                {value: (_.get(portfolioMetrics, 'volatility', 0) || 0).toFixed(2), label: 'Volatility', percentage: true},
-                {value: (_.get(portfolioMetrics, 'dailyChange', 0) || 0).toFixed(2), label: `Daily PnL (\u20B9)`, color:true, direction:true},
-                {value: (_.get(portfolioMetrics, 'dailyChangePct', 0) || 0).toFixed(2), label: 'Daily PnL (%)', percentage: true, color: true, direction:true},
-                {
-                    value: _.get(portfolioMetrics, 'netValue', 0).toFixed(2), 
-                    label: 'Net Value', 
-                    isNetValue: true, 
+                return axios.get(performanceUrl, {headers: Utils.getAuthTokenHeader()});
+            })
+            .then(response => { // Getting Portfolio Performance
+                const colorData = generateColorData(positions);
+                let performanceSeries = [];
+                if (response.data.simulated !== undefined) {
+                    performanceSeries = _.get(response.data, 'simulated.portfolioValues', []).map((item, index) => {
+                        return [moment(item.date, dateFormat).valueOf(), item.netValue];
+                    });
+                } else {
+                    performanceSeries = _.get(response.data, 'current.portfolioValues', []).map((item, index) => {
+                        return [moment(item.date, dateFormat).valueOf(), item.netValue];
+                    });
                 }
-            ];
-            this.setState({
-                portfolioMetrics: metrics, 
-                tickers,
-                performanceDollarSeries: constituentDollarPerformance,
-                performancepercentageSeries: constituentPercentagePerformance,
-                pieSeries: series,
-            }, () => {
-                console.log(this.state.tickers);
+                tickers.push({ // Pushing advice performance to performance graph
+                    name: 'Portfolio',
+                    data: performanceSeries
+                });
+                const portfolioMetrics = _.get(response.data, 'summary.current', {});
+                const constituentDollarPerformance = _.get(
+                            response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
+                    return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
+                });
+                const constituentPercentagePerformance = _.get(response.data, 'current.metrics.constituentPerformance')
+                        .map((item, index) => {
+                    return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]}
+                });
+                const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition')
+                        .map((item, index) =>{
+                    return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
+                });
+                series.push({name: 'Composition', data: portfolioComposition});
+                const metrics = [
+                    {value: (_.get(portfolioMetrics, 'annualReturn', 0) || 0).toFixed(2), label: 'Annual Return', percentage: true, color:true},
+                    {value: _.get(portfolioMetrics, 'totalReturn', 0).toFixed(2) || 0, label: 'Total Return', percentage: true,},
+                    {value: (_.get(portfolioMetrics, 'volatility', 0) || 0).toFixed(2), label: 'Volatility', percentage: true},
+                    {value: (_.get(portfolioMetrics, 'dailyChange', 0) || 0).toFixed(2), label: `Daily PnL (\u20B9)`, color:true, direction:true},
+                    {value: (_.get(portfolioMetrics, 'dailyChangePct', 0) || 0).toFixed(2), label: 'Daily PnL (%)', percentage: true, color: true, direction:true},
+                    {
+                        value: _.get(portfolioMetrics, 'netValue', 0).toFixed(2), 
+                        label: 'Net Value', 
+                        isNetValue: true, 
+                    }
+                ];
+                this.setState({
+                    portfolioMetrics: metrics, 
+                    tickers,
+                    performanceDollarSeries: constituentDollarPerformance,
+                    performancepercentageSeries: constituentPercentagePerformance,
+                    pieSeries: series,
+                }, () => {
+                    console.log(this.state.tickers);
+                });
+            })
+            .catch(error => {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                if (error.response.status === 400) {
+                    this.setState({notAuthorized: true});
+                }
+                console.log(error.message);
+            })
+            .finally(() => {
+                this.setState({show: false});
             });
-        })
-        .catch(error => {
-            if (error.response.status === 400) {
-                this.setState({notAuthorized: true});
-            }
-            console.log(error.message);
-        })
-        .finally(() => {
-            this.setState({show: false});
-        });
+        }
     }
 
     handleChange(activeKey) {
@@ -534,7 +541,7 @@ class PortfolioDetailImpl extends React.Component {
     }
 }
 
-export const PortfolioDetail =  Radium(PortfolioDetailImpl);
+export const PortfolioDetail =  withRouter(PortfolioDetailImpl);
 
 const metricItemStyle = {
     padding: '10px'

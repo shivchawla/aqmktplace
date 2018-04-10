@@ -33,6 +33,12 @@ export class LoginModal extends React.Component {
         .then(response => {
             Utils.localStorageSaveObject(Utils.userInfoString, response.data);
             Utils.setLoggedInUserInfo(response.data);
+            const redirectUrl = Utils.getRedirectAfterLoginUrl();
+            if (redirectUrl){
+                this.props.history.push(redirectUrl);
+              }else{
+                this.props.history.push('/');
+              }
         })
         .catch(err => {
             console.log(err);

@@ -10,7 +10,7 @@ import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, lo
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems} from '../components';
 import {MyChartNew} from './MyChartNew';
-import {generateColorData} from '../utils';
+import {generateColorData, Utils} from '../utils';
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
@@ -19,7 +19,7 @@ const Panel = Collapse.Panel;
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
 const dateFormat = 'Do MMMM YYYY';
 
-export class AdviceDetail extends React.Component {
+class AdviceDetailImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -68,14 +68,14 @@ export class AdviceDetail extends React.Component {
         axios({
             method: 'POST',
             url,
-            headers: {'aimsquant-token': aimsquantToken},
+            headers: Utils.getAuthTokenHeader(),
         })
         .then(response => {
             this.getAdviceData();
             message.success('Advice successfully made Public');
         })
         .catch(error => {
-            console.log(error.message);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         });
     };
 
@@ -171,19 +171,16 @@ export class AdviceDetail extends React.Component {
         const performanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
         let positions = [];
         this.setState({show: true});
-        axios.get(url, {
-            headers: {
-                'aimsquant-token': aimsquantToken
-            }
-        })
+        axios.get(url, {headers: Utils.getAuthTokenHeader()}
+        )
         .then(response => {
             this.getAdviceSummary(response);
-            return axios.get(`${url}/portfolio`, {headers: {'aimsquant-token': aimsquantToken}});
+            return axios.get(`${url}/portfolio`, {headers: Utils.getAuthTokenHeader()});
         })
         .then(response => {
             this.getAdviceDetail(response);
             positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
-            return axios.get(performanceUrl, {headers: {'aimsquant-token': aimsquantToken}});
+            return axios.get(performanceUrl, {headers: Utils.getAuthTokenHeader()});
         })
         .then(response => {
             const series = [];
@@ -205,8 +202,8 @@ export class AdviceDetail extends React.Component {
                 barPercentageSeries: constituentPercentagePerformance
             });
         })
-        .catch((error) => {
-            console.log(error);
+        .catch(error => {
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({show: false});
@@ -251,7 +248,7 @@ export class AdviceDetail extends React.Component {
         axios({
             method: 'POST',
             url: `${requestUrl}/advice/${this.props.match.params.id}/subscribe`,
-            headers: {'aimsquant-token': aimsquantToken}
+            headers: Utils.getAuthTokenHeader()
         })
         .then(response => {
             this.toggleDialog();
@@ -259,7 +256,7 @@ export class AdviceDetail extends React.Component {
             message.success('Success');
         })
         .catch(error => {
-            message.error('Error Occured');
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({disableSubscribeButton: false});
@@ -271,14 +268,14 @@ export class AdviceDetail extends React.Component {
         axios({
             method: 'POST',
             url: `${requestUrl}/advice/${this.props.match.params.id}/follow`,
-            headers: {'aimsquant-token': aimsquantToken}
+            headers: Utils.getAuthTokenHeader()
         })
         .then(response => {
             this.getAdviceData();
             message.success('Success');
         })
         .catch(error => {
-            message.error('Error occured');
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({disableFollowButton: false});
@@ -324,16 +321,23 @@ export class AdviceDetail extends React.Component {
 
     getUserData = () => {
         const url = `${requestUrl}/me`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const userId = response.data._id;
             this.setState({userId});
+        })
+        .catch(error => {
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         });
     };
 
     componentWillMount() {
-        this.getUserData();
-        this.getAdviceData();
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            this.getUserData();
+            this.getAdviceData();
+        }
     } 
 
     renderActionButtons = () => {
@@ -501,6 +505,8 @@ export class AdviceDetail extends React.Component {
         );
     }
 }
+
+export const AdviceDetail = withRouter(AdviceDetailImpl);
 
 const cardItemStyle = {
     border: '1px solid #444'

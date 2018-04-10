@@ -19,7 +19,8 @@ import {
     InvestorDashboard,
     AdvisorProfile,
     AdvisorDashboard,
-    ScreenAdvisors
+    ScreenAdvisors,
+    TokenUpdate
 } from './containers'; 
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
@@ -89,18 +90,19 @@ class App extends React.Component {
                         <Route exact={true} path='/advice' component={ScreenAdvices} />
                         <Route exact={true} path='/stockresearch' component={StockResearch} />
                         <Route exact={true} path='/login' component={LoginModal} />
+                        <Route path='/tokenUpdate' component={TokenUpdate}/>
                         {/* <Route exact={true} path='/quantresearch' component={QuantResearch} /> */}
-                        <AuthRoute path='/quantresearch' component={QuantResearch}/>
-                        <AuthRoute path='/advice/:id' component={AdviceDetail} />
-                        <AuthRoute path='/dashboard/createadvice' component={CreateAdvice} />
-                        <AuthRoute path='/dashboard/createportfolio' component={CreatePortfolio} />
-                        <AuthRoute path='/dashboard/updateadvice/:id' component={UpdateAdvice} />
-                        <AuthRoute path='/dashboard/portfolio/:id' component={PortfolioDetail} />
-                        <AuthRoute path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
-                        <AuthRoute path='/investordashboard' component={InvestorDashboard} />
-                        <AuthRoute path='/advisorprofile/:id' component={AdvisorProfile} />
-                        <AuthRoute path='/advisordashboard' component={AdvisorDashboard} />
-                        <AuthRoute path='/screenadvisors' component={ScreenAdvisors} />
+                        <Route exact={true} path='/quantresearch' component={QuantResearch}/>
+                        <Route exact={true} path='/advice/:id' component={AdviceDetail} />
+                        <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} />
+                        <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} />
+                        <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} />
+                        <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} />
+                        <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
+                        <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
+                        <Route exact={true} path='/advisorprofile/:id' component={AdvisorProfile} />
+                        <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
+                        <Route exact={true} path='/screenadvisors' component={ScreenAdvisors} />
                         <Route exact={true} path='/hoc' component={HocExample} />
                     </Content>
                 </Layout>

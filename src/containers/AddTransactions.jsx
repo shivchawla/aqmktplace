@@ -13,6 +13,7 @@ import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortf
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
 import {newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor} from '../constants';
 import { MetricItem } from '../components/MetricItem';
+import {Utils} from'../utils';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -713,26 +714,30 @@ class AddTransactionsImpl extends React.Component {
     }
 
     componentWillMount() {
-        if (this.props.portfolioId) {
-            // Check if the user is authorized to access this page
-            this.setState({show: true});
-            const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
-            axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
-            .then(response => {
-                const tickers = [...this.state.tickers];
-                tickers.push({
-                    name: this.state.selectedBenchmark
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            if (this.props.portfolioId) {
+                // Check if the user is authorized to access this page
+                this.setState({show: true});
+                const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
+                axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+                .then(response => {
+                    const tickers = [...this.state.tickers];
+                    tickers.push({
+                        name: this.state.selectedBenchmark
+                    });
+                    this.setState({tickers, notAuthorized: false});
+                })
+                .catch(err => {
+                    if (err.response.status === 400) {
+                        this.setState({notAuthorized: true});
+                    }
+                })
+                .finally(() => {
+                    this.setState({show: false});
                 });
-                this.setState({tickers, notAuthorized: false});
-            })
-            .catch(err => {
-                if (err.response.status === 400) {
-                    this.setState({notAuthorized: true});
-                }
-            })
-            .finally(() => {
-                this.setState({show: false});
-            });
+            }
         }
     }
 

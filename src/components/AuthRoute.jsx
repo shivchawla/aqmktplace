@@ -7,6 +7,10 @@ class AuthRouteImpl extends React.Component {
     render() {
         const {path, component} = this.props;
         const PassedComponent = component;
+        if (!Utils.isLoggedIn()) {
+            Utils.localStorageSave('redirectToUrlFromLogin', path);
+            Utils.logoutUser();
+        }
 
         return (
             <Route 

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
 import {Input, Button, Form, Icon, Popover, Row, Col, Avatar, Radio, Checkbox} from 'antd';
+import {Utils} from '../utils';
 
 const {TextArea} = Input;
 const FormItem = Form.Item;
@@ -32,31 +33,35 @@ class UpdateAdvisorProfileImpl extends React.Component {
     }
 
     componentDidMount() {
-        const {advisor} = this.props;
-        let value = 1;
-        const {webUrl, linkedIn, phone, isCompany, companyName, registrationNumber, facebook, twitter, isRegistered} = advisor.profile;
-        const {line1, line2, line3, city, country, pincode, state} = advisor.profile.address;
-        if (!isCompany) {
-            value = 2;
-        }
-        // url, photoUrl, userId
-        this.setState({value, isRegistered});
+        if (!Utils.isLoggedIn()){
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            const {advisor} = this.props;
+            let value = 1;
+            const {webUrl, linkedIn, phone, isCompany, companyName, registrationNumber, facebook, twitter, isRegistered} = advisor.profile;
+            const {line1, line2, line3, city, country, pincode, state} = advisor.profile.address;
+            if (!isCompany) {
+                value = 2;
+            }
+            // url, photoUrl, userId
+            this.setState({value, isRegistered});
 
-        this.props.form.setFieldsValue({
-            webUrl,
-            line1,
-            line2,
-            line3,
-            city,
-            state,
-            pincode,
-            phone,
-            linkedIn,
-            companyName,
-            registrationNumber,
-            facebook,
-            twitter
-        })
+            this.props.form.setFieldsValue({
+                webUrl,
+                line1,
+                line2,
+                line3,
+                city,
+                state,
+                pincode,
+                phone,
+                linkedIn,
+                companyName,
+                registrationNumber,
+                facebook,
+                twitter
+            });
+        }
     }
 
     callback = () => {

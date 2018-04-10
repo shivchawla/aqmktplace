@@ -2,6 +2,7 @@ import * as React from 'react';
 import {debounce} from 'throttle-debounce';
 import {Input} from 'antd';
 import {AqLink} from '../components';
+import {Utils} from '../utils';
 
 export class QuantResearch extends React.Component {
     constructor(props) {
@@ -18,6 +19,12 @@ export class QuantResearch extends React.Component {
     
     changeState = (value) => {
         this.setState({value})
+    }
+
+    componetWillMount() {
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        }
     }
 
     render() {

@@ -721,9 +721,13 @@ export class InvestorDashboard extends React.Component {
     }
 
     componentWillMount() {
-        this.getDefaultPortfolioData();
-        this.getInvestorPortfolios();
-        this.getInvestorSubscribedAdvices();
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            this.getDefaultPortfolioData();
+            this.getInvestorPortfolios();
+            this.getInvestorSubscribedAdvices();   
+        }
     }
 
     renderPageContent = () => {
