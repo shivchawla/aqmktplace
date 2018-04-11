@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
-import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor} from '../constants';
+import {newLayoutStyle, shadowBoxStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -399,7 +399,7 @@ class AdviceDetailImpl extends React.Component {
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
 
         return (
-            <Col span={18} style={newLayoutStyle}>
+            <Col span={18} style={shadowBoxStyle}>
                 <Row className="row-container">
                     <Col span={18}>
                         <h1 style={adviceNameStyle}>{name}</h1>

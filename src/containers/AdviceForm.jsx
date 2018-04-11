@@ -409,7 +409,7 @@ export class AdviceFormImpl extends React.Component {
                         this.getVerifiedTransactions().length > 0
                         ?   <Row type="flex" justfy="center" align="middle">
                                 <Col span={16}>
-                                    <MyChartNew series={this.state.tickers} hideLegend={true}/>
+                                    <MyChartNew series={this.state.tickers}/>
                                 </Col>
                                 <Col span={8}>
                                     <Row>
@@ -417,7 +417,7 @@ export class AdviceFormImpl extends React.Component {
                                             <h4 style={{textAlign: 'center', fontSize: '16px'}}>Composition</h4>
                                         </Col>
                                     </Row>
-                                    <Row justfy="center" type="flex" style={{marginLeft: '10px'}}>
+                                    <Row style={{marginLeft: '10px'}}>
                                         {
                                             series.length > 0 &&series[0].data.length > 0 && series[0].data[0].y > 0 &&
                                             <HighChartNew series={series}/>
@@ -541,7 +541,7 @@ export class AdviceFormImpl extends React.Component {
     updateAllWeights = (data) => {
         const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
         return data.map((item, index) => {
-            item['weight'] = Number((item['totalValue'] / totalSummation).toFixed(2));
+            item['weight'] = totalSummation > 0 ? Number((item['totalValue'] * 100 / totalSummation).toFixed(2)) : 0;
             return item;
         });
     }

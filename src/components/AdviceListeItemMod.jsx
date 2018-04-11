@@ -480,16 +480,19 @@ const cardStyle = {
     backgroundColor: '#fff',
     padding: '10px 5px 10px 10px',
     border: '1px solid #eaeaea',
-    margin: '5px 10px 0px 10px',
-    cursor: 'pointer'
+    margin: '15px 5px',
+    cursor: 'pointer',
+    boxShadow: '0 2px 4px rgba(171, 171, 171, 50)',
 };
 
 const hoverCardStyle = {
-    backgroundColor: '#F5F6FA',
+    //backgroundColor: '#F5F6FA',
+    backgroundColor: '#fff',
     padding: '10px 5px 10px 10px',
     border: '1px solid #eaeaea',
-    margin: '5px 10px 0px 10px',
-    cursor: 'pointer'
+    margin: '15px 5px',
+    cursor: 'pointer',
+    boxShadow: '0 6px 10px rgba(171, 171, 171, 50)',
 };
 
 const adviceTitleStyle = {

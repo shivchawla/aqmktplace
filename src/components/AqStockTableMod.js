@@ -110,17 +110,11 @@ export class AqStockTableMod extends React.Component {
                 target[column] = value >= 0 ? value : 0;
             } else {
                 target[column] = value;
-            }   
-            if (value.length > 0) {
-                target['totalValue'] = value >= 0 ? Number((value * target['lastPrice']).toFixed(2)) : 0;
-                this.updateAllWeights(newData);
-                const totalSummation = this.getTotalValueSummation(newData);
-                const weight = value >= 0 ? (totalSummation === 0 ? 0 : Number(((target['totalValue'] / this.getTotalValueSummation(newData) * 100)).toFixed(2))) : 0;
-                target['weight'] = weight;
-                this.setState({data: newData});
             }
+            value = value.length > 0 ? value : "0";   
+            target['totalValue'] = value >= 0 ? Number((value * target['lastPrice']).toFixed(2)) : 0;
+            this.updateAllWeights(newData);
             this.setState({data: newData});
-            // this.props.onChange(newData);
         }
     }
 
@@ -257,7 +251,10 @@ export class AqStockTableMod extends React.Component {
             const data = initialTransactions();
             this.setState({data});
         } else {
-            this.setState({data: this.props.data});
+            this.setState({data: this.props.data.map(item => {
+                    item['weight'] = `${item['weight']} %`; return item; 
+                })
+            });
         }
     }
 

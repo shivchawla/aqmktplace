@@ -19,6 +19,13 @@ export const layoutStyle = {
 };
 
 export const newLayoutStyle = {
+    //borderRadius: '2px',
+    //boxShadow: '0 1px 2px rgba(171, 171, 171, 50)',
+    overflow: 'hidden',
+    //border: '1px solid #eaeaea'
+};
+
+export const shadowBoxStyle = {
     borderRadius: '2px',
     boxShadow: '0 1px 2px rgba(171, 171, 171, 50)',
     overflow: 'hidden',

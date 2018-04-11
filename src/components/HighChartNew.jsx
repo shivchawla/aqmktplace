@@ -14,7 +14,7 @@ export class HighChartNew extends React.Component {
                 colors: ['#f58231','#911eb4','#3cb44b','#ffe119','#46f0f0','#f032e6','#d2f53c','#fabebe','#008080','#e6beff','#aa6e28','#fffac8','#800000','#aaffc3','#808000','#ffd8b1','#000080', '#808080'],
                 chart: {
                     type: 'variablepie',
-                    height: 230,
+                    height: 280,
                     animation:false,
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
@@ -33,13 +33,13 @@ export class HighChartNew extends React.Component {
                 tooltip: {
                     enabled: false
                 },
-                legend:{
+                /*legend:{
                     align:'right',
                     layout:'vertical',
                     verticalAlign:'center',
                     y:100,
                     x:20
-                },
+                },*/
                 plotOptions: {
                     variablepie: {
                         //center: [160, 100],
@@ -68,7 +68,7 @@ export class HighChartNew extends React.Component {
                         dataLabels: {
                             enabled: false,
                             format: '{point.name} {point.percentage:.1f}%',
-                            distance: -100,
+                            distance: -15,
                             filter: {
                                 property: 'percentage',
                                 operator: '>',

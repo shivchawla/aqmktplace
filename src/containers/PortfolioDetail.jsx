@@ -24,6 +24,7 @@ import {
 } from '../components';
 import {
     newLayoutStyle, 
+    shadowBoxStyle,
     metricsHeaderStyle, 
     pageHeaderStyle, 
     metricsLabelStyle, 
@@ -54,8 +55,6 @@ class PortfolioDetailImpl extends React.Component {
             show: false,
             notAuthorized: false
         };
-
-        this.handleChange = this.handleChange.bind(this);
 
         this.columns = [
             {
@@ -357,16 +356,12 @@ class PortfolioDetailImpl extends React.Component {
         }
     }
 
-    handleChange(activeKey) {
-        this.setState({activeKey: activeKey});
-    }
-
     renderPageContent = () => {
         return (
             this.state.notAuthorized 
             ?   <ForbiddenAccess />
             :   <Row style={{margin: '20px 0'}}>
-                    <Col xl={18} md={24} style={{...newLayoutStyle, padding: '0'}}>
+                    <Col xl={18} md={24} style={{...shadowBoxStyle, padding: '0'}}>
                         <Row style={{padding: '20px 30px'}}>
                             <Col span={24}>
                                 <Row>
@@ -411,12 +406,11 @@ class PortfolioDetailImpl extends React.Component {
                         <Row>
                             <Col span={24} style={dividerStyle}></Col>
                         </Row>
-                        <Collapse bordered={false} activeKey={this.state.activeKey} onChange={this.handleChange}>
+                        <Collapse bordered={false} defaultActiveKey={["2"]}>
                             <Panel  key='1'
                                 style={customPanelStyle} 
                                 header={<h3 style={metricsHeaderStyle}>Summary</h3>}
-                                forceRender={true}
-                            >   
+                                forceRender={true}>   
                                 <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
                                     <Col span={24}>
                                         <Row style={{marginTop: '10px'}}>
