@@ -4,7 +4,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal} from 'antd';
 import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, BreadCrumb} from '../components';
-import {newLayoutStyle, pageTitleStyle} from '../constants';
+import {newLayoutStyle, pageTitleStyle, shadowBoxStyle} from '../constants';
 import {Utils, getBreadCrumbArray} from '../utils';
 import '../css/screenAdvices.css';
 
@@ -233,7 +233,7 @@ export class ScreenAdvices extends React.PureComponent {
         const breadCrumbs = getBreadCrumbArray([{name: 'Screen Advices'}]);
 
         return (
-            <Row style={{paddingBottom: '20px'}}>
+            <Row className="row-container" style={shadowBoxStyle}>
                 {this.renderFilter()}
                 <Col xl={17} md={24}>
                     <h1 style={pageTitleStyle}>Screen Advices</h1>
@@ -241,56 +241,43 @@ export class ScreenAdvices extends React.PureComponent {
                 <Col xl={17} md={24}>
                     <BreadCrumb breadCrumbs={breadCrumbs} />
                 </Col>
-                <Col xl={17} md={24} style={{...newLayoutStyle, padding: 0}}>
-                    <Row className="row-container">
-                        <Col span={24}>
-                            <Input
-                                    suffix={(
-                                        <Icon 
-                                                type="search" 
-                                                style={{fontSize: '16px', marginRight: '10px', fontWeight: '600'}}
+                <Col xl={17} md={24} style={{padding: 0}}>
+                    <Row style={{marginTop: '10px'}}>
+                        
+                        <Row style={shadowBoxStyle}> 
+                            <Input style={{border: 'none'}}
+                                suffix={(
+                                    <Icon 
+                                        type="search" 
+                                        style={{fontSize: '16px', marginRight: '10px', fontWeight: '600'}}
+                                    />
+                                )}
+                                placeholder="Search Advice"
+                                value={this.state.searchValue}
+                                onChange={this.handleInputChange}
+                                onPressEnter={() => this.getAdvices()}/>
+                        </Row>
+
+                        <Row type="flex" align="middle" justify="end" >
+                            <Col span={10} style={{...filterSortContainerStyle, marginBottom: '-40px', zIndex:'4'}}>
+                                <Row type="flex" align="middle" justify="end">
+                                    <Col xs={3} md={3} xl={0} style={{marginTop: '5px'}}>
+                                        <Icon   onClick={this.toggleFilterModal} 
+                                                style={{cursor: 'pointer'}}
+                                                type="bars" 
+                                                //onClick={this.toggleFilter} 
+                                                style={{ fontSize: 20, cursor: 'pointer'}}
                                         />
-                                    )}
-                                    placeholder="Enter advice here"
-                                    value={this.state.searchValue}
-                                    onChange={this.handleInputChange}
-                                    onPressEnter={() => this.getAdvices()}
-                            />
-                        </Col>
-                        <Col span={24} style={filterSortContainerStyle}>
-                            <Row type="flex" align="middle" justify="end">
-                                <Col xs={6} md={6} xl={0} style={{}}>
-                                {/* <Col span={6}> */}
-                                    <Row type="flex" align="middle">
-                                        <Col span={4}>
-                                            <Icon 
-                                                    type="bars" 
-                                                    onClick={this.toggleFilter} 
-                                                    style={{ fontSize: 20, cursor: 'pointer'}}
-                                            />
-                                        </Col>
-                                        <Col span={14}>
-                                            <h5 onClick={this.toggleFilterModal} style={{cursor: 'pointer'}}>Apply Filters</h5>  
-                                        </Col>
-                                    </Row>
-                                </Col>
-                                <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                                    <Row type="flex" align="middle">
-                                        <Col span={8}>
-                                            <h5 
-                                                    style={{fontSize: '14px', color: '#6C6C6C', textAlign: 'right', marginRight: '10px'}}
-                                            >
-                                                Sort By
-                                            </h5>
-                                        </Col>
-                                        <Col span={6}>
-                                            {this.renderSortingMenu()}
-                                        </Col>
-                                    </Row>
-                                </Col>
-                            </Row>
-                            
-                        </Col>
+                                    </Col>
+                                    <Col span={4}>
+                                        <h5 style={{fontSize: '14px', color: '#6C6C6C'}}>Sort By</h5>
+                                    </Col>
+                                    <Col span={9}>
+                                        {this.renderSortingMenu()}
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
                     </Row>
                     <Row>
                         <Col span={24}>

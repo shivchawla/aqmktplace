@@ -20,6 +20,7 @@ export class AdviceMetricsItems extends React.Component {
                         const value = `${(item.percentage ? `${(item.value * 100).toFixed(2)} %` : item.value)} ${dirArrow}`;
                         
                         return (
+                            <Col span={4}>
                             <MetricItem 
                                     key={index}
                                     valueStyle = {{...metricsValueStyle, color: valueColor, fontSize: '20px'}} 
@@ -31,6 +32,7 @@ export class AdviceMetricsItems extends React.Component {
                                     dailyChange={item.dailyChange || null}
                                     dailyChangePct={item.dailyChangePct || null}
                             />
+                            </Col>
                         );
                     })
                 }

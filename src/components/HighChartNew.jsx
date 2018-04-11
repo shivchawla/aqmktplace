@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Col} from 'antd';
+import {Row,Col} from 'antd';
 import _ from 'lodash';
 import HighChart from 'highcharts';
 import VariablePie from 'highcharts/modules/variable-pie'
@@ -19,6 +19,7 @@ export class HighChartNew extends React.Component {
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
                     plotShadow: false,
+                    
                 },
                 title: {
                     text: '',
@@ -32,13 +33,22 @@ export class HighChartNew extends React.Component {
                 tooltip: {
                     enabled: false
                 },
+                /*legend:{
+                    align:'right',
+                    layout:'vertical',
+                    verticalAlign:'center',
+                    y:100,
+                    x:20
+                },*/
                 plotOptions: {
                     variablepie: {
+                        //center: [160, 100],
                         innerSize: 150,
                         cursor: 'pointer',
                         zMin:0,
                         zMax:1,
                         minPointSize:30,
+                        //showInLegend:true,
                         point:{
                             events:{
                                 click: function(){
@@ -162,7 +172,7 @@ export class HighChartNew extends React.Component {
 
     render() {
         return(
-            <Col span={24} style={{textAlign: 'center', height: '320px'}} id="chart-container"></Col>
+            <Row style={{height: '320px'}} id="chart-container"></Row>
         );
     }
 }

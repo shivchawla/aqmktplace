@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
-import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle} from '../constants';
+import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, BreadCrumb} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -424,7 +424,7 @@ class AdviceDetailImpl extends React.Component {
                 <Col span={24}>
                     <BreadCrumb breadCrumbs={breadCrumbs}/>
                 </Col>
-                <Col span={18} style={newLayoutStyle}>
+                <Col span={18} style={shadowBoxStyle}>
                     <StockResearchModal 
                             ticker={this.state.stockResearchModalTicker} 
                             visible={this.state.stockResearchModalVisible}

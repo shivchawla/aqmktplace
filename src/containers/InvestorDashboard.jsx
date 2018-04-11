@@ -600,18 +600,18 @@ export class InvestorDashboard extends React.Component {
                 </Col>
                 <Col span={5} style={colStyle}>
                     <MetricItem 
-                        valueStyle={{...valueStyle, color: getMetricColor(dailyreturn)}} 
+                        valueStyle={{...valueStyle}} 
                         labelStyle={labelStyle} 
-                        label="Daily Return" 
-                        value={`${Number(dailyreturn * 100).toFixed(2)} %`}
+                        label="Volatility" 
+                        value={`${Number(volatility * 100).toFixed(2)} %`}
                     />
                 </Col>
                 <Col span={5} style={colStyle}>
                     <MetricItem 
-                        valueStyle={{...valueStyle, color: getMetricColor(volatility)}} 
+                        valueStyle={{...valueStyle, color: getMetricColor(dailyreturn)}} 
                         labelStyle={labelStyle} 
-                        label="Volatility" 
-                        value={`${Number(volatility * 100).toFixed(2)} %`}
+                        label="Daily Return" 
+                        value={`${Number(dailyreturn * 100).toFixed(2)} %`}
                     />
                 </Col>
                 <Col span={5} style={colStyle}>
@@ -680,18 +680,17 @@ export class InvestorDashboard extends React.Component {
 
     renderOverviewPieChart = () => {
         return (
-            <Row>
-                <Col span={24} style={{marginTop: '-10px'}}>
-                    <HighChartNew series = {this.state.composition} />
-                </Col>
-                <Col span={24} style={{textAlign: 'center', marginTop: '-60px'}}>
+            <Col>
+                <HighChartNew series = {this.state.composition} />
+                
+                <Row style={{textAlign: 'center', marginTop: '-60px'}}>
                     <RadioGroup onChange={this.handleOverviewSelectChange} defaultValue="stocks" size="small">
                         <RadioButton value="stocks">Stocks</RadioButton>
                         <RadioButton value="sectors">Sectors</RadioButton>
                         <RadioButton value="industries">Industries</RadioButton>
                     </RadioGroup>
-                </Col>
-            </Row>
+                </Row>
+            </Col>
         );
     }
 
@@ -782,8 +781,8 @@ export class InvestorDashboard extends React.Component {
                             <DashboardCard 
                                     title="SUMMARY" 
                                     loading={this.state.defaultPortfolioLoading}
-                                    cardStyle={{marginTop:'10px'}} 
-                                    contentStyle={{height: '400px'}}
+                                    cardStyle={{marginTop:'10px', height:'425px'}} 
+                                    //contentStyle={{height: '400px'}}
                                     headerStyle={headerStyle}
                                     menu={this.renderPortfolioMenu()}
                             >
@@ -802,17 +801,14 @@ export class InvestorDashboard extends React.Component {
                             <DashboardCard 
                                     title="PERFORMANCE CHART" 
                                     loading={this.state.defaultPortfolioLoading}
-                                    cardStyle={{marginTop:'10px'}} 
-                                    contentStyle={{height: '400px'}}
+                                    cardStyle={{marginTop:'10px', height: '425px'}} 
                                     headerStyle={headerStyle}
                                     menu={this.renderPortfolioMenu()}
                             >
 
-                                    <Col 
-                                            style={{paddingLeft: '20px', paddingTop: '10px'}}
-                                    >
-                                        <MyChartNew series={this.state.tickers} />
-                                    </Col>
+                                <Row style={{padding: '10px'}}>
+                                    <MyChartNew series={this.state.tickers} />
+                                </Row>
                             
                             </DashboardCard>
                         </Col>
@@ -826,7 +822,7 @@ export class InvestorDashboard extends React.Component {
                                     title="MY PORTFOLIOS" 
                                     loading={this.state.portfolioLoading}
                                     headerStyle={headerStyle}
-                                    cardStyle={{marginTop:'12px'}} 
+                                    cardStyle={{marginTop:'12px', height: '450px'}} 
                             >
                                 {this.renderPortfolios()}
                             </DashboardCard>
@@ -835,7 +831,7 @@ export class InvestorDashboard extends React.Component {
                         <Col xl={12} lg={24}>
                             <DashboardCard 
                                     title="MY ADVICES" 
-                                    cardStyle={{marginTop:'12px'}}
+                                    cardStyle={{marginTop:'12px', height: '450px'}}
                                     loading={this.state.subscribedAdvicesLoading}
                                     headerStyle={headerStyle}
                             >

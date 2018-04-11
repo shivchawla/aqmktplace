@@ -18,6 +18,7 @@ class AdviceListItemImpl extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {
+            isHovered: false,
             diversityConfig: {
                 chart: {
                     type: 'pie',
@@ -172,6 +173,9 @@ class AdviceListItemImpl extends React.PureComponent {
                 // }
             }
         }
+
+        this.handleHover = this.handleHover.bind(this);
+        
     }
 
     handleClick = (id) => {
@@ -208,8 +212,8 @@ class AdviceListItemImpl extends React.PureComponent {
                 <Col span={24}>
                     <img style={iconStyle} src={pie} />
                 </Col>
-                <Col span={24} style={{fontSize: '16px'}}>
-                    <h5>Diversification <span style={{fontSize: "14px"}}>80%</span></h5>
+                <Col span={24} style={{fontSize: '14px'}}>
+                    <h5>Diversified <span style={{fontSize: "12px"}}>80%</span></h5>
                 </Col>
             </Row>
         );
@@ -222,7 +226,7 @@ class AdviceListItemImpl extends React.PureComponent {
                     <img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />
                 </Col>
                 <Col span={24} style={{marginTop: '6px'}}>
-                    <h5>Beta <span style={{fontSize: "16px"}}>{(beta * 100).toFixed(2)}</span></h5>
+                    <h5>Beta <span style={{fontSize: "12px"}}>{beta.toFixed(2)}</span></h5>
                 </Col>
             </Row>
         );
@@ -235,7 +239,7 @@ class AdviceListItemImpl extends React.PureComponent {
                     <img style={{transform: 'scale(0.8, 0.8)'}} src={totalReturnIcon} />
                 </Col>
                 <Col span={24}>
-                    <h5>Total Ret <span style={{fontSize: "16px"}}>{(totalReturn * 100).toFixed(2)} %</span></h5>
+                    <h5>Total Ret <span style={{fontSize: "12px"}}>{(totalReturn * 100).toFixed(2)} %</span></h5>
                 </Col>
             </Row>
         );
@@ -248,7 +252,7 @@ class AdviceListItemImpl extends React.PureComponent {
                 <img style={iconStyle} src={sunrise} />
                 </Col>
                 <Col span={24}>
-                    <h5>Volatility <span style={{fontSize: "16px"}}>{Number((volatility * 100).toFixed(2))} %</span></h5>
+                    <h5>Volatility <span style={{fontSize: "12px"}}>{Number((volatility * 100).toFixed(2))} %</span></h5>
                 </Col>
             </Row>
         );
@@ -256,19 +260,22 @@ class AdviceListItemImpl extends React.PureComponent {
 
     renderTrendingApprovedIcon = () => {
         return (
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginLeft: '-7px'}}>
-                <div>
+            <Row type="flex" justify="center" style={{paddingRight:'40px'}}>
+                <Col span={12}>
                     <IconItem 
-                            src={medalIcon} 
-                            imageStyle={{transform: 'scale(0.7, 0.7)'}} 
-                            labelStyle={{marginLeft: '5px'}}
-                            label="Approved"
+                        src={medalIcon} 
+                        imageStyle={{transform: 'scale(0.7, 0.7)'}} 
+                        labelStyle={{marginLeft: '5px', color:'teal'}}
+                        label="Approved"
                     />
-                </div>
-                <div span={10} style={{marginLeft: '5px'}}>
-                    <IconItem src={trendingUpIcon} imageStyle={{transform: 'scale(0.7, 0.7)'}} label="Trending" labelStyle={{marginLeft: "10px"}}/>
-                </div>
-            </div>
+                </Col>
+                <Col span={12}>
+                    <IconItem src={trendingUpIcon} imageStyle={{transform: 'scale(0.7, 0.7)', marginTop: '8px'}} label="Trending" labelStyle={{marginLeft: "9px", color:'#ff4500'}}/>
+                </Col>
+                {/*<Col span={12}>
+                    <IconItem src={trendingUpIcon} imageStyle={{transform: 'scale(0.7, 0.7)', marginTop: '8px'}} label="Trending" labelStyle={{marginLeft: "9px"}}/>
+                </Col>*/}
+            </Row>
         );
     }
 
@@ -281,7 +288,7 @@ class AdviceListItemImpl extends React.PureComponent {
                 {
                     performanceSummary.current && 
                     <Col span={6}>
-                        {this.renderBetaChart(performanceSummary.current.beta)}
+                        {this.renderBetaChart(_.get(performanceSummary,'current.beta', 0))}
                     </Col>
                 }
                 {
@@ -308,35 +315,52 @@ class AdviceListItemImpl extends React.PureComponent {
             dailyChangePct = _.get(performanceSummary, 'current.dailyChangePct', NaN);
             totalReturn = _.get(performanceSummary, 'current.dailyChangePct', NaN);
         }
+        var str1 = "Daily PnL";
+        var str2 = "| Daily Chg";
+      
         return (
-            <Row type="flex" align="bottom">
+            <Row type="flex"  style={{marginTop:'-10px'}}>
                 <Col span={24}>
-                    <h3
-                            style={netValueStyle}
-                    >
+                    <h3 style={netValueStyle}>
                         {`Rs ${netValue.toFixed(2)}`}
                     </h3>
-                </Col>
-                <Col span={24}>
-                    <h3 
-                            style={{
-                                fontSize: '18px',
-                                marginRight: '25px',
-                                textAlign: 'right', color: dailyChange < 0 ? '#FA4747' : '#3EBB72'
-                            }}
-                    >
-                        {(totalReturn * 100).toFixed(2)} ({(dailyChangePct * 100).toFixed(2)} %)
-                    </h3>
-                </Col>
-                <Col span={24}>
-                    <h3 
-                            style={{fontSize: '12px', textAlign: 'right',marginRight: '25px'}}
-                    >
-                        Daily PnL. | Daily Chg
-                    </h3>
+
+                    <Row align="bottom" >
+                        <Col span={12} style={{
+                                fontSize: '15px',
+                                marginTop:'-2px',
+                                textAlign:'right',
+                                paddingRight:'2px',
+                                color: dailyChange < 0 ? '#FA4747' : '#3EBB72'}}>
+                                {(dailyChange).toFixed(2) }     
+                        </Col> 
+                        <Col span={12} style={{
+                                fontSize: '15px',
+                                marginTop:'-2px',
+                                textAlign:'left',
+                                paddingLeft:'2px',
+                                color: dailyChange < 0 ? '#FA4747' : '#3EBB72'}}>
+                                ({(dailyChangePct * 100).toFixed(2)} %)
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={12} style={{fontSize: '13px', textAlign:'right', paddingRight:'2px'}}>
+                            {str1}
+                        </Col>
+                        <Col span={12} style={{fontSize: '13px', textAlign:'left', paddingLeft:'0px'}}>
+                            {str2}
+                    </Col>
+                    </Row>
                 </Col>
             </Row>
         );
+    }
+
+    handleHover(){
+        console.log()
+        this.setState({
+            isHovered: !this.state.isHovered
+        });
     }
 
     render() {
@@ -354,27 +378,41 @@ class AdviceListItemImpl extends React.PureComponent {
         } = this.props.advice;
         let sectors = _.get(performanceSummary, 'current.sectors', []);
 
+        const activeCardStyle = this.state.isHovered ? hoverCardStyle : cardStyle;
+
         return (
-            <Row type="flex" style={cardStyle} align="top" onClick={e => this.handleClick(id)}>
-                <Col span={8}>
+            <Row type="flex" style={activeCardStyle} align="top" onClick={e => this.handleClick(id)} onMouseEnter={this.handleHover} onMouseLeave={this.handleHover}>
+                <Col span={24}>
                     <Row>
-                        <Col span={24}>
-                            <h3 style={{fontSize: '18px'}}>{name}</h3>
-                        </Col>
-                        {
-                            sectors.length > 0 && sectors &&
-                            <Col span={24} style={{margin: '5px 0'}}>
-                                {this.renderSectors(sectors)}
-                            </Col>
-                        }
-                        <Col span={24} style={{marginTop: '20px'}}>
+                        <Col span={10}>
                             <Row>
+                                <Col span={24}>
+                                    <h3 style={{fontSize: '18px'}}>{name}</h3>
+                                </Col>
+                                {
+                                    sectors.length > 0 && sectors &&
+                                    <Col span={24} style={{margin: '5px 0'}}>
+                                        {this.renderSectors(sectors)}
+                                    </Col>
+                                }
+                                
+                            </Row>
+                        </Col>
+
+                        <Col span={14} offset={0}>
+                            {this.renderMetricIcons(performanceSummary)}
+                        </Col>
+                    
+                    </Row>
+                
+                    <Row style={{marginTop: '20px'}}>
+                        <Col span={7} style={{marginTop: '5px'}}>
                             <Col span={8}>
                                 <MetricItem 
                                         style={{border: 'none'}} 
                                         value={subscribers} 
                                         label="Subscribers"
-                                        valueStyle={{fontSize: '16px', fontWeight: '400', color: '#3B3737'}}
+                                        valueStyle={{fontSize: '20px', fontWeight: '400', color: '#3B3737'}}
                                         labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E'}}
                                 />
                             </Col>
@@ -385,33 +423,27 @@ class AdviceListItemImpl extends React.PureComponent {
                                             style={{border: 'none'}} 
                                             value={followers} 
                                             label="Followers"
-                                            valueStyle={{fontSize: '16px', fontWeight: '400', color: '#3B3737'}}
-                                            labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E'}}
+                                            valueStyle={{fontSize: '20px', fontWeight: '400', color: '#3B3737', paddingLeft: '10px'}}
+                                            labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E', paddingLeft: '10px'}}
                                     />
                                 </Col>
                             }
-                            </Row>
                         </Col>
-                    </Row>
-                </Col>
-                <Col span={16}>
-                    <Row>
-                        <Col span={22} offset={2}>
-                            {this.renderMetricIcons(performanceSummary)}
-                        </Col>
-                        <Col span={24} style={{marginTop: '15px'}}>
+                        
+                        <Col span={17}>
                             <Row>
                                 <Col span={12} style={{textAlign: 'center'}}>
                                     <Rate disabled value={rating}/>
                                     {this.renderTrendingApprovedIcon()}
                                 </Col>
-                                <Col span={11} offset={1}>
+                                <Col span={10} offset={2}>
                                     {this.renderNetValueChange(performanceSummary)}
                                 </Col>
                             </Row>
                         </Col>
                     </Row>
                 </Col>
+                <Row style={{marginTop: '10px'}}></Row>
             </Row>
         );
     }
@@ -421,8 +453,8 @@ export const AdviceListItemMod = withRouter(Radium(AdviceListItemImpl));
 
 const IconItem = ({src, label, imageStyle={}, labelStyle={}}) => {
     return (
-        <Row>
-            <Col span={4} style={iconItemImageStyle}>
+        <Row type="flex" justify="center" align="center">
+            <Col span={3} style={iconItemImageStyle}>
                 <img style={imageStyle} src={src} />
             </Col>
             <Col span={8}>
@@ -434,19 +466,33 @@ const IconItem = ({src, label, imageStyle={}, labelStyle={}}) => {
 
 const iconItemImageStyle = {
     color: '#5A5A5A',
-    fontSize: '14px',
+    fontSize: '12px',
     fontWeight: 400
+    
 };
 
 const iconItemLabelStyle = {
-    fontSize: '14px'
+    fontSize: '12px',
+    verticalAlign:'sub'
 };
 
 const cardStyle = {
     backgroundColor: '#fff',
-    padding: '10px 5px 10px 15px',
-    borderBottom: '1px solid #eaeaea',
+    padding: '10px 5px 10px 10px',
+    border: '1px solid #eaeaea',
+    margin: '15px 5px',
     cursor: 'pointer',
+    boxShadow: '0 2px 4px rgba(171, 171, 171, 50)',
+};
+
+const hoverCardStyle = {
+    //backgroundColor: '#F5F6FA',
+    backgroundColor: '#fff',
+    padding: '10px 5px 10px 10px',
+    border: '1px solid #eaeaea',
+    margin: '15px 5px',
+    cursor: 'pointer',
+    boxShadow: '0 6px 10px rgba(171, 171, 171, 50)',
 };
 
 const adviceTitleStyle = {
@@ -476,8 +522,8 @@ const netValueStyle = {
     fontSize: '22px',
     fontWeight: 400,
     color: '#3B3737',
-    textAlign: 'right',
-    marginRight: '25px'
+    textAlign: 'center',
+    //marginRight: '25px'
 };
 
 const netLabelStyle = {
