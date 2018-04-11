@@ -11,11 +11,13 @@ export class AqPortfolioTable extends React.Component {
                 dataIndex: 'name',
                 key: 'name',
                 fixed: true,
-                render: text => (
-                    <Tooltip title={text}>
-                        <h3 style={nameEllipsisStyle}>{text}</h3>
-                    </Tooltip>
-                )
+                render: (text, record) => {
+                    return (
+                        <Tooltip title={text}>
+                            <a onClick={() => props.updateTicker && props.updateTicker(record)} style={nameEllipsisStyle}>{text}</a>
+                        </Tooltip>
+                    );
+                }
             },
             {
                 title: 'SYMBOL',

@@ -30,3 +30,5 @@ export * from './DashboardCard';
 export * from './PageNotFound';
 export * from './NoIternetAccess';
 export * from './ForbiddenAccess';
+export * from './StockResearchModal';
+export * from './BreadCrumb';

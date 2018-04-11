@@ -99,4 +99,9 @@ export const loadingColor = {
     color: '#e91e63'
 }
 
+export const pageTitleStyle = {
+    fontSize: '18px',
+    color: '#595959'
+};
+
 export const benchmarkColor = '#D50000';

@@ -5,10 +5,10 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
-import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard} from '../components';
+import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, BreadCrumb} from '../components';
 import {loadingColor, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
-import {generateColorData, getMetricColor, Utils} from '../utils';
+import {generateColorData, getMetricColor, Utils, getBreadCrumbArray} from '../utils';
 import 'react-loading-bar/dist/index.css'
 
 const {requestUrl, aimsquantToken, investorId} = require('../localConfig');
@@ -152,7 +152,7 @@ export class InvestorDashboard extends React.Component {
     renderColumnHeader = name => <h3 style={{fontSize: '12px', color: '#353535', fontWeight: '700'}}>{name}</h3>
 
     getDefaultPortfolioData = () => {
-        const url = `${requestUrl}/investor/${investorId}`;
+        const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}`;
         const tickers = [...this.state.tickers];
         this.setState({defaultPortfolioLoading: true});
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
@@ -227,7 +227,7 @@ export class InvestorDashboard extends React.Component {
     }
 
     getInvestorPortfolios = () => {
-        const investorPortfolioUrl = `${requestUrl}/investor/${investorId}/portfolio`;
+        const investorPortfolioUrl = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio`;
         this.setState({portfolioLoading: true});
         axios.get(investorPortfolioUrl, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
@@ -731,9 +731,16 @@ export class InvestorDashboard extends React.Component {
     }
 
     renderPageContent = () => {
+        const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);
         return (
             this.state.showEmptyScreen.status
             ?   <Row>
+                    <Col span={24}>
+                        <h1>Investor Dashboard</h1>
+                    </Col>
+                    <Col span={24}>
+                        <BreadCrumb breadCrumbs={breadCrumbArray}/>
+                    </Col>
                     <Col span={24} style={emptyPortfolioStyle}>
                         {
                             this.state.showEmptyScreen.errorCode === 'empty_portfolio'
@@ -752,8 +759,14 @@ export class InvestorDashboard extends React.Component {
                     </Col>
                 </Row>
             :   <Row>
+                <Col span={24}>
+                        <h1>Investor Dashboard</h1>
+                </Col>
+                <Col span={24}>
+                        <BreadCrumb breadCrumbs={breadCrumbArray}/>
+                </Col>
                 <Col style={{paddingBottom: '20px'}}>
-                    <Row type="flex" justify="end" style={{marginTop: '-40px'}}>
+                    <Row type="flex" justify="end">
                         <Col>
                             <Button 
                                     type="primary" 
@@ -761,14 +774,6 @@ export class InvestorDashboard extends React.Component {
                                     style={{marginRight: '20px'}}
                             >
                                 Create Portfolio
-                            </Button>
-                            {/* {
-                                this.state.showAdvisorDashboardToggle && */}
-                            <Button 
-                                    type="secondary" 
-                                    onClick={() => this.props.history.push('/advisordashboard')}
-                            >
-                                Advisor Dashboard
                             </Button>
                         </Col>
                     </Row>

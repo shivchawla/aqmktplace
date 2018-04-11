@@ -1,6 +1,8 @@
 import * as React from 'react';
 import axios from 'axios';
 import {Input, InputNumber, Form, AutoComplete, Icon, Spin, Row, Col} from 'antd';
+import {withRouter} from 'react-router';
+import {Utils} from '../utils';
 
 const Option = AutoComplete.Option;
 const FormItem = Form.Item;
@@ -8,7 +10,7 @@ const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' 
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
 
-export class AutoCompleteEditableCell extends React.Component {
+export class AutoCompleteEditableCellImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -18,13 +20,15 @@ export class AutoCompleteEditableCell extends React.Component {
         };
     }
 
-  
     handleSearch = query => {
         this.setState({spinning: true});
         const url = `${requestUrl}/stock?search=${query}`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({dataSource: this.processSearchResponseData(response.data)});
+        })
+        .catch(error => {
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({spinning: false});
@@ -85,6 +89,8 @@ export class AutoCompleteEditableCell extends React.Component {
         );
     }
 }
+
+export const AutoCompleteEditableCell = withRouter(AutoCompleteEditableCellImpl);
 
 const searchIconStyle = {
     marginRight: '20px',

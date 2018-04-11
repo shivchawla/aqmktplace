@@ -4,14 +4,14 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio} from 'antd';
 import {List} from 'immutable';
-import {AqLink, DashboardCard} from '../components';
-import {newLayoutStyle, loadingColor} from '../constants';
-import {getStockData} from '../utils';
+import {AqLink, DashboardCard, BreadCrumb} from '../components';
+import {pageTitleStyle, newLayoutStyle, loadingColor} from '../constants';
+import {getStockData, Utils, getBreadCrumbArray} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
 
 const RadioButton = Radio.Button;
-const {aimsquantToken, requestUrl} = require('../localConfig');
+const {requestUrl} = require('../localConfig');
 const RadioGroup = Radio.Group;
 const Option = AutoComplete.Option;
 const TabPane = Tabs.TabPane;
@@ -65,9 +65,12 @@ export class StockResearch extends React.Component {
     handleSearch = (query) => {
         this.setState({spinning: true});
         const url = `${requestUrl}/stock?search=${query}`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({dataSource: this.processSearchResponseData(response.data)})
+        })
+        .catch(error => {
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({spinning: false});
@@ -108,6 +111,9 @@ export class StockResearch extends React.Component {
             console.log('Rolling Performance', response.data);
             this.setState({rollingPerformance: response.data.rollingPerformance.detail});
         })
+        .catch(error => {
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+        })
         .finally(() => {
             this.setState({loadingData: false, show: false});
         });
@@ -138,8 +144,22 @@ export class StockResearch extends React.Component {
         this.setState({selectedPerformanceScreen: e.target.value});
     }
 
+    componentWillReceiveProps(nextProps) {
+        if ((this.props.openAsDialog) && this.props.ticker !== nextProps.ticker) {
+            this.onSelect(nextProps.ticker);
+        }
+    }
+
     componentWillMount() {
-        this.onSelect("TCS");
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            if (!this.props.openAsDialog) {
+                this.onSelect("TCS");
+            } else {
+                this.onSelect(this.props.ticker);
+            }
+        }
     }
 
     renderPriceMetrics = metrics => {
@@ -210,6 +230,7 @@ export class StockResearch extends React.Component {
 
     renderPageContent = () => {
         const {dataSource, latestDetail} = this.state;
+        const breadCrumbs = getBreadCrumbArray([{name: 'Stock Research'}]);
         // const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
         const priceMetrics = [
             {label: 'High', value: latestDetail.high},
@@ -221,94 +242,104 @@ export class StockResearch extends React.Component {
         const performanceMetricsTimeline = ['MTD', 'YTD', '1Y', '2Y', '5Y', '10Y'];
         const percentageColor = latestDetail.change < 0 ? '#FA4747' : '#3EBB72';
         const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
-        
+        // chartId is required so that we have the option to have multiple HighStock component in the same page with different Id
+        const {xl=18, chartId='highchart-container'} = this.props; 
+
         return (
-            <Col xl={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
-                <Row style={metricStyle}>
-                    <Col span={24}>
-                        <AutoComplete
-                            size="large"
-                            style={{ width: '100%' }}
-                            dataSource={dataSource.map(this.renderOption)}
-                            onSelect={this.onSelect}
-                            onSearch={this.handleSearch}
-                            placeholder="Search stocks"
-                            optionLabelProp="value"
-                        >
-                            <Input 
-                                    suffix={(
-                                        <div>
-                                            <Spin indicator={spinIcon} spinning={this.state.spinning}/>
-                                            <Icon style={searchIconStyle} type="search" />
-                                        </div>
-                                    )} 
-                            />
-                        </AutoComplete>
-                    </Col>
-                </Row>
-                <Row style={metricStyle} type="flex" justify="space-between">
-                    <Col span={7} style={cardStyle}>
-                        <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
-                        <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
-                                <span 
-                                        style={{fontSize: '18px', fontWeight: '700'}}>
-                                    {latestDetail.exchange}:
-                                </span>
-                                {latestDetail.ticker}
-                        </h1>
-                        <h3 style={lastPriceStyle}>
-                            {latestDetail.closePrice} 
-                            <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
-                        </h3>
-                        <h5 
-                                style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
-                        >
-                            * Data is delayed by 15 min
-                        </h5>
-                    </Col>
-                    <Col span={6} style={cardStyle}>
-                        <h3 style={cardHeaderStyle}>Price Metrics</h3>
-                        {this.renderPriceMetrics(priceMetrics)}
-                    </Col>
-                    <Col span={10} style={cardStyle}>
-                        <Row>
+            <React.Fragment>
+                {
+                    !this.props.openAsDialog &&
+                    <React.Fragment>
+                        <Col span={24}>
+                            <h1 style={pageTitleStyle}>Stock Research</h1>
+                        </Col>
+                        <Col xl={xl} md={24}>
+                            <BreadCrumb breadCrumbs={breadCrumbs}/>
+                        </Col>
+                    </React.Fragment>
+                }
+                <Col xl={xl} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
+                    <Row style={metricStyle}>
+                        {
+                            !this.props.openAsDialog &&
                             <Col span={24}>
-                                <h3 style={cardHeaderStyle}>Performance Metrics</h3>
+                                <AutoComplete
+                                    size="large"
+                                    style={{ width: '100%' }}
+                                    dataSource={dataSource.map(this.renderOption)}
+                                    onSelect={this.onSelect}
+                                    onSearch={this.handleSearch}
+                                    placeholder="Search stocks"
+                                    optionLabelProp="value"
+                                >
+                                    <Input 
+                                            suffix={(
+                                                <div>
+                                                    <Spin indicator={spinIcon} spinning={this.state.spinning}/>
+                                                    <Icon style={searchIconStyle} type="search" />
+                                                </div>
+                                            )} 
+                                    />
+                                </AutoComplete>
                             </Col>
-                            <Col span={24} style={{textAlign: 'right'}}>
-                                {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
-                            </Col>
-                            <Col span={24}>
-                                {this.renderPerformanceMetrics()}
-                            </Col>
-                        </Row>
-                    </Col>
-                </Row>
-                <Row style={metricStyle}>  
-                    <DashboardCard 
-                            xl={24} 
-                            title="Performance" 
-                            headerStyle={{borderBottom: '1px solid #eaeaea'}}
-                            contentStyle={{height: '405px', marginTop: '10px'}}
-                    >
-                        <MyChartNew 
-                                series = {this.state.tickers} 
-                                deleteItem = {this.deleteItem}
-                                addItem = {this.addItem}
-                                verticalLegend = {true}
-                        /> 
-                    </DashboardCard>
-                    {/* <Col span={24} style={{fontSize: '16px', color: '#565656', fontWeight: '700', marginBottom: '10px'}}>Performance</Col>
-                    <Col span={24} style={{marginTop: '10px'}}>
-                        <MyChartNew 
-                                series = {this.state.tickers} 
-                                deleteItem = {this.deleteItem}
-                                addItem = {this.addItem}
-                                verticalLegend = {true}
-                        /> 
-                    </Col> */}
-                </Row>
-            </Col>
+                        }
+                    </Row>
+                    <Row style={metricStyle} type="flex" justify="space-between">
+                        <Col span={7} style={cardStyle}>
+                            <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
+                            <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
+                                    <span 
+                                            style={{fontSize: '18px', fontWeight: '700'}}>
+                                        {latestDetail.exchange}:
+                                    </span>
+                                    {latestDetail.ticker}
+                            </h1>
+                            <h3 style={lastPriceStyle}>
+                                {latestDetail.closePrice} 
+                                <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
+                            </h3>
+                            <h5 
+                                    style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
+                            >
+                                * Data is delayed by 15 min
+                            </h5>
+                        </Col>
+                        <Col span={6} style={cardStyle}>
+                            <h3 style={cardHeaderStyle}>Price Metrics</h3>
+                            {this.renderPriceMetrics(priceMetrics)}
+                        </Col>
+                        <Col span={10} style={cardStyle}>
+                            <Row>
+                                <Col span={24}>
+                                    <h3 style={cardHeaderStyle}>Performance Metrics</h3>
+                                </Col>
+                                <Col span={24} style={{textAlign: 'right'}}>
+                                    {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
+                                </Col>
+                                <Col span={24}>
+                                    {this.renderPerformanceMetrics()}
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                    <Row style={metricStyle}>  
+                        <DashboardCard 
+                                xl={24} 
+                                title="Performance" 
+                                headerStyle={{borderBottom: '1px solid #eaeaea'}}
+                                contentStyle={{height: '405px', marginTop: '10px'}}
+                        >
+                            <MyChartNew 
+                                    series = {this.state.tickers} 
+                                    deleteItem = {this.deleteItem}
+                                    addItem = {this.addItem}
+                                    verticalLegend = {true}
+                                    chartId={chartId}
+                            /> 
+                        </DashboardCard>
+                    </Row>
+                </Col>
+            </React.Fragment>
         );
     }
 

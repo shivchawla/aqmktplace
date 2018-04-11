@@ -4,6 +4,8 @@ import {reactLocalStorage} from 'reactjs-localstorage';
 import {graphColors, metricColor} from '../constants';
 import {getStockData} from './requests';
 
+const {requestUrl} = require('../localConfig');
+
 export const dateFormat = 'Do MMMM YYYY';
 
 export const getUnixTimeSeries = (data) => {
@@ -144,6 +146,11 @@ export class Utils{
 		}else{
 			return undefined;
 		}
+	}
+
+	static getBaseUrl(){
+		return requestUrl;
+		// return "https://api.aimsquant.com/api/v2";
 	}
 
 	static logoutUser(){
@@ -296,6 +303,14 @@ export class Utils{
 		}
 	}
 
+}
+
+export const getBreadCrumbArray = (array = [], item = []) => {
+	return [
+		{name: 'Home', url: '/home'},
+		...array,
+		...item
+	];
 }
 
 export * from './requests';

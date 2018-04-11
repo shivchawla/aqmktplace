@@ -1,8 +1,10 @@
 import * as React from 'react';
 import axios from 'axios';
 import moment from 'moment';
+import {withRouter} from 'react-router';
 import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker} from 'antd';
 import {AdviceTransactionTable} from '../components';
+import {Utils} from '../utils';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 
 const Panel = Collapse.Panel;
@@ -12,7 +14,7 @@ const {requestUrl, aimsquantToken} = require('../localConfig.js');
 
 const dateFormat = 'YYYY-MM-DD';
 
-export class AdviceItem extends React.Component {
+class AdviceItemImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -57,12 +59,14 @@ export class AdviceItem extends React.Component {
     componentWillMount() {
         const {investorId} = this.props;
         let advices = [...this.state.advices];
+        console.log('Component Mounted');
         const url = `${requestUrl}/advice?subscribed=true`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthToken()})
         .then(response => {
+            console.log('Subscribed Advices', response.data);
             response.data.map((advice, index) => {
                 const adviceUrl = `${requestUrl}/advice/${advice._id}`;
-                axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
+                axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()})
                 .then(response => {
                     const portfolioUrl = `${requestUrl}/advice/${advice._id}/portfolio`;
                     const newAdvice = {
@@ -79,22 +83,28 @@ export class AdviceItem extends React.Component {
                         date: moment().format(dateFormat),
                         createdDate: response.data.createdDate
                     };
-                    axios.get(portfolioUrl, {headers: {'aimsquant-token': aimsquantToken}})
+                    axios.get(portfolioUrl, {headers: Utils.getAuthTokenHeader()})
                     .then(response => {
                         newAdvice.portfolio.detail = response.data.detail;
                         advices.push(newAdvice);
                         this.setState({advices});
                         this.props.updateSubscribedAdvices(advices);
                     })
+                    .catch(error => {
+                        console.log(error);
+                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                    })
                 })
                 .catch(error => {
-                    console.log(error.message)
+                    console.log(error);
+                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                 });
                 
             });
         })
         .catch(error => {
-            console.log(error.message);
+            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         });
         
     }
@@ -171,7 +181,7 @@ export class AdviceItem extends React.Component {
         const url = `${requestUrl}/advice/${adviceId}/portfolio?date=${moment(date).format(dateFormat)}`;
         
         // improvement needed - this should be a common method
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const portfolio = response.data.detail;
             targetAdvice.date = moment(date).format(dateFormat);
@@ -187,7 +197,7 @@ export class AdviceItem extends React.Component {
             
         }).
         catch(error => {
-            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         });
     }
 
@@ -294,6 +304,8 @@ export class AdviceItem extends React.Component {
         );
     }
 }
+
+export const AdviceItem = withRouter(AdviceItemImpl);
 
 const MetricItem = (props) => {
     return (

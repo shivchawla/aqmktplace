@@ -6,12 +6,13 @@ import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse} from 'antd';
-import {ForbiddenAccess} from '../components';
+import {ForbiddenAccess, StockResearchModal, BreadCrumb} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
-import {loadingColor} from '../constants';
+import {loadingColor, pageTitleStyle} from '../constants';
+import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
-import {convertToPercentage, generateColorData, Utils} from '../utils';
+import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray} from '../utils';
 import {
     AdviceTransactionTable, 
     AqHighChartMod, 
@@ -52,7 +53,9 @@ class PortfolioDetailImpl extends React.Component {
             pieSeries: [],
             activeKey:['.$2'],
             show: false,
-            notAuthorized: false
+            notAuthorized: false,
+            stockResearchModalVisible: false,
+            stockResearchModalTicker: 'TCS'
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -106,7 +109,11 @@ class PortfolioDetailImpl extends React.Component {
 
     renderStockTransactions = () => {
         return (
-            <AqPortfolioTable style={{marginTop: '20px'}} positions={this.state.stockPositions} />
+            <AqPortfolioTable 
+                    style={{marginTop: '20px'}} 
+                    positions={this.state.stockPositions} 
+                    updateTicker={this.updateTicker}
+            />
         );
     }
 
@@ -259,6 +266,16 @@ class PortfolioDetailImpl extends React.Component {
         return totalWeight;
     }
 
+    updateTicker = record => {
+        this.setState({stockResearchModalTicker: record}, () => {
+            this.toggleModal();
+        });
+    }
+
+    toggleModal = ticker => {
+        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});        
+    }
+
     componentWillMount() {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -362,10 +379,24 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     renderPageContent = () => {
+        const breadCrumbs = getBreadCrumbArray(PortfolioDetailCrumb, [{
+            name: this.state.name,
+        }]);
         return (
             this.state.notAuthorized 
             ?   <ForbiddenAccess />
             :   <Row style={{margin: '20px 0'}}>
+                    <StockResearchModal 
+                            ticker={this.state.stockResearchModalTicker} 
+                            visible={this.state.stockResearchModalVisible}
+                            toggleModal={this.toggleModal}
+                    />
+                    <Col xl={18} md={24}>
+                        <h1 style={pageTitleStyle}>{this.state.name}</h1>
+                    </Col>
+                    <Col xl={18} md={24}>
+                        <BreadCrumb breadCrumbs={breadCrumbs} />
+                    </Col>
                     <Col xl={18} md={24} style={{...newLayoutStyle, padding: '0'}}>
                         <Row style={{padding: '20px 30px'}}>
                             <Col span={24}>

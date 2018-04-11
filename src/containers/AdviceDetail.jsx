@@ -6,11 +6,12 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
-import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor} from '../constants';
+import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems} from '../components';
+import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, BreadCrumb} from '../components';
 import {MyChartNew} from './MyChartNew';
-import {generateColorData, Utils} from '../utils';
+import {AdviceDetailCrumb} from '../constants/breadcrumbs';
+import {generateColorData, Utils, getBreadCrumbArray} from '../utils';
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
@@ -59,7 +60,9 @@ class AdviceDetailImpl extends React.Component {
             barDollarSeries: [],
             barPercentageSeries: [],
             positions: [],
-            show: false
+            show: false,
+            stockResearchModalVisible: false,
+            stockResearchModalTicker: 'TCS'
         };
     }
 
@@ -394,94 +397,125 @@ class AdviceDetailImpl extends React.Component {
         this.setState({selectedValue: value});
     }
 
+    updateTicker = record => {
+        this.setState({stockResearchModalTicker: record}, () => {
+            this.toggleModal();
+        });
+    }
+
+    toggleModal = ticker => {
+        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});        
+    }
+
+    
+
     renderPageContent = () => {
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
+        const breadCrumbs = getBreadCrumbArray(AdviceDetailCrumb, [
+            {name, url: '#'}
+        ]);
 
         return (
-            <Col span={18} style={newLayoutStyle}>
-                <Row className="row-container">
-                    <Col span={18}>
-                        <h1 style={adviceNameStyle}>{name}</h1>
-                        {
-                            advisor.user &&
-                            <h5 style={userStyle}>
-                                By {advisor.user.firstName} {advisor.user.lastName} 
-                                <span style={dateStyle}>{updatedDate}</span>
-                            </h5>
-                        }
-                        <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
-                    </Col>
-                    <Col span={4} offset={2}>
-                        {this.renderActionButtons()}
-                    </Col>
-                </Row>
-                <Row className="row-container">
-                    {this.renderAdviceMetrics()}
-                </Row>
-                <Row>
-                    <Col span={24} style={dividerStyle}></Col>
-                </Row>
-                <Collapse bordered={false} defaultActiveKey={["2"]}>
-                    <Panel 
-                            key="1"
-                            style={customPanelStyle} 
-                            header={<h3 style={metricsHeaderStyle}>Description</h3>}
-                    >
-                        <Row className="row-container">
-                            <Col span={24}>
-                                <h5 style={{...textStyle, marginTop: '-10px', marginLeft: '20px'}}>{description}</h5>
-                            </Col>
-                        </Row>
-                    </Panel>
-                    {
-                        (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
-                        <Panel
-                                key="2"
+            <Row>
+                <Col span={24}>
+                    <h1 style={pageTitleStyle}>{name}</h1>
+                </Col>
+                <Col span={24}>
+                    <BreadCrumb breadCrumbs={breadCrumbs}/>
+                </Col>
+                <Col span={18} style={newLayoutStyle}>
+                    <StockResearchModal 
+                            ticker={this.state.stockResearchModalTicker} 
+                            visible={this.state.stockResearchModalVisible}
+                            toggleModal={this.toggleModal}
+                    />
+                    <Row className="row-container">
+                        <Col span={18}>
+                            <h1 style={adviceNameStyle}>{name}</h1>
+                            {
+                                advisor.user &&
+                                <h5 style={userStyle}>
+                                    By {advisor.user.firstName} {advisor.user.lastName} 
+                                    <span style={dateStyle}>{updatedDate}</span>
+                                </h5>
+                            }
+                            <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
+                        </Col>
+                        <Col span={4} offset={2}>
+                            {this.renderActionButtons()}
+                        </Col>
+                    </Row>
+                    <Row className="row-container">
+                        {this.renderAdviceMetrics()}
+                    </Row>
+                    <Row>
+                        <Col span={24} style={dividerStyle}></Col>
+                    </Row>
+                    <Collapse bordered={false} defaultActiveKey={["3"]}>
+                        <Panel 
+                                key="1"
                                 style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
+                                header={<h3 style={metricsHeaderStyle}>Description</h3>}
                         >
                             <Row className="row-container">
                                 <Col span={24}>
-                                    <AqCard title="Portfolio Summary">
-                                        <HighChartNew series = {this.state.series} />
-                                    </AqCard>
-                                    <AqCard title="Performance Summary" offset={2}>
-                                        {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
-                                        <Col span={24} style={{paddingTop: '10px'}}>
-                                            <HighChartBar 
-                                                    dollarSeries={this.state.barDollarSeries} 
-                                                    percentageSeries={this.state.barPercentageSeries}
-                                            />
-                                        </Col>
-                                    </AqCard>
+                                    <h5 style={{...textStyle, marginTop: '-10px', marginLeft: '20px'}}>{description}</h5>
                                 </Col>
                             </Row>
                         </Panel>
-                    }
-                    {
-                        (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
-                        <Panel
-                                key="3"
-                                style={customPanelStyle} 
-                                header={<h3 style={metricsHeaderStyle}>Detail</h3>}
-                        >
-                            <Row>
-                                <Col span={24}>
-                                    <Tabs animated={false} defaultActiveKey="1">
-                                        <TabPane tab="Performance" key="1" className="row-container">
-                                            <MyChartNew series={this.state.tickers} />
-                                        </TabPane>
-                                        <TabPane tab="Portfolio" key="2" className="row-container">
-                                            <AqPortfolioTable positions={this.state.positions} />
-                                        </TabPane>
-                                    </Tabs>
-                                </Col>
-                            </Row>
-                        </Panel>
-                    }
-                </Collapse>
-            </Col>
+                        {
+                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
+                            <Panel
+                                    key="2"
+                                    style={customPanelStyle} 
+                                    header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
+                            >
+                                <Row className="row-container">
+                                    <Col span={24}>
+                                        <AqCard title="Portfolio Summary">
+                                            <HighChartNew series = {this.state.series} />
+                                        </AqCard>
+                                        <AqCard title="Performance Summary" offset={2}>
+                                            {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
+                                            <Col span={24} style={{paddingTop: '10px'}}>
+                                                <HighChartBar 
+                                                        dollarSeries={this.state.barDollarSeries} 
+                                                        percentageSeries={this.state.barPercentageSeries}
+                                                />
+                                            </Col>
+                                        </AqCard>
+                                    </Col>
+                                </Row>
+                            </Panel>
+                        }
+                        {
+                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
+                            <Panel
+                                    key="3"
+                                    style={customPanelStyle} 
+                                    header={<h3 style={metricsHeaderStyle}>Detail</h3>}
+                            >
+                                <Row>
+                                    <Col span={24}>
+                                        <Tabs animated={false} defaultActiveKey="2">
+                                            <TabPane tab="Performance" key="1" className="row-container">
+                                                <MyChartNew series={this.state.tickers} />
+                                            </TabPane>
+                                            <TabPane tab="Portfolio" key="2" className="row-container">
+                                                <AqPortfolioTable 
+                                                        positions={this.state.positions} 
+                                                        updateTicker={this.updateTicker}
+                                                />
+                                            </TabPane>
+                                        </Tabs>
+                                    </Col>
+                                </Row>
+                            </Panel>
+                        }
+                    </Collapse>
+                </Col>
+            </Row>
         );
     }
 

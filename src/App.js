@@ -25,11 +25,9 @@ import {
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
 
+const SubMenu = Menu.SubMenu;
+const MenuItemGroup = Menu.ItemGroup;
 const {Header, Content} = Layout;
-const firstChild = props => {
-    const childrenArray = React.Children.toArray(props.children);
-    return childrenArray[0] || null;
-};
 
 class App extends React.Component {
     constructor(props) {
@@ -66,9 +64,14 @@ class App extends React.Component {
                                 defaultSelectedKeys={['1']}
                                 style={{lineHeight: '64px'}}
                             >
-                                <Menu.Item key={1}>
-                                    <Link to='/dashboard' pageTitle='Dashboard'>Dashboard</Link>
-                                </Menu.Item>
+                                <SubMenu title="Dashboard">
+                                        <Menu.Item key={1}>
+                                            <Link to='/investordashboard' pageTitle='Dashboard'>Investor Dashboard</Link>
+                                        </Menu.Item>
+                                        <Menu.Item key={1}>
+                                            <Link to='/advisordashboard' pageTitle='Dashboard'>Advisor Dashboard</Link>
+                                        </Menu.Item>
+                                </SubMenu>
                                 <Menu.Item key={2}>
                                     <Link to='/advice' pageTitle='Screen Advices'>Screen Advices</Link>
                                 </Menu.Item>
@@ -83,10 +86,8 @@ class App extends React.Component {
                     </Row>
                 </Header>
                 <Layout style={contentLayoutStyle}>
-                    <h1 style={pageTitleStyle}>{this.state.pageTitle}</h1>
-                    {/* <AqBreadCrumb /> */}
                     <Content>
-                        <Route exact={true} path='/dashboard' component={Dashboard} />
+                        {/* <Route exact={true} path='/dashboard' component={Dashboard} /> */}
                         <Route exact={true} path='/advice' component={ScreenAdvices} />
                         <Route exact={true} path='/stockresearch' component={StockResearch} />
                         <Route exact={true} path='/login' component={LoginModal} />
@@ -116,7 +117,6 @@ export default withRouter(App);
 const headerStyle = {
     background: '#fff',
     boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
-    overflow: 'hidden'
 };
 
 const headerColor = {
@@ -128,9 +128,4 @@ const contentLayoutStyle = {
     padding: '0 50px',
     background: '#fff',
     marginTop: '25px'
-};
-
-const pageTitleStyle = {
-    fontSize: '18px',
-    color: '#595959'
 };

@@ -2,11 +2,12 @@ import * as React from 'react';
 import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
+import Loading from 'react-loading-bar';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} from 'antd';
 import {MyChartNew} from './MyChartNew';
-import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard} from '../components';
-import {newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor} from '../constants';
-import {dateFormat, Utils} from '../utils';
+import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, BreadCrumb} from '../components';
+import {pageTitleStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor} from '../constants';
+import {dateFormat, Utils, getBreadCrumbArray} from '../utils';
 import '../css/advisorDashboard.css';
 
 const RadioGroup = Radio.Group;
@@ -83,7 +84,8 @@ export class AdvisorDashboard extends React.Component {
             myAdvicesLoading: false,
             advicePerformanceLoading: false,
             dashboardDataLoading: false,
-            showEmptyScreen: false
+            showEmptyScreen: false,
+            show: true
         };
         this.adviceColumns = [
             {
@@ -135,14 +137,14 @@ export class AdvisorDashboard extends React.Component {
     }
 
     getUserDashboardData = () => {
-        const url = `${requestUrl}/advisor/${advisorId}?dashboard=1`;
+        const url = `${requestUrl}/advisor/${Utils.getUserInfo().advisor}?dashboard=1`;
         const subsPerAdviceSeries = [];
         const subsTotalSeries = [];
         const ratingSeries = [];
         const advisorRating = [];
         let subscriberRating = {};
         let totalSubscribers = 0;
-        this.setState({dashboardDataLoading: true, myAdvicesLoading: true});
+        this.setState({dashboardDataLoading: true, myAdvicesLoading: true, show: true});
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             subsPerAdviceSeries.push({
@@ -213,7 +215,7 @@ export class AdvisorDashboard extends React.Component {
             this.setState({showEmptyScreen: true});
         })
         .finally(() => {
-            this.setState({dashboardDataLoading: false, myAdvicesLoading: false});
+            this.setState({dashboardDataLoading: false, myAdvicesLoading: false, show: false});
         })
     }
 
@@ -563,12 +565,19 @@ export class AdvisorDashboard extends React.Component {
         });
     }
 
-    render() {
+    renderPageContent = () => {
         const {radioValue} = this.state;
+        const breadCrumbArray = getBreadCrumbArray([{name: 'Advisor Dashboard'}]);
 
-        return(
+        return (
             this.state.showEmptyScreen
             ?   <Row>
+                    <Col span={24}>
+                        <h1 style={pageTitleStyle}>Advisor Dashboard</h1>
+                    </Col>
+                    <Col span={24}>
+                        <BreadCrumb breadCrumbs={breadCrumbArray}/>
+                    </Col>
                     <Col span={24} style={emptyPortfolioStyle}>
                         <h1>You have not created any advices yet. Get started by creating One</h1>
                         <Button 
@@ -582,19 +591,18 @@ export class AdvisorDashboard extends React.Component {
                 </Row>
             :   <Row style={{paddingBottom: '40px'}}>
                         {this.renderFilterModal()}
+                        <Col span={24}>
+                            <h1 style={pageTitleStyle}>Advisor Dashboard</h1>
+                        </Col>
+                        <Col span={24}>
+                            <BreadCrumb breadCrumbs={breadCrumbArray}/>
+                        </Col>
                         <Col span={24} style={{textAlign: 'right'}}>
                             <Button 
                                     type="primary" 
-                                    style={{marginRight: '20px'}}
                                     onClick={() => this.props.history.push('/dashboard/createadvice')}
                             >
                                 Create Advice
-                            </Button>
-                            <Button 
-                                    type="secondary" 
-                                    onClick={() => this.props.history.push('/investordashboard')}
-                            >
-                                Investor Dashboard
                             </Button>
                         </Col>
                         <Col span={24} style={{marginTop: '10px'}}>
@@ -678,7 +686,24 @@ export class AdvisorDashboard extends React.Component {
                                 </Col>
                             </Row>
                         </Col>
-                    </Row>  
+                    </Row>
+        );
+    }
+
+    render() {
+        return(
+            <Row>
+                <Loading 
+                    show={this.state.show}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+                {
+                    !this.state.show &&
+                    this.renderPageContent() 
+                }
+            </Row>
         );
     }
 }

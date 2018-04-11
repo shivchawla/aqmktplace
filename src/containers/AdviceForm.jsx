@@ -5,9 +5,10 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor} from '../constants';
-import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess} from '../components';
-import {getUnixStockData, getStockPerformance, Utils} from '../utils';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle} from '../constants';
+import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, BreadCrumb} from '../components';
+import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray} from '../utils';
+import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
 import {MyChartNew} from '../containers/MyChartNew';
@@ -64,6 +65,7 @@ export class AdviceFormImpl extends React.Component {
             rebalancingFrequency: rebalancingFrequency[0],
             maxNotional: maxNotional[0],
             adviceName: '',
+            adviceId: '',
             adviceDescription: '',
             adviceHeading: '',
             positions: [],
@@ -72,13 +74,16 @@ export class AdviceFormImpl extends React.Component {
             isOwner: false,
             addTickerModalVisible: false,
             compositionSeries: [],
-            show: false
+            show: false,
+            stockResearchModalVisible: false,
+            stockResearchModalTicker: {},
         };
         this.columns = [
             {
                 title: 'SYMBOL',
                 dataIndex: 'symbol',
-                key: 'symbol'
+                key: 'symbol',
+                render: text => <a onClick={() => this.updateTicker({name: text, symbol: text})}>{text}</a>
             },
             {
                 title: 'SHARES',
@@ -163,9 +168,7 @@ export class AdviceFormImpl extends React.Component {
                 axios({
                     method,
                     url,
-                    headers: {
-                        'aimsquant-token': aimsquantToken
-                    },
+                    headers: Utils.getAuthTokenHeader(),
                     data: requestData
                 })
                 .then((response) => {
@@ -174,7 +177,7 @@ export class AdviceFormImpl extends React.Component {
                     this.props.history.goBack();
                 })
                 .catch((error) => {
-                    message.error(error.message);
+                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                 });
             }
         });
@@ -202,7 +205,7 @@ export class AdviceFormImpl extends React.Component {
             }
         };
         axios({
-            headers: {'aimsquant-token': aimsquantToken},
+            headers: Utils.getAuthTokenHeader(),
             data: requestData,
             method: 'POST',
             url
@@ -236,7 +239,7 @@ export class AdviceFormImpl extends React.Component {
             this.setState({tickers, compositionSeries: series});
         })
         .catch(error => {
-            console.log(error.message);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         });
     }
 
@@ -479,7 +482,7 @@ export class AdviceFormImpl extends React.Component {
         const adviceDetailUrl = `${adviceUrl}/detail`;
         const tickers = [...this.state.tickers];
         this.setState({show: true});
-        axios.get(adviceUrl, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const {name, description, heading} = response.data;
             const isOwner = _.get(response.data, 'isOwner', false);
@@ -508,7 +511,7 @@ export class AdviceFormImpl extends React.Component {
                 this.setState({show: false}, () => {
                     this.props.form.setFieldsValue({name, description, headline: heading});
                 });
-                return axios.get(adviceDetailUrl, {headers: {'aimsquant-token': aimsquantToken}});
+                return axios.get(adviceDetailUrl, {headers: Utils.getAuthTokenHeader()});
             } else {
                 this.setState({show: false});
                 return null;
@@ -533,8 +536,11 @@ export class AdviceFormImpl extends React.Component {
                 this.props.form.setFieldsValue({startDate: moment(this.state.startDate)});
             });
         })
-        .catch(err => {
-            console.log(err);
+        .catch(error => {
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+        })
+        .finally(() => {
+            this.setState({show: false});
         });
     }
 
@@ -563,6 +569,16 @@ export class AdviceFormImpl extends React.Component {
         return current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
     }
 
+    updateTicker = record => {
+        this.setState({stockResearchModalTicker: record}, () => {
+            this.toggleModal();
+        });
+    }
+
+    toggleModal = ticker => {
+        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});        
+    }
+
     componentDidMount() {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -587,10 +603,29 @@ export class AdviceFormImpl extends React.Component {
         const {startDate, endDate} = this.state;
         const {getFieldDecorator} = this.props.form;
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
-        
+        const breadCrumbs = this.props.isUpdate
+                ? getBreadCrumbArray(UpdateAdviceCrumb, [
+                    {name: this.state.adviceName, url: `/advice/${this.props.adviceId}`},
+                    {name: 'Update Advice'}
+                ])
+                : getBreadCrumbArray(UpdateAdviceCrumb, [
+                    {name: 'Create Advice'}
+                ]);
+                
         return (
-            this.state.isOwner
+            this.state.isOwner || !this.props.isUpdate
             ?   <React.Fragment>
+                    <StockResearchModal 
+                            ticker={this.state.stockResearchModalTicker} 
+                            visible={this.state.stockResearchModalVisible}
+                            toggleModal={this.toggleModal}
+                    />
+                    <Col span={24}>
+                        <h1 style={pageTitleStyle}>{this.props.isUpdate ? "Update Advice" : "Create Advice"}</h1>
+                    </Col>
+                    <Col span={24}>
+                        <BreadCrumb breadCrumbs={breadCrumbs}/>
+                    </Col>
                     <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
                         <Button 
                                 style={buttonStyle} 

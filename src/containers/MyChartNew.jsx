@@ -3,16 +3,17 @@ import HighStock from 'highcharts/highstock';
 import _ from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
+import {withRouter} from 'react-router';
 import {Row, Col, Checkbox, message, Tabs, AutoComplete, Input, Icon, Spin} from 'antd';
 import {ChartTickerItem} from '../components';
-import {getStockPerformance, dateFormat} from '../utils';
+import {getStockPerformance, dateFormat, Utils} from '../utils';
 import '../css/myChart.css';
 
 const TabPane = Tabs.TabPane;
 const Option = AutoComplete.Option;
 const {aimsquantToken, requestUrl} = require('../localConfig');
 
-export class MyChartNew extends React.Component {
+class MyChartNewImpl extends React.Component {
     constructor(props) {
         super(props);
         const self = this;
@@ -338,7 +339,8 @@ export class MyChartNew extends React.Component {
     }
 
     initializeChart() {
-        this.chart = new HighStock['StockChart']('highchart-container', this.state.config);
+        const {chartId='highchart-container'} = this.props;
+        this.chart = new HighStock['StockChart'](chartId, this.state.config);
         // console.log(this.props.series);
         this.setState({series: this.props.series}, () => {
             this.updateSeries(this.state.series);
@@ -406,9 +408,12 @@ export class MyChartNew extends React.Component {
     handleSearch = query => {
         this.setState({spinning: true});
         const url = `${requestUrl}/stock?search=${query}`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({dataSource: this.processSearchResponseData(response.data)})
+        })
+        .catch(error => {
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({spinning: false});
@@ -483,11 +488,15 @@ export class MyChartNew extends React.Component {
 
     renderVerticalLegend = () => {
         const {dataSource} = this.state;
+        const {chartId="highchart-container"} = this.props;
 
         return (
             <Row>
                 <Spin spinning={this.state.loading}>
-                    <Col span={14} id="highchart-container" style={{borderRight: '1px solid #DCD6D6', paddingRight: '20px'}}></Col>
+                    <Col 
+                            span={14} id={chartId} 
+                            style={{borderRight: '1px solid #DCD6D6', paddingRight: '20px'}}>
+                    </Col>
                     <Col span={9} style={{marginLeft: '20px'}}>
                         <Row type="flex" align="middle">
                             <Col span={12}>
@@ -518,6 +527,8 @@ export class MyChartNew extends React.Component {
     }
 
     renderHorizontalLegend = () => {
+        const {chartId="highchart-container"} = this.props;
+
         return (
             <Row>
                 {
@@ -534,7 +545,7 @@ export class MyChartNew extends React.Component {
                         {this.renderHorizontalLegendList()}
                     </Col>
                 }
-                <Col id="highchart-container" style={{margin: '20px'}}></Col>
+                <Col id={chartId} style={{margin: '20px'}}></Col>
             </Row>
         );
     }
@@ -557,6 +568,8 @@ export class MyChartNew extends React.Component {
         return this.renderHorizontalLegend();
     }
 }
+
+export const MyChartNew = withRouter(MyChartNewImpl);
 
 const searchIconStyle = {
     marginRight: '20px',

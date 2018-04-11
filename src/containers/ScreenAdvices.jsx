@@ -3,9 +3,9 @@ import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal} from 'antd';
-import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent} from '../components';
-import {newLayoutStyle} from '../constants';
-import {Utils} from '../utils';
+import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, BreadCrumb} from '../components';
+import {newLayoutStyle, pageTitleStyle} from '../constants';
+import {Utils, getBreadCrumbArray} from '../utils';
 import '../css/screenAdvices.css';
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
@@ -83,8 +83,7 @@ export class ScreenAdvices extends React.PureComponent {
     getAdvices = (adviceUrl) => {
         this.setState({loading: true});
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
-        console.log(url);
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             console.log(response.data);
             this.setState({
@@ -92,7 +91,7 @@ export class ScreenAdvices extends React.PureComponent {
             });
         })
         .catch(error => {
-            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
             this.setState({loading: false});
@@ -231,10 +230,17 @@ export class ScreenAdvices extends React.PureComponent {
 
     render() {
         const antIcon = <Icon type="loading" style={{ fontSize: 36 }} spin />;
+        const breadCrumbs = getBreadCrumbArray([{name: 'Screen Advices'}]);
 
         return (
             <Row style={{paddingBottom: '20px'}}>
                 {this.renderFilter()}
+                <Col xl={17} md={24}>
+                    <h1 style={pageTitleStyle}>Screen Advices</h1>
+                </Col>
+                <Col xl={17} md={24}>
+                    <BreadCrumb breadCrumbs={breadCrumbs} />
+                </Col>
                 <Col xl={17} md={24} style={{...newLayoutStyle, padding: 0}}>
                     <Row className="row-container">
                         <Col span={24}>
