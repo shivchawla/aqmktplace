@@ -24,7 +24,8 @@ export class AdvisorDashboard extends React.Component {
             radioValue: 'all',
             advices: [],
             adviceUrl: `${requestUrl}/advice?all=true&trending=false&subscribed=false&following=false&order=-1`,
-            rawAdvices: [],
+            rawAdvices: [], // the advice structure is not changed, it is modified when new network call is done to sort the advices
+            staticAdvices: [], // the advice is not changed, it is populated only the first time when getDashboardData is called
             subsPerAdviceConfig: {
                 chart: {
                     type: 'pie',
@@ -152,9 +153,10 @@ export class AdvisorDashboard extends React.Component {
                 name: 'Browser share',
                 data: this.processSubsPerAdvice(response.data.advices)
             });
-            const currentRating = _.get(response.data, 'advices[0].analytics[response.data.advices[0].analytics.length - 1].rating.current', 0).toFixed(2);
-            const simulatedRating = _.get(response.data, 'advices[0].analytics[response.data.advices[0].analytics.length - 1].rating.simulated', 0).toFixed(2);
-            const advisorRatingStat = _.get(response.data, 'analytics[response.data.analytics.length - 1].rating.current', 0).toFixed(2);
+            const currentRating = _.get(response.data, 'advices[0].rating.current', 0).toFixed(2);
+            const simulatedRating = _.get(response.data, 'advices[0].rating.simulated', 0).toFixed(2);
+            const analytics = _.get(response.data, 'analytics', []);
+            const advisorRatingStat = (_.get(analytics[analytics.length - 1], 'rating.current', 0)).toFixed(2);
             const advisorSubscribers = _.get(response.data, 'analytics[response.data.analytics.length - 1].numFollowers', 0);
             subscriberRating = {name: 'Total Subscribers', data: this.processTotalSubscribers(_.get(response.data, 'analytics', []))};
             subsTotalSeries.push({
@@ -184,6 +186,7 @@ export class AdvisorDashboard extends React.Component {
             this.setState({
                 selectedAdvice: _.get(response.data, 'advices[0].name', ''),
                 rawAdvices: _.get(response.data, 'advices', []),
+                staticAdvices: _.get(response.data, 'advices', []),
                 showEmptyScreen: _.get(response.data, 'advices', []).length > 0 ? false : true,
                 advices: this.processAdvices(this.sortAdvices(_.get(response.data, 'advices', []))),
                 subsPerAdviceConfig: {
@@ -316,13 +319,14 @@ export class AdvisorDashboard extends React.Component {
 
     processRatingByAdvice = (advice, type='current') => {
         const monthData = [];
+        console.log(advice);
          // Initializing month's data to null
         for (let i=0; i < 12; i++) {
             monthData.push(null);
         };
         advice.analytics.map((item, index) => {
             const month = moment(item.date).format('M');
-            const rating = type === 'current' ? item.rating.current : item.rating.simulated;
+            const rating = type === 'current' ? _.get(item, 'rating.current', 0) : _.get(item, 'rating.simulated', 0);
             monthData[month - 1] = rating !== undefined ? Number(rating.toFixed(2)) : 0;
         });
 
@@ -371,7 +375,7 @@ export class AdvisorDashboard extends React.Component {
     }
 
     renderAdvicesMenu = (handleSelect, top = 0, right = 0) => {
-        const advices = this.state.rawAdvices;
+        const advices = this.state.staticAdvices;
 
         if(advices.length > 0) {
             return (
@@ -400,12 +404,13 @@ export class AdvisorDashboard extends React.Component {
     }
 
     handleSelectAdvice = value => {
-        const advices = this.state.rawAdvices;
+        const advices = this.state.staticAdvices;
         const ratingSeries = [];
         const series = this.state.ratingsConfig.series;
         const advice = advices.filter(item => item._id === value)[0];
-        const currentRating = _.get(advice, 'analytics[advice.analytics.length - 1].rating.current', 0).toFixed(2);
-        const simulatedRating = _.get(advice, '.analytics[advice.analytics.length - 1].rating.simulated', 0).toFixed(2);    
+        console.log(advice);
+        const currentRating = _.get(advice, 'rating.current', 0).toFixed(2);
+        const simulatedRating = _.get(advice, 'rating.simulated', 0).toFixed(2);    
 
         ratingSeries.push({name: 'Current Rating', data: this.processRatingByAdvice(advice), color: '#607D8B'});
         ratingSeries.push({name: 'Simulated Rating', data: this.processRatingByAdvice(advice, 'simulated'), color: '#FF9800'});
