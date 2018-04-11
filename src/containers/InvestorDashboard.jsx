@@ -249,7 +249,7 @@ export class InvestorDashboard extends React.Component {
         axios.get(subscribedAdvicesUrl, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({subscribedAdvices: this.processSubscribedAdvices(response.data)});
-            return axios.get(followingAdviceUrl, {headers: {'aimsquant-token': aimsquantToken}});
+            return axios.get(followingAdviceUrl, {headers: Utils.getAuthTokenHeader()});
         })
         .then(response => {
             const advices = [...this.state.subscribedAdvices];
@@ -262,8 +262,8 @@ export class InvestorDashboard extends React.Component {
                         id: advice._id,
                         key: index,
                         name: advice.name,
-                        return: Number(performanceSummary.current.totalReturn * 100).toFixed(2),
-                        netValue: performanceSummary.current.netValue,
+                        return: Number(_.get(performanceSummary, 'current.totalReturn', 0) * 100).toFixed(2),
+                        netValue: _.get(performanceSummary, 'current.netValue', 0),
                         rating: advice.rating.current,
                         isFollowing: advice.isFollowing,
                         isSubscribed: advice.isSubscribed
