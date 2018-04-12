@@ -125,10 +125,17 @@ export class HighChartNew extends React.Component {
     updateSeries = series => {
         if (series.length > 0) {
             this.clearSeries();
+            const validIndex = this.getValidIndex(series);
             series.map((item, index) => {
                 this.chart.addSeries({
                     name: item.name,
-                    data: item.data,
+                    data: item.data.map((item, index) => {
+                        console.log(index);
+                        return {
+                            ...item,
+                            z: index === validIndex ? 1 : 0
+                        }
+                    }),
                 });
             });
             this.updateTitle(series);
@@ -136,7 +143,7 @@ export class HighChartNew extends React.Component {
     }
 
     updateTitle = series => {
-        const titleIndex = this.getValidTitle(series);
+        const titleIndex = this.getValidIndex(series);
         try {
             this.chart.update({
                 title: {
@@ -152,7 +159,8 @@ export class HighChartNew extends React.Component {
         }
     }
 
-    getValidTitle = series => {
+    // Gives the index of the first item of the series where y > 0
+    getValidIndex = series => {
         const dataArray = series[0].data;
         let i = 0;
         while(i < dataArray.length) {

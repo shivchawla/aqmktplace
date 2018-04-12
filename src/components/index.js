@@ -32,3 +32,4 @@ export * from './NoIternetAccess';
 export * from './ForbiddenAccess';
 export * from './StockResearchModal';
 export * from './BreadCrumb';
+export * from './SubscribedAdvices';

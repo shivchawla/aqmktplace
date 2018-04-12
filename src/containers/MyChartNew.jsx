@@ -194,7 +194,7 @@ class MyChartNewImpl extends React.Component {
                                 change: 0,
                                 disabled: destroy,
                                 checked: legendItems.length < 5 ,
-                                color: this.chart.series[this.chart.series.length - 1].color
+                                color: color || this.chart.series[this.chart.series.length - 1].color
                             }
                         ]
                     }
@@ -207,7 +207,7 @@ class MyChartNewImpl extends React.Component {
                             change: 0,
                             disabled: destroy,
                             checked: legendItems.length < 5 ,
-                            color: this.chart.series[this.chart.series.length - 1].color
+                            color: color || this.chart.series[this.chart.series.length - 1].color
                         }]
                     }
                 }
@@ -455,7 +455,7 @@ class MyChartNewImpl extends React.Component {
     renderHorizontalLegendList = () => {
         const {legendItems} = this.state;
         return (
-            <Col style={{ zIndex:'20'}} span={14} >
+            <Col style={{ zIndex:'20'}} span={24} >
                 {
                     legendItems.map((legend, index) => {
                         const changeColor = legend.change < 0 ? '#F44336' : '#00C853';

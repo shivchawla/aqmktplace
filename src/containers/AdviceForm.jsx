@@ -220,10 +220,10 @@ export class AdviceFormImpl extends React.Component {
             series.push(
                 {
                     name: 'First Series',
-                    data: this.getVerifiedTransactions().map(item => {
+                    data: this.getVerifiedTransactions().map((item, index) => {
                         return {
                             name: item.symbol,
-                            y: item.weight
+                            y: item.weight,
                         }
                     })
                 }

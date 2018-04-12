@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
-import {newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle} from '../constants';
+import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, BreadCrumb} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -101,7 +101,7 @@ class AdviceDetailImpl extends React.Component {
         } = response.data;
         const {annualReturn, dailyChange, netValue, totalReturn} = _.get(performanceSummary, 'current', {});
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
-        tickers.push({name: benchmark});
+        tickers.push({name: benchmark, color: benchmarkColor});
         this.setState({
             tickers,
             adviceResponse: response.data,
@@ -150,13 +150,15 @@ class AdviceDetailImpl extends React.Component {
         if (response.data.simulated) {
             tickers.push({
                 name: 'ADVICE SIM',
-                data: this.processPerformanceData(_.get(response.data, 'simulated.portfolioValues', []))
+                data: this.processPerformanceData(_.get(response.data, 'simulated.portfolioValues', [])),
+                color: simulatedPerformanceColor
             });
         }
         if (response.data.current) {
             tickers.push({
                 name: 'ADVICE CURR',
-                data: this.processPerformanceData(_.get(response.data, 'current.portfolioValues', []))
+                data: this.processPerformanceData(_.get(response.data, 'current.portfolioValues', [])),
+                color: currentPerformanceColor
             });
         }
         this.setState({tickers});
@@ -452,7 +454,7 @@ class AdviceDetailImpl extends React.Component {
                     <Row>
                         <Col span={24} style={dividerStyle}></Col>
                     </Row>
-                    <Collapse bordered={false} defaultActiveKey={["3"]}>
+                    <Collapse bordered={false} defaultActiveKey={["2"]}>
                         <Panel 
                                 key="1"
                                 style={customPanelStyle} 
@@ -498,7 +500,7 @@ class AdviceDetailImpl extends React.Component {
                             >
                                 <Row>
                                     <Col span={24}>
-                                        <Tabs animated={false} defaultActiveKey="2">
+                                        <Tabs animated={false} defaultActiveKey="1">
                                             <TabPane tab="Performance" key="1" className="row-container">
                                                 <MyChartNew series={this.state.tickers} />
                                             </TabPane>

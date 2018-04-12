@@ -1,9 +1,12 @@
 import * as React from 'react';
+import _ from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker} from 'antd';
 import {AdviceTransactionTable} from '../components';
+import {MyChartNew} from '../containers/MyChartNew';
+import {currentPerformanceColor, simulatedPerformanceColor} from '../constants';
 import {Utils} from '../utils';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 
@@ -14,7 +17,7 @@ const {requestUrl, aimsquantToken} = require('../localConfig.js');
 
 const dateFormat = 'YYYY-MM-DD';
 
-class AdviceItemImpl extends React.Component {
+class SubscribedAdvicesImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -61,7 +64,7 @@ class AdviceItemImpl extends React.Component {
         let advices = [...this.state.advices];
         console.log('Component Mounted');
         const url = `${requestUrl}/advice?subscribed=true`;
-        axios.get(url, {headers: Utils.getAuthToken()})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             console.log('Subscribed Advices', response.data);
             response.data.map((advice, index) => {
@@ -69,6 +72,7 @@ class AdviceItemImpl extends React.Component {
                 axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()})
                 .then(response => {
                     const portfolioUrl = `${requestUrl}/advice/${advice._id}/portfolio`;
+                    const performanceUrl = `${requestUrl}/performance/advice/${advice._id}`;
                     const newAdvice = {
                         id: advice._id,
                         portfolio: {detail: null},
@@ -81,14 +85,21 @@ class AdviceItemImpl extends React.Component {
                         isSelected: false,
                         disabled: false,
                         date: moment().format(dateFormat),
-                        createdDate: response.data.createdDate
+                        createdDate: response.data.createdDate,
+                        currentPerformance: [],
+                        simulatedPerformance: []
                     };
                     axios.get(portfolioUrl, {headers: Utils.getAuthTokenHeader()})
                     .then(response => {
                         newAdvice.portfolio.detail = response.data.detail;
                         advices.push(newAdvice);
-                        this.setState({advices});
                         this.props.updateSubscribedAdvices(advices);
+                        this.setState({advices}, () => {
+                            this.getPerformance(axios.get(performanceUrl, {headers: Utils.getAuthTokenHeader()}), advice._id);
+                        });
+                    })
+                    .then(response => {
+                        console.log(response);
                     })
                     .catch(error => {
                         console.log(error);
@@ -109,15 +120,44 @@ class AdviceItemImpl extends React.Component {
         
     }
 
+    getPerformance = (axiosInstance, adviceid) => {
+        const advices = [...this.state.advices];
+        const target = advices.filter(item => item.id === adviceid)[0];
+
+        return new Promise((resolve, reject) => {
+            axiosInstance.then(response => {
+                const currentPerformanceUP = _.get(response.data, 'current.portfolioValues', []);
+                const simulatedPerformanceUP = _.get(response.data, 'simulated.portfolioValues', []);
+                const processedSimulatedPerformance = simulatedPerformanceUP.map(item => {
+                    return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))]
+                });
+                const processerCurrentPerformance = currentPerformanceUP.map(item => {
+                    return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))]
+                });
+                target.simulatedPerformance = processedSimulatedPerformance;
+                target.currentPerformance = processerCurrentPerformance;
+                this.setState({advices});
+                resolve(response.data);
+            })
+            .catch(error => {
+                reject(error);
+            })
+        })
+    }
+
     renderAdvices = () => {
         const {advices = []} = this.state;
 
         return advices.map((item, index) => {
             const data = this.processComposition(item);
+            const adviceSeries = [
+                {name: 'Current Performance', data: item.currentPerformance, color: currentPerformanceColor},
+                {name: 'Simulated Performance', data: item.simulatedPerformance, color: simulatedPerformanceColor}
+            ];
 
             return (
                 <Panel header={this.renderHeaderItem(item)} key={index}>
-                    <Tabs>
+                    <Tabs animated={false}>
                         <TabPane tab="Composition" key="1">
                             <Row>
                                 <Col span={6} offset={18}>
@@ -135,7 +175,7 @@ class AdviceItemImpl extends React.Component {
                             </Row>
                         </TabPane>
                         <TabPane tab="Performance" key="2">
-                            <h4>Performance</h4>
+                            <MyChartNew series={adviceSeries} chartId={`${item.name}-chart-container`}/>
                         </TabPane>
                     </Tabs>
                 </Panel>
@@ -202,7 +242,7 @@ class AdviceItemImpl extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
-        const performance = advice.performance.historicalPerformance;
+        const performance = _.get(advice, 'performance.historicalPerformance', {});
 
         return (
             <Row>
@@ -212,30 +252,33 @@ class AdviceItemImpl extends React.Component {
                             <Checkbox 
                                     checked={advice.isSelected} 
                                     onChange={(e) => this.handleCheckboxChange(e, advice)}
-                                    disabled={advice.disabled}
+                                    disabled={advice.disabled || false}
                             />
                         </Col>
                         <Col span={22}>
                             <Row>
                                 <Col span={24}>
-                                    <h5>{advice.name}</h5>
+                                    <h5>{advice.name || ''}</h5>
                                 </Col>
                                 <Col span={24}>
                                     <h5>
-                                        By {advice.advisor.user.firstName} {advice.advisor.user.lastName} {advice.updatedDate}
+                                        By 
+                                        {_.get(advice, 'advisor.user.firstName', '')} 
+                                        {_.get(advice, 'advisor.user.lastName', '')} 
+                                        {_.get(advice, 'updatedDate', '')}
                                     </h5>
                                 </Col>
                                 <Col span={24}>
                                     <Row>
                                         <Col span={4}>
                                             <MetricItem
-                                                    value={advice.subscribers}
+                                                    value={advice.subscribers || 0}
                                                     label="Subscribers"
                                             />
                                         </Col>
                                         <Col span={4}>
                                             <MetricItem
-                                                    value={advice.followers}
+                                                    value={advice.followers || 0}
                                                     label="Followers"
                                             />
                                         </Col>
@@ -247,47 +290,6 @@ class AdviceItemImpl extends React.Component {
                                         </Col>
                                     </Row>
                                 </Col>
-                                {
-                                    performance && 
-                                    <Col span={24}>
-                                        <Col span={4}>
-                                            <MetricItem 
-                                                    value={Math.round(performance.analytics.ratios.calmarratio * 100) / 100}
-                                                    label="Calmar Ratio"
-                                            />
-                                        </Col>
-                                        <Col span={4}>
-                                            <MetricItem 
-                                                    value={Math.round(performance.analytics.ratios.alpha * 100) / 100}
-                                                    label="Alpha"
-                                            />
-                                        </Col>
-                                        <Col span={4}>
-                                            <MetricItem 
-                                                    value={Math.round(performance.analytics.ratios.sortinoratio * 100) / 100}
-                                                    label="Sortino Ratio"
-                                            />
-                                        </Col>
-                                        <Col span={4}>
-                                            <MetricItem 
-                                                    value={Math.round(performance.analytics.ratios.treynorratio * 100) / 100}
-                                                    label="Treynor Ratio"
-                                            />
-                                        </Col>
-                                        <Col span={4}>
-                                            <MetricItem 
-                                                    value={Math.round(performance.analytics.ratios.stability * 100) / 100}
-                                                    label="Stability"
-                                            />
-                                        </Col>
-                                        <Col span={4}>
-                                            <MetricItem 
-                                                    value={Math.round(performance.analytics.ratios.informationratio * 100) / 100}
-                                                    label="Information Ratio"
-                                            />
-                                        </Col>
-                                    </Col>
-                                }
                             </Row>
                         </Col>
                     </Row>
@@ -305,7 +307,7 @@ class AdviceItemImpl extends React.Component {
     }
 }
 
-export const AdviceItem = withRouter(AdviceItemImpl);
+export const SubscribedAdvices = withRouter(SubscribedAdvicesImpl);
 
 const MetricItem = (props) => {
     return (

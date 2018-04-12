@@ -438,7 +438,8 @@ class PortfolioDetailImpl extends React.Component {
                             <Col span={24} style={dividerStyle}></Col>
                         </Row>
                         <Collapse bordered={false} defaultActiveKey={["2"]}>
-                            <Panel  key='1'
+                            <Panel  
+                                key='1'
                                 style={customPanelStyle} 
                                 header={<h3 style={metricsHeaderStyle}>Summary</h3>}
                                 forceRender={true}>   

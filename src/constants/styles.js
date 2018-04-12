@@ -112,3 +112,7 @@ export const pageTitleStyle = {
 };
 
 export const benchmarkColor = '#D50000';
+
+export const currentPerformanceColor = '#9C27B0';
+
+export const simulatedPerformanceColor = '#00BCD4';

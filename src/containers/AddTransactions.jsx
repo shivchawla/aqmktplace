@@ -8,7 +8,7 @@ import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, I
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, BreadCrumb} from '../components';
 import {MyChartNew} from './MyChartNew';
-import {AdviceItem} from '../components/AdviceItem';
+import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
 import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor} from '../constants';
@@ -154,7 +154,7 @@ class AddTransactionsImpl extends React.Component {
                         overflowY: 'scroll'
                     }}
             >
-                <AdviceItem 
+                <SubscribedAdvices 
                         investorId={investorId}
                         addAdvice={this.addAdvice}
                         deleteAdvice = {this.deleteAdvice}
@@ -814,7 +814,7 @@ class AddTransactionsImpl extends React.Component {
                                     </Row>
                                     <Row style={{marginTop: '5px'}}>
                                         <Col span={24}>
-                                            <Tabs defaultActiveKey="1" animated={false} style={{paddingBottom: '20px'}}>
+                                            <Tabs defaultActiveKey="2" animated={false} style={{paddingBottom: '20px'}}>
                                                 <TabPane tab="Stock Transaction" key="1" style={{minHeight: '250px'}}>
                                                     {this.renderStockTransactions()}
                                                 </TabPane> 
