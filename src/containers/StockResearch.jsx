@@ -2,6 +2,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
+import {withRouter} from 'react-router';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio} from 'antd';
 import {List} from 'immutable';
 import {AqLink, DashboardCard, BreadCrumb} from '../components';
@@ -16,7 +17,7 @@ const RadioGroup = Radio.Group;
 const Option = AutoComplete.Option;
 const TabPane = Tabs.TabPane;
 
-export class StockResearch extends React.Component {
+class StockResearchImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -360,6 +361,8 @@ export class StockResearch extends React.Component {
         );
     }
 }
+
+export const StockResearch = withRouter(StockResearchImpl);
 
 const metricStyle = {
     // marginTop: '20px',

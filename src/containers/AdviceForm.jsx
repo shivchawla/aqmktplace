@@ -138,14 +138,15 @@ export class AdviceFormImpl extends React.Component {
         const url = isUpdate ? `${requestUrl}/advice/${adviceId}` : `${requestUrl}/advice`;
         const method = isUpdate ? 'PUT' : 'POST';
         this.props.form.validateFields((err, values) => {
-            let {name, description, headline, startDate} = values;
+            const defaultStartDate = moment().add(1, 'days').format(dateFormat);
+            let {name, description, headline, startDate = defaultStartDate} = values;
             startDate = moment(startDate).format('YYYY-MM-DD');
             const endDate = moment(startDate).add(5, 'days').format(dateFormat);
             if(!err && this.validateTransactions()) {
                 requestData = {
                     name,
                     description,
-                    heading: 'headline',
+                    heading: isUpdate ? null : 'headline',
                     portfolio: {
                         name,
                         detail: {
@@ -717,7 +718,7 @@ export class AdviceFormImpl extends React.Component {
                                                                 // onChange={this.onStartDateChange} 
                                                                 format={dateFormat}
                                                                 style={{...inputStyle, width: 150}}
-                                                                disabled={this.state.isPublic}
+                                                                // disabled={this.state.isPublic}
                                                                 disabledDate={this.getDisabeldDate}
                                                             /> 
                                                         )}

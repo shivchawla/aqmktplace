@@ -1,7 +1,7 @@
 import * as React from 'react';
 import moment from 'moment';
 import axios from 'axios';
-import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker } from 'antd';
+import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker, Icon} from 'antd';
 import {MetricItem} from '../components';
 import {metricsValueStyle, metricsLabelStyle, nameEllipsisStyle} from '../constants';
 import {EditableCell} from './AqEditableCell';
@@ -23,39 +23,52 @@ export class AdviceTransactionTable extends React.Component {
         }
         this.columns = [
             {
-                title: 'NAME',
+                title: this.renderTableHeader('NAME'),
                 dataIndex: 'name',
                 key: 'name',
-                render: text => <h3 style={nameEllipsisStyle}>{text}</h3>
+                render: text => <h3 style={{...nameEllipsisStyle, textAlign: 'center'}}>{text}</h3>
             },
             {
-                title: 'SYMBOL',
+                title: this.renderTableHeader('SYMBOL'),
                 dataIndex: 'symbol',
                 key: 'symbol'
             },
             {
-                title: 'SHARES',
+                title: this.renderTableHeader('OLD SHARES'),
                 dataIndex: 'modifiedShares',
                 key: 'shares'
             },
             {
-                title: 'LAST PRICE',
-                dataIndex: 'price',
-                key: 'price',
-                render: (text, record) => this.renderInput(text, record, 'price', 'text')
+                title: this.renderTableHeader('NEW SHARES'),
+                dataIndex: 'modifiedShares',
+                key: 'shares'
             },
             {
-                title: 'AVG. PRICE',
+                title: this.renderTableHeader('LAST PRICE'),
+                dataIndex: 'price',
+                key: 'price',
+                render: (text, record) => this.renderInput(text, record, 'price', 'text'),
+                width: 100
+            },
+            {
+                title: this.renderTableHeader('AVG. PRICE'),
                 dataIndex: 'costBasic',
                 key: 'costBasic'
             }, 
             {
-                title: 'SECTOR',
+                title: this.renderTableHeader('SECTOR'),
                 dataIndex: 'sector',
                 key: 'sector'
+            },
+            {
+                title: this.renderTableHeader('TRANSACTIONAL QTY.'),
+                dataIndex: 'transactionalQuantity',
+                key: 'transactionalQuantity'
             }
         ]
     }
+
+    renderTableHeader = text => <span style={tableHeaderStyle}>{text}</span>
 
     componentWillReceiveProps(nextProps) {
         this.setState({
@@ -187,7 +200,8 @@ export class AdviceTransactionTable extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
-        const profitOrLossColor = advice.profitLoss < 0 ? '#F44336' : '#4CAF50';
+        const profitOrLossColor = advice.profitLosse < 0 ? '#F44336' : '#4CAF50';
+        const adviceChangeIconSrc = advice.hasChanged ? 'exclamation-circle' : 'check-circle';
         if (!this.props.header) {
             return (
                 <Row type="flex" justify={this.props.preview ? "space-between" : null}>
@@ -207,20 +221,34 @@ export class AdviceTransactionTable extends React.Component {
                     </Col>
                     {
                         !this.props.preview &&
-                        <Col span={4} offset={1}>
+                        <Col span={2} offset={1}>
                             <Input 
+                                disabled={true}
                                 onClick={this.handleInputClick}
                                 value={advice.units} 
                                 type="number" 
-                                placeholder="Units" 
+                                placeholder="Old Units" 
                                 onChange={(e) => {this.handleInputChange(e, advice)}}
                             />
-                            <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Units</h3>
+                            <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Old Units</h3>
                         </Col>
                     }
                     {
                         !this.props.preview &&
-                        <Col span={4} offset={1}>
+                        <Col span={2} offset={1}>
+                            <Input 
+                                    onClick={this.handleInputClick}
+                                    value={advice.units} 
+                                    type="number" 
+                                    placeholder="Target Units" 
+                                    onChange={(e) => {this.handleInputChange(e, advice)}}
+                            />
+                            <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Target Units</h3>
+                        </Col>
+                    }
+                    {
+                        !this.props.preview &&
+                        <Col span={3} offset={1}>
                             <DatePicker
                                 onChange={date => this.handleDateChange(date, advice)}
                                 value={moment(advice.date, dateFormat)}
@@ -255,13 +283,14 @@ export class AdviceTransactionTable extends React.Component {
                     }
                     {
                         this.props.preview &&
-                        <Col span={4}>
+                        <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <MetricItem 
                                     value={`${advice.profitLoss} %`} 
                                     label="Profit/Loss" 
                                     valueStyle={{...metricsValueStyle, color: profitOrLossColor}}
                                     labelStyle={metricsLabelStyle}
                             />
+                            <Icon type={adviceChangeIconSrc} style={{fontSize: '20px', marginRight: '15px'}}/>
                         </Col>
                     }
                 </Row>
@@ -287,4 +316,9 @@ const customPanelStyle = {
 const adviceNameStyle = {
     fontFamily: 'Lato, sans-serif',
     fontSize: '16px'
+};
+
+const tableHeaderStyle = {
+    fontSize: '12px',
+    color: '#787878'
 };

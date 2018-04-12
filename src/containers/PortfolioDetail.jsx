@@ -116,85 +116,93 @@ class PortfolioDetailImpl extends React.Component {
         );
     }
 
-    processPresentAdviceTransaction = (adviceTransactions, advicePerformance) => {
+    // subpositions, advicePerformance
+    processPresentAdviceTransaction = (subPositions, advicePerformance) => {
         let advices = [];
-        adviceTransactions.map((item, index) => {
-            advices = item.advice === null 
-                            ? this.addToMyPortfolio(advices, advicePerformance, item, index) 
-                            : this.addToAdvice(advices, advicePerformance, item, index);
+        subPositions.map((position, positionIndex) => {
+            advices = position.advice === null // check whether the sub position belongs to any advice 
+                            ? this.addToMyPortfolio(advices, advicePerformance, position, positionIndex) 
+                            : this.addToAdvice(advices, advicePerformance, position, positionIndex);
         });
 
         return advices;
     }
 
-    addToMyPortfolio = (advices, advicePerformance, item, key) => {
+    addToMyPortfolio = (advices, advicePerformance, position, positionIndex) => {
         const adviceIndex = _.findIndex(advices, advice => advice.id === null);
+
+        // Check if an advice with the same id is already added.
+        // if not create a new advice and add the position into it
+        // if exists insert the position into the particular advice
         return adviceIndex === -1 
-                        ? this.addAdvicePosition(advices, advicePerformance, item, key) 
-                        : this.addAdvicePosition(advices, advicePerformance, item, key, adviceIndex);
+                        ? this.addPositionToAdvice(advices, advicePerformance, position, positionIndex) 
+                        : this.addPositionToAdvice(advices, advicePerformance, position, positionIndex, adviceIndex);
     }
 
-    addToAdvice = (advices, advicePerformance, item, key) => {
+    addToAdvice = (advices, advicePerformance, position, positionIndex) => {
         const adviceIndex = _.findIndex(advices, advice => {
-            if (item.advice !== null) {
-                return advice.id === item.advice._id
+            if (position.advice !== null) {
+                return advice.id === position.advice._id
             }
             return false;
         });
-    
+
+        // Check if an advice with the same id is already added.
+        // if not create a new advice and add the position into it
+        // if exists insert the position into the particular advice
         return adviceIndex === -1 
-                        ? this.addAdvicePosition(advices, advicePerformance, item, key) 
-                        : this.addAdvicePosition(advices, advicePerformance, item, key, adviceIndex);
+                        ? this.addPositionToAdvice(advices, advicePerformance, position, positionIndex) 
+                        : this.addPositionToAdvice(advices, advicePerformance, position, positionIndex, adviceIndex);
     }
 
-    addAdvicePosition = (advices, advicePerformance, item, key, adviceIndex = null) => {
-        const advice = advicePerformance.filter(adviceItem => {
-            if (item.advice !== null) {
-                return item.advice._id === adviceItem.advice;
+    addPositionToAdvice = (advices, advicePerformance, position, positionIndex, adviceIndex = null) => {
+        const advice = advicePerformance.filter(advicePerformanceItem => {
+            if (position.advice !== null) { // such that the sub position belongs to an advice
+                return position.advice._id === advicePerformanceItem.advice;
             } else {
-                return adviceItem.advice === "";
+                return advicePerformanceItem.advice === "";
             }
         })[0];
 
-        if (adviceIndex === null) {
+        if (adviceIndex === null) { // A new advice is to be created with position in it
             advices.push({
-                id: item.advice ? item.advice._id : null,
-                name: item.advice ? item.advice.name : 'My Portfolio',
-                key,
+                id: position.advice ? position.advice._id : null,
+                name: position.advice ? position.advice.name : 'My Portfolio',
+                key: positionIndex,
                 weight: Number((_.get(advice, 'personal.weightInPortfolio', 0) * 100).toFixed(2)),
                 profitLoss: (_.get(advice, 'personal.pnlPct', 0)).toFixed(2),
                 units: 1,
                 netAssetValue: Number((_.get(advice, 'personal.netValue', 0)).toFixed(2)),
+                hasChanged: advice.hasChanged || false,
                 composition: [
                     {
                         key: 1,
-                        adviceKey: key,
-                        symbol: item.security.ticker,
-                        shares: item.quantity,
-                        modifiedShares: item.quantity,
-                        price: item.lastPrice,
-                        costBasic: item.avgPrice,
+                        adviceKey: positionIndex,
+                        symbol: position.security.ticker,
+                        shares: position.quantity,
+                        modifiedShares: position.quantity,
+                        price: position.lastPrice,
+                        costBasic: position.avgPrice,
                         unrealizedPL: 1231,
                         weight: '12%',
-                        name: item.security.detail ? item.security.detail.Nse_Name : 'undefined',
-                        sector: item.security.detail ? item.security.detail.Sector : 'undefined'
+                        name: position.security.detail ? position.security.detail.Nse_Name : 'undefined',
+                        sector: position.security.detail ? position.security.detail.Sector : 'undefined'
                     }
                 ]
             });
-        } else {
-            // advices[adviceIndex].netAssetValue += item.lastPrice * item.quantity;
+        } else { // A new position needs to be added where the advice has index == adviceIndex
             advices[adviceIndex].composition.push({
-                key: key + 1,
+                key: positionIndex + 1,
                 adviceKey: advices[adviceIndex].key,
-                symbol: item.security.ticker,
-                shares: item.quantity,
-                modifiedShares: item.quantity,
-                price: item.lastPrice,
-                costBasic: item.avgPrice,
+                symbol: position.security.ticker,
+                shares: position.quantity,
+                modifiedShares: position.quantity,
+                price: position.lastPrice,
+                costBasic: position.avgPrice,
                 unrealizedPL: 1231,
                 weight: '12%',
-                name: item.security.detail ? item.security.detail.Nse_Name : 'undefined',
-                sector: item.security.detail ? item.security.detail.Sector : 'undefined'
+                name: position.security.detail ? position.security.detail.Nse_Name : 'undefined',
+                sector: position.security.detail ? position.security.detail.Sector : 'undefined'
             });
         }
 
@@ -285,7 +293,6 @@ class PortfolioDetailImpl extends React.Component {
             const tickers = [...this.state.tickers];
             const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${this.props.match.params.id}`;
             this.setState({show: true});
-            console.log('Header', Utils.getAuthTokenHeader());
             axios.get(url, {headers: Utils.getAuthTokenHeader()})
             .then(response => { // Getting details of portfolio
                 if (response.data.benchmark) {
@@ -295,7 +302,6 @@ class PortfolioDetailImpl extends React.Component {
                 }   
                 const advicePerformance = response.data.advicePerformance;
                 const subPositions = response.data.detail.subPositions;
-                // const advices = this.updateAdvices(this.processPresentAdviceTransaction(subPositions, advicePerformance));
                 const advices = this.processPresentAdviceTransaction(subPositions, advicePerformance);
                 positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
                 this.setState({
@@ -303,8 +309,6 @@ class PortfolioDetailImpl extends React.Component {
                     presentAdvices: advices,
                     stockPositions: _.get(response.data, 'detail.positions', []),
                     tickers
-                }, () => {
-                    console.log(this.state.tickers);
                 });
                 return axios.get(performanceUrl, {headers: Utils.getAuthTokenHeader()});
             })
@@ -356,8 +360,6 @@ class PortfolioDetailImpl extends React.Component {
                     performanceDollarSeries: constituentDollarPerformance,
                     performancepercentageSeries: constituentPercentagePerformance,
                     pieSeries: series,
-                }, () => {
-                    console.log(this.state.tickers);
                 });
             })
             .catch(error => {
@@ -423,7 +425,7 @@ class PortfolioDetailImpl extends React.Component {
                                                 className="secondary-btn"
                                                 style = {{marginLeft: '20px'}}
                                         >
-                                            Add Transactions
+                                            Update Portfolio
                                         </Button>
                                     </Col>
                                 </Row>
@@ -437,7 +439,7 @@ class PortfolioDetailImpl extends React.Component {
                         <Row>
                             <Col span={24} style={dividerStyle}></Col>
                         </Row>
-                        <Collapse bordered={false} defaultActiveKey={["2"]}>
+                        <Collapse bordered={false} defaultActiveKey={["3"]}>
                             <Panel  
                                 key='1'
                                 style={customPanelStyle} 
@@ -477,38 +479,25 @@ class PortfolioDetailImpl extends React.Component {
                                 header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
                                 <Row style={{padding: '0 30px'}}>
                                     <Col span={24}>
-                                        {/*<Tabs 
-                                            animated={false} 
-                                            tabBarStyle={{ width: '300px', marginLeft: '30px'}}>
-                                        <TabPane tab="Portfolio" key="1" style={{padding: '0 30px'}}>*/}
-                                                <Row className="row-container">
-                                                    <Col span={8} offset={16} style={{marginBottom: 10, marginTop: '-10px'}}>
-                                                        <Radio.Group 
-                                                                value={this.state.toggleValue} 
-                                                                onChange={this.toggleView} 
-                                                                style={{margin: '0 auto 0 auto'}} 
-                                                                //position: 'absolute', right: 0}}
-                                                                size="small"
-                                                        >
-                                                            <Radio.Button value="advice">Advice</Radio.Button>
-                                                            <Radio.Button value="stock">Stock</Radio.Button>
-                                                        </Radio.Group>
-                                                    </Col>
-                                                </Row>
-                                                {
-                                                    this.state.toggleValue === 'advice'
-                                                    ? this.renderAdviceTransactions()
-                                                    : this.renderStockTransactions()
-                                                }
-                                            {/*</TabPane>
-                                            <TabPane tab="Performance" key="2" style={{padding: '20px 30px'}}>
-                                                <Row>
-                                                    <Col span={24}>
-                                                        <MyChartNew series={this.state.tickers}/> 
-                                                    </Col>
-                                                </Row>
-                                            </TabPane>
-                                            </Tabs>*/}
+                                        <Row className="row-container">
+                                            <Col span={24} style={{textAlign: 'right'}}>
+                                                <Radio.Group 
+                                                        value={this.state.toggleValue} 
+                                                        onChange={this.toggleView} 
+                                                        style={{margin: '0 auto 0 auto'}} 
+                                                        //position: 'absolute', right: 0}}
+                                                        size="small"
+                                                >
+                                                    <Radio.Button value="advice">Advice</Radio.Button>
+                                                    <Radio.Button value="stock">Stock</Radio.Button>
+                                                </Radio.Group>
+                                            </Col>
+                                        </Row>
+                                        {
+                                            this.state.toggleValue === 'advice'
+                                            ? this.renderAdviceTransactions()
+                                            : this.renderStockTransactions()
+                                        }
                                     </Col>
                                 </Row>
                             </Panel>
@@ -540,7 +529,7 @@ class PortfolioDetailImpl extends React.Component {
                                         )}
                                         className="secondary-btn"
                                 >
-                                    Add Transactions
+                                    Update Portfolio
                                 </Button>
                             </Col>
                         </Row>

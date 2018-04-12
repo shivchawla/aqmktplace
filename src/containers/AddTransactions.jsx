@@ -11,7 +11,7 @@ import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
-import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor} from '../constants';
+import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle} from '../constants';
 import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
 import {Utils, getBreadCrumbArray} from'../utils';
@@ -788,7 +788,7 @@ class AddTransactionsImpl extends React.Component {
                                         Cancel
                                     </Button>
                                 </Col>
-                                <Col xl={18} lg={18} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
+                                <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, marginTop: '20px'}}>
                                     {
                                         !portfolioId && 
                                         <Row type="flex" align="middle" style={{marginTop: '20px'}}>
