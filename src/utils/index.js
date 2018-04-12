@@ -314,3 +314,5 @@ export const getBreadCrumbArray = (array = [], item = []) => {
 }
 
 export * from './requests';
+
+export * from './portfolio';

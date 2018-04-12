@@ -117,6 +117,9 @@ export default withRouter(App);
 const headerStyle = {
     background: '#fff',
     boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
+    position: 'fixed',
+    width: '100%',
+    zIndex: '1000'
 };
 
 const headerColor = {
@@ -125,7 +128,7 @@ const headerColor = {
 };
 
 const contentLayoutStyle = {
-    padding: '0 50px',
+    padding: '50px 50px 20px 50px',
     background: '#fff',
     marginTop: '25px'
 };

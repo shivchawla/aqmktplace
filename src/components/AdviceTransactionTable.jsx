@@ -1,11 +1,12 @@
 import * as React from 'react';
 import moment from 'moment';
 import axios from 'axios';
-import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker, Icon} from 'antd';
+import {withRouter} from 'react-router';
+import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker, Icon, Tooltip} from 'antd';
 import {MetricItem} from '../components';
-import {metricsValueStyle, metricsLabelStyle, nameEllipsisStyle} from '../constants';
+import {metricsValueStyle, metricsLabelStyle, nameEllipsisStyle, metricColor} from '../constants';
 import {EditableCell} from './AqEditableCell';
-import {getStockData} from '../utils';
+import {getStockData, Utils} from '../utils';
 import '../css/adviceTransactionTable.css';
 
 const Panel = Collapse.Panel;
@@ -13,7 +14,7 @@ const dateFormat ='YYYY-MM-DD';
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
 
-export class AdviceTransactionTable extends React.Component {
+class AdviceTransactionTableImpl extends React.Component {
 
     constructor(props) {
         super(props);
@@ -26,7 +27,7 @@ export class AdviceTransactionTable extends React.Component {
                 title: this.renderTableHeader('NAME'),
                 dataIndex: 'name',
                 key: 'name',
-                render: text => <h3 style={{...nameEllipsisStyle, textAlign: 'center'}}>{text}</h3>
+                render: text => <h3 style={nameEllipsisStyle}>{text}</h3>
             },
             {
                 title: this.renderTableHeader('SYMBOL'),
@@ -40,8 +41,8 @@ export class AdviceTransactionTable extends React.Component {
             },
             {
                 title: this.renderTableHeader('NEW SHARES'),
-                dataIndex: 'modifiedShares',
-                key: 'shares'
+                dataIndex: 'newShares',
+                key: 'newShares'
             },
             {
                 title: this.renderTableHeader('LAST PRICE'),
@@ -51,11 +52,6 @@ export class AdviceTransactionTable extends React.Component {
                 width: 100
             },
             {
-                title: this.renderTableHeader('AVG. PRICE'),
-                dataIndex: 'costBasic',
-                key: 'costBasic'
-            }, 
-            {
                 title: this.renderTableHeader('SECTOR'),
                 dataIndex: 'sector',
                 key: 'sector'
@@ -63,7 +59,8 @@ export class AdviceTransactionTable extends React.Component {
             {
                 title: this.renderTableHeader('TRANSACTIONAL QTY.'),
                 dataIndex: 'transactionalQuantity',
-                key: 'transactionalQuantity'
+                key: 'transactionalQuantity',
+                render: text => <span style={{color: Number(text) >= 0 ? metricColor.positive : metricColor.negative}}>{text}</span>
             }
         ]
     }
@@ -139,17 +136,20 @@ export class AdviceTransactionTable extends React.Component {
         const advices = [...this.state.advices];
         let netAssetValue = 0;
         let target = advices.filter(item => item.key === advice.key)[0];
-        target['units'] = e.target.value; 
+        target['newUnits'] = e.target.value; 
         target.composition = target.composition.map((item, index) => {
-            if (e.target.value.length > 0 && Number(e.target.value) > 0) {
-                item.modifiedShares = item.shares * Number(e.target.value);
-                netAssetValue += item.modifiedShares * item.price;
+            console.log(e.target.value);
+            if (e.target.value.length > 0) {
+                item.transactionalQuantity = item.newShares * Number(e.target.value) - item.shares;
+                // item.modifiedShares = item.shares * Number(e.target.value);
+                // netAssetValue += (item.newShares * Number(e.target.value)) * item.price;
             } else {
-                item.modifiedShares = item.shares;
+                console.log('Empty Units');
+                item.transactionalQuantity = item.newShares - item.shares;
             }
             return item;
         });
-        target['netAssetValue'] = netAssetValue;
+        // target['netAssetValue'] = netAssetValue;
         this.setState({advices});
     }
 
@@ -171,7 +171,7 @@ export class AdviceTransactionTable extends React.Component {
 
         const selectedDate = moment(date).format(dateFormat);
         const url = `${requestUrl}/advice/${adviceId}/portfolio?date=${selectedDate}`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response =>{
             const portfolio = response.data.detail;
             if (portfolio) {
@@ -188,7 +188,8 @@ export class AdviceTransactionTable extends React.Component {
             });
         })
         .catch(error => {
-            // console.log(error);
+            console.log(error);
+            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         });
     }
 
@@ -202,6 +203,8 @@ export class AdviceTransactionTable extends React.Component {
     renderHeaderItem = (advice) => {
         const profitOrLossColor = advice.profitLosse < 0 ? '#F44336' : '#4CAF50';
         const adviceChangeIconSrc = advice.hasChanged ? 'exclamation-circle' : 'check-circle';
+        const adviceChangeIconColor = advice.hasChanged ? metricColor.neutral : metricColor.positive;
+        const tooltipText = advice.hasChanged ? 'Advice needs to be updated' : 'Advice up to date';
         if (!this.props.header) {
             return (
                 <Row type="flex" justify={this.props.preview ? "space-between" : null}>
@@ -225,7 +228,7 @@ export class AdviceTransactionTable extends React.Component {
                             <Input 
                                 disabled={true}
                                 onClick={this.handleInputClick}
-                                value={advice.units} 
+                                value={advice.oldUnits} 
                                 type="number" 
                                 placeholder="Old Units" 
                                 onChange={(e) => {this.handleInputChange(e, advice)}}
@@ -238,7 +241,7 @@ export class AdviceTransactionTable extends React.Component {
                         <Col span={2} offset={1}>
                             <Input 
                                     onClick={this.handleInputClick}
-                                    value={advice.units} 
+                                    value={advice.newUnits} 
                                     type="number" 
                                     placeholder="Target Units" 
                                     onChange={(e) => {this.handleInputChange(e, advice)}}
@@ -251,7 +254,7 @@ export class AdviceTransactionTable extends React.Component {
                         <Col span={3} offset={1}>
                             <DatePicker
                                 onChange={date => this.handleDateChange(date, advice)}
-                                value={moment(advice.date, dateFormat)}
+                                value={moment()}
                                 format={dateFormat}
                                 disabledDate={(current) => this.props.disabledDate(current, advice)}
                             />
@@ -290,7 +293,12 @@ export class AdviceTransactionTable extends React.Component {
                                     valueStyle={{...metricsValueStyle, color: profitOrLossColor}}
                                     labelStyle={metricsLabelStyle}
                             />
-                            <Icon type={adviceChangeIconSrc} style={{fontSize: '20px', marginRight: '15px'}}/>
+                            <Tooltip title={tooltipText}>
+                                <Icon 
+                                        type={adviceChangeIconSrc} 
+                                        style={{fontSize: '20px', marginRight: '15px', color: adviceChangeIconColor}}
+                                />
+                            </Tooltip>
                         </Col>
                     }
                 </Row>
@@ -308,6 +316,8 @@ export class AdviceTransactionTable extends React.Component {
         );
     }
 }
+
+export const AdviceTransactionTable = withRouter(AdviceTransactionTableImpl);
 
 const customPanelStyle = {
     border: '1px solid #eaeaea',

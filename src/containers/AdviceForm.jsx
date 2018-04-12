@@ -146,7 +146,7 @@ export class AdviceFormImpl extends React.Component {
                 requestData = {
                     name,
                     description,
-                    heading: isUpdate ? null : 'headline',
+                    // heading: isUpdate ? null : 'headline',
                     portfolio: {
                         name,
                         detail: {

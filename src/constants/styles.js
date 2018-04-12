@@ -99,7 +99,8 @@ export const tabBackgroundColor = '#fbfbfc';
 
 export const metricColor = {
     positive: '#4CAF50',
-    negative: '#f44335'
+    negative: '#f44335',
+    neutral: '#3F51B5'
 };
 
 export const loadingColor = {

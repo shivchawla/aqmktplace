@@ -14,7 +14,7 @@ import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransac
 import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle} from '../constants';
 import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
-import {Utils, getBreadCrumbArray} from'../utils';
+import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice} from'../utils';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -32,6 +32,7 @@ class AddTransactionsImpl extends React.Component {
             selectedAdvices: [],
             presentAdvices: [],
             presentStocks: [],
+            latestAdvices: [],
             subscribedAdvices: [],
             isPreviewModalVisible: false,
             isSubscibedAdviceModalVisible: false,
@@ -75,7 +76,7 @@ class AddTransactionsImpl extends React.Component {
     }
 
     renderAdviceTransactions = () => {
-        const {advices, subscribedAdvices} = this.state;
+        const {advices, subscribedAdvices, latestAdvices} = this.state;
         const advicesToBeDeleted = this.state.advices.filter(item => item.checked === true);
 
         return (
@@ -460,7 +461,8 @@ class AddTransactionsImpl extends React.Component {
             netAssetValue: this.calculateNetAssetValue(advice),
             weight: '12.4%',
             profitLoss: '+12.4%',
-            units: 1,
+            oldUnits: 1,
+            newUnits: 1,
             key,
             date: advice.date,
             createdDate: advice.createdDate,
@@ -489,6 +491,7 @@ class AddTransactionsImpl extends React.Component {
                     sector: _.get(item, 'security.detail.Sector', ''),
                     shares: item.quantity || 0,
                     modifiedShares: item.quantity || 0,
+                    newShares: 0,
                     price: item.lastPrice || 0,
                     costBasic: 12,
                     unrealizedPL: 1231,
@@ -645,7 +648,6 @@ class AddTransactionsImpl extends React.Component {
     }
 
     processPreviewAdviceTransaction = (adviceTransactions) => {
-        console.log('Advice Transactions', adviceTransactions);
         const advices = [];
         adviceTransactions.map((item, index) => {
             console.log(item);
@@ -724,20 +726,65 @@ class AddTransactionsImpl extends React.Component {
                 // Check if the user is authorized to access this page
                 this.setState({show: true});
                 const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
+                const unionAdvices = [];
                 axios.get(url, {headers: Utils.getAuthTokenHeader()})
                 .then(response => {
+                    const advicePerformance = _.get(response.data, 'advicePerformance', []);
+                    const subPositions = _.get(response.data, 'detail.subPositions', []);
+                    const advices = this.processSubscribedAdviceTransactions(subPositions, advicePerformance);
+                    const changedAdvices = advices.filter(advice => advice.hasChanged === true);
                     const name = _.get(response.data, 'name', '');
                     const id = _.get(response.data, '_id', '');
                     const tickers = [...this.state.tickers];
                     tickers.push({
                         name: this.state.selectedBenchmark
                     });
-                    this.setState({tickers, notAuthorized: false, portfolioName: name, portfolioId: id});
+                    this.setState({
+                        tickers, notAuthorized: false, 
+                        portfolioName: name, portfolioId: id,
+                        advices: changedAdvices,
+                    });
+                    return this.getSubscribedAdvicesRequest(changedAdvices);
+                })
+                .then(adviceResponse => {
+                    let advices = [...this.state.advices]; // Portfolio Advices
+                    const modifiedAdvices = this.generateLatestAdvices(advices, adviceResponse); // Latest advices
+                    advices.map(advice => {
+                        const modifiedAdvice = modifiedAdvices.filter(item => item.id === advice.id)[0];
+                        const consolidatedList = _.uniq(_.concat(
+                                advice.composition.map(item => item.symbol), 
+                                modifiedAdvice.composition.map(item => item.symbol)
+                        ));
+                        const composition = [];
+                        consolidatedList.map(consolidatedListItem => { // Running through the list of all positions
+                            const adviceCompositionIndex = _.findIndex(advice.composition, item => item.symbol === consolidatedListItem);
+                            const modifiedCompositionIndex = _.findIndex(modifiedAdvice.composition, item => item.symbol === consolidatedListItem);
+                            const oldShares = adviceCompositionIndex === -1 ? 0 : advice.composition[adviceCompositionIndex].modifiedShares;
+                            const newShares = modifiedCompositionIndex === -1 ? 0 : modifiedAdvice.composition[modifiedCompositionIndex].modifiedShares;
+                            const positionDetail = adviceCompositionIndex > -1 ? advice.composition[adviceCompositionIndex] : modifiedAdvice.composition[modifiedCompositionIndex];
+                            composition.push({
+                                ...positionDetail,
+                                name: consolidatedListItem,
+                                shares: oldShares,
+                                modifiedShares: oldShares,
+                                newShares,
+                                transactionalQuantity: newShares - (oldShares * Number(advice.oldUnits))
+                            });
+                        });
+                        unionAdvices.push({
+                            ...advice,
+                            composition
+                        });
+                    });
+                    this.setState({advices: unionAdvices});
                 })
                 .catch(error => {
-                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-                    if (error.response.status === 400) {
-                        this.setState({notAuthorized: true});
+                    console.log(error);
+                    if (error.response) {
+                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                        if (error.response.status === 400) {
+                            this.setState({notAuthorized: true});
+                        }
                     }
                 })
                 .finally(() => {
@@ -745,6 +792,72 @@ class AddTransactionsImpl extends React.Component {
                 });
             }
         }
+    }
+
+    generateLatestAdvices = (portfolioAdvices, adviceResponse) => {
+        const modifiedAdvices = [];
+        adviceResponse.map((response, index) => {
+            const adviceId = response.data.adviceId;
+            const advice = portfolioAdvices.filter(advice => advice.id === adviceId)[0];
+            modifiedAdvices.push({
+                id: advice.id,
+                name: advice.name,
+                key: index,
+                weight: advice.weight,
+                profitLoss: advice.profitLoss,
+                oldUnits: advice.units,
+                newUnits: 1,
+                netAssetValue: advice.netAssetValue,
+                hasChanged: advice.hasChanged,
+                composition: this.getAdviceComposition(_.get(response.data, 'detail.positions', []), index)
+            })
+        });
+
+        return modifiedAdvices;
+    }
+ 
+    generateDiffAdvices = (portfolioAdvices, latestAdvices) => {
+        return _.union(portfolioAdvices, latestAdvices);
+    }
+
+    getSubscribedAdvicesRequest = advices => {
+        const adviceRequests = advices.map(
+            advice => 
+                axios.get(`${requestUrl}/advice/${advice.id}/portfolio`, {headers: Utils.getAuthTokenHeader()}
+            )
+        );
+        return Promise.all(adviceRequests)        
+    }
+
+    getAdviceComposition = (composition, adviceIndex) => {
+        return composition.map((position, index) => {
+            return {
+                key: index,
+                adviceKey: adviceIndex,
+                symbol: position.security.ticker,
+                shares: position.quantity,
+                modifiedShares: position.quantity,
+                newShares: 0,
+                price: position.lastPrice,
+                costBasic: position.avgPrice,
+                unrealizedPL: 1231,
+                weight: '12%',
+                name: _.get(position, 'security.detail.Nse_Name', 'undefined'),
+                sector: _.get(position, 'security.detail.Sector', 'undefined'),
+                transactionalQuantity: 0 
+            }
+        })
+    }
+
+    processSubscribedAdviceTransactions = (subPositions, advicePerformance) => {
+        let advices = [];
+        subPositions.map((position, positionIndex) => {
+            advices = position.advice === null // check whether the sub position belongs to any advice 
+                            ? addToMyPortfolio(advices, advicePerformance, position, positionIndex) 
+                            : addToAdvice(advices, advicePerformance, position, positionIndex);
+        });
+
+        return advices;
     }
 
     renderPageContent = () => {
