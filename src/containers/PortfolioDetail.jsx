@@ -36,7 +36,7 @@ import {
 const dateFormat = 'YYYY-MM-DD';
 const Panel = Collapse.Panel;
 const TabPane = Tabs.TabPane;
-const {requestUrl, investorId} = require('../localConfig.js');
+const {requestUrl} = require('../localConfig.js');
 
 class PortfolioDetailImpl extends React.Component {
     constructor(props) {
@@ -99,7 +99,12 @@ class PortfolioDetailImpl extends React.Component {
                 <Col span={24} style={{marginTop: 20}}>
                     {
                         this.state.presentAdvices.length > 0 
-                        ? <AdviceTransactionTable preview advices={this.state.presentAdvices} toggleStockResearchModal={this.updateTicker}/>
+                        ? <AdviceTransactionTable 
+                                preview 
+                                advices={this.state.presentAdvices} 
+                                toggleStockResearchModal={this.updateTicker}
+                                hideTransactionalDetails={true}
+                          />
                         : <h5>Please add advices to your portfolio</h5>
                     }
                 </Col>

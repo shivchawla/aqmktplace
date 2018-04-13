@@ -11,7 +11,7 @@ import {MyChartNew} from './MyChartNew';
 import {generateColorData, getMetricColor, Utils, getBreadCrumbArray} from '../utils';
 import 'react-loading-bar/dist/index.css'
 
-const {requestUrl, aimsquantToken, investorId} = require('../localConfig');
+const {requestUrl, aimsquantToken} = require('../localConfig');
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 const TabPane = Tabs.TabPane;
@@ -164,7 +164,7 @@ export class InvestorDashboard extends React.Component {
             const portfolioMetrics = _.get(response.data, 'defaultPerformance.current.metrics.portfolioMetrics', {});
             const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
             const performance = _.get(response.data, 'defaultPerformance.current.metrics.portfolioPerformance.true', {});
-            const performanceUrl = `${requestUrl}/performance/investor/${investorId}/${response.data.defaultPortfolio._id}`;
+            const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${response.data.defaultPortfolio._id}`;
             const performanceData = _.get(response.data, 'defaultPerformance.simulated.portfolioValues', []).map(item => {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue]
             });

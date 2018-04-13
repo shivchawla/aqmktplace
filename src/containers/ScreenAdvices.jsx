@@ -8,7 +8,7 @@ import {newLayoutStyle, pageTitleStyle, shadowBoxStyle} from '../constants';
 import {Utils, getBreadCrumbArray} from '../utils';
 import '../css/screenAdvices.css';
 
-const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
+const {aimsquantToken, requestUrl} = require('../localConfig');
 const Option = Select.Option;
 const CheckboxGroup = Checkbox.Group;
 const TabPane = Tabs.TabPane;

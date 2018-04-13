@@ -15,7 +15,7 @@ const RadioButton = Radio.Button;
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 const ReactHighcharts = require('react-highcharts');
-const {requestUrl, aimsquantToken, advisorId} = require('../localConfig');
+const {requestUrl, aimsquantToken} = require('../localConfig');
 
 export class AdvisorDashboard extends React.Component {
     constructor(props) {

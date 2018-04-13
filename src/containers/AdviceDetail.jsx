@@ -17,7 +17,7 @@ import '../css/adviceDetail.css';
 const TabPane = Tabs.TabPane;
 const Panel = Collapse.Panel;
 
-const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
+const {aimsquantToken, requestUrl} = require('../localConfig.js');
 const dateFormat = 'Do MMMM YYYY';
 
 class AdviceDetailImpl extends React.Component {

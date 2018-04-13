@@ -19,7 +19,7 @@ import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice} from'../utils'
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
 const FormItem = Form.Item;
-const {investorId, aimsquantToken, requestUrl} = require('../localConfig.js');
+const {aimsquantToken, requestUrl} = require('../localConfig.js');
 
 const dateFormat = 'YYYY-MM-DD';
 
@@ -164,7 +164,7 @@ class AddTransactionsImpl extends React.Component {
                     }}
             >
                 <SubscribedAdvices 
-                        investorId={investorId}
+                        investorId={Utils.getUserInfo().investor}
                         addAdvice={this.addAdvice}
                         deleteAdvice = {this.deleteAdvice}
                         subscribedAdvices={this.state.subscribedAdvices}
@@ -261,8 +261,8 @@ class AddTransactionsImpl extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         const url = !this.props.portfolioId 
-                ? `${requestUrl}/investor/${investorId}/portfolio`
-                : `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}/transactions`;
+                ? `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio`
+                : `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}/transactions`;
         const transactions = [
             ...this.processAdviceTransaction(this.state.advices),
             ...this.processCashTransaction(this.state.cashTransactions),
@@ -309,8 +309,8 @@ class AddTransactionsImpl extends React.Component {
     previewPortfolio = () => {
         const tickers = [...this.state.tickers];
         const url = !this.props.portfolioId 
-                ? `${requestUrl}/investor/${investorId}/portfolio`
-                : `${requestUrl}/investor/${investorId}/portfolio/${this.props.portfolioId}/transactions`;
+                ? `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio`
+                : `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.portfolioId}/transactions`;
         const transactions = [
             ...this.processAdviceTransaction(this.state.advices),
             ...this.processCashTransaction(this.state.cashTransactions),

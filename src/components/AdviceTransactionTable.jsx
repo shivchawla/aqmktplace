@@ -22,7 +22,7 @@ class AdviceTransactionTableImpl extends React.Component {
             advices: props.advices,
             subscribedAdvices: props.subscribedAdvices,
         }
-        this.columns = [
+        this.detailedColumns = [
             {
                 title: this.renderTableHeader('NAME'),
                 dataIndex: 'name',
@@ -62,6 +62,37 @@ class AdviceTransactionTableImpl extends React.Component {
                 dataIndex: 'transactionalQuantity',
                 key: 'transactionalQuantity',
                 render: text => <span style={{color: Number(text) >= 0 ? metricColor.positive : metricColor.negative}}>{text}</span>
+            }
+        ]
+        this.summaryColumns = [
+            {
+                title: this.renderTableHeader('NAME'),
+                dataIndex: 'name',
+                key: 'name',
+                render: (text, record) => <a onClick={() => this.props.toggleStockResearchModal && this.props.toggleStockResearchModal(record)}style={nameEllipsisStyle}>{text}</a>,
+                width: 100
+            },
+            {
+                title: this.renderTableHeader('SYMBOL'),
+                dataIndex: 'symbol',
+                key: 'symbol'
+            },
+            {
+                title: this.renderTableHeader('SHARES'),
+                dataIndex: 'modifiedShares',
+                key: 'shares'
+            },
+            {
+                title: this.renderTableHeader('LAST PRICE'),
+                dataIndex: 'price',
+                key: 'price',
+                render: (text, record) => this.renderInput(text, record, 'price', 'text'),
+                width: 100
+            },
+            {
+                title: this.renderTableHeader('SECTOR'),
+                dataIndex: 'sector',
+                key: 'sector'
             }
         ]
     }
@@ -125,7 +156,7 @@ class AdviceTransactionTableImpl extends React.Component {
         return (
             <Table 
                     dataSource={tickers} 
-                    columns={this.columns} 
+                    columns={this.props.hideTransactionalDetails ? this.summaryColumns : this.detailedColumns} 
                     pagination={false} 
                     size="small"
                     style={{margin: '20px 20px'}} 
