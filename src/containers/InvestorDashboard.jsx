@@ -760,24 +760,24 @@ export class InvestorDashboard extends React.Component {
                     </Col>
                 </Row>
             :   <Row>
-                <Col span={24}>
+                <Row type="flex" justify="space-between" align="middle">
+                    <Col span={16}>
                         <h1>Investor Dashboard</h1>
-                </Col>
-                <Col span={24}>
                         <BreadCrumb breadCrumbs={breadCrumbArray}/>
-                </Col>
-                <Col style={{paddingBottom: '20px'}}>
-                    <Row type="flex" justify="end">
-                        <Col>
-                            <Button 
-                                    type="primary" 
-                                    onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                                    style={{marginRight: '20px'}}
+                    </Col>
+
+                    <Col span={3}>
+                        <Button 
+                            type="primary" 
+                            onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                            //style={{marginRight: '20px'}}
                             >
-                                Create Portfolio
-                            </Button>
-                        </Col>
-                    </Row>
+                            Create Portfolio
+                        </Button>
+                    </Col>
+                </Row>
+               
+                <Col style={{paddingBottom: '20px', marginTop: '-20px'}}>
                     <Row gutter={12}>
                         <Col xl={12} lg={24}>
                             <DashboardCard 

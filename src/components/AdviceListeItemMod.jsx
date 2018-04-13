@@ -213,7 +213,7 @@ class AdviceListItemImpl extends React.PureComponent {
                     <img style={iconStyle} src={pie} />
                 </Col>
                 <Col span={24} style={{fontSize: '14px'}}>
-                    <h5>Diversified <span style={{fontSize: "12px"}}>80%</span></h5>
+                    <h5>Diversified <span style={{fontSize: "14px"}}>80%</span></h5>
                 </Col>
             </Row>
         );
@@ -226,7 +226,7 @@ class AdviceListItemImpl extends React.PureComponent {
                     <img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />
                 </Col>
                 <Col span={24} style={{marginTop: '6px'}}>
-                    <h5>Beta <span style={{fontSize: "12px"}}>{beta.toFixed(2)}</span></h5>
+                    <h5>Beta <span style={{fontSize: "14px"}}>{beta.toFixed(2)}</span></h5>
                 </Col>
             </Row>
         );
@@ -239,7 +239,7 @@ class AdviceListItemImpl extends React.PureComponent {
                     <img style={{transform: 'scale(0.8, 0.8)'}} src={totalReturnIcon} />
                 </Col>
                 <Col span={24}>
-                    <h5>Total Ret <span style={{fontSize: "12px"}}>{(totalReturn * 100).toFixed(2)} %</span></h5>
+                    <h5>Total Ret <span style={{fontSize: "14px"}}>{(totalReturn * 100).toFixed(2)} %</span></h5>
                 </Col>
             </Row>
         );
@@ -252,7 +252,7 @@ class AdviceListItemImpl extends React.PureComponent {
                 <img style={iconStyle} src={sunrise} />
                 </Col>
                 <Col span={24}>
-                    <h5>Volatility <span style={{fontSize: "12px"}}>{Number((volatility * 100).toFixed(2))} %</span></h5>
+                    <h5>Volatility <span style={{fontSize: "14px"}}>{Number((volatility * 100).toFixed(2))} %</span></h5>
                 </Col>
             </Row>
         );
@@ -382,7 +382,7 @@ class AdviceListItemImpl extends React.PureComponent {
 
         return (
             <Row type="flex" style={activeCardStyle} align="top" onClick={e => this.handleClick(id)} onMouseEnter={this.handleHover} onMouseLeave={this.handleHover}>
-                <Col span={24}>
+                <Col span={24} style={{paddingLeft:'10px', paddingRight:'10px'}}>
                     <Row>
                         <Col span={10}>
                             <Row>
