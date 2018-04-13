@@ -12,7 +12,7 @@ const initialTransactions = () => {
     for(let i=0; i < 3; i++) {
         data.push({
             symbol: '',
-            key: i,
+            key: Math.random().toString(36),
             shares: 0,
             lastPrice: 0,
             totalValue: 0,
@@ -186,7 +186,7 @@ export class AqStockTableTransaction extends React.Component {
         const {data} = this.state;
         data.push({
             symbol: '',
-            key: data.length,
+            key: Math.random().toString(36),
             shares: 0,
             lastPrice: 0,
             totalValue: 0,

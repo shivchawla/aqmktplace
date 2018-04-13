@@ -11,7 +11,7 @@ const addInititalTransaction = () => {
     const transactions = [];
     for (let i=0 ; i< 3; i++) {
         transactions.push({
-            key: i,
+            key: Math.random().toString(36),
             symbol: '',
             date: moment().format("YYYY-MM-DD"),
             shares: 0,
@@ -74,10 +74,10 @@ export class AqStockTableCreatePortfolio extends React.Component {
     renderInput = (text, record, column, type, validationStatus) => {
         return (
             <EditableCell 
-                    validationStatus={validationStatus}
-                    type={type}
-                    value={text}
-                    onChange={value => this.handleRowChange(value, record, column)}
+                validationStatus={validationStatus}
+                type={type}
+                value={text}
+                onChange={value => this.handleRowChange(value, record, column)}
             />
         );
     }
@@ -139,6 +139,8 @@ export class AqStockTableCreatePortfolio extends React.Component {
     getRowSelection = () => {
         return {
             onChange: (selectedRowKeys, selectedRows) => {
+                console.log(selectedRows);
+                console.log(selectedRowKeys);
                 this.setState(prevState => {
                     return {
                         selectedRows
@@ -159,7 +161,7 @@ export class AqStockTableCreatePortfolio extends React.Component {
     addItem = () => {
         const data = [...this.state.data];
         data.push({
-            key: data.length + 1,
+            key: Math.random().toString(36),
             symbol: '',
             date: moment().format("YYYY-MM-DD"),
             shares: 0,

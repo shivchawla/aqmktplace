@@ -14,7 +14,7 @@ const addInitialTransactions = () => {
             date: undefined,
             type: 'deposit',
             notes: '',
-            key: i
+            key: Math.random().toString(36),
         });
     }
 
@@ -167,7 +167,7 @@ export class AqStockTableCashTransaction extends React.Component {
             date: '2018-02-21',
             type: 'deposit',
             notes: '',
-            key: data.length + 1
+            key: Math.random().toString(36),
         });
         this.setState({data}, () => {
             this.props.onChange(data);
