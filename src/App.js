@@ -50,7 +50,7 @@ class App extends React.Component {
 
     render() {
         return (
-            <Layout style={{backgroundColor: '#fff'}}>
+            <Layout style={{backgroundColor: '#f9f9f9'}}>
                 <Header style={headerStyle}>
                     <Row type="flex">
                         <Col span={4}>
@@ -61,9 +61,7 @@ class App extends React.Component {
                         <Col span={20} style={{display: 'flex', justifyContent: 'flex-end'}}>
                             <Menu 
                                 mode="horizontal"
-                                defaultSelectedKeys={['1']}
-                                style={{lineHeight: '64px'}}
-                            >
+                                defaultSelectedKeys={['1']}>
                                 <SubMenu title="Dashboard">
                                         <Menu.Item key={1}>
                                             <Link to='/investordashboard' pageTitle='Dashboard'>Investor Dashboard</Link>
@@ -85,6 +83,7 @@ class App extends React.Component {
                         </Col> 
                     </Row>
                 </Header>
+
                 <Layout style={contentLayoutStyle}>
                     <Content>
                         {/* <Route exact={true} path='/dashboard' component={Dashboard} /> */}
@@ -116,10 +115,13 @@ export default withRouter(App);
 
 const headerStyle = {
     background: '#fff',
-    boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
-    position: 'fixed',
+    borderBottom: '1px solid #e1e1e1', 
+    //boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
+    //position: 'fixed',
     width: '100%',
-    zIndex: '1000'
+    //zIndex: '1000'
+    height:'64px'
+
 };
 
 const headerColor = {
@@ -128,7 +130,9 @@ const headerColor = {
 };
 
 const contentLayoutStyle = {
-    padding: '50px 50px 20px 50px',
-    background: '#fff',
-    marginTop: '25px'
+    //padding: '10px 0px 0px 0px',
+    background: '#f9f9f9',
+    //marginTop: '15px'
+    width:'90%',
+    margin:'0 auto'
 };

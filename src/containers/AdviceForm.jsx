@@ -6,7 +6,7 @@ import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle} from '../constants';
-import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, BreadCrumb} from '../components';
+import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {store} from '../store';
@@ -612,7 +612,6 @@ export class AdviceFormImpl extends React.Component {
                 : getBreadCrumbArray(UpdateAdviceCrumb, [
                     {name: 'Create Advice'}
                 ]);
-                
         return (
             this.state.isOwner || !this.props.isUpdate
             ?   <React.Fragment>
@@ -621,12 +620,7 @@ export class AdviceFormImpl extends React.Component {
                             visible={this.state.stockResearchModalVisible}
                             toggleModal={this.toggleModal}
                     />
-                    <Col span={24}>
-                        <h1 style={pageTitleStyle}>{this.props.isUpdate ? "Update Advice" : "Create Advice"}</h1>
-                    </Col>
-                    <Col span={24}>
-                        <BreadCrumb breadCrumbs={breadCrumbs}/>
-                    </Col>
+                    <AqPageHeader title={this.props.isUpdate ? "Update Advice" : "Create Advice"} breadCrumbs={breadCrumbs}/>
                     <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
                         <Button 
                                 style={buttonStyle} 

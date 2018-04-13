@@ -5,8 +5,8 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
-import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, BreadCrumb, AqPortfolioSummary} from '../components';
-import {loadingColor, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
+import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary} from '../components';
+import {pageTitleStyle, loadingColor, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {generateColorData, getMetricColor, Utils, getBreadCrumbArray} from '../utils';
 import 'react-loading-bar/dist/index.css'
@@ -733,27 +733,10 @@ export class InvestorDashboard extends React.Component {
 
     renderPageContent = () => {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);
+        const button = !this.state.showEmptyScreen.status ? {route: '/dashboard/createportfolio', title: 'Create Portfolio'} : null;
         return (
             <Row>
-                <Row type="flex" justify="space-between" align="middle">
-                    <Col span={16}>
-                        <h3>Investor Dashboard</h3>
-                        <BreadCrumb breadCrumbs={breadCrumbArray}/>
-                    </Col>
-
-                    {!this.state.showEmptyScreen.status && 
-                        <Col span={3}>
-                            <Button 
-                                type="primary" 
-                                onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                                //style={{marginRight: '20px'}}
-                                >
-                                Create Portfolio
-                            </Button>
-                        </Col>
-                    }
-                </Row>
-
+                <AqPageHeader title="Investor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
             {this.state.showEmptyScreen.status ?
                 <Col span={24} style={emptyPortfolioStyle}>
                     {
@@ -772,13 +755,13 @@ export class InvestorDashboard extends React.Component {
                     }
                 </Col>
             :   
-                <Col style={{paddingBottom: '20px', marginTop: '-20px'}}>
+                <Col style={{paddingBottom: '20px'}}>
                     <Row gutter={12}>
                         <Col xl={12} lg={24}>
                             <DashboardCard 
                                     title="SUMMARY" 
                                     loading={this.state.defaultPortfolioLoading}
-                                    cardStyle={{marginTop:'10px', height:'425px'}} 
+                                    cardStyle={{height:'425px'}} 
                                     headerStyle={headerStyle}
                                     menu={this.renderPortfolioMenu()}
                             >
@@ -797,7 +780,7 @@ export class InvestorDashboard extends React.Component {
                             <DashboardCard 
                                     title="PERFORMANCE CHART" 
                                     loading={this.state.defaultPortfolioLoading}
-                                    cardStyle={{marginTop:'10px', height: '425px'}} 
+                                    cardStyle={{height: '425px'}} 
                                     headerStyle={headerStyle}
                                     menu={this.renderPortfolioMenu()}
                             >

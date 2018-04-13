@@ -6,7 +6,7 @@ import moment from 'moment';
 import {withRouter} from 'react-router'
 import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
-import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, BreadCrumb, StockResearchModal} from '../components';
+import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, AqPageHeader, StockResearchModal} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
@@ -913,21 +913,13 @@ class AddTransactionsImpl extends React.Component {
                                 visible={this.state.stockResearchModalVisible}
                                 toggleModal={this.toggleModal}
                         />
-                            <Row>
-                                <Col span={24}>
-                                    <h1 style={pageTitleStyle}>{this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"}</h1>
-                                </Col>
-                                <Col span={24}>
-                                    <BreadCrumb breadCrumbs={breadCrumbs}/>
-                                </Col>
-                            </Row>
+                            <AqPageHeader title={this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"} breadCrumbs={breadCrumbs}/>
                             <Form>
                                 <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
                                     <Button 
-                                            type="primary" 
-                                            onClick={this.togglePreviewModal} 
-                                            style={{marginRight: '20px'}}
-                                    >
+                                        type="primary" 
+                                        onClick={this.togglePreviewModal} 
+                                        style={{marginRight: '20px'}}>
                                         Preview
                                     </Button>
                                     <Button

@@ -24,7 +24,6 @@ export class ChartTickerItem extends React.Component {
         const {name = 'HDFCBANK', y = 1388, checked = false, change=0, disabled = false, color='#585858'} = this.props.legend;
         const iconScale = this.state.focused ? 'scale(1,1)' : 'scale(0, 0)';
         const changeColor = change < 0 ? '#F44336' : '#00C853';
-
         return(
             <Row 
                     className='ticker-row' 
@@ -37,10 +36,10 @@ export class ChartTickerItem extends React.Component {
                 <Col span={2}>
                     <Checkbox disabled={disabled} checked={checked} onChange={this.props.onChange}/>
                 </Col>
-                <Col span={10}>
+                <Col span={8}>
                     <h4 style={{fontSize: '12px', color}}>{name}</h4>
                 </Col>
-                <Col span={5}>
+                <Col span={6}>
                     <MetricItem 
                             label="Price"
                             value={y}
@@ -48,7 +47,7 @@ export class ChartTickerItem extends React.Component {
                             valueStyle={{fontSize: '13px', fontWeight: 400}}
                     />
                 </Col>
-                <Col span={5}>
+                <Col span={6}>
                     <MetricItem 
                             value={`${change} %`}
                             label="Change"

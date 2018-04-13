@@ -30,6 +30,7 @@ export const noOverflowStyle = {
 };
 
 export const shadowBoxStyle = {
+    backgroundColor: '#fff',
     borderRadius: '2px',
     boxShadow: '0 1px 2px rgba(171, 171, 171, 50)',
     overflow: 'hidden',

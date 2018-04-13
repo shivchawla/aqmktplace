@@ -47,16 +47,16 @@ class MyChartNewImpl extends React.Component {
                         count: 3,
                         text: '3m'
                     }, {
-                        type: 'month',
-                        count: 6,
-                        text: '6m'
-                    }, {
                         type: 'ytd',
                         text: 'YTD'
                     }, {
                         type: 'year',
                         count: 1,
                         text: '1y'
+                    }, {
+                        type: 'year',
+                        count: 2,
+                        text: '2y'
                     }, {
                         type: 'all',
                         text: 'All'
@@ -440,9 +440,9 @@ class MyChartNewImpl extends React.Component {
                         return (
                             <Col span={24} key={index}>
                                 <ChartTickerItem 
-                                        legend={legend}
-                                        onChange={(e) => this.onCheckboxChange(e, legend)}
-                                        deleteItem = {this.deleteTicker}
+                                    legend={legend}
+                                    onChange={(e) => this.onCheckboxChange(e, legend)}
+                                    deleteItem = {this.deleteTicker}
                                 />
                             </Col>
                         );

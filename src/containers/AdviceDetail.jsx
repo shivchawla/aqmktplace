@@ -8,7 +8,7 @@ import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, BreadCrumb} from '../components';
+import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray} from '../utils';
@@ -420,14 +420,7 @@ class AdviceDetailImpl extends React.Component {
 
         return (
             <Row>
-                <Col span={24}>
-                    <h1 style={pageTitleStyle}>{name}</h1>
-                </Col>
-                
-                <Col span={24}>
-                    <BreadCrumb breadCrumbs={breadCrumbs}/>
-                </Col>
-                
+                <AqPageHeader title={name} breadCrumbs={breadCrumbs}/>
                 <Col span={18} style={shadowBoxStyle}>
                     <StockResearchModal 
                             ticker={this.state.stockResearchModalTicker} 

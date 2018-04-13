@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal} from 'antd';
-import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, BreadCrumb} from '../components';
+import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, AqPageHeader} from '../components';
 import {newLayoutStyle, pageTitleStyle, shadowBoxStyle} from '../constants';
 import {Utils, getBreadCrumbArray} from '../utils';
 import '../css/screenAdvices.css';
@@ -235,14 +235,16 @@ export class ScreenAdvices extends React.PureComponent {
         return (
 
             <Row>
-                <Row>
+                <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs}/>
+                {/*<Row style={{backgroundColor: '#f9f9f9', paddingTop:'10px'}}>
                     <Col xl={17} md={24}>
                         <h1 style={pageTitleStyle}>Screen Advices</h1>
                     </Col>
                     <Col xl={17} md={24}>
                         <BreadCrumb breadCrumbs={breadCrumbs} />
                     </Col>
-                </Row>    
+                </Row>*/}    
+                
                 <Row className="row-container" style={shadowBoxStyle}>
                     {this.renderFilter()}
                     

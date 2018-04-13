@@ -5,7 +5,7 @@ import _ from 'lodash';
 import Loading from 'react-loading-bar';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} from 'antd';
 import {MyChartNew} from './MyChartNew';
-import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, BreadCrumb} from '../components';
+import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader} from '../components';
 import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor} from '../constants';
 import {dateFormat, Utils, getBreadCrumbArray} from '../utils';
 import '../css/advisorDashboard.css';
@@ -579,26 +579,10 @@ export class AdvisorDashboard extends React.Component {
     renderPageContent = () => {
         const {radioValue} = this.state;
         const breadCrumbArray = getBreadCrumbArray([{name: 'Advisor Dashboard'}]);
-
+        const button = !this.state.showEmptyScreen ? {route: '/dashboard/createadvice', title: 'Create Advice'} : null;
         return (
             <Row>
-                <Row type="flex" justify="space-between" align="middle">
-                    <Col span={16}>
-                        <h3>Advisor Dashboard</h3>
-                        <BreadCrumb breadCrumbs={breadCrumbArray}/>
-                    </Col>
-
-                    {!this.state.showEmptyScreen && 
-                        <Col span={3}>
-                            <Button 
-                                type="primary" 
-                                onClick={() => this.props.history.push('/dashboard/createadvice')}
-                                >
-                                Create Advice
-                            </Button>
-                        </Col>
-                    }
-                </Row>
+                <AqPageHeader title="Advisor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
             {this.state.showEmptyScreen
             ?   <Row>
                     <Col span={24} style={emptyPortfolioStyle}>

@@ -5,8 +5,8 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio} from 'antd';
 import {List} from 'immutable';
-import {AqLink, DashboardCard, BreadCrumb} from '../components';
-import {pageTitleStyle, newLayoutStyle, loadingColor} from '../constants';
+import {AqLink, DashboardCard, AqPageHeader} from '../components';
+import {pageTitleStyle, newLayoutStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
@@ -36,6 +36,7 @@ class StockResearchImpl extends React.Component {
                 high: 0,
                 low: 0,
                 close: 0,
+                open: 0,
                 low_52w: 0,
                 high_52w:0,
                 name: ''
@@ -96,9 +97,11 @@ class StockResearchImpl extends React.Component {
         getStockData(value, 'latestDetail')
         .then(response => {
             const {data} = response;
+            console.log(data);
             latestDetail.ticker = data.security.ticker;
             latestDetail.exchange = data.security.exchange;
-            latestDetail.closePrice = data.latestDetail.values.Close;
+            latestDetail.close = data.latestDetail.values.Close;
+            latestDetail.open = data.latestDetail.values.Open;
             latestDetail.low = data.latestDetail.values.Low;
             latestDetail.high = data.latestDetail.values.High;
             latestDetail.low_52w = data.latestDetail.values.Low_52w;
@@ -122,17 +125,19 @@ class StockResearchImpl extends React.Component {
 
     renderRollingPerformanceData = key => {
         const {rollingPerformance} = this.state;
+        console.log(rollingPerformance);
         if(rollingPerformance[key]) {
             const ratios = rollingPerformance[key].ratios;
             const returns = rollingPerformance[key].returns;
             const deviation = rollingPerformance[key].deviation;
+            const drawdown = rollingPerformance[key].drawdown;
             const metricsData = [
-                {label: 'Alpha', value: `${(ratios.alpha * 100).toFixed(2)} %`},
-                {label: 'Beta', value: ratios.beta},
                 {label: 'Ann. Return', value: `${(returns.annualreturn * 100).toFixed(2)} %`},
-                {label: 'Stability', value: `${(ratios.stability * 100).toFixed(2)} %`},
                 {label: 'Volatility', value: `${(deviation.annualstandarddeviation * 100).toFixed(2)} %`},
+                {label: 'Beta', value: ratios.beta},
                 {label: 'Sharpe Ratio', value: ratios.sharperatio},
+                {label: 'Alpha', value: `${(ratios.alpha * 100).toFixed(2)} %`},
+                {label: 'Max Loss', value: `${(drawdown.currentdrawdown * 100).toFixed(2)} %`},
             ];
 
             return this.renderPerformanceMetricsItems(metricsData);
@@ -163,12 +168,16 @@ class StockResearchImpl extends React.Component {
         }
     }
 
+    formatPriceMetrics = value => {
+        return value ? Math.round(value) == value ? value : value.toFixed(2) : '-';
+    }
+
     renderPriceMetrics = metrics => {
         return metrics.map((item, index) => {
             return (
                 <Row key={index} style={{marginBottom: '5px'}}>
                     <Col span={16}>{item.label}</Col>
-                    <Col span={8} style={{color: '#3B3737', fontWeight: 700}}>{item.value}</Col>
+                    <Col span={8} style={{color: '#3B3737'}}>{this.formatPriceMetrics(item.value)}</Col>
                 </Row>
             );
         });
@@ -183,7 +192,7 @@ class StockResearchImpl extends React.Component {
                             <Col span={12} key={index} style={{marginBottom: '10px'}}>
                                 <Row>
                                     <Col span={14}>{item.label}</Col>
-                                    <Col span={10} style={{color: '#3B3737', fontWeight: 700}}>{item.value}</Col>
+                                    <Col span={10} style={{color: '#3B3737'}}>{item.value}</Col>
                                 </Row>
                             </Col>
                         );
@@ -232,10 +241,11 @@ class StockResearchImpl extends React.Component {
     renderPageContent = () => {
         const {dataSource, latestDetail} = this.state;
         const breadCrumbs = getBreadCrumbArray([{name: 'Stock Research'}]);
-        // const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
+        
         const priceMetrics = [
             {label: 'High', value: latestDetail.high},
             {label: 'Low', value: latestDetail.low},
+            {label: 'Open', value: latestDetail.open},
             {label: 'Close', value: latestDetail.close},
             {label: '52W High', value: latestDetail.high_52w},
             {label: '52W Low', value: latestDetail.low_52w},
@@ -251,15 +261,10 @@ class StockResearchImpl extends React.Component {
                 {
                     !this.props.openAsDialog &&
                     <React.Fragment>
-                        <Col span={24}>
-                            <h1 style={pageTitleStyle}>Stock Research</h1>
-                        </Col>
-                        <Col xl={xl} md={24}>
-                            <BreadCrumb breadCrumbs={breadCrumbs}/>
-                        </Col>
+                        <AqPageHeader title="Stock Research" breadCrumbs = {breadCrumbs}/>
                     </React.Fragment>
                 }
-                <Col xl={xl} md={24} style={{...newLayoutStyle, ...this.props.style}}>
+                <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
                     <Row style={metricStyle}>
                         {
                             !this.props.openAsDialog &&
@@ -274,13 +279,12 @@ class StockResearchImpl extends React.Component {
                                     optionLabelProp="value"
                                 >
                                     <Input 
-                                            suffix={(
-                                                <div>
-                                                    <Spin indicator={spinIcon} spinning={this.state.spinning}/>
-                                                    <Icon style={searchIconStyle} type="search" />
-                                                </div>
-                                            )} 
-                                    />
+                                        suffix={(
+                                            <div>
+                                                <Spin indicator={spinIcon} spinning={this.state.spinning}/>
+                                                <Icon style={searchIconStyle} type="search" />
+                                            </div>
+                                        )} />
                                 </AutoComplete>
                             </Col>
                         }
@@ -289,14 +293,11 @@ class StockResearchImpl extends React.Component {
                         <Col span={7} style={cardStyle}>
                             <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
                             <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
-                                    <span 
-                                            style={{fontSize: '18px', fontWeight: '700'}}>
-                                        {latestDetail.exchange}:
-                                    </span>
-                                    {latestDetail.ticker}
+                                <span>{latestDetail.exchange}:</span>
+                                <span style={{fontSize: '20px'}}>{latestDetail.ticker}</span>
                             </h1>
                             <h3 style={lastPriceStyle}>
-                                {latestDetail.closePrice} 
+                                {latestDetail.close} 
                                 <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
                             </h3>
                             <h5 
@@ -366,12 +367,12 @@ export const StockResearch = withRouter(StockResearchImpl);
 
 const metricStyle = {
     // marginTop: '20px',
-    padding: '7px 20px 7px 20px',
+    padding: '15px 20px 7px 20px',
     //paddingBottom:'0px',
 };
 
 const tickerNameStyle = {
-    fontSize: '18px',
+    fontSize: '16px',
     color: '#3B3737',
     fontWeight: 400
 };
