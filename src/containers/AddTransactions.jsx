@@ -11,7 +11,7 @@ import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
-import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle} from '../constants';
+import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle, benchmarkColor, metricColor} from '../constants';
 import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
 import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice} from'../utils';
@@ -334,7 +334,6 @@ class AddTransactionsImpl extends React.Component {
             transactions,
             ...additionalData
         };
-        console.log('Preview Data', data);
         axios({
             url,
             method: 'POST',
@@ -383,6 +382,7 @@ class AddTransactionsImpl extends React.Component {
             } else{
                 tickers[1].data = performanceSeries;
             }
+            console.log('Tickers', tickers);
             this.setState({tickers});
         })
         .catch(error => {
@@ -739,7 +739,7 @@ class AddTransactionsImpl extends React.Component {
             if (this.props.portfolioId) {
                 // Check if the user is authorized to access this page
                 this.setState({show: true});
-                const url = `${requestUrl}/investor/${investorId}/portfolio/${this.props.match.params.id}`;
+                const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
                 const unionAdvices = [];
                 axios.get(url, {headers: Utils.getAuthTokenHeader()})
                 .then(response => {
@@ -804,6 +804,12 @@ class AddTransactionsImpl extends React.Component {
                 .finally(() => {
                     this.setState({show: false});
                 });
+            } else {
+                const tickers = [...this.state.tickers];
+                tickers.push({
+                    name: this.state.selectedBenchmark
+                });
+                this.setState({tickers});
             }
         }
     }

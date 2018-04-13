@@ -823,6 +823,7 @@ export class InvestorDashboard extends React.Component {
                                     loading={this.state.portfolioLoading}
                                     headerStyle={headerStyle}
                                     cardStyle={{marginTop:'12px', height: '450px'}} 
+                                    contentStyle={{...contentStyle, height: '90%'}}
                             >
                                 {this.renderPortfolios()}
                             </DashboardCard>
@@ -887,8 +888,7 @@ const headerStyle = {
 };
 
 const contentStyle = {
-    paddingTop: '20px', 
-    height: '340px', 
+    // paddingTop: '20px', 
     overflow: 'hidden', 
     overflowY: 'scroll'
 };

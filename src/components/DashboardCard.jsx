@@ -34,5 +34,5 @@ const headerStyle = {
 const contentStyle = {
     //height: '350px', 
     overflow: 'hidden', 
-    overflowY: 'scroll'
+    overflowY: 'scroll',
 };
