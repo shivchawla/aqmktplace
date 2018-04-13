@@ -94,9 +94,7 @@ class SubscribedAdvicesImpl extends React.Component {
                         newAdvice.portfolio.detail = response.data.detail;
                         advices.push(newAdvice);
                         this.props.updateSubscribedAdvices(advices);
-                        this.setState({advices}, () => {
-                            this.getPerformance(axios.get(performanceUrl, {headers: Utils.getAuthTokenHeader()}), advice._id);
-                        });
+                        this.setState({advices});
                     })
                     .then(response => {
                         console.log(response);
@@ -174,9 +172,9 @@ class SubscribedAdvicesImpl extends React.Component {
                                 </Col>
                             </Row>
                         </TabPane>
-                        <TabPane tab="Performance" key="2">
+                        {/* <TabPane tab="Performance" key="2">
                             <MyChartNew series={adviceSeries} chartId={`${item.name}-chart-container`}/>
-                        </TabPane>
+                        </TabPane> */}
                     </Tabs>
                 </Panel>
             );

@@ -58,7 +58,7 @@ class App extends React.Component {
                                 <h1 style={headerColor}>AIMSQUANT</h1>
                             </Link>
                         </Col>
-                        <Col span={10} offset={10}>
+                        <Col span={20} style={{display: 'flex', justifyContent: 'flex-end'}}>
                             <Menu 
                                 mode="horizontal"
                                 defaultSelectedKeys={['1']}

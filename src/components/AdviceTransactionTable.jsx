@@ -27,7 +27,8 @@ class AdviceTransactionTableImpl extends React.Component {
                 title: this.renderTableHeader('NAME'),
                 dataIndex: 'name',
                 key: 'name',
-                render: text => <h3 style={nameEllipsisStyle}>{text}</h3>
+                render: (text, record) => <a onClick={() => this.props.toggleStockResearchModal && this.props.toggleStockResearchModal(record)}style={nameEllipsisStyle}>{text}</a>,
+                width: 100
             },
             {
                 title: this.renderTableHeader('SYMBOL'),
@@ -226,12 +227,12 @@ class AdviceTransactionTableImpl extends React.Component {
                         !this.props.preview &&
                         <Col span={2} offset={1}>
                             <Input 
-                                disabled={true}
-                                onClick={this.handleInputClick}
-                                value={advice.oldUnits} 
-                                type="number" 
-                                placeholder="Old Units" 
-                                onChange={(e) => {this.handleInputChange(e, advice)}}
+                                    disabled={true}
+                                    onClick={this.handleInputClick}
+                                    value={advice.oldUnits} 
+                                    type="number" 
+                                    placeholder="Old Units" 
+                                    onChange={(e) => {this.handleInputChange(e, advice)}}
                             />
                             <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Old Units</h3>
                         </Col>
@@ -273,7 +274,7 @@ class AdviceTransactionTableImpl extends React.Component {
                                 labelStyle={metricsLabelStyle}
                         />
                     </Col>
-                    {
+                    {/* {
                         this.props.preview &&
                         <Col span={4}>
                             <MetricItem 
@@ -300,7 +301,7 @@ class AdviceTransactionTableImpl extends React.Component {
                                 />
                             </Tooltip>
                         </Col>
-                    }
+                    } */}
                 </Row>
             );
         } else {

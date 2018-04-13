@@ -99,7 +99,7 @@ class PortfolioDetailImpl extends React.Component {
                 <Col span={24} style={{marginTop: 20}}>
                     {
                         this.state.presentAdvices.length > 0 
-                        ? <AdviceTransactionTable preview advices={this.state.presentAdvices} />
+                        ? <AdviceTransactionTable preview advices={this.state.presentAdvices} toggleStockResearchModal={this.updateTicker}/>
                         : <h5>Please add advices to your portfolio</h5>
                     }
                 </Col>

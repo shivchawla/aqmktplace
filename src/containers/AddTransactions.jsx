@@ -6,7 +6,7 @@ import moment from 'moment';
 import {withRouter} from 'react-router'
 import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
-import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, BreadCrumb} from '../components';
+import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, BreadCrumb, StockResearchModal} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
@@ -43,7 +43,9 @@ class AddTransactionsImpl extends React.Component {
             notAuthorized: false,
             show: false,
             portfolioName: '',
-            portfolioId: ''
+            portfolioId: '',
+            stockResearchModalVisible: false,
+            stockResearchModalTicker: {name: 'TCS', symbol: 'TCS'}
         };
         this.columns = [
             {
@@ -65,6 +67,12 @@ class AddTransactionsImpl extends React.Component {
                 title: 'PRICE',
                 dataIndex: 'price',
                 key: 'price'
+            },
+            {
+                title: 'WEIGHT',
+                dataIndex: 'weight',
+                key: 'weight',
+                render: text => <span>{text} %</span>
             },
             {
                 title: 'SECTOR',
@@ -107,6 +115,7 @@ class AddTransactionsImpl extends React.Component {
                                     processAdvice={this.processAdvice}
                                     disabledDate={this.disabledDate}
                                     previewPortfolio={this.previewPortfolio}
+                                    toggleStockResearchModal={this.toggleStockResearchModal}
                             />
                         :   <h5 
                                 style={{textAlign: 'center', fontSize: '16px'}}
@@ -123,7 +132,6 @@ class AddTransactionsImpl extends React.Component {
         return (
             <AqStockTableCreatePortfolio 
                     onChange={this.onStockTransactionChange}
-                    previewPortfolio={this.previewPortfolio}
             />
         );
     }
@@ -182,7 +190,7 @@ class AddTransactionsImpl extends React.Component {
                     ]}
             >
                 <Row>
-                    <Col span={24}>
+                    <Col span={24} style={{display: 'flex', flexDirection: 'row'}}>
                         <MetricItem 
                             label="Name"
                             value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : 'undefined'}
@@ -190,6 +198,7 @@ class AddTransactionsImpl extends React.Component {
                             labelStyle={metricsLabelStyle}
                         />
                         <MetricItem 
+                            style={{display: 'inline-flex', flexDirection: 'column'}}
                             label="Benchmark"
                             value={this.state.selectedBenchmark}
                             valueStyle={{...metricsValueStyle, fontWeight: 700}}
@@ -203,7 +212,9 @@ class AddTransactionsImpl extends React.Component {
     }
 
     togglePreviewModal = () => {
-        console.log("HOla");
+        if (!this.state.isPreviewModalVisible) {
+            this.previewPortfolio();
+        }
         this.setState({isPreviewModalVisible: !this.state.isPreviewModalVisible});
     }
 
@@ -223,9 +234,7 @@ class AddTransactionsImpl extends React.Component {
         const advices = selectedAdvices.map((advice, index) => {
             return this.processAdvice(advice);
         });
-        this.setState({advices}, () => {
-            this.previewPortfolio();
-        });
+        this.setState({advices});
     }
 
     addAdvice = (advice) => {
@@ -286,7 +295,7 @@ class AddTransactionsImpl extends React.Component {
                     data: data
                 })
                 .then(response => {
-                    message.success('Transactions Added');
+                    message.success('Portfolio Created Successfully');
                 })
                 .catch(error => {
                     Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -325,6 +334,7 @@ class AddTransactionsImpl extends React.Component {
             transactions,
             ...additionalData
         };
+        console.log('Preview Data', data);
         axios({
             url,
             method: 'POST',
@@ -426,6 +436,7 @@ class AddTransactionsImpl extends React.Component {
                         ? <AdviceTransactionTable
                                 preview 
                                 // advices={this.state.presentAdvices} 
+                                toggleStockResearchModal={this.toggleStockResearchModal}
                                 advices={this.state.advices} 
                         />
                         :   <h5 
@@ -453,6 +464,7 @@ class AddTransactionsImpl extends React.Component {
 
     processAdvice = (advice) => {
         const key = this.adviceKey++;
+        console.log('Advice Detail', advice);
 
         return {
             checked: false,
@@ -461,7 +473,7 @@ class AddTransactionsImpl extends React.Component {
             netAssetValue: this.calculateNetAssetValue(advice),
             weight: '12.4%',
             profitLoss: '+12.4%',
-            oldUnits: 1,
+            oldUnits: 0,
             newUnits: 1,
             key,
             date: advice.date,
@@ -489,13 +501,14 @@ class AddTransactionsImpl extends React.Component {
                     symbol: _.get(item, 'security.ticker', ''),
                     name: _.get(item, 'security.detail.Nse_Name', ''),
                     sector: _.get(item, 'security.detail.Sector', ''),
-                    shares: item.quantity || 0,
-                    modifiedShares: item.quantity || 0,
-                    newShares: 0,
+                    shares: 0,
+                    modifiedShares: 0,
+                    newShares: item.quantity || 0,
                     price: item.lastPrice || 0,
                     costBasic: 12,
                     unrealizedPL: 1231,
                     weight: '12%',
+                    transactionalQuantity: item.quantity - 0
                 });
             });
         }
@@ -515,7 +528,7 @@ class AddTransactionsImpl extends React.Component {
                             country: "IN",
                             exchange: "NSE"
                         },
-                        quantity: item.shares,
+                        quantity: item.transactionalQuantity,
                         price: Number(item.price),
                         fee: 0,
                         date: transaction.date,
@@ -712,6 +725,7 @@ class AddTransactionsImpl extends React.Component {
                 country: item.security.country,
                 name: item.security.detail.Nse_Name,
                 sector: item.security.detail.Sector,
+                weight: (item.weightInPortfolio * 100).toFixed(2)
             });
         });
 
@@ -860,6 +874,16 @@ class AddTransactionsImpl extends React.Component {
         return advices;
     }
 
+    toggleModal = () => {
+        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});        
+    }
+
+    toggleStockResearchModal = ticker => {
+        this.setState({stockResearchModalTicker: ticker}, () => {
+            this.toggleModal();
+        });
+    }
+
     renderPageContent = () => {
         const {getFieldDecorator} = this.props.form;
         const {portfolioId} = this.props;
@@ -878,6 +902,11 @@ class AddTransactionsImpl extends React.Component {
                     this.state.notAuthorized 
                     ?   <ForbiddenAccess />
                     :   <Col span={24}>
+                        <StockResearchModal 
+                                ticker={this.state.stockResearchModalTicker} 
+                                visible={this.state.stockResearchModalVisible}
+                                toggleModal={this.toggleModal}
+                        />
                             <Row>
                                 <Col span={24}>
                                     <h1 style={pageTitleStyle}>{this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"}</h1>

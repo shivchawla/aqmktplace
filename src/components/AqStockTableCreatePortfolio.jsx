@@ -189,9 +189,6 @@ export class AqStockTableCreatePortfolio extends React.Component {
             target[column] = column === 'symbol' ? value.toUpperCase() : value; 
             this.setState({data: newData});
             this.props.onChange(newData);
-            if (this.props.previewPortfolio && this.isValidRow(target)) {
-                this.props.previewPortfolio();
-            }
         }
     }
 
