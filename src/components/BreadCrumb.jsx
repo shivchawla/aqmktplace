@@ -16,7 +16,7 @@ export class BreadCrumb extends React.Component {
     }
     render() {
         return (
-            <Breadcrumb>
+            <Breadcrumb style={{fontSize: '12px', marginBottom: '20px'}}>
                 {this.renderBreadCrumbs()}
             </Breadcrumb>
         );

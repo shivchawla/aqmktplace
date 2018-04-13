@@ -16,8 +16,8 @@ export class AdviceMetricsItems extends React.Component {
                         const negativeColor = '#F44336';
                         const valueColor = item.color ? item.value > 0 ? positiveColor : item.value < 0 ? negativeColor : neutralColor: neutralColor;
                         // var dirArrow = item.direction ? item.value > 0 ? '▲' : item.value < 0 ? '▼' : "" : ""; 
-                        var dirArrow = ""; 
-                        const value = `${(item.percentage ? `${(item.value * 100).toFixed(2)} %` : item.value)} ${dirArrow}`;
+                        var dirArrow = "";
+                        const value = item.value ? `${(item.percentage ? `${(item.value * 100).toFixed(item.fixed ? item.fixed : 0)} %` : item.value.toFixed(item.fixed ? item.fixed : 0))} ${dirArrow}` : '-';
                         
                         return (
                             <Col span={4}>

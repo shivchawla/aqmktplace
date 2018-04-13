@@ -5,7 +5,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
-import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, BreadCrumb} from '../components';
+import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, BreadCrumb, AqPortfolioSummary} from '../components';
 import {loadingColor, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {generateColorData, getMetricColor, Utils, getBreadCrumbArray} from '../utils';
@@ -157,7 +157,6 @@ export class InvestorDashboard extends React.Component {
         this.setState({defaultPortfolioLoading: true});
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            console.log(response.data);
             const positions = _.get(response.data, 'defaultPortfolio.detail.positions', []);
             const positionModdedForColors = positions.map(item => item.security.ticker);
             const colorData = generateColorData(positionModdedForColors);
@@ -583,11 +582,15 @@ export class InvestorDashboard extends React.Component {
         }
     }
 
+    formatNetValue = (netValue) => {
+        var nv = Number(Number(netValue).toFixed(2));
+        var nvRound = Math.round(nv);
+        return nvRound == nv ? nvRound : nv;
+    }
     renderSummaryMetrics = () => {
         const {totalreturn, dailyreturn, volatility, netValue} = this.state.metrics;
         const colStyle = {marginBottom: '0px'};
         
-
         return(
             <Row type="flex" justify="space-around"> 
                 <Col span={5} style={colStyle}>
@@ -614,12 +617,12 @@ export class InvestorDashboard extends React.Component {
                         value={`${Number(dailyreturn * 100).toFixed(2)} %`}
                     />
                 </Col>
-                <Col span={5} style={colStyle}>
+                <Col span={6} style={colStyle}>
                     <MetricItem 
                         valueStyle={valueStyle} 
                         labelStyle={labelStyle} 
                         label="NetValue" 
-                        value={`${Number(netValue).toFixed(2)}`}
+                        value={this.formatNetValue(netValue)}
                     />
                 </Col>
             </Row>
@@ -628,7 +631,6 @@ export class InvestorDashboard extends React.Component {
 
     renderOverviewMetrics = () => {
         const {positions, defaultComposition} = this.state;
-        console.log(defaultComposition);
         const {concentration = 0} = this.state.metrics;
         const colStyle = {marginBottom: '20px'};
         let nStocks = 0, nSectors = 0, nIndustries = 0, maxPosSize = {y: 0}, minPosSize = {y: 0};
@@ -807,7 +809,7 @@ export class InvestorDashboard extends React.Component {
                             >
 
                                 <Row style={{padding: '10px'}}>
-                                    <MyChartNew series={this.state.tickers} />
+                                    <MyChartNew series={this.state.tickers}/>
                                 </Row>
                             
                             </DashboardCard>

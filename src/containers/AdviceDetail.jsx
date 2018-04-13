@@ -44,6 +44,7 @@ class AdviceDetailImpl extends React.Component {
             metrics: {
                 annualReturn: 0,
                 dailyChange: 0,
+                dailyChangePct: 0,
                 netValue: 0,
                 totalReturn: 0,
                 netValue: 0
@@ -99,7 +100,7 @@ class AdviceDetailImpl extends React.Component {
             portfolio,
             performanceSummary
         } = response.data;
-        const {annualReturn, dailyChange, netValue, totalReturn} = _.get(performanceSummary, 'current', {});
+        const {annualReturn, dailyChange, dailyChangePct, netValue, totalReturn} = _.get(performanceSummary, 'current', {});
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         tickers.push({name: benchmark, color: benchmarkColor});
         this.setState({
@@ -125,6 +126,7 @@ class AdviceDetailImpl extends React.Component {
                 annualReturn,
                 totalReturn,
                 dailyChange,
+                dailyChangePct,
                 netValue
             }
         });
@@ -227,17 +229,15 @@ class AdviceDetailImpl extends React.Component {
     };
 
     renderAdviceMetrics = () => {
-        const {annualReturn, dailyChange, netValue, totalReturn} = this.state.metrics;
-        const {followers, subscribers, rating} = this.state.adviceDetail;
-        const positiveColor = '#8BC34A';
-        const negativeColor = '#F44336';
+        const {annualReturn, dailyChange, dailyChangePct, netValue, totalReturn} = this.state.metrics;
+        const {followers, subscribers} = this.state.adviceDetail;
         const metricsItems = [
             {value: subscribers, label: 'Subscribers'},
-            {value: followers, label: 'Followers'},
-            {value: Number(netValue.toFixed(2)), label: 'Net Value'},
-            {value: dailyChange, label: 'Daily Change'},
-            {value: totalReturn, label: 'Total Return', percentage: true, color: true},
-            {value: annualReturn, label: 'Annual Return', percentage: true, color:true},
+            {value: followers, label: 'Wishlisters'},
+            {value: totalReturn, label: 'Total Return', percentage: true, color: true, fixed: 2},
+            {value: dailyChange, label: 'Daily PnL (\u20B9)', color: true, fixed: Math.round(dailyChange) == dailyChange ? 0 : 2},
+            {value: dailyChangePct, label: 'Daily PnL (%)', percentage: true, color: true, fixed: 2},
+            {value: netValue, label: 'Net Value', fixed: Math.round(netValue) == netValue ? 0 : 2},
         ]
 
         return <AdviceMetricsItems metrics={metricsItems} />
@@ -359,7 +359,7 @@ class AdviceDetailImpl extends React.Component {
                                 className="primary-btn"
                                 disabled={this.state.disableSubscribeButton}
                         >
-                            {!this.state.adviceDetail.isSubscribed ? "Subscribe" : "Unsubscribe"}
+                            {!this.state.adviceDetail.isSubscribed ? "SUBSCRIBE" : "UNSUBSCRIBE"}
                         </Button>
                     </Col>
                     <Col span={24}>
@@ -369,7 +369,7 @@ class AdviceDetailImpl extends React.Component {
                                 className="secondary-btn"
                                 disabled={this.state.disableFollowButton}
                         >
-                            {!this.state.adviceDetail.isFollowing ? "Add to wishlist" : "Remove from wishlist"}
+                            {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
                         </Button>
                     </Col>
                 </Row>
@@ -423,16 +423,18 @@ class AdviceDetailImpl extends React.Component {
                 <Col span={24}>
                     <h1 style={pageTitleStyle}>{name}</h1>
                 </Col>
+                
                 <Col span={24}>
                     <BreadCrumb breadCrumbs={breadCrumbs}/>
                 </Col>
+                
                 <Col span={18} style={shadowBoxStyle}>
                     <StockResearchModal 
                             ticker={this.state.stockResearchModalTicker} 
                             visible={this.state.stockResearchModalVisible}
                             toggleModal={this.toggleModal}
                     />
-                    <Row className="row-container">
+                    <Row className="row-container" type="flex" justify="space-between">
                         <Col span={18}>
                             <h1 style={adviceNameStyle}>{name}</h1>
                             {
@@ -444,7 +446,7 @@ class AdviceDetailImpl extends React.Component {
                             }
                             <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
                         </Col>
-                        <Col span={4} offset={2}>
+                        <Col span={6}>
                             {this.renderActionButtons()}
                         </Col>
                     </Row>
@@ -491,27 +493,27 @@ class AdviceDetailImpl extends React.Component {
                                 </Row>
                             </Panel>
                         }
+
+                        <Panel
+                            key="3"
+                            style={customPanelStyle} 
+                            header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
+                            <Row>
+                                <MyChartNew series={this.state.tickers} />
+                            </Row>
+                        </Panel>
+
                         {
                             (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
+                            
                             <Panel
-                                    key="3"
-                                    style={customPanelStyle} 
-                                    header={<h3 style={metricsHeaderStyle}>Detail</h3>}
-                            >
+                                key="4"
+                                style={customPanelStyle} 
+                                header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
                                 <Row>
-                                    <Col span={24}>
-                                        <Tabs animated={false} defaultActiveKey="1">
-                                            <TabPane tab="Performance" key="1" className="row-container">
-                                                <MyChartNew series={this.state.tickers} />
-                                            </TabPane>
-                                            <TabPane tab="Portfolio" key="2" className="row-container">
-                                                <AqPortfolioTable 
-                                                        positions={this.state.positions} 
-                                                        updateTicker={this.updateTicker}
-                                                />
-                                            </TabPane>
-                                        </Tabs>
-                                    </Col>
+                                    <AqPortfolioTable 
+                                        positions={this.state.positions} 
+                                        updateTicker={this.updateTicker}/>
                                 </Row>
                             </Panel>
                         }
@@ -523,7 +525,7 @@ class AdviceDetailImpl extends React.Component {
 
     render() { 
         return (
-           <Row style={{marginTop: '20px'}}>
+           <Row>
                 <Loading
                     show={this.state.show}
                     color={loadingColor}

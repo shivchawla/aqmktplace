@@ -274,17 +274,21 @@ class PortfolioDetailImpl extends React.Component {
                     return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
                 });
                 series.push({name: 'Composition', data: portfolioComposition});
+                
+                const annualReturn = _.get(portfolioMetrics, 'annualReturn', null);
+                const totalReturn = _.get(portfolioMetrics, 'totalReturn', null);
+                const volatility = _.get(portfolioMetrics, 'volatility', null);
+                const dailyChange = _.get(portfolioMetrics, 'dailyChange', null);
+                const dailyChangePct = _.get(portfolioMetrics, 'dailyChangePct', null);
+                const netValue = _.get(portfolioMetrics, 'netValue', null);
+
                 const metrics = [
-                    {value: (_.get(portfolioMetrics, 'annualReturn', 0) || 0).toFixed(2), label: 'Annual Return', percentage: true, color:true},
-                    {value: _.get(portfolioMetrics, 'totalReturn', 0).toFixed(2) || 0, label: 'Total Return', percentage: true,},
-                    {value: (_.get(portfolioMetrics, 'volatility', 0) || 0).toFixed(2), label: 'Volatility', percentage: true},
-                    {value: (_.get(portfolioMetrics, 'dailyChange', 0) || 0).toFixed(2), label: `Daily PnL (\u20B9)`, color:true, direction:true},
-                    {value: (_.get(portfolioMetrics, 'dailyChangePct', 0) || 0).toFixed(2), label: 'Daily PnL (%)', percentage: true, color: true, direction:true},
-                    {
-                        value: _.get(portfolioMetrics, 'netValue', 0).toFixed(2), 
-                        label: 'Net Value', 
-                        isNetValue: true, 
-                    }
+                    {value: annualReturn, label: 'Annual Return', fixed:2, percentage: true},
+                    {value: volatility, label: 'Volatility', fixed:2, percentage: true},
+                    {value: totalReturn, label: 'Total Return', fixed:2, percentage: true, color: true},
+                    {value: dailyChange, label: `Daily PnL (\u20B9)`, fixed:2, color:true, direction:true},
+                    {value: dailyChangePct, label: 'Daily PnL (%)', fixed:2, percentage: true, color: true, direction:true},
+                    {value: netValue, label: 'Net Value', isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2}
                 ];
                 this.setState({
                     portfolioMetrics: metrics, 

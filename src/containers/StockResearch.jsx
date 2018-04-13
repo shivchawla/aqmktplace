@@ -43,7 +43,7 @@ class StockResearchImpl extends React.Component {
             rollingPerformance: {},
             selectedPerformanceScreen: '10y',
             show: false
-        };
+        }; 
     }
 
     addItem = (tickerName = this.state.tickerName) => {
@@ -259,7 +259,7 @@ class StockResearchImpl extends React.Component {
                         </Col>
                     </React.Fragment>
                 }
-                <Col xl={xl} md={24} style={{...newLayoutStyle, marginTop: '20px'}}>
+                <Col xl={xl} md={24} style={{...newLayoutStyle, ...this.props.style}}>
                     <Row style={metricStyle}>
                         {
                             !this.props.openAsDialog &&
