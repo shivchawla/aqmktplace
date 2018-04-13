@@ -734,49 +734,44 @@ export class InvestorDashboard extends React.Component {
     renderPageContent = () => {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);
         return (
-            this.state.showEmptyScreen.status
-            ?   <Row>
-                    <Col span={24}>
-                        <h1>Investor Dashboard</h1>
-                    </Col>
-                    <Col span={24}>
-                        <BreadCrumb breadCrumbs={breadCrumbArray}/>
-                    </Col>
-                    <Col span={24} style={emptyPortfolioStyle}>
-                        {
-                            this.state.showEmptyScreen.errorCode === 'empty_portfolio'
-                            ?   <div style={{textAlign: 'center'}}>
-                                    <h1>{this.state.showEmptyScreen.messageText}</h1>
-                                    <Button 
-                                            type="primary" 
-                                            onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                                            style={{marginTop: '20px'}}
-                                    >
-                                        Create Portfolio
-                                    </Button>
-                                </div>
-                            : <h1>{this.state.showEmptyScreen.messageText}</h1>
-                        }
-                    </Col>
-                </Row>
-            :   <Row>
+            <Row>
                 <Row type="flex" justify="space-between" align="middle">
                     <Col span={16}>
-                        <h1>Investor Dashboard</h1>
+                        <h3>Investor Dashboard</h3>
                         <BreadCrumb breadCrumbs={breadCrumbArray}/>
                     </Col>
 
-                    <Col span={3}>
-                        <Button 
-                            type="primary" 
-                            onClick={() => this.props.history.push('/dashboard/createportfolio')}
-                            //style={{marginRight: '20px'}}
-                            >
-                            Create Portfolio
-                        </Button>
-                    </Col>
+                    {!this.state.showEmptyScreen.status && 
+                        <Col span={3}>
+                            <Button 
+                                type="primary" 
+                                onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                                //style={{marginRight: '20px'}}
+                                >
+                                Create Portfolio
+                            </Button>
+                        </Col>
+                    }
                 </Row>
-               
+
+            {this.state.showEmptyScreen.status ?
+                <Col span={24} style={emptyPortfolioStyle}>
+                    {
+                        this.state.showEmptyScreen.errorCode === 'empty_portfolio'
+                        ?   <div style={{textAlign: 'center'}}>
+                                <h1>{this.state.showEmptyScreen.messageText}</h1>
+                                <Button 
+                                        type="primary" 
+                                        onClick={() => this.props.history.push('/dashboard/createportfolio')}
+                                        style={{marginTop: '20px'}}
+                                >
+                                    Create Portfolio
+                                </Button>
+                            </div>
+                        : <h1>{this.state.showEmptyScreen.messageText}</h1>
+                    }
+                </Col>
+            :   
                 <Col style={{paddingBottom: '20px', marginTop: '-20px'}}>
                     <Row gutter={12}>
                         <Col xl={12} lg={24}>
@@ -784,7 +779,6 @@ export class InvestorDashboard extends React.Component {
                                     title="SUMMARY" 
                                     loading={this.state.defaultPortfolioLoading}
                                     cardStyle={{marginTop:'10px', height:'425px'}} 
-                                    //contentStyle={{height: '400px'}}
                                     headerStyle={headerStyle}
                                     menu={this.renderPortfolioMenu()}
                             >
@@ -843,6 +837,7 @@ export class InvestorDashboard extends React.Component {
                         </Col>
                     </Row>
                 </Col>
+            }
             </Row>
         );
     }

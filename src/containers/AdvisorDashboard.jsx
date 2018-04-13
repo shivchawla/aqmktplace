@@ -6,7 +6,7 @@ import Loading from 'react-loading-bar';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} from 'antd';
 import {MyChartNew} from './MyChartNew';
 import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, BreadCrumb} from '../components';
-import {pageTitleStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor} from '../constants';
+import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor} from '../constants';
 import {dateFormat, Utils, getBreadCrumbArray} from '../utils';
 import '../css/advisorDashboard.css';
 
@@ -439,6 +439,11 @@ export class AdvisorDashboard extends React.Component {
                 name: advice.name,
                 data
             });
+            newTickers.push({
+                name: "NIFTY_50",
+                show: true,
+                color: benchmarkColor
+            });
             this.setState({tickers: newTickers});
         })
         .catch(error => {
@@ -502,22 +507,24 @@ export class AdvisorDashboard extends React.Component {
 
     renderSortingMenu = () => {
         return (
-            <Select 
+            <div> 
+                <span style={{fontSize:'12px'}}>Sort By: </span> 
+                <Select 
                     defaultValue={this.state.sortBy} 
                     style={{width: 120}} 
                     size="small"
-                    onChange={this.handleSortingMenuChange}
-            >
-                <Option value="rating">Rating</Option>
-                <Option value="return">Return</Option>
-                <Option value="name">Name</Option>
-                <Option value="volatility">Volatility</Option>
-                <Option value="sharpe">Sharpe</Option>
-                <Option value="maxloss">Max Loss</Option>
-                <Option value="numFollowers">Followers</Option>
-                <Option value="numSubscribers">Subscribers</Option>
-                <Option value="createdDate">Created Date</Option>
-            </Select>
+                    onChange={this.handleSortingMenuChange}>
+                    <Option value="rating">Rating</Option>
+                    <Option value="return">Return</Option>
+                    <Option value="name">Name</Option>
+                    <Option value="volatility">Volatility</Option>
+                    <Option value="sharpe">Sharpe</Option>
+                    <Option value="maxloss">Max Loss</Option>
+                    <Option value="numFollowers">Followers</Option>
+                    <Option value="numSubscribers">Subscribers</Option>
+                    <Option value="createdDate">Created Date</Option>
+                </Select>
+            </div>
         );
     }
 
@@ -535,11 +542,10 @@ export class AdvisorDashboard extends React.Component {
             const returnColor = _.get(advice, 'performanceSummary.current.totalReturn', 0) < 0 ? '#ED4D4D' : '#3DC66B';
             return (
                 <Row 
-                        key={index} 
-                        style={{padding: '0 20px', cursor: 'pointer', paddingBottom: '20px'}}
-                        onClick={() => this.props.history.push(`/advice/${advice._id}`)}
-                        className='advice-row'
-                >
+                    key={index} 
+                    style={{padding: '10px 20px', cursor: 'pointer', }}
+                    onClick={() => this.props.history.push(`/advice/${advice._id}`)}
+                    className='advice-row'>
                     <Col span={7}>
                         <ListMetricItem label="Name" value={advice.name} />
                     </Col>
@@ -575,14 +581,26 @@ export class AdvisorDashboard extends React.Component {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Advisor Dashboard'}]);
 
         return (
-            this.state.showEmptyScreen
-            ?   <Row>
-                    <Col span={24}>
-                        <h1 style={pageTitleStyle}>Advisor Dashboard</h1>
-                    </Col>
-                    <Col span={24}>
+            <Row>
+                <Row type="flex" justify="space-between" align="middle">
+                    <Col span={16}>
+                        <h3>Advisor Dashboard</h3>
                         <BreadCrumb breadCrumbs={breadCrumbArray}/>
                     </Col>
+
+                    {!this.state.showEmptyScreen && 
+                        <Col span={3}>
+                            <Button 
+                                type="primary" 
+                                onClick={() => this.props.history.push('/dashboard/createadvice')}
+                                >
+                                Create Advice
+                            </Button>
+                        </Col>
+                    }
+                </Row>
+            {this.state.showEmptyScreen
+            ?   <Row>
                     <Col span={24} style={emptyPortfolioStyle}>
                         <h1>You have not created any advices yet. Get started by creating One</h1>
                         <Button 
@@ -594,104 +612,95 @@ export class AdvisorDashboard extends React.Component {
                         </Button>
                     </Col>
                 </Row>
-            :   <Row style={{paddingBottom: '40px'}}>
-                        {this.renderFilterModal()}
-                        <Col span={24}>
-                            <h1 style={pageTitleStyle}>Advisor Dashboard</h1>
-                        </Col>
-                        <Col span={24}>
-                            <BreadCrumb breadCrumbs={breadCrumbArray}/>
-                        </Col>
-                        <Col span={24} style={{textAlign: 'right'}}>
-                            <Button 
-                                    type="primary" 
-                                    onClick={() => this.props.history.push('/dashboard/createadvice')}
-                            >
-                                Create Advice
-                            </Button>
-                        </Col>
-                        <Col span={24} style={{marginTop: '10px'}}>
-                            <Row gutter={12}>
-                                <Col span={12}>
-                                    <DashboardCard 
-                                            headerStyle={headerStyle}
-                                            title=" My Advices" 
-                                            menu={this.renderSortingMenu()}
-                                            loading={this.state.myAdvicesLoading}
-                                            contentStyle={{paddingBottom: '20px'}}
+            :   <Row style={{paddingBottom: '20px', marginTop: '-20px'}}>
+                    {this.renderFilterModal()}
+                     <Col span={24} style={{marginTop: '10px'}}>
+                        <Row gutter={12}>
+                            <Col span={12}>
+                                <DashboardCard 
+                                        headerStyle={headerStyle}
+                                        title=" MY ADVICES"
+                                        cardStyle={{marginTop:'10px', height:'425px'}}  
+                                        menu={this.renderSortingMenu()}
+                                        loading={this.state.myAdvicesLoading}
+                                        contentStyle={{paddingBottom: '20px'}}
+                                >
+                                    {this.renderAdvices()}
+                                </DashboardCard>
+                            </Col>
+                            <Col span={12}>
+                                <DashboardCard 
+                                        headerStyle={headerStyle}
+                                        cardStyle={{marginTop:'10px', height:'425px'}} 
+                                        title="PERFORMANCE CHART" 
+                                        menu={this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
+                                        loading={this.state.advicePerformanceLoading}
+                                >
+                                    <Col
+                                            style={{paddingLeft: '20px', paddingTop: '10px'}}
                                     >
-                                        {this.renderAdvices()}
-                                    </DashboardCard>
-                                </Col>
-                                <Col span={12}>
-                                    <DashboardCard 
-                                            headerStyle={headerStyle}
-                                            title="Advice Performance" 
-                                            menu={this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
-                                            loading={this.state.advicePerformanceLoading}
-                                    >
-                                        <Col
-                                                style={{paddingLeft: '20px', paddingTop: '10px'}}
-                                        >
-                                            <MyChartNew series={this.state.tickers} />
-                                        </Col>
-                                    </DashboardCard>
-                                </Col>
-                            </Row>
-                            <Row style={{marginTop: '12px'}}>
-                                <Col xl={12} md={24} style={{paddingRight: '5px'}} >
-                                    <Row style={{height: '380px', ...newLayoutStyle}}>
+                                        <MyChartNew series={this.state.tickers} />
+                                    </Col>
+                                </DashboardCard>
+                            </Col>
+                        </Row>
+                        <Row style={{marginTop: '12px'}}>
+                            <Col xl={12} md={24} style={{paddingRight: '5px'}} >
+                                <Row style={{height: '380px', ...shadowBoxStyle, ...noOverflowStyle}}>
+                                    <Col span={24}>
+                                        {this.renderSubscriberStatsView()}
+                                    </Col>
+                                </Row>
+                            </Col>
+                            <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
+                                <Spin spinning={this.state.dashboardDataLoading}>
+                                    <Row style={{height: '380px', ...shadowBoxStyle, ...noOverflowStyle}}>
                                         <Col span={24}>
-                                            {this.renderSubscriberStatsView()}
+                                            <Tabs size="small" defaultActiveKey="1" animated={false} tabBarStyle={{backgroundColor: tabBackgroundColor}}>
+                                                <TabPane key="1" tab="Advice Rating">
+                                                    {/* <Row type="flex" align="middle">
+                                                        <Col span={6} offset={18}>
+                                                            {this.renderAdvicesMenu(this.handleSelectAdvice)}
+                                                        </Col>
+                                                    </Row> */}
+                                                    <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                        <Col span={12}>
+                                                            <HighChartSpline id="advice-rating-chart" series={this.state.adviceRating}/>
+                                                        </Col>
+                                                        <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
+                                                            <Row type="flex" align="middle">
+                                                                <Col span={24}>
+                                                                    {this.renderAdvicesMenu(this.handleSelectAdvice, -20)}
+                                                                </Col>
+                                                                <StatsMetricItem style={{marginTop: '30px'}} label="Current Rating" value={this.state.ratingStats.currentRating}/>
+                                                                <StatsMetricItem label="Simulated Rating" value={this.state.ratingStats.simulatedRating}/>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
+                                                </TabPane>
+                                                <TabPane key="2" tab="Advisor Rating">
+                                                    <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                        <Col span={12}>
+                                                            <HighChartSpline id="advisor-rating-chart" series={this.state.advisorRating}/>
+                                                        </Col>
+                                                        <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
+                                                            <Row type="flex" align="middle">
+                                                                <StatsMetricItem label="Rating" value={this.state.advisorRatingStat}/>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
+                                                </TabPane>
+                                            </Tabs>
                                         </Col>
                                     </Row>
-                                </Col>
-                                <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
-                                    <Spin spinning={this.state.dashboardDataLoading}>
-                                        <Row style={{height: '380px', ...newLayoutStyle}}>
-                                            <Col span={24}>
-                                                <Tabs size="small" defaultActiveKey="1" animated={false} tabBarStyle={{backgroundColor: tabBackgroundColor}}>
-                                                    <TabPane key="1" tab="Advice Rating">
-                                                        {/* <Row type="flex" align="middle">
-                                                            <Col span={6} offset={18}>
-                                                                {this.renderAdvicesMenu(this.handleSelectAdvice)}
-                                                            </Col>
-                                                        </Row> */}
-                                                        <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                                            <Col span={12}>
-                                                                <HighChartSpline id="advice-rating-chart" series={this.state.adviceRating}/>
-                                                            </Col>
-                                                            <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
-                                                                <Row type="flex" align="middle">
-                                                                    <Col span={24}>
-                                                                        {this.renderAdvicesMenu(this.handleSelectAdvice, -20)}
-                                                                    </Col>
-                                                                    <StatsMetricItem style={{marginTop: '30px'}} label="Current Rating" value={this.state.ratingStats.currentRating}/>
-                                                                    <StatsMetricItem label="Simulated Rating" value={this.state.ratingStats.simulatedRating}/>
-                                                                </Row>
-                                                            </Col>
-                                                        </Row>
-                                                    </TabPane>
-                                                    <TabPane key="2" tab="Advisor Rating">
-                                                        <Row style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                                            <Col span={12}>
-                                                                <HighChartSpline id="advisor-rating-chart" series={this.state.advisorRating}/>
-                                                            </Col>
-                                                            <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
-                                                                <Row type="flex" align="middle">
-                                                                    <StatsMetricItem label="Rating" value={this.state.advisorRatingStat}/>
-                                                                </Row>
-                                                            </Col>
-                                                        </Row>
-                                                    </TabPane>
-                                                </Tabs>
-                                            </Col>
-                                        </Row>
-                                    </Spin>
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
+                                </Spin>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+            }
+            </Row>
+            
         );
     }
 

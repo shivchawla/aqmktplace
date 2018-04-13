@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Row, Col, Spin} from 'antd';
-import {shadowBoxStyle, tabBackgroundColor} from '../constants';
+import {shadowBoxStyle, tabBackgroundColor, noOverflowStyle} from '../constants';
 
 export class DashboardCard extends React.Component {
     render() {
@@ -8,7 +8,7 @@ export class DashboardCard extends React.Component {
 
         return (
             <Spin spinning={loading}>
-                <Col span={24} style={{...shadowBoxStyle, ...cardStyle}}>
+                <Col span={24} style={{...shadowBoxStyle, ...cardStyle, ...noOverflowStyle}}>
                     <Row style={{...headerStyle, ...this.props.headerStyle}} type="flex" justify="space-between">
                         <Col span={headerSpan}>
                             <h3 style={{marginLeft: '20px'}}>{title}</h3>
