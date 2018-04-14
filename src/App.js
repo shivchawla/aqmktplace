@@ -74,17 +74,16 @@ class App extends React.Component {
                             <Button onClick={() => {Utils.logoutUser(); this.props.history.push('/login')}}>Logout</Button>
                             <Menu 
                                     mode="horizontal"
-                                    defaultSelectedKeys={['1']}
                                     onClick={this.handleNavMenuClick}
                                     selectedKeys={[this.state.parentPath]}
                             >
                                 <SubMenu title="Dashboard">
-                                        <Menu.Item onClick={() => this.props.history.push('/investordashboard')} key="investordashboard">Investor Dashboard</Menu.Item>
-                                        <Menu.Item onClick={() => this.props.history.push('/advisordashboard')} key="advisordashboard">Advisor Dashboard</Menu.Item>
+                                        <Menu.Item key="investordashboard">Investor Dashboard</Menu.Item>
+                                        <Menu.Item key="advisordashboard">Advisor Dashboard</Menu.Item>
                                 </SubMenu>
-                                <Menu.Item onClick={() => this.props.history.push('/advice')} key="advice">Screen Advices</Menu.Item>
-                                <Menu.Item onClick={() => this.props.history.push('/stockresearch')} key="stockresearch">Stock Research</Menu.Item>
-                                <Menu.Item onClick={() => this.props.history.push('/quantresearch')} key="quantresearch">Quant Research</Menu.Item>
+                                <Menu.Item key="advice">Screen Advices</Menu.Item>
+                                <Menu.Item key="stockresearch">Stock Research</Menu.Item>
+                                <Menu.Item key="quantresearch">Quant Research</Menu.Item>
                             </Menu>
                         </Col> 
                     </Row>
