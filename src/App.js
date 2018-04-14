@@ -48,7 +48,9 @@ class App extends React.Component {
 
     onRouteChanged = location => {
         const locationArray = location.split('/');
-        const parentPath = locationArray.length > 0 ? locationArray[1] : '/';
+        // Getting the parent path of any route
+        // For eg. if route is /advice/{adviceId} then parent path is advice
+        const parentPath = locationArray.length > 0 ? locationArray[1] : '/'; 
         this.setState({parentPath});
     }
 
@@ -87,6 +89,12 @@ class App extends React.Component {
 
                 <Layout style={contentLayoutStyle}>
                     <Content>
+                        {/*
+                            Add Routes in the following format if it is to be synced with header navigation
+                            path='/parent/child/grandChild/....'
+                            where parent is one of the keys from the <Menu.Item> above.
+                            i.e investordashboard, advisordashboard, advice, stockresearch, quantresearch
+                         */}
                         <Route exact={true} path='/advice' component={ScreenAdvices} />
                         <Route exact={true} path='/stockresearch' component={StockResearch} />
                         <Route exact={true} path='/login' component={LoginModal} />
@@ -99,9 +107,9 @@ class App extends React.Component {
                         <Route exact={true} path='/investordashboard/portfolio/:id' component={PortfolioDetail} />
                         <Route exact={true} path='/investordashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
                         <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
-                        <Route exact={true} path='/advisorprofile/:id' component={AdvisorProfile} />
+                        <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} />
                         <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
-                        <Route exact={true} path='/screenadvisors' component={ScreenAdvisors} />
+                        <Route exact={true} path='/advisordashboard/screenadvisors' component={ScreenAdvisors} />
                     </Content>
                 </Layout>
             </Layout>
