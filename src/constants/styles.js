@@ -110,9 +110,7 @@ export const metricColor = {
     neutral: '#3F51B5'
 };
 
-export const loadingColor = {
-    color: '#e91e63'
-}
+export const loadingColor = '#3F51B5';
 
 export const pageTitleStyle = {
     fontSize: '18px',

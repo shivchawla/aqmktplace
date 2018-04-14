@@ -1,9 +1,10 @@
 import * as React from 'react';
 import {Row, Col, Button} from 'antd';
+import {withRouter} from 'react-router';
 import {pageTitleStyle} from '../constants';
 import {AqBreadCrumb} from './AqBreadCrumb';
 
-export class AqPageHeader extends React.Component {
+class AqPageHeaderImpl extends React.Component {
     constructor(props) {
         super(props);
     };
@@ -22,7 +23,7 @@ export class AqPageHeader extends React.Component {
                     <AqBreadCrumb breadCrumbs={breadCrumbs} />
                 </Col>
                 {button && 
-                    <Col span={3}>
+                    <Col span={3} style={{textAlign: 'right'}}>
                         <Button 
                             type="primary" 
                             onClick={() => this.props.history.push(button.route)}>
@@ -34,3 +35,5 @@ export class AqPageHeader extends React.Component {
         );
     }
 }
+
+export const AqPageHeader = withRouter(AqPageHeaderImpl);

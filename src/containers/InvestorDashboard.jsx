@@ -376,7 +376,7 @@ export class InvestorDashboard extends React.Component {
                 <Row 
                         key={index} 
                         style={{marginBottom: '10px', padding: '0 20px', cursor: 'pointer', marginTop: '10px'}} 
-                        onClick={(e) => this.props.history.push(`/dashboard/portfolio/${portfolio.id}`)}
+                        onClick={(e) => this.props.history.push(`/investordashboard/portfolio/${portfolio.id}`)}
                 >
                     <Col span={7}>
                         <ListMetricItem label="Name" value={portfolio.name} />
@@ -733,11 +733,11 @@ export class InvestorDashboard extends React.Component {
 
     renderPageContent = () => {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);
-        const button = !this.state.showEmptyScreen.status ? {route: '/dashboard/createportfolio', title: 'Create Portfolio'} : null;
+        const button = !this.state.showEmptyScreen.status ? {route: '/investordashboard/createportfolio', title: 'Create Portfolio'} : null;
         return (
             <Row>
                 <AqPageHeader title="Investor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
-            {this.state.showEmptyScreen.status ?
+                {this.state.showEmptyScreen.status ?
                 <Col span={24} style={emptyPortfolioStyle}>
                     {
                         this.state.showEmptyScreen.errorCode === 'empty_portfolio'

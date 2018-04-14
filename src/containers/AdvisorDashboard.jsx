@@ -579,7 +579,7 @@ export class AdvisorDashboard extends React.Component {
     renderPageContent = () => {
         const {radioValue} = this.state;
         const breadCrumbArray = getBreadCrumbArray([{name: 'Advisor Dashboard'}]);
-        const button = !this.state.showEmptyScreen ? {route: '/dashboard/createadvice', title: 'Create Advice'} : null;
+        const button = !this.state.showEmptyScreen ? {route: '/advisordashboard/createadvice', title: 'Create Advice'} : null;
         return (
             <Row>
                 <AqPageHeader title="Advisor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
@@ -607,7 +607,7 @@ export class AdvisorDashboard extends React.Component {
                                         cardStyle={{marginTop:'10px', height:'425px'}}  
                                         menu={this.renderSortingMenu()}
                                         loading={this.state.myAdvicesLoading}
-                                        contentStyle={{paddingBottom: '20px'}}
+                                        contentStyle={{height: '90%', overflow: 'hidden', overflowY: 'scroll'}}
                                 >
                                     {this.renderAdvices()}
                                 </DashboardCard>

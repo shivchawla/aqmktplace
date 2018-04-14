@@ -345,7 +345,7 @@ class PortfolioDetailImpl extends React.Component {
                                                 type="primary" 
                                                 style={{marginBottom: 20}} 
                                                 onClick={() => this.props.history.push(
-                                                    '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
+                                                    '/investordashboard/createportfolio', {pageTitle: 'Create Portfolio'}
                                                 )}
                                                 className="primary-btn"
                                         >
@@ -354,7 +354,7 @@ class PortfolioDetailImpl extends React.Component {
                                     
                                         <Button
                                                 onClick={() => this.props.history.push(
-                                                    `/dashboard/portfolio/transactions/${this.props.match.params.id}`, 
+                                                    `/investordashboard/portfolio/transactions/${this.props.match.params.id}`, 
                                                     {
                                                         pageTitle: 'Add Transactions',
                                                         advices: this.state.presentAdvices,
@@ -449,7 +449,7 @@ class PortfolioDetailImpl extends React.Component {
                                         type="primary" 
                                         style={{marginBottom: 20}} 
                                         onClick={() => this.props.history.push(
-                                            '/dashboard/createportfolio', {pageTitle: 'Create Portfolio'}
+                                            '/investordashboard/createportfolio', {pageTitle: 'Create Portfolio'}
                                         )}
                                         className="primary-btn"
                                 >
@@ -459,7 +459,7 @@ class PortfolioDetailImpl extends React.Component {
                             <Col span={24} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                                 <Button
                                         onClick={() => this.props.history.push(
-                                            `/dashboard/portfolio/transactions/${this.props.match.params.id}`, 
+                                            `/investordashboard/portfolio/transactions/${this.props.match.params.id}`, 
                                             {
                                                 pageTitle: 'Add Transactions',
                                                 advices: this.state.presentAdvices,

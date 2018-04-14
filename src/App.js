@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Layout, Menu, Row, Col, Button} from 'antd';
+import {Layout, Menu, Row, Col, Button, notification} from 'antd';
 import {Route, withRouter, Link} from 'react-router-dom';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import AqBreadCrumb from './components/AqBreadCrumb';
@@ -35,19 +35,29 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            pageTitle: 'Home'
+            pageTitle: 'Home',
+            parentPath: '/'
         };
     }
 
     componentWillMount() {
-        // listening to route change and updating local state
-        this.props.history.listen((location) => { 
-            if (location.state) {
-                const {pageTitle = ''} = location.state;
-                console.log(location.state);
-                this.setState({pageTitle});
-            }   
-        });
+        this.onRouteChanged(this.props.location.pathname);
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.location !== prevProps.location) {
+            this.onRouteChanged(this.props.location.pathname);
+        }
+    }
+
+    onRouteChanged = location => {
+        const locationArray = location.split('/');
+        const parentPath = locationArray.length > 0 ? locationArray[1] : '/';
+        this.setState({parentPath});
+    }
+
+    handleNavMenuClick = e => {
+        this.props.history.push(`/${e.key}`);
     }
 
     render() {
@@ -56,32 +66,25 @@ class App extends React.Component {
                 <Header style={headerStyle}>
                     <Row type="flex">
                         <Col span={4}>
-                            <Link to='/' pageTitle='Home'>
+                            <Link to='/'>
                                 <h1 style={headerColor}>AIMSQUANT</h1>
                             </Link>
                         </Col>
                         <Col span={20} style={{display: 'flex', justifyContent: 'flex-end'}}>
                             <Button onClick={() => {Utils.logoutUser(); this.props.history.push('/login')}}>Logout</Button>
                             <Menu 
-                                mode="horizontal"
-                                defaultSelectedKeys={['1']}>
+                                    mode="horizontal"
+                                    defaultSelectedKeys={['1']}
+                                    onClick={this.handleNavMenuClick}
+                                    selectedKeys={[this.state.parentPath]}
+                            >
                                 <SubMenu title="Dashboard">
-                                        <Menu.Item key={1}>
-                                            <Link to='/investordashboard' pageTitle='Dashboard'>Investor Dashboard</Link>
-                                        </Menu.Item>
-                                        <Menu.Item key={1}>
-                                            <Link to='/advisordashboard' pageTitle='Dashboard'>Advisor Dashboard</Link>
-                                        </Menu.Item>
+                                        <Menu.Item onClick={() => this.props.history.push('/investordashboard')} key="investordashboard">Investor Dashboard</Menu.Item>
+                                        <Menu.Item onClick={() => this.props.history.push('/advisordashboard')} key="advisordashboard">Advisor Dashboard</Menu.Item>
                                 </SubMenu>
-                                <Menu.Item key={2}>
-                                    <Link to='/advice' pageTitle='Screen Advices'>Screen Advices</Link>
-                                </Menu.Item>
-                                <Menu.Item key={3}>
-                                    <Link to='/stockresearch' pageTitle='Stock Research' >Stock Research</Link>
-                                </Menu.Item>
-                                <Menu.Item key={4}>
-                                    <Link to='/quantresearch' pageTitle='Quant Research' >Quant Research</Link>
-                                </Menu.Item>
+                                <Menu.Item onClick={() => this.props.history.push('/advice')} key="advice">Screen Advices</Menu.Item>
+                                <Menu.Item onClick={() => this.props.history.push('/stockresearch')} key="stockresearch">Stock Research</Menu.Item>
+                                <Menu.Item onClick={() => this.props.history.push('/quantresearch')} key="quantresearch">Quant Research</Menu.Item>
                             </Menu>
                         </Col> 
                     </Row>
@@ -89,24 +92,21 @@ class App extends React.Component {
 
                 <Layout style={contentLayoutStyle}>
                     <Content>
-                        {/* <Route exact={true} path='/dashboard' component={Dashboard} /> */}
                         <Route exact={true} path='/advice' component={ScreenAdvices} />
                         <Route exact={true} path='/stockresearch' component={StockResearch} />
                         <Route exact={true} path='/login' component={LoginModal} />
                         <Route path='/tokenUpdate' component={TokenUpdate}/>
-                        {/* <Route exact={true} path='/quantresearch' component={QuantResearch} /> */}
                         <Route exact={true} path='/quantresearch' component={QuantResearch}/>
                         <Route exact={true} path='/advice/:id' component={AdviceDetail} />
-                        <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} />
-                        <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} />
-                        <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} />
-                        <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} />
-                        <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
+                        <Route exact={true} path='/advisordashboard/createadvice' component={CreateAdvice} />
+                        <Route exact={true} path='/investordashboard/createportfolio' component={CreatePortfolio} />
+                        <Route exact={true} path='/advisordashboard/updateadvice/:id' component={UpdateAdvice} />
+                        <Route exact={true} path='/investordashboard/portfolio/:id' component={PortfolioDetail} />
+                        <Route exact={true} path='/investordashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
                         <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
                         <Route exact={true} path='/advisorprofile/:id' component={AdvisorProfile} />
                         <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
                         <Route exact={true} path='/screenadvisors' component={ScreenAdvisors} />
-                        <Route exact={true} path='/hoc' component={HocExample} />
                     </Content>
                 </Layout>
             </Layout>

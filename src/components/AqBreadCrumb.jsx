@@ -8,7 +8,7 @@ export class AqBreadCrumb extends React.Component {
         return breadCrumbs.map((item, index) => {
             const url = item.url ? item.url : '#';
             return (
-                <Breadcrumb.Item>
+                <Breadcrumb.Item key={index}>
                     <Link to={url}>{item.name}</Link>
                 </Breadcrumb.Item>
             );

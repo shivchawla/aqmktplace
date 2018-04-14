@@ -105,12 +105,6 @@ class AdviceDetailImpl extends React.Component {
             performanceSummary
         } = response.data;
         const {annualReturn, dailyChange, dailyChangePct, netValue, totalReturn} = _.get(performanceSummary, 'current', {});
-        // const {
-        //     annualReturn = 'N/A', 
-        //     dailyChange = 'N/A', 
-        //     netValue = 'N/A', 
-        //     totalReturn = 'N/A'
-        // } = _.get(performanceSummary, 'current', {});
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         tickers.push({name: benchmark, color: benchmarkColor});
         this.setState({
@@ -146,6 +140,7 @@ class AdviceDetailImpl extends React.Component {
         const portfolio = {...this.state.portfolio};
         const positions = _.get(response.data, 'detail.positions', []);
         const {maxNotional, rebalance} = response.data;
+        console.log('Advice Detail', response.data);
         this.setState({
             positions, 
             adviceDetail: {
@@ -265,6 +260,7 @@ class AdviceDetailImpl extends React.Component {
     };
 
     subscribeAdvice = () => {
+        const url = `${requestUrl}/advice/${this.props.match.params.id}`;
         this.setState({disableSubscribeButton: true});
         axios({
             method: 'POST',
@@ -273,8 +269,12 @@ class AdviceDetailImpl extends React.Component {
         })
         .then(response => {
             this.toggleDialog();
-            this.getAdviceData();
+            // this.getAdviceData();
             message.success('Success');
+            return axios.get(url, {headers: Utils.getAuthTokenHeader()}) 
+        })
+        .then(response => {
+            this.getAdviceSummary(response);
         })
         .catch(error => {
             console.log(error);
@@ -288,6 +288,7 @@ class AdviceDetailImpl extends React.Component {
     };
 
     followAdvice = () => {
+        const url = `${requestUrl}/advice/${this.props.match.params.id}`;
         this.setState({disableFollowButton: true});
         axios({
             method: 'POST',
@@ -295,8 +296,11 @@ class AdviceDetailImpl extends React.Component {
             headers: Utils.getAuthTokenHeader()
         })
         .then(response => {
-            this.getAdviceData();
             message.success('Success');
+            return axios.get(url, {headers: Utils.getAuthTokenHeader()}) 
+        })
+        .then(response => {
+            this.getAdviceSummary(response);
         })
         .catch(error => {
             console.log(error);
@@ -436,9 +440,14 @@ class AdviceDetailImpl extends React.Component {
 
     handlePortfolioStartDateChange = date => {
         const startDate = date.format('YYYY-MM-DD');
-        this.setState({selectedPortfolioDate: date}, () => {
-            this.getAdviceData(startDate);
-        });
+        const url = `${requestUrl}/advice/${this.props.match.params.id}`;
+        axios.get(`${url}/portfolio?date=${startDate}`, {headers: Utils.getAuthTokenHeader()})
+        .then(response => {
+            this.setState({selectedPortfolioDate: date}, () => {
+                this.getAdviceDetail(response);
+            });
+        })
+        
     }    
 
     renderPageContent = () => {
@@ -496,7 +505,7 @@ class AdviceDetailImpl extends React.Component {
                             <Panel
                                     key="2"
                                     style={customPanelStyle} 
-                                    header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
+                                    header={<h3 style={metricsHeaderStyle}>Summary</h3>}
                             >  
                                 {
                                     this.state.barDollarSeries.length > 0
@@ -528,7 +537,7 @@ class AdviceDetailImpl extends React.Component {
                             key="3"
                             style={customPanelStyle} 
                             header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
-                            <Row>
+                            <Row className="row-container">
                                 <MyChartNew series={this.state.tickers} />
                             </Row>
                         </Panel>
@@ -540,20 +549,26 @@ class AdviceDetailImpl extends React.Component {
                                 key="4"
                                 style={customPanelStyle} 
                                 header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
-                                <Row>
-                                    <AqPortfolioTable 
-                                        positions={this.state.positions} 
-                                        updateTicker={this.updateTicker}/>
+                                <Row className="row-container">
+                                    <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                        {
+                                            this.state.adviceDetail.isOwner &&
+                                            <DatePicker 
+                                                    value={this.state.selectedPortfolioDate} 
+                                                    onChange={this.handlePortfolioStartDateChange}
+                                            />
+                                        }
+                                    </Col>
+                                    <Col span={24} style={{marginTop: '10px'}}>
+                                        <AqPortfolioTable 
+                                                    positions={this.state.positions} 
+                                                    updateTicker={this.updateTicker}
+                                        />
+                                    </Col>
                                 </Row>
                             </Panel>
                         }
                     </Collapse>
-                </Col>
-                <Col span={5} offset={1}>
-                    {
-                        this.state.adviceDetail.isOwner &&
-                        <DatePicker value={this.state.selectedPortfolioDate} onChange={this.handlePortfolioStartDateChange}/>
-                    }
                 </Col>
             </Row>
         );

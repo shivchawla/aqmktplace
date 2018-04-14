@@ -18,29 +18,20 @@ export class AdviceMetricsItems extends React.Component {
                         // var dirArrow = item.direction ? item.value > 0 ? '▲' : item.value < 0 ? '▼' : "" : ""; 
                         var dirArrow = "";
                         const value = item.value ? `${(item.percentage ? `${(item.value * 100).toFixed(item.fixed ? item.fixed : 0)} %` : item.value.toFixed(item.fixed ? item.fixed : 0))} ${dirArrow}` : '-';
-                        
-                        // var dirArrow = ""; 
-                        // let value = 0;
-                        // if (typeof(item.value) === 'number') {
-                        //     value = `${(item.percentage ? `${(item.value * 100).toFixed(2)} %` : item.value)} ${dirArrow}`;
-                        // } else {
-                        //     value = item.value;
-                        // }
-                        // console.log(value);
-
+                       
                         return (
-                            <Col span={4}>
-                            <MetricItem 
-                                    key={index}
-                                    valueStyle = {{...metricsValueStyle, color: valueColor, fontSize: '20px'}} 
-                                    labelStyle={metricsLabelStyle} 
-                                    value={value} 
-                                    label={item.label} 
-                                    style={metricItemStyle} 
-                                    isNetValue={item.isNetValue}
-                                    dailyChange={item.dailyChange || null}
-                                    dailyChangePct={item.dailyChangePct || null}
-                            />
+                            <Col span={4} key={index}>
+                                <MetricItem 
+                                        key={index}
+                                        valueStyle = {{...metricsValueStyle, color: valueColor, fontSize: '20px'}} 
+                                        labelStyle={metricsLabelStyle} 
+                                        value={value} 
+                                        label={item.label} 
+                                        style={metricItemStyle} 
+                                        isNetValue={item.isNetValue}
+                                        dailyChange={item.dailyChange || null}
+                                        dailyChangePct={item.dailyChangePct || null}
+                                />
                             </Col>
                         );
                     })

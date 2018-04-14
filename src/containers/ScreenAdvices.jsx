@@ -52,7 +52,7 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     handleSelectChange = value => {
-        console.log(value);
+        // console.log(value);
     }
     
     renderMenu = () => {
@@ -85,7 +85,7 @@ export class ScreenAdvices extends React.PureComponent {
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            console.log(response.data);
+            // console.log(response.data);
             this.setState({
                 advices: this.processAdvices(response.data)
             });
@@ -132,7 +132,7 @@ export class ScreenAdvices extends React.PureComponent {
     renderAdvices = () => {
         const {advices} = this.state;
         return advices.map((advice, index) => {
-            console.log('Advice', advice);
+            // console.log('Advice', advice);
 
             return (
                 <AdviceListItemMod key={index} advice={advice}/>
@@ -189,7 +189,7 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     handleSortingMenuChange = (value) => {
-        console.log(value);
+        // console.log(value);
         this.setState({sortBy: value}, () => {
             const url = `${this.state.adviceUrl}&orderParam=${this.state.sortBy}`;
             this.getAdvices(url);
