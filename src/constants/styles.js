@@ -91,7 +91,9 @@ export const nameEllipsisStyle = {
     overflow: 'hidden', 
     textOverflow: 'ellipsis', 
     whiteSpace: 'nowrap', 
-    width: '150px'
+    width: '250px',
+    cursor: 'pointer',
+    color: '#0091EA'
 };
 
 export const buttonStyle = {

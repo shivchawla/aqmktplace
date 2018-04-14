@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker} from 'antd';
 import {AdviceTransactionTable} from '../components';
 import {MyChartNew} from '../containers/MyChartNew';
-import {currentPerformanceColor, simulatedPerformanceColor} from '../constants';
+import {currentPerformanceColor, simulatedPerformanceColor, nameEllipsisStyle} from '../constants';
 import {Utils} from '../utils';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 
@@ -26,34 +26,42 @@ class SubscribedAdvicesImpl extends React.Component {
         };
         this.columns = [
             {
-                title: 'symbol',
+                title: 'NAME',
+                dataIndex: 'name',
+                key: 'name',
+                width: 250,
+                render: text => <h3 style={nameEllipsisStyle}>{text}</h3>
+            },
+            {
+                title: 'SYMBOL',
                 dataIndex: 'symbol',
                 key: 'symbol'
             },
             {
-                title: 'Shares',
+                title: 'SHARES',
                 dataIndex: 'quantity',
                 key: 'quantity'
             },
             {
-                title: 'Last Price',
+                title: 'LAST PRICE',
                 dataIndex: 'lastPrice',
                 key: 'lastPrice'
             },
             {
-                title: 'Cost Basic',
-                dataIndex: 'costBasic',
-                key: 'costBasic'
+                title: 'AVG. PRICE',
+                dataIndex: 'averagePrice',
+                key: 'averagePrice'
             },
             {
-                title: 'Unrealized P/L',
+                title: 'UNREALIZED P/L',
                 dataIndex: 'unrealizedPL',
                 key: 'unrealizedPL'
             },
             {
-                title: 'Weight',
+                title: 'WEIGHT',
                 dataIndex: 'weight',
-                key: 'weight'
+                key: 'weight',
+                render: text => <span>{text} %</span>
             }
         ];
         this.adviceKey = 0;
@@ -62,11 +70,9 @@ class SubscribedAdvicesImpl extends React.Component {
     componentWillMount() {
         const {investorId} = this.props;
         let advices = [...this.state.advices];
-        console.log('Component Mounted');
         const url = `${requestUrl}/advice?subscribed=true`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            console.log('Subscribed Advices', response.data);
             response.data.map((advice, index) => {
                 const adviceUrl = `${requestUrl}/advice/${advice._id}`;
                 axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()})
@@ -83,7 +89,9 @@ class SubscribedAdvicesImpl extends React.Component {
                         subscribers: response.data.numSubscribers,
                         followers: response.data.numFollowers,
                         isSelected: false,
+                        isAdded: false,
                         disabled: false,
+                        rating: response.data.rating,
                         date: moment().format(dateFormat),
                         createdDate: response.data.createdDate,
                         currentPerformance: [],
@@ -95,9 +103,6 @@ class SubscribedAdvicesImpl extends React.Component {
                         advices.push(newAdvice);
                         this.props.updateSubscribedAdvices(advices);
                         this.setState({advices});
-                    })
-                    .then(response => {
-                        console.log(response);
                     })
                     .catch(error => {
                         console.log(error);
@@ -143,6 +148,19 @@ class SubscribedAdvicesImpl extends React.Component {
         })
     }
 
+    renderDatePicker = item => {
+        return (
+            <DatePicker
+                    style={{marginRight: '20px'}}
+                    onChange={date => {this.handleDateChange(date, item)}}
+                    format={dateFormat}
+                    value={moment(item.date, dateFormat)}
+                    disabledDate={current => this.props.disabledDate(current, item)}
+                    allowClear={false}
+            />
+        );
+    }
+
     renderAdvices = () => {
         const {advices = []} = this.state;
 
@@ -155,19 +173,10 @@ class SubscribedAdvicesImpl extends React.Component {
 
             return (
                 <Panel header={this.renderHeaderItem(item)} key={index}>
-                    <Tabs animated={false}>
+                    <Tabs animated={false} tabBarExtraContent={this.renderDatePicker(item)}>
                         <TabPane tab="Composition" key="1">
                             <Row>
-                                <Col span={6} offset={18}>
-                                    <DatePicker
-                                            style={{right: 0}}
-                                            onChange={date => {this.handleDateChange(date, item)}}
-                                            format={dateFormat}
-                                            value={moment(item.date, dateFormat)}
-                                            disabledDate={current => this.props.disabledDate(current, item)}
-                                    />
-                                </Col>
-                                <Col span={24} style={{marginTop: 20}}>
+                                <Col span={24} style={{marginTop: 20, padding: '0 20px'}}>
                                     <Table size="small" columns={this.columns} dataSource={data} pagination={false}/>
                                 </Col>
                             </Row>
@@ -187,12 +196,14 @@ class SubscribedAdvicesImpl extends React.Component {
             advice.portfolio.detail.positions.map((item, index) => {
                 compositions.push({
                     key: index,
+                    name: _.get(item, 'security.detail.Nse_Name', 'N/A'),
                     symbol: item.security.ticker,
                     quantity: item.quantity,
                     lastPrice: item.lastPrice,
                     costBasic: 200,
-                    unrealizedPL: 200,
-                    weight: 200
+                    averagePrice: _.get(item, 'avgPrice', 0),
+                    unrealizedPL: _.get(item, 'unrealizedPnL', 0),
+                    weight: Number((_.get(item, 'weightInPortfolio', 0) * 100).toFixed(2))
                 });
             });
         }
@@ -205,11 +216,6 @@ class SubscribedAdvicesImpl extends React.Component {
         const targetAdvice = advices.filter(item => item.id === advice.id)[0];
         targetAdvice.isSelected = e.target.checked;
         this.setState({advices});
-        // if (e.target.checked) {
-        //     this.props.addAdvice(this.processAdvice(advice));
-        // } else {
-        //     this.props.deleteAdvice(this.processAdvice(advice));
-        // }
     }
 
     handleDateChange = (date, advice) => {
@@ -260,9 +266,9 @@ class SubscribedAdvicesImpl extends React.Component {
                                 </Col>
                                 <Col span={24}>
                                     <h5>
-                                        By 
-                                        {_.get(advice, 'advisor.user.firstName', '')} 
-                                        {_.get(advice, 'advisor.user.lastName', '')} 
+                                        By &nbsp;&nbsp;
+                                        {_.get(advice, 'advisor.user.firstName', '')} &nbsp;&nbsp;
+                                        {_.get(advice, 'advisor.user.lastName', '')} &nbsp;&nbsp;
                                         {_.get(advice, 'updatedDate', '')}
                                     </h5>
                                 </Col>
@@ -282,8 +288,14 @@ class SubscribedAdvicesImpl extends React.Component {
                                         </Col>
                                         <Col span={4}>
                                             <MetricItem
-                                                    value="4.9/5"
-                                                    label="Rating"
+                                                    value={advice.rating.current.toFixed(2)}
+                                                    label="Current Rating"
+                                            />
+                                        </Col>
+                                        <Col span={4}>
+                                            <MetricItem
+                                                    value={advice.rating.simulated.toFixed(2)}
+                                                    label="Simulated Rating"
                                             />
                                         </Col>
                                     </Row>

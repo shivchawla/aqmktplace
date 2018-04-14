@@ -4,7 +4,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import moment from 'moment';
 import {withRouter} from 'react-router'
-import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table} from 'antd';
+import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table, notification} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, AqPageHeader, StockResearchModal} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -29,6 +29,7 @@ class AddTransactionsImpl extends React.Component {
         this.state = {
             tickers: [],
             advices: [],
+            transactionalAdvices: [],
             selectedAdvices: [],
             presentAdvices: [],
             presentStocks: [],
@@ -85,6 +86,7 @@ class AddTransactionsImpl extends React.Component {
 
     renderAdviceTransactions = () => {
         const {advices, subscribedAdvices, latestAdvices} = this.state;
+        console.log('Subscribed Advices', subscribedAdvices);
         const advicesToBeDeleted = this.state.advices.filter(item => item.checked === true);
 
         return (
@@ -113,6 +115,7 @@ class AddTransactionsImpl extends React.Component {
                                     subscribedAdvices={subscribedAdvices}
                                     updateAdvices={this.updateAdvices}
                                     processAdvice={this.processAdvice}
+                                    processAdviceComposition={this.processAdviceComposition}
                                     disabledDate={this.disabledDate}
                                     previewPortfolio={this.previewPortfolio}
                                     toggleStockResearchModal={this.toggleStockResearchModal}
@@ -228,13 +231,28 @@ class AddTransactionsImpl extends React.Component {
     }
 
     updateAdvices = () => {
-        const selectedAdvices = this.state.subscribedAdvices.filter(advice => {
+        const presentAdvices = [...this.state.advices];
+        const subscribedAdvices = [...this.state.subscribedAdvices];
+        const selectedAdvices = subscribedAdvices.filter(advice => {
             return advice.isSelected === true;
         });
-        const advices = selectedAdvices.map((advice, index) => {
+        const selectedSubscribedAdvices = selectedAdvices.map((advice, index) => {
             return this.processAdvice(advice);
         });
-        this.setState({advices});
+        selectedSubscribedAdvices.map(selectedSubscribedAdvice => {
+            const targetPresentAdvice = presentAdvices.filter(presentAdvice => presentAdvice.id === selectedSubscribedAdvice.id)[0];
+            // const subscribedAdvice = subscribedAdvices.filter(item => item.id === selectedSubscribedAdvice.id)[0];
+            if (targetPresentAdvice) {
+                notification.open({
+                    style: {backgroundColor: '#f9f9f9'},
+                    message: targetPresentAdvice.name,
+                    description: `${targetPresentAdvice.name} is already to your portfolio.`
+                });
+            }
+        });
+        const unionAdvices = _.uniqBy([...presentAdvices, ...selectedSubscribedAdvices], 'id');
+        // this.setState({advices: unionAdvices, subscribedAdvices});
+        this.setState({advices: unionAdvices});
     }
 
     addAdvice = (advice) => {
@@ -298,7 +316,13 @@ class AddTransactionsImpl extends React.Component {
                     message.success('Portfolio Created Successfully');
                 })
                 .catch(error => {
-                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                    console.log(error);
+                    if(error.response) {
+                        const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating portfolio');
+                        const code = _.get(error.response, 'data.errorCode', 'N/A');
+                        message.error(`Code - ${code}: ${errorMessage}`);
+                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                    }
                 });
             } else {
                 message.error('Please provide a valid name');
@@ -435,9 +459,11 @@ class AddTransactionsImpl extends React.Component {
                         this.state.advices.length > 0
                         ? <AdviceTransactionTable
                                 preview 
+                                subscribedAdvices={this.state.subscribedAdvices}
                                 // advices={this.state.presentAdvices} 
                                 toggleStockResearchModal={this.toggleStockResearchModal}
                                 advices={this.state.advices} 
+                                processAdviceComposition={this.processAdviceComposition}
                         />
                         :   <h5 
                                 style={{textAlign: 'center', fontSize: '16px'}}
@@ -468,7 +494,7 @@ class AddTransactionsImpl extends React.Component {
 
         return {
             checked: false,
-            adviceId: advice.id,
+            id: advice.id,
             name: advice.name,
             netAssetValue: this.calculateNetAssetValue(advice),
             weight: '12.4%',
@@ -657,13 +683,13 @@ class AddTransactionsImpl extends React.Component {
 
     disabledDate = (current, advice) => {
         const createdDate = moment(advice.createdDate).subtract(2, 'days');
-        return (current && current > moment().endOf('day')) || (current && current < createdDate);
+        // return (current && current > moment().endOf('day')) || (current && current < createdDate);
+        return (current && current > moment().endOf('day'));
     }
 
     processPreviewAdviceTransaction = (adviceTransactions) => {
         const advices = [];
         adviceTransactions.map((item, index) => {
-            console.log(item);
             const adviceIndex = _.findIndex(advices, advice => {
                 if (item.advice) {
                     return advice.id === item.advice._id;
@@ -745,7 +771,9 @@ class AddTransactionsImpl extends React.Component {
                 .then(response => {
                     const advicePerformance = _.get(response.data, 'advicePerformance', []);
                     const subPositions = _.get(response.data, 'detail.subPositions', []);
+                    // Getiing all the advices
                     const advices = this.processSubscribedAdviceTransactions(subPositions, advicePerformance);
+                    // Getting all the advices that has changed
                     const changedAdvices = advices.filter(advice => advice.hasChanged === true);
                     const name = _.get(response.data, 'name', '');
                     const id = _.get(response.data, '_id', '');
@@ -778,7 +806,6 @@ class AddTransactionsImpl extends React.Component {
                             const positionDetail = adviceCompositionIndex > -1 ? advice.composition[adviceCompositionIndex] : modifiedAdvice.composition[modifiedCompositionIndex];
                             composition.push({
                                 ...positionDetail,
-                                name: consolidatedListItem,
                                 shares: oldShares,
                                 modifiedShares: oldShares,
                                 newShares,

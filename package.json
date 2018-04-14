@@ -5,6 +5,7 @@
   "theme": {
     "primary-color": "#1DA57A"
   },
+  "production": false,
   "dependencies": {
     "animated": "0.2.2",
     "antd": "3.1.3",

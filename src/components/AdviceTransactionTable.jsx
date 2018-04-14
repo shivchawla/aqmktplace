@@ -1,6 +1,7 @@
 import * as React from 'react';
 import moment from 'moment';
 import axios from 'axios';
+import _ from 'lodash';
 import {withRouter} from 'react-router';
 import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker, Icon, Tooltip} from 'antd';
 import {MetricItem} from '../components';
@@ -19,16 +20,16 @@ class AdviceTransactionTableImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            advices: props.advices,
-            subscribedAdvices: props.subscribedAdvices,
+            advices: props.advices, // advices rendered here
+            subscribedAdvices: props.subscribedAdvices, // subscribed advices that is shown in the subscribed
         }
         this.detailedColumns = [
             {
                 title: this.renderTableHeader('NAME'),
                 dataIndex: 'name',
                 key: 'name',
-                render: (text, record) => <a onClick={() => this.props.toggleStockResearchModal && this.props.toggleStockResearchModal(record)}style={nameEllipsisStyle}>{text}</a>,
-                width: 100
+                render: (text, record) => <h3 onClick={() => this.props.toggleStockResearchModal && this.props.toggleStockResearchModal(record)}style={nameEllipsisStyle}>{text}</h3>,
+                width: 250
             },
             {
                 title: this.renderTableHeader('SYMBOL'),
@@ -69,30 +70,33 @@ class AdviceTransactionTableImpl extends React.Component {
                 title: this.renderTableHeader('NAME'),
                 dataIndex: 'name',
                 key: 'name',
-                render: (text, record) => <a onClick={() => this.props.toggleStockResearchModal && this.props.toggleStockResearchModal(record)}style={nameEllipsisStyle}>{text}</a>,
-                width: 100
+                render: (text, record) => <h3 onClick={() => this.props.toggleStockResearchModal && this.props.toggleStockResearchModal(record)}style={nameEllipsisStyle}>{text}</h3>,
+                width: 250
             },
             {
                 title: this.renderTableHeader('SYMBOL'),
                 dataIndex: 'symbol',
-                key: 'symbol'
+                key: 'symbol',
+                width: 150
             },
             {
                 title: this.renderTableHeader('SHARES'),
                 dataIndex: 'modifiedShares',
-                key: 'shares'
+                key: 'shares',
+                width: 150
             },
             {
                 title: this.renderTableHeader('LAST PRICE'),
                 dataIndex: 'price',
                 key: 'price',
                 render: (text, record) => this.renderInput(text, record, 'price', 'text'),
-                width: 100
+                width: 150,
             },
             {
                 title: this.renderTableHeader('SECTOR'),
                 dataIndex: 'sector',
-                key: 'sector'
+                key: 'sector',
+                width: 150
             }
         ]
     }
@@ -144,7 +148,7 @@ class AdviceTransactionTableImpl extends React.Component {
                 >
                     <Row>
                         <Col span={24}>
-                            {this.renderComposition(advice.composition)}
+                            {this.renderComposition(advice, advice.composition)}
                         </Col>
                     </Row>
                 </Panel>
@@ -152,15 +156,35 @@ class AdviceTransactionTableImpl extends React.Component {
         })
     }
 
-    renderComposition = (tickers) => {
+    renderComposition = (advice, tickers) => {
         return (
-            <Table 
-                    dataSource={tickers} 
-                    columns={this.props.hideTransactionalDetails ? this.summaryColumns : this.detailedColumns} 
-                    pagination={false} 
-                    size="small"
-                    style={{margin: '20px 20px'}} 
-            />
+            <Row type="flex">
+                <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', paddingRight: '20px'}}>
+                    {
+                        !this.props.preview &&
+                        <Col span={3} offset={1}>
+                            <DatePicker
+                                onChange={date => this.handleDateChange(date, advice)}
+                                onOpenChange={this.datePickerOpened}
+                                value={moment()}
+                                format={dateFormat}
+                                disabledDate={(current) => this.props.disabledDate(current, advice)}
+                                allowClear={false}
+                            />
+                            <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Date</h3>
+                        </Col>
+                    }
+                </Col>
+                <Col span={24}>
+                    <Table 
+                            dataSource={tickers} 
+                            columns={this.props.hideTransactionalDetails ? this.summaryColumns : this.detailedColumns} 
+                            pagination={false} 
+                            size="small"
+                            style={{margin: '20px 20px'}} 
+                    />
+                </Col>
+            </Row>
         );
     }
 
@@ -191,37 +215,51 @@ class AdviceTransactionTableImpl extends React.Component {
 
     // improvement needed - this should be a common method
     handleDateChange = (date, advice) => {
-        const adviceId = advice.adviceId;
-        const subscribedAdvices = [...this.state.subscribedAdvices];
+        const adviceId = advice.id;
+        const unmodifiedAdvices = [...this.state.advices];
         const advices = [...this.state.advices];
-
-        const targetSubscribedAdvice = subscribedAdvices.filter(advice => advice.id === adviceId)[0];
         let targetAdvice = advices.filter(item => item.key === advice.key)[0];
-        
-        targetSubscribedAdvice.date = date.format(dateFormat);
+        let unModifiedTargetAdvice = unmodifiedAdvices.filter(item => item.key === advice.key)[0];
+        console.log('Target Advice', targetAdvice.composition);
         targetAdvice.date = date.format(dateFormat);
-
         const selectedDate = moment(date).format(dateFormat);
         const url = `${requestUrl}/advice/${adviceId}/portfolio?date=${selectedDate}`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response =>{
             const portfolio = response.data.detail;
-            if (portfolio) {
-                targetSubscribedAdvice.portfolio.detail = portfolio;
-                targetSubscribedAdvice.disabled = false;
-            } else {
-                targetSubscribedAdvice.portfolio.detail = null;
-                targetSubscribedAdvice.disabled = true;
-            }
-            targetAdvice.composition = this.props.processAdvice(targetSubscribedAdvice).composition;
+            targetAdvice.composition = this.processComposition(portfolio, advice.key, targetAdvice);
             this.setState({
-                subscribedAdvices,
                 advices
             });
         })
         .catch(error => {
             console.log(error);
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        });
+    }
+
+    processComposition = (portfolio, key, advice) => {
+        console.log(advice.composition);
+        return portfolio.positions.map((item, index) => {
+            const targetPosition = advice.composition.filter(advicePosition => advicePosition.symbol === item.security.ticker)[0];
+            console.log(targetPosition);
+            return {
+                key: index,
+                adviceKey: key,
+                symbol: _.get(item, 'security.ticker', ''),
+                name: _.get(item, 'security.detail.Nse_Name', ''),
+                sector: _.get(item, 'security.detail.Sector', ''),
+                shares: targetPosition.modifiedShares,
+                modifiedShares: targetPosition.modifiedShares,
+                newShares: item.quantity || 0,
+                price: item.lastPrice || 0,
+                costBasic: 12,
+                unrealizedPL: 1231,
+                weight: '12%',
+                transactionalQuantity: item.quantity - targetPosition.modifiedShares
+            };
         });
     }
 
@@ -232,6 +270,10 @@ class AdviceTransactionTableImpl extends React.Component {
         this.setState({advices});
     }
 
+    datePickerOpened = e => {
+        console.log(e);
+    }
+
     renderHeaderItem = (advice) => {
         const profitOrLossColor = advice.profitLosse < 0 ? '#F44336' : '#4CAF50';
         const adviceChangeIconSrc = advice.hasChanged ? 'exclamation-circle' : 'check-circle';
@@ -239,7 +281,7 @@ class AdviceTransactionTableImpl extends React.Component {
         const tooltipText = advice.hasChanged ? 'Advice needs to be updated' : 'Advice up to date';
         if (!this.props.header) {
             return (
-                <Row type="flex" justify={this.props.preview ? "space-between" : null}>
+                <Row type="flex" justify="space-between">
                     {
                         !this.props.preview &&  
                         <Col span={2}>
@@ -281,29 +323,36 @@ class AdviceTransactionTableImpl extends React.Component {
                             <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Target Units</h3>
                         </Col>
                     }
-                    {
+                    {/* {
                         !this.props.preview &&
                         <Col span={3} offset={1}>
                             <DatePicker
                                 onChange={date => this.handleDateChange(date, advice)}
+                                onOpenChange={this.datePickerOpened}
                                 value={moment()}
                                 format={dateFormat}
                                 disabledDate={(current) => this.props.disabledDate(current, advice)}
                             />
                             <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Date</h3>
                         </Col>
-                    }
+                    } */}
                     {/* {
                         this.props.preview &&
                         <Col span={8}></Col>
                     } */}
-                    <Col span={4} offset={this.props.preview ? 0 : 2}>
+                    <Col span={4} offset={this.props.preview ? 0 : 2} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                         <MetricItem 
                                 value={advice.netAssetValue} 
                                 label="Net Asset Value" 
                                 valueStyle={metricsValueStyle}
                                 labelStyle={metricsLabelStyle}
                         />
+                        <Tooltip title={tooltipText}>
+                            <Icon 
+                                    type={adviceChangeIconSrc} 
+                                    style={{fontSize: '20px', marginRight: '15px', color: adviceChangeIconColor}}
+                            />
+                        </Tooltip>
                     </Col>
                     {/* {
                         this.props.preview &&

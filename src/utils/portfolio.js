@@ -58,8 +58,8 @@ export const addPositionToAdvice = (advices, advicePerformance, position, positi
                     costBasic: position.avgPrice,
                     unrealizedPL: 1231,
                     weight: '12%',
-                    name: position.security.detail ? position.security.detail.Nse_Name : 'undefined',
-                    sector: position.security.detail ? position.security.detail.Sector : 'undefined',
+                    name: _.get(position, 'security.detail.Nse_Name', '-'),
+                    sector: _.get(position, 'security.detail.Sector', '-'),
                     transactionalQuantity: 0
                 }
             ]
@@ -76,8 +76,8 @@ export const addPositionToAdvice = (advices, advicePerformance, position, positi
             unrealizedPL: 1231,
             newShares: 0,
             weight: '12%',
-            name: position.security.detail ? position.security.detail.Nse_Name : 'undefined',
-            sector: position.security.detail ? position.security.detail.Sector : 'undefined',
+            name: _.get(position, 'security.detail.Nse_Name', '-'),
+            sector: _.get(position, 'security.detail.Sector', '-'),
             transactionalQuantity: 0
         });
     }

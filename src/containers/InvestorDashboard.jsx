@@ -120,7 +120,7 @@ export class InvestorDashboard extends React.Component {
 
                     return (
                         <h3 style={{fontSize: '16px'}}>
-                            {text}
+                            {Number(text).toFixed(2)}
                             <span style={{fontSize: '12px', color, fontWeight: 700, marginLeft: '5px'}}>
                                 {`${record.return} %`}
                             </span>
@@ -262,7 +262,7 @@ export class InvestorDashboard extends React.Component {
                         key: index,
                         name: advice.name,
                         return: Number(_.get(performanceSummary, 'current.totalReturn', 0) * 100).toFixed(2),
-                        netValue: _.get(performanceSummary, 'current.netValue', 0),
+                        netValue: _.get(performanceSummary, 'current.netValue', 0).toFixed(2),
                         rating: advice.rating.current,
                         isFollowing: advice.isFollowing,
                         isSubscribed: advice.isSubscribed

@@ -5,13 +5,13 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse} from 'antd';
+import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
-import {generateColorData, Utils, getBreadCrumbArray} from '../utils';
+import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal} from '../utils';
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
@@ -63,7 +63,8 @@ class AdviceDetailImpl extends React.Component {
             positions: [],
             show: false,
             stockResearchModalVisible: false,
-            stockResearchModalTicker: 'TCS'
+            stockResearchModalTicker: 'TCS',
+            selectedPortfolioDate: moment()
         };
     }
 
@@ -79,19 +80,22 @@ class AdviceDetailImpl extends React.Component {
             message.success('Advice successfully made Public');
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         });
     };
 
     getAdviceSummary = response => {
-        const tickers = [...this.state.tickers];
+        const tickers = [];
         const {
             name, 
             description, 
             heading, 
             advisor, 
             updatedDate, 
-            rating, 
+            rating = {current: 0, simulated: 0}, 
             isSubscribed, 
             isFollowing, 
             isOwner,
@@ -101,6 +105,12 @@ class AdviceDetailImpl extends React.Component {
             performanceSummary
         } = response.data;
         const {annualReturn, dailyChange, dailyChangePct, netValue, totalReturn} = _.get(performanceSummary, 'current', {});
+        // const {
+        //     annualReturn = 'N/A', 
+        //     dailyChange = 'N/A', 
+        //     netValue = 'N/A', 
+        //     totalReturn = 'N/A'
+        // } = _.get(performanceSummary, 'current', {});
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         tickers.push({name: benchmark, color: benchmarkColor});
         this.setState({
@@ -118,7 +128,7 @@ class AdviceDetailImpl extends React.Component {
                 isFollowing,
                 followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
-                rating: Number(rating.current.toFixed(0)),
+                rating: Number(rating.current.toFixed(2)),
                 isPublic: response.data.public
             },
             metrics: {
@@ -147,7 +157,7 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
-    getAdvicePerformance = response => {
+    getAdvicePerformance = (response, series = []) => {
         const tickers = [...this.state.tickers];
         if (response.data.simulated) {
             tickers.push({
@@ -168,21 +178,20 @@ class AdviceDetailImpl extends React.Component {
 
     processPerformanceData = performanceData => {
         return performanceData.map(item => {
-            return ([moment(item.date).valueOf(), Number(item.netValue.toFixed(2))])
+            return ([moment(item.date, 'YYYY-MM-DD').valueOf(), Number(item.netValue.toFixed(2))])
         })
     }
 
-    getAdviceData = () => {
+    getAdviceData = (startDate = moment().format('YYYY-MM-DD')) => {
         const adviceId = this.props.match.params.id;
         const url = `${requestUrl}/advice/${adviceId}`;
         const performanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
         let positions = [];
         this.setState({show: true});
-        axios.get(url, {headers: Utils.getAuthTokenHeader()}
-        )
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.getAdviceSummary(response);
-            return axios.get(`${url}/portfolio`, {headers: Utils.getAuthTokenHeader()});
+            return axios.get(`${url}/portfolio?date=${startDate}`, {headers: Utils.getAuthTokenHeader()});
         })
         .then(response => {
             this.getAdviceDetail(response);
@@ -192,7 +201,6 @@ class AdviceDetailImpl extends React.Component {
         .then(response => {
             const series = [];
             const colorData = generateColorData(positions);
-            this.getAdvicePerformance(response);
             const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition', []).map((item, index) =>{
                 return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
             });
@@ -203,6 +211,7 @@ class AdviceDetailImpl extends React.Component {
                 return {name: item.ticker, data: [item.pnl_pct], color: colorData[item.ticker]};
             });
             series.push({name: 'Composition', data: portfolioComposition});
+            this.getAdvicePerformance(response, series);
             this.setState({
                 series,
                 barDollarSeries: constituentDollarPerformance,
@@ -210,7 +219,14 @@ class AdviceDetailImpl extends React.Component {
             });
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            this.setState({
+                positions: [],
+                series: []
+            });
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({show: false});
@@ -261,7 +277,10 @@ class AdviceDetailImpl extends React.Component {
             message.success('Success');
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({disableSubscribeButton: false});
@@ -280,7 +299,10 @@ class AdviceDetailImpl extends React.Component {
             message.success('Success');
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({disableFollowButton: false});
@@ -332,7 +354,10 @@ class AdviceDetailImpl extends React.Component {
             this.setState({userId});
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         });
     };
 
@@ -409,7 +434,12 @@ class AdviceDetailImpl extends React.Component {
         this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});        
     }
 
-    
+    handlePortfolioStartDateChange = date => {
+        const startDate = date.format('YYYY-MM-DD');
+        this.setState({selectedPortfolioDate: date}, () => {
+            this.getAdviceData(startDate);
+        });
+    }    
 
     renderPageContent = () => {
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
@@ -449,7 +479,7 @@ class AdviceDetailImpl extends React.Component {
                     <Row>
                         <Col span={24} style={dividerStyle}></Col>
                     </Row>
-                    <Collapse bordered={false} defaultActiveKey={["2"]}>
+                    <Collapse bordered={false} defaultActiveKey={this.state.barDollarSeries.length > 0 ? ["2"] : ["3"]}>
                         <Panel 
                                 key="1"
                                 style={customPanelStyle} 
@@ -467,23 +497,30 @@ class AdviceDetailImpl extends React.Component {
                                     key="2"
                                     style={customPanelStyle} 
                                     header={<h3 style={metricsHeaderStyle}>Advice Summary</h3>}
-                            >
-                                <Row className="row-container">
-                                    <Col span={24}>
-                                        <AqCard title="Portfolio Summary">
-                                            <HighChartNew series = {this.state.series} />
-                                        </AqCard>
-                                        <AqCard title="Performance Summary" offset={2}>
-                                            {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
-                                            <Col span={24} style={{paddingTop: '10px'}}>
-                                                <HighChartBar 
-                                                        dollarSeries={this.state.barDollarSeries} 
-                                                        percentageSeries={this.state.barPercentageSeries}
-                                                />
+                            >  
+                                {
+                                    this.state.barDollarSeries.length > 0
+                                    ?   <Row className="row-container">
+                                            <Col span={24}>
+                                                <AqCard title="Portfolio Summary">
+                                                    <HighChartNew series = {this.state.series} />
+                                                </AqCard>
+                                                <AqCard title="Performance Summary" offset={2}>
+                                                    {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
+                                                    <Col span={24} style={{paddingTop: '10px'}}>
+                                                        <HighChartBar 
+                                                                dollarSeries={this.state.barDollarSeries} 
+                                                                percentageSeries={this.state.barPercentageSeries}
+                                                        />
+                                                    </Col>
+                                                </AqCard>
                                             </Col>
-                                        </AqCard>
-                                    </Col>
-                                </Row>
+                                        </Row>
+                                    :   <Row type="flex" align="middle" justify="center">
+                                            <h3>No Data Available</h3>
+                                        </Row>
+                                }
+                                
                             </Panel>
                         }
 
@@ -511,6 +548,12 @@ class AdviceDetailImpl extends React.Component {
                             </Panel>
                         }
                     </Collapse>
+                </Col>
+                <Col span={5} offset={1}>
+                    {
+                        this.state.adviceDetail.isOwner &&
+                        <DatePicker value={this.state.selectedPortfolioDate} onChange={this.handlePortfolioStartDateChange}/>
+                    }
                 </Col>
             </Row>
         );

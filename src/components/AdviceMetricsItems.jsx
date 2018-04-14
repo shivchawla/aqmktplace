@@ -19,6 +19,15 @@ export class AdviceMetricsItems extends React.Component {
                         var dirArrow = "";
                         const value = item.value ? `${(item.percentage ? `${(item.value * 100).toFixed(item.fixed ? item.fixed : 0)} %` : item.value.toFixed(item.fixed ? item.fixed : 0))} ${dirArrow}` : '-';
                         
+                        // var dirArrow = ""; 
+                        // let value = 0;
+                        // if (typeof(item.value) === 'number') {
+                        //     value = `${(item.percentage ? `${(item.value * 100).toFixed(2)} %` : item.value)} ${dirArrow}`;
+                        // } else {
+                        //     value = item.value;
+                        // }
+                        // console.log(value);
+
                         return (
                             <Col span={4}>
                             <MetricItem 

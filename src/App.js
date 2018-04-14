@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Layout, Menu, Row, Col} from 'antd';
+import {Layout, Menu, Row, Col, Button} from 'antd';
 import {Route, withRouter, Link} from 'react-router-dom';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import AqBreadCrumb from './components/AqBreadCrumb';
@@ -20,10 +20,12 @@ import {
     AdvisorProfile,
     AdvisorDashboard,
     ScreenAdvisors,
-    TokenUpdate
+    TokenUpdate,
+    HelloComponent
 } from './containers'; 
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
+import {Utils} from './utils';
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
@@ -59,6 +61,7 @@ class App extends React.Component {
                             </Link>
                         </Col>
                         <Col span={20} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                            <Button onClick={() => {Utils.logoutUser(); this.props.history.push('/login')}}>Logout</Button>
                             <Menu 
                                 mode="horizontal"
                                 defaultSelectedKeys={['1']}>

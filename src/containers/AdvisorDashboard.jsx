@@ -23,7 +23,7 @@ export class AdvisorDashboard extends React.Component {
         this.state = {
             radioValue: 'all',
             advices: [],
-            adviceUrl: `${requestUrl}/advice?all=true&trending=false&subscribed=false&following=false&order=-1`,
+            adviceUrl: `${requestUrl}/advice?all=true&trending=false&subscribed=false&following=false&order=-1&personal=1`,
             rawAdvices: [], // the advice structure is not changed, it is modified when new network call is done to sort the advices
             staticAdvices: [], // the advice is not changed, it is populated only the first time when getDashboardData is called
             subsPerAdviceConfig: {
@@ -562,7 +562,7 @@ export class AdvisorDashboard extends React.Component {
                     <Col span={7}>
                         <Row>
                             <Col span={24}>
-                                <Rate disabled value={advice.rating.current} />
+                                <Rate disabled value={_.get(advice, 'rating.current', 0)} />
                             </Col>
                             <Col span={24}>
                                 <h3 style={listMetricItemLabelStyle}>Rating</h3>

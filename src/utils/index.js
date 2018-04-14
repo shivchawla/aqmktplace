@@ -313,6 +313,12 @@ export const getBreadCrumbArray = (array = [], item = []) => {
 	];
 }
 
-export * from './requests';
+export const convertToDecimal = value => {
+	if (typeof(value) !== 'number') {
+		return value;
+	}
+	return Number(value.toFixed(2));
+}
 
+export * from './requests';
 export * from './portfolio';
