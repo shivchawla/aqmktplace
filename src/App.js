@@ -21,7 +21,6 @@ import {
     AdvisorDashboard,
     ScreenAdvisors,
     TokenUpdate,
-    HelloComponent
 } from './containers'; 
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
@@ -34,10 +33,7 @@ const {Header, Content} = Layout;
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            pageTitle: 'Home',
-            parentPath: '/'
-        };
+        this.state = {parentPath: '/'};
     }
 
     componentWillMount() {
@@ -45,7 +41,7 @@ class App extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.location !== prevProps.location) {
+        if (this.props.location !== prevProps.location) { // Route changed
             this.onRouteChanged(this.props.location.pathname);
         }
     }
@@ -94,7 +90,7 @@ class App extends React.Component {
                         <Route exact={true} path='/advice' component={ScreenAdvices} />
                         <Route exact={true} path='/stockresearch' component={StockResearch} />
                         <Route exact={true} path='/login' component={LoginModal} />
-                        <Route path='/tokenUpdate' component={TokenUpdate}/>
+                        <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
                         <Route exact={true} path='/quantresearch' component={QuantResearch}/>
                         <Route exact={true} path='/advice/:id' component={AdviceDetail} />
                         <Route exact={true} path='/advisordashboard/createadvice' component={CreateAdvice} />
