@@ -29,6 +29,32 @@ export class AqPortfolioSummary extends React.Component {
         this.chart.destroy();
     }
 
+    handleOverviewSelectChange = e => {
+        const {positions, defaultComposition} = this.props;
+        const choice = e.target.value;
+        let series = [];
+        try {
+            switch(choice) {
+                case "stocks":
+                    series = defaultComposition;
+                    break;
+                case "sectors":
+                    series = this.processSectorsForChart(positions, defaultComposition[0].data);
+                    break;
+                case "industries":
+                    series = this.processIndustriesForChart(positions, defaultComposition[0].data);
+                    break;
+                default:
+                    break;
+            }
+            this.setState({
+                composition: series,
+            });
+        } catch(err) {
+            console.log(err);
+        }
+    }
+
     renderOverviewMetrics = () => {
         const {positions, defaultComposition} = this.state;
         const {concentration = 0} = this.state.metrics;

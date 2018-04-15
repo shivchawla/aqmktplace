@@ -86,16 +86,12 @@ class AddTransactionsImpl extends React.Component {
 
     renderAdviceTransactions = () => {
         const {advices, subscribedAdvices, latestAdvices} = this.state;
-        console.log('Subscribed Advices', subscribedAdvices);
         const advicesToBeDeleted = this.state.advices.filter(item => item.checked === true);
 
         return (
             <Row>
                 <Col span={4} style={{left: '20px'}}>
-                    <Button 
-                            onClick={this.deleteSelected}
-                            // disabled={advicesToBeDeleted.length > 0 ? false : tr}
-                    >
+                    <Button onClick={this.deleteSelected}>
                         Delete Selected
                     </Button>
                 </Col>
@@ -155,17 +151,16 @@ class AddTransactionsImpl extends React.Component {
     renderSubscribedAdviceModal = () => {
         return (
             <Modal 
-                    title="Add Advices"
-                    visible={this.state.isSubscibedAdviceModalVisible}
-                    onCancel={this.toggleSubscribedAdviceModal}
-                    onOk={this.onOk}
-                    width="80%"
-                    bodyStyle={{
-                        height: '600px',
-                        overflow: 'hidden',
-                        overflowY: 'scroll'
-                    }}
-            >
+                title="Add Advices"
+                visible={this.state.isSubscibedAdviceModalVisible}
+                onCancel={this.toggleSubscribedAdviceModal}
+                onOk={this.onOk}
+                width="80%"
+                style={{top: 20, height:'640px'}}
+                bodyStyle={{
+                    height: '540px',
+                    overflow: 'hidden',
+                    overflowY: 'scroll'}}>
                 <SubscribedAdvices 
                         investorId={Utils.getUserInfo().investor}
                         addAdvice={this.addAdvice}
@@ -184,6 +179,11 @@ class AddTransactionsImpl extends React.Component {
                     title="Preview"
                     visible={this.state.isPreviewModalVisible}
                     width="80%"
+                    bodyStyle={{
+                        height: '540px',
+                        overflow: 'hidden',
+                        overflowY: 'scroll'}}
+                    style={{top: 20, height: '650px', overflow: 'hidden'}}
                     onCancel={this.togglePreviewModal}
                     footer={[
                         <Button key="back" onClick={this.togglePreviewModal}>Cancel</Button>,
@@ -192,16 +192,17 @@ class AddTransactionsImpl extends React.Component {
                         </Button>,
                     ]}
             >
-                <Row>
-                    <Col span={24} style={{display: 'flex', flexDirection: 'row'}}>
+                <Row >
+                    <Col span={12}>
                         <MetricItem 
                             label="Name"
                             value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : 'undefined'}
                             valueStyle={{...metricsValueStyle, fontWeight: 700}}
                             labelStyle={metricsLabelStyle}
                         />
+                    </Col>
+                    <Col span={12} style={{textAlign:'right', paddingRight:'40px'}}>
                         <MetricItem 
-                            style={{display: 'inline-flex', flexDirection: 'column'}}
                             label="Benchmark"
                             value={this.state.selectedBenchmark}
                             valueStyle={{...metricsValueStyle, fontWeight: 700}}
@@ -419,7 +420,7 @@ class AddTransactionsImpl extends React.Component {
             <Col span={24}>
                 <Tabs defaultActiveKey="2" animated={false}>
                     <TabPane tab="Portfolio" key="2" style={{padding: '0 20px 20px 20px'}}>
-                        <Row>
+                        <Row style={{overflowY:'scroll'}}>
                             <Col span={8} offset={16} style={{marginBottom: 20}}>
                                 <Radio.Group 
                                         value={this.state.toggleValue} 
@@ -453,7 +454,7 @@ class AddTransactionsImpl extends React.Component {
     renderPreviewAdvicePositions = () => {
         return (
             <Row>
-                <Col span={24} style={{marginTop: 20}}>
+                <Col span={24} style={{marginTop: 20, overflowY:'auto'}}>
                     {
                         // this.state.presentAdvices.length > 0 
                         this.state.advices.length > 0
@@ -494,7 +495,7 @@ class AddTransactionsImpl extends React.Component {
 
         return {
             checked: false,
-            id: advice.id,
+            adviceId: advice.id,
             name: advice.name,
             netAssetValue: this.calculateNetAssetValue(advice),
             weight: '12.4%',
@@ -544,6 +545,8 @@ class AddTransactionsImpl extends React.Component {
 
     processAdviceTransaction = (adviceTransactions) => {
         const transactions = [];
+        console.log("Bullll");
+        console.log(adviceTransactions);
         adviceTransactions.map(transaction => {
             if (transaction.composition.length > 0) {
                 transaction.composition.map(item => {
@@ -640,14 +643,14 @@ class AddTransactionsImpl extends React.Component {
         this.setState({selectedBenchmark: value, tickers});
     }
 
-    renderSelect = () => {
+    renderSelectBenchmark = (portfolioId) => {
         const benchmarkArray = ['TCS', 'NIFTY_50', 'WIPRO', 'LT'];
 
         return (
             <Row>
                 <Col span={12}>
-                    <h4 style={labelStyle}>Benchmark</h4>
-                    <Select 
+                    <h3 style={labelStyle}>Benchmark</h3>
+                    <Select disabled = {portfolioId}
                             defaultValue={this.state.selectedBenchmark} 
                             style={{width: 120}} 
                             onChange={this.handleBenchmarkChange}
@@ -929,6 +932,7 @@ class AddTransactionsImpl extends React.Component {
                     {name: 'Create Portfolio'}
                 ]);
 
+        const {portfolioName} = this.state;    
         return (
             <Row>
                 {
@@ -942,39 +946,39 @@ class AddTransactionsImpl extends React.Component {
                         />
                             <AqPageHeader title={this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"} breadCrumbs={breadCrumbs}/>
                             <Form>
-                                <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
+                                <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right', marginBottom:'10px'}}>
                                     <Button 
                                         type="primary" 
+                                        //onClick={this.togglePreviewModal} 
+                                        style={{marginRight: '20px'}}>
+                                        SAVE
+                                    </Button>
+                                    
+                                    <Button 
                                         onClick={this.togglePreviewModal} 
                                         style={{marginRight: '20px'}}>
                                         Preview
                                     </Button>
-                                    <Button
-                                            onClick={() => this.props.history.goBack()}
-                                    >
-                                        Cancel
-                                    </Button>
+                                    
                                 </Col>
-                                <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, marginTop: '20px'}}>
+                                <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, overflowY:'scroll', minHeight:'580px'}}>
                                     {
-                                        !portfolioId && 
-                                        <Row type="flex" align="middle" style={{marginTop: '20px'}}>
-                                            <Col span={5} style={{marginLeft: '20px'}}>
-                                                <h4 style={{...labelStyle, marginTop: '-4px'}}>Portfolio Name</h4>
+                                        <Row type="flex" align="top" justify="space-between" style={{padding: '20px 20px 0px 20px'}}>
+                                            <Col span={10} style={{margin:'auto 0'}}>
                                                 <FormItem>
                                                     {getFieldDecorator('name', {
                                                         rules: [{required: true, message: 'Please enter Portfolio Name'}]
                                                     })(
-                                                        <Input placeholder="Portfolio Name"/>
+                                                        <Input disabled={portfolioId} style={{fontSize: '22px', height:'48px', padding:'10px'}} placeholder="Portfolio Name" value={portfolioName}/>
                                                     )}
                                                 </FormItem>
                                             </Col>
-                                            <Col span={18} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                                                {this.renderSelect()}
+                                            <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                                {this.renderSelectBenchmark(portfolioId)}
                                             </Col>
                                         </Row>
                                     }
-                                    <Row style={{marginLeft: '20px', marginTop: '10px'}}>
+                                    <Row style={{marginLeft: '20px', marginBottom: '20px'}}>
                                         <Col span={24}>
                                             <Checkbox>Make Default Portfolio</Checkbox>
                                         </Col>
@@ -982,36 +986,34 @@ class AddTransactionsImpl extends React.Component {
                                     <Row style={{marginTop: '5px'}}>
                                         <Col span={24}>
                                             <Tabs defaultActiveKey="2" animated={false} style={{paddingBottom: '20px'}}>
-                                                <TabPane tab="Stock Transaction" key="1" style={{minHeight: '250px'}}>
+                                                <TabPane tab="Stock Transaction" key="1" style={{minHeight: '300px'}}>
                                                     {this.renderStockTransactions()}
                                                 </TabPane> 
-                                                <TabPane tab="Advice Transaction" key="2" style={{minHeight: '250px'}}>
+                                                <TabPane tab="Advice Transaction" key="2" style={{minHeight: '300px'}}>
                                                     {this.renderAdviceTransactions()}
                                                 </TabPane> 
-                                                <TabPane tab="Cash Transaction" key="3" style={{minHeight: '250px'}}>
+                                                <TabPane tab="Cash Transaction" key="3" style={{minHeight: '300px'}}>
                                                     {this.renderCashTransactions()}
                                                 </TabPane> 
                                             </Tabs>
                                         </Col>
                                     </Row>
                                 </Col>
-                                <Col xl={5} lg={5} md={0} sm={0} xs={0} offset={1} style={{marginTop: '20px'}}>
+                                <Col xl={5} lg={5} md={0} sm={0} xs={0} offset={1}>
                                     <Row type="flex">
                                         <Col span={24}>
                                             <Button 
-                                                    type="primary" 
-                                                    onClick={this.togglePreviewModal} 
-                                                    style={buttonStyle}
-                                            >
-                                                Preview
+                                                type="primary" 
+                                                onClick={this.togglePreviewModal} 
+                                                style={buttonStyle}>
+                                                SAVE
                                             </Button>
                                         </Col>
                                         <Col span={24} style={{marginTop: 10}}>
-                                            <Button
-                                                    onClick={() => this.props.history.goBack()}
-                                                    style={buttonStyle}
-                                            >
-                                                Cancel
+                                            <Button 
+                                                onClick={this.togglePreviewModal} 
+                                                style={buttonStyle}>
+                                                Preview
                                             </Button>
                                         </Col>
                                     </Row>

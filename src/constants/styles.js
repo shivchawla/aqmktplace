@@ -91,7 +91,7 @@ export const nameEllipsisStyle = {
     overflow: 'hidden', 
     textOverflow: 'ellipsis', 
     whiteSpace: 'nowrap', 
-    width: '250px',
+    width: '200px',
     cursor: 'pointer',
     color: '#0091EA'
 };

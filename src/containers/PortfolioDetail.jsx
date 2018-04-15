@@ -6,7 +6,7 @@ import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip} from 'antd';
-import {ForbiddenAccess, StockResearchModal, BreadCrumb} from '../components';
+import {ForbiddenAccess, StockResearchModal} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
 import {loadingColor, pageTitleStyle, metricColor} from '../constants';
@@ -32,6 +32,7 @@ import {
     metricsValueStyle, 
     dividerStyle
 } from '../constants';
+import { AqPageHeader } from '../components/AqPageHeader';
 
 const dateFormat = 'YYYY-MM-DD';
 const Panel = Collapse.Panel;
@@ -96,14 +97,14 @@ class PortfolioDetailImpl extends React.Component {
     renderAdviceTransactions = () => {
         return (
             <Row>
-                <Col span={24} style={{marginTop: 20}}>
+                <Col span={24} style={{marginTop: '5px'}}>
                     {
                         this.state.presentAdvices.length > 0 
                         ? <AdviceTransactionTable 
-                                preview 
-                                advices={this.state.presentAdvices} 
-                                toggleStockResearchModal={this.updateTicker}
-                                hideTransactionalDetails={true}
+                            preview 
+                            advices={this.state.presentAdvices} 
+                            toggleStockResearchModal={this.updateTicker}
+                            hideTransactionalDetails={true}
                           />
                         : <h5>Please add advices to your portfolio</h5>
                     }
@@ -115,7 +116,7 @@ class PortfolioDetailImpl extends React.Component {
     renderStockTransactions = () => {
         return (
             <AqPortfolioTable 
-                    style={{marginTop: '20px'}} 
+                    style={{marginTop: '5px'}} 
                     positions={this.state.stockPositions} 
                     updateTicker={this.updateTicker}
             />
@@ -321,27 +322,23 @@ class PortfolioDetailImpl extends React.Component {
         return (
             this.state.notAuthorized 
             ?   <ForbiddenAccess />
-            :   <Row style={{margin: '20px 0'}}>
+            :   <Row>
                     <StockResearchModal 
                             ticker={this.state.stockResearchModalTicker} 
                             visible={this.state.stockResearchModalVisible}
                             toggleModal={this.toggleModal}
                     />
-                    <Col xl={18} md={24}>
-                        <h1 style={pageTitleStyle}>{this.state.name}</h1>
-                    </Col>
-                    <Col xl={18} md={24}>
-                        <BreadCrumb breadCrumbs={breadCrumbs} />
-                    </Col>
+                    <AqPageHeader title={this.state.name} breadCrumbs={breadCrumbs} button={{route:'/investordashboard/createportfolio', title:'Create Portfolio'}}/>
+                     
                     <Col xl={18} md={24} style={{...shadowBoxStyle, padding: '0'}}>
                         <Row style={{padding: '20px 30px'}}>
                             <Col span={24}>
-                                <Row>
+                                <Row type="flex" justify="space-between">
                                     <Col span={10}>
                                         <h2 style={pageHeaderStyle}>{this.state.name}</h2>
                                     </Col>
-                                    <Col xl={0} md={14} style={{textAlign: 'right'}}>
-                                        <Button 
+                                    <Col span={6} style={{textAlign: 'right'}}>
+                                        {/*<Button 
                                                 type="primary" 
                                                 style={{marginBottom: 20}} 
                                                 onClick={() => this.props.history.push(
@@ -350,7 +347,7 @@ class PortfolioDetailImpl extends React.Component {
                                                 className="primary-btn"
                                         >
                                             Create Portfolio
-                                        </Button>
+                                            </Button>*/}
                                     
                                         <Button
                                                 onClick={() => this.props.history.push(
@@ -418,7 +415,7 @@ class PortfolioDetailImpl extends React.Component {
                                 header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
                                 <Row style={{padding: '0 30px'}}>
                                     <Col span={24}>
-                                        <Row className="row-container">
+                                        <Row>
                                             <Col span={24} style={{textAlign: 'right'}}>
                                                 <Radio.Group 
                                                         value={this.state.toggleValue} 
@@ -433,6 +430,7 @@ class PortfolioDetailImpl extends React.Component {
                                             </Col>
                                         </Row>
                                         {
+                                            //this should be called portfolio and not transactions
                                             this.state.toggleValue === 'advice'
                                             ? this.renderAdviceTransactions()
                                             : this.renderStockTransactions()
@@ -445,7 +443,7 @@ class PortfolioDetailImpl extends React.Component {
                     <Col xl={5} md={0} offset={1}>
                         <Row>
                             <Col span={24}>
-                                <Button 
+                                {/*<Button 
                                         type="primary" 
                                         style={{marginBottom: 20}} 
                                         onClick={() => this.props.history.push(
@@ -454,10 +452,10 @@ class PortfolioDetailImpl extends React.Component {
                                         className="primary-btn"
                                 >
                                     Create Portfolio
-                                </Button>
+                                    </Button>*/}
                             </Col>
                             <Col span={24} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                <Button
+                                {/*<Button
                                         onClick={() => this.props.history.push(
                                             `/investordashboard/portfolio/transactions/${this.props.match.params.id}`, 
                                             {
@@ -469,7 +467,7 @@ class PortfolioDetailImpl extends React.Component {
                                         className="secondary-btn"
                                 >
                                     Update Portfolio
-                                </Button>
+                                    </Button>*/}
                                 {
                                     this.state.hasChangedCount > 0 &&
                                     <Tooltip title="Some advices in your portfolio are backdated. You need to update your portfolio.">

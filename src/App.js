@@ -68,7 +68,7 @@ class App extends React.Component {
                                 <h1 style={headerColor}>AIMSQUANT</h1>
                             </Link>
                         </Col>
-                        <Col span={20} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <Col span={20} style={{display: 'flex', justifyContent: 'flex-end', height: '64px'}}>
                             <Button onClick={() => {Utils.logoutUser(); this.props.history.push('/login')}}>Logout</Button>
                             <Menu 
                                     mode="horizontal"
@@ -140,5 +140,8 @@ const contentLayoutStyle = {
     background: '#f9f9f9',
     //marginTop: '15px'
     width:'90%',
-    margin:'0 auto'
+    margin:'0 auto',
+    //height:'calc(100vh - 64px)'
+    height: '100%',
+    overflowY:'scroll',
 };

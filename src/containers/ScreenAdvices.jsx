@@ -52,7 +52,6 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     handleSelectChange = value => {
-        // console.log(value);
     }
     
     renderMenu = () => {
@@ -85,7 +84,6 @@ export class ScreenAdvices extends React.PureComponent {
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            // console.log(response.data);
             this.setState({
                 advices: this.processAdvices(response.data)
             });
@@ -132,8 +130,6 @@ export class ScreenAdvices extends React.PureComponent {
     renderAdvices = () => {
         const {advices} = this.state;
         return advices.map((advice, index) => {
-            // console.log('Advice', advice);
-
             return (
                 <AdviceListItemMod key={index} advice={advice}/>
             );
@@ -189,7 +185,6 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     handleSortingMenuChange = (value) => {
-        // console.log(value);
         this.setState({sortBy: value}, () => {
             const url = `${this.state.adviceUrl}&orderParam=${this.state.sortBy}`;
             this.getAdvices(url);
@@ -236,15 +231,6 @@ export class ScreenAdvices extends React.PureComponent {
 
             <Row>
                 <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs}/>
-                {/*<Row style={{backgroundColor: '#f9f9f9', paddingTop:'10px'}}>
-                    <Col xl={17} md={24}>
-                        <h1 style={pageTitleStyle}>Screen Advices</h1>
-                    </Col>
-                    <Col xl={17} md={24}>
-                        <BreadCrumb breadCrumbs={breadCrumbs} />
-                    </Col>
-                </Row>*/}    
-                
                 <Row className="row-container" style={shadowBoxStyle}>
                     {this.renderFilter()}
                     

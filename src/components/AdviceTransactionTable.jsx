@@ -29,7 +29,7 @@ class AdviceTransactionTableImpl extends React.Component {
                 dataIndex: 'name',
                 key: 'name',
                 render: (text, record) => <h3 onClick={() => this.props.toggleStockResearchModal && this.props.toggleStockResearchModal(record)}style={nameEllipsisStyle}>{text}</h3>,
-                width: 250
+                width: 220
             },
             {
                 title: this.renderTableHeader('SYMBOL'),
@@ -47,19 +47,19 @@ class AdviceTransactionTableImpl extends React.Component {
                 key: 'newShares'
             },
             {
-                title: this.renderTableHeader('LAST PRICE'),
+                title: this.renderTableHeader('TRADE PRICE'),
                 dataIndex: 'price',
                 key: 'price',
                 render: (text, record) => this.renderInput(text, record, 'price', 'text'),
                 width: 100
             },
-            {
+            /*{
                 title: this.renderTableHeader('SECTOR'),
                 dataIndex: 'sector',
                 key: 'sector'
-            },
+            },*/
             {
-                title: this.renderTableHeader('TRANSACTIONAL QTY.'),
+                title: this.renderTableHeader('TRADE QTY.'),
                 dataIndex: 'transactionalQuantity',
                 key: 'transactionalQuantity',
                 render: text => <span style={{color: Number(text) >= 0 ? metricColor.positive : metricColor.negative}}>{text}</span>
@@ -146,8 +146,8 @@ class AdviceTransactionTableImpl extends React.Component {
                         key={index}
                         style={customPanelStyle}
                 >
-                    <Row>
-                        <Col span={24}>
+                    <Row style={{overflow: 'hidden', overflowY: 'scroll', maxHeight: '320px'}}>
+                        <Col span={24} >
                             {this.renderComposition(advice, advice.composition)}
                         </Col>
                     </Row>
@@ -159,29 +159,31 @@ class AdviceTransactionTableImpl extends React.Component {
     renderComposition = (advice, tickers) => {
         return (
             <Row type="flex">
-                <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', paddingRight: '20px'}}>
-                    {
-                        !this.props.preview &&
-                        <Col span={3} offset={1}>
-                            <DatePicker
-                                onChange={date => this.handleDateChange(date, advice)}
-                                onOpenChange={this.datePickerOpened}
-                                value={moment()}
-                                format={dateFormat}
-                                disabledDate={(current) => this.props.disabledDate(current, advice)}
-                                allowClear={false}
-                            />
-                            <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Date</h3>
-                        </Col>
-                    }
-                </Col>
+                {!this.props.preview &&
+                    <Col span={24}>
+                        <Row type="flex" justify="end" align="middle" style={{paddingRight: '20px'}}>
+                            <Col span={4}><h3 style={{fontSize: '14px', textAlign: 'right', marginRight:'10px'}}>Select Date:</h3></Col>   
+                            <Col span={5}>
+                                <DatePicker
+                                    onChange={date => this.handleDateChange(date, advice)}
+                                    onOpenChange={this.datePickerOpened}
+                                    value={moment()}
+                                    format={dateFormat}
+                                    disabledDate={(current) => this.props.disabledDate(current, advice)}
+                                    allowClear={false}
+                                />
+                                
+                            </Col>
+                        </Row>
+                    </Col>
+                }
                 <Col span={24}>
                     <Table 
                             dataSource={tickers} 
                             columns={this.props.hideTransactionalDetails ? this.summaryColumns : this.detailedColumns} 
                             pagination={false} 
                             size="small"
-                            style={{margin: '20px 20px'}} 
+                            style={{margin: '5px 20px'}} 
                     />
                 </Col>
             </Row>
@@ -241,7 +243,6 @@ class AdviceTransactionTableImpl extends React.Component {
     }
 
     processComposition = (portfolio, key, advice) => {
-        console.log(advice.composition);
         return portfolio.positions.map((item, index) => {
             const targetPosition = advice.composition.filter(advicePosition => advicePosition.symbol === item.security.ticker)[0];
             console.log(targetPosition);
@@ -275,93 +276,63 @@ class AdviceTransactionTableImpl extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
-        const profitOrLossColor = advice.profitLosse < 0 ? '#F44336' : '#4CAF50';
+        const profitOrLossColor = advice.profitLoss < 0 ? '#F44336' : '#4CAF50';
         const adviceChangeIconSrc = advice.hasChanged ? 'exclamation-circle' : 'check-circle';
         const adviceChangeIconColor = advice.hasChanged ? metricColor.neutral : metricColor.positive;
         const tooltipText = advice.hasChanged ? 'Advice needs to be updated' : 'Advice up to date';
+        const weight = advice.weight;
         if (!this.props.header) {
             return (
-                <Row type="flex" justify="space-between">
+                <Row type="flex" gutter={40}>
                     {
                         !this.props.preview &&  
                         <Col span={2}>
                             <Checkbox onChange={(e) => this.handleCheckBoxchange(e, advice)} checked={advice.checked} />
                         </Col>
                     }
-                    <Col span={4}>
+                    <Col span={7}>
                         <MetricItem 
-                                value={advice.name} 
-                                label="Advice" 
-                                valueStyle={metricsValueStyle}
-                                labelStyle={metricsLabelStyle}
+                            value={advice.name} 
+                            label={advice.id ? "Advice":""} 
+                            valueStyle={metricsValueStyle}
+                            labelStyle={metricsLabelStyle}
                         />
                     </Col>
                     {
                         !this.props.preview &&
-                        <Col span={2} offset={1}>
+                        <Col span={4}>
                             <Input 
-                                    disabled={true}
-                                    onClick={this.handleInputClick}
-                                    value={advice.oldUnits} 
-                                    type="number" 
-                                    placeholder="Old Units" 
-                                    onChange={(e) => {this.handleInputChange(e, advice)}}
+                                disabled={true}
+                                onClick={this.handleInputClick}
+                                value={advice.oldUnits} 
+                                type="number" 
+                                placeholder="Old Units" 
+                                onChange={(e) => {this.handleInputChange(e, advice)}}
                             />
                             <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Old Units</h3>
                         </Col>
                     }
                     {
                         !this.props.preview &&
-                        <Col span={2} offset={1}>
+                        <Col span={4}>
                             <Input 
-                                    onClick={this.handleInputClick}
-                                    value={advice.newUnits} 
-                                    type="number" 
-                                    placeholder="Target Units" 
-                                    onChange={(e) => {this.handleInputChange(e, advice)}}
+                                onClick={this.handleInputClick}
+                                value={advice.newUnits} 
+                                type="number" 
+                                placeholder="Target Units" 
+                                onChange={(e) => {this.handleInputChange(e, advice)}}
                             />
                             <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Target Units</h3>
                         </Col>
                     }
-                    {/* {
-                        !this.props.preview &&
-                        <Col span={3} offset={1}>
-                            <DatePicker
-                                onChange={date => this.handleDateChange(date, advice)}
-                                onOpenChange={this.datePickerOpened}
-                                value={moment()}
-                                format={dateFormat}
-                                disabledDate={(current) => this.props.disabledDate(current, advice)}
-                            />
-                            <h3 style={{...metricsLabelStyle, textAlign: 'center'}}>Date</h3>
-                        </Col>
-                    } */}
-                    {/* {
-                        this.props.preview &&
-                        <Col span={8}></Col>
-                    } */}
-                    <Col span={4} offset={this.props.preview ? 0 : 2} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                        <MetricItem 
-                                value={advice.netAssetValue} 
-                                label="Net Asset Value" 
-                                valueStyle={metricsValueStyle}
-                                labelStyle={metricsLabelStyle}
-                        />
-                        <Tooltip title={tooltipText}>
-                            <Icon 
-                                    type={adviceChangeIconSrc} 
-                                    style={{fontSize: '20px', marginRight: '15px', color: adviceChangeIconColor}}
-                            />
-                        </Tooltip>
-                    </Col>
-                    {/* {
+                    {
                         this.props.preview &&
                         <Col span={4}>
                             <MetricItem 
-                                    value={advice.weight} 
-                                    label="Weight" 
-                                    valueStyle={metricsValueStyle}
-                                    labelStyle={metricsLabelStyle}
+                                value={`${advice.weight} %`} 
+                                label="Weight" 
+                                valueStyle={metricsValueStyle}
+                                labelStyle={metricsLabelStyle}
                             />
                         </Col>
                     }
@@ -369,19 +340,31 @@ class AdviceTransactionTableImpl extends React.Component {
                         this.props.preview &&
                         <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <MetricItem 
-                                    value={`${advice.profitLoss} %`} 
-                                    label="Profit/Loss" 
-                                    valueStyle={{...metricsValueStyle, color: profitOrLossColor}}
-                                    labelStyle={metricsLabelStyle}
+                                value={`${advice.profitLoss} %`} 
+                                label="Profit/Loss" 
+                                valueStyle={{...metricsValueStyle, color: profitOrLossColor}}
+                                labelStyle={metricsLabelStyle}
                             />
+                        </Col>
+                    } 
+                    <Col span={7} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                        <MetricItem 
+                            value={advice.netAssetValue} 
+                            label="Net Asset Value" 
+                            valueStyle={{...metricsValueStyle, textAlign:'center'}}
+                            labelStyle={{...metricsLabelStyle, textAlign: 'center'}}
+                        />
+                        
+                        {advice.id &&
                             <Tooltip title={tooltipText}>
                                 <Icon 
-                                        type={adviceChangeIconSrc} 
-                                        style={{fontSize: '20px', marginRight: '15px', color: adviceChangeIconColor}}
+                                    type={adviceChangeIconSrc} 
+                                    style={{fontSize: '20px', marginRight: '15px', color: adviceChangeIconColor}}
                                 />
                             </Tooltip>
-                        </Col>
-                    } */}
+                        }
+                    </Col>
+                    
                 </Row>
             );
         } else {

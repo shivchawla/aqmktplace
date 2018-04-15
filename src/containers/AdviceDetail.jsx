@@ -380,7 +380,7 @@ class AdviceDetailImpl extends React.Component {
         if (userId !== advisorId) {
             return (
                 <Row>
-                    <Col span={24}>
+                    <Col span={24} style={{textAlign: 'right'}}>
                         <Button 
                                 onClick={this.toggleDialog} 
                                 style={{width: 170}} 
@@ -391,7 +391,7 @@ class AdviceDetailImpl extends React.Component {
                             {!this.state.adviceDetail.isSubscribed ? "SUBSCRIBE" : "UNSUBSCRIBE"}
                         </Button>
                     </Col>
-                    <Col span={24}>
+                    <Col span={24} style={{textAlign: 'right'}}>
                         <Button 
                                 onClick={this.followAdvice} 
                                 style={{width: 170, marginTop: 10}} 
@@ -407,12 +407,12 @@ class AdviceDetailImpl extends React.Component {
 
         return (
             <Row>
-                <Col span={24}>
+                <Col span={24} style={{textAlign: 'right'}}>
                     {
                         !this.state.adviceDetail.isPublic 
                         && <Button onClick={this.makeAdvicePublic} style={{width: 150}} type="primary">Publish</Button>}
                 </Col>
-                <Col span={24}>
+                <Col span={24} style={{textAlign: 'right'}}>
                     <Button 
                             onClick={() => this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`)} 
                             style={{width: 150, marginTop: 10}}
@@ -460,7 +460,7 @@ class AdviceDetailImpl extends React.Component {
         return (
             <Row>
                 <AqPageHeader title={name} breadCrumbs={breadCrumbs}/>
-                <Col span={18} style={shadowBoxStyle}>
+                <Col xl={18} md={24} style={shadowBoxStyle}>
                     <StockResearchModal 
                             ticker={this.state.stockResearchModalTicker} 
                             visible={this.state.stockResearchModalVisible}

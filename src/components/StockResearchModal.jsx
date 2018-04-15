@@ -19,11 +19,12 @@ export class StockResearchModal extends React.Component {
                     title={this.props.ticker.name}
                     visible={this.props.visible}
                     width={900}
-                    bodyStyle={{height: '700px'}}
+                    bodyStyle={{height: '600px'}}
+                    style={{top: 20, height: '640px'}}
                     footer={null}
             >
                 <StockResearch
-                        style={{marginTop: '-20px'}} 
+                        //style={{marginTop: '-80px'}} 
                         xl={24} 
                         openAsDialog={true} 
                         ticker={this.props.ticker.symbol}

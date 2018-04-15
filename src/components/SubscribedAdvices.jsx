@@ -29,7 +29,7 @@ class SubscribedAdvicesImpl extends React.Component {
                 title: 'NAME',
                 dataIndex: 'name',
                 key: 'name',
-                width: 250,
+                width: 210,
                 render: text => <h3 style={nameEllipsisStyle}>{text}</h3>
             },
             {
@@ -47,16 +47,16 @@ class SubscribedAdvicesImpl extends React.Component {
                 dataIndex: 'lastPrice',
                 key: 'lastPrice'
             },
-            {
+            /*{
                 title: 'AVG. PRICE',
                 dataIndex: 'averagePrice',
                 key: 'averagePrice'
-            },
-            {
+            },*/
+            /*{
                 title: 'UNREALIZED P/L',
                 dataIndex: 'unrealizedPL',
                 key: 'unrealizedPL'
-            },
+            },*/
             {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
@@ -196,13 +196,13 @@ class SubscribedAdvicesImpl extends React.Component {
             advice.portfolio.detail.positions.map((item, index) => {
                 compositions.push({
                     key: index,
-                    name: _.get(item, 'security.detail.Nse_Name', 'N/A'),
+                    name: _.get(item, 'security.detail.Nse_Name', 'N/A'), 
                     symbol: item.security.ticker,
                     quantity: item.quantity,
                     lastPrice: item.lastPrice,
                     costBasic: 200,
-                    averagePrice: _.get(item, 'avgPrice', 0),
-                    unrealizedPL: _.get(item, 'unrealizedPnL', 0),
+                    //averagePrice: _.get(item, 'avgPrice', 0),
+                    //unrealizedPL: _.get(item, 'unrealizedPnL', 0),
                     weight: Number((_.get(item, 'weightInPortfolio', 0) * 100).toFixed(2))
                 });
             });
