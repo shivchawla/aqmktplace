@@ -110,6 +110,7 @@ export class ScreenAdvices extends React.PureComponent {
     processAdvices = (responseAdvices) => {
         const advices = [];
         responseAdvices.map((advice, index) => {
+            console.log('Advice Item', advice);
             advices.push({
                 isFollowing: advice.isFollowing || false,
                 id: advice._id || 0,
@@ -120,7 +121,12 @@ export class ScreenAdvices extends React.PureComponent {
                 subscribers: advice.numSubscribers || 0,
                 followers: advice.numFollowers || 0,
                 rating: _.get(advice, 'rating.current', 0).toFixed(2),
-                performanceSummary: advice.performanceSummary
+                performanceSummary: advice.performanceSummary,
+                rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
+                isApproved: _.get(advice, 'approvalStatus', 'N/A'),
+                isOwner: _.get(advice, 'isOwner', false),
+                isSubscribed: _.get(advice, 'isSubscribed', false),
+                isTrending: false
             })
         });
 

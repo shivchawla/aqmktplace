@@ -2,9 +2,6 @@
   "name": "aq-marketplace-ui",
   "version": "0.1.0",
   "private": true,
-  "theme": {
-    "primary-color": "#1DA57A"
-  },
   "production": false,
   "dependencies": {
     "animated": "0.2.2",
@@ -47,7 +44,10 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-import": "^1.7.0",
     "babel-plugin-syntax-decorators": "^6.13.0",
+    "react-app-rewire-less": "^2.1.1",
+    "react-app-rewired": "^1.5.0",
     "react-scripts": "1.1.0"
   },
   "scripts": {

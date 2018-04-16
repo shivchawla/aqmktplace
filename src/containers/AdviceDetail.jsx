@@ -6,9 +6,9 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor} from '../constants';
+import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader} from '../components';
+import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal} from '../utils';
@@ -456,16 +456,24 @@ class AdviceDetailImpl extends React.Component {
         const breadCrumbs = getBreadCrumbArray(AdviceDetailCrumb, [
             {name, url: '#'}
         ]);
+        const statusBarColor = this.state.adviceDetail.isOwner 
+                ? statusColor.owner 
+                : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
 
         return (
             <Row>
                 <AqPageHeader title={name} breadCrumbs={breadCrumbs}/>
+                <StockResearchModal 
+                        ticker={this.state.stockResearchModalTicker} 
+                        visible={this.state.stockResearchModalVisible}
+                        toggleModal={this.toggleModal}
+                />
                 <Col xl={18} md={24} style={shadowBoxStyle}>
-                    <StockResearchModal 
-                            ticker={this.state.stockResearchModalTicker} 
-                            visible={this.state.stockResearchModalVisible}
-                            toggleModal={this.toggleModal}
-                    />
+                    {/* <Row 
+                            className="statusBar" 
+                            style={{height: '3px', backgroundColor: statusColor.owner, width: '100%'}}
+                    ></Row> */}
+                    <StatusBar color={statusBarColor} />
                     <Row className="row-container" type="flex" justify="space-between">
                         <Col span={18}>
                             <h1 style={adviceNameStyle}>{name}</h1>
@@ -560,7 +568,7 @@ class AdviceDetailImpl extends React.Component {
                                         }
                                     </Col>
                                     <Col span={24} style={{marginTop: '10px'}}>
-                                        <AqPortfolioTable 
+                                        <AqStockPortfolioTable 
                                                     positions={this.state.positions} 
                                                     updateTicker={this.updateTicker}
                                         />

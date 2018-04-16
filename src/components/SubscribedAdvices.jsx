@@ -4,7 +4,7 @@ import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker} from 'antd';
-import {AdviceTransactionTable} from '../components';
+import {AqPortfolioCompositionAdvice} from '../components';
 import {MyChartNew} from '../containers/MyChartNew';
 import {currentPerformanceColor, simulatedPerformanceColor, nameEllipsisStyle} from '../constants';
 import {Utils} from '../utils';

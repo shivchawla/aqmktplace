@@ -206,14 +206,19 @@ class AdviceListItemImpl extends React.PureComponent {
         });
     }
 
-    renderDiversityChart = () => {
+    renderDiversityChart = (diversity) => {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
                     <img style={iconStyle} src={pie} />
                 </Col>
                 <Col span={24} style={{fontSize: '14px'}}>
-                    <h5>Diversified <span style={{fontSize: "14px"}}>80%</span></h5>
+                    <h5>
+                        Diversified&nbsp;
+                        <span style={{fontSize: "14px"}}>
+                            {(diversity * 100).toFixed(2)} %
+                        </span>
+                    </h5>
                 </Col>
             </Row>
         );
@@ -283,7 +288,7 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row>
                 <Col span={6}>
-                    {this.renderDiversityChart()}
+                    {this.renderDiversityChart(_.get(performanceSummary, 'current.concentration', 0))}
                 </Col>
                 {
                     performanceSummary.current && 
@@ -374,14 +379,26 @@ class AdviceListItemImpl extends React.PureComponent {
             rating, 
             performanceSummary = {}, 
             id,
-            isFollowing
+            isFollowing,
+            isSubscribed,
+            isApproved,
+            isOwner,
+            rebalancingFrequency
         } = this.props.advice;
         let sectors = _.get(performanceSummary, 'current.sectors', []);
 
         const activeCardStyle = this.state.isHovered ? hoverCardStyle : cardStyle;
+        const cardBackgroundColor = isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
 
         return (
-            <Row type="flex" style={activeCardStyle} align="top" onClick={e => this.handleClick(id)} onMouseEnter={this.handleHover} onMouseLeave={this.handleHover}>
+            <Row 
+                    type="flex" 
+                    style={{...activeCardStyle, backgroundColor: cardBackgroundColor}} 
+                    align="top" 
+                    onClick={e => this.handleClick(id)} 
+                    onMouseEnter={this.handleHover} 
+                    onMouseLeave={this.handleHover}
+            >
                 <Col span={24} style={{paddingLeft:'10px', paddingRight:'10px'}}>
                     <Row>
                         <Col span={10}>
@@ -395,6 +412,10 @@ class AdviceListItemImpl extends React.PureComponent {
                                         {this.renderSectors(sectors)}
                                     </Col>
                                 }
+                                <Col span={24} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                    <Icon type="clock-circle-o" style={{fontWeight: '700', fontSize: '16px'}}/>
+                                    <span style={{marginLeft: '5px'}}>{rebalancingFrequency}</span>
+                                </Col>
                                 
                             </Row>
                         </Col>

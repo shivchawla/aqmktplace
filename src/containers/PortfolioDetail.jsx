@@ -14,13 +14,13 @@ import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
 import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio} from '../utils';
 import {
-    AdviceTransactionTable, 
+    AqPortfolioCompositionAdvice, 
     AqHighChartMod, 
     MetricItem, 
     AqCard, 
     HighChartNew, 
     HighChartBar, 
-    AqPortfolioTable,
+    AqStockPortfolioTable,
     AdviceMetricsItems
 } from '../components';
 import {
@@ -100,7 +100,7 @@ class PortfolioDetailImpl extends React.Component {
                 <Col span={24} style={{marginTop: '5px'}}>
                     {
                         this.state.presentAdvices.length > 0 
-                        ? <AdviceTransactionTable 
+                        ? <AqPortfolioCompositionAdvice 
                             preview 
                             advices={this.state.presentAdvices} 
                             toggleStockResearchModal={this.updateTicker}
@@ -115,7 +115,7 @@ class PortfolioDetailImpl extends React.Component {
 
     renderStockTransactions = () => {
         return (
-            <AqPortfolioTable 
+            <AqStockPortfolioTable 
                     style={{marginTop: '5px'}} 
                     positions={this.state.stockPositions} 
                     updateTicker={this.updateTicker}
@@ -337,18 +337,7 @@ class PortfolioDetailImpl extends React.Component {
                                     <Col span={10}>
                                         <h2 style={pageHeaderStyle}>{this.state.name}</h2>
                                     </Col>
-                                    <Col span={6} style={{textAlign: 'right'}}>
-                                        {/*<Button 
-                                                type="primary" 
-                                                style={{marginBottom: 20}} 
-                                                onClick={() => this.props.history.push(
-                                                    '/investordashboard/createportfolio', {pageTitle: 'Create Portfolio'}
-                                                )}
-                                                className="primary-btn"
-                                        >
-                                            Create Portfolio
-                                            </Button>*/}
-                                    
+                                    <Col span={6} style={{textAlign: 'right'}}>                                    
                                         <Button
                                                 onClick={() => this.props.history.push(
                                                     `/investordashboard/portfolio/transactions/${this.props.match.params.id}`, 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Table, Tooltip} from 'antd';
 import {nameEllipsisStyle} from '../constants';
 
-export class AqPortfolioTable extends React.Component {
+export class AqStockPortfolioTable extends React.Component {
     constructor(props) {
         super(props);
         this.columns = [
@@ -31,7 +31,7 @@ export class AqPortfolioTable extends React.Component {
                 key: 'shares'
             },
             {
-                title: 'PRICE',
+                title: 'PRICE(\u20B9)',
                 dataIndex: 'price',
                 key: 'price'
             },
@@ -92,8 +92,13 @@ export class AqPortfolioTable extends React.Component {
                     pagination={false} 
                     columns={this.columns} 
                     style={this.props.style}
-                    // style={{marginTop: 20, border: '1px solid #EAEAEA'}} 
-                    dataSource={this.getPortfolioArray(this.props.positions)}
+                    // processedPosition true means that the positions provided as props are processed into
+                    // a certain format required by this table as seen in the columns
+                    dataSource={
+                            this.props.processedPositions 
+                            ? this.updateWeights(this.props.positions)
+                            : this.getPortfolioArray(this.props.positions)
+                        }
             />
         );
     }

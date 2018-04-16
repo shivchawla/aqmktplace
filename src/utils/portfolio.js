@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 
 export const addToMyPortfolio = (advices, advicePerformance, position, positionIndex) => {
     const adviceIndex = _.findIndex(advices, advice => advice.id === null);
@@ -46,6 +47,7 @@ export const addPositionToAdvice = (advices, advicePerformance, position, positi
             newUnits: 1,
             netAssetValue: Number((_.get(advice, 'personal.netValue', 0)).toFixed(2)),
             hasChanged: advice.hasChanged || false,
+            date: moment().format('YYYY-MM-DD'),
             composition: [
                 {
                     key: 1,
@@ -57,7 +59,7 @@ export const addPositionToAdvice = (advices, advicePerformance, position, positi
                     price: position.lastPrice,
                     costBasic: position.avgPrice,
                     unrealizedPL: 1231,
-                    weight: '12%',
+                    weight: 0,
                     name: _.get(position, 'security.detail.Nse_Name', '-'),
                     sector: _.get(position, 'security.detail.Sector', '-'),
                     transactionalQuantity: 0

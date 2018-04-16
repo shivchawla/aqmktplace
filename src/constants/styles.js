@@ -122,3 +122,9 @@ export const benchmarkColor = '#D50000';
 export const currentPerformanceColor = '#9C27B0';
 
 export const simulatedPerformanceColor = '#00BCD4';
+
+export const statusColor = {
+    subscribed: '#FFAB00',
+    notSubscribed: '#607D8B',
+    owner: '#1DE9B6'
+}

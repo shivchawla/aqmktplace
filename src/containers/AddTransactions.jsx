@@ -6,7 +6,7 @@ import moment from 'moment';
 import {withRouter} from 'react-router'
 import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table, notification} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
-import {AdviceTransactionTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, AqPageHeader, StockResearchModal} from '../components';
+import {AqPortfolioCompositionAdvice, AqPortfolioTransactionAdvice, AqStockPortfolioTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, AqPageHeader, StockResearchModal} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
@@ -48,39 +48,6 @@ class AddTransactionsImpl extends React.Component {
             stockResearchModalVisible: false,
             stockResearchModalTicker: {name: 'TCS', symbol: 'TCS'}
         };
-        this.columns = [
-            {
-                title: 'NAME',
-                dataIndex: 'name',
-                key: 'name'
-            },
-            {
-                title: 'SYMBOL',
-                dataIndex: 'symbol',
-                key: 'symbol'
-            },
-            {
-                title: 'SHARES',
-                dataIndex: 'shares',
-                key: 'shares'
-            },
-            {
-                title: 'PRICE',
-                dataIndex: 'price',
-                key: 'price'
-            },
-            {
-                title: 'WEIGHT',
-                dataIndex: 'weight',
-                key: 'weight',
-                render: text => <span>{text} %</span>
-            },
-            {
-                title: 'SECTOR',
-                dataIndex: 'sector',
-                key: 'sector'
-            }
-        ];
         this.adviceKey = 0;
     }
 
@@ -106,7 +73,7 @@ class AddTransactionsImpl extends React.Component {
                 <Col span={24} style={{marginTop: 20, padding: '0 20px'}}>
                     {
                         advices.length > 0 
-                        ?   <AdviceTransactionTable 
+                        ?   <AqPortfolioTransactionAdvice 
                                     advices={advices} 
                                     subscribedAdvices={subscribedAdvices}
                                     updateAdvices={this.updateAdvices}
@@ -186,17 +153,14 @@ class AddTransactionsImpl extends React.Component {
                     style={{top: 20, height: '650px', overflow: 'hidden'}}
                     onCancel={this.togglePreviewModal}
                     footer={[
-                        <Button key="back" onClick={this.togglePreviewModal}>Cancel</Button>,
-                        <Button key="submit" type="primary" onClick={this.handleSubmit}>
-                          Save
-                        </Button>,
+                        <Button key="back" onClick={this.togglePreviewModal}>Ok</Button>,
                     ]}
             >
                 <Row >
                     <Col span={12}>
                         <MetricItem 
                             label="Name"
-                            value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : 'undefined'}
+                            value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : '-'}
                             valueStyle={{...metricsValueStyle, fontWeight: 700}}
                             labelStyle={metricsLabelStyle}
                         />
@@ -242,7 +206,6 @@ class AddTransactionsImpl extends React.Component {
         });
         selectedSubscribedAdvices.map(selectedSubscribedAdvice => {
             const targetPresentAdvice = presentAdvices.filter(presentAdvice => presentAdvice.id === selectedSubscribedAdvice.id)[0];
-            // const subscribedAdvice = subscribedAdvices.filter(item => item.id === selectedSubscribedAdvice.id)[0];
             if (targetPresentAdvice) {
                 notification.open({
                     style: {backgroundColor: '#f9f9f9'},
@@ -252,7 +215,6 @@ class AddTransactionsImpl extends React.Component {
             }
         });
         const unionAdvices = _.uniqBy([...presentAdvices, ...selectedSubscribedAdvices], 'id');
-        // this.setState({advices: unionAdvices, subscribedAdvices});
         this.setState({advices: unionAdvices});
     }
 
@@ -458,12 +420,12 @@ class AddTransactionsImpl extends React.Component {
                     {
                         // this.state.presentAdvices.length > 0 
                         this.state.advices.length > 0
-                        ? <AdviceTransactionTable
+                        ? <AqPortfolioCompositionAdvice
                                 preview 
                                 subscribedAdvices={this.state.subscribedAdvices}
-                                // advices={this.state.presentAdvices} 
+                                advices={this.state.presentAdvices} 
                                 toggleStockResearchModal={this.toggleStockResearchModal}
-                                advices={this.state.advices} 
+                                // advices={this.state.advices} 
                                 processAdviceComposition={this.processAdviceComposition}
                         />
                         :   <h5 
@@ -479,12 +441,10 @@ class AddTransactionsImpl extends React.Component {
 
     renderPreviewStockPositions = () => {
         return (
-            <Table 
-                    size="small"
-                    pagination={false} 
+            <AqStockPortfolioTable 
                     style={{marginTop: 20}} 
-                    columns={this.columns} 
-                    dataSource={this.state.presentStocks} 
+                    positions={this.state.presentStocks} 
+                    processedPositions={true}
             />
         );
     }
@@ -545,9 +505,8 @@ class AddTransactionsImpl extends React.Component {
 
     processAdviceTransaction = (adviceTransactions) => {
         const transactions = [];
-        console.log("Bullll");
-        console.log(adviceTransactions);
         adviceTransactions.map(transaction => {
+            console.log(transaction);
             if (transaction.composition.length > 0) {
                 transaction.composition.map(item => {
                     transactions.push({
@@ -563,7 +522,7 @@ class AddTransactionsImpl extends React.Component {
                         date: transaction.date,
                         commission: 0,
                         cashLinked: false,
-                        advice: transaction.adviceId,
+                        advice: transaction.id,
                         _id: ""
                     })
                 });
@@ -772,6 +731,7 @@ class AddTransactionsImpl extends React.Component {
                 const unionAdvices = [];
                 axios.get(url, {headers: Utils.getAuthTokenHeader()})
                 .then(response => {
+                    this.props.form.setFieldsValue({name: _.get(response.data, 'name', '-')})
                     const advicePerformance = _.get(response.data, 'advicePerformance', []);
                     const subPositions = _.get(response.data, 'detail.subPositions', []);
                     // Getiing all the advices
@@ -925,7 +885,7 @@ class AddTransactionsImpl extends React.Component {
         const {portfolioId} = this.props;
         const breadCrumbs = this.props.portfolioId 
                 ? getBreadCrumbArray(UpdatePortfolioCrumb, [
-                    {name: this.state.portfolioName, url: `/dashboard/portfolio/${this.state.portfolioId}`},
+                    {name: this.state.portfolioName, url: `/investordashboard/portfolio/${this.state.portfolioId}`},
                     {name: 'Update Portfolio'}
                 ])
                 : getBreadCrumbArray(UpdatePortfolioCrumb, [
@@ -948,9 +908,10 @@ class AddTransactionsImpl extends React.Component {
                             <Form>
                                 <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right', marginBottom:'10px'}}>
                                     <Button 
-                                        type="primary" 
-                                        //onClick={this.togglePreviewModal} 
-                                        style={{marginRight: '20px'}}>
+                                            type="primary" 
+                                            onClick={this.handleSubmit} 
+                                            style={{marginRight: '20px'}}
+                                    >
                                         SAVE
                                     </Button>
                                     
@@ -969,12 +930,16 @@ class AddTransactionsImpl extends React.Component {
                                                     {getFieldDecorator('name', {
                                                         rules: [{required: true, message: 'Please enter Portfolio Name'}]
                                                     })(
-                                                        <Input disabled={portfolioId} style={{fontSize: '22px', height:'48px', padding:'10px'}} placeholder="Portfolio Name" value={portfolioName}/>
+                                                        <Input 
+                                                                disabled={this.props.portfolioId ? true : false} 
+                                                                style={{fontSize: '22px', height:'48px', padding:'10px'}} 
+                                                                placeholder="Portfolio Name" 
+                                                        />
                                                     )}
                                                 </FormItem>
                                             </Col>
                                             <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                                                {this.renderSelectBenchmark(portfolioId)}
+                                                {this.renderSelectBenchmark(this.props.portfolioId ? true : false)}
                                             </Col>
                                         </Row>
                                     }
@@ -1003,16 +968,18 @@ class AddTransactionsImpl extends React.Component {
                                     <Row type="flex">
                                         <Col span={24}>
                                             <Button 
-                                                type="primary" 
-                                                onClick={this.togglePreviewModal} 
-                                                style={buttonStyle}>
+                                                    type="primary" 
+                                                    onClick={this.handleSubmit} 
+                                                    style={buttonStyle}
+                                            >
                                                 SAVE
                                             </Button>
                                         </Col>
                                         <Col span={24} style={{marginTop: 10}}>
                                             <Button 
-                                                onClick={this.togglePreviewModal} 
-                                                style={buttonStyle}>
+                                                    onClick={this.togglePreviewModal} 
+                                                    style={buttonStyle}
+                                            >
                                                 Preview
                                             </Button>
                                         </Col>
