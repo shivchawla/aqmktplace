@@ -110,6 +110,7 @@ class App extends React.Component {
                         <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} />
                         <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
                         <Route exact={true} path='/advisordashboard/screenadvisors' component={ScreenAdvisors} />
+                        <Route exact={true} path='/dashboard' component={Dashboard} />
                     </Content>
                 </Layout>
             </Layout>

@@ -106,6 +106,40 @@ export class Utils{
 		return this.getFromLocalStorage('SHOULDUPDATETOKEN');
 	}
 
+	static getSocketUrl(){
+		// return "wss://devaqdashapi.aimsquant.com";
+		return 'ws://localhost:1337';
+	}
+
+	static getBaseUrl(){
+		return "https://devaqdashapi.aimsquant.com/api/v2";
+		// return "https://api.aimsquant.com/api/v2";
+	}
+
+	static getAnnouncementUrl(){
+		return "/assets/community/announcement.json";
+	}
+
+	static getPolicyTxtUrl(){
+		return "/assets/policy/privacy.txt";
+	}
+
+	static getHelpUrl(){
+		return "/assets/help/data_help.json";
+	}
+
+	static getBenchMarkUrl(){
+		return "/assets/benchmark/benchmark.json";
+	}
+
+	static getTutorialUrl(){
+		return "/assets/help/data_tutorial.json";
+	}
+
+	static getTncUrl(){
+		return "/assets/policy/tnc.txt";
+	}
+
 	static goToLoginPage(history, fromUrl){
 		if (fromUrl){
 			this.localStorageSave('redirectToUrlFromLogin', fromUrl);
@@ -121,7 +155,7 @@ export class Utils{
 			if(error.response.data.name==='TokenExpiredError' ||
 				error.response.data.message==='jwt expired'){
 				if (this.loggedInUserinfo.recentTokenUpdateTime
-					&& (moment().valueOf() < ((5*60*1000) + this.loggedInUserinfo.recentTokenUpdateTime)) ){
+					&& (moment().valueOf() < ((60*1000) + this.loggedInUserinfo.recentTokenUpdateTime)) ){
 					return;
 				}else{
 					this.setShouldUpdateToken(true);
@@ -146,11 +180,6 @@ export class Utils{
 		}else{
 			return undefined;
 		}
-	}
-
-	static getBaseUrl(){
-		return requestUrl;
-		// return "https://api.aimsquant.com/api/v2";
 	}
 
 	static logoutUser(){
@@ -183,6 +212,7 @@ export class Utils{
 	}
 
 	static getAuthToken(){
+		this.loggedInUserinfo = reactLocalStorage.getObject('USERINFO');
 		if (this.loggedInUserinfo && this.loggedInUserinfo['token']){
 			return this.loggedInUserinfo['token'];
 		}else{
@@ -202,6 +232,7 @@ export class Utils{
 	}
 
 	static getUserId(){
+		this.loggedInUserinfo = reactLocalStorage.getObject('USERINFO');
 		if (this.loggedInUserinfo && this.loggedInUserinfo['_id']){
 			return this.loggedInUserinfo['_id'];
 		}else{
@@ -210,6 +241,7 @@ export class Utils{
 	}
 
 	static getUserInfo(){
+		this.loggedInUserinfo = reactLocalStorage.getObject('USERINFO');
 		if (this.loggedInUserinfo){
 			return this.loggedInUserinfo;
 		}else{
@@ -259,8 +291,21 @@ export class Utils{
 			returnString = returnString + lastName.trim().slice(0, 1).toUpperCase();
 		}
 		return returnString;
-    }
-    
+	}
+
+	static getReactQuillEditorModules(){
+		const modules = {
+		      toolbar: [
+		        [{ 'header': [1, 2, 3, false] }],
+		        ['bold', 'italic', 'underline','strike', 'blockquote', 'code-block'],
+		        [{'list': 'ordered'}, {'list': 'bullet'}],
+		        ['link'],
+		        ['clean']
+		      ],
+		    };
+		return modules;
+	}
+
 	static formatMoneyValueMaxTwoDecimals(value){
 		if (value){
 			var x=value.toString();
@@ -277,6 +322,22 @@ export class Utils{
 		}else{
 			return value;
 		}
+	}
+
+	static openSocketConnection(){
+		if (this.webSocket){
+			try{
+				this.webSocket.close();
+			}catch(err){}
+		}
+		this.webSocket = new WebSocket(this.getSocketUrl());
+	}
+
+	static closeWebSocket(){
+		try{
+			this.webSocket.close();
+		}catch(err){}
+		this.webSocket = undefined;
 	}
 
 	static firstLetterUppercase(stringy){
@@ -301,6 +362,58 @@ export class Utils{
 		}else{	
 			return "";
 		}
+	}
+
+
+
+
+	static saveCommunitySearchString(stringy){
+		let savedData = this.getObjectFromLocalStorage('COMMUNITYFILTERS');
+		if (!savedData){
+			savedData = {};
+		}
+		savedData['searchString'] = stringy;
+		this.localStorageSaveObject('COMMUNITYFILTERS', savedData);
+	}
+
+	static saveCommunityTab(stringy){
+		let savedData = this.getObjectFromLocalStorage('COMMUNITYFILTERS');
+		if (!savedData){
+			savedData = {};
+		}
+		savedData['tabs'] = stringy;
+		this.localStorageSaveObject('COMMUNITYFILTERS', savedData);
+	}
+
+	static saveCommunityCheckBox(stringy){
+		let savedData = this.getObjectFromLocalStorage('COMMUNITYFILTERS');
+		if (!savedData){
+			savedData = {};
+		}
+		savedData['checkboxes'] = stringy;
+		this.localStorageSaveObject('COMMUNITYFILTERS', savedData);
+	}
+
+	static getCommunitySearchString(){
+		let savedData = this.getObjectFromLocalStorage('COMMUNITYFILTERS');
+		if (savedData && savedData.searchString){
+			return savedData.searchString;
+		}
+		return '';
+	}
+	static getCommunityTab(){
+		let savedData = this.getObjectFromLocalStorage('COMMUNITYFILTERS');
+		if (savedData && savedData.tabs){
+			return savedData.tabs;
+		}
+		return '';
+	}
+	static getCommunityCheckBox(){
+		let savedData = this.getObjectFromLocalStorage('COMMUNITYFILTERS');
+		if (savedData && savedData.checkboxes){
+			return savedData.checkboxes;
+		}
+		return '';
 	}
 
 }

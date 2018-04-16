@@ -6,7 +6,7 @@ import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary} from '../components';
-import {pageTitleStyle, loadingColor, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor} from '../constants';
+import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {generateColorData, getMetricColor, Utils, getBreadCrumbArray} from '../utils';
 import 'react-loading-bar/dist/index.css'
@@ -370,7 +370,9 @@ export class InvestorDashboard extends React.Component {
     renderPortfolios = () => {
         const portfolios = this.state.investorPortfolios;
         return portfolios.map((portfolio, index) => {
+            console.log(portfolio);
             const returnColor = portfolio.return < 0 ? metricColor.negative : metricColor.positive;
+            const dailyChangePctColor = portfolio.dailyChangePct < 0 ? metricColor.negative : metricColor.positive;
 
             return (
                 <Row 
@@ -387,14 +389,15 @@ export class InvestorDashboard extends React.Component {
                     <Col span={6}>
                         <ListMetricItem 
                                 value={`${portfolio.return} %`} 
-                                label="Return" 
+                                label="Total Return" 
                                 valueColor={returnColor}
                         />
                     </Col>
                     <Col span={6}>
                         <ListMetricItem 
-                                value={`${portfolio.volatility} %`} 
-                                label="Volatility" 
+                                value={`${portfolio.dailyChangePct} %`} 
+                                label="Daily Change" 
+                                valueColor={dailyChangePctColor}
                         />
                     </Col>
                     <Col span={24} style={{backgroundColor: '#eaeaea', marginTop: '10px'}}>
@@ -404,14 +407,18 @@ export class InvestorDashboard extends React.Component {
         });
     }
 
+    // Also used to subscribe to realtime updates of individual portfolios
     processPortfolios = (portfolios) => {
         return portfolios.map(portfolio => {
+            // this.subscribeToPortfolio(portfolio._id);
             return {
                 id: portfolio._id,
                 name: portfolio.name.length < 1 ? 'Undefined' : portfolio.name,
                 netValue: _.get(portfolio, 'performance.netValue', 0) || 0,
                 return: (_.get(portfolio, 'performance.totalReturn', 0) || 0).toFixed(2),
-                volatility: (_.get(portfolio, 'performance.volatility', 0) || 0).toFixed(2)
+                volatility: (_.get(portfolio, 'performance.volatility', 0) || 0).toFixed(2),
+                dailyChangePct: ((_.get(portfolio, 'performance.dailyChangePct', 0) || 0) * 100).toFixed(2),
+                dailyChangeDollar: (_.get(portfolio, 'performance.dailyChange', 0) || 0).toFixed(2)
             }
         });
     }
@@ -469,7 +476,7 @@ export class InvestorDashboard extends React.Component {
         const chartData = [];
         const seriesData = [];
         const positions = composition.map(item => item.ticker);
-        console.log('PieChart positions', positions);
+        // console.log('PieChart positions', positions);
         composition.map((item, index) => {
             const weight = Number((item.weight * 100).toFixed(2));
             if (weight > 0) {
@@ -487,22 +494,25 @@ export class InvestorDashboard extends React.Component {
 
     processSectorsForChart = (positions, composition) => {
         const sectorData = [];
+        console.log(positions, composition);
         const colors = ['#0091EA', '#FFEB3B', '#FFC107', '#FF9800', '#795548', '#FF5722', '#607D8B', '#3D5AFE', '#7C4DFF'];
         try {
             positions.map((position, positionIndex) => {
                 const sectorName = _.get(position, 'security.detail.Sector', 0);
                 const index = _.findIndex(sectorData, sector => sector.name === sectorName);
                 const compositonIndex = _.findIndex(composition, item => item.name === position.security.ticker);
-                if (index === -1 ) {
-                    sectorData.push({
-                        name: sectorName,
-                        y: composition[compositonIndex].y,
-                        color: colors[positionIndex]
-                    });
-                } else {
-                    const weight = composition[compositonIndex].y;
-                    sectorData[index].y = Number((sectorData[index].y + weight).toFixed(2));
-    
+                if (compositonIndex >= 0) {
+                    if (index === -1) {
+                        sectorData.push({
+                            name: sectorName,
+                            y: composition[compositonIndex].y,
+                            color: colors[positionIndex]
+                        });
+                    } else {
+                        const weight = composition[compositonIndex].y;
+                        sectorData[index].y = Number((sectorData[index].y + weight).toFixed(2));
+        
+                    }
                 }
             });
             return [{name: 'Chart Data', data: sectorData}];
@@ -520,16 +530,18 @@ export class InvestorDashboard extends React.Component {
                 const industryName = _.get(position, 'security.detail.Industry', '');
                 const index = _.findIndex(industryData, sector => sector.name === industryName);
                 const compositonIndex = _.findIndex(composition, item => item.name === position.security.ticker);
-                if (index === -1 ) {
-                    industryData.push({
-                        name: industryName,
-                        y: composition[compositonIndex].y,
-                        color: colors[positionIndex]
-                    });
-                } else {
-                    const weight = composition[compositonIndex].y;
-                    industryData[index].y = Number((industryData[index].y + weight).toFixed(2));
-    
+                if (compositonIndex >= 0) {
+                    if (index === -1 ) {
+                        industryData.push({
+                            name: industryName,
+                            y: composition[compositonIndex].y,
+                            color: colors[positionIndex]
+                        });
+                    } else {
+                        const weight = composition[compositonIndex].y;
+                        industryData[index].y = Number((industryData[index].y + weight).toFixed(2));
+        
+                    }
                 }
             });
     
@@ -587,6 +599,7 @@ export class InvestorDashboard extends React.Component {
         var nvRound = Math.round(nv);
         return nvRound == nv ? nvRound : nv;
     }
+
     renderSummaryMetrics = () => {
         const {totalreturn, dailyreturn, volatility, netValue} = this.state.metrics;
         const colStyle = {marginBottom: '0px'};
@@ -727,7 +740,37 @@ export class InvestorDashboard extends React.Component {
         } else {
             this.getDefaultPortfolioData();
             this.getInvestorPortfolios();
-            this.getInvestorSubscribedAdvices();   
+            this.getInvestorSubscribedAdvices();
+            // this.setUpSocketConnection();
+        }
+    }
+
+    componentWillUnmount() {
+        // Utils.closeWebSocket();
+    }
+
+    setUpSocketConnection = () => {
+        Utils.openSocketConnection();
+        Utils.webSocket.onmessage = msg => {
+            const data = JSON.parse(msg.data);
+            console.log(data);
+        }
+    }
+
+    // updatePortfolRealTime = 
+
+    subscribeToPortfolio = portfolioId => {
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'stock/watchlist/portfolio',
+            'portfolioId': portfolioId
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
         }
     }
 
@@ -830,7 +873,7 @@ export class InvestorDashboard extends React.Component {
             <Col span={24}>
                 <Loading 
                     show={this.state.defaultPortfolioLoading}
-                    color={this.state.loadingColor}
+                    color={loadingColor}
                     showSpinner={false}
                     className="main-loader"
                 />

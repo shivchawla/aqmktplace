@@ -1,5 +1,6 @@
 import * as React from 'react';
 import axios from 'axios';
+import Websocket from 'react-websocket';
 import Loading from 'react-loading-bar';
 import {Link} from 'react-router-dom';
 import {Button, Row, Col} from 'antd';
@@ -8,9 +9,11 @@ import {AqLink} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {loadingColor} from '../constants';
 import '../css/highstock.css';
+import {Utils} from '../utils';
 const ReactHighstock = require('react-highcharts/ReactHighstock.src');
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
+const WebSocket = require('ws');
 
 export class DashboardImpl extends React.Component {
     constructor(props) {
@@ -27,7 +30,19 @@ export class DashboardImpl extends React.Component {
     }
     
     componentWillMount() {
-        this.getInvestorPortfolios();
+        this.setUpWebSocket();
+        // this.getInvestorPortfolios();
+    }
+
+    componentWillUnmount() {
+        Utils.closeWebSocket();
+    }
+
+    setUpWebSocket = () => {
+        Utils.openSocketConnection();
+        Utils.webSocket.onmessage = msg => {
+            console.log(msg.data);
+        }
     }
 
     getInvestorPortfolios = () => {
@@ -70,13 +85,22 @@ export class DashboardImpl extends React.Component {
         this.setState({ show: true })
       }
   
-      onHide = ()=> {
+    onHide = ()=> {
         this.setState({ show: false })
-      }
+    }
+
+    // handleData = data => {
+    //     console.log('Called');
+    //     console.log(data);
+    // }
 
     render() {
         return (
             <Row>
+                {/* <Websocket 
+                        url='ws://localhost:1337'
+                        onMessage={this.handleData}
+                /> */}
                 <Loading
                     show={this.state.show}
                     color={loadingColor}

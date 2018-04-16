@@ -43,7 +43,8 @@ class StockResearchImpl extends React.Component {
             },
             rollingPerformance: {},
             selectedPerformanceScreen: '10y',
-            show: false
+            show: false,
+            // appInitialized: false
         }; 
     }
 
@@ -165,7 +166,12 @@ class StockResearchImpl extends React.Component {
             } else {
                 this.onSelect(this.props.ticker);
             }
+            this.setUpSocketConnection();
         }
+    }
+
+    componentWillUnmount() {
+        Utils.closeWebSocket();
     }
 
     formatPriceMetrics = value => {
@@ -236,6 +242,21 @@ class StockResearchImpl extends React.Component {
                 </Row>
             </Option>
         );
+    }
+
+    setUpSocketConnection = () => {
+        Utils.openSocketConnection();
+        Utils.webSocket.onmessage = msg => {
+            const data = JSON.parse(msg.data);
+            this.setState({
+                latestDetail: {
+                    ...this.state.latestDetail,
+                    change: data.changePct,
+                    close: data.latestPrice
+                }
+            })
+            console.log(JSON.parse(msg.data));
+        }
     }
 
     renderPageContent = () => {
