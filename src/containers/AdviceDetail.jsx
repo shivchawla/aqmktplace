@@ -90,14 +90,14 @@ class AdviceDetailImpl extends React.Component {
     getAdviceSummary = response => {
         const tickers = [];
         const {
-            name, 
-            description, 
-            heading, 
-            advisor, 
-            updatedDate, 
-            rating = {current: 0, simulated: 0}, 
-            isSubscribed, 
-            isFollowing, 
+            name,
+            description,
+            heading,
+            advisor,
+            updatedDate,
+            rating = {current: 0, simulated: 0},
+            isSubscribed,
+            isFollowing,
             isOwner,
             numSubscribers,
             numFollowers,
@@ -111,9 +111,9 @@ class AdviceDetailImpl extends React.Component {
             tickers,
             adviceResponse: response.data,
             adviceDetail: {
-                ...this.state.adviceDetail, 
-                name, 
-                description, 
+                ...this.state.adviceDetail,
+                name,
+                description,
                 heading,
                 advisor,
                 subscribers: numSubscribers,
@@ -142,7 +142,7 @@ class AdviceDetailImpl extends React.Component {
         const {maxNotional, rebalance} = response.data;
         console.log('Advice Detail', response.data);
         this.setState({
-            positions, 
+            positions,
             adviceDetail: {
                 ...this.state.adviceDetail,
                 maxNotional,
@@ -248,7 +248,7 @@ class AdviceDetailImpl extends React.Component {
             {value: totalReturn, label: 'Total Return', percentage: true, color: true, fixed: 2},
             {value: dailyChange, label: 'Daily PnL (\u20B9)', color: true, fixed: Math.round(dailyChange) == dailyChange ? 0 : 2},
             {value: dailyChangePct, label: 'Daily PnL (%)', percentage: true, color: true, fixed: 2},
-            {value: netValue, label: 'Net Value', fixed: Math.round(netValue) == netValue ? 0 : 2},
+            {value: netValue, label: 'Net Value (\u20B9)', fixed: Math.round(netValue) == netValue ? 0 : 2},
         ]
 
         return <AdviceMetricsItems metrics={metricsItems} />
@@ -271,7 +271,7 @@ class AdviceDetailImpl extends React.Component {
             this.toggleDialog();
             // this.getAdviceData();
             message.success('Success');
-            return axios.get(url, {headers: Utils.getAuthTokenHeader()}) 
+            return axios.get(url, {headers: Utils.getAuthTokenHeader()})
         })
         .then(response => {
             this.getAdviceSummary(response);
@@ -297,7 +297,7 @@ class AdviceDetailImpl extends React.Component {
         })
         .then(response => {
             message.success('Success');
-            return axios.get(url, {headers: Utils.getAuthTokenHeader()}) 
+            return axios.get(url, {headers: Utils.getAuthTokenHeader()})
         })
         .then(response => {
             this.getAdviceSummary(response);
@@ -326,7 +326,7 @@ class AdviceDetailImpl extends React.Component {
                     onCancel={this.toggleDialog}
             >
                 <h3>
-                    { 
+                    {
                         this.state.adviceDetail.isSubscribed
                         ? "Are you sure you want to Unsubscribe"
                         : "Are you sure you want to Subscribe"
@@ -372,7 +372,7 @@ class AdviceDetailImpl extends React.Component {
             this.getUserData();
             this.getAdviceData();
         }
-    } 
+    }
 
     renderActionButtons = () => {
         const {userId} = this.state;
@@ -381,21 +381,19 @@ class AdviceDetailImpl extends React.Component {
             return (
                 <Row>
                     <Col span={24} style={{textAlign: 'right'}}>
-                        <Button 
-                                onClick={this.toggleDialog} 
-                                style={{width: 170}} 
-                                type="primary" 
-                                className="primary-btn"
+                        <Button
+                                onClick={this.toggleDialog}
+                                style={{width: 170}}
+                                type="primary"
                                 disabled={this.state.disableSubscribeButton}
                         >
                             {!this.state.adviceDetail.isSubscribed ? "SUBSCRIBE" : "UNSUBSCRIBE"}
                         </Button>
                     </Col>
                     <Col span={24} style={{textAlign: 'right'}}>
-                        <Button 
-                                onClick={this.followAdvice} 
-                                style={{width: 170, marginTop: 10}} 
-                                className="secondary-btn"
+                        <Button
+                                onClick={this.followAdvice}
+                                style={{width: 170, marginTop: 10}}
                                 disabled={this.state.disableFollowButton}
                         >
                             {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
@@ -409,19 +407,19 @@ class AdviceDetailImpl extends React.Component {
             <Row>
                 <Col span={24} style={{textAlign: 'right'}}>
                     {
-                        !this.state.adviceDetail.isPublic 
+                        !this.state.adviceDetail.isPublic
                         && <Button onClick={this.makeAdvicePublic} style={{width: 150}} type="primary">Publish</Button>}
                 </Col>
                 <Col span={24} style={{textAlign: 'right'}}>
-                    <Button 
-                            onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)} 
+                    <Button
+                            onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
                             style={{width: 150, marginTop: 10}}
                     >
                         Update Advice
                     </Button>
                 </Col>
             </Row>
-        );  
+        );
     };
 
     handleChange = value => {
@@ -435,7 +433,7 @@ class AdviceDetailImpl extends React.Component {
     }
 
     toggleModal = ticker => {
-        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});        
+        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});
     }
 
     handlePortfolioStartDateChange = date => {
@@ -447,8 +445,8 @@ class AdviceDetailImpl extends React.Component {
                 this.getAdviceDetail(response);
             });
         })
-        
-    }    
+
+    }
 
     renderPageContent = () => {
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
@@ -456,15 +454,15 @@ class AdviceDetailImpl extends React.Component {
         const breadCrumbs = getBreadCrumbArray(AdviceDetailCrumb, [
             {name, url: '#'}
         ]);
-        const statusBarColor = this.state.adviceDetail.isOwner 
-                ? statusColor.owner 
+        const statusBarColor = this.state.adviceDetail.isOwner
+                ? statusColor.owner
                 : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
 
         return (
             <Row>
                 <AqPageHeader title={name} breadCrumbs={breadCrumbs}/>
-                <StockResearchModal 
-                        ticker={this.state.stockResearchModalTicker} 
+                <StockResearchModal
+                        ticker={this.state.stockResearchModalTicker}
                         visible={this.state.stockResearchModalVisible}
                         toggleModal={this.toggleModal}
                 />
@@ -476,7 +474,7 @@ class AdviceDetailImpl extends React.Component {
                             {
                                 advisor.user &&
                                 <h5 style={userStyle}>
-                                    By {advisor.user.firstName} {advisor.user.lastName} 
+                                    By {advisor.user.firstName} {advisor.user.lastName}
                                     <span style={dateStyle}>{updatedDate}</span>
                                 </h5>
                             }
@@ -493,9 +491,9 @@ class AdviceDetailImpl extends React.Component {
                         <Col span={24} style={dividerStyle}></Col>
                     </Row>
                     <Collapse bordered={false} defaultActiveKey={this.state.barDollarSeries.length > 0 ? ["2"] : ["3"]}>
-                        <Panel 
+                        <Panel
                                 key="1"
-                                style={customPanelStyle} 
+                                style={customPanelStyle}
                                 header={<h3 style={metricsHeaderStyle}>Description</h3>}
                         >
                             <Row className="row-container">
@@ -505,12 +503,12 @@ class AdviceDetailImpl extends React.Component {
                             </Row>
                         </Panel>
                         {
-                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
+                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) &&
                             <Panel
                                     key="2"
-                                    style={customPanelStyle} 
+                                    style={customPanelStyle}
                                     header={<h3 style={metricsHeaderStyle}>Summary</h3>}
-                            >  
+                            >
                                 {
                                     this.state.barDollarSeries.length > 0
                                     ?   <Row className="row-container">
@@ -521,8 +519,8 @@ class AdviceDetailImpl extends React.Component {
                                                 <AqCard title="Performance Summary" offset={2}>
                                                     {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
                                                     <Col span={24} style={{paddingTop: '10px'}}>
-                                                        <HighChartBar 
-                                                                dollarSeries={this.state.barDollarSeries} 
+                                                        <HighChartBar
+                                                                dollarSeries={this.state.barDollarSeries}
                                                                 percentageSeries={this.state.barPercentageSeries}
                                                         />
                                                     </Col>
@@ -533,13 +531,13 @@ class AdviceDetailImpl extends React.Component {
                                             <h3>No Data Available</h3>
                                         </Row>
                                 }
-                                
+
                             </Panel>
                         }
 
                         <Panel
                             key="3"
-                            style={customPanelStyle} 
+                            style={customPanelStyle}
                             header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
                             <Row className="row-container">
                                 <MyChartNew series={this.state.tickers} />
@@ -547,25 +545,25 @@ class AdviceDetailImpl extends React.Component {
                         </Panel>
 
                         {
-                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) && 
-                            
+                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) &&
+
                             <Panel
                                 key="4"
-                                style={customPanelStyle} 
+                                style={customPanelStyle}
                                 header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
                                 <Row className="row-container">
                                     <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                         {
                                             this.state.adviceDetail.isOwner &&
-                                            <DatePicker 
-                                                    value={this.state.selectedPortfolioDate} 
+                                            <DatePicker
+                                                    value={this.state.selectedPortfolioDate}
                                                     onChange={this.handlePortfolioStartDateChange}
                                             />
                                         }
                                     </Col>
                                     <Col span={24} style={{marginTop: '10px'}}>
-                                        <AqStockPortfolioTable 
-                                                    positions={this.state.positions} 
+                                        <AqStockPortfolioTable
+                                                    positions={this.state.positions}
                                                     updateTicker={this.updateTicker}
                                         />
                                     </Col>
@@ -578,7 +576,7 @@ class AdviceDetailImpl extends React.Component {
         );
     }
 
-    render() { 
+    render() {
         return (
            <Row>
                 <Loading
@@ -593,7 +591,7 @@ class AdviceDetailImpl extends React.Component {
                     !this.state.show &&
                     this.renderPageContent()
                }
-               
+
            </Row>
         );
     }

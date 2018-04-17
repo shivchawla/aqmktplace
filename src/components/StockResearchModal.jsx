@@ -18,9 +18,9 @@ export class StockResearchModal extends React.Component {
                     onCancel={this.props.toggleModal}
                     title={this.props.ticker.name}
                     visible={this.props.visible}
-                    width={1000}
+                    width='80%'
                     bodyStyle={{height: '650px', overflow: 'hidden', overflowY: 'scroll'}}
-                    style={{top: 20, height: '640px'}}
+                    style={{top: 20}}
                     footer={null}
             >
                 <StockResearch

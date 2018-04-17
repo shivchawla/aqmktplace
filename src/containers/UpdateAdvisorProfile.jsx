@@ -33,6 +33,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
     }
 
     componentDidMount() {
+        console.log(this.props.advisor);
         if (!Utils.isLoggedIn()){
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {

@@ -1,18 +1,16 @@
 import * as React from 'react';
 import moment from 'moment';
+import _ from 'lodash';
 import axios from 'axios';
 import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select} from 'antd';
 import {Twitter} from 'twitter-node-client';
-import {MetricItem, AdviceListItem, AdviceFilterComponent, AdviceSortingMenu} from '../components';
+import {MetricItem, AdviceListItem, AdviceFilterComponent, AdviceSortingMenu, AdviceListItemMod} from '../components';
 import {UpdateAdvisorProfile} from '../containers';
 import {layoutStyle} from '../constants';
 import {Utils} from '../utils';
 
 const {requestUrl, investorId, advisorId, aimsquantToken} = require('../localConfig');
 const dateFormat = 'YYYY-MM-DD';
-const clientId = '81udlgx5kk2aad';
-const clientSecret = 'mtF7xm8K81Ipyevk';
-const redirectUri = 'http://localhost:3000/advisorprofile';
 const Option = Select.Option;
 
 export class AdvisorProfile extends React.Component {
@@ -88,37 +86,33 @@ export class AdvisorProfile extends React.Component {
         const {advices} = this.state;
 
         return advices.map((advice, index) => {
-            const adviceItem = {
-                id: advice._id,
-                name: advice.name,
-                subscribers: advice.latestAnalytics.numSubscribers,
-                rating: advice.latestAnalytics.rating,
-                latestPerformance: advice.latestPerformance
-            };
-
-            return <AdviceListItem key={index} advice={adviceItem}/>
+            return <AdviceListItemMod key={index} advice={advice}/>
         })
     }
 
     getAdvisorDetail = () => {
         const advisorIdCurrent = this.props.match.params.id;
         const url = `${requestUrl}/advisor/${advisorIdCurrent}?dashboard=0`;
+        const advicesUrl = `${requestUrl}/advice?personal=1`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            console.log(response.data);
             const {latestAnalytics, user} = response.data;
             this.setState({
                 advisor: response.data,
-                advices: response.data.advices,
+                // advices: response.data.advices,
                 metrics: {
                     name: `${user.firstName} ${user.lastName}`,
                     numAdvices: latestAnalytics.numAdvices,
                     numFollowers: latestAnalytics.numFollowers,
-                    rating: latestAnalytics.rating,
+                    rating: Number(_.get(latestAnalytics, 'rating.current', 0).toFixed(2)),
                 },
                 ownProfile: this.props.match.params.id === advisorId,
                 isCompany: response.data.profile ? response.data.profile.isCompany : false
             });
+            return axios.get(advicesUrl, {headers: Utils.getAuthTokenHeader()})
+        })
+        .then(response => {
+            this.setState({advices: this.processAdvices(response.data)});
         })
         .catch(error => {
             console.log(error);
@@ -126,6 +120,32 @@ export class AdvisorProfile extends React.Component {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
         });
+    }
+
+    processAdvices = (responseAdvices) => {
+        const advices = [];
+        responseAdvices.map((advice, index) => {
+            console.log('Advice Item', advice);
+            advices.push({
+                isFollowing: advice.isFollowing || false,
+                id: advice._id || 0,
+                name: advice.name || '',
+                advisor: advice.advisor || {},
+                createdDate: advice.createdDate || '',
+                heading: advice.heading || '',
+                subscribers: advice.numSubscribers || 0,
+                followers: advice.numFollowers || 0,
+                rating: _.get(advice, 'rating.current', 0).toFixed(2),
+                performanceSummary: advice.performanceSummary,
+                rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
+                isApproved: _.get(advice, 'approvalStatus', 'N/A'),
+                isOwner: _.get(advice, 'isOwner', false),
+                isSubscribed: _.get(advice, 'isSubscribed', false),
+                isTrending: false
+            })
+        });
+
+        return advices;
     }
 
     renderPage = () => {

@@ -4,7 +4,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import moment from 'moment';
 import {withRouter} from 'react-router'
-import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table, notification} from 'antd';
+import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table, notification, Spin} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 import {AqPortfolioCompositionAdvice, AqPortfolioTransactionAdvice, AqStockPortfolioTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, AqPageHeader, StockResearchModal} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -48,7 +48,8 @@ class AddTransactionsImpl extends React.Component {
             stockResearchModalVisible: false,
             stockResearchModalTicker: {name: 'TCS', symbol: 'TCS'},
             submitButtonLoading: false,
-            previewCash: 0
+            previewCash: 0,
+            loadingPreviewData: false
         };
         this.adviceKey = 0;
     }
@@ -161,25 +162,27 @@ class AddTransactionsImpl extends React.Component {
                         <Button key="back" onClick={this.togglePreviewModal}>Ok</Button>,
                     ]}
             >
-                <Row >
-                    <Col span={12}>
-                        <MetricItem 
-                            label="Name"
-                            value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : '-'}
-                            valueStyle={{...metricsValueStyle, fontWeight: 700}}
-                            labelStyle={metricsLabelStyle}
-                        />
-                    </Col>
-                    <Col span={12} style={{textAlign:'right', paddingRight:'40px'}}>
-                        <MetricItem 
-                            label="Benchmark"
-                            value={this.state.selectedBenchmark}
-                            valueStyle={{...metricsValueStyle, fontWeight: 700}}
-                            labelStyle={metricsLabelStyle}
-                        />
-                    </Col>
-                    {this.renderPreview()}
-                </Row>
+                <Spin spinning={this.state.loadingPreviewData}>
+                    <Row >
+                        <Col span={12}>
+                            <MetricItem 
+                                label="Name"
+                                value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : '-'}
+                                valueStyle={{...metricsValueStyle, fontWeight: 700}}
+                                labelStyle={metricsLabelStyle}
+                            />
+                        </Col>
+                        <Col span={12} style={{textAlign:'right', paddingRight:'40px'}}>
+                            <MetricItem 
+                                label="Benchmark"
+                                value={this.state.selectedBenchmark}
+                                valueStyle={{...metricsValueStyle, fontWeight: 700}}
+                                labelStyle={metricsLabelStyle}
+                            />
+                        </Col>
+                        {this.renderPreview()}
+                    </Row>
+                </Spin>
             </Modal>
         );
     }
@@ -328,7 +331,6 @@ class AddTransactionsImpl extends React.Component {
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
-        console.log('Transactions', transactions);
         const additionalData = !this.props.portfolioId 
                 ?   {
                         name: "Yo",
@@ -347,6 +349,7 @@ class AddTransactionsImpl extends React.Component {
             transactions,
             ...additionalData
         };
+        this.setState({loadingPreviewData: true});
         axios({
             url,
             method: 'POST',
@@ -397,7 +400,12 @@ class AddTransactionsImpl extends React.Component {
             this.setState({tickers});
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            if(error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        })
+        .finally(() => {
+            this.setState({loadingPreviewData: false});
         });
     }
 

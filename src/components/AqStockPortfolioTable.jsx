@@ -68,11 +68,11 @@ export class AqStockPortfolioTable extends React.Component {
         positions.map((position, index) => {
             portfolioArray.push({
                 key: index,
-                name: position.security.detail.Nse_Name,
+                name: _.get(position, 'security.detail.Nse_Name', '-'),
                 weight: 0,
-                sector: position.security.detail.Sector,
-                price: position.lastPrice.toFixed(2),
-                shares: position.quantity,
+                sector: _.get(position, 'security.detail.Sector', '-'),
+                price: _.get(position, 'lastPrice', 0).toFixed(2),
+                shares: position.quantity || 0,
                 symbol: _.get(position, 'security.ticker', '-'),
                 avgPrice: _.get(position, 'avgPrice', 0).toFixed(2)
             });

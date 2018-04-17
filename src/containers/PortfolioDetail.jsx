@@ -14,22 +14,22 @@ import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
 import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio} from '../utils';
 import {
-    AqPortfolioCompositionAdvice, 
-    AqHighChartMod, 
-    MetricItem, 
-    AqCard, 
-    HighChartNew, 
-    HighChartBar, 
+    AqPortfolioCompositionAdvice,
+    AqHighChartMod,
+    MetricItem,
+    AqCard,
+    HighChartNew,
+    HighChartBar,
     AqStockPortfolioTable,
     AdviceMetricsItems
 } from '../components';
 import {
-    newLayoutStyle, 
+    newLayoutStyle,
     shadowBoxStyle,
-    metricsHeaderStyle, 
-    pageHeaderStyle, 
-    metricsLabelStyle, 
-    metricsValueStyle, 
+    metricsHeaderStyle,
+    pageHeaderStyle,
+    metricsLabelStyle,
+    metricsValueStyle,
     dividerStyle
 } from '../constants';
 import { AqPageHeader } from '../components/AqPageHeader';
@@ -81,7 +81,7 @@ class PortfolioDetailImpl extends React.Component {
                 title: 'Average Price',
                 dataIndex: 'avgPrice',
                 key: 'avgPrice'
-            }, 
+            },
             {
                 title: 'Country',
                 dataIndex: 'country',
@@ -99,10 +99,10 @@ class PortfolioDetailImpl extends React.Component {
             <Row>
                 <Col span={24} style={{marginTop: '5px'}}>
                     {
-                        this.state.presentAdvices.length > 0 
-                        ? <AqPortfolioCompositionAdvice 
-                                preview 
-                                advices={this.state.presentAdvices} 
+                        this.state.presentAdvices.length > 0
+                        ? <AqPortfolioCompositionAdvice
+                                preview
+                                advices={this.state.presentAdvices}
                                 toggleStockResearchModal={this.updateTicker}
                                 hideTransactionalDetails={true}
                           />
@@ -115,9 +115,9 @@ class PortfolioDetailImpl extends React.Component {
 
     renderStockTransactions = () => {
         return (
-            <AqStockPortfolioTable 
-                    style={{marginTop: '5px'}} 
-                    positions={this.state.stockPositions} 
+            <AqStockPortfolioTable
+                    style={{marginTop: '5px'}}
+                    positions={this.state.stockPositions}
                     updateTicker={this.updateTicker}
             />
         );
@@ -128,8 +128,8 @@ class PortfolioDetailImpl extends React.Component {
         let advices = [];
         let hasChangedCount = 0;
         subPositions.map((position, positionIndex) => {
-            advices = position.advice === null // check whether the sub position belongs to any advice 
-                            ? addToMyPortfolio(advices, advicePerformance, position, positionIndex) 
+            advices = position.advice === null // check whether the sub position belongs to any advice
+                            ? addToMyPortfolio(advices, advicePerformance, position, positionIndex)
                             : addToAdvice(advices, advicePerformance, position, positionIndex);
         });
         advices.map(advice => {
@@ -138,7 +138,7 @@ class PortfolioDetailImpl extends React.Component {
             }
         })
         this.setState({hasChangedCount});
-        
+
         return advices;
     }
 
@@ -156,8 +156,8 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     handlePerformanceToggle = (e) => {
-        const performanceSeries = e.target.value === 'dollar' 
-                ? this.state.performanceDollarSeries 
+        const performanceSeries = e.target.value === 'dollar'
+                ? this.state.performanceDollarSeries
                 : this.state.performancepercentageSeries;
         this.setState({
             togglePerformance: e.target.value,
@@ -167,7 +167,7 @@ class PortfolioDetailImpl extends React.Component {
             }
         });
     }
-    
+
     updateAdvices = advices => {
         const totalWeight = this.getTotalAdviceWeight(advices);
         const adviceNetValue = this.getNetValue(advices);
@@ -213,7 +213,7 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     toggleModal = ticker => {
-        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});        
+        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});
     }
 
     componentWillMount() {
@@ -232,7 +232,7 @@ class PortfolioDetailImpl extends React.Component {
                     tickers.push({ // Pushing data to get the benchmark performance to performance graph
                         name: response.data.benchmark.ticker,
                     });
-                }   
+                }
                 const advicePerformance = _.get(response.data, 'advicePerformance', []);
                 const subPositions = _.get(response.data, 'detail.subPositions', []);
                 const advices = this.processPresentAdviceTransaction(subPositions, advicePerformance);
@@ -275,7 +275,7 @@ class PortfolioDetailImpl extends React.Component {
                     return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
                 });
                 series.push({name: 'Composition', data: portfolioComposition});
-                
+
                 const annualReturn = _.get(portfolioMetrics, 'annualReturn', null);
                 const totalReturn = _.get(portfolioMetrics, 'totalReturn', null);
                 const volatility = _.get(portfolioMetrics, 'volatility', null);
@@ -289,10 +289,10 @@ class PortfolioDetailImpl extends React.Component {
                     {value: totalReturn, label: 'Total Return', fixed: 2, percentage: true, color: true},
                     {value: dailyChange, label: `Daily PnL (\u20B9)`, fixed: 2, color:true, direction:true},
                     {value: dailyChangePct, label: 'Daily PnL (%)', fixed: 2, percentage: true, color: true, direction:true},
-                    {value: netValue, label: 'Net Value', isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2}
+                    {value: netValue, label: 'Net Value (\u20B9)', isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2}
                 ];
                 this.setState({
-                    portfolioMetrics: metrics, 
+                    portfolioMetrics: metrics,
                     tickers,
                     performanceDollarSeries: constituentDollarPerformance,
                     performancepercentageSeries: constituentPercentagePerformance,
@@ -319,17 +319,24 @@ class PortfolioDetailImpl extends React.Component {
         const breadCrumbs = getBreadCrumbArray(PortfolioDetailCrumb, [{
             name: this.state.name,
         }]);
+        const tooltipText = this.state.hasChangedCount 
+                ? "Some advices in your portfolio are backdated. You need to update your portfolio."
+                : "Portfolio is updated. You can still add new transactions"
         return (
-            this.state.notAuthorized 
+            this.state.notAuthorized
             ?   <ForbiddenAccess />
             :   <Row>
-                    <StockResearchModal 
-                            ticker={this.state.stockResearchModalTicker} 
+                    <StockResearchModal
+                            ticker={this.state.stockResearchModalTicker}
                             visible={this.state.stockResearchModalVisible}
                             toggleModal={this.toggleModal}
                     />
-                    <AqPageHeader title={this.state.name} breadCrumbs={breadCrumbs} button={{route:'/investordashboard/createportfolio', title:'Create Portfolio'}}/>
-                     
+                    <AqPageHeader 
+                            title={this.state.name} 
+                            breadCrumbs={breadCrumbs} 
+                            button={{route:'/investordashboard/createportfolio', title:'Create Portfolio'}}
+                    />
+
                     <Col xl={18} md={24} style={{...shadowBoxStyle, padding: '0'}}>
                         <Row style={{padding: '20px 30px'}}>
                             <Col span={24}>
@@ -337,21 +344,29 @@ class PortfolioDetailImpl extends React.Component {
                                     <Col span={10}>
                                         <h2 style={pageHeaderStyle}>{this.state.name}</h2>
                                     </Col>
-                                    <Col span={6} style={{textAlign: 'right'}}>                                    
-                                        <Button
-                                                onClick={() => this.props.history.push(
-                                                    `/investordashboard/portfolio/transactions/${this.props.match.params.id}`, 
-                                                    {
-                                                        pageTitle: 'Add Transactions',
-                                                        advices: this.state.presentAdvices,
-                                                        stocksPositions: this.state.stockPositions
-                                                    }
-                                                )}
-                                                className="secondary-btn"
-                                                style = {{marginLeft: '20px'}}
-                                        >
-                                            Update Portfolio
-                                        </Button>
+                                    <Col span={6} style={{textAlign: 'right'}}>
+                                        <Tooltip title={tooltipText}>
+                                            <Button
+                                                    onClick={() => this.props.history.push(
+                                                        `/investordashboard/portfolio/transactions/${this.props.match.params.id}`,
+                                                        {
+                                                            pageTitle: 'Add Transactions',
+                                                            advices: this.state.presentAdvices,
+                                                            stocksPositions: this.state.stockPositions
+                                                        }
+                                                    )}
+                                                    style = {{marginLeft: '20px'}}
+                                            >
+                                                Update Portfolio
+                                                {
+                                                    this.state.hasChangedCount > 0 &&
+                                                    <Icon
+                                                            type="exclamation-circle"
+                                                            style={{fontSize: '18px', color: metricColor.neutral}}
+                                                    />
+                                                }
+                                            </Button>
+                                        </Tooltip>
                                     </Col>
                                 </Row>
                             </Col>
@@ -365,20 +380,20 @@ class PortfolioDetailImpl extends React.Component {
                             <Col span={24} style={dividerStyle}></Col>
                         </Row>
                         <Collapse bordered={false} defaultActiveKey={["3"]}>
-                            <Panel  
+                            <Panel
                                 key='1'
-                                style={customPanelStyle} 
+                                style={customPanelStyle}
                                 header={<h3 style={metricsHeaderStyle}>Summary</h3>}
-                                forceRender={true}>   
+                                forceRender={true}>
                                 <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
                                     <Col span={24}>
                                         <Row style={{marginTop: '10px'}}>
                                             <AqCard title="Portfolio Summary">
                                                 <HighChartNew series={this.state.pieSeries} />
-                                            </AqCard>        
+                                            </AqCard>
                                             <AqCard title="Performance Summary" offset={2}>
-                                                <HighChartBar 
-                                                        dollarSeries={this.state.performanceDollarSeries} 
+                                                <HighChartBar
+                                                        dollarSeries={this.state.performanceDollarSeries}
                                                         percentageSeries={this.state.performancepercentageSeries}
                                                         legendEnabled={false}
                                                 />
@@ -389,27 +404,27 @@ class PortfolioDetailImpl extends React.Component {
                             </Panel>
                             <Panel
                                 key='2'
-                                style={customPanelStyle} 
+                                style={customPanelStyle}
                                 header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
                                 <Row style={{padding: '0 30px'}}>
                                     <Col span={24}>
-                                        <MyChartNew series={this.state.tickers}/> 
+                                        <MyChartNew series={this.state.tickers}/>
                                     </Col>
                                 </Row>
 
                             </Panel>
-                            <Panel 
+                            <Panel
                                 key='3'
-                                style={customPanelStyle} 
+                                style={customPanelStyle}
                                 header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
                                 <Row style={{padding: '0 30px'}}>
                                     <Col span={24}>
                                         <Row>
                                             <Col span={24} style={{textAlign: 'right'}}>
-                                                <Radio.Group 
-                                                        value={this.state.toggleValue} 
-                                                        onChange={this.toggleView} 
-                                                        style={{margin: '0 auto 0 auto'}} 
+                                                <Radio.Group
+                                                        value={this.state.toggleValue}
+                                                        onChange={this.toggleView}
+                                                        style={{margin: '0 auto 0 auto'}}
                                                         //position: 'absolute', right: 0}}
                                                         size="small"
                                                 >
@@ -428,46 +443,6 @@ class PortfolioDetailImpl extends React.Component {
                                 </Row>
                             </Panel>
                         </Collapse>
-                    </Col>
-                    <Col xl={5} md={0} offset={1}>
-                        <Row>
-                            <Col span={24}>
-                                {/*<Button 
-                                        type="primary" 
-                                        style={{marginBottom: 20}} 
-                                        onClick={() => this.props.history.push(
-                                            '/investordashboard/createportfolio', {pageTitle: 'Create Portfolio'}
-                                        )}
-                                        className="primary-btn"
-                                >
-                                    Create Portfolio
-                                    </Button>*/}
-                            </Col>
-                            <Col span={24} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                {/*<Button
-                                        onClick={() => this.props.history.push(
-                                            `/investordashboard/portfolio/transactions/${this.props.match.params.id}`, 
-                                            {
-                                                pageTitle: 'Add Transactions',
-                                                advices: this.state.presentAdvices,
-                                                stocksPositions: this.state.stockPositions
-                                            }
-                                        )}
-                                        className="secondary-btn"
-                                >
-                                    Update Portfolio
-                                    </Button>*/}
-                                {
-                                    this.state.hasChangedCount > 0 &&
-                                    <Tooltip title="Some advices in your portfolio are backdated. You need to update your portfolio.">
-                                        <Icon 
-                                                type="exclamation-circle" 
-                                                style={{fontSize: '20px', color: metricColor.neutral, marginLeft: '10px'}}
-                                        />
-                                    </Tooltip>
-                                }
-                            </Col>
-                        </Row>
                     </Col>
                 </Row>
         );

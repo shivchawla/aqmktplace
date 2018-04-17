@@ -11,7 +11,7 @@ h1, h2, h3, h4, h5 {
 	margin :0;
 	font-family: 'Lato', sans-serif;
 }
-
+/* 
 .primary-btn { 
     background-color: #26899A;
     border-radius: 2px;
@@ -27,7 +27,7 @@ h1, h2, h3, h4, h5 {
     border: 1px solid #26899A;
     width: 150px;
 }
-
+ */
 
 .animated-page-wrapper {
 	position: absolute;
