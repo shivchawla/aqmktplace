@@ -15,7 +15,16 @@ export class AqStockPortfolioTable extends React.Component {
                 render: (text, record) => {
                     return (
                         <Tooltip title={text}>
-                            <h3 onClick={() => props.updateTicker && props.updateTicker(record)} style={nameEllipsisStyle}>{text}</h3>
+                            <h3 
+                                    onClick={() => props.updateTicker && props.updateTicker(record)} 
+                                    style={{
+                                        ...nameEllipsisStyle, 
+                                        color: props.updateTicker ? '#0091EA' : '#000000a6',
+                                        cursor: props.updateTicker ? 'pointer' : 'auto'
+                                    }}
+                            >
+                                {text}
+                            </h3>
                         </Tooltip>
                     );
                 }

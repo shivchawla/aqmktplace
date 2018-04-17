@@ -46,7 +46,9 @@ class AddTransactionsImpl extends React.Component {
             portfolioName: '',
             portfolioId: '',
             stockResearchModalVisible: false,
-            stockResearchModalTicker: {name: 'TCS', symbol: 'TCS'}
+            stockResearchModalTicker: {name: 'TCS', symbol: 'TCS'},
+            submitButtonLoading: false,
+            previewCash: 0
         };
         this.adviceKey = 0;
     }
@@ -58,7 +60,7 @@ class AddTransactionsImpl extends React.Component {
         return (
             <Row>
                 <Col span={4} style={{left: '20px'}}>
-                    <Button onClick={this.deleteSelected}>
+                    <Button onClick={this.deleteSelected} disabled={advices.length < 1}>
                         Delete Selected
                     </Button>
                 </Col>
@@ -269,6 +271,7 @@ class AddTransactionsImpl extends React.Component {
                     transactions,
                     ...additionalData
                 };
+                this.setState({submitButtonLoading: true});
                 axios({
                     url,
                     method: 'POST',
@@ -276,7 +279,19 @@ class AddTransactionsImpl extends React.Component {
                     data: data
                 })
                 .then(response => {
-                    message.success('Portfolio Created Successfully');
+                    const {portfolioId = null} = this.props;
+                    const successMessage = portfolioId ? 'Portfolio Updated Successfully' : 'Portfolio Created Successfully';
+                    message.success(successMessage);
+                    if (portfolioId) {
+                        this.props.history.push(`/investordashboard/portfolio/${portfolioId}`);
+                    } else {
+                        const portfolioId = _.get(response.data, '_id', null);
+                        if (portfolioId) {
+                            this.props.history.push(`/investordashboard/portfolio/${portfolioId}`);
+                        } else {
+                            this.props.history.push(`/investordashboard`);
+                        }
+                    }
                 })
                 .catch(error => {
                     console.log(error);
@@ -286,6 +301,9 @@ class AddTransactionsImpl extends React.Component {
                         message.error(`Code - ${code}: ${errorMessage}`);
                         Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                     }
+                })
+                .finally(() => {
+                    this.setState({submitButtonLoading: false});
                 });
             } else {
                 message.error('Please provide a valid name');
@@ -346,7 +364,8 @@ class AddTransactionsImpl extends React.Component {
             };
             this.setState({
                 presentAdvices: this.processPreviewAdviceTransaction(_.get(response.data, 'detail.subPositions', [])),
-                presentStocks: this.processPreviewStockTransction(_.get(response.data, 'detail.positions', []))
+                presentStocks: this.processPreviewStockTransction(_.get(response.data, 'detail.positions', [])),
+                previewCash: _.get(response.data, 'detail.cash', 0)
             });
             return axios({
                 url: `${requestUrl}/performance`,
@@ -380,8 +399,11 @@ class AddTransactionsImpl extends React.Component {
             <Col span={24}>
                 <Tabs defaultActiveKey="2" animated={false}>
                     <TabPane tab="Portfolio" key="2" style={{padding: '0 20px 20px 20px'}}>
-                        <Row style={{overflowY:'scroll'}}>
-                            <Col span={8} offset={16} style={{marginBottom: 20}}>
+                        <Row type="flex" justify="space-between">
+                            <Col span={8}>
+                                <h3>Cash: {this.state.previewCash}</h3>
+                            </Col>
+                            <Col span={8} style={{marginBottom: 20}}>
                                 <Radio.Group 
                                         value={this.state.toggleValue} 
                                         onChange={this.toggleView} 
@@ -422,7 +444,7 @@ class AddTransactionsImpl extends React.Component {
                                 preview 
                                 subscribedAdvices={this.state.subscribedAdvices}
                                 advices={this.state.presentAdvices} 
-                                toggleStockResearchModal={this.toggleStockResearchModal}
+                                // toggleStockResearchModal={this.toggleStockResearchModal}
                                 // advices={this.state.advices} 
                                 processAdviceComposition={this.processAdviceComposition}
                         />
@@ -449,11 +471,10 @@ class AddTransactionsImpl extends React.Component {
 
     processAdvice = (advice) => {
         const key = this.adviceKey++;
-        console.log('Advice Detail', advice);
 
         return {
             checked: false,
-            adviceId: advice.id,
+            id: advice.id,
             name: advice.name,
             netAssetValue: this.calculateNetAssetValue(advice),
             weight: '12.4%',
@@ -504,7 +525,6 @@ class AddTransactionsImpl extends React.Component {
     processAdviceTransaction = (adviceTransactions) => {
         const transactions = [];
         adviceTransactions.map(transaction => {
-            console.log(transaction);
             if (transaction.composition.length > 0) {
                 transaction.composition.map(item => {
                     transactions.push({
@@ -664,14 +684,16 @@ class AddTransactionsImpl extends React.Component {
                     name: item.advice !== null ? item.advice.name : 'My Portfolio',
                     key: index,
                     netAssetValue: item.lastPrice * item.quantity,
-                    weight: '12.4%',
-                    profitLoss: '+12.4%',
+                    weight: '12.4',
+                    profitLoss: '+12.4',
                     units: 1,
                     composition: [
                         {
                             key: 1,
                             adviceKey: index,
                             symbol: item.security.ticker,
+                            name: item.security.detail.Nse_Name,
+                            sector: item.security.detail.Sector,
                             shares: item.quantity,
                             modifiedShares: item.quantity,
                             price: item.lastPrice,
@@ -687,6 +709,8 @@ class AddTransactionsImpl extends React.Component {
                     key: index + 1,
                     adviceKey: advices[adviceIndex].key,
                     symbol: item.security.ticker,
+                    name: item.security.detail.Nse_Name,
+                    sector: item.security.detail.Sector,
                     shares: item.quantity,
                     modifiedShares: item.quantity,
                     price: item.lastPrice,
@@ -880,6 +904,15 @@ class AddTransactionsImpl extends React.Component {
         });
     }
 
+    checkPreviewButtonDisabled = () => {
+        const transactions = [
+            ...this.processAdviceTransaction(this.state.advices),
+            ...this.processCashTransaction(this.state.cashTransactions),
+            ...this.processStockTransaction(this.state.stockTransactions)
+        ];
+        return transactions.length;
+    }
+
     renderPageContent = () => {
         const {getFieldDecorator} = this.props.form;
         const {portfolioId} = this.props;
@@ -971,6 +1004,7 @@ class AddTransactionsImpl extends React.Component {
                                                     type="primary" 
                                                     onClick={this.handleSubmit} 
                                                     style={buttonStyle}
+                                                    loading={this.state.submitButtonLoading}
                                             >
                                                 SAVE
                                             </Button>
@@ -979,6 +1013,7 @@ class AddTransactionsImpl extends React.Component {
                                             <Button 
                                                     onClick={this.togglePreviewModal} 
                                                     style={buttonStyle}
+                                                    disabled={!this.checkPreviewButtonDisabled()}
                                             >
                                                 Preview
                                             </Button>

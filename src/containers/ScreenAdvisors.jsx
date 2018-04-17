@@ -20,10 +20,16 @@ export class ScreenAdvisors extends React.Component {
 
     getAdvisors = () => {
         const url = `${requestUrl}/advisor?&orderParam=${this.state.sortBy}&order=-1`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             console.log(response.data);
             this.setState({advisors: response.data});
+        })
+        .catch(error => {
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
     }
     
@@ -60,7 +66,7 @@ export class ScreenAdvisors extends React.Component {
                 {
                     menu.map((item, index) => {
                         return (
-                            <Option value={item.value}>{item.name}</Option>
+                            <Option key={index} value={item.value}>{item.name}</Option>
                         );
                     })
                 }

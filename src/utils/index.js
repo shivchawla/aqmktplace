@@ -66,27 +66,6 @@ export const getMetricColor = metricValue => {
     return metricValue < 0 ? metricColor.negative : metricColor.positive;
 };
 
-export const checkErrorForTokenExpiry = (error, history, fromUrl) => {
-    const name = _.get(error, 'response.data.name', '');
-    const message = _.get(error, 'response.data.message', '');
-    if(name==='TokenExpiredError' || message==='jwt expired'){
-        if (this.loggedInUserinfo.recentTokenUpdateTime
-            && (moment().valueOf() < ((5*60*1000) + this.loggedInUserinfo.recentTokenUpdateTime)) ){
-            return;
-        } else{
-            this.setShouldUpdateToken(true);
-            history.push('/tokenUpdate?redirectUrl='+encodeURIComponent(fromUrl));
-        }
-    }else{
-        // if (fromUrl && history){
-        // 	history.push(fromUrl);
-        // }else if (history){
-        // 	history.push('/login');
-        // }
-        // Utils.logoutUser();
-    }
-}
-
 export class Utils{
 
 	static loggedInUserinfo = reactLocalStorage.getObject('USERINFO');
@@ -431,6 +410,12 @@ export const convertToDecimal = value => {
 		return value;
 	}
 	return Number(value.toFixed(2));
+}
+
+export const constructErrorMessage = error => {
+	const errorCode = _.get(error.response, 'data.errorCode', 'N/A');
+	const message = _.get(error.response, 'data.message', 'N/A');
+	return(`${errorCode} - ${message}`);
 }
 
 export * from './requests';

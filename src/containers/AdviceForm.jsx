@@ -7,7 +7,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
-import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray} from '../utils';
+import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {store} from '../store';
 import {AqStockTableMod} from '../components/AqStockTableMod';
@@ -178,7 +178,10 @@ export class AdviceFormImpl extends React.Component {
                     this.props.history.goBack();
                 })
                 .catch((error) => {
-                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                    if (error.response) {
+                        message.error(constructErrorMessage(error));
+                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);                        
+                    }
                 });
             }
         });

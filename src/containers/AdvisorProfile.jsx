@@ -103,7 +103,7 @@ export class AdvisorProfile extends React.Component {
     getAdvisorDetail = () => {
         const advisorIdCurrent = this.props.match.params.id;
         const url = `${requestUrl}/advisor/${advisorIdCurrent}?dashboard=0`;
-        axios.get(url, {headers: {'aimsquant-token': aimsquantToken}})
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             console.log(response.data);
             const {latestAnalytics, user} = response.data;
@@ -122,6 +122,9 @@ export class AdvisorProfile extends React.Component {
         })
         .catch(error => {
             console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         });
     }
 
