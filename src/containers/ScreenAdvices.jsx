@@ -18,7 +18,7 @@ const antIcon = <Icon type="loading" style={{ fontSize: 18 }} spin />;
 const filters = {
     maxNotional: ['100000', '200000', '300000', '500000', '750000', '1000000'],
     rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
-    approved: ['Approved', 'UnApproved']
+    approved: ['Approved', 'UnApproved'],
 };
 
 const kvp = {

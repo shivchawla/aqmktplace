@@ -128,3 +128,5 @@ export const statusColor = {
     notSubscribed: '#607D8B',
     owner: '#1DE9B6'
 }
+
+export const performanceColor = '#2196F3';

@@ -70,6 +70,7 @@ export class AqStockTableMod extends React.Component {
                 dataIndex: 'weight',
                 key: 'weight',
                 width: 150,
+                render: text => <span>{text} %</span>
             }
         ];
         this.state = {

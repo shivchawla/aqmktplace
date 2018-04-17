@@ -12,6 +12,7 @@ const filters = {
     maxNotional: ['100000', '200000', '300000', '500000', '750000', '1000000'],
     rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
     approved: ['Approved', 'UnApproved'],
+    advices: ['Personal', 'Others'],
     netValue: '0,100000000',
     sharpe: '-100,100',
     return: '-100,100',
@@ -21,7 +22,8 @@ const filters = {
 const kvp = {
     maxNotional: 'selectMaxNotionalAllFilters',
     rebalancingFrequency: 'selectRebalanceAllFilters',
-    approved: 'selectApprovedllFilters'
+    approved: 'selectApprovedllFilters',
+    advices: 'selectAdvicesAllFilters'
 };
 
 export class AdviceFilterSideComponent extends React.Component {
@@ -33,6 +35,7 @@ export class AdviceFilterSideComponent extends React.Component {
             selectMaxNotionalAllFilters: true,
             selectRebalanceAllFilters: true,
             selectApprovedllFilters: true,
+            selectAdvicesAllFilters: true
         };
     }
 
@@ -54,6 +57,14 @@ export class AdviceFilterSideComponent extends React.Component {
                 onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "approved")} 
                 options={this.state.defaultFilters.approved} 
                 value={this.state.selectedFilters.approved} 
+        />
+    )
+
+    renderAdviceFilter = () => (
+        <CheckboxGroup 
+                onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "advices")} 
+                options={this.state.defaultFilters.advices}
+                value={this.state.selectedFilters.advices}
         />
     )
 
@@ -82,12 +93,13 @@ export class AdviceFilterSideComponent extends React.Component {
     processUrl = (type = 'all') => {
         const {selectedFilters, defaultFilters} = this.state;
         let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
-        const personal = this.props.personal;
+        let personal = selectedFilters.advices.map(item => item === 'Personal' ? 1 : 0);
         const limit = 10;
         const maxNotional = selectedFilters.maxNotional.length > 0 ? _.join(selectedFilters.maxNotional, ',') : _.join(defaultFilters.maxNotional, ',');
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         const {netValue, sharpe, volatility, rating} = selectedFilters;
         approved = _.join(approved, ',');
+        personal = _.join(personal, ',');
         const url = `${requestUrl}/advice?all=true&rebalance=${rebalancingFrequency}&return=${selectedFilters.return}&rating=${rating}&volatility=${volatility}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
         this.props.updateAdviceUrl(url);
         return url;
@@ -184,6 +196,20 @@ export class AdviceFilterSideComponent extends React.Component {
                         <Row>
                             <Col span={24}>
                                 {this.renderStatusFilter()}
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col span={24} style={{marginBottom: '20px'}}>
+                        <IconHeader 
+                                icon="check-circle" 
+                                label="Advices"
+                                checked={this.state.selectAdvicesAllFilters}
+                                filterType="advices"
+                                onChange={this.handleFilterGroupCheckboxChange}
+                        />
+                        <Row>
+                            <Col span={24}>
+                                {this.renderAdviceFilter()}
                             </Col>
                         </Row>
                     </Col>

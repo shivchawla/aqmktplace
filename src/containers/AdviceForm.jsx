@@ -5,7 +5,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle} from '../constants';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
@@ -173,9 +173,14 @@ export class AdviceFormImpl extends React.Component {
                     data: requestData
                 })
                 .then((response) => {
+                    const adviceId = _.get(response.data, '_id', null);
                     const successMessage = isUpdate ? 'Advice Updated successfully' : 'Advice Created successfully';
                     message.success(successMessage);
-                    this.props.history.goBack();
+                    if (adviceId) {
+                        this.props.history.push(`/advice/${adviceId}`);
+                    } else {
+                        this.props.history.push('/advisordashboard');
+                    }
                 })
                 .catch((error) => {
                     if (error.response) {
@@ -235,7 +240,8 @@ export class AdviceFormImpl extends React.Component {
             if (tickers.length < 2) {
                 tickers.push({
                     name: 'Portofolio',
-                    data: performance
+                    data: performance,
+                    color: performanceColor
                 });
             } else {
                 tickers[1].data = performance;
@@ -595,7 +601,8 @@ export class AdviceFormImpl extends React.Component {
                 .then(performance => {
                     tickers.push({
                         name: `BENCHMARK`,
-                        data: performance
+                        data: performance,
+                        color: benchmarkColor
                     });
                     this.setState({tickers});
                 });

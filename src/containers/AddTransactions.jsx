@@ -11,7 +11,7 @@ import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
-import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle, benchmarkColor, metricColor} from '../constants';
+import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle, benchmarkColor, metricColor, performanceColor} from '../constants';
 import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
 import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice} from'../utils';
@@ -159,7 +159,8 @@ class AddTransactionsImpl extends React.Component {
                     style={{top: 20, height: '650px', overflow: 'hidden'}}
                     onCancel={this.togglePreviewModal}
                     footer={[
-                        <Button key="back" onClick={this.togglePreviewModal}>Ok</Button>,
+                        <Button key="back" onClick={this.togglePreviewModal}>Cancel</Button>,
+                        <Button key="back" type="primary" onClick={this.handleSubmit}>Save</Button>,
                     ]}
             >
                 <Spin spinning={this.state.loadingPreviewData}>
@@ -392,7 +393,7 @@ class AddTransactionsImpl extends React.Component {
                 tickers.push({
                     name: 'Portfolio',
                     data: performanceSeries,
-                    color: '#2196F3'
+                    color: performanceColor
                 });
             } else{
                 tickers[1].data = performanceSeries;
@@ -783,7 +784,7 @@ class AddTransactionsImpl extends React.Component {
                     const tickers = [...this.state.tickers];
                     tickers.push({
                         name: this.state.selectedBenchmark,
-                        color: benchmarkColor
+                        color: '#e91e63'
                     });
                     this.setState({
                         tickers, notAuthorized: false, 
