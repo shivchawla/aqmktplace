@@ -303,6 +303,7 @@ class AddTransactionsImpl extends React.Component {
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
+        console.log('Transactions', transactions);
         const additionalData = !this.props.portfolioId 
                 ?   {
                         name: "Yo",
@@ -328,7 +329,6 @@ class AddTransactionsImpl extends React.Component {
             data: data
         })
         .then(response => {
-            console.log('Preview', response.data);
             const performanceData = {
                 name: "",
                 detail: {
@@ -359,17 +359,15 @@ class AddTransactionsImpl extends React.Component {
             let performanceSeries = _.get(response.data, 'portfolioPerformance.portfolioValues', []).map((item, index) => {
                 return [moment(item.date, dateFormat).valueOf(), item.netValue];
             });
-            console.log('Performance Series', performanceSeries);
             if (tickers.length < 2) {
                 tickers.push({
                     name: 'Portfolio',
-                    show: true,
-                    data: performanceSeries
+                    data: performanceSeries,
+                    color: '#2196F3'
                 });
             } else{
                 tickers[1].data = performanceSeries;
             }
-            console.log('Tickers', tickers);
             this.setState({tickers});
         })
         .catch(error => {
@@ -522,7 +520,7 @@ class AddTransactionsImpl extends React.Component {
                         date: transaction.date,
                         commission: 0,
                         cashLinked: false,
-                        advice: transaction.id,
+                        advice: transaction.id || '',
                         _id: ""
                     })
                 });
@@ -594,7 +592,8 @@ class AddTransactionsImpl extends React.Component {
         const tickers = [...this.state.tickers];
         if (tickers.length < 1) {
             tickers.push({
-                name: value
+                name: value,
+                color: benchmarkColor
             });
         } else {
             tickers[0].name = value;
@@ -742,7 +741,8 @@ class AddTransactionsImpl extends React.Component {
                     const id = _.get(response.data, '_id', '');
                     const tickers = [...this.state.tickers];
                     tickers.push({
-                        name: this.state.selectedBenchmark
+                        name: this.state.selectedBenchmark,
+                        color: benchmarkColor
                     });
                     this.setState({
                         tickers, notAuthorized: false, 
