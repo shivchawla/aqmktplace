@@ -101,10 +101,10 @@ class PortfolioDetailImpl extends React.Component {
                     {
                         this.state.presentAdvices.length > 0 
                         ? <AqPortfolioCompositionAdvice 
-                            preview 
-                            advices={this.state.presentAdvices} 
-                            toggleStockResearchModal={this.updateTicker}
-                            hideTransactionalDetails={true}
+                                preview 
+                                advices={this.state.presentAdvices} 
+                                toggleStockResearchModal={this.updateTicker}
+                                hideTransactionalDetails={true}
                           />
                         : <h5>Please add advices to your portfolio</h5>
                     }
@@ -284,11 +284,11 @@ class PortfolioDetailImpl extends React.Component {
                 const netValue = _.get(portfolioMetrics, 'netValue', null);
 
                 const metrics = [
-                    {value: annualReturn, label: 'Annual Return', fixed:2, percentage: true},
-                    {value: volatility, label: 'Volatility', fixed:2, percentage: true},
-                    {value: totalReturn, label: 'Total Return', fixed:2, percentage: true, color: true},
-                    {value: dailyChange, label: `Daily PnL (\u20B9)`, fixed:2, color:true, direction:true},
-                    {value: dailyChangePct, label: 'Daily PnL (%)', fixed:2, percentage: true, color: true, direction:true},
+                    {value: annualReturn, label: 'Annual Return', fixed: 2, percentage: true},
+                    {value: volatility, label: 'Volatility', fixed: 2, percentage: true},
+                    {value: totalReturn, label: 'Total Return', fixed: 2, percentage: true, color: true},
+                    {value: dailyChange, label: `Daily PnL (\u20B9)`, fixed: 2, color:true, direction:true},
+                    {value: dailyChangePct, label: 'Daily PnL (%)', fixed: 2, percentage: true, color: true, direction:true},
                     {value: netValue, label: 'Net Value', isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2}
                 ];
                 this.setState({

@@ -233,6 +233,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
         const targetAdvice = advices.filter(item => item.key === advice.key)[0];
         targetAdvice.checked = e.target.checked;
         this.setState({advices});
+        this.props.updateAdvices(advices);
     }
 
     datePickerOpened = e => {
@@ -288,7 +289,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
                             labelStyle={{...metricsLabelStyle, textAlign: 'center'}}
                         />
                         
-                        {advice.id &&
+                        {advice.id && advice.hasChanged &&
                             <Tooltip title={tooltipText}>
                                 <Icon 
                                     type={adviceChangeIconSrc} 

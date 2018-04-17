@@ -1,4 +1,5 @@
 import * as React from 'react';
+import _ from 'lodash';
 import {Table, Tooltip} from 'antd';
 import {nameEllipsisStyle} from '../constants';
 
@@ -7,7 +8,7 @@ export class AqStockPortfolioTable extends React.Component {
         super(props);
         this.columns = [
             {
-                title: 'NAME',
+                title: this.renderHeaderText('NAME'),
                 dataIndex: 'name',
                 key: 'name',
                 fixed: true,
@@ -30,26 +31,32 @@ export class AqStockPortfolioTable extends React.Component {
                 }
             },
             {
-                title: 'SYMBOL',
+                title: this.renderHeaderText('SYMBOL'),
                 dataIndex: 'symbol',
                 key: 'symbol'
             },
             {
-                title: 'SHARES',
+                title: this.renderHeaderText('SHARES'),
                 dataIndex: 'shares',
                 key: 'shares'
             },
             {
-                title: 'PRICE(\u20B9)',
+                title: this.renderHeaderText('LAST PRICE(\u20B9)'),
                 dataIndex: 'price',
                 key: 'price'
             },
             {
-                title: 'SECTOR',
+                title: this.renderHeaderText('AVG. PRICE(\u20B9)'),
+                dataIndex: 'avgPrice',
+                key: 'avgPrice'
+            },
+            {
+                title: this.renderHeaderText('SECTOR'),
                 dataIndex: 'sector',
                 key: 'sector'
-            }, {
-                title: 'WEIGHT',
+            }, 
+            {
+                title: this.renderHeaderText('WEIGHT'),
                 dataIndex: 'weight',
                 key: 'weight'
             }
@@ -66,7 +73,8 @@ export class AqStockPortfolioTable extends React.Component {
                 sector: position.security.detail.Sector,
                 price: position.lastPrice.toFixed(2),
                 shares: position.quantity,
-                symbol: position.security.ticker,
+                symbol: _.get(position, 'security.ticker', '-'),
+                avgPrice: _.get(position, 'avgPrice', 0).toFixed(2)
             });
         });
         portfolioArray = this.updateWeights(portfolioArray);
@@ -94,7 +102,11 @@ export class AqStockPortfolioTable extends React.Component {
         return totalWeight;
     }
 
+    renderHeaderText = title => <span style={{fontSize: '12px', fontWeight: '700'}}>{title}</span>
+
     render() {
+        console.log('Positions', this.props.positions);
+
         return (
             <Table 
                     size="small"

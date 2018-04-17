@@ -210,7 +210,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
     processComposition = (portfolio, key, advice) => {
         return portfolio.positions.map((item, index) => {
             const targetPosition = advice.composition.filter(advicePosition => advicePosition.symbol === item.security.ticker)[0];
-
+            console.log('Item Position', item);
             return {
                 key: index,
                 adviceKey: key,
@@ -221,6 +221,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                 modifiedShares: targetPosition.modifiedShares,
                 newShares: item.quantity || 0,
                 price: item.lastPrice || 0,
+                avgPrice: item.avgPrice || 0,
                 costBasic: 12,
                 unrealizedPL: 1231,
                 weight: '12%',
@@ -281,7 +282,8 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                             labelStyle={{...metricsLabelStyle, textAlign: 'center'}}
                         />
                         
-                        {advice.id &&
+                        {
+                            advice.id && advice.hasChanged &&
                             <Tooltip title={tooltipText}>
                                 <Icon 
                                     type={adviceChangeIconSrc} 

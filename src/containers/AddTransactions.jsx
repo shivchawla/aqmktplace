@@ -60,7 +60,10 @@ class AddTransactionsImpl extends React.Component {
         return (
             <Row>
                 <Col span={4} style={{left: '20px'}}>
-                    <Button onClick={this.deleteSelected} disabled={advices.length < 1}>
+                    <Button 
+                            onClick={this.deleteSelected} 
+                            disabled={advices.filter(advice => advice.checked === true).length < 1}
+                    >
                         Delete Selected
                     </Button>
                 </Col>
@@ -78,11 +81,11 @@ class AddTransactionsImpl extends React.Component {
                         ?   <AqPortfolioTransactionAdvice 
                                     advices={advices} 
                                     subscribedAdvices={subscribedAdvices}
-                                    updateAdvices={this.updateAdvices}
                                     processAdvice={this.processAdvice}
                                     processAdviceComposition={this.processAdviceComposition}
                                     disabledDate={this.disabledDate}
                                     previewPortfolio={this.previewPortfolio}
+                                    updateAdvices={this.updateAdvices}
                                     toggleStockResearchModal={this.toggleStockResearchModal}
                             />
                         :   <h5 
@@ -193,11 +196,11 @@ class AddTransactionsImpl extends React.Component {
     }   
 
     onOk = () => {
-        this.updateAdvices();
+        this.addSelectedSubscribedAdvices();
         this.toggleSubscribedAdviceModal();
     }
 
-    updateAdvices = () => {
+    addSelectedSubscribedAdvices = () => {
         const presentAdvices = [...this.state.advices];
         const subscribedAdvices = [...this.state.subscribedAdvices];
         const selectedAdvices = subscribedAdvices.filter(advice => {
@@ -218,6 +221,10 @@ class AddTransactionsImpl extends React.Component {
         });
         const unionAdvices = _.uniqBy([...presentAdvices, ...selectedSubscribedAdvices], 'id');
         this.setState({advices: unionAdvices});
+    }
+
+    updateAdvices = advices => {
+        this.setState({advices});
     }
 
     addAdvice = (advice) => {
@@ -399,11 +406,11 @@ class AddTransactionsImpl extends React.Component {
             <Col span={24}>
                 <Tabs defaultActiveKey="2" animated={false}>
                     <TabPane tab="Portfolio" key="2" style={{padding: '0 20px 20px 20px'}}>
-                        <Row type="flex" justify="space-between">
+                        <Row type="flex" justify="space-between" align="middle">
                             <Col span={8}>
                                 <h3>Cash: {this.state.previewCash}</h3>
                             </Col>
-                            <Col span={8} style={{marginBottom: 20}}>
+                            <Col span={8} style={{marginBottom: 5}}>
                                 <Radio.Group 
                                         value={this.state.toggleValue} 
                                         onChange={this.toggleView} 
@@ -446,7 +453,7 @@ class AddTransactionsImpl extends React.Component {
                                 advices={this.state.presentAdvices} 
                                 // toggleStockResearchModal={this.toggleStockResearchModal}
                                 // advices={this.state.advices} 
-                                processAdviceComposition={this.processAdviceComposition}
+                                // processAdviceComposition={this.processAdviceComposition}
                         />
                         :   <h5 
                                 style={{textAlign: 'center', fontSize: '16px'}}
@@ -650,14 +657,14 @@ class AddTransactionsImpl extends React.Component {
         let advices = [...this.state.advices];
         let subscribedAdvices = [...this.state.subscribedAdvices];
         const advicesToBeDeleted = this.state.advices.filter(item => item.checked === true);
-        subscribedAdvices = subscribedAdvices.map(subscribedAdvice => {
-            advicesToBeDeleted.map(advice => {
-                if (advice.adviceId === subscribedAdvice.id) {
-                    subscribedAdvice.isSelected = false;
-                }
-            });
-            return subscribedAdvice;
-        });
+        // subscribedAdvices = subscribedAdvices.map(subscribedAdvice => {
+        //     advicesToBeDeleted.map(advice => {
+        //         if (advice.adviceId === subscribedAdvice.id) {
+        //             subscribedAdvice.isSelected = false;
+        //         }
+        //     });
+        //     return subscribedAdvice;
+        // });
         advices = _.pullAll(advices, advicesToBeDeleted);
         this.setState({advices, subscribedAdvices});
     }
@@ -696,6 +703,7 @@ class AddTransactionsImpl extends React.Component {
                             sector: item.security.detail.Sector,
                             shares: item.quantity,
                             modifiedShares: item.quantity,
+                            avgPrice: item.avgPrice,
                             price: item.lastPrice,
                             costBasic: item.avgPrice,
                             unrealizedPL: 1231,
@@ -714,6 +722,7 @@ class AddTransactionsImpl extends React.Component {
                     shares: item.quantity,
                     modifiedShares: item.quantity,
                     price: item.lastPrice,
+                    avgPrice: item.avgPrice,
                     costBasic: item.avgPrice,
                     unrealizedPL: 1231,
                     weight: '12%',
@@ -821,7 +830,8 @@ class AddTransactionsImpl extends React.Component {
             } else {
                 const tickers = [...this.state.tickers];
                 tickers.push({
-                    name: this.state.selectedBenchmark
+                    name: this.state.selectedBenchmark,
+                    color: benchmarkColor
                 });
                 this.setState({tickers});
             }
