@@ -31,7 +31,8 @@ class StockResearchImpl extends React.Component {
             spinning: false,
             loadingData: true,
             latestDetail: {
-                ticker: '',
+                latestPrice: 0,
+                ticker: 'TCS',
                 exchange: '',
                 closePrice: 0,
                 change: '',
@@ -61,10 +62,6 @@ class StockResearchImpl extends React.Component {
         const index = _.findIndex(tickers, item => item.name === name);
         tickers.splice(index, 1);
         this.setState({tickers});
-    }
-
-    onChange = (e) => { 
-        this.setState({tickerName: e.target.value});
     }
 
     handleSearch = (query) => {
@@ -100,10 +97,10 @@ class StockResearchImpl extends React.Component {
         getStockData(value, 'latestDetail')
         .then(response => {
             const {data} = response;
-            console.log(data);
             latestDetail.ticker = data.security.ticker;
             latestDetail.exchange = data.security.exchange;
             latestDetail.close = data.latestDetail.values.Close;
+            latestDetail.latestPrice = data.latestDetail.values.Close
             latestDetail.open = data.latestDetail.values.Open;
             latestDetail.low = data.latestDetail.values.Low;
             latestDetail.high = data.latestDetail.values.High;
@@ -111,7 +108,9 @@ class StockResearchImpl extends React.Component {
             latestDetail.high_52w = data.latestDetail.values.High_52w;
             latestDetail.change = data.latestDetail.values.Change;
             latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
-            this.setState({latestDetail});
+            this.setState({latestDetail}, () => {
+                this.subscribeToStock(value);
+            });
             return getStockData(value, 'rollingPerformance');
         })
         .then(response => {
@@ -168,8 +167,8 @@ class StockResearchImpl extends React.Component {
             } else {
                 this.onSelect(this.props.ticker);
             }
-            this.setUpSocketConnection();
         }
+        this.setUpSocketConnection();
     }
 
     componentWillUnmount() {
@@ -247,30 +246,36 @@ class StockResearchImpl extends React.Component {
     }
 
     setUpSocketConnection = () => {
-        Utils.openSocketConnection();
+        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
+            Utils.openSocketConnection();
+        }
         Utils.webSocket.onopen = () => {
-            this.subscribeToStock('TCS');
+            this.subscribeToStock(this.state.latestDetail.ticker);
         };
         Utils.webSocket.onerror = err => {
             console.log('Error Occured', err);
         };
         Utils.webSocket.onclose = code => {
             console.log('Connection Closed');
-            console.log('Code', code);
             Utils.webSocket = undefined;
-            if (this.numberOfTimeSocketConnectionCalled < 5){
-              setTimeout(() => {
+            setTimeout(() => {
                 this.numberOfTimeSocketConnectionCalled++;
-                Utils.openSocketConnection();
-                console.log('Connection established again');
-              }, this.socketOpenConnectionTimeout);
+                this.setUpSocketConnection(this.state.latestDetail.ticker);
+            }, this.socketOpenConnectionTimeout);
+        };
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
+    }
+
+    processRealtimeMessage = msg => {
+        const realtimeResponse = JSON.parse(msg.data);
+        console.log(realtimeResponse);
+        this.setState({
+            latestDetail: {
+                ...this.state.latestDetail,
+                latestPrice: _.get(realtimeResponse, 'output.price', 0),
+                change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
             }
-        };
-        Utils.webSocket.onmessage = msg => {
-            console.log('Message Received');
-            // const data = JSON.parse(msg.data);
-            console.log(msg);
-        };
+        });
     }
 
     subscribeToStock = (ticker) => {
@@ -288,6 +293,10 @@ class StockResearchImpl extends React.Component {
             Utils.webSocket = undefined;
             this.setUpSocketConnection();
         }
+    }
+
+    unSubscribeToStock = ticker => {
+        
     }
 
     renderPageContent = () => {
@@ -349,7 +358,7 @@ class StockResearchImpl extends React.Component {
                                 <span style={{fontSize: '20px'}}>{latestDetail.ticker}</span>
                             </h1>
                             <h3 style={lastPriceStyle}>
-                                {latestDetail.close} 
+                                {latestDetail.latestPrice} 
                                 <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
                             </h3>
                             <h5 

@@ -216,6 +216,7 @@ class SubscribedAdvicesImpl extends React.Component {
         const targetAdvice = advices.filter(item => item.id === advice.id)[0];
         targetAdvice.isSelected = e.target.checked;
         this.setState({advices});
+        this.props.updateSubscribedAdvices(advices);
     }
 
     handleDateChange = (date, advice) => {

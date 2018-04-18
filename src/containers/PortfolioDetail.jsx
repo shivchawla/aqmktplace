@@ -40,6 +40,9 @@ const TabPane = Tabs.TabPane;
 const {requestUrl} = require('../localConfig.js');
 
 class PortfolioDetailImpl extends React.Component {
+    socketOpenConnectionTimeout = 1000;
+    numberOfTimeSocketConnectionCalled = 1;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -220,6 +223,12 @@ class PortfolioDetailImpl extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
+            // Subscribing to real-time data
+            if (Utils.webSocket && Utils.webSocket.readyState === 1) {
+                this.subscribeToPortfolio(this.props.match.params.id);
+            } else {
+                this.setUpSocketConnection();
+            }
             const series = [];
             let positions = [];
             const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
@@ -313,6 +322,82 @@ class PortfolioDetailImpl extends React.Component {
                 this.setState({show: false});
             });
         }
+    }
+
+    componentWillUnmount() {
+        this.unSubscribeToPortfolio(this.props.match.params.id);
+    }
+
+    setUpSocketConnection = () => {
+        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
+            Utils.openSocketConnection();
+        }
+
+        Utils.webSocket.onopen = () => {
+            // subscribed to advice
+            this.subscribeToPortfolio(this.props.match.params.id);
+        };
+        
+        Utils.webSocket.onerror = error => {
+            console.log(error);
+        };
+
+        Utils.webSocket.onclose = () => {
+            console.log('Connection Closed');
+            Utils.webSocket = undefined;
+            setTimeout(() => {
+                this.numberOfTimeSocketConnectionCalled++;
+                this.setUpSocketConnection();
+            }, this.socketOpenConnectionTimeout);
+        };
+        
+        Utils.webSocket.onmessage = msg => {
+            console.log('Message Received', msg);
+        };
+    }
+
+    subscribeToPortfolio = portfolioId => {
+        console.log('Subscription');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'portfolio',
+            'portfolioId': portfolioId,
+            'detail': true
+        };
+        console.log('Message', msg);
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to ${portfolioId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    unSubscribeToPortfolio = portfolioId => {
+        console.log('UnSubscription');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'portfolio',
+            'portfolioId': portfolioId,
+            // 'detail': true
+        };
+        console.log('Message', msg);
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`UnSubscribed to ${portfolioId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    processRealtimeMessage = msg => {
+        console.log('Hello World');
+        const realtimeData = JSON.parse(msg.data);
+        console.log('Realtime Data', realtimeData);
     }
 
     renderPageContent = () => {

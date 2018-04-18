@@ -20,7 +20,7 @@ export class AqStockPortfolioTable extends React.Component {
                                     onClick={() => props.updateTicker && props.updateTicker(record)} 
                                     style={{
                                         ...nameEllipsisStyle, 
-                                        color: props.updateTicker ? '#0091EA' : '#000000a6',
+                                        // color: props.updateTicker ? '#0091EA' : '#000000a6',
                                         cursor: props.updateTicker ? 'pointer' : 'auto'
                                     }}
                             >

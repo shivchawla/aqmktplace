@@ -21,8 +21,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
         super(props);
         this.state = {
             advices: props.advices, // advices rendered here
-            subscribedAdvices: props.subscribedAdvices, // subscribed advices that is shown in the subscribed
-            selectedDate: moment()
+            // subscribedAdvices: props.subscribedAdvices, // subscribed advices that is shown in the subscribed
         }
         this.columns = [
             {
@@ -133,7 +132,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
                             <DatePicker
                                 onChange={date => this.handleDateChange(date, advice)}
                                 onOpenChange={this.datePickerOpened}
-                                value={this.state.selectedDate}
+                                value={moment(advice.date, dateFormat)}
                                 format={dateFormat}
                                 disabledDate={(current) => this.props.disabledDate(current, advice)}
                                 allowClear={false}
@@ -187,7 +186,6 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
         const advices = [...this.state.advices];
         let targetAdvice = advices.filter(item => item.key === advice.key)[0];
         let unModifiedTargetAdvice = unmodifiedAdvices.filter(item => item.key === advice.key)[0];
-        console.log('Target Advice', targetAdvice.composition);
         targetAdvice.date = date.format(dateFormat);
         const selectedDate = moment(date).format(dateFormat);
         const url = `${requestUrl}/advice/${adviceId}/portfolio?date=${selectedDate}`;
@@ -197,8 +195,8 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
             targetAdvice.composition = this.processComposition(portfolio, advice.key, targetAdvice);
             this.setState({
                 advices,
-                selectedDate: date
             });
+            this.props.updateAdvices(advices);
         })
         .catch(error => {
             console.log(error);
@@ -211,25 +209,21 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
     processComposition = (portfolio, key, advice) => {
         return portfolio.positions.map((item, index) => {
             const targetPosition = advice.composition.filter(advicePosition => advicePosition.symbol === item.security.ticker)[0];
-            // console.log('Target Positiom', targetPosition);
-            if (targetPosition) {
-                return {
-                    key: index,
-                    adviceKey: key,
-                    symbol: _.get(item, 'security.ticker', ''),
-                    name: _.get(item, 'security.detail.Nse_Name', ''),
-                    sector: _.get(item, 'security.detail.Sector', ''),
-                    shares: targetPosition.modifiedShares,
-                    modifiedShares: targetPosition.modifiedShares,
-                    newShares: item.quantity || 0,
-                    price: item.lastPrice || 0,
-                    costBasic: 12,
-                    unrealizedPL: 1231,
-                    weight: '12%',
-                    transactionalQuantity: item.quantity - targetPosition.modifiedShares
-                };
-            }
-            
+            return {
+                key: index,
+                adviceKey: key,
+                symbol: _.get(item, 'security.ticker', ''),
+                name: _.get(item, 'security.detail.Nse_Name', ''),
+                sector: _.get(item, 'security.detail.Sector', ''),
+                shares: _.get(targetPosition, 'modifiedShares', 0),
+                modifiedShares: _.get(targetPosition, 'modifiedShares', 0),
+                newShares: item.quantity || 0,
+                price: item.lastPrice || 0,
+                costBasic: 12,
+                unrealizedPL: 1231,
+                weight: '12%',
+                transactionalQuantity: item.quantity - _.get(targetPosition, 'modifiedShares', 0)
+            };
         });
     }
 

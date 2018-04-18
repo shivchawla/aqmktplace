@@ -21,6 +21,9 @@ const {aimsquantToken, requestUrl} = require('../localConfig.js');
 const dateFormat = 'Do MMMM YYYY';
 
 class AdviceDetailImpl extends React.Component {
+    socketOpenConnectionTimeout = 1000;
+    numberOfTimeSocketConnectionCalled = 1;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -369,9 +372,98 @@ class AdviceDetailImpl extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
+            if (Utils.webSocket && Utils.webSocket.readyState === 1) {
+                this.subscribeToAdvice(this.props.match.params.id);
+            } else {
+                this.setUpSocketConnection();
+            }
             this.getUserData();
             this.getAdviceData();
         }
+    }
+
+    componentWillUnmount() {
+        this.unSubscribeToAdvice(this.props.match.params.id);
+    }
+
+    setUpSocketConnection = () => {
+        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
+            Utils.openSocketConnection();
+        }
+
+        Utils.webSocket.onopen = () => {
+            // subscribed to advice
+            this.subscribeToAdvice(this.props.match.params.id);
+        };
+        
+        Utils.webSocket.onerror = error => {
+            console.log(error);
+        };
+
+        Utils.webSocket.onclose = () => {
+            console.log('Connection Closed');
+            Utils.webSocket = undefined;
+            setTimeout(() => {
+                this.numberOfTimeSocketConnectionCalled++;
+                this.setUpSocketConnection();
+            }, this.socketOpenConnectionTimeout);
+        };
+        
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
+    }
+
+    subscribeToAdvice = adviceId => {
+        console.log('Subscription');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'advice',
+            'adviceId': adviceId,
+            'detail': true
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to ${adviceId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    unSubscribeToAdvice = adviceId => {
+        console.log('UnSubscription');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'advice',
+            'adviceId': adviceId,
+            // 'detail': true
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`UnSubscribed to ${adviceId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    processRealtimeMessage = msg => {
+        console.log(JSON.parse(msg.data));
+        const realtimeData = JSON.parse(msg.data);
+        const netAssetValue = _.get(realtimeData, 'output.summary.nav', 0);
+        const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
+        const dailyChange = _.get(realtimeData, 'output.summary.dailyChange');
+        
+        this.setState({
+            metrics: {
+                ...this.state.metrics,
+                dailyChange,
+                dailyChangePct,
+                netValue: netAssetValue
+            },
+            positions: _.get(realtimeData, 'output.detail.positions', [])
+        })
     }
 
     renderActionButtons = () => {

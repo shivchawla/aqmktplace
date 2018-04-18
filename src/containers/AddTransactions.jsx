@@ -215,11 +215,11 @@ class AddTransactionsImpl extends React.Component {
         });
         selectedSubscribedAdvices.map(selectedSubscribedAdvice => {
             const targetPresentAdvice = presentAdvices.filter(presentAdvice => presentAdvice.id === selectedSubscribedAdvice.id)[0];
-            if (targetPresentAdvice) {
+            if (!targetPresentAdvice) {
                 notification.open({
                     style: {backgroundColor: '#f9f9f9'},
-                    message: targetPresentAdvice.name,
-                    description: `${targetPresentAdvice.name} is already to your portfolio.`
+                    message: selectedSubscribedAdvice.name,
+                    description: `${selectedSubscribedAdvice.name} is added to your portfolio.`
                 });
             }
         });
@@ -930,6 +930,11 @@ class AddTransactionsImpl extends React.Component {
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
         return transactions.length;
+    }
+
+    componentWillUpdate(nextProps, nextState) {
+        console.log('Advices', nextState.advices);
+        console.log('Subscribed Advices', nextState.subscribedAdvices);
     }
 
     renderPageContent = () => {
