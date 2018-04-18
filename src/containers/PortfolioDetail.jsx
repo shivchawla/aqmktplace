@@ -38,11 +38,17 @@ const dateFormat = 'YYYY-MM-DD';
 const Panel = Collapse.Panel;
 const TabPane = Tabs.TabPane;
 const {requestUrl} = require('../localConfig.js');
+const annualReturnLabel = 'Annual Return';
+const volatilityLabel = 'Volatility';
+const totalReturnLabel = 'Total Return';
+const dailyChangeLabel = 'Daily PnL (\u20B9)';
+const dailyChangePctLabel = 'Daily PnL (%)';
+const netValueLabel = 'Net Value (\u20B9)';
 
 class PortfolioDetailImpl extends React.Component {
     socketOpenConnectionTimeout = 1000;
     numberOfTimeSocketConnectionCalled = 1;
-
+    mounted = false;
     constructor(props) {
         super(props);
         this.state = {
@@ -220,15 +226,12 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     componentWillMount() {
+        this.mounted = true;
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
             // Subscribing to real-time data
-            if (Utils.webSocket && Utils.webSocket.readyState === 1) {
-                this.subscribeToPortfolio(this.props.match.params.id);
-            } else {
-                this.setUpSocketConnection();
-            }
+            this.setUpSocketConnection();
             const series = [];
             let positions = [];
             const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
@@ -293,12 +296,12 @@ class PortfolioDetailImpl extends React.Component {
                 const netValue = _.get(portfolioMetrics, 'netValue', null);
 
                 const metrics = [
-                    {value: annualReturn, label: 'Annual Return', fixed: 2, percentage: true},
-                    {value: volatility, label: 'Volatility', fixed: 2, percentage: true},
+                    {value: annualReturn, label: annualReturnLabel, fixed: 2, percentage: true},
+                    {value: volatility, label: volatilityLabel, fixed: 2, percentage: true},
                     {value: totalReturn, label: 'Total Return', fixed: 2, percentage: true, color: true},
-                    {value: dailyChange, label: `Daily PnL (\u20B9)`, fixed: 2, color:true, direction:true},
-                    {value: dailyChangePct, label: 'Daily PnL (%)', fixed: 2, percentage: true, color: true, direction:true},
-                    {value: netValue, label: 'Net Value (\u20B9)', isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2}
+                    {value: dailyChange, label: dailyChangeLabel, fixed: 2, color:true, direction:true},
+                    {value: dailyChangePct, label: dailyChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
+                    {value: netValue, label: netValueLabel, isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2}
                 ];
                 this.setState({
                     portfolioMetrics: metrics,
@@ -325,6 +328,7 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     componentWillUnmount() {
+        this.mounted = false;
         this.unSubscribeToPortfolio(this.props.match.params.id);
     }
 
@@ -339,21 +343,28 @@ class PortfolioDetailImpl extends React.Component {
         };
         
         Utils.webSocket.onerror = error => {
-            console.log(error);
+            console.log('Error Occured', error);
+            if (this.mounted) {
+                this.subscribeToPortfolio(this.props.match.params.id);
+            } else {
+                this.unSubscribeToPortfolio(this.props.match.params.id);
+            }
         };
 
         Utils.webSocket.onclose = () => {
             console.log('Connection Closed');
-            Utils.webSocket = undefined;
-            setTimeout(() => {
-                this.numberOfTimeSocketConnectionCalled++;
-                this.setUpSocketConnection();
-            }, this.socketOpenConnectionTimeout);
+            if (this.mounted) {
+                Utils.webSocket = undefined;
+                setTimeout(() => {
+                    this.numberOfTimeSocketConnectionCalled++;
+                    this.setUpSocketConnection();
+                }, this.socketOpenConnectionTimeout);
+            } else {
+                return;
+            }
         };
         
-        Utils.webSocket.onmessage = msg => {
-            console.log('Message Received', msg);
-        };
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
     }
 
     subscribeToPortfolio = portfolioId => {
@@ -395,9 +406,26 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     processRealtimeMessage = msg => {
-        console.log('Hello World');
-        const realtimeData = JSON.parse(msg.data);
-        console.log('Realtime Data', realtimeData);
+        if (this.mounted) {
+            const realtimeData = JSON.parse(msg.data);
+            const subPositions = _.get(realtimeData, 'output.detail.subPositions', []);
+            const positions = _.get(realtimeData, 'output.detail.positions', []);
+            const netValue = _.get(realtimeData, 'output.summary.nav', 0);
+            const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
+            const dailyChange = _.get(realtimeData, 'output.summary.dailyChange', 0);
+            const metrics = _.uniqBy([
+                {value: dailyChange, label: dailyChangeLabel, fixed: 2, color:true, direction:true},
+                {value: dailyChangePct, label: dailyChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
+                {value: netValue, label: netValueLabel, isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2},
+                ...this.state.portfolioMetrics
+            ], 'label');
+            this.setState({
+                portfolioMetrics: metrics,
+                stockPositions: positions
+            });
+        } else {
+            this.unSubscribeToPortfolio(this.props.match.params.id);
+        }
     }
 
     renderPageContent = () => {

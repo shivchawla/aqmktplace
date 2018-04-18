@@ -296,7 +296,20 @@ class StockResearchImpl extends React.Component {
     }
 
     unSubscribeToStock = ticker => {
-        
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'stock',
+            'ticker': ticker
+        };
+        console.log(msg);
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`UnSubscribed to ${ticker}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
     }
 
     renderPageContent = () => {

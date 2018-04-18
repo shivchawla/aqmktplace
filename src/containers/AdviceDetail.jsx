@@ -23,6 +23,7 @@ const dateFormat = 'Do MMMM YYYY';
 class AdviceDetailImpl extends React.Component {
     socketOpenConnectionTimeout = 1000;
     numberOfTimeSocketConnectionCalled = 1;
+    mounted = false;
 
     constructor(props) {
         super(props);
@@ -369,14 +370,11 @@ class AdviceDetailImpl extends React.Component {
     };
 
     componentWillMount() {
+        this.mounted = true;
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            if (Utils.webSocket && Utils.webSocket.readyState === 1) {
-                this.subscribeToAdvice(this.props.match.params.id);
-            } else {
-                this.setUpSocketConnection();
-            }
+            this.setUpSocketConnection();
             this.getUserData();
             this.getAdviceData();
         }
@@ -384,32 +382,44 @@ class AdviceDetailImpl extends React.Component {
 
     componentWillUnmount() {
         this.unSubscribeToAdvice(this.props.match.params.id);
+        this.mounted = false;
     }
 
     setUpSocketConnection = () => {
-        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
-            Utils.openSocketConnection();
+        if (this.mounted) {
+            if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
+                Utils.openSocketConnection();
+            }
+    
+            Utils.webSocket.onopen = () => {
+                // subscribed to advice
+                this.subscribeToAdvice(this.props.match.params.id);
+            };
+            
+            Utils.webSocket.onerror = error => {
+                console.log('Error Occured', error);
+                if (this.mounted) {
+                    this.subscribeToAdvice(this.props.match.params.id);
+                } else {
+                    this.unSubscribeToAdvice(this.props.match.params.id);
+                }
+            };
+    
+            Utils.webSocket.onclose = () => {
+                console.log('Connection Closed');
+                if (this.mounted) {
+                    Utils.webSocket = undefined;
+                    setTimeout(() => {
+                        this.numberOfTimeSocketConnectionCalled++;
+                        this.setUpSocketConnection();
+                    }, this.socketOpenConnectionTimeout);
+                } else {
+                    return;
+                }
+            };
+            
+            Utils.webSocket.onmessage = this.processRealtimeMessage;
         }
-
-        Utils.webSocket.onopen = () => {
-            // subscribed to advice
-            this.subscribeToAdvice(this.props.match.params.id);
-        };
-        
-        Utils.webSocket.onerror = error => {
-            console.log(error);
-        };
-
-        Utils.webSocket.onclose = () => {
-            console.log('Connection Closed');
-            Utils.webSocket = undefined;
-            setTimeout(() => {
-                this.numberOfTimeSocketConnectionCalled++;
-                this.setUpSocketConnection();
-            }, this.socketOpenConnectionTimeout);
-        };
-        
-        Utils.webSocket.onmessage = this.processRealtimeMessage;
     }
 
     subscribeToAdvice = adviceId => {
@@ -449,21 +459,24 @@ class AdviceDetailImpl extends React.Component {
     }
 
     processRealtimeMessage = msg => {
-        console.log(JSON.parse(msg.data));
-        const realtimeData = JSON.parse(msg.data);
-        const netAssetValue = _.get(realtimeData, 'output.summary.nav', 0);
-        const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
-        const dailyChange = _.get(realtimeData, 'output.summary.dailyChange');
-        
-        this.setState({
-            metrics: {
-                ...this.state.metrics,
-                dailyChange,
-                dailyChangePct,
-                netValue: netAssetValue
-            },
-            positions: _.get(realtimeData, 'output.detail.positions', [])
-        })
+        if (this.mounted) {
+            console.log(JSON.parse(msg.data));
+            const realtimeData = JSON.parse(msg.data);
+            const netAssetValue = _.get(realtimeData, 'output.summary.nav', 0);
+            const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
+            const dailyChange = _.get(realtimeData, 'output.summary.dailyChange');
+            this.setState({
+                metrics: {
+                    ...this.state.metrics,
+                    dailyChange,
+                    dailyChangePct,
+                    netValue: netAssetValue
+                },
+                positions: _.get(realtimeData, 'output.detail.positions', [])
+            })
+        } else {
+            this.unSubscribeToAdvice(this.props.match.params.id);
+        }
     }
 
     renderActionButtons = () => {
