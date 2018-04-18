@@ -18,6 +18,8 @@ const Option = AutoComplete.Option;
 const TabPane = Tabs.TabPane;
 
 class StockResearchImpl extends React.Component {
+    socketOpenConnectionTimeout = 1000;
+    numberOfTimeSocketConnectionCalled = 1;
     constructor(props) {
         super(props);
         this.state = {
@@ -246,16 +248,45 @@ class StockResearchImpl extends React.Component {
 
     setUpSocketConnection = () => {
         Utils.openSocketConnection();
+        Utils.webSocket.onopen = () => {
+            this.subscribeToStock('TCS');
+        };
+        Utils.webSocket.onerror = err => {
+            console.log('Error Occured', err);
+        };
+        Utils.webSocket.onclose = code => {
+            console.log('Connection Closed');
+            console.log('Code', code);
+            Utils.webSocket = undefined;
+            if (this.numberOfTimeSocketConnectionCalled < 5){
+              setTimeout(() => {
+                this.numberOfTimeSocketConnectionCalled++;
+                Utils.openSocketConnection();
+                console.log('Connection established again');
+              }, this.socketOpenConnectionTimeout);
+            }
+        };
         Utils.webSocket.onmessage = msg => {
-            const data = JSON.parse(msg.data);
-            this.setState({
-                latestDetail: {
-                    ...this.state.latestDetail,
-                    change: data.changePct,
-                    close: data.latestPrice
-                }
-            })
-            console.log(JSON.parse(msg.data));
+            console.log('Message Received');
+            // const data = JSON.parse(msg.data);
+            console.log(msg);
+        };
+    }
+
+    subscribeToStock = (ticker) => {
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'stock',
+            'ticker': ticker
+        };
+        console.log(msg);
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to ${ticker}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
         }
     }
 

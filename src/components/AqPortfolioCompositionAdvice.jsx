@@ -22,6 +22,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
         this.state = {
             advices: props.advices, // advices rendered here
             subscribedAdvices: props.subscribedAdvices, // subscribed advices that is shown in the subscribed
+            selectedDate: moment()
         }
         this.detailedColumns = [
             {
@@ -132,8 +133,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                             <Col span={5}>
                                 <DatePicker
                                     onChange={date => this.handleDateChange(date, advice)}
-                                    onOpenChange={this.datePickerOpened}
-                                    value={moment()}
+                                    value={this.state.selectedDate}
                                     format={dateFormat}
                                     disabledDate={(current) => this.props.disabledDate(current, advice)}
                                     allowClear={false}
@@ -180,14 +180,12 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
         e.stopPropagation();
     }
 
-    // improvement needed - this should be a common method
     handleDateChange = (date, advice) => {
         const adviceId = advice.id;
         const unmodifiedAdvices = [...this.state.advices];
         const advices = [...this.state.advices];
         let targetAdvice = advices.filter(item => item.key === advice.key)[0];
         let unModifiedTargetAdvice = unmodifiedAdvices.filter(item => item.key === advice.key)[0];
-        console.log('Target Advice', targetAdvice.composition);
         targetAdvice.date = date.format(dateFormat);
         const selectedDate = moment(date).format(dateFormat);
         const url = `${requestUrl}/advice/${adviceId}/portfolio?date=${selectedDate}`;
@@ -196,7 +194,8 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
             const portfolio = response.data.detail;
             targetAdvice.composition = this.processComposition(portfolio, advice.key, targetAdvice);
             this.setState({
-                advices
+                advices,
+                selectedDate: date
             });
         })
         .catch(error => {

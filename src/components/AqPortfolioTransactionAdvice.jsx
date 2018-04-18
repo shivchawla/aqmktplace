@@ -22,6 +22,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
         this.state = {
             advices: props.advices, // advices rendered here
             subscribedAdvices: props.subscribedAdvices, // subscribed advices that is shown in the subscribed
+            selectedDate: moment()
         }
         this.columns = [
             {
@@ -132,7 +133,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
                             <DatePicker
                                 onChange={date => this.handleDateChange(date, advice)}
                                 onOpenChange={this.datePickerOpened}
-                                value={moment()}
+                                value={this.state.selectedDate}
                                 format={dateFormat}
                                 disabledDate={(current) => this.props.disabledDate(current, advice)}
                                 allowClear={false}
@@ -195,7 +196,8 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
             const portfolio = response.data.detail;
             targetAdvice.composition = this.processComposition(portfolio, advice.key, targetAdvice);
             this.setState({
-                advices
+                advices,
+                selectedDate: date
             });
         })
         .catch(error => {
@@ -209,22 +211,25 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
     processComposition = (portfolio, key, advice) => {
         return portfolio.positions.map((item, index) => {
             const targetPosition = advice.composition.filter(advicePosition => advicePosition.symbol === item.security.ticker)[0];
-
-            return {
-                key: index,
-                adviceKey: key,
-                symbol: _.get(item, 'security.ticker', ''),
-                name: _.get(item, 'security.detail.Nse_Name', ''),
-                sector: _.get(item, 'security.detail.Sector', ''),
-                shares: targetPosition.modifiedShares,
-                modifiedShares: targetPosition.modifiedShares,
-                newShares: item.quantity || 0,
-                price: item.lastPrice || 0,
-                costBasic: 12,
-                unrealizedPL: 1231,
-                weight: '12%',
-                transactionalQuantity: item.quantity - targetPosition.modifiedShares
-            };
+            // console.log('Target Positiom', targetPosition);
+            if (targetPosition) {
+                return {
+                    key: index,
+                    adviceKey: key,
+                    symbol: _.get(item, 'security.ticker', ''),
+                    name: _.get(item, 'security.detail.Nse_Name', ''),
+                    sector: _.get(item, 'security.detail.Sector', ''),
+                    shares: targetPosition.modifiedShares,
+                    modifiedShares: targetPosition.modifiedShares,
+                    newShares: item.quantity || 0,
+                    price: item.lastPrice || 0,
+                    costBasic: 12,
+                    unrealizedPL: 1231,
+                    weight: '12%',
+                    transactionalQuantity: item.quantity - targetPosition.modifiedShares
+                };
+            }
+            
         });
     }
 

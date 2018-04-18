@@ -86,8 +86,8 @@ export class Utils{
 	}
 
 	static getSocketUrl(){
-		// return "wss://devaqdashapi.aimsquant.com";
-		return 'ws://localhost:1337';
+		return "wss://developapi.aimsquant.com";
+		// return 'ws://localhost:1337';
 	}
 
 	static getBaseUrl(){
