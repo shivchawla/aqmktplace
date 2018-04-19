@@ -273,7 +273,7 @@ class StockResearchImpl extends React.Component {
                 setTimeout(() => {
                     this.numberOfTimeSocketConnectionCalled++;
                     this.setUpSocketConnection();
-                }, this.numberOfTimeSocketConnectionCalled * this.socketOpenConnectionTimeout);
+                }, Math.min(this.numberOfTimeSocketConnectionCalled * this.socketOpenConnectionTimeout, 5000));
             } else {
                 return;
             }
