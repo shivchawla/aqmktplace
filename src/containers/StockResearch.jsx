@@ -3,9 +3,9 @@ import _ from 'lodash';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
-import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio} from 'antd';
+import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio, Modal, message} from 'antd';
 import {List} from 'immutable';
-import {AqLink, DashboardCard, AqPageHeader, WatchList} from '../components';
+import {AqLink, DashboardCard, AqPageHeader, WatchList, CreateWatchList} from '../components';
 import {pageTitleStyle, newLayoutStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
@@ -21,6 +21,7 @@ class StockResearchImpl extends React.Component {
     socketOpenConnectionTimeout = 1000;
     numberOfTimeSocketConnectionCalled = 1;
     mounted = false;
+    reconnecting = false;
     constructor(props) {
         super(props);
         this.state = {
@@ -48,6 +49,9 @@ class StockResearchImpl extends React.Component {
             rollingPerformance: {},
             selectedPerformanceScreen: 'YTD',
             show: false,
+            watchlists: [],
+            watchlistModalVisible: false,
+            createWatchlistSecurities: []
             // appInitialized: false
         }; 
     }
@@ -169,8 +173,9 @@ class StockResearchImpl extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            this.setUpSocketConnection();
+            // this.setUpSocketConnection();
             if (!this.props.openAsDialog) {
+                this.getWatchlists();
                 this.onSelect("TCS", true);
             } else {
                 this.onSelect(this.props.latestDetail.ticker, true);
@@ -255,25 +260,24 @@ class StockResearchImpl extends React.Component {
 
     setUpSocketConnection = () => {
         if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
+            console.log('Opening Socket connection');
             Utils.openSocketConnection();
         } else {
+            console.log('Will Subscribe Now');
             this.subscribeToStock(this.state.latestDetail.ticker);
+            this.state.watchlists.map(item => {
+                this.subscribeToWatchList(item.id);
+            });
         }
         Utils.webSocket.onopen = () => {
-            this.takeStockAction();
-        };
-        Utils.webSocket.onerror = err => {
-            console.log('Error Occured', err);
-            this.takeStockAction();
+            console.log('Connection Opened Will Subscribe Now');
+            this.takeAction();
         };
         Utils.webSocket.onclose = code => {
             console.log('Connection Closed');
             if (this.mounted) {
                 Utils.webSocket = undefined;
-                setTimeout(() => {
-                    this.numberOfTimeSocketConnectionCalled++;
-                    this.setUpSocketConnection();
-                }, this.numberOfTimeSocketConnectionCalled * this.socketOpenConnectionTimeout);
+                this.reconnect();
             } else {
                 return;
             }
@@ -281,20 +285,36 @@ class StockResearchImpl extends React.Component {
         Utils.webSocket.onmessage = this.processRealtimeMessage;
     }
 
-    takeStockAction = () => {
+    reconnect = () => {
+        console.log('Reconnecting');
+        this.numberOfTimeSocketConnectionCalled++;
+        const count = this.numberOfTimeSocketConnectionCalled;
+        console.log(this.numberOfTimeSocketConnectionCalled);
+        setTimeout(() => {
+            this.setUpSocketConnection();
+        }, Math.min(1000 * count * 2, 8000));
+    }
+
+    takeAction = () => {
         if (this.mounted) {
             this.subscribeToStock(this.state.latestDetail.ticker);
+            this.state.watchlists.map(item => {
+                this.subscribeToWatchList(item.id);
+            });
         } else {
             this.unSubscribeToStock(this.state.latestDetail.ticker);
+            this.state.watchlists.map(item => {
+                this.unsubscribeToWatchlist(item.id);
+            });
         }
     }
 
     processRealtimeMessage = msg => {
-        console.log('Message Received', msg);
         if (this.mounted) {
             const realtimeResponse = JSON.parse(msg.data);
-            console.log(realtimeResponse);
+            // console.log(realtimeResponse);
             if (realtimeResponse.type === 'stock' && realtimeResponse.ticker === this.state.latestDetail.ticker) {
+                console.log(realtimeResponse);
                 this.setState({
                     latestDetail: {
                         ...this.state.latestDetail,
@@ -302,6 +322,10 @@ class StockResearchImpl extends React.Component {
                         change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
                     }
                 });
+            } else {
+                const watchlists = [...this.state.watchlists];
+                const targetWatchlist = watchlists.filter(item => item.id === realtimeResponse.watchlistId)[0];
+                const ticker = realtimeResponse.output.ticker;
             }
         } else {
             this.unSubscribeToStock(this.state.latestDetail.ticker);
@@ -340,6 +364,155 @@ class StockResearchImpl extends React.Component {
             Utils.webSocket = undefined;
             this.setUpSocketConnection();
         }
+    }
+
+    subscribeToWatchList = watchListId => {
+        console.log('Subscription Started to Watchlist');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'watchlist',
+            'watchlistId': watchListId
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to watchlist ${watchListId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } 
+    }
+
+    unsubscribeToWatchlist = watchListId => {
+        console.log('Un Subscription Started');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'watchlist',
+            'watchlistId': watchListId
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Un Subscribed to watchlist ${watchListId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    toggleWatchListModal = () => {
+        this.setState({watchlistModalVisible: !this.state.watchlistModalVisible});
+    }
+
+    getWatchlists = () => {
+        const url = `${requestUrl}/watchlist`;
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        .then(response => {
+            const watchlists = this.processWatchlistData(response.data);
+            this.setState({watchlists});
+        })
+        .catch(error => {
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        });
+    }
+
+    getWatchlist = id => {
+        const url = `${requestUrl}/watchlist/${id}`;
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        .then(response => {
+            // const watchlists = this.processWatchlistData(response.data);
+            // this.setState({watchlists});
+            console.log(response.data);
+            const watchlists = [...this.state.watchlists];
+            const targetWatchlist = watchlists.filter(item => item.id === id)[0];
+            targetWatchlist.positions = response.data.securities.map(item => {
+                return {
+                    name: item.ticker,
+                    change: 0,
+                    price: 100
+                }
+            });
+            this.setState({watchlists}, () => {
+                // this.subscribeToWatchList(id)
+            });
+        })
+        .catch(error => {
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        })
+    }
+
+    processWatchlistData = watchlistResponse => {
+        return watchlistResponse.map(item => {
+            return {
+                name: item.name,
+                positions: item.securities.map(item => {
+                    return {
+                        name: item.ticker,
+                        change: 0,
+                        price: 100
+                    }
+                }),
+                id: item._id
+            };
+        });
+    }
+
+    renderCreateWatchListModal = () => {
+        return (
+            <CreateWatchList 
+                    visible={this.state.watchlistModalVisible} 
+                    toggleModal={this.toggleWatchListModal} 
+                    getWatchlists={this.getWatchlists}
+            />
+        );
+    }
+
+    deleteWatchlist = id => {
+        const url = `${requestUrl}/watchlist/${id}`;
+        axios({
+            url,
+            headers: Utils.getAuthTokenHeader(),
+            method: 'DELETE'
+        })
+        .then(response => {
+            console.log(response.data);
+            message.success('Watchlist successfully deleted');
+            this.getWatchlists();
+        })
+        .catch(error => {
+            console.log(error);
+            message.error('Error occured while deleting watchlist. Please try again')
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        })
+    }
+
+    renderWatchlistTabs = () => {
+        const watchlists = this.state.watchlists;
+        return watchlists.map((item, index) => {
+            // {name: 'TCS', y: 145, change: 1.5, hideCheckbox: true},
+            const tickers = item.positions.map(item => {return {name: item.name, y: item.price, change:item.change, hideCheckbox: true}});
+            return (
+                <TabPane key={index} tab={item.name}>
+                    <Col span={24}>
+                        <Button type="primary" onClick={() => this.deleteWatchlist(item.id)}>Delete Watchlist</Button>
+                    </Col>
+                    <Col span={24}>
+                        <WatchList 
+                                tickers={tickers} 
+                                id={item.id} 
+                                name={item.name} 
+                                getWatchlist={this.getWatchlist}
+                                subscribeToWatchList={this.subscribeToWatchList}
+                        />
+                    </Col>
+                </TabPane>
+            );
+        })
     }
 
     renderPageContent = () => {
@@ -445,8 +618,11 @@ class StockResearchImpl extends React.Component {
                         </DashboardCard>
                     </Row>
                 </Col>
-                <Col span={5} offset={1}>
-                    <WatchList />
+                <Col span={6}>
+                    <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button>
+                    <Tabs defaultActiveKey="0">
+                        {this.renderWatchlistTabs()}
+                    </Tabs>
                 </Col>
             </React.Fragment>
         );
@@ -455,6 +631,7 @@ class StockResearchImpl extends React.Component {
     render() {
         return (
             <React.Fragment>
+                {this.renderCreateWatchListModal()}
                 <Loading
                     show={this.state.show}
                     color={loadingColor}

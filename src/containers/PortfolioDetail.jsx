@@ -340,33 +340,31 @@ class PortfolioDetailImpl extends React.Component {
         }
 
         Utils.webSocket.onopen = () => {
-            // subscribed to advice
-            this.subscribeToPortfolio(this.props.match.params.id);
+            this.takePortfolioAction();
         };
         
-        Utils.webSocket.onerror = error => {
-            console.log('Error Occured', error);
-            if (this.mounted) {
-                this.subscribeToPortfolio(this.props.match.params.id);
-            } else {
-                this.unSubscribeToPortfolio(this.props.match.params.id);
-            }
-        };
-
         Utils.webSocket.onclose = () => {
             console.log('Connection Closed');
             if (this.mounted) {
                 Utils.webSocket = undefined;
+                this.numberOfTimeSocketConnectionCalled++;
                 setTimeout(() => {
-                    this.numberOfTimeSocketConnectionCalled++;
                     this.setUpSocketConnection();
-                }, this.numberOfTimeSocketConnectionCalled * this.socketOpenConnectionTimeout);
+                }, Math.min(2 * this.numberOfTimeSocketConnectionCalled * 1000, 5000));
             } else {
                 return;
             }
         };
         
         Utils.webSocket.onmessage = this.processRealtimeMessage;
+    }
+
+    takePortfolioAction = () => {
+        if (this.mounted) {
+            this.subscribeToPortfolio(this.props.match.params.id);
+        } else {
+            this.unSubscribeToPortfolio(this.props.match.params.id);
+        }
     }
 
     subscribeToPortfolio = portfolioId => {
