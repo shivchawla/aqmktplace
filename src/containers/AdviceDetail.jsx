@@ -389,6 +389,8 @@ class AdviceDetailImpl extends React.Component {
         if (this.mounted) {
             if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
                 Utils.openSocketConnection();
+            } else {
+                this.subscribeToAdvice(this.props.match.params.id);
             }
     
             Utils.webSocket.onopen = () => {
@@ -423,7 +425,6 @@ class AdviceDetailImpl extends React.Component {
     }
 
     subscribeToAdvice = adviceId => {
-        console.log('Subscription');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -432,7 +433,7 @@ class AdviceDetailImpl extends React.Component {
             'detail': true
         };
         if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to ${adviceId}`);
+            console.log(`Subscribed to Advice ${adviceId}`);
             Utils.webSocket.send(JSON.stringify(msg));
         } else {
             Utils.webSocket = undefined;
@@ -462,18 +463,20 @@ class AdviceDetailImpl extends React.Component {
         if (this.mounted) {
             console.log(JSON.parse(msg.data));
             const realtimeData = JSON.parse(msg.data);
-            const netAssetValue = _.get(realtimeData, 'output.summary.nav', 0);
-            const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
-            const dailyChange = _.get(realtimeData, 'output.summary.dailyChange');
-            this.setState({
-                metrics: {
-                    ...this.state.metrics,
-                    dailyChange,
-                    dailyChangePct,
-                    netValue: netAssetValue
-                },
-                positions: _.get(realtimeData, 'output.detail.positions', [])
-            })
+            if (realtimeData.type === 'portfolio') {
+                const netAssetValue = _.get(realtimeData, 'output.summary.nav', 0);
+                const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
+                const dailyChange = _.get(realtimeData, 'output.summary.dailyChange');
+                this.setState({
+                    metrics: {
+                        ...this.state.metrics,
+                        dailyChange,
+                        dailyChangePct,
+                        netValue: netAssetValue
+                    },
+                    positions: _.get(realtimeData, 'output.detail.positions', [])
+                });
+            }
         } else {
             this.unSubscribeToAdvice(this.props.match.params.id);
         }

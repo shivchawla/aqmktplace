@@ -335,6 +335,8 @@ class PortfolioDetailImpl extends React.Component {
     setUpSocketConnection = () => {
         if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
             Utils.openSocketConnection();
+        } else {
+            this.subscribeToPortfolio(this.props.match.params.id);
         }
 
         Utils.webSocket.onopen = () => {
@@ -358,7 +360,7 @@ class PortfolioDetailImpl extends React.Component {
                 setTimeout(() => {
                     this.numberOfTimeSocketConnectionCalled++;
                     this.setUpSocketConnection();
-                }, this.socketOpenConnectionTimeout);
+                }, this.numberOfTimeSocketConnectionCalled * this.socketOpenConnectionTimeout);
             } else {
                 return;
             }
@@ -368,7 +370,6 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     subscribeToPortfolio = portfolioId => {
-        console.log('Subscription');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -376,9 +377,9 @@ class PortfolioDetailImpl extends React.Component {
             'portfolioId': portfolioId,
             'detail': true
         };
-        console.log('Message', msg);
+        // console.log('Message', msg);
         if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to ${portfolioId}`);
+            console.log(`Subscribed to Portfolio ${portfolioId}`);
             Utils.webSocket.send(JSON.stringify(msg));
         } else {
             Utils.webSocket = undefined;
@@ -395,7 +396,7 @@ class PortfolioDetailImpl extends React.Component {
             'portfolioId': portfolioId,
             // 'detail': true
         };
-        console.log('Message', msg);
+        // console.log('Message', msg);
         if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
             console.log(`UnSubscribed to ${portfolioId}`);
             Utils.webSocket.send(JSON.stringify(msg));
@@ -408,21 +409,24 @@ class PortfolioDetailImpl extends React.Component {
     processRealtimeMessage = msg => {
         if (this.mounted) {
             const realtimeData = JSON.parse(msg.data);
-            const subPositions = _.get(realtimeData, 'output.detail.subPositions', []);
-            const positions = _.get(realtimeData, 'output.detail.positions', []);
-            const netValue = _.get(realtimeData, 'output.summary.nav', 0);
-            const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
-            const dailyChange = _.get(realtimeData, 'output.summary.dailyChange', 0);
-            const metrics = _.uniqBy([
-                {value: dailyChange, label: dailyChangeLabel, fixed: 2, color:true, direction:true},
-                {value: dailyChangePct, label: dailyChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
-                {value: netValue, label: netValueLabel, isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2},
-                ...this.state.portfolioMetrics
-            ], 'label');
-            this.setState({
-                portfolioMetrics: metrics,
-                stockPositions: positions
-            });
+            console.log('Message Received', realtimeData);
+            if (realtimeData.type === 'portfolio') {
+                const subPositions = _.get(realtimeData, 'output.detail.subPositions', []);
+                const positions = _.get(realtimeData, 'output.detail.positions', []);
+                const netValue = _.get(realtimeData, 'output.summary.nav', 0);
+                const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
+                const dailyChange = _.get(realtimeData, 'output.summary.dailyChange', 0);
+                const metrics = _.uniqBy([
+                    {value: dailyChange, label: dailyChangeLabel, fixed: 2, color:true, direction:true},
+                    {value: dailyChangePct, label: dailyChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
+                    {value: netValue, label: netValueLabel, isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2},
+                    ...this.state.portfolioMetrics
+                ], 'label');
+                this.setState({
+                    portfolioMetrics: metrics,
+                    stockPositions: positions
+                });
+            }
         } else {
             this.unSubscribeToPortfolio(this.props.match.params.id);
         }

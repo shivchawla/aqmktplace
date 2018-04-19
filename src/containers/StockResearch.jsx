@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio} from 'antd';
 import {List} from 'immutable';
-import {AqLink, DashboardCard, AqPageHeader} from '../components';
+import {AqLink, DashboardCard, AqPageHeader, WatchList} from '../components';
 import {pageTitleStyle, newLayoutStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
@@ -20,6 +20,7 @@ const TabPane = Tabs.TabPane;
 class StockResearchImpl extends React.Component {
     socketOpenConnectionTimeout = 1000;
     numberOfTimeSocketConnectionCalled = 1;
+    mounted = false;
     constructor(props) {
         super(props);
         this.state = {
@@ -45,7 +46,7 @@ class StockResearchImpl extends React.Component {
                 name: ''
             },
             rollingPerformance: {},
-            selectedPerformanceScreen: '10y',
+            selectedPerformanceScreen: 'YTD',
             show: false,
             // appInitialized: false
         }; 
@@ -57,14 +58,14 @@ class StockResearchImpl extends React.Component {
         this.setState({tickers});
     }
 
-    deleteItem = (name) => {
+    deleteItem = name => {
         const tickers = [...this.state.tickers];
         const index = _.findIndex(tickers, item => item.name === name);
         tickers.splice(index, 1);
         this.setState({tickers});
     }
 
-    handleSearch = (query) => {
+    handleSearch = query => {
         this.setState({spinning: true});
         const url = `${requestUrl}/stock?search=${query}`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
@@ -89,11 +90,15 @@ class StockResearchImpl extends React.Component {
         })
     }
 
-    onSelect = (value) => {
+    onSelect = (value, initialCall = false) => {
         const {latestDetail} = this.state;
         let tickers = [];
         tickers.push({name: value, destroy: true});
         this.setState({tickers, show: true});
+        console.log('Initial Call' , initialCall);
+        if (initialCall === false) {
+            this.unSubscribeToStock(this.state.latestDetail.ticker);
+        }
         getStockData(value, 'latestDetail')
         .then(response => {
             const {data} = response;
@@ -109,7 +114,8 @@ class StockResearchImpl extends React.Component {
             latestDetail.change = data.latestDetail.values.Change;
             latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
             this.setState({latestDetail}, () => {
-                this.subscribeToStock(value);
+                // Subscribing to real-time data
+                this.setUpSocketConnection();
             });
             return getStockData(value, 'rollingPerformance');
         })
@@ -127,7 +133,7 @@ class StockResearchImpl extends React.Component {
 
     renderRollingPerformanceData = key => {
         const {rollingPerformance} = this.state;
-        console.log(rollingPerformance);
+        // console.log(rollingPerformance);
         if(rollingPerformance[key]) {
             const ratios = rollingPerformance[key].ratios;
             const returns = rollingPerformance[key].returns;
@@ -159,20 +165,22 @@ class StockResearchImpl extends React.Component {
     }
 
     componentWillMount() {
+        this.mounted = true;
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
+            this.setUpSocketConnection();
             if (!this.props.openAsDialog) {
-                this.onSelect("TCS");
+                this.onSelect("TCS", true);
             } else {
-                this.onSelect(this.props.ticker);
+                this.onSelect(this.props.latestDetail.ticker, true);
             }
         }
-        this.setUpSocketConnection();
     }
 
     componentWillUnmount() {
-        Utils.closeWebSocket();
+        this.mounted = false;
+        this.unSubscribeToStock(this.state.latestDetail.ticker);
     }
 
     formatPriceMetrics = value => {
@@ -248,44 +256,66 @@ class StockResearchImpl extends React.Component {
     setUpSocketConnection = () => {
         if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
             Utils.openSocketConnection();
+        } else {
+            this.subscribeToStock(this.state.latestDetail.ticker);
         }
         Utils.webSocket.onopen = () => {
-            this.subscribeToStock(this.state.latestDetail.ticker);
+            this.takeStockAction();
         };
         Utils.webSocket.onerror = err => {
             console.log('Error Occured', err);
+            this.takeStockAction();
         };
         Utils.webSocket.onclose = code => {
             console.log('Connection Closed');
-            Utils.webSocket = undefined;
-            setTimeout(() => {
-                this.numberOfTimeSocketConnectionCalled++;
-                this.setUpSocketConnection(this.state.latestDetail.ticker);
-            }, this.socketOpenConnectionTimeout);
+            if (this.mounted) {
+                Utils.webSocket = undefined;
+                setTimeout(() => {
+                    this.numberOfTimeSocketConnectionCalled++;
+                    this.setUpSocketConnection();
+                }, this.numberOfTimeSocketConnectionCalled * this.socketOpenConnectionTimeout);
+            } else {
+                return;
+            }
         };
         Utils.webSocket.onmessage = this.processRealtimeMessage;
     }
 
-    processRealtimeMessage = msg => {
-        const realtimeResponse = JSON.parse(msg.data);
-        console.log(realtimeResponse);
-        this.setState({
-            latestDetail: {
-                ...this.state.latestDetail,
-                latestPrice: _.get(realtimeResponse, 'output.price', 0),
-                change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
-            }
-        });
+    takeStockAction = () => {
+        if (this.mounted) {
+            this.subscribeToStock(this.state.latestDetail.ticker);
+        } else {
+            this.unSubscribeToStock(this.state.latestDetail.ticker);
+        }
     }
 
-    subscribeToStock = (ticker) => {
+    processRealtimeMessage = msg => {
+        console.log('Message Received', msg);
+        if (this.mounted) {
+            const realtimeResponse = JSON.parse(msg.data);
+            console.log(realtimeResponse);
+            if (realtimeResponse.type === 'stock' && realtimeResponse.ticker === this.state.latestDetail.ticker) {
+                this.setState({
+                    latestDetail: {
+                        ...this.state.latestDetail,
+                        latestPrice: _.get(realtimeResponse, 'output.current', 0),
+                        change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
+                    }
+                });
+            }
+        } else {
+            this.unSubscribeToStock(this.state.latestDetail.ticker);
+        }
+    }
+
+    subscribeToStock = ticker => {
+        console.log('Subscription Started');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
             'type': 'stock',
             'ticker': ticker
         };
-        console.log(msg);
         if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
             console.log(`Subscribed to ${ticker}`);
             Utils.webSocket.send(JSON.stringify(msg));
@@ -296,13 +326,13 @@ class StockResearchImpl extends React.Component {
     }
 
     unSubscribeToStock = ticker => {
+        console.log('Unsubscription Started');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
             'type': 'stock',
             'ticker': ticker
         };
-        console.log(msg);
         if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
             console.log(`UnSubscribed to ${ticker}`);
             Utils.webSocket.send(JSON.stringify(msg));
@@ -324,7 +354,7 @@ class StockResearchImpl extends React.Component {
             {label: '52W High', value: latestDetail.high_52w},
             {label: '52W Low', value: latestDetail.low_52w},
         ];
-        const performanceMetricsTimeline = ['MTD', 'YTD', '1Y', '2Y', '5Y', '10Y'];
+        const performanceMetricsTimeline = ['YTD', '1Y', '2Y', '5Y', '10Y'];
         const percentageColor = latestDetail.change < 0 ? '#FA4747' : '#3EBB72';
         const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
         // chartId is required so that we have the option to have multiple HighStock component in the same page with different Id
@@ -347,7 +377,7 @@ class StockResearchImpl extends React.Component {
                                     size="large"
                                     style={{ width: '100%' }}
                                     dataSource={dataSource.map(this.renderOption)}
-                                    onSelect={this.onSelect}
+                                    onSelect={value => this.onSelect(value)}
                                     onSearch={this.handleSearch}
                                     placeholder="Search stocks"
                                     optionLabelProp="value"
@@ -414,6 +444,9 @@ class StockResearchImpl extends React.Component {
                             /> 
                         </DashboardCard>
                     </Row>
+                </Col>
+                <Col span={5} offset={1}>
+                    <WatchList />
                 </Col>
             </React.Fragment>
         );

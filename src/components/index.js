@@ -36,3 +36,4 @@ export * from './BreadCrumb';
 export * from './SubscribedAdvices';
 export * from './AqPageHeader';
 export * from './StatusBar';
+export * from './WatchList';
