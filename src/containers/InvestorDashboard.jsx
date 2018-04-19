@@ -649,7 +649,7 @@ export class InvestorDashboard extends React.Component {
         let nStocks = 0, nSectors = 0, nIndustries = 0, maxPosSize = {y: 0}, minPosSize = {y: 0};
         try {
             if (defaultComposition.length){
-                nStocks = defaultComposition[0].data.length;
+                nStocks = defaultComposition[0].data.filter(item => {return item.ticker !="CASH_INR"}).length;
                 nSectors = this.processSectorsForChart(positions, defaultComposition[0].data)[0].data.length;
                 nIndustries = this.processIndustriesForChart(positions, defaultComposition[0].data)[0].data.length;
                 maxPosSize = _.maxBy(defaultComposition[0].data, item => item.y);

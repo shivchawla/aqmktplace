@@ -24,7 +24,9 @@ export class StockResearchModal extends React.Component {
                     footer={null}
             >
                 <StockResearch
-                        //style={{marginTop: '-80px'}} 
+                        style={{marginTop: '-50px',
+                        boxShadow: 'none',
+                        border: 'none'}} 
                         xl={24} 
                         openAsDialog={true} 
                         ticker={this.props.ticker.symbol}
