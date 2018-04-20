@@ -18,6 +18,9 @@ const ReactHighcharts = require('react-highcharts');
 const {requestUrl, aimsquantToken} = require('../localConfig');
 
 export class AdvisorDashboard extends React.Component {
+    numberOfTimeSocketConnectionCalled = 1;
+    mounted = false;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -211,6 +214,8 @@ export class AdvisorDashboard extends React.Component {
                 },
                 advisorRatingStat,
                 totalSubscribers: advisorSubscribers
+            }, () => {
+                this.setUpSocketConnection();
             });
         })
         .catch(error => {
@@ -486,7 +491,7 @@ export class AdvisorDashboard extends React.Component {
 
     handleSortingMenuChange = (value) => {
         this.setState({sortBy: value}, () => {
-            const url = `${this.state.adviceUrl}&orderParam=${this.state.sortBy}`;
+            const url = `${this.state.adviceUrl}&orderParam=${this.state.sortBy}&personal=1`;
             this.getAdvices(url);
         });
     }
@@ -529,10 +534,120 @@ export class AdvisorDashboard extends React.Component {
     }
 
     componentWillMount() {
+        this.mounted = true;
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
             this.getUserDashboardData();
+        }
+    }
+
+    componentWillUnmount() {
+        this.mounted = false;
+        this.unSubscribeToAllAdvices(this.state.advices);
+    }
+
+    setUpSocketConnection = () => {
+        console.log('Setting Up connection');
+        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
+            console.log('Opening Connection');
+            Utils.openSocketConnection();
+        } else {
+            // Subscribe to all advices
+            this.subscribeToAllAdvices(this.state.advices);
+        }
+
+        Utils.webSocket.onopen = () => {
+            console.log('Connection Openend');
+            this.takeAction();
+        }
+
+        Utils.webSocket.onclose = () => {
+            console.log('Connection Closed');
+            if (this.mounted) {
+                Utils.webSocket = undefined;
+                this.numberOfTimeSocketConnectionCalled++;
+                setTimeout(() => {
+                    this.setUpSocketConnection();
+                }, Math.min(2 * this.numberOfTimeSocketConnectionCalled * 1000, 5000));
+            } else {
+                return;
+            }
+        }
+
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
+    }
+
+    takeAction = () => {
+        if (this.mounted) {
+            this.subscribeToAllAdvices(this.state.advices);
+        } else {
+            this.unSubscribeToAllAdvices(this.state.advices);
+        }
+    }
+
+    subscribeToAllAdvices = (advices = []) => {
+        advices.map(advice => {
+            this.subscribeToAdvice(advice.id);
+        });
+    }
+
+    unSubscribeToAllAdvices = (advices = []) => {
+        console.log('Un Subscribing to all advices');
+        advices.map(advice => {
+            this.unSubscribeToAdvice(advice.id);
+        });
+    }
+
+    subscribeToAdvice = adviceId => {
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'advice',
+            'adviceId': adviceId,
+            'detail': true
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to Advice ${adviceId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    unSubscribeToAdvice = adviceId => {
+        console.log('UnSubscription to advice ' + adviceId);
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'advice',
+            'adviceId': adviceId,
+            // 'detail': true
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`UnSubscribed to ${adviceId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    processRealtimeMessage = msg => {
+        if (this.mounted) {
+            const realtimeData = JSON.parse(msg.data);
+            console.log(realtimeData);
+            if (realtimeData.type === 'advice') {
+                const rawAdvices = [...this.state.rawAdvices];
+                const targetAdvice = rawAdvices.filter(advice => advice._id === realtimeData.adviceId)[0];
+                if (targetAdvice) {
+                    targetAdvice.performanceSummary.current.netValue = _.get(realtimeData, 'output.summary.nav', 0);
+                    targetAdvice.performanceSummary.current.totalReturn = _.get(realtimeData, 'output.summary.dailyPnlChangePct', 0);
+                    console.log(targetAdvice);
+                    this.setState({rawAdvices});
+                }
+            }
         }
     }
 

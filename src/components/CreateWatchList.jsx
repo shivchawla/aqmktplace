@@ -11,6 +11,7 @@ const Option = AutoComplete.Option;
 const {requestUrl} = require('../localConfig');
 
 class CreateWatchListImpl extends React.Component {
+    mounted = false;
     constructor(props) {
         super(props);
         this.state = {
@@ -63,25 +64,23 @@ class CreateWatchListImpl extends React.Component {
         this.setState({watchlists});
     }
 
-    handleSearch = query => {
-        const url = `${requestUrl}/stock?search=${query}`;
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
-        .then(response => {
-            try {
+    handleNewSearch = query => {
+        console.log('Query', query);
+        if (this.mounted) {
+            const url = `${requestUrl}/stock?search=${query}`;
+            axios.get(url, {headers: Utils.getAuthTokenHeader()})
+            .then(response => {
                 this.setState({dataSource: this.processSearchResponseData(response.data)})
-            } catch(error) {
-                console.log(error);
-            }
-            
-        })
-        .catch(error => {
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-        })
-        .finally(() => {
-            // this.setState({spinning: false});
-        });
+            })
+            .catch(error => {
+                if (error.response) {
+                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                }
+            })
+            .finally(() => {
+                // this.setState({spinning: false});
+            });
+        }
     }
 
     processSearchResponseData = data => {
@@ -153,6 +152,14 @@ class CreateWatchListImpl extends React.Component {
         })
     }
 
+    componentWillMount() {
+        this.mounted = true;
+    }
+
+    componentWillUnmount() {
+        this.mounted = false;
+    }
+
     handleInputChange = e => {
         try {
             this.setState({name: e.target.value});
@@ -175,14 +182,12 @@ class CreateWatchListImpl extends React.Component {
                 </Col>
                 <Col span={24} style={{backgroundColor: '#fff', padding: '10px'}}>
                     <AutoComplete
-                        // disabled={!this.state.tickers.length}
-                        className="global-search"
-                        dataSource={dataSource.map(this.renderOption)}
-                        onSelect={this.onSelect}
-                        onSearch={this.handleSearch}
-                        placeholder="Search Stocks"
-                        style={{width: '100%'}}
-                        optionLabelProp="value"
+                            dataSource={dataSource.map(this.renderOption)}
+                            onSelect={value => this.onSelect(value)}
+                            onSearch={this.handleNewSearch}
+                            placeholder="Search Stocks"
+                            style={{width: '100%'}}
+                            optionLabelProp="valuess"
                     >
                         <Input suffix={<Icon style={searchIconStyle} type="search" />} />
                     </AutoComplete>

@@ -761,6 +761,8 @@ export class InvestorDashboard extends React.Component {
 
     componentWillUnmount() {
         this.mounted = false;
+        this.unSubscribeToAllPortfolios();
+        this.unSubscribeToAllAdvices();
         // Utils.closeWebSocket();
     }
 
@@ -796,27 +798,28 @@ export class InvestorDashboard extends React.Component {
         Utils.webSocket.onmessage = this.processRealtimeMessage;
     }
 
-    subscribeToAllPortfolios = portfolios => {
+    subscribeToAllPortfolios = (portfolios = []) => {
         console.log('Subscribing to all Portfolios');
         portfolios.map(portfolio => {
             this.subscribeToPortfolio(portfolio.id);
         });
     }
 
-    unSubscribeToAllPortfolios = portfolios => {
-        console.log('Subscribing to all advices');
+    unSubscribeToAllPortfolios = (portfolios = []) => {
+        console.log('Un Subscribing to all portfolios');
         portfolios.map(portfolio => {
             this.unSubscribeToPortfolio(portfolio.id);
         });
     }
 
-    subscribeToAllAdvices = advices => {
+    subscribeToAllAdvices = (advices = []) => {
         advices.map(advice => {
             this.subscribeToAdvice(advice.id);
         });
     }
 
-    unSubscribeToAllAdvices = advices => {
+    unSubscribeToAllAdvices = (advices = []) => {
+        console.log('Un Subscribing to all Advices');
         advices.map(advice => {
             this.unSubscribeToAdvice(advice.id);
         });
@@ -836,9 +839,6 @@ export class InvestorDashboard extends React.Component {
         if (this.mounted) {
             const realtimeData = JSON.parse(msg.data);
             console.log(realtimeData);
-            // dailyreturn: -1,
-            //         totalreturn: -1,
-            //         netValue: -1,
             if (realtimeData.type === 'portfolio') {
                 const investorPortfolios = [...this.state.investorPortfolios];
                 const targetPortfolio = investorPortfolios.filter(portfolio => portfolio.id === realtimeData.portfolioId)[0];
@@ -939,7 +939,6 @@ export class InvestorDashboard extends React.Component {
             this.setUpSocketConnection();
         }
     }
-
 
     renderPageContent = () => {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);

@@ -511,10 +511,10 @@ class AdviceDetailImpl extends React.Component {
         if (this.mounted) {
             console.log(JSON.parse(msg.data));
             const realtimeData = JSON.parse(msg.data);
-            if (realtimeData.type === 'portfolio') {
+            if (realtimeData.type === 'advice') {
                 const netAssetValue = _.get(realtimeData, 'output.summary.nav', 0);
-                const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
-                const dailyChange = _.get(realtimeData, 'output.summary.dailyChange');
+                const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyPnlChangePct', 0) * 100).toFixed(2);
+                const dailyChange = _.get(realtimeData, 'output.summary.dailyPnlChange');
                 this.setState({
                     metrics: {
                         ...this.state.metrics,

@@ -120,7 +120,9 @@ class StockResearchImpl extends React.Component {
             latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
             this.setState({latestDetail}, () => {
                 // Subscribing to real-time data
-                this.setUpSocketConnection();
+                if (!this.props.openAsDialog) {
+                    this.setUpSocketConnection();
+                }
             });
             return getStockData(value, 'rollingPerformance');
         })
@@ -179,7 +181,7 @@ class StockResearchImpl extends React.Component {
                 this.getWatchlists();
                 this.onSelect("TCS", true);
             } else {
-                this.onSelect(this.props.latestDetail.ticker, true);
+                this.onSelect(this.props.ticker, true);
             }
         }
     }
@@ -308,31 +310,35 @@ class StockResearchImpl extends React.Component {
     }
 
     processRealtimeMessage = msg => {
-        const realtimeResponse = JSON.parse(msg.data);
         if (this.mounted) {
-            if (realtimeResponse.type === 'stock' && realtimeResponse.ticker === this.state.latestDetail.ticker) {
-                console.log(realtimeResponse);
-                this.setState({
-                    latestDetail: {
-                        ...this.state.latestDetail,
-                        latestPrice: _.get(realtimeResponse, 'output.current', 0),
-                        change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
-                    }
-                });
-            } else {
-                console.log(realtimeResponse);
-                const watchlists = [...this.state.watchlists];
-                // Getting the required wathclist
-                const targetWatchlist = watchlists.filter(item => item.id === realtimeResponse.watchlistId)[0];
-                if (targetWatchlist) {
-                    // Getiing the required security to update
-                    const targetSecurity = targetWatchlist.positions.filter(item => item.name === realtimeResponse.ticker)[0];
-                    if (targetSecurity) {
-                        targetSecurity.change = realtimeResponse.output.change;
-                        targetSecurity.price = realtimeResponse.output.current;
-                        this.setState({watchlists});
+            try {
+                const realtimeResponse = JSON.parse(msg.data);
+                if (realtimeResponse.type === 'stock' && realtimeResponse.ticker === this.state.latestDetail.ticker) {
+                    console.log(realtimeResponse);
+                    this.setState({
+                        latestDetail: {
+                            ...this.state.latestDetail,
+                            latestPrice: _.get(realtimeResponse, 'output.current', 0),
+                            change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
+                        }
+                    });
+                } else {
+                    console.log(realtimeResponse);
+                    const watchlists = [...this.state.watchlists];
+                    // Getting the required wathclist
+                    const targetWatchlist = watchlists.filter(item => item.id === realtimeResponse.watchlistId)[0];
+                    if (targetWatchlist) {
+                        // Getiing the required security to update
+                        const targetSecurity = targetWatchlist.positions.filter(item => item.name === realtimeResponse.ticker)[0];
+                        if (targetSecurity) {
+                            targetSecurity.change = realtimeResponse.output.change;
+                            targetSecurity.price = realtimeResponse.output.current;
+                            this.setState({watchlists});
+                        }
                     }
                 }
+            } catch(error) {
+
             }
         } else {
             this.unSubscribeToStock(this.state.latestDetail.ticker);
@@ -635,12 +641,15 @@ class StockResearchImpl extends React.Component {
                         </DashboardCard>
                     </Row>
                 </Col>
-                <Col span={6}>
-                    <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button>
-                    <Tabs onChange={this.handleWatchlistTabChange} tabBarExtraContent={deleteIcon}>
-                        {this.renderWatchlistTabs()}
-                    </Tabs>
-                </Col>
+                {
+                    !this.props.openAsDialog &&
+                    <Col span={6}>
+                        <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button>
+                        <Tabs onChange={this.handleWatchlistTabChange} tabBarExtraContent={deleteIcon}>
+                            {this.renderWatchlistTabs()}
+                        </Tabs>
+                    </Col>
+                }
             </React.Fragment>
         );
     }
