@@ -10,7 +10,7 @@ const MetricItemImpl = (props) => {
     const border = props.bordered ? '1px solid #eaeaea' : 'none';
     const padding = props.bordered ? '10px' : 0;
     const change = props.dailyChange, changePct = props.dailyChangePct;
-    const changeColor = changePct < 0 ? metricColor.positive : metricColor.negative;
+    const changeColor = changePct >= 0 ? metricColor.positive : metricColor.negative;
     // const fontSize = props.isNetValue ? {fontSize: '30px' } : {};
 
     return (
@@ -18,8 +18,8 @@ const MetricItemImpl = (props) => {
             <Col span={24}>
                 <h5 style={{...valueStyle, ...props.valueStyle}}>
                     {props.value}
-                    {props.isNetValue && change !== null && <span style={{fontSize: '14px', marginLeft: '4px', color: changeColor}}>{change}</span>}
-                    {props.isNetValue && changePct !== null &&<span style={{fontSize: '14px', marginLeft: '4px', color: changeColor}}>({changePct}) %</span>}
+                    {props.isNetValue && change !== null && <span style={{fontSize: '14px', marginLeft: '2px', color: changeColor}}>{change}</span>}
+                    {props.isNetValue && changePct !== null &&<span style={{fontSize: '14px', marginLeft: '2px', color: changeColor}}>({changePct}%)</span>}
                 </h5>
             </Col>
             <Col><h5 style={{...labelStyle, ...props.labelStyle}} value={labelStyle}>{props.label}</h5></Col>

@@ -668,7 +668,7 @@ export const StockResearch = withRouter(StockResearchImpl);
 
 const metricStyle = {
     // marginTop: '20px',
-    padding: '15px 20px 7px 20px',
+    padding: '15px 20px 0px 20px',
     //paddingBottom:'0px',
 };
 

@@ -35,9 +35,10 @@ export class ChartTickerItem extends React.Component {
         return(
             <Row 
                     className='ticker-row' 
-                    type="flex" 
+                    type="flex"
+                    gutter={0} 
                     align="middle" 
-                    style={{borderRadius: '4px', padding: '5px 5px', margin: '3px'}}
+                    style={{borderRadius: '4px', padding: '5px 0px', margin: '3px 0px'}}
                     onMouseEnter={this.focus}
                     onMouseLeave={this.clearFocus}
             >
@@ -47,25 +48,28 @@ export class ChartTickerItem extends React.Component {
                         <Checkbox disabled={disabled} checked={checked} onChange={this.props.onChange}/>
                     </Col>
                 }
-                <Col span={8}>
-                    <h4 style={{fontSize: '12px', color}}>{name}</h4>
+                <Col span={11}>
+                    <h4 style={{fontSize: '13px', color}}>{name}</h4>
                 </Col>
-                <Col span={6}>
+                <Col span={9} style={{textAlign: 'left'}}>
                     <MetricItem 
-                            label="Price"
+                            label=""
+                            //value={`${y} (${change} %)`}
                             value={y}
+                            dailyChangePct={change}
+                            isNetValue
                             labelStyle={{fontSize: '11px'}}
                             valueStyle={{fontSize: '13px', fontWeight: 400}}
                     />
                 </Col>
-                <Col span={6}>
+                {/*<Col span={6}>
                     <MetricItem 
                             value={`${change} %`}
                             label="Change"
                             labelStyle={{fontSize: '11px'}}
                             valueStyle={{fontSize: '16px', fontWeight: 400, color: changeColor}}
                     />
-                </Col>
+            </Col>*/}
                 <Col span={1}>
                     {
                         !disabled &&

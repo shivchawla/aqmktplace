@@ -493,9 +493,9 @@ class MyChartNewImpl extends React.Component {
                 <Spin spinning={this.state.loading}>
                     <Col 
                             span={14} id={chartId} 
-                            style={{borderRight: '1px solid #DCD6D6', paddingRight: '20px'}}>
+                            style={{borderRight: '1px solid #DCD6D6', paddingRight: '10px'}}>
                     </Col>
-                    <Col span={9} style={{marginLeft: '20px'}}>
+                    <Col span={10} style={{marginLeft: '0px', padding:'0px 4px'}}>
                         <Row type="flex" align="middle">
                             <Col span={12}>
                                 <h2 style={{fontSize: '12px', margin: '0'}}>
@@ -540,7 +540,7 @@ class MyChartNewImpl extends React.Component {
                 {
                     !this.props.hideLegend &&
                     
-                    <Row style={{position:'absolute', width: '400px'}}>{this.renderHorizontalLegendList()}</Row>
+                    <Row style={{position:'absolute', width: '300px'}}>{this.renderHorizontalLegendList()}</Row>
                 }
                 <Row id={chartId}></Row>
             </Col>
