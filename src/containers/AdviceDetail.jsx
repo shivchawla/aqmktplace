@@ -8,7 +8,7 @@ import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar} from '../components';
+import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal} from '../utils';
@@ -68,7 +68,8 @@ class AdviceDetailImpl extends React.Component {
             show: false,
             stockResearchModalVisible: false,
             stockResearchModalTicker: 'TCS',
-            selectedPortfolioDate: moment()
+            selectedPortfolioDate: moment(),
+            realtimeSecurities: []
         };
     }
 
@@ -147,12 +148,15 @@ class AdviceDetailImpl extends React.Component {
         console.log('Advice Detail', response.data);
         this.setState({
             positions,
+            realtimeSecurities: this.processPositionToWatchlistData(positions),
             adviceDetail: {
                 ...this.state.adviceDetail,
                 maxNotional,
                 rebalance
             },
             portfolio: response.data.portfolio
+        }, () => {
+            this.setUpSocketConnection();
         });
     }
 
@@ -374,7 +378,6 @@ class AdviceDetailImpl extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            this.setUpSocketConnection();
             this.getUserData();
             this.getAdviceData();
         }
@@ -382,6 +385,9 @@ class AdviceDetailImpl extends React.Component {
 
     componentWillUnmount() {
         this.unSubscribeToAdvice(this.props.match.params.id);
+        this.state.realtimeSecurities.map(item => {
+            this.unSubscribeToStock(item.name);
+        });
         this.mounted = false;
     }
 
@@ -391,6 +397,9 @@ class AdviceDetailImpl extends React.Component {
                 Utils.openSocketConnection();
             } else {
                 this.subscribeToAdvice(this.props.match.params.id);
+                this.state.realtimeSecurities.map(item => {
+                    this.subscribeToStock(item.name);
+                });
             }
     
             Utils.webSocket.onopen = () => {
@@ -418,8 +427,14 @@ class AdviceDetailImpl extends React.Component {
     takeAdviceAction = () => {
         if (this.mounted) {
             this.subscribeToAdvice(this.props.match.params.id);
+            this.state.realtimeSecurities.map(item => {
+                this.subscribeToStock(item.name);
+            });
         } else {
             this.unSubscribeToAdvice(this.props.match.params.id);
+            this.state.realtimeSecurities.map(item => {
+                this.unSubscribeToStock(item.name);
+            });
         }
     }
 
@@ -458,6 +473,40 @@ class AdviceDetailImpl extends React.Component {
         }
     }
 
+    subscribeToStock = ticker => {
+        console.log('Subscription Started');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'stock',
+            'ticker': ticker
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to ${ticker}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    unSubscribeToStock = ticker => {
+        console.log('Unsubscription Started');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'stock',
+            'ticker': ticker
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`UnSubscribed to ${ticker}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
     processRealtimeMessage = msg => {
         if (this.mounted) {
             console.log(JSON.parse(msg.data));
@@ -475,11 +524,31 @@ class AdviceDetailImpl extends React.Component {
                     },
                     positions: _.get(realtimeData, 'output.detail.positions', [])
                 });
+            } else if (realtimeData.type === 'stock') {
+                console.log(realtimeData);
+                const realtimeSecurities = [...this.state.realtimeSecurities];
+                const targetSecurity = realtimeSecurities.filter(item => item.name === realtimeData.ticker)[0];
+                if (targetSecurity) {
+                    targetSecurity.change = (realtimeData.output.changePct * 100).toFixed(2);
+                    targetSecurity.y = realtimeData.output.current < 1 ? realtimeData.output.close : realtimeData.output.current;
+                    this.setState({realtimeSecurities});
+                }
             }
-        } else {
-            this.unSubscribeToAdvice(this.props.match.params.id);
         }
     }
+
+    processPositionToWatchlistData = (positions) => {
+        return positions.map(item => {
+            return {
+                name: item.security.ticker,
+                y: item.lastPrice,
+                change: '-',
+                hideCheckbox: true,
+                disabled: true
+            };
+        });
+    }
+
 
     renderActionButtons = () => {
         const {userId} = this.state;
@@ -678,6 +747,12 @@ class AdviceDetailImpl extends React.Component {
                             </Panel>
                         }
                     </Collapse>
+                </Col>
+                <Col span={6}>
+                    <WatchList 
+                            tickers={this.state.realtimeSecurities}
+                            preview={true}
+                    />
                 </Col>
             </Row>
         );

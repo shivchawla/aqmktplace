@@ -187,6 +187,7 @@ class StockResearchImpl extends React.Component {
     componentWillUnmount() {
         this.mounted = false;
         this.unSubscribeToStock(this.state.latestDetail.ticker);
+        this.unsubscribeToWatchlist(this.state.selectedWatchlistTab);
     }
 
     formatPriceMetrics = value => {

@@ -6,7 +6,7 @@ import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip} from 'antd';
-import {ForbiddenAccess, StockResearchModal} from '../components';
+import {ForbiddenAccess, StockResearchModal, WatchList} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
 import {loadingColor, pageTitleStyle, metricColor} from '../constants';
@@ -57,6 +57,7 @@ class PortfolioDetailImpl extends React.Component {
             toggleValue: 'advice',
             togglePerformance: 'dollar',
             stockPositions: [],
+            realtimeSecurities: [],
             portfolioMetrics: [],
             tickers: [],
             performanceDollarSeries: [],
@@ -230,8 +231,6 @@ class PortfolioDetailImpl extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            // Subscribing to real-time data
-            this.setUpSocketConnection();
             const series = [];
             let positions = [];
             const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
@@ -253,7 +252,11 @@ class PortfolioDetailImpl extends React.Component {
                     name: response.data.name,
                     presentAdvices: advices,
                     stockPositions: _.get(response.data, 'detail.positions', []),
+                    realtimeSecurities: this.processPositionToWatchlistData(_.get(response.data, 'detail.positions', [])),
                     tickers
+                }, () => {
+                    // Subscribing to real-time data
+                    this.setUpSocketConnection();
                 });
                 return axios.get(performanceUrl, {headers: Utils.getAuthTokenHeader()});
             })
@@ -330,6 +333,9 @@ class PortfolioDetailImpl extends React.Component {
     componentWillUnmount() {
         this.mounted = false;
         this.unSubscribeToPortfolio(this.props.match.params.id);
+        this.state.realtimeSecurities.map(item => {
+            this.unSubscribeToStock(item.name);
+        });
     }
 
     setUpSocketConnection = () => {
@@ -337,6 +343,9 @@ class PortfolioDetailImpl extends React.Component {
             Utils.openSocketConnection();
         } else {
             this.subscribeToPortfolio(this.props.match.params.id);
+            this.state.realtimeSecurities.map(item => {
+                this.subscribeToStock(item.name);
+            });
         }
 
         Utils.webSocket.onopen = () => {
@@ -362,8 +371,14 @@ class PortfolioDetailImpl extends React.Component {
     takePortfolioAction = () => {
         if (this.mounted) {
             this.subscribeToPortfolio(this.props.match.params.id);
+            this.state.realtimeSecurities.map(item => {
+                this.subscribeToStock(item.name);
+            });
         } else {
             this.unSubscribeToPortfolio(this.props.match.params.id);
+            this.state.realtimeSecurities.map(item => {
+                this.unSubscribeToStock(item.name);
+            });
         }
     }
 
@@ -392,11 +407,43 @@ class PortfolioDetailImpl extends React.Component {
             'action': 'unsubscribe-mktplace',
             'type': 'portfolio',
             'portfolioId': portfolioId,
-            // 'detail': true
         };
-        // console.log('Message', msg);
         if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
             console.log(`UnSubscribed to ${portfolioId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    subscribeToStock = ticker => {
+        console.log('Subscription Started for stock ' + ticker);
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'stock',
+            'ticker': ticker
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to ${ticker}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    unSubscribeToStock = ticker => {
+        console.log('Unsubscription Started');
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'stock',
+            'ticker': ticker
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`UnSubscribed to ${ticker}`);
             Utils.webSocket.send(JSON.stringify(msg));
         } else {
             Utils.webSocket = undefined;
@@ -407,13 +454,13 @@ class PortfolioDetailImpl extends React.Component {
     processRealtimeMessage = msg => {
         if (this.mounted) {
             const realtimeData = JSON.parse(msg.data);
-            console.log('Message Received', realtimeData);
+            // console.log('Message Received', realtimeData);
             if (realtimeData.type === 'portfolio') {
                 const subPositions = _.get(realtimeData, 'output.detail.subPositions', []);
                 const positions = _.get(realtimeData, 'output.detail.positions', []);
                 const netValue = _.get(realtimeData, 'output.summary.nav', 0);
                 const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
-                const dailyChange = _.get(realtimeData, 'output.summary.dailyChange', 0);
+                const dailyChange = _.get(realtimeData, 'output.summary.dailyPnlChange', 0);
                 const metrics = _.uniqBy([
                     {value: dailyChange, label: dailyChangeLabel, fixed: 2, color:true, direction:true},
                     {value: dailyChangePct, label: dailyChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
@@ -424,10 +471,29 @@ class PortfolioDetailImpl extends React.Component {
                     portfolioMetrics: metrics,
                     stockPositions: positions
                 });
+            } else if(realtimeData.type === 'stock') {
+                console.log(realtimeData);
+                const realtimeSecurities = [...this.state.realtimeSecurities];
+                const targetSecurity = realtimeSecurities.filter(item => item.name === realtimeData.ticker)[0];
+                if (targetSecurity) {
+                    targetSecurity.change = (realtimeData.output.changePct * 100).toFixed(2);
+                    targetSecurity.y = realtimeData.output.current < 1 ? realtimeData.output.close : realtimeData.output.current;
+                    this.setState({realtimeSecurities});
+                }
             }
-        } else {
-            this.unSubscribeToPortfolio(this.props.match.params.id);
         }
+    }
+
+    processPositionToWatchlistData = (positions) => {
+        return positions.map(item => {
+            return {
+                name: item.security.ticker,
+                y: item.lastPrice,
+                change: '-',
+                hideCheckbox: true,
+                disabled: true
+            };
+        });
     }
 
     renderPageContent = () => {
@@ -558,6 +624,12 @@ class PortfolioDetailImpl extends React.Component {
                                 </Row>
                             </Panel>
                         </Collapse>
+                    </Col>
+                    <Col span={6}>
+                        <WatchList 
+                                tickers={this.state.realtimeSecurities}
+                                preview={true}
+                        />
                     </Col>
                 </Row>
         );

@@ -22,10 +22,8 @@ export class WatchListImpl extends React.Component {
     }
 
     renderTickers = () => {
-        // const tickers = [
-        //     {name: 'TCS', y: 145, change: 1.5, hideCheckbox: true},
-        // ];
-        const {tickers} = this.props;
+        // {name: 'TCS', y: 145, change: 1.5, hideCheckbox: true}
+        const {tickers = [], preview = true} = this.props;
         return tickers.map((ticker, index) => 
                 <ChartTickerItem 
                         key={index} 
@@ -153,18 +151,21 @@ export class WatchListImpl extends React.Component {
         return (
             <Row>
                 <Col span={24}>
-                    <AutoComplete
-                            // disabled={!this.state.tickers.length}
-                            className="global-search"
-                            dataSource={dataSource.map(this.renderOption)}
-                            onSelect={this.onSelect}
-                            onSearch={this.handleSearch}
-                            placeholder="Search Stocks"
-                            style={{width: '100%'}}
-                            optionLabelProp="value"
-                    >
-                        <Input suffix={<Icon style={searchIconStyle} type="search" />} />
-                    </AutoComplete>
+                    {
+                        !this.props.preview &&
+                        <AutoComplete
+                                // disabled={!this.state.tickers.length}
+                                className="global-search"
+                                dataSource={dataSource.map(this.renderOption)}
+                                onSelect={this.onSelect}
+                                onSearch={this.handleSearch}
+                                placeholder="Search Stocks"
+                                style={{width: '100%'}}
+                                optionLabelProp="value"
+                        >
+                            <Input suffix={<Icon style={searchIconStyle} type="search" />} />
+                        </AutoComplete>
+                    }
                 </Col>
                  <Col span={24}>
                     {this.renderTickers()}
