@@ -180,7 +180,7 @@ class CreateWatchListImpl extends React.Component {
                 <Col span={24}>
                     <Input placeholder="Watchlist Name" onChange={this.handleInputChange} value={this.state.name}/>
                 </Col>
-                <Col span={24} style={{backgroundColor: '#fff', padding: '10px'}}>
+                {/* <Col span={24} style={{backgroundColor: '#fff', padding: '10px'}}>
                     <AutoComplete
                             dataSource={dataSource.map(this.renderOption)}
                             onSelect={value => this.onSelect(value)}
@@ -192,7 +192,7 @@ class CreateWatchListImpl extends React.Component {
                         <Input suffix={<Icon style={searchIconStyle} type="search" />} />
                     </AutoComplete>
                     {this.renderTickers()}
-                </Col>
+                </Col> */}
             </Modal>
         );
     }
