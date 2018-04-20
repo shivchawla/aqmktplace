@@ -67,7 +67,12 @@ class CreateWatchListImpl extends React.Component {
         const url = `${requestUrl}/stock?search=${query}`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            this.setState({dataSource: this.processSearchResponseData(response.data)})
+            try {
+                this.setState({dataSource: this.processSearchResponseData(response.data)})
+            } catch(error) {
+                console.log(error);
+            }
+            
         })
         .catch(error => {
             if (error.response) {
@@ -75,7 +80,7 @@ class CreateWatchListImpl extends React.Component {
             }
         })
         .finally(() => {
-            this.setState({spinning: false});
+            // this.setState({spinning: false});
         });
     }
 
@@ -149,7 +154,11 @@ class CreateWatchListImpl extends React.Component {
     }
 
     handleInputChange = e => {
-        this.setState({name: e.target.value});
+        try {
+            this.setState({name: e.target.value});
+        } catch(error) {
+            console.log(error);
+        }
     }
 
     render() {

@@ -51,8 +51,9 @@ class StockResearchImpl extends React.Component {
             show: false,
             watchlists: [],
             watchlistModalVisible: false,
-            createWatchlistSecurities: []
+            createWatchlistSecurities: [],
             // appInitialized: false
+            selectedWatchlistTab: ''
         }; 
     }
 
@@ -265,9 +266,7 @@ class StockResearchImpl extends React.Component {
         } else {
             console.log('Will Subscribe Now');
             this.subscribeToStock(this.state.latestDetail.ticker);
-            this.state.watchlists.map(item => {
-                this.subscribeToWatchList(item.id);
-            });
+            this.subscribeToWatchList(this.state.selectedWatchlistTab);
         }
         Utils.webSocket.onopen = () => {
             console.log('Connection Opened Will Subscribe Now');
@@ -298,21 +297,18 @@ class StockResearchImpl extends React.Component {
     takeAction = () => {
         if (this.mounted) {
             this.subscribeToStock(this.state.latestDetail.ticker);
-            this.state.watchlists.map(item => {
-                this.subscribeToWatchList(item.id);
-            });
+            this.subscribeToWatchList(this.state.selectedWatchlistTab);
         } else {
             this.unSubscribeToStock(this.state.latestDetail.ticker);
             this.state.watchlists.map(item => {
-                this.unsubscribeToWatchlist(item.id);
+                this.unsubscribeToWatchlist(this.state.selectedWatchlistTab);
             });
         }
     }
 
     processRealtimeMessage = msg => {
+        const realtimeResponse = JSON.parse(msg.data);
         if (this.mounted) {
-            const realtimeResponse = JSON.parse(msg.data);
-            // console.log(realtimeResponse);
             if (realtimeResponse.type === 'stock' && realtimeResponse.ticker === this.state.latestDetail.ticker) {
                 console.log(realtimeResponse);
                 this.setState({
@@ -323,9 +319,19 @@ class StockResearchImpl extends React.Component {
                     }
                 });
             } else {
+                console.log(realtimeResponse);
                 const watchlists = [...this.state.watchlists];
+                // Getting the required wathclist
                 const targetWatchlist = watchlists.filter(item => item.id === realtimeResponse.watchlistId)[0];
-                const ticker = realtimeResponse.output.ticker;
+                if (targetWatchlist) {
+                    // Getiing the required security to update
+                    const targetSecurity = targetWatchlist.positions.filter(item => item.name === realtimeResponse.ticker)[0];
+                    if (targetSecurity) {
+                        targetSecurity.change = realtimeResponse.output.change;
+                        targetSecurity.price = realtimeResponse.output.current;
+                        this.setState({watchlists});
+                    }
+                }
             }
         } else {
             this.unSubscribeToStock(this.state.latestDetail.ticker);
@@ -406,7 +412,7 @@ class StockResearchImpl extends React.Component {
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const watchlists = this.processWatchlistData(response.data);
-            this.setState({watchlists});
+            this.setState({watchlists, selectedWatchlistTab: watchlists[0].id});
         })
         .catch(error => {
             console.log(error);
@@ -420,9 +426,7 @@ class StockResearchImpl extends React.Component {
         const url = `${requestUrl}/watchlist/${id}`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            // const watchlists = this.processWatchlistData(response.data);
-            // this.setState({watchlists});
-            console.log(response.data);
+            this.subscribeToWatchList(id);
             const watchlists = [...this.state.watchlists];
             const targetWatchlist = watchlists.filter(item => item.id === id)[0];
             targetWatchlist.positions = response.data.securities.map(item => {
@@ -432,9 +436,7 @@ class StockResearchImpl extends React.Component {
                     price: 100
                 }
             });
-            this.setState({watchlists}, () => {
-                // this.subscribeToWatchList(id)
-            });
+            this.setState({watchlists});
         })
         .catch(error => {
             console.log(error);
@@ -481,6 +483,9 @@ class StockResearchImpl extends React.Component {
             console.log(response.data);
             message.success('Watchlist successfully deleted');
             this.getWatchlists();
+            if (this.state.watchlists.length > 0) {
+                this.subscribeToWatchList(this.state.watchlists[0].id);
+            }
         })
         .catch(error => {
             console.log(error);
@@ -491,23 +496,29 @@ class StockResearchImpl extends React.Component {
         })
     }
 
+    handleWatchlistTabChange = key => {
+        const previousWatchListId = this.state.selectedWatchlistTab;
+        const currentWatchListId = key;
+        if (previousWatchListId.length > 0) {
+            this.unsubscribeToWatchlist(previousWatchListId);
+        }
+        this.subscribeToWatchList(currentWatchListId);
+        this.setState({selectedWatchlistTab: currentWatchListId});
+    }
+
     renderWatchlistTabs = () => {
         const watchlists = this.state.watchlists;
-        return watchlists.map((item, index) => {
+        return watchlists.map(item => {
             // {name: 'TCS', y: 145, change: 1.5, hideCheckbox: true},
             const tickers = item.positions.map(item => {return {name: item.name, y: item.price, change:item.change, hideCheckbox: true}});
             return (
-                <TabPane key={index} tab={item.name}>
-                    <Col span={24}>
-                        <Button type="primary" onClick={() => this.deleteWatchlist(item.id)}>Delete Watchlist</Button>
-                    </Col>
+                <TabPane key={item.id} tab={item.name}>
                     <Col span={24}>
                         <WatchList 
                                 tickers={tickers} 
                                 id={item.id} 
                                 name={item.name} 
                                 getWatchlist={this.getWatchlist}
-                                subscribeToWatchList={this.subscribeToWatchList}
                         />
                     </Col>
                 </TabPane>
@@ -530,6 +541,11 @@ class StockResearchImpl extends React.Component {
         const performanceMetricsTimeline = ['YTD', '1Y', '2Y', '5Y', '10Y'];
         const percentageColor = latestDetail.change < 0 ? '#FA4747' : '#3EBB72';
         const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
+        const deleteIcon = <Icon 
+                        onClick={() => this.deleteWatchlist(this.state.selectedWatchlistTab)} 
+                        type="delete" 
+                        style={{fontSize: '18px', color: '#F44336', cursor: 'pointer'}} 
+                />;
         // chartId is required so that we have the option to have multiple HighStock component in the same page with different Id
         const {xl=18, chartId='highchart-container'} = this.props; 
 
@@ -620,7 +636,7 @@ class StockResearchImpl extends React.Component {
                 </Col>
                 <Col span={6}>
                     <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button>
-                    <Tabs defaultActiveKey="0">
+                    <Tabs onChange={this.handleWatchlistTabChange} tabBarExtraContent={deleteIcon}>
                         {this.renderWatchlistTabs()}
                     </Tabs>
                 </Col>
