@@ -19,6 +19,8 @@ const Option = Select.Option;
 const dateFormat = 'YYYY-MM-DD';
 
 export class InvestorDashboard extends React.Component {
+    numberOfTimeSocketConnectionCalled = 1;
+    mounted = false;
     constructor(props) {
         super(props);
         this.state = {
@@ -57,6 +59,7 @@ export class InvestorDashboard extends React.Component {
             },
             showAdvisorDashboardToggle: false,
             defaultPortfolioName: 'Default Portfolio',
+            defaultPortfolioId: '',
             topLoader: false
         };
         this.stockPositionColumns = [
@@ -188,6 +191,7 @@ export class InvestorDashboard extends React.Component {
             });
             this.setState({
                 defaultPortfolioName: _.get(response.data, 'defaultPortfolio.name', ''),
+                defaultPortfolioId: _.get(response.data, 'defaultPortfolio._id', ''),
                 positions,
                 showEmptyScreen: {...this.state.showEmptyScreen, status: positions.length > 0 ? false : true},
                 composition,
@@ -207,6 +211,14 @@ export class InvestorDashboard extends React.Component {
                 percentagePerformance,
                 tickers,
             });
+            return this.getInvestorPortfolios();
+        })
+        .then(() => {
+            return this.getInvestorSubscribedAdvices();
+        })
+        .then((response) => {
+            console.log(response);
+            this.setUpSocketConnection();
         })
         .catch(error => {
             Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -225,23 +237,25 @@ export class InvestorDashboard extends React.Component {
         });
     }
 
-    getInvestorPortfolios = () => {
+    getInvestorPortfolios = () => new Promise((resolve, reject) => {
         const investorPortfolioUrl = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio`;
         this.setState({portfolioLoading: true});
         axios.get(investorPortfolioUrl, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const subscribedAdvicesUrl = `${requestUrl}/advice?subscribed=true`;
-            this.setState({investorPortfolios: this.processPortfolios(response.data)});
+            this.setState({investorPortfolios: this.processPortfolios(response.data)}, () => {
+                resolve(true);
+            });
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            reject(error);
         })
         .finally(() => {
             this.setState({portfolioLoading: false});
         });
-    }
-
-    getInvestorSubscribedAdvices = () => {
+    })
+        
+    getInvestorSubscribedAdvices = () => new Promise((resolve, reject) => {
         const subscribedAdvicesUrl = `${requestUrl}/advice?subscribed=true`;
         const followingAdviceUrl = `${requestUrl}/advice?following=true`;
         this.setState({subscribedAdvicesLoading: true});
@@ -254,7 +268,7 @@ export class InvestorDashboard extends React.Component {
             const advices = [...this.state.subscribedAdvices];
             const followingAdvices = response.data;
             followingAdvices.map((advice, index) => {
-                console.log('Advice', advice);
+                // console.log('Advice', advice);
                 const {name, performanceSummary} = advice;
                 if(_.findIndex(advices, presentAdvice => presentAdvice.id === advice._id) === -1) {
                     advices.push({
@@ -270,15 +284,17 @@ export class InvestorDashboard extends React.Component {
                 }
             });
             console.log('Advices', advices);
-            this.setState({subscribedAdvices: advices});
+            this.setState({subscribedAdvices: advices}, () => {
+                resolve(true);
+            });
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            reject(Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url));
         })
         .finally(() => {
             this.setState({subscribedAdvicesLoading: false});
         });
-    }
+    })
 
     onMenuSelected = (type, value) => {
         const portfolios = [...this.state.investorPortfolios];
@@ -370,7 +386,6 @@ export class InvestorDashboard extends React.Component {
     renderPortfolios = () => {
         const portfolios = this.state.investorPortfolios;
         return portfolios.map((portfolio, index) => {
-            console.log(portfolio);
             const returnColor = portfolio.return < 0 ? metricColor.negative : metricColor.positive;
             const dailyChangePctColor = portfolio.dailyChangePct < 0 ? metricColor.negative : metricColor.positive;
 
@@ -494,7 +509,6 @@ export class InvestorDashboard extends React.Component {
 
     processSectorsForChart = (positions, composition) => {
         const sectorData = [];
-        console.log(positions, composition);
         const colors = ['#0091EA', '#FFEB3B', '#FFC107', '#FF9800', '#795548', '#FF5722', '#607D8B', '#3D5AFE', '#7C4DFF'];
         try {
             positions.map((position, positionIndex) => {
@@ -735,44 +749,197 @@ export class InvestorDashboard extends React.Component {
     }
 
     componentWillMount() {
+        this.mounted = true;
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
             this.getDefaultPortfolioData();
-            this.getInvestorPortfolios();
-            this.getInvestorSubscribedAdvices();
-            // this.setUpSocketConnection();
+            // this.getInvestorPortfolios();
+            // this.getInvestorSubscribedAdvices();
         }
     }
 
     componentWillUnmount() {
+        this.mounted = false;
         // Utils.closeWebSocket();
     }
 
     setUpSocketConnection = () => {
-        Utils.openSocketConnection();
-        Utils.webSocket.onmessage = msg => {
-            const data = JSON.parse(msg.data);
-            console.log(data);
+        console.log('Setting Up connection');
+        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
+            console.log('Opening Connection');
+            Utils.openSocketConnection();
+        } else {
+            // Subscribe to all portfolios and advices
+            this.subscribeToAllPortfolios(this.state.investorPortfolios);
+            this.subscribeToAllAdvices(this.state.subscribedAdvices);
+        }
+
+        Utils.webSocket.onopen = () => {
+            console.log('Connection Openend');
+            this.takeAction();
+        }
+
+        Utils.webSocket.onclose = () => {
+            console.log('Connection Closed');
+            if (this.mounted) {
+                Utils.webSocket = undefined;
+                this.numberOfTimeSocketConnectionCalled++;
+                setTimeout(() => {
+                    this.setUpSocketConnection();
+                }, Math.min(2 * this.numberOfTimeSocketConnectionCalled * 1000, 5000));
+            } else {
+                return;
+            }
+        }
+
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
+    }
+
+    subscribeToAllPortfolios = portfolios => {
+        console.log('Subscribing to all Portfolios');
+        portfolios.map(portfolio => {
+            this.subscribeToPortfolio(portfolio.id);
+        });
+    }
+
+    unSubscribeToAllPortfolios = portfolios => {
+        console.log('Subscribing to all advices');
+        portfolios.map(portfolio => {
+            this.unSubscribeToPortfolio(portfolio.id);
+        });
+    }
+
+    subscribeToAllAdvices = advices => {
+        advices.map(advice => {
+            this.subscribeToAdvice(advice.id);
+        });
+    }
+
+    unSubscribeToAllAdvices = advices => {
+        advices.map(advice => {
+            this.unSubscribeToAdvice(advice.id);
+        });
+    }
+
+    takeAction = () => {
+        if (this.mounted) {
+            this.subscribeToAllPortfolios(this.state.investorPortfolios);
+            this.subscribeToAllAdvices(this.state.subscribedAdvices);
+        } else {
+            this.unSubscribeToAllPortfolios(this.state.investorPortfolios);
+            this.unSubscribeToAllAdvices(this.state.subscribedAdvices);
         }
     }
 
+    processRealtimeMessage = msg => {
+        if (this.mounted) {
+            const realtimeData = JSON.parse(msg.data);
+            console.log(realtimeData);
+            // dailyreturn: -1,
+            //         totalreturn: -1,
+            //         netValue: -1,
+            if (realtimeData.type === 'portfolio') {
+                const investorPortfolios = [...this.state.investorPortfolios];
+                const targetPortfolio = investorPortfolios.filter(portfolio => portfolio.id === realtimeData.portfolioId)[0];
+                if (targetPortfolio) {
+                    let defaultPorfolio = false;
+                    // Checking if it's a default portfolio
+                    if (realtimeData.portfolioId === this.state.defaultPortfolioId) {
+                        defaultPorfolio = true;
+                    }
+                    targetPortfolio.dailyChangePct = (_.get(realtimeData, 'output.summary.dailyPnlChangePct', 0) * 100).toFixed(2);
+                    targetPortfolio.netValue = _.get(realtimeData, 'output.summary.nav', 0).toFixed(2);
+                    this.setState({
+                        investorPortfolios,
+                        metrics: defaultPorfolio 
+                                ?   {
+                                        ...this.state.metrics,
+                                        dailyreturn: _.get(realtimeData, 'output.summary.dailyPnlChangePct', 0),
+                                        netValue: _.get(realtimeData, 'output.summary.nav', 0).toFixed(2)
+                                    }
+                                :   this.state.metrics
+                    });
+                }
+            } else if (realtimeData.type === 'advice') {
+                const subscribedAdvices = [...this.state.subscribedAdvices];
+                const targetAdvice = subscribedAdvices.filter(advice => advice.id === realtimeData.adviceId)[0];
+                targetAdvice.netValue = _.get(realtimeData, 'output.summary.nav', 0).toFixed(2);
+                targetAdvice.return = (_.get(realtimeData, 'output.summary.dailyPnlChangePct', 0) * 100).toFixed(2);
+                this.setState({subscribedAdvices});
+            }
+        }
+    }
     // updatePortfolRealTime = 
 
     subscribeToPortfolio = portfolioId => {
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
-            'type': 'stock/watchlist/portfolio',
+            'type': 'portfolio',
             'portfolioId': portfolioId
         };
         if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to portfolio ${portfolioId}`);
             Utils.webSocket.send(JSON.stringify(msg));
         } else {
             Utils.webSocket = undefined;
             this.setUpSocketConnection();
         }
     }
+
+    unSubscribeToPortfolio = portfolioId => {
+        console.log('UnSubscription to portfolio ' + portfolioId);
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'portfolio',
+            'portfolioId': portfolioId,
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`UnSubscribed to ${portfolioId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    subscribeToAdvice = adviceId => {
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'subscribe-mktplace',
+            'type': 'advice',
+            'adviceId': adviceId,
+            'detail': true
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`Subscribed to Advice ${adviceId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
+    unSubscribeToAdvice = adviceId => {
+        console.log('UnSubscription to advice ' + adviceId);
+        const msg = {
+            'aimsquant-token': Utils.getAuthToken(),
+            'action': 'unsubscribe-mktplace',
+            'type': 'advice',
+            'adviceId': adviceId,
+            // 'detail': true
+        };
+        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
+            console.log(`UnSubscribed to ${adviceId}`);
+            Utils.webSocket.send(JSON.stringify(msg));
+        } else {
+            Utils.webSocket = undefined;
+            this.setUpSocketConnection();
+        }
+    }
+
 
     renderPageContent = () => {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);
