@@ -53,7 +53,8 @@ class StockResearchImpl extends React.Component {
             watchlistModalVisible: false,
             createWatchlistSecurities: [],
             // appInitialized: false
-            selectedWatchlistTab: ''
+            selectedWatchlistTab: '',
+            isDeleteModalVisible: false
         }; 
     }
 
@@ -479,6 +480,23 @@ class StockResearchImpl extends React.Component {
         );
     }
 
+    toggleDeleteModalVisible = () => {
+        this.setState({isDeleteModalVisible: !this.state.isDeleteModalVisible});
+    }
+
+    renderDeleteModal = () => {
+        return (
+            <Modal
+                    visible={this.state.isDeleteModalVisible}
+                    onCancel={this.toggleDeleteModalVisible}
+                    onOk={() => this.deleteWatchlist(this.state.selectedWatchlistTab)}
+                    title='Delete Watchlist'
+            >
+                <h3>Are you sure you want to delete this watchlist</h3>
+            </Modal>
+        );
+    }
+
     deleteWatchlist = id => {
         const url = `${requestUrl}/watchlist/${id}`;
         axios({
@@ -493,6 +511,7 @@ class StockResearchImpl extends React.Component {
             if (this.state.watchlists.length > 0) {
                 this.subscribeToWatchList(this.state.watchlists[0].id);
             }
+            this.toggleDeleteModalVisible();
         })
         .catch(error => {
             console.log(error);
@@ -533,6 +552,23 @@ class StockResearchImpl extends React.Component {
         })
     }
 
+    watchlistTabBarExtraContent = () => {
+        return (
+            <div style={{display: 'flex', flexDirection: 'row', alignItems: 'middle'}}>
+                <Icon 
+                        onClick={() => this.toggleDeleteModalVisible(this.state.selectedWatchlistTab)} 
+                        type="delete" 
+                        style={{fontSize: '18px', color: '#F44336', cursor: 'pointer'}} 
+                />
+                <Icon 
+                        onClick={this.toggleWatchListModal}
+                        type="plus-circle-o" 
+                        style={{fontSize: '18px', color: '#009688', cursor: 'pointer', marginLeft: '8px'}} 
+                />
+            </div>
+        );
+    }
+
     renderPageContent = () => {
         const {dataSource, latestDetail} = this.state;
         const breadCrumbs = getBreadCrumbArray([{name: 'Stock Research'}]);
@@ -565,6 +601,7 @@ class StockResearchImpl extends React.Component {
                     </React.Fragment>
                 }
                 <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
+                    {this.renderDeleteModal()}
                     <Row style={metricStyle}>
                         {
                             !this.props.openAsDialog &&
@@ -644,8 +681,17 @@ class StockResearchImpl extends React.Component {
                 {
                     !this.props.openAsDialog &&
                     <Col span={6}>
-                        <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button>
-                        <Tabs onChange={this.handleWatchlistTabChange} tabBarExtraContent={deleteIcon}>
+                        {/* <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button> */}
+                        <Tabs 
+                                onChange={this.handleWatchlistTabChange} 
+                                tabBarExtraContent={this.watchlistTabBarExtraContent()}
+                                tabBarStyle={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    alignContent: 'center'
+                                }}
+                        >
                             {this.renderWatchlistTabs()}
                         </Tabs>
                     </Col>

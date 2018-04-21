@@ -21,7 +21,6 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
         super(props);
         this.state = {
             advices: props.advices, // advices rendered here
-            subscribedAdvices: props.subscribedAdvices, // subscribed advices that is shown in the subscribed
             selectedDate: moment()
         }
         this.detailedColumns = [

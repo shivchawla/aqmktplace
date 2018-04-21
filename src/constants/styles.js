@@ -130,3 +130,9 @@ export const statusColor = {
 }
 
 export const performanceColor = '#2196F3';
+
+export const cashStyle = {
+    fontSize: '14px',
+    color: '#455A64',
+    fontWeight: 700
+}

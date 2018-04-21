@@ -455,14 +455,10 @@ class AddTransactionsImpl extends React.Component {
                 <Col span={24} style={{marginTop: 20, overflowY:'auto'}}>
                     {
                         // this.state.presentAdvices.length > 0 
-                        this.state.advices.length > 0
+                        this.state.presentAdvices.length > 0
                         ? <AqPortfolioCompositionAdvice
                                 preview 
-                                subscribedAdvices={this.state.subscribedAdvices}
                                 advices={this.state.presentAdvices} 
-                                // toggleStockResearchModal={this.toggleStockResearchModal}
-                                // advices={this.state.advices} 
-                                // processAdviceComposition={this.processAdviceComposition}
                         />
                         :   <h5 
                                 style={{textAlign: 'center', fontSize: '16px'}}
@@ -681,7 +677,12 @@ class AddTransactionsImpl extends React.Component {
     disabledDate = (current, advice) => {
         const createdDate = moment(advice.createdDate).subtract(2, 'days');
         // return (current && current > moment().endOf('day')) || (current && current < createdDate);
-        return (current && current > moment().endOf('day'));
+        return current && (
+            current > moment().endOf('day') 
+            || [0, 6].indexOf(current.weekday()) !== -1
+            || (current && current < createdDate
+        ));
+        // return (current && current > moment().endOf('day'));
     }
 
     processPreviewAdviceTransaction = (adviceTransactions) => {

@@ -4,11 +4,18 @@ import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker} from 'antd';
-import {AqPortfolioCompositionAdvice} from '../components';
+import {AqPortfolioCompositionAdvice, MetricItem} from '../components';
 import {MyChartNew} from '../containers/MyChartNew';
-import {currentPerformanceColor, simulatedPerformanceColor, nameEllipsisStyle} from '../constants';
 import {Utils} from '../utils';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
+import {
+    currentPerformanceColor, 
+    simulatedPerformanceColor, 
+    nameEllipsisStyle, 
+    metricsValueStyle,
+    metricsLabelStyle,
+    metricColor
+} from '../constants';
 
 const Panel = Collapse.Panel;
 const TabPane = Tabs.TabPane;
@@ -95,7 +102,12 @@ class SubscribedAdvicesImpl extends React.Component {
                         date: moment().format(dateFormat),
                         createdDate: response.data.createdDate,
                         currentPerformance: [],
-                        simulatedPerformance: []
+                        simulatedPerformance: [],
+                        netValue: _.get(response.data, 'performanceSummary.current.netValue', 0),
+                        dailyChange: _.get(response.data, 'performanceSummary.current.dailyChange', 0),
+                        dailyChangePct: _.get(response.data, 'performanceSummary.current.dailyChangePct', 0),
+                        maxLoss: _.get(response.data, 'performanceSummary.current.maxLoss', 0),
+                        totalReturn: _.get(response.data, 'performanceSummary.current.totalReturn', 0)
                     };
                     axios.get(portfolioUrl, {headers: Utils.getAuthTokenHeader()})
                     .then(response => {
@@ -172,7 +184,11 @@ class SubscribedAdvicesImpl extends React.Component {
             ];
 
             return (
-                <Panel header={this.renderHeaderItem(item)} key={index}>
+                <Panel 
+                        header={this.renderHeaderItem(item)} 
+                        key={index}
+                        
+                >
                     <Tabs animated={false} tabBarExtraContent={this.renderDatePicker(item)}>
                         <TabPane tab="Composition" key="1">
                             <Row>
@@ -248,70 +264,125 @@ class SubscribedAdvicesImpl extends React.Component {
 
     renderHeaderItem = (advice) => {
         const performance = _.get(advice, 'performance.historicalPerformance', {});
-
+        const dailyChangeColor = advice.dailyChange >= 0 ? metricColor.positive : metricColor.negative;
+        const dailyChangePctColor = advice.dailyChange >= 0 ? metricColor.positive : metricColor.negative;
+        const totalReturnColor = advice.totalReturn >=0 ? metricColor.positive : metricColor.negative;
         return (
-            <Row>
-                <Col span={24}>
-                    <Row>
-                        <Col span={2}>
-                            <Checkbox 
-                                    checked={advice.isSelected} 
-                                    onChange={(e) => this.handleCheckboxChange(e, advice)}
-                                    disabled={advice.disabled || false}
-                            />
-                        </Col>
-                        <Col span={22}>
-                            <Row>
-                                <Col span={24}>
-                                    <h5>{advice.name || ''}</h5>
-                                </Col>
-                                <Col span={24}>
-                                    <h5>
-                                        By &nbsp;&nbsp;
-                                        {_.get(advice, 'advisor.user.firstName', '')} &nbsp;&nbsp;
-                                        {_.get(advice, 'advisor.user.lastName', '')} &nbsp;&nbsp;
-                                        {_.get(advice, 'updatedDate', '')}
-                                    </h5>
-                                </Col>
-                                <Col span={24}>
-                                    <Row>
-                                        <Col span={4}>
-                                            <MetricItem
-                                                    value={advice.subscribers || 0}
-                                                    label="Subscribers"
-                                            />
-                                        </Col>
-                                        <Col span={4}>
-                                            <MetricItem
-                                                    value={advice.followers || 0}
-                                                    label="Followers"
-                                            />
-                                        </Col>
-                                        <Col span={4}>
-                                            <MetricItem
-                                                    value={advice.rating.current.toFixed(2)}
-                                                    label="Current Rating"
-                                            />
-                                        </Col>
-                                        <Col span={4}>
-                                            <MetricItem
-                                                    value={advice.rating.simulated.toFixed(2)}
-                                                    label="Simulated Rating"
-                                            />
-                                        </Col>
-                                    </Row>
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
+            <Row type="flex" gutter={40}>
+                <Col span={2}>
+                    <Checkbox 
+                            checked={advice.isSelected} 
+                            onChange={(e) => this.handleCheckboxChange(e, advice)}
+                            disabled={advice.disabled || false}
+                    />
+                </Col>
+                <Col span={6}>
+                    <MetricItem 
+                        value={advice.name || ''} 
+                        label="Advice" 
+                        valueStyle={metricsValueStyle}
+                        labelStyle={metricsLabelStyle}
+                    />
+                </Col>
+                <Col span={4}>
+                    <MetricItem 
+                        value={10} 
+                        value={`${advice.dailyChange.toFixed(2)}`} 
+                        label="Daily Change" 
+                        valueStyle={{...metricsValueStyle, color: dailyChangeColor}}
+                        labelStyle={metricsLabelStyle}
+                    />
+                </Col>
+                <Col span={4}>
+                    <MetricItem 
+                        value={10} 
+                        value={`${(advice.dailyChangePct * 100).toFixed(2)} %`} 
+                        label="Daily Change Pct" 
+                        valueStyle={{...metricsValueStyle, color: dailyChangePctColor}}
+                        labelStyle={metricsLabelStyle}
+                    />
+                </Col>
+                <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <MetricItem 
+                        value={11.5} 
+                        value={`${(advice.totalReturn * 100).toFixed(2)} %`} 
+                        label="Total Return" 
+                        valueStyle={{...metricsValueStyle, color: totalReturnColor}}
+                        labelStyle={metricsLabelStyle}
+                    />
+                </Col>
+                <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <MetricItem 
+                        value={1100} 
+                        value={advice.netValue} 
+                        label="Net Asset Value" 
+                        valueStyle={{...metricsValueStyle, textAlign:'center'}}
+                        labelStyle={{...metricsLabelStyle, textAlign: 'center'}}
+                    />
                 </Col>
             </Row>
+            // <Row>
+            //     <Col span={24}>
+            //         <Row>
+            //             <Col span={2}>
+            //                 <Checkbox 
+            //                         checked={advice.isSelected} 
+            //                         onChange={(e) => this.handleCheckboxChange(e, advice)}
+            //                         disabled={advice.disabled || false}
+            //                 />
+            //             </Col>
+            //             <Col span={22}>
+            //                 <Row>
+            //                     <Col span={24}>
+            //                         <h5>{advice.name || ''}</h5>
+            //                     </Col>
+            //                     <Col span={24}>
+            //                         <h5>
+            //                             By &nbsp;&nbsp;
+            //                             {_.get(advice, 'advisor.user.firstName', '')} &nbsp;&nbsp;
+            //                             {_.get(advice, 'advisor.user.lastName', '')} &nbsp;&nbsp;
+            //                             {_.get(advice, 'updatedDate', '')}
+            //                         </h5>
+            //                     </Col>
+            //                     <Col span={24}>
+            //                         <Row>
+            //                             <Col span={4}>
+            //                                 <MetricItem
+            //                                         value={advice.subscribers || 0}
+            //                                         label="Subscribers"
+            //                                 />
+            //                             </Col>
+            //                             <Col span={4}>
+            //                                 <MetricItem
+            //                                         value={advice.followers || 0}
+            //                                         label="Followers"
+            //                                 />
+            //                             </Col>
+            //                             <Col span={4}>
+            //                                 <MetricItem
+            //                                         value={advice.rating.current.toFixed(2)}
+            //                                         label="Current Rating"
+            //                                 />
+            //                             </Col>
+            //                             <Col span={4}>
+            //                                 <MetricItem
+            //                                         value={advice.rating.simulated.toFixed(2)}
+            //                                         label="Simulated Rating"
+            //                                 />
+            //                             </Col>
+            //                         </Row>
+            //                     </Col>
+            //                 </Row>
+            //             </Col>
+            //         </Row>
+            //     </Col>
+            // </Row>
         );
     }
 
     render() {
         return (
-            <Collapse>
+            <Collapse bordered={false}>
                 {this.renderAdvices()}
             </Collapse>
         );
@@ -320,17 +391,22 @@ class SubscribedAdvicesImpl extends React.Component {
 
 export const SubscribedAdvices = withRouter(SubscribedAdvicesImpl);
 
-const MetricItem = (props) => {
-    return (
-        <Row>
-            <Col span={24}><h5 style={{fontWeight: 600, fontSize: '16px'}}>{props.value}</h5></Col>
-            <Col><h5>{props.label}</h5></Col>
-        </Row>
-    );
-};
-
 const HeaderItem = ({text}) => {
     return (
         <h5>Symbols - {text}</h5>
     );
 }
+
+const customPanelStyle = {
+    border: '1px solid #eaeaea',
+};
+
+const adviceNameStyle = {
+    fontFamily: 'Lato, sans-serif',
+    fontSize: '16px'
+};
+
+const tableHeaderStyle = {
+    fontSize: '12px',
+    color: '#787878'
+};

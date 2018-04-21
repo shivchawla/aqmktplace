@@ -9,7 +9,7 @@ import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Too
 import {ForbiddenAccess, StockResearchModal, WatchList} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
-import {loadingColor, pageTitleStyle, metricColor} from '../constants';
+import {loadingColor, pageTitleStyle, metricColor, cashStyle} from '../constants';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
 import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio} from '../utils';
@@ -66,6 +66,7 @@ class PortfolioDetailImpl extends React.Component {
             activeKey:['.$2'],
             show: false,
             notAuthorized: false,
+            cash: -10,
             stockResearchModalVisible: false,
             stockResearchModalTicker: 'TCS',
             hasChangedCount: 0
@@ -253,6 +254,7 @@ class PortfolioDetailImpl extends React.Component {
                     presentAdvices: advices,
                     stockPositions: _.get(response.data, 'detail.positions', []),
                     realtimeSecurities: this.processPositionToWatchlistData(_.get(response.data, 'detail.positions', [])),
+                    cash: _.get(response.data, 'detail.cash', 0),
                     tickers
                 }, () => {
                     // Subscribing to real-time data
@@ -562,10 +564,11 @@ class PortfolioDetailImpl extends React.Component {
                         </Row>
                         <Collapse bordered={false} defaultActiveKey={["3"]}>
                             <Panel
-                                key='1'
-                                style={customPanelStyle}
-                                header={<h3 style={metricsHeaderStyle}>Summary</h3>}
-                                forceRender={true}>
+                                    key='1'
+                                    style={customPanelStyle}
+                                    header={<h3 style={metricsHeaderStyle}>Summary</h3>}
+                                    forceRender={true}
+                            >
                                 <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
                                     <Col span={24}>
                                         <Row style={{marginTop: '10px'}}>
@@ -584,9 +587,10 @@ class PortfolioDetailImpl extends React.Component {
                                 </Row>
                             </Panel>
                             <Panel
-                                key='2'
-                                style={customPanelStyle}
-                                header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
+                                    key='2'
+                                    style={customPanelStyle}
+                                    header={<h3 style={metricsHeaderStyle}>Performance</h3>}
+                            >
                                 <Row style={{padding: '0 30px'}}>
                                     <Col span={24}>
                                         <MyChartNew series={this.state.tickers}/>
@@ -595,13 +599,15 @@ class PortfolioDetailImpl extends React.Component {
 
                             </Panel>
                             <Panel
-                                key='3'
-                                style={customPanelStyle}
-                                header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
+                                    key='3'
+                                    style={customPanelStyle}
+                                    header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}
+                            >
                                 <Row style={{padding: '0 30px'}}>
                                     <Col span={24}>
-                                        <Row>
-                                            <Col span={24} style={{textAlign: 'right'}}>
+                                        <Row type="flex" justify="space-between">
+                                        <Col span={6}><span style={cashStyle}>Cash: {this.state.cash}</span></Col>
+                                            <Col span={6} style={{textAlign: 'right'}}>
                                                 <Radio.Group
                                                         value={this.state.toggleValue}
                                                         onChange={this.toggleView}

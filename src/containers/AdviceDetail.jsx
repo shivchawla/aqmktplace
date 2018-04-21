@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor} from '../constants';
+import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -66,6 +66,7 @@ class AdviceDetailImpl extends React.Component {
             barPercentageSeries: [],
             positions: [],
             show: false,
+            cash: -10,
             stockResearchModalVisible: false,
             stockResearchModalTicker: 'TCS',
             selectedPortfolioDate: moment(),
@@ -148,6 +149,7 @@ class AdviceDetailImpl extends React.Component {
         console.log('Advice Detail', response.data);
         this.setState({
             positions,
+            cash: _.get(response.data, 'detail.cash', 0),
             realtimeSecurities: this.processPositionToWatchlistData(positions),
             adviceDetail: {
                 ...this.state.adviceDetail,
@@ -724,16 +726,19 @@ class AdviceDetailImpl extends React.Component {
                             (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) &&
 
                             <Panel
-                                key="4"
-                                style={customPanelStyle}
-                                header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
-                                <Row className="row-container">
-                                    <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                    key="4"
+                                    style={customPanelStyle}
+                                    header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}
+                            >
+                                <Row className="row-container" type="flex" justify="space-between" align="middle">
+                                    <Col span={6}><span style={cashStyle}>Cash: {this.state.cash}</span></Col>
+                                    <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                         {
                                             this.state.adviceDetail.isOwner &&
                                             <DatePicker
                                                     value={this.state.selectedPortfolioDate}
                                                     onChange={this.handlePortfolioStartDateChange}
+                                                    allowClear={false}
                                             />
                                         }
                                     </Col>
