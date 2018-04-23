@@ -140,7 +140,7 @@ const contentLayoutStyle = {
     //padding: '10px 0px 0px 0px',
     background: '#f9f9f9',
     //marginTop: '15px'
-    width:'90%',
+    width:'95%',
     margin:'0 auto',
     //height:'calc(100vh - 64px)'
     height: '100%',

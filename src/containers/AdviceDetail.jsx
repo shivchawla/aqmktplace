@@ -637,7 +637,7 @@ class AdviceDetailImpl extends React.Component {
                 : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
 
         return (
-            <Row>
+            <Row style={{marginBottom:'20px'}}>
                 <AqPageHeader title={name} breadCrumbs={breadCrumbs}/>
                 <StockResearchModal
                         ticker={this.state.stockResearchModalTicker}
@@ -753,12 +753,16 @@ class AdviceDetailImpl extends React.Component {
                         }
                     </Collapse>
                 </Col>
-                <Col span={6}>
-                    <WatchList 
-                            tickers={this.state.realtimeSecurities}
-                            preview={true}
-                    />
-                </Col>
+                {this.state.realtimeSecurities.length > 0 && 
+                    <Col span={6} >
+                        <div style={{...shadowBoxStyle, padding: '0px 10px', width: '95%', marginLeft:'auto', minHeight:'200px', maxHeight: '500px'}}>
+                            <WatchList 
+                                tickers={this.state.realtimeSecurities}
+                                preview={true}
+                            />
+                        </div>
+                    </Col>
+                }
             </Row>
         );
     }

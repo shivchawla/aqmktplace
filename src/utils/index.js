@@ -86,8 +86,8 @@ export class Utils{
 	}
 
 	static getSocketUrl(){
-		return "wss://developapi.aimsquant.com";
-		// return 'ws://localhost:1337';
+		//return "wss://developapi.aimsquant.com";
+		return 'ws://localhost:3002';
 	}
 
 	static getBaseUrl(){
@@ -287,7 +287,7 @@ export class Utils{
 
 	static formatMoneyValueMaxTwoDecimals(value){
 		if (value){
-			var x=value.toString();
+			var x=value.toFixed(2);
 			var afterPoint = '';
 			if(x.indexOf('.') > 0)
 			   afterPoint = x.substring(x.indexOf('.'),x.length);

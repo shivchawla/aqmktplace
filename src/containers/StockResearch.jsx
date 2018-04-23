@@ -111,13 +111,13 @@ class StockResearchImpl extends React.Component {
             latestDetail.ticker = data.security.ticker;
             latestDetail.exchange = data.security.exchange;
             latestDetail.close = data.latestDetail.values.Close;
-            latestDetail.latestPrice = data.latestDetail.values.Close
-            latestDetail.open = data.latestDetail.values.Open;
-            latestDetail.low = data.latestDetail.values.Low;
-            latestDetail.high = data.latestDetail.values.High;
-            latestDetail.low_52w = data.latestDetail.values.Low_52w;
-            latestDetail.high_52w = data.latestDetail.values.High_52w;
-            latestDetail.change = data.latestDetail.values.Change;
+            latestDetail.latestPrice = _.get(data, 'latestDetailRT.current', 0) || data.latestDetail.values.Close
+            latestDetail.open = _.get(data, 'latestDetailRT.open', 0) || data.latestDetail.values.Open;
+            latestDetail.low = _.get(data, 'latestDetailRT.low', 0) || data.latestDetail.values.Low;
+            latestDetail.high = _.get(data, 'latestDetailRT.high', 0) || data.latestDetail.values.High;
+            latestDetail.low_52w = Math.min(_.get(data, 'latestDetailRT.low', 0), data.latestDetail.values.Low_52w);
+            latestDetail.high_52w = Math.max(_.get(data, 'latestDetailRT.high', 0), data.latestDetail.values.High_52w);
+            latestDetail.change = Number(((_.get(data, 'latestDetailRT.changePct', 0) || data.latestDetail.values.ChangePct)*100).toFixed(2));
             latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
             this.setState({latestDetail}, () => {
                 // Subscribing to real-time data
@@ -194,7 +194,7 @@ class StockResearchImpl extends React.Component {
     }
 
     formatPriceMetrics = value => {
-        return value ? Math.round(value) == value ? value : value.toFixed(2) : '-';
+        return value ? Math.round(value) == value ? Utils.formatMoneyValueMaxTwoDecimals(value) : Utils.formatMoneyValueMaxTwoDecimals(Number(value.toFixed(2))) : '-';
     }
 
     renderPriceMetrics = metrics => {
@@ -319,7 +319,7 @@ class StockResearchImpl extends React.Component {
                     this.setState({
                         latestDetail: {
                             ...this.state.latestDetail,
-                            latestPrice: _.get(realtimeResponse, 'output.current', 0),
+                            latestPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(realtimeResponse, 'output.current', 0)),
                             change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
                         }
                     });
@@ -332,8 +332,8 @@ class StockResearchImpl extends React.Component {
                         // Getiing the required security to update
                         const targetSecurity = targetWatchlist.positions.filter(item => item.name === realtimeResponse.ticker)[0];
                         if (targetSecurity) {
-                            targetSecurity.change = realtimeResponse.output.change;
-                            targetSecurity.price = realtimeResponse.output.current;
+                            targetSecurity.change = (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
+                            targetSecurity.price = Utils.formatMoneyValueMaxTwoDecimals(_.get(realtimeResponse, 'output.current', 0)),
                             this.setState({watchlists});
                         }
                     }
@@ -440,8 +440,8 @@ class StockResearchImpl extends React.Component {
             targetWatchlist.positions = response.data.securities.map(item => {
                 return {
                     name: item.ticker,
-                    change: 0,
-                    price: 100
+                    change: Number(((_.get(item, 'realtime.changePct', 0.0) || _.get(item, 'eod.ChangePct', 0.0))*100).toFixed(2)) ,
+                    price: Utils.formatMoneyValueMaxTwoDecimals(_.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0))
                 }
             });
             this.setState({watchlists});
@@ -455,14 +455,15 @@ class StockResearchImpl extends React.Component {
     }
 
     processWatchlistData = watchlistResponse => {
+        console.log(watchlistResponse);
         return watchlistResponse.map(item => {
             return {
                 name: item.name,
                 positions: item.securities.map(item => {
                     return {
                         name: item.ticker,
-                        change: 0,
-                        price: 100
+                        change: Number(((_.get(item, 'realtime.changePct', 0.0) || _.get(item, 'eod.ChangePct', 0.0))*100).toFixed(2)),
+                        price: Utils.formatMoneyValueMaxTwoDecimals(_.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0))
                     }
                 }),
                 id: item._id
@@ -534,17 +535,19 @@ class StockResearchImpl extends React.Component {
 
     renderWatchlistTabs = () => {
         const watchlists = this.state.watchlists;
+        console.log(watchlists);
         return watchlists.map(item => {
-            // {name: 'TCS', y: 145, change: 1.5, hideCheckbox: true},
-            const tickers = item.positions.map(item => {return {name: item.name, y: item.price, change:item.change, hideCheckbox: true}});
+            console.log(item.positions);
+            const tickers = item.positions.map(it => {return {name: it.name, y: it.price, change:it.change, hideCheckbox: true}});
+            console.log(tickers);
             return (
                 <TabPane key={item.id} tab={item.name}>
                     <Col span={24}>
                         <WatchList 
-                                tickers={tickers} 
-                                id={item.id} 
-                                name={item.name} 
-                                getWatchlist={this.getWatchlist}
+                            tickers={tickers} 
+                            id={item.id} 
+                            name={item.name} 
+                            getWatchlist={this.getWatchlist}
                         />
                     </Col>
                 </TabPane>
@@ -600,6 +603,7 @@ class StockResearchImpl extends React.Component {
                         <AqPageHeader title="Stock Research" breadCrumbs = {breadCrumbs}/>
                     </React.Fragment>
                 }
+                <Row type="flex" justify="space-between">
                 <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
                     {this.renderDeleteModal()}
                     <Row style={metricStyle}>
@@ -681,6 +685,7 @@ class StockResearchImpl extends React.Component {
                 {
                     !this.props.openAsDialog &&
                     <Col span={6}>
+                    <div style={{...shadowBoxStyle, width: '95%', height: '300px', padding:'0px 10px', marginLeft: 'auto'}}>
                         {/* <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button> */}
                         <Tabs 
                                 onChange={this.handleWatchlistTabChange} 
@@ -694,8 +699,11 @@ class StockResearchImpl extends React.Component {
                         >
                             {this.renderWatchlistTabs()}
                         </Tabs>
+                    </div>
                     </Col>
+                    
                 }
+                </Row>
             </React.Fragment>
         );
     }
