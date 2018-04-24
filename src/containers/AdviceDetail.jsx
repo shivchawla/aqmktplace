@@ -47,10 +47,9 @@ class AdviceDetailImpl extends React.Component {
             },
             metrics: {
                 annualReturn: 0,
-                dailyChange: 0,
-                dailyChangePct: 0,
-                netValue: 0,
-                totalReturn: 0,
+                volatility:0,
+                maxLoss:0,
+                dailyNAVChangePct: 0,
                 netValue: 0
             },
             tickers: [],
@@ -108,11 +107,20 @@ class AdviceDetailImpl extends React.Component {
             numSubscribers,
             numFollowers,
             portfolio,
-            performanceSummary
+            performanceSummary,
+            netValue,
+            stocks
         } = response.data;
-        const {annualReturn, dailyChange, dailyChangePct, netValue, totalReturn} = _.get(performanceSummary, 'current', {});
+        const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks} = _.get(performanceSummary, 'current', {});
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         tickers.push({name: benchmark, color: benchmarkColor});
+
+        //Compute change in NAV from EOD nav
+        var dailyNAVChangePct = Number(((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
+        var annualReturnOld = annualReturn;
+        var avgDailyReturnOld = Math.pow((1+annualReturnOld), (1/252)) - 1.0;
+        var annualReturnNew = Math.pow((1+avgDailyReturnOld),251)*(1+dailyNAVChangePct/100) - 1.0;
+        
         this.setState({
             tickers,
             adviceResponse: response.data,
@@ -129,14 +137,15 @@ class AdviceDetailImpl extends React.Component {
                 followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
                 rating: Number(rating.current.toFixed(2)),
-                isPublic: response.data.public
+                isPublic: response.data.public,
             },
             metrics: {
                 ...this.state.metrics,
-                annualReturn,
-                totalReturn,
-                dailyChange,
-                dailyChangePct,
+                nstocks,
+                annualReturn: annualReturnNew,
+                volatility,
+                maxLoss,
+                dailyNAVChangePct,
                 netValue
             }
         });
@@ -146,10 +155,9 @@ class AdviceDetailImpl extends React.Component {
         const portfolio = {...this.state.portfolio};
         const positions = _.get(response.data, 'detail.positions', []);
         const {maxNotional, rebalance} = response.data;
-        console.log('Advice Detail', response.data);
         this.setState({
             positions,
-            cash: _.get(response.data, 'detail.cash', 0),
+            //cash: _.get(response.data, 'detail.cash', 0),
             realtimeSecurities: this.processPositionToWatchlistData(positions),
             adviceDetail: {
                 ...this.state.adviceDetail,
@@ -166,14 +174,14 @@ class AdviceDetailImpl extends React.Component {
         const tickers = [...this.state.tickers];
         if (response.data.simulated) {
             tickers.push({
-                name: 'ADVICE SIM',
+                name: 'Simulated Performance',
                 data: this.processPerformanceData(_.get(response.data, 'simulated.portfolioValues', [])),
                 color: simulatedPerformanceColor
             });
         }
         if (response.data.current) {
             tickers.push({
-                name: 'ADVICE CURR',
+                name: 'True Performance',
                 data: this.processPerformanceData(_.get(response.data, 'current.portfolioValues', [])),
                 color: currentPerformanceColor
             });
@@ -250,15 +258,15 @@ class AdviceDetailImpl extends React.Component {
     };
 
     renderAdviceMetrics = () => {
-        const {annualReturn, dailyChange, dailyChangePct, netValue, totalReturn} = this.state.metrics;
+        const {annualReturn, volatility, maxLoss, dailyNAVChangePct, netValue, totalReturn, nstocks} = this.state.metrics;
         const {followers, subscribers} = this.state.adviceDetail;
         const metricsItems = [
             {value: subscribers, label: 'Subscribers'},
-            {value: followers, label: 'Wishlisters'},
-            {value: totalReturn, label: 'Total Return', percentage: true, color: true, fixed: 2},
-            {value: dailyChange, label: 'Daily PnL (\u20B9)', color: true, fixed: Math.round(dailyChange) == dailyChange ? 0 : 2},
-            {value: dailyChangePct, label: 'Daily PnL (%)', percentage: true, color: true, fixed: 2},
-            {value: netValue, label: 'Net Value (\u20B9)', fixed: Math.round(netValue) == netValue ? 0 : 2},
+            {value: nstocks, label: 'Num. of Stocks'},
+            {value: annualReturn, label: 'Annual Return', percentage: true, color:true, fixed: 2},
+            {value: volatility, label: 'Volatility', percentage: true, fixed: 2},
+            {value: maxLoss, label: 'Max. Loss', percentage: true, fixed: 2},
+            {value: netValue, label: 'Net Value', money:true, isNetValue:true, dailyChangePct:dailyNAVChangePct},
         ]
 
         return <AdviceMetricsItems metrics={metricsItems} />
@@ -394,36 +402,12 @@ class AdviceDetailImpl extends React.Component {
     }
 
     setUpSocketConnection = () => {
-        if (this.mounted) {
-            if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
-                Utils.openSocketConnection();
-            } else {
-                this.subscribeToAdvice(this.props.match.params.id);
-                this.state.realtimeSecurities.map(item => {
-                    this.subscribeToStock(item.name);
-                });
-            }
-    
-            Utils.webSocket.onopen = () => {
-                // subscribed to advice
-                this.takeAdviceAction();
-            };
-            
-            Utils.webSocket.onclose = () => {
-                console.log('Connection Closed');
-                if (this.mounted) {
-                    Utils.webSocket = undefined;
-                    this.numberOfTimeSocketConnectionCalled++;
-                    setTimeout(() => {
-                        this.setUpSocketConnection();
-                    }, Math.min(2 * 1000 * this.numberOfTimeSocketConnectionCalled, 5000));
-                } else {
-                    return;
-                }
-            };
-            
-            Utils.webSocket.onmessage = this.processRealtimeMessage;
-        }
+        Utils.webSocket.onopen = () => {
+            // subscribed to advice
+            this.takeAdviceAction();
+        };
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
+        this.takeAdviceAction();
     }
 
     takeAdviceAction = () => {
@@ -448,13 +432,7 @@ class AdviceDetailImpl extends React.Component {
             'adviceId': adviceId,
             'detail': true
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to Advice ${adviceId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     unSubscribeToAdvice = adviceId => {
@@ -466,13 +444,7 @@ class AdviceDetailImpl extends React.Component {
             'adviceId': adviceId,
             // 'detail': true
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${adviceId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     subscribeToStock = ticker => {
@@ -483,13 +455,7 @@ class AdviceDetailImpl extends React.Component {
             'type': 'stock',
             'ticker': ticker
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to ${ticker}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     unSubscribeToStock = ticker => {
@@ -500,34 +466,28 @@ class AdviceDetailImpl extends React.Component {
             'type': 'stock',
             'ticker': ticker
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${ticker}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     processRealtimeMessage = msg => {
         if (this.mounted) {
-            console.log(JSON.parse(msg.data));
             const realtimeData = JSON.parse(msg.data);
             if (realtimeData.type === 'advice') {
-                const netAssetValue = _.get(realtimeData, 'output.summary.nav', 0);
-                const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyPnlChangePct', 0) * 100).toFixed(2);
-                const dailyChange = _.get(realtimeData, 'output.summary.dailyPnlChange');
+                const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
+                const dailyNAVChangePct = Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2));
+                var annualReturnOld = this.state.metrics.annualReturn;
+                var avgDailyReturnOld = Math.pow((1+this.state.metrics.annualReturn), (1/252)) - 1.0;
+                var annualReturnNew = Math.pow((1+avgDailyReturnOld),251)*(1+dailyNAVChangePct/100) - 1.0;
                 this.setState({
                     metrics: {
                         ...this.state.metrics,
-                        dailyChange,
-                        dailyChangePct,
-                        netValue: netAssetValue
+                        annualReturn: annualReturnNew,
+                        dailyNAVChangePct,
+                        netValue
                     },
                     positions: _.get(realtimeData, 'output.detail.positions', [])
                 });
             } else if (realtimeData.type === 'stock') {
-                console.log(realtimeData);
                 const realtimeSecurities = [...this.state.realtimeSecurities];
                 const targetSecurity = realtimeSecurities.filter(item => item.name === realtimeData.ticker)[0];
                 if (targetSecurity) {
@@ -689,19 +649,21 @@ class AdviceDetailImpl extends React.Component {
                             >
                                 {
                                     this.state.barDollarSeries.length > 0
-                                    ?   <Row className="row-container">
-                                            <Col span={24}>
+                                    ?   <Row className="row-container" gutter={20}>
+                                            <Col span={12}>
                                                 <AqCard title="Portfolio Summary">
                                                     <HighChartNew series = {this.state.series} />
                                                 </AqCard>
-                                                <AqCard title="Performance Summary" offset={2}>
+                                            </Col>
+                                            <Col span={12}>
+                                                <AqCard title="Performance Summary">
                                                     {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
-                                                    <Col span={24} style={{paddingTop: '10px'}}>
+                                                    {/*<Col span={24} style={{paddingTop: '10px'}}>*/}
                                                         <HighChartBar
                                                                 dollarSeries={this.state.barDollarSeries}
                                                                 percentageSeries={this.state.barPercentageSeries}
                                                         />
-                                                    </Col>
+                                                    {/*</Col>*/}
                                                 </AqCard>
                                             </Col>
                                         </Row>
@@ -731,7 +693,7 @@ class AdviceDetailImpl extends React.Component {
                                     header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}
                             >
                                 <Row className="row-container" type="flex" justify="space-between" align="middle">
-                                    <Col span={6}><span style={cashStyle}>Cash: {this.state.cash}</span></Col>
+                                    {/*<Col span={6}><span style={cashStyle}>Cash: {this.state.cash}</span></Col>*/}
                                     <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                         {
                                             this.state.adviceDetail.isOwner &&
@@ -744,8 +706,9 @@ class AdviceDetailImpl extends React.Component {
                                     </Col>
                                     <Col span={24} style={{marginTop: '10px'}}>
                                         <AqStockPortfolioTable
-                                                    positions={this.state.positions}
-                                                    updateTicker={this.updateTicker}
+                                            composition
+                                            positions={this.state.positions}
+                                            updateTicker={this.updateTicker}
                                         />
                                     </Col>
                                 </Row>

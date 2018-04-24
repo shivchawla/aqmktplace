@@ -103,7 +103,7 @@ class StockResearchImpl extends React.Component {
         this.setState({tickers, show: true});
         console.log('Initial Call' , initialCall);
         if (initialCall === false) {
-            this.unSubscribeToStock(this.state.latestDetail.ticker);
+            //this.unSubscribeToStock(this.state.latestDetail.ticker);
         }
         getStockData(value, 'latestDetail')
         .then(response => {
@@ -128,7 +128,6 @@ class StockResearchImpl extends React.Component {
             return getStockData(value, 'rollingPerformance');
         })
         .then(response => {
-            console.log('Rolling Performance', response.data);
             this.setState({rollingPerformance: response.data.rollingPerformance.detail});
         })
         .catch(error => {
@@ -141,7 +140,6 @@ class StockResearchImpl extends React.Component {
 
     renderRollingPerformanceData = key => {
         const {rollingPerformance} = this.state;
-        // console.log(rollingPerformance);
         if(rollingPerformance[key]) {
             const ratios = rollingPerformance[key].ratios;
             const returns = rollingPerformance[key].returns;
@@ -264,38 +262,11 @@ class StockResearchImpl extends React.Component {
     }
 
     setUpSocketConnection = () => {
-        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
-            console.log('Opening Socket connection');
-            Utils.openSocketConnection();
-        } else {
-            console.log('Will Subscribe Now');
-            this.subscribeToStock(this.state.latestDetail.ticker);
-            this.subscribeToWatchList(this.state.selectedWatchlistTab);
-        }
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
         Utils.webSocket.onopen = () => {
-            console.log('Connection Opened Will Subscribe Now');
             this.takeAction();
         };
-        Utils.webSocket.onclose = code => {
-            console.log('Connection Closed');
-            if (this.mounted) {
-                Utils.webSocket = undefined;
-                this.reconnect();
-            } else {
-                return;
-            }
-        };
-        Utils.webSocket.onmessage = this.processRealtimeMessage;
-    }
-
-    reconnect = () => {
-        console.log('Reconnecting');
-        this.numberOfTimeSocketConnectionCalled++;
-        const count = this.numberOfTimeSocketConnectionCalled;
-        console.log(this.numberOfTimeSocketConnectionCalled);
-        setTimeout(() => {
-            this.setUpSocketConnection();
-        }, Math.min(1000 * count * 2, 8000));
+        this.takeAction();
     }
 
     takeAction = () => {
@@ -315,16 +286,14 @@ class StockResearchImpl extends React.Component {
             try {
                 const realtimeResponse = JSON.parse(msg.data);
                 if (realtimeResponse.type === 'stock' && realtimeResponse.ticker === this.state.latestDetail.ticker) {
-                    console.log(realtimeResponse);
                     this.setState({
                         latestDetail: {
                             ...this.state.latestDetail,
-                            latestPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(realtimeResponse, 'output.current', 0)),
+                            latestPrice: _.get(realtimeResponse, 'output.current', 0),
                             change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
                         }
                     });
                 } else {
-                    console.log(realtimeResponse);
                     const watchlists = [...this.state.watchlists];
                     // Getting the required wathclist
                     const targetWatchlist = watchlists.filter(item => item.id === realtimeResponse.watchlistId)[0];
@@ -354,13 +323,7 @@ class StockResearchImpl extends React.Component {
             'type': 'stock',
             'ticker': ticker
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to ${ticker}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     unSubscribeToStock = ticker => {
@@ -371,13 +334,7 @@ class StockResearchImpl extends React.Component {
             'type': 'stock',
             'ticker': ticker
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${ticker}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     subscribeToWatchList = watchListId => {
@@ -388,10 +345,7 @@ class StockResearchImpl extends React.Component {
             'type': 'watchlist',
             'watchlistId': watchListId
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to watchlist ${watchListId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } 
+        Utils.sendWSMessage(msg); 
     }
 
     unsubscribeToWatchlist = watchListId => {
@@ -402,13 +356,7 @@ class StockResearchImpl extends React.Component {
             'type': 'watchlist',
             'watchlistId': watchListId
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Un Subscribed to watchlist ${watchListId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     toggleWatchListModal = () => {
@@ -455,7 +403,6 @@ class StockResearchImpl extends React.Component {
     }
 
     processWatchlistData = watchlistResponse => {
-        console.log(watchlistResponse);
         return watchlistResponse.map(item => {
             return {
                 name: item.name,
@@ -506,7 +453,6 @@ class StockResearchImpl extends React.Component {
             method: 'DELETE'
         })
         .then(response => {
-            console.log(response.data);
             message.success('Watchlist successfully deleted');
             this.getWatchlists();
             if (this.state.watchlists.length > 0) {
@@ -535,11 +481,8 @@ class StockResearchImpl extends React.Component {
 
     renderWatchlistTabs = () => {
         const watchlists = this.state.watchlists;
-        console.log(watchlists);
         return watchlists.map(item => {
-            console.log(item.positions);
             const tickers = item.positions.map(it => {return {name: it.name, y: it.price, change:it.change, hideCheckbox: true}});
-            console.log(tickers);
             return (
                 <TabPane key={item.id} tab={item.name}>
                     <Col span={24}>
@@ -638,7 +581,7 @@ class StockResearchImpl extends React.Component {
                                 <span style={{fontSize: '20px'}}>{latestDetail.ticker}</span>
                             </h1>
                             <h3 style={lastPriceStyle}>
-                                {latestDetail.latestPrice} 
+                                {Utils.formatMoneyValueMaxTwoDecimals(latestDetail.latestPrice)} 
                                 <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
                             </h3>
                             <h5 

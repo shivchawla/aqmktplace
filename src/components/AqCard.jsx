@@ -6,7 +6,7 @@ export class AqCard extends React.Component {
         const {title, children, offset=0} = this.props;
 
         return(
-            <Col span={11} style={overviewStyle} offset={offset}>
+            <Col style={overviewStyle} offset={offset}>
                 <Row type="flex" align="middle">
                     <Col span={24} style={overHeadContainerStyle}>
                         <h3 style={overviewHeaderStyle}>{title}</h3>
