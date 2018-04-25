@@ -302,7 +302,7 @@ class StockResearchImpl extends React.Component {
                         const targetSecurity = targetWatchlist.positions.filter(item => item.name === realtimeResponse.ticker)[0];
                         if (targetSecurity) {
                             targetSecurity.change = (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
-                            targetSecurity.price = Utils.formatMoneyValueMaxTwoDecimals(_.get(realtimeResponse, 'output.current', 0)),
+                            targetSecurity.price = _.get(realtimeResponse, 'output.current', 0),
                             this.setState({watchlists});
                         }
                     }
@@ -389,7 +389,7 @@ class StockResearchImpl extends React.Component {
                 return {
                     name: item.ticker,
                     change: Number(((_.get(item, 'realtime.changePct', 0.0) || _.get(item, 'eod.ChangePct', 0.0))*100).toFixed(2)) ,
-                    price: Utils.formatMoneyValueMaxTwoDecimals(_.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0))
+                    price: _.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0)
                 }
             });
             this.setState({watchlists});
@@ -410,7 +410,7 @@ class StockResearchImpl extends React.Component {
                     return {
                         name: item.ticker,
                         change: Number(((_.get(item, 'realtime.changePct', 0.0) || _.get(item, 'eod.ChangePct', 0.0))*100).toFixed(2)),
-                        price: Utils.formatMoneyValueMaxTwoDecimals(_.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0))
+                        price: _.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0)
                     }
                 }),
                 id: item._id

@@ -144,7 +144,7 @@ class MyChartNewImpl extends React.Component {
             // console.log(point.series.name);
             try{
                 const item = legendItems.filter(item => item.name.toUpperCase() === point.series.name.toUpperCase())[0];
-                item.y = point.y.toFixed(2);
+                item.y = point.y;
                 item.change = Number(point.point.change.toFixed(2));
                 this.setState({legendItems, selectedDate: moment(points[0].x).format(dateFormat)});
             }

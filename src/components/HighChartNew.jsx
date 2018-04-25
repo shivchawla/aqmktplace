@@ -130,7 +130,6 @@ export class HighChartNew extends React.Component {
                 this.chart.addSeries({
                     name: item.name,
                     data: item.data.map((item, index) => {
-                        console.log(index);
                         return {
                             ...item,
                             z: index === validIndex ? 1 : 0

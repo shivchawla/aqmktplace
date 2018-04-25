@@ -12,6 +12,7 @@ export class ChartTickerItem extends React.Component {
         };
     }
 
+    //Fix required: On focus, instead of just rendering the delete icon, whole item is re-rendered
     focus = () => {
         this.setState({focused: true});
     }
@@ -35,6 +36,7 @@ export class ChartTickerItem extends React.Component {
         const metricFontSize = this.props.watchlist ? '13px' : '13px';
         const nameSpan = this.props.watchlist ? 12 : 11;
         //const metricSpan = this.props.watchlist ? 9 : 11;
+        console.log(y);
         return(
             <Row 
                 className='ticker-row' 
@@ -58,6 +60,7 @@ export class ChartTickerItem extends React.Component {
                         label=""
                         //value={`${y} (${change} %)`}
                         value={y}
+                        money
                         dailyChangePct={change}
                         isNetValue
                         labelStyle={{fontSize: '11px'}}

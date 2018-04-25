@@ -13,19 +13,21 @@ const MetricItemImpl = (props) => {
     const change = props.dailyChange, changePct = props.dailyChangePct;
     const changeColor = changePct >= 0 ? metricColor.positive : metricColor.negative;
 
-    const label = props.money ? `${props.label} (\u20B9)` : props.label;
+    const label = props.label!="" ? props.money ? `${props.label} (\u20B9)` : props.label : "";
     const neutralColor = '#353535';
     const positiveColor = '#00b300';
     const negativeColor = '#F44336';
     const valueColor = props.color ? props.value > 0 ? positiveColor : props.value < 0 ? negativeColor : neutralColor: neutralColor;
     // var dirArrow = props.direction ? props.value > 0 ? '▲' : props.value < 0 ? '▼' : "" : ""; 
     var dirArrow = "";
+    
+    var fixed = props.fixed ? props.fixed : props.percentage ? 2 : 0;
     const value = props.value ? 
         `${(props.percentage ? 
-            `${(props.value * 100).toFixed((props.fixed+1) ? props.fixed : 2)} %` : 
+            `${(props.value * 100).toFixed(fixed)} %` : 
             props.money ? 
                 Utils.formatMoneyValueMaxTwoDecimals(props.value) : 
-                props.value.toFixed((props.fixed+1) ? props.fixed : 2))} ${dirArrow}` :
+                props.value.toFixed(fixed))} ${dirArrow}` :
         '-';
                     
     return (

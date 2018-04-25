@@ -37,7 +37,6 @@ export class HighChartSpline extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextState) {
-        console.log('Received New Spline', nextProps.series);
         if (nextProps.series !== this.props.series) {
             try {
                 this.updateSeries(nextProps.series);
@@ -53,7 +52,6 @@ export class HighChartSpline extends React.Component {
 
     initializeChart = () => {
         const {series} = this.props;
-        console.log('Spline Series', series);
         this.chart = new HighChart['Chart'](this.props.id, this.state.config);
         try {
             this.updateSeries(series);
@@ -63,7 +61,6 @@ export class HighChartSpline extends React.Component {
     }
 
     updateSeries = series => {
-        console.log('My Series', series);
         this.clearSeries();
         series.map(item => {
             this.chart.addSeries(item);
