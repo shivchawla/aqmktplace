@@ -394,14 +394,9 @@ class AdviceListItemImpl extends React.PureComponent {
             rebalancingFrequency
         } = this.props.advice;
         let sectors = _.get(performanceSummary, 'current.sectors', []);
-
-        console.log(name);
-        console.log(isFollowing);
+        
         const activeCardStyle = this.state.isHovered ? hoverCardStyle : cardStyle;
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
-        //'#f58231','#911eb4','#3cb44b','#ffe119','#46f0f0'
-        //'#f032e6','#d2f53c','#fabebe','#008080','#e6beff','#aa6e28','#fffac8','#800000','#aaffc3','#808000','#ffd8b1'
-        //const statusTagColor = isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
         const statusTagColor = isOwner ? '#3cb44b' : isSubscribed ? '#1890ff' : isFollowing ? '#03a7ad' : '#fff';
         const statusTagLabel = isOwner ? 'Owner' : isSubscribed ? 'Subscribed' : isFollowing ? 'Wishlist' : "";
 
