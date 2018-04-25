@@ -139,7 +139,7 @@ export class Home extends React.Component {
                     <Col span={12}>
                         <Row>
                             <Col span={24}>
-                                <h1 className="hero-text">Crowd-Sourced<br></br>Investment Advice</h1>
+                                <h1 className="hero-text">Crowd-Sourced<br></br>Investment Portfolio</h1>
                             </Col>
                             <Col span={24}>
                                 <h5 className="hero-description-text">
@@ -212,7 +212,7 @@ export class Home extends React.Component {
                     </Col>
                 </Row>
                 <Row className="footer">
-                    <h3 className="footer-header">AimsQube</h3>
+                    <h3 className="footer-header">AdviceQube</h3>
                     <Col span={4} className="footer-container">
                         <h5 className="footer-group-header">Products</h5>
                         <div className="footer-list">
