@@ -152,7 +152,7 @@ export class ScreenAdvices extends React.PureComponent {
                     width={700}
             >
                 <AdviceFilterComponent 
-                        personal="0,1"
+                        personal="0"
                         updateAdvices={this.updateAdvices}
                         updateAdviceUrl={this.updateAdviceUrl}
                         toggleModal = {this.toggleFilterModal}
@@ -321,7 +321,7 @@ export class ScreenAdvices extends React.PureComponent {
                         <Row>
                             <Col span={24}>
                                 <AdviceFilterSideComponent 
-                                        personal="0,1"
+                                        owner={false}
                                         updateAdvices={this.updateAdvices}
                                         updateAdviceUrl={this.updateAdviceUrl}
                                         toggleModal = {this.toggleFilterModal}

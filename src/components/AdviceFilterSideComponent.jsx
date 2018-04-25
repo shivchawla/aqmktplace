@@ -12,7 +12,7 @@ const filters = {
     maxNotional: ['100000', '200000', '300000', '500000', '750000', '1000000'],
     rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
     approved: ['Approved', 'UnApproved'],
-    advices: ['Personal', 'Others'],
+    owner: ['Personal', 'Others'],
     netValue: '0,100000000',
     sharpe: '-100,100',
     return: '-100,100',
@@ -23,7 +23,7 @@ const kvp = {
     maxNotional: 'selectMaxNotionalAllFilters',
     rebalancingFrequency: 'selectRebalanceAllFilters',
     approved: 'selectApprovedllFilters',
-    advices: 'selectAdvicesAllFilters'
+    owner: 'selectOwnerAllFilters'
 };
 
 export class AdviceFilterSideComponent extends React.Component {
@@ -35,12 +35,12 @@ export class AdviceFilterSideComponent extends React.Component {
             selectMaxNotionalAllFilters: true,
             selectRebalanceAllFilters: true,
             selectApprovedllFilters: true,
-            selectAdvicesAllFilters: true
+            selectOwnerAllFilters: true
         };
     }
 
     componentWillReceiveProps(nextProps) {
-        this.setState({advices: nextProps.advices});
+        this.setState({owner: nextProps.owner});
     }
 
     renderRebalancingFreqFilter = () => (
@@ -62,9 +62,9 @@ export class AdviceFilterSideComponent extends React.Component {
 
     renderAdviceFilter = () => (
         <CheckboxGroup 
-                onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "advices")} 
-                options={this.state.defaultFilters.advices}
-                value={this.state.selectedFilters.advices}
+                onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "owner")} 
+                options={this.state.defaultFilters.owner}
+                value={this.state.selectedFilters.owner}
         />
     )
 
@@ -93,7 +93,7 @@ export class AdviceFilterSideComponent extends React.Component {
     processUrl = (type = 'all') => {
         const {selectedFilters, defaultFilters} = this.state;
         let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
-        let personal = selectedFilters.advices.map(item => item === 'Personal' ? 1 : 0);
+        let personal = selectedFilters.owner.map(item => item === 'Personal' ? 1 : 0);
         const limit = 10;
         const maxNotional = selectedFilters.maxNotional.length > 0 ? _.join(selectedFilters.maxNotional, ',') : _.join(defaultFilters.maxNotional, ',');
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
@@ -202,9 +202,9 @@ export class AdviceFilterSideComponent extends React.Component {
                     <Col span={24} style={{marginBottom: '20px'}}>
                         <IconHeader 
                                 icon="check-circle" 
-                                label="Advices"
-                                checked={this.state.selectAdvicesAllFilters}
-                                filterType="advices"
+                                label="Ownership"
+                                checked={this.state.selectOwnerAllFilters}
+                                filterType="owner"
                                 onChange={this.handleFilterGroupCheckboxChange}
                         />
                         <Row>
@@ -232,7 +232,7 @@ const filterHeader = {
 const filterLayoutStyle = {
     padding: '15px', 
     overflow: 'hidden', 
-    overflowY: 'scroll', 
-    height: '600px',
+    //overflowY: 'scroll', 
+    //height: '600px',
     layout_weight: '1'
 }

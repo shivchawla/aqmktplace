@@ -11,6 +11,7 @@ import sunrise from '../assets/sunrise.svg';
 import pie from '../assets/pie.svg';
 import barChart from '../assets/bar-chart-2.svg';
 import totalReturnIcon from '../assets/totalReturn.svg';
+import {Utils} from '../utils';
 
 const dateFormat = 'Do MMMM YYYY';
 
@@ -183,24 +184,23 @@ class AdviceListItemImpl extends React.PureComponent {
     }
 
     renderSectors = (sectors) => {
-        if (sectors.length > 2) {
+        if (sectors.length > 3) {
             return (
                 <Tag 
-                    color="#ECFAFF" 
-                    style={{color: '#414141'}} 
+                    //color="#ECFAFF" 
+                    style={{color: '#414141', border:'1px solid #cc6666'}} 
                     onClick={e => {e.stopPropagation()}} 
                 >
-                    Diversified
+                    Multiple Sectors
                 </Tag>
             );
         } 
         return sectors.slice(0, 2).map((sector, index) => {
             return <Tag 
-                    color="#ECFAFF" 
-                    style={{color: '#414141'}} 
+                    //color="#ECFAFF" 
+                    style={{color: '#414141', border:'1px solid #cc6666'}} 
                     onClick={e => {e.stopPropagation()}} 
-                    key={index}
-                >
+                    key={index}>
                     {sector}
                 </Tag>
         });
@@ -210,16 +210,19 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
+                <h5 style={{fontSize: "16px"}}>
+                    {(diversity * 100).toFixed(2)} %
+                </h5>
+                    {/*<img style={iconStyle} src={pie} />*/}
+                </Col>
+                <Col span={24}>
+                    <span style={{fontSize: '13px'}}>
+                        Diversity Index
+                    </span>
+                </Col>
+                {/*<Col span={24}>
                     <img style={iconStyle} src={pie} />
-                </Col>
-                <Col span={24} style={{fontSize: '14px'}}>
-                    <h5>
-                        Diversified&nbsp;
-                        <span style={{fontSize: "14px"}}>
-                            {(diversity * 100).toFixed(2)} %
-                        </span>
-                    </h5>
-                </Col>
+                </Col>*/}
             </Row>
         );
     }
@@ -228,23 +231,28 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
+                    {/*<img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />*/}
+                    <h5 style={{fontSize: "16px"}}>{beta.toFixed(2)}</h5>
+                </Col>
+                <Col span={24}>
+                    <span style={{fontSize: '13px'}}>Beta</span>
+                </Col>
+                {/*<Col span={24}>
                     <img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />
-                </Col>
-                <Col span={24} style={{marginTop: '6px'}}>
-                    <h5>Beta <span style={{fontSize: "14px"}}>{beta.toFixed(2)}</span></h5>
-                </Col>
+                </Col>*/}
             </Row>
         );
     }
 
-    renderTotalReturnIcon = totalReturn => {
+    renderAnnualReturnIcon = annualReturn => {
         return (
-            <Row style={{textAlign: 'center', marginTop: '8px'}}>
+            <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                    <img style={{transform: 'scale(0.8, 0.8)'}} src={totalReturnIcon} />
+                    <h5 style={{fontSize: "16px"}}>{(annualReturn * 100).toFixed(2)} %</h5>
+                    {/*<img style={{transform: 'scale(0.8, 0.8)'}} src={totalReturnIcon} />*/}
                 </Col>
                 <Col span={24}>
-                    <h5>Total Ret <span style={{fontSize: "14px"}}>{(totalReturn * 100).toFixed(2)} %</span></h5>
+                    <span style={{fontSize: '13px'}}>Ann. Return</span>
                 </Col>
             </Row>
         );
@@ -254,10 +262,11 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                <img style={iconStyle} src={sunrise} />
+                {/*<img style={iconStyle} src={sunrise} />*/}
+                <h5 style={{fontSize: "16px"}}>{Number((volatility * 100).toFixed(2))} %</h5>
                 </Col>
                 <Col span={24}>
-                    <h5>Volatility <span style={{fontSize: "14px"}}>{Number((volatility * 100).toFixed(2))} %</span></h5>
+                    <span style={{fontSize: '13px'}}>Volatility </span>
                 </Col>
             </Row>
         );
@@ -305,7 +314,7 @@ class AdviceListItemImpl extends React.PureComponent {
                 {
                     performanceSummary.current && 
                     <Col span={6}>
-                        {this.renderTotalReturnIcon(performanceSummary.current.totalReturn)}
+                        {this.renderAnnualReturnIcon(performanceSummary.current.annualReturn)}
                     </Col>
                 }
             </Row>
@@ -315,19 +324,18 @@ class AdviceListItemImpl extends React.PureComponent {
     renderNetValueChange = performanceSummary => {
         let netValue = 0, dailyChange = 0, dailyChangePct = 0, totalReturn;
         if (performanceSummary ) {
-            netValue = _.get(performanceSummary, 'current.netValue', NaN);
-            dailyChange = _.get(performanceSummary, 'current.dailyChange', NaN);
-            dailyChangePct = _.get(performanceSummary, 'current.dailyChangePct', NaN);
-            totalReturn = _.get(performanceSummary, 'current.dailyChangePct', NaN);
+            netValue = _.get(performanceSummary, 'current.netValueEOD', NaN);
+            dailyChange = _.get(performanceSummary, 'current.dailyNAVChangeEOD', NaN);
+            dailyChangePct = _.get(performanceSummary, 'current.dailyNAVChangeEODPct', NaN);
         }
-        var str1 = "Daily PnL";
-        var str2 = "| Daily Chg";
+        var str1 = "Daily Chg (\u20B9)";
+        var str2 = "| Daily Chg (%)";
       
         return (
             <Row type="flex"  style={{marginTop:'-10px'}}>
                 <Col span={24}>
                     <h3 style={netValueStyle}>
-                        {`Rs ${netValue.toFixed(2)}`}
+                        {`\u20B9 ${Utils.formatMoneyValueMaxTwoDecimals(netValue)}`}
                     </h3>
 
                     <Row align="bottom" >
@@ -337,7 +345,7 @@ class AdviceListItemImpl extends React.PureComponent {
                                 textAlign:'right',
                                 paddingRight:'2px',
                                 color: dailyChange < 0 ? '#FA4747' : '#3EBB72'}}>
-                                {(dailyChange).toFixed(2) }     
+                                {Utils.formatMoneyValueMaxTwoDecimals(dailyChange)}     
                         </Col> 
                         <Col span={12} style={{
                                 fontSize: '15px',
@@ -387,8 +395,15 @@ class AdviceListItemImpl extends React.PureComponent {
         } = this.props.advice;
         let sectors = _.get(performanceSummary, 'current.sectors', []);
 
+        console.log(name);
+        console.log(isFollowing);
         const activeCardStyle = this.state.isHovered ? hoverCardStyle : cardStyle;
-        const cardBackgroundColor = isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
+        const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
+        //'#f58231','#911eb4','#3cb44b','#ffe119','#46f0f0'
+        //'#f032e6','#d2f53c','#fabebe','#008080','#e6beff','#aa6e28','#fffac8','#800000','#aaffc3','#808000','#ffd8b1'
+        //const statusTagColor = isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
+        const statusTagColor = isOwner ? '#3cb44b' : isSubscribed ? '#1890ff' : isFollowing ? '#03a7ad' : '#fff';
+        const statusTagLabel = isOwner ? 'Owner' : isSubscribed ? 'Subscribed' : isFollowing ? 'Wishlist' : "";
 
         return (
             <Row 
@@ -403,20 +418,28 @@ class AdviceListItemImpl extends React.PureComponent {
                     <Row>
                         <Col span={10}>
                             <Row>
-                                <Col span={24}>
-                                    <h3 style={{fontSize: '18px'}}>{name}</h3>
+                                <h3 style={{fontSize: '18px'}}>{name}</h3>
+                            </Row>
+                            {
+                                sectors.length > 0 && sectors &&
+                                <Row style={{margin: '5px 0'}}>
+                                    {this.renderSectors(sectors)}
+                                </Row>
+                            }
+                            <Row style={{fontSize: '15px'}} >
+                                <Col span={7}>
+                                    <Tag color='#f58231' style={{color:'#fff', border:'none', width:'85px', paddingTop:'1px'}}>
+                                        <Icon type="clock-circle-o" style={{fontWeight: '400'}}/>
+                                        <span style={{marginLeft: '5px'}}>{rebalancingFrequency}</span>
+                                    </Tag>
                                 </Col>
-                                {
-                                    sectors.length > 0 && sectors &&
-                                    <Col span={24} style={{margin: '5px 0'}}>
-                                        {this.renderSectors(sectors)}
+                                {statusTagLabel!="" &&
+                                    <Col span={11}>
+                                        <Tag color={statusTagColor} style={{color:'#fff'}}>
+                                            <span style={{marginLeft: '5px'}}>{statusTagLabel}</span>
+                                        </Tag>
                                     </Col>
-                                }
-                                <Col span={24} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                    <Icon type="clock-circle-o" style={{fontWeight: '700', fontSize: '16px'}}/>
-                                    <span style={{marginLeft: '5px'}}>{rebalancingFrequency}</span>
-                                </Col>
-                                
+                                 }
                             </Row>
                         </Col>
 
