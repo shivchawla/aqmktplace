@@ -22,3 +22,7 @@ export const PortfolioDetailCrumb = [
 export const UpdatePortfolioCrumb = [
     ...PortfolioDetailCrumb
 ];
+
+export const AdvisorProfileCrumb = [
+    {name: 'Screen Advisors', url: '#'}
+]

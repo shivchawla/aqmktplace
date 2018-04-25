@@ -16,3 +16,5 @@ export * from './AdvisorDashboard';
 export * from './ScreenAdvisors';
 export * from './TokenUpdate';
 export * from './Home';
+export * from './Login';
+export * from './Signup';

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
-import {Input, Button, Form, Icon, Popover, Row, Col, Avatar, Radio, Checkbox} from 'antd';
+import _ from 'lodash';
+import {Input, Button, Form, Icon, Popover, Row, Col, Avatar, Radio, Checkbox, message} from 'antd';
 import {Utils} from '../utils';
 
 const {TextArea} = Input;
@@ -15,7 +16,8 @@ class UpdateAdvisorProfileImpl extends React.Component {
         this.state = {
             picUrl: '',
             value: 1,
-            isRegistered: false
+            isRegistered: false,
+            linkedInUserId: ''
         };
     }
 
@@ -39,8 +41,26 @@ class UpdateAdvisorProfileImpl extends React.Component {
         } else {
             const {advisor} = this.props;
             let value = 1;
-            const {webUrl, linkedIn, phone, isCompany, companyName, registrationNumber, facebook, twitter, isRegistered} = advisor.profile;
-            const {line1, line2, line3, city, country, pincode, state} = advisor.profile.address;
+            const {
+                webUrl = '', 
+                linkedIn = '', 
+                phone = '', 
+                isCompany = '', 
+                companyName = '', 
+                registrationNumber = '', 
+                facebook = '', 
+                twitter = '', 
+                isRegistered = false
+            } = _.get(advisor, 'profile', {});
+            const {
+                line1 = '', 
+                line2 = '', 
+                line3 = '', 
+                city = '', 
+                country = '', 
+                pincode = '', 
+                state = ''
+            } = _.get(advisor, 'profile.address', {});
             if (!isCompany) {
                 value = 2;
             }
@@ -56,11 +76,11 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 state,
                 pincode,
                 phone,
-                linkedIn,
+                linkedIn: _.get(linkedIn, 'url', ''),
                 companyName,
                 registrationNumber,
-                facebook,
-                twitter
+                facebook: _.get(facebook, 'url', ''),
+                twitter:  _.get(twitter, 'url', '')
             });
         }
     }
@@ -82,6 +102,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
     resultCallback = response => {
         console.log(response);
         this.props.form.setFieldsValue({linkedIn: response.values[0].publicProfileUrl});
+        console.log(response);
         this.setState({picUrl: response.values[0].pictureUrl})
     }
 
@@ -90,10 +111,11 @@ class UpdateAdvisorProfileImpl extends React.Component {
         axios({
             method: 'PUT',
             url,
-            headers: {'aimsquant-token': aimsquantToken},
+            headers: Utils.getAuthTokenHeader(),
             data: this.processData()
         })
         .then(response => {
+            message.success('Successfully updated profile');
             this.props.toggleModal();
         })
         .catch(error => {
@@ -118,10 +140,22 @@ class UpdateAdvisorProfileImpl extends React.Component {
             isRegistered: this.state.isRegistered,
             registrationNumber:  values.registrationNumber,
             phone: values.phone,
-            linkedIn: values.linkedIn,
+            linkedIn: {
+                url: values.linkedIn,
+                photoUrl: _.get(this.state, 'picUrl', ''),
+                id: ''
+            },
             companyName: values.companyName,
-            facebook: values.facebook,
-            twitter: values.twitter
+            facebook: {
+                url: '',
+                photoUrl: '',
+                id: ''
+            },
+            twitter: {
+                url: '',
+                photoUrl: '',
+                id: ''
+            }
         };
 
         return data;
@@ -213,33 +247,27 @@ class UpdateAdvisorProfileImpl extends React.Component {
                     </Row>
                     {getFieldDecorator('linkedIn')(
                             <Input placeholder="LinkedIn Public Profile Url" addonBefore={
-                                    <Popover content={this.renderPopoverContent("LinkedIn")} title="Yo">
-                                        <Icon type="linkedin" onClick={this.handleIconClick}/>
-                                    </Popover>
+                                <Icon type="linkedin" onClick={this.authenticateLN} />
                             } />
                     )}
                 </FormItem>
                 <FormItem>
                     {getFieldDecorator('twitter')(
                         <Input placeholder="Twitter Public Profile Url" addonBefore={
-                            <Popover content={this.renderPopoverContent("Twitter")} title="Yo">
-                                <Icon type="twitter" onClick={this.handleIconClick}/>
-                            </Popover>
+                            <Icon type="twitter" onClick={this.handleIconClick}/>
                         } />
                     )}
                 </FormItem>
                 <FormItem>
                     {getFieldDecorator('facebook')(
                         <Input placeholder="Facebook Public Profile Url" addonBefore={
-                            <Popover content={this.renderPopoverContent("Facebook")} title="Yo">
-                                <Icon type="facebook" onClick={this.handleIconClick}/>
-                            </Popover>
+                            <Icon type="facebook" onClick={this.handleIconClick}/>
                         } />
                     )}
                 </FormItem>
                 <FormItem>
-                    <Row>
-                        <Col span={4} offset={20}>
+                    <Row type="flex" justify="end" style={{marginTop: '20px'}}>
+                        <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
                             <Button type="primary" htmlType="submit" onClick={this.updateUserProfile}>Update</Button>
                         </Col>
                     </Row>

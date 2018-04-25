@@ -1,10 +1,11 @@
 import * as React from 'react';
 import axios from 'axios';
+import Loading from 'react-loading-bar';
 import moment from 'moment';
 import _ from 'lodash';
-import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal} from 'antd';
+import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal, Pagination} from 'antd';
 import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, AqPageHeader} from '../components';
-import {newLayoutStyle, pageTitleStyle, shadowBoxStyle} from '../constants';
+import {newLayoutStyle, pageTitleStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {Utils, getBreadCrumbArray} from '../utils';
 import '../css/screenAdvices.css';
 
@@ -47,7 +48,12 @@ export class ScreenAdvices extends React.PureComponent {
             sortBy: 'rating',
             activeFilterPanel: [],
             filterModalVisible: false,
-            loading: true
+            loading: true,
+            selectedPage: 1,
+            limit: 3,
+            totalCount: 3,
+            initialCall: true,
+            show: false
         }
     }
 
@@ -80,19 +86,24 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     getAdvices = (adviceUrl) => {
-        this.setState({loading: true});
+        this.setState({
+            loading: true,
+            show: this.state.initialCall,
+            initialCall: false,
+        });
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({
-                advices: this.processAdvices(response.data)
+                advices: this.processAdvices(response.data.advices),
+                totalCount: _.get(response.data, 'count', 10)
             });
         })
         .catch(error => {
             Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         })
         .finally(() => {
-            this.setState({loading: false});
+            this.setState({loading: false, show: false});
         });
     }
 
@@ -100,11 +111,12 @@ export class ScreenAdvices extends React.PureComponent {
         const {selectedFilters, defaultFilters} = this.state;
         let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
         const personal = '0,1';
-        const limit = 10;
+        const limit = this.state.limit;
+        const skip = this.state.selectedPage - 1;
         const maxNotional = selectedFilters.maxNotional.length > 0 ? _.join(selectedFilters.maxNotional, ',') : _.join(defaultFilters.maxNotional, ',');
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         approved = _.join(approved, ',');
-        return `${requestUrl}/advice?search=${this.state.searchValue}&${type}=true&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}`;
+        return `${requestUrl}/advice?search=${this.state.searchValue}&${type}=true&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip * limit}`;
     }
 
     processAdvices = (responseAdvices) => {
@@ -135,11 +147,33 @@ export class ScreenAdvices extends React.PureComponent {
 
     renderAdvices = () => {
         const {advices} = this.state;
-        return advices.map((advice, index) => {
-            return (
-                <AdviceListItemMod key={index} advice={advice}/>
-            );
-        })
+        return (
+            <div 
+                    className="advice-list" 
+                    style={{
+                        position: 'relative', 
+                        width: '100%', 
+                        height: '100%', 
+                        zoom: 1, 
+                        padding: '0px 4px 1% 4px', 
+                        overflowY: 'auto', 
+                        minHeight: '300px'
+                    }}
+            >
+                <Loading
+                        show={this.state.loading}
+                        color={loadingColor}
+                        className="main-loader"
+                        showSpinner={false}
+                />
+                {
+                    !this.state.loading &&
+                    advices.map((advice, index) => {
+                        return <AdviceListItemMod key={index} advice={advice}/>;
+                    })
+                }
+            </div>
+        );
     }
 
     renderFilter = () => {
@@ -176,7 +210,7 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     handleTabChange = (key) => {
-        this.setState({selectedTab: key}, () => {
+        this.setState({selectedTab: key, selectedPage: 1}, () => {
             this.getAdvices();
         });
     }
@@ -229,7 +263,14 @@ export class ScreenAdvices extends React.PureComponent {
         });
     }
 
-    render() {
+    onPaginationChange = (page, pageSize) => {
+        this.setState({selectedPage: page}, () => {
+            this.getAdvices();
+        })
+        console.log('Page', page);
+    }   
+
+    renderPageContent = () => {
         const antIcon = <Icon type="loading" style={{ fontSize: 36 }} spin />;
         const breadCrumbs = getBreadCrumbArray([{name: 'Screen Advices'}]);
 
@@ -285,25 +326,53 @@ export class ScreenAdvices extends React.PureComponent {
                                         defaultActiveKey="all" 
                                         onChange={this.handleTabChange}
                                 >
-                                    <TabPane tab="All" key="all">
-                                        <Spin size="large" spinning={this.state.loading}>
+                                    <TabPane 
+                                            tab="All" 
+                                            key="all" 
+                                            // style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}
+                                    >
+                                        {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
-                                        </Spin>
+                                        {/* </Spin> */}
+                                        <Pagination 
+                                                current={this.state.selectedPage} 
+                                                total={this.state.totalCount} 
+                                                pageSize={this.state.limit}
+                                                onChange={this.onPaginationChange}
+                                        />
                                     </TabPane>
                                     <TabPane tab="Trending" key="trending">
-                                        <Spin size="large" spinning={this.state.loading}>
+                                        {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
-                                        </Spin>
+                                        {/* </Spin> */}
+                                        <Pagination 
+                                                current={this.state.selectedPage} 
+                                                total={this.state.totalCount} 
+                                                pageSize={this.state.limit}
+                                                onChange={this.onPaginationChange}
+                                        />
                                     </TabPane>
                                     <TabPane tab="Subscribed" key="subscribed">
-                                        <Spin size="large" spinning={this.state.loading}>
+                                        {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
-                                        </Spin>
+                                        {/* </Spin> */}
+                                        <Pagination 
+                                                current={this.state.selectedPage} 
+                                                total={this.state.totalCount} 
+                                                pageSize={this.state.limit}
+                                                onChange={this.onPaginationChange}
+                                        />
                                     </TabPane>
                                     <TabPane tab="Wishlist" key="following">
-                                        <Spin size="large" spinning={this.state.loading}>
+                                        {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
-                                        </Spin>
+                                        {/* </Spin> */}
+                                        <Pagination 
+                                                current={this.state.selectedPage} 
+                                                total={this.state.totalCount} 
+                                                pageSize={this.state.limit} 
+                                                onChange={this.onPaginationChange}
+                                        />
                                     </TabPane>
                                 </Tabs>
                             </Col>
@@ -333,6 +402,23 @@ export class ScreenAdvices extends React.PureComponent {
                     </Col>
                 </Row>
             </Row>
+        );
+    }
+
+    render() {
+        return (
+            <React.Fragment>
+                <Loading
+                        show={this.state.show}
+                        color={loadingColor}
+                        className="main-loader"
+                        showSpinner={false}
+                />
+                {
+                    !this.state.show &&
+                    this.renderPageContent()
+                }
+            </React.Fragment>
         );
     }
 }

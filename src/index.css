@@ -72,3 +72,100 @@ h1, h2, h3, h4, h5 {
 	position: relative;
 	margin-top: '200px'
 }
+
+
+.card{
+	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  }
+  
+
+.card-1 {
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  }
+  
+  .card-1:hover {
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  }
+  
+  .height_width_full{
+	height: 100%;
+	width: 100%;
+  }
+  
+  .center-content{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+  }
+  
+  .ant-form.login-form {
+	max-width: 300px;
+	text-align: left;
+	margin-top: 20px;
+  }
+  .login-form-forgot {
+	float: right;
+  }
+  .login-form-button {
+	width: 100%;
+  }
+	
+	
+.ant-popover.ant-popover-placement-bottomRight .ant-popover-arrow,
+.ant-popover.ant-popover-placement-bottomRight .ant-popover-inner{
+  background: teal !important;
+}
+
+.ant-popover.ant-popover-placement-bottomRight .ant-popover-content{
+  border-radius: 2px !important;
+}
+
+.ant-popover.ant-popover-placement-bottomRight .ant-popover-inner-content{
+  padding: 0px !important;
+}
+
+.loggedinuser-menu-popup-header{
+  padding: 10px;
+  min-width: 300px;
+  min-height: 100px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.loggedinuser-menu-popup-header h3{
+  color: white;
+  font-size: 13px;
+  font-weight: bolder;
+  margin:0px;
+  text-align: right;
+}
+
+.loggedinuser-menu-popup-header p{
+  color: white;
+  font-size: 13px;
+  margin:0px;
+  text-align: right;
+}
+
+.loggedinuser-menu-popup-content{
+  background: white;
+}
+
+.loggedinuser-menu-popup-content .row{
+  display: flex;
+  padding: 10px;
+  border-bottom: 1px solid #dfdfdf;
+  cursor: pointer;
+  align-items: center;
+  font-size: 13px;
+  color: #24293d;
+  font-weight: bold;
+}
+
+.loggedinuser-menu-popup-content .row .icon{
+  color: #cc6666;
+  margin-right: 10px;
+  font-size: 20px;
+}
