@@ -41,9 +41,10 @@ const {requestUrl} = require('../localConfig.js');
 const annualReturnLabel = 'Annual Return';
 const volatilityLabel = 'Volatility';
 const totalReturnLabel = 'Total Return';
-const dailyChangeLabel = 'Daily PnL (\u20B9)';
-const dailyChangePctLabel = 'Daily PnL (%)';
-const netValueLabel = 'Net Value (\u20B9)';
+const dailyChangeLabel = 'Daily PnL';
+const dailyNAVChangePctLabel = 'Dly NAV Chg (%)';
+const netValueLabel = 'Net Value';
+const unrealizedPnlLabel = 'Unrealized PnL';
 
 class PortfolioDetailImpl extends React.Component {
     socketOpenConnectionTimeout = 1000;
@@ -105,7 +106,7 @@ class PortfolioDetailImpl extends React.Component {
         return <AdviceMetricsItems metrics={this.state.portfolioMetrics} />
     }
 
-    renderAdviceTransactions = () => {
+    renderAdvicePortfolio = () => {
         return (
             <Row>
                 <Col span={24} style={{marginTop: '5px'}}>
@@ -124,18 +125,18 @@ class PortfolioDetailImpl extends React.Component {
         );
     }
 
-    renderStockTransactions = () => {
+    renderStockPortfolio = () => {
         return (
             <AqStockPortfolioTable
-                    style={{marginTop: '5px'}}
-                    positions={this.state.stockPositions}
-                    updateTicker={this.updateTicker}
+                style={{marginTop: '5px'}}
+                portfolio={{positions: this.state.stockPositions, cash:this.state.cash}}
+                updateTicker={this.updateTicker}
             />
         );
     }
 
     // subpositions, advicePerformance
-    processPresentAdviceTransaction = (subPositions, advicePerformance) => {
+    processPresentAdvicePortfolio = (subPositions, advicePerformance) => {
         let advices = [];
         let hasChangedCount = 0;
         subPositions.map((position, positionIndex) => {
@@ -238,16 +239,19 @@ class PortfolioDetailImpl extends React.Component {
             const tickers = [...this.state.tickers];
             const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${this.props.match.params.id}`;
             this.setState({show: true});
+            let pnlStats;
             axios.get(url, {headers: Utils.getAuthTokenHeader()})
             .then(response => { // Getting details of portfolio
+
                 if (response.data.benchmark) {
                     tickers.push({ // Pushing data to get the benchmark performance to performance graph
                         name: response.data.benchmark.ticker,
                     });
                 }
+                pnlStats = _.get(response.data, 'pnlStats', {});
                 const advicePerformance = _.get(response.data, 'advicePerformance', []);
                 const subPositions = _.get(response.data, 'detail.subPositions', []);
-                const advices = this.processPresentAdviceTransaction(subPositions, advicePerformance);
+                const advices = this.processPresentAdvicePortfolio(subPositions, advicePerformance);
                 positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
                 this.setState({
                     name: response.data.name,
@@ -278,7 +282,9 @@ class PortfolioDetailImpl extends React.Component {
                     name: 'Portfolio',
                     data: performanceSeries
                 });
-                const portfolioMetrics = _.get(response.data, 'summary.current', {});
+
+                const portfolioMetrics = Object.assign(_.get(response.data, 'summary.current', {}), pnlStats);
+
                 const constituentDollarPerformance = _.get(
                             response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
                     return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
@@ -291,22 +297,32 @@ class PortfolioDetailImpl extends React.Component {
                         .map((item, index) =>{
                     return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
                 });
+
                 series.push({name: 'Composition', data: portfolioComposition});
 
-                const annualReturn = _.get(portfolioMetrics, 'annualReturn', null);
-                const totalReturn = _.get(portfolioMetrics, 'totalReturn', null);
+                var annualReturn = _.get(portfolioMetrics, 'annualReturn', null);
+                var totalReturn = _.get(portfolioMetrics, 'totalReturn', null);
+
+                const realtimeNAV = _.get(portfolioMetrics, 'netValue', 0.0);
+                const eodNAV = _.get(portfolioMetrics, 'netValueEOD', 0.0);
+                const rtNAVChangePct = eodNAV > 0.0 ? (realtimeNAV - eodNAV)/eodNAV : 0.0;
+
+                //Update return for recent NAV change
+                annualReturn = Math.pow((1 + (annualReturn ? annualReturn : 0.0)), (251/252))*(1+rtNAVChangePct) - 1.0;
+                totalReturn = (1 + (totalReturn ? totalReturn : 0.0))*(1+rtNAVChangePct) - 1.0;
+                
                 const volatility = _.get(portfolioMetrics, 'volatility', null);
-                const dailyChange = _.get(portfolioMetrics, 'dailyChange', null);
-                const dailyChangePct = _.get(portfolioMetrics, 'dailyChangePct', null);
+                const dailyNAVChangePct = Number(((rtNAVChangePct || _.get(portfolioMetrics, 'dailyNAVChangeEODPct', 0.0))*100).toFixed(2));
+                const totalPnl = _.get(portfolioMetrics, 'totalPnl', null);
                 const netValue = _.get(portfolioMetrics, 'netValue', null);
 
                 const metrics = [
                     {value: annualReturn, label: annualReturnLabel, fixed: 2, percentage: true},
                     {value: volatility, label: volatilityLabel, fixed: 2, percentage: true},
                     {value: totalReturn, label: 'Total Return', fixed: 2, percentage: true, color: true},
-                    {value: dailyChange, label: dailyChangeLabel, fixed: 2, color:true, direction:true},
-                    {value: dailyChangePct, label: dailyChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
-                    {value: netValue, label: netValueLabel, isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2}
+                    //{value: dailyNAVChangePct, label: dailyNAVChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
+                    {value: totalPnl, label: unrealizedPnlLabel, fixed: 2, money:true, color: true, direction:true},
+                    {value: netValue, label: netValueLabel, isNetValue: true, money:true, dailyChangePct: dailyNAVChangePct, fixed: Math.round(netValue) == netValue ? 0 : 2}
                 ];
                 this.setState({
                     portfolioMetrics: metrics,
@@ -341,32 +357,10 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     setUpSocketConnection = () => {
-        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
-            Utils.openSocketConnection();
-        } else {
-            this.subscribeToPortfolio(this.props.match.params.id);
-            this.state.realtimeSecurities.map(item => {
-                this.subscribeToStock(item.name);
-            });
-        }
-
         Utils.webSocket.onopen = () => {
             this.takePortfolioAction();
         };
-        
-        Utils.webSocket.onclose = () => {
-            console.log('Connection Closed');
-            if (this.mounted) {
-                Utils.webSocket = undefined;
-                this.numberOfTimeSocketConnectionCalled++;
-                setTimeout(() => {
-                    this.setUpSocketConnection();
-                }, Math.min(2 * this.numberOfTimeSocketConnectionCalled * 1000, 5000));
-            } else {
-                return;
-            }
-        };
-        
+        this.takePortfolioAction();
         Utils.webSocket.onmessage = this.processRealtimeMessage;
     }
 
@@ -392,14 +386,8 @@ class PortfolioDetailImpl extends React.Component {
             'portfolioId': portfolioId,
             'detail': true
         };
-        // console.log('Message', msg);
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to Portfolio ${portfolioId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
+         
     }
 
     unSubscribeToPortfolio = portfolioId => {
@@ -410,13 +398,7 @@ class PortfolioDetailImpl extends React.Component {
             'type': 'portfolio',
             'portfolioId': portfolioId,
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${portfolioId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     subscribeToStock = ticker => {
@@ -427,13 +409,7 @@ class PortfolioDetailImpl extends React.Component {
             'type': 'stock',
             'ticker': ticker
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to ${ticker}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     unSubscribeToStock = ticker => {
@@ -444,37 +420,37 @@ class PortfolioDetailImpl extends React.Component {
             'type': 'stock',
             'ticker': ticker
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${ticker}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     processRealtimeMessage = msg => {
         if (this.mounted) {
             const realtimeData = JSON.parse(msg.data);
-            // console.log('Message Received', realtimeData);
+
             if (realtimeData.type === 'portfolio') {
                 const subPositions = _.get(realtimeData, 'output.detail.subPositions', []);
                 const positions = _.get(realtimeData, 'output.detail.positions', []);
-                const netValue = _.get(realtimeData, 'output.summary.nav', 0);
-                const dailyChangePct = (_.get(realtimeData, 'output.summary.dailyChangePct', 0) * 100).toFixed(2);
-                const dailyChange = _.get(realtimeData, 'output.summary.dailyPnlChange', 0);
-                const metrics = _.uniqBy([
-                    {value: dailyChange, label: dailyChangeLabel, fixed: 2, color:true, direction:true},
-                    {value: dailyChangePct, label: dailyChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
-                    {value: netValue, label: netValueLabel, isNetValue: true, fixed: Math.round(netValue) == netValue ? 0 : 2},
-                    ...this.state.portfolioMetrics
-                ], 'label');
+                const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
+                const dailyNAVChangePct = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
+                const totalPnl = _.get(realtimeData, 'output.summary.totalPnl', 0);
+                var portfolioMetrics = this.state.portfolioMetrics;
+                const metrics = [
+                    {value: netValue, label: netValueLabel, isNetValue: true, money:true, dailyChangePct: dailyNAVChangePct, fixed: Math.round(netValue) == netValue ? 0 : 2},
+                    {value: totalPnl, label: unrealizedPnlLabel, money:true, fixed: 2, color:true, direction:true},
+                ];
+
+                metrics.map(item => {
+                    var idx = portfolioMetrics.map(item => item.label).indexOf(item.label);
+                    if (idx != -1) {
+                        portfolioMetrics[idx] = item;
+                    }
+                });
+                
                 this.setState({
-                    portfolioMetrics: metrics,
+                    portfolioMetrics,
                     stockPositions: positions
                 });
             } else if(realtimeData.type === 'stock') {
-                console.log(realtimeData);
                 const realtimeSecurities = [...this.state.realtimeSecurities];
                 const targetSecurity = realtimeSecurities.filter(item => item.name === realtimeData.ticker)[0];
                 if (targetSecurity) {
@@ -508,7 +484,7 @@ class PortfolioDetailImpl extends React.Component {
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />
-            :   <Row>
+            :   <Row style={{marginBottom: '20px'}}>
                     <StockResearchModal
                             ticker={this.state.stockResearchModalTicker}
                             visible={this.state.stockResearchModalVisible}
@@ -569,20 +545,20 @@ class PortfolioDetailImpl extends React.Component {
                                     header={<h3 style={metricsHeaderStyle}>Summary</h3>}
                                     forceRender={true}
                             >
-                                <Row style={{padding: '0 30px 20px 30px'}} className="row-container">
-                                    <Col span={24}>
-                                        <Row style={{marginTop: '10px'}}>
-                                            <AqCard title="Portfolio Summary">
-                                                <HighChartNew series={this.state.pieSeries} />
-                                            </AqCard>
-                                            <AqCard title="Performance Summary" offset={2}>
-                                                <HighChartBar
-                                                        dollarSeries={this.state.performanceDollarSeries}
-                                                        percentageSeries={this.state.performancepercentageSeries}
-                                                        legendEnabled={false}
-                                                />
-                                            </AqCard>
-                                        </Row>
+                                <Row gutter={20} style={{padding: '0 30px 20px 30px'}} className="row-container">
+                                    <Col span={12}>
+                                        <AqCard title="Portfolio Summary">
+                                            <HighChartNew series={this.state.pieSeries} />
+                                        </AqCard>
+                                    </Col>
+                                    <Col span={12}>
+                                        <AqCard title="Performance Summary">
+                                            <HighChartBar
+                                                    dollarSeries={this.state.performanceDollarSeries}
+                                                    percentageSeries={this.state.performancepercentageSeries}
+                                                    legendEnabled={false}
+                                            />
+                                        </AqCard>
                                     </Col>
                                 </Row>
                             </Panel>
@@ -606,7 +582,7 @@ class PortfolioDetailImpl extends React.Component {
                                 <Row style={{padding: '0 30px'}}>
                                     <Col span={24}>
                                         <Row type="flex" justify="space-between">
-                                        <Col span={6}><span style={cashStyle}>Cash: {this.state.cash}</span></Col>
+                                        <Col span={6}><span style={cashStyle}>Cash: {Utils.formatMoneyValueMaxTwoDecimals(this.state.cash)}</span></Col>
                                             <Col span={6} style={{textAlign: 'right'}}>
                                                 <Radio.Group
                                                         value={this.state.toggleValue}
@@ -623,19 +599,20 @@ class PortfolioDetailImpl extends React.Component {
                                         {
                                             //this should be called portfolio and not transactions
                                             this.state.toggleValue === 'advice'
-                                            ? this.renderAdviceTransactions()
-                                            : this.renderStockTransactions()
+                                            ? this.renderAdvicePortfolio()
+                                            : this.renderStockPortfolio()
                                         }
                                     </Col>
                                 </Row>
                             </Panel>
                         </Collapse>
                     </Col>
-                    <Col span={6}>
-                        <WatchList 
+                    <Col span={6} style={{minHeight:'200px', maxHeight: '500px'}}>
+                        <div style={{...shadowBoxStyle, padding: '0px 10px', width: '95%', marginLeft:'auto'}}>
+                            <WatchList 
                                 tickers={this.state.realtimeSecurities}
-                                preview={true}
-                        />
+                                preview={true}/>
+                        </div>
                     </Col>
                 </Row>
         );

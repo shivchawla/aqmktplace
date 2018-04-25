@@ -32,35 +32,36 @@ export class ChartTickerItem extends React.Component {
         } = this.props.legend;
         const iconScale = this.state.focused ? 'scale(1,1)' : 'scale(0, 0)';
         const changeColor = change < 0 ? '#F44336' : '#00C853';
+        const metricFontSize = this.props.watchlist ? '13px' : '13px';
+        const nameSpan = this.props.watchlist ? 12 : 11;
+        //const metricSpan = this.props.watchlist ? 9 : 11;
         return(
             <Row 
-                    className='ticker-row' 
-                    type="flex"
-                    gutter={0} 
-                    align="middle" 
-                    style={{borderRadius: '4px', padding: '5px 0px', margin: '3px 0px'}}
-                    onMouseEnter={this.focus}
-                    onMouseLeave={this.clearFocus}
-            >
+                className='ticker-row' 
+                type="flex"
+                gutter={0} 
+                align="middle" 
+                style={{borderRadius: '4px', padding: '5px 0px', margin: '3px 0px'}}
+                onMouseEnter={this.focus}
+                onMouseLeave={this.clearFocus}>
                 {
                     !hideCheckbox &&
                     <Col span={2}>
                         <Checkbox disabled={disabled} checked={checked} onChange={this.props.onChange}/>
                     </Col>
                 }
-                <Col span={11}>
-                    <h4 style={{fontSize: '13px', color}}>{name}</h4>
+                <Col span={nameSpan}>
+                    <h4 style={{fontSize: metricFontSize, color}}>{name}</h4>
                 </Col>
-                <Col span={9} style={{textAlign: 'left'}}>
+                <Col span={10} style={{textAlign: 'left'}}>
                     <MetricItem 
-                            label=""
-                            //value={`${y} (${change} %)`}
-                            value={y}
-                            dailyChangePct={change}
-                            isNetValue
-                            labelStyle={{fontSize: '11px'}}
-                            valueStyle={{fontSize: '13px', fontWeight: 400}}
-                    />
+                        label=""
+                        //value={`${y} (${change} %)`}
+                        value={y}
+                        dailyChangePct={change}
+                        isNetValue
+                        labelStyle={{fontSize: '11px'}}
+                        valueStyle={{fontSize: metricFontSize, fontWeight: 400}}/>
                 </Col>
                 {/*<Col span={6}>
                     <MetricItem 

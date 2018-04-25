@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
+import {Utils} from '../utils';
 
 export const addToMyPortfolio = (advices, advicePerformance, position, positionIndex) => {
     const adviceIndex = _.findIndex(advices, advice => advice.id === null);
@@ -42,10 +43,10 @@ export const addPositionToAdvice = (advices, advicePerformance, position, positi
             name: position.advice ? position.advice.name : 'My Portfolio',
             key: positionIndex,
             weight: Number((_.get(advice, 'personal.weightInPortfolio', 0) * 100).toFixed(2)),
-            profitLoss: (_.get(advice, 'personal.pnlPct', 0)).toFixed(2),
+            profitLoss: Utils.formatMoneyValueMaxTwoDecimals(_.get(advice, 'personal.totalPnl', 0)),
             oldUnits: 1,
             newUnits: 1,
-            netAssetValue: Number((_.get(advice, 'personal.netValue', 0)).toFixed(2)),
+            netAssetValue: Utils.formatMoneyValueMaxTwoDecimals(_.get(advice, 'personal.netValue', 0)),
             hasChanged: advice.hasChanged || false,
             date: moment().format('YYYY-MM-DD'),
             composition: [

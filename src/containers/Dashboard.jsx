@@ -29,20 +29,8 @@ export class DashboardImpl extends React.Component {
         this.setState({visible: !this.state.visible});
     }
     
-    componentWillMount() {
-        this.setUpWebSocket();
-        // this.getInvestorPortfolios();
-    }
-
     componentWillUnmount() {
         Utils.closeWebSocket();
-    }
-
-    setUpWebSocket = () => {
-        Utils.openSocketConnection();
-        Utils.webSocket.onmessage = msg => {
-            console.log(msg.data);
-        }
     }
 
     getInvestorPortfolios = () => {

@@ -40,6 +40,8 @@ export class InvestorDashboard extends React.Component {
                 dailyreturn: -1,
                 totalreturn: -1,
                 netValue: -1,
+                dailyNavChangePct: 0,
+                totalPnl: 0,
             },
             sectorSeries: [],
             industySeries: [],
@@ -123,7 +125,7 @@ export class InvestorDashboard extends React.Component {
 
                     return (
                         <h3 style={{fontSize: '16px'}}>
-                            {Number(text).toFixed(2)}
+                            {Utils.formatMoneyValueMaxTwoDecimals(Number(text))}
                             <span style={{fontSize: '12px', color, fontWeight: 700, marginLeft: '5px'}}>
                                 {`${record.return} %`}
                             </span>
@@ -166,12 +168,22 @@ export class InvestorDashboard extends React.Component {
             const portfolioMetrics = _.get(response.data, 'defaultPerformance.current.metrics.portfolioMetrics', {});
             const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
             const performance = _.get(response.data, 'defaultPerformance.current.metrics.portfolioPerformance.true', {});
+            
             const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${response.data.defaultPortfolio._id}`;
             const performanceData = _.get(response.data, 'defaultPerformance.simulated.portfolioValues', []).map(item => {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue]
             });
             const pieChartTitle = composition[0].data.length > 1 && `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
-            const summary = _.get(response.data, 'defaultPerformance.summary.current', {});
+            const summary = Object.assign(
+                _.get(response.data, 'defaultPerformance.summary.current', {}),
+                _.get(response.data, 'defaultPortfolio.pnlStats', {})
+            );
+
+            var netValue = summary.netValue || summary.netValueEOD;
+            var netValueEOD = summary.netValueEOD;
+            var dailyNavChangePct = (((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : 0) || summary.dailyNAVChangeEODPct)*100).toFixed(2);
+            var totalPnl = summary.totalPnl;
+
             tickers.push({
                 name: _.get(response.data, 'defaultPortfolio.benchmark.ticker', ''),
                 show: true,
@@ -205,7 +217,9 @@ export class InvestorDashboard extends React.Component {
                     dailyreturn: performance.returns.dailyreturn,
                     totalreturn: performance.returns.totalreturn,
                     volatility: summary.volatility,
-                    netValue: summary.netValue
+                    netValue: summary.netValue,
+                    dailyNavChangePct: dailyNavChangePct,
+                    totalPnl: totalPnl
                 },
                 dollarPerformance,
                 percentagePerformance,
@@ -217,7 +231,6 @@ export class InvestorDashboard extends React.Component {
             return this.getInvestorSubscribedAdvices();
         })
         .then((response) => {
-            console.log(response);
             this.setUpSocketConnection();
         })
         .catch(error => {
@@ -268,7 +281,6 @@ export class InvestorDashboard extends React.Component {
             const advices = [...this.state.subscribedAdvices];
             const followingAdvices = response.data;
             followingAdvices.map((advice, index) => {
-                // console.log('Advice', advice);
                 const {name, performanceSummary} = advice;
                 if(_.findIndex(advices, presentAdvice => presentAdvice.id === advice._id) === -1) {
                     advices.push({
@@ -299,8 +311,6 @@ export class InvestorDashboard extends React.Component {
     onMenuSelected = (type, value) => {
         const portfolios = [...this.state.investorPortfolios];
         const advices = [...this.state.subscribedAdvices];
-        console.log(portfolios);
-        console.log(advices);
         switch (type) {
             case 'portfolio':
                 const sortedPortfolios = _.sortBy(portfolios, [object => object.performance[value]]);
@@ -387,34 +397,35 @@ export class InvestorDashboard extends React.Component {
         const portfolios = this.state.investorPortfolios;
         return portfolios.map((portfolio, index) => {
             const returnColor = portfolio.return < 0 ? metricColor.negative : metricColor.positive;
-            const dailyChangePctColor = portfolio.dailyChangePct < 0 ? metricColor.negative : metricColor.positive;
+            const dailyNavChangePctColor = portfolio.dailyNavChangePct < 0 ? metricColor.negative : metricColor.positive;
 
             return (
                 <Row 
-                        key={index} 
-                        style={{marginBottom: '10px', padding: '0 20px', cursor: 'pointer', marginTop: '10px'}} 
-                        onClick={(e) => this.props.history.push(`/investordashboard/portfolio/${portfolio.id}`)}
-                >
+                    key={index} 
+                    style={{marginBottom: '10px', padding: '0 20px', cursor: 'pointer', marginTop: '10px'}} 
+                    onClick={(e) => this.props.history.push(`/investordashboard/portfolio/${portfolio.id}`)}>
                     <Col span={7}>
                         <ListMetricItem label="Name" value={portfolio.name} />
                     </Col>
+                    <Col span={6}>
+                        <ListMetricItem 
+                            value={`${portfolio.return} %`} 
+                            label="Total Return" 
+                            valueColor={returnColor}
+                        />
+                    </Col>
+                    <Col span={6}>
+                        <ListMetricItem 
+                            value={`${portfolio.dailyNavChangePct} %`} 
+                            label="Daily Change" 
+                            valueColor={dailyNavChangePctColor}
+                        />
+                    </Col>
+
                     <Col span={5}>
-                        <ListMetricItem value={portfolio.netValue} label="Net Value" />
+                        <ListMetricItem value={Utils.formatMoneyValueMaxTwoDecimals(portfolio.netValue)} label="Net Value" />
                     </Col>
-                    <Col span={6}>
-                        <ListMetricItem 
-                                value={`${portfolio.return} %`} 
-                                label="Total Return" 
-                                valueColor={returnColor}
-                        />
-                    </Col>
-                    <Col span={6}>
-                        <ListMetricItem 
-                                value={`${portfolio.dailyChangePct} %`} 
-                                label="Daily Change" 
-                                valueColor={dailyChangePctColor}
-                        />
-                    </Col>
+
                     <Col span={24} style={{backgroundColor: '#eaeaea', marginTop: '10px'}}>
                     </Col>
                 </Row>
@@ -426,20 +437,23 @@ export class InvestorDashboard extends React.Component {
     processPortfolios = (portfolios) => {
         return portfolios.map(portfolio => {
             // this.subscribeToPortfolio(portfolio._id);
+            var dailyNAVChangeEODPct = _.get(portfolio, 'performance.dailyNAVChangeEODPct', 0);
+            var netValue = _.get(portfolio, 'pnlStats.netValue', 0);
+            var netValueEOD = _.get(portfolio, 'performance.netValueEOD', 0);
+            var dailyNavChangePct = ((netValueEOD > 0 ? (netValue - netValueEOD)/netValue : dailyNAVChangeEODPct)*100).toFixed(2);
             return {
                 id: portfolio._id,
                 name: portfolio.name.length < 1 ? 'Undefined' : portfolio.name,
-                netValue: _.get(portfolio, 'performance.netValue', 0) || 0,
+                netValue: netValue || netValueEOD,
                 return: (_.get(portfolio, 'performance.totalReturn', 0) || 0).toFixed(2),
                 volatility: (_.get(portfolio, 'performance.volatility', 0) || 0).toFixed(2),
-                dailyChangePct: ((_.get(portfolio, 'performance.dailyChangePct', 0) || 0) * 100).toFixed(2),
+                dailyNavChangePct: dailyNavChangePct,
                 dailyChangeDollar: (_.get(portfolio, 'performance.dailyChange', 0) || 0).toFixed(2)
             }
         });
     }
 
     processSubscribedAdvices = advices => {
-        console.log('My Advices', advices);
         return advices.map((advice, index) => {
             const {name, performanceSummary, isSubscribed, isFollowing} = advice;
             if (performanceSummary) {
@@ -447,8 +461,9 @@ export class InvestorDashboard extends React.Component {
                     id: advice._id,
                     key: index,
                     name: advice.name,
-                    return: Number(_.get(performanceSummary, 'current.totalReturn', 0) * 100).toFixed(2),
-                    netValue: _.get(performanceSummary, 'current.netValue', 0),
+                    //This is EOD change in NAV na not return...KEY needs a NAME change
+                    return: Number(_.get(performanceSummary, 'current.dailyNAVChangeEODPct', 0) * 100).toFixed(2),
+                    netValue: _.get(performanceSummary, 'current.netValueEOD', 0),
                     rating: _.get(advice, 'rating.current', 0),
                     isSubscribed,
                     isFollowing
@@ -462,12 +477,11 @@ export class InvestorDashboard extends React.Component {
     renderSubscribedAdvices = () => {
         return (
             <Table 
-                    columns={this.adviceColumns} 
-                    dataSource={this.state.subscribedAdvices} 
-                    pagination={false}
-                    size="small"
-                    style={{margin: '10px 20px'}}
-            />
+                columns={this.adviceColumns} 
+                dataSource={this.state.subscribedAdvices} 
+                pagination={false}
+                size="small"
+                style={{margin: '10px 20px'}}/>
         );
     }
 
@@ -491,7 +505,6 @@ export class InvestorDashboard extends React.Component {
         const chartData = [];
         const seriesData = [];
         const positions = composition.map(item => item.ticker);
-        // console.log('PieChart positions', positions);
         composition.map((item, index) => {
             const weight = Number((item.weight * 100).toFixed(2));
             if (weight > 0) {
@@ -615,41 +628,49 @@ export class InvestorDashboard extends React.Component {
     }
 
     renderSummaryMetrics = () => {
-        const {totalreturn, dailyreturn, volatility, netValue} = this.state.metrics;
+        const {totalreturn, dailyreturn, volatility, netValue, dailyNavChangePct, totalPnl} = this.state.metrics;
         const colStyle = {marginBottom: '0px'};
         
         return(
-            <Row type="flex" justify="space-around"> 
-                <Col span={5} style={colStyle}>
-                    <MetricItem 
-                        valueStyle={{...valueStyle, color: getMetricColor(totalreturn)}} 
-                        labelStyle={labelStyle} 
-                        label="Total Return" 
-                        value={`${Number(totalreturn * 100).toFixed(2)} %`}
-                    />
-                </Col>
+            <Row type="flex" justify="space-around" style={{margin:'0 auto'}}> 
                 <Col span={5} style={colStyle}>
                     <MetricItem 
                         valueStyle={{...valueStyle}} 
                         labelStyle={labelStyle} 
-                        label="Volatility" 
-                        value={`${Number(volatility * 100).toFixed(2)} %`}
+                        label="Total Return"
+                        percentage
+                        color
+                        value={totalreturn}
                     />
                 </Col>
-                <Col span={5} style={colStyle}>
+                <Col span={4} style={colStyle}>
                     <MetricItem 
-                        valueStyle={{...valueStyle, color: getMetricColor(dailyreturn)}} 
+                        valueStyle={{...valueStyle}} 
                         labelStyle={labelStyle} 
-                        label="Daily Return" 
-                        value={`${Number(dailyreturn * 100).toFixed(2)} %`}
+                        label="Volatility"
+                        percentage 
+                        value={volatility}
                     />
                 </Col>
                 <Col span={6} style={colStyle}>
                     <MetricItem 
+                        valueStyle={{...valueStyle}} 
+                        labelStyle={labelStyle} 
+                        label="Unrealized PnL" 
+                        money
+                        color
+                        value={totalPnl}
+                    />
+                </Col>
+                <Col span={7} style={colStyle}>
+                    <MetricItem 
                         valueStyle={valueStyle} 
                         labelStyle={labelStyle} 
-                        label="NetValue" 
-                        value={this.formatNetValue(netValue)}
+                        label="Net Value"
+                        money
+                        isNetValue
+                        dailyChangePct={dailyNavChangePct} 
+                        value={netValue}
                     />
                 </Col>
             </Row>
@@ -676,26 +697,28 @@ export class InvestorDashboard extends React.Component {
                         <Row> 
                             <Col span={24} style={colStyle}>
                                 <MetricItem 
-                                        valueStyle={valueStyle} 
-                                        labelStyle={labelStyle} 
-                                        label="No. of Stocks" 
-                                        value={nStocks}
+                                    valueStyle={valueStyle} 
+                                    labelStyle={labelStyle} 
+                                    label="No. of Stocks" 
+                                    fixed={0}
+                                    value={nStocks}
                                 />
                             </Col>
                             <Col span={24} style={colStyle}>
                                 <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
-                                        label="Concentration" 
-                                        value={Number(concentration).toFixed(2)}
+                                    label="Concentration" 
+                                    value={concentration}
                                 />
                             </Col>
                             <Col span={24} style={colStyle}>
                                 <MetricItem 
-                                        valueStyle={valueStyle} 
-                                        labelStyle={labelStyle} 
-                                        label="Max. Position Size" 
-                                        value={maxPosSize.y}
+                                    valueStyle={valueStyle} 
+                                    labelStyle={labelStyle} 
+                                    label="Max. Position Size" 
+                                    percentage
+                                    value={maxPosSize.y/100}
                                 />
                             </Col>
                         </Row>
@@ -768,34 +791,11 @@ export class InvestorDashboard extends React.Component {
 
     setUpSocketConnection = () => {
         console.log('Setting Up connection');
-        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
-            console.log('Opening Connection');
-            Utils.openSocketConnection();
-        } else {
-            // Subscribe to all portfolios and advices
-            this.subscribeToAllPortfolios(this.state.investorPortfolios);
-            this.subscribeToAllAdvices(this.state.subscribedAdvices);
-        }
-
-        Utils.webSocket.onopen = () => {
-            console.log('Connection Openend');
-            this.takeAction();
-        }
-
-        Utils.webSocket.onclose = () => {
-            console.log('Connection Closed');
-            if (this.mounted) {
-                Utils.webSocket = undefined;
-                this.numberOfTimeSocketConnectionCalled++;
-                setTimeout(() => {
-                    this.setUpSocketConnection();
-                }, Math.min(2 * this.numberOfTimeSocketConnectionCalled * 1000, 5000));
-            } else {
-                return;
-            }
-        }
-
         Utils.webSocket.onmessage = this.processRealtimeMessage;
+        Utils.webSocket.onopen = () => {
+            this.takeAction();
+        };
+        this.takeAction();
     }
 
     subscribeToAllPortfolios = (portfolios = []) => {
@@ -848,15 +848,15 @@ export class InvestorDashboard extends React.Component {
                     if (realtimeData.portfolioId === this.state.defaultPortfolioId) {
                         defaultPorfolio = true;
                     }
-                    targetPortfolio.dailyChangePct = (_.get(realtimeData, 'output.summary.dailyPnlChangePct', 0) * 100).toFixed(2);
-                    targetPortfolio.netValue = _.get(realtimeData, 'output.summary.nav', 0).toFixed(2);
+                    targetPortfolio.dailyNavChangePct = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
+                    targetPortfolio.netValue = _.get(realtimeData, 'output.summary.netValue', 0)
                     this.setState({
                         investorPortfolios,
                         metrics: defaultPorfolio 
                                 ?   {
                                         ...this.state.metrics,
-                                        dailyreturn: _.get(realtimeData, 'output.summary.dailyPnlChangePct', 0),
-                                        netValue: _.get(realtimeData, 'output.summary.nav', 0).toFixed(2)
+                                        dailyNavChangePct: (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0)*100).toFixed(2),
+                                        netValue: _.get(realtimeData, 'output.summary.netValue', 0)
                                     }
                                 :   this.state.metrics
                     });
@@ -864,8 +864,8 @@ export class InvestorDashboard extends React.Component {
             } else if (realtimeData.type === 'advice') {
                 const subscribedAdvices = [...this.state.subscribedAdvices];
                 const targetAdvice = subscribedAdvices.filter(advice => advice.id === realtimeData.adviceId)[0];
-                targetAdvice.netValue = _.get(realtimeData, 'output.summary.nav', 0).toFixed(2);
-                targetAdvice.return = (_.get(realtimeData, 'output.summary.dailyPnlChangePct', 0) * 100).toFixed(2);
+                targetAdvice.netValue = _.get(realtimeData, 'output.summary.netValue', 0);
+                targetAdvice.return = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
                 this.setState({subscribedAdvices});
             }
         }
@@ -879,13 +879,7 @@ export class InvestorDashboard extends React.Component {
             'type': 'portfolio',
             'portfolioId': portfolioId
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to portfolio ${portfolioId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     unSubscribeToPortfolio = portfolioId => {
@@ -896,13 +890,7 @@ export class InvestorDashboard extends React.Component {
             'type': 'portfolio',
             'portfolioId': portfolioId,
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${portfolioId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     subscribeToAdvice = adviceId => {
@@ -913,13 +901,7 @@ export class InvestorDashboard extends React.Component {
             'adviceId': adviceId,
             'detail': true
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to Advice ${adviceId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg); 
     }
 
     unSubscribeToAdvice = adviceId => {
@@ -931,13 +913,7 @@ export class InvestorDashboard extends React.Component {
             'adviceId': adviceId,
             // 'detail': true
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${adviceId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     renderPageContent = () => {

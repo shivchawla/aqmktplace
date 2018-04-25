@@ -228,7 +228,6 @@ export class AdvisorDashboard extends React.Component {
     }
 
     processAdviceData = advices => {
-        console.log(advices);
         return advices.map((advice, index) => {
             return {
                 name: advice.name,
@@ -324,7 +323,6 @@ export class AdvisorDashboard extends React.Component {
 
     processRatingByAdvice = (advice, type='current') => {
         const monthData = [];
-        console.log(advice);
          // Initializing month's data to null
         for (let i=0; i < 12; i++) {
             monthData.push(null);
@@ -413,7 +411,6 @@ export class AdvisorDashboard extends React.Component {
         const ratingSeries = [];
         const series = this.state.ratingsConfig.series;
         const advice = advices.filter(item => item._id === value)[0];
-        console.log(advice);
         const currentRating = _.get(advice, 'rating.current', 0).toFixed(2);
         const simulatedRating = _.get(advice, 'rating.simulated', 0).toFixed(2);    
 
@@ -548,34 +545,12 @@ export class AdvisorDashboard extends React.Component {
     }
 
     setUpSocketConnection = () => {
-        console.log('Setting Up connection');
-        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
-            console.log('Opening Connection');
-            Utils.openSocketConnection();
-        } else {
-            // Subscribe to all advices
-            this.subscribeToAllAdvices(this.state.advices);
-        }
-
         Utils.webSocket.onopen = () => {
             console.log('Connection Openend');
             this.takeAction();
         }
-
-        Utils.webSocket.onclose = () => {
-            console.log('Connection Closed');
-            if (this.mounted) {
-                Utils.webSocket = undefined;
-                this.numberOfTimeSocketConnectionCalled++;
-                setTimeout(() => {
-                    this.setUpSocketConnection();
-                }, Math.min(2 * this.numberOfTimeSocketConnectionCalled * 1000, 5000));
-            } else {
-                return;
-            }
-        }
-
         Utils.webSocket.onmessage = this.processRealtimeMessage;
+        this.takeAction();
     }
 
     takeAction = () => {
@@ -607,13 +582,7 @@ export class AdvisorDashboard extends React.Component {
             'adviceId': adviceId,
             'detail': true
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to Advice ${adviceId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     unSubscribeToAdvice = adviceId => {
@@ -625,26 +594,18 @@ export class AdvisorDashboard extends React.Component {
             'adviceId': adviceId,
             // 'detail': true
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${adviceId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     processRealtimeMessage = msg => {
         if (this.mounted) {
             const realtimeData = JSON.parse(msg.data);
-            console.log(realtimeData);
             if (realtimeData.type === 'advice') {
                 const rawAdvices = [...this.state.rawAdvices];
                 const targetAdvice = rawAdvices.filter(advice => advice._id === realtimeData.adviceId)[0];
                 if (targetAdvice) {
                     targetAdvice.performanceSummary.current.netValue = _.get(realtimeData, 'output.summary.nav', 0);
                     targetAdvice.performanceSummary.current.totalReturn = _.get(realtimeData, 'output.summary.dailyPnlChangePct', 0);
-                    console.log(targetAdvice);
                     this.setState({rawAdvices});
                 }
             }

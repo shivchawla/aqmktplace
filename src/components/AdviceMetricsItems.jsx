@@ -2,35 +2,29 @@ import * as React from 'react';
 import {Row, Col} from 'antd';
 import {metricsLabelStyle, metricsValueStyle} from '../constants';
 import {MetricItem} from '../components';
+import {Utils} from '../utils';
 
 export class AdviceMetricsItems extends React.Component {
     render() {
         const {metrics} = this.props;
 
         return (
-            <Row>
+            <Row type="flex" justify="space-between">
                 {
                     metrics.map((item, index) => {
-                        const neutralColor = '#353535';
-                        const positiveColor = '#00b300';//'#8BC34A';
-                        const negativeColor = '#F44336';
-                        const valueColor = item.color ? item.value > 0 ? positiveColor : item.value < 0 ? negativeColor : neutralColor: neutralColor;
-                        // var dirArrow = item.direction ? item.value > 0 ? '▲' : item.value < 0 ? '▼' : "" : ""; 
-                        var dirArrow = "";
-                        const value = item.value ? `${(item.percentage ? `${(item.value * 100).toFixed(item.fixed ? item.fixed : 0)} %` : item.value.toFixed(item.fixed ? item.fixed : 0))} ${dirArrow}` : '-';
-                       
                         return (
-                            <Col span={4} key={index}>
+                            <Col span={item.isNetValue ? 5 : item.label == "Subscribers" ? 3 : 4} key={index}>
                                 <MetricItem 
-                                        key={index}
-                                        valueStyle = {{...metricsValueStyle, color: valueColor, fontSize: '20px'}} 
-                                        labelStyle={metricsLabelStyle} 
-                                        value={value} 
-                                        label={item.label} 
-                                        style={metricItemStyle} 
-                                        isNetValue={item.isNetValue}
-                                        dailyChange={item.dailyChange || null}
-                                        dailyChangePct={item.dailyChangePct || null}
+                                    key={index}
+                                    valueStyle = {{...metricsValueStyle, fontSize: '20px'}} 
+                                    labelStyle={metricsLabelStyle} 
+                                    value={item.value} 
+                                    label={item.label} 
+                                    money={item.money}
+                                    style={metricItemStyle} 
+                                    isNetValue={item.isNetValue}
+                                    dailyChange={item.dailyChange || null}
+                                    dailyChangePct={item.dailyChangePct || null}
                                 />
                             </Col>
                         );

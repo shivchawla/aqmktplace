@@ -103,7 +103,7 @@ class StockResearchImpl extends React.Component {
         this.setState({tickers, show: true});
         console.log('Initial Call' , initialCall);
         if (initialCall === false) {
-            this.unSubscribeToStock(this.state.latestDetail.ticker);
+            //this.unSubscribeToStock(this.state.latestDetail.ticker);
         }
         getStockData(value, 'latestDetail')
         .then(response => {
@@ -111,13 +111,13 @@ class StockResearchImpl extends React.Component {
             latestDetail.ticker = data.security.ticker;
             latestDetail.exchange = data.security.exchange;
             latestDetail.close = data.latestDetail.values.Close;
-            latestDetail.latestPrice = data.latestDetail.values.Close
-            latestDetail.open = data.latestDetail.values.Open;
-            latestDetail.low = data.latestDetail.values.Low;
-            latestDetail.high = data.latestDetail.values.High;
-            latestDetail.low_52w = data.latestDetail.values.Low_52w;
-            latestDetail.high_52w = data.latestDetail.values.High_52w;
-            latestDetail.change = data.latestDetail.values.Change;
+            latestDetail.latestPrice = _.get(data, 'latestDetailRT.current', 0) || data.latestDetail.values.Close
+            latestDetail.open = _.get(data, 'latestDetailRT.open', 0) || data.latestDetail.values.Open;
+            latestDetail.low = _.get(data, 'latestDetailRT.low', 0) || data.latestDetail.values.Low;
+            latestDetail.high = _.get(data, 'latestDetailRT.high', 0) || data.latestDetail.values.High;
+            latestDetail.low_52w = Math.min(_.get(data, 'latestDetailRT.low', 0), data.latestDetail.values.Low_52w);
+            latestDetail.high_52w = Math.max(_.get(data, 'latestDetailRT.high', 0), data.latestDetail.values.High_52w);
+            latestDetail.change = Number(((_.get(data, 'latestDetailRT.changePct', 0) || data.latestDetail.values.ChangePct)*100).toFixed(2));
             latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
             this.setState({latestDetail}, () => {
                 // Subscribing to real-time data
@@ -128,7 +128,6 @@ class StockResearchImpl extends React.Component {
             return getStockData(value, 'rollingPerformance');
         })
         .then(response => {
-            console.log('Rolling Performance', response.data);
             this.setState({rollingPerformance: response.data.rollingPerformance.detail});
         })
         .catch(error => {
@@ -141,7 +140,6 @@ class StockResearchImpl extends React.Component {
 
     renderRollingPerformanceData = key => {
         const {rollingPerformance} = this.state;
-        // console.log(rollingPerformance);
         if(rollingPerformance[key]) {
             const ratios = rollingPerformance[key].ratios;
             const returns = rollingPerformance[key].returns;
@@ -194,7 +192,7 @@ class StockResearchImpl extends React.Component {
     }
 
     formatPriceMetrics = value => {
-        return value ? Math.round(value) == value ? value : value.toFixed(2) : '-';
+        return value ? Math.round(value) == value ? Utils.formatMoneyValueMaxTwoDecimals(value) : Utils.formatMoneyValueMaxTwoDecimals(Number(value.toFixed(2))) : '-';
     }
 
     renderPriceMetrics = metrics => {
@@ -264,38 +262,11 @@ class StockResearchImpl extends React.Component {
     }
 
     setUpSocketConnection = () => {
-        if (!Utils.webSocket || Utils.webSocket.readyState !== 1) {
-            console.log('Opening Socket connection');
-            Utils.openSocketConnection();
-        } else {
-            console.log('Will Subscribe Now');
-            this.subscribeToStock(this.state.latestDetail.ticker);
-            this.subscribeToWatchList(this.state.selectedWatchlistTab);
-        }
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
         Utils.webSocket.onopen = () => {
-            console.log('Connection Opened Will Subscribe Now');
             this.takeAction();
         };
-        Utils.webSocket.onclose = code => {
-            console.log('Connection Closed');
-            if (this.mounted) {
-                Utils.webSocket = undefined;
-                this.reconnect();
-            } else {
-                return;
-            }
-        };
-        Utils.webSocket.onmessage = this.processRealtimeMessage;
-    }
-
-    reconnect = () => {
-        console.log('Reconnecting');
-        this.numberOfTimeSocketConnectionCalled++;
-        const count = this.numberOfTimeSocketConnectionCalled;
-        console.log(this.numberOfTimeSocketConnectionCalled);
-        setTimeout(() => {
-            this.setUpSocketConnection();
-        }, Math.min(1000 * count * 2, 8000));
+        this.takeAction();
     }
 
     takeAction = () => {
@@ -315,7 +286,6 @@ class StockResearchImpl extends React.Component {
             try {
                 const realtimeResponse = JSON.parse(msg.data);
                 if (realtimeResponse.type === 'stock' && realtimeResponse.ticker === this.state.latestDetail.ticker) {
-                    console.log(realtimeResponse);
                     this.setState({
                         latestDetail: {
                             ...this.state.latestDetail,
@@ -324,7 +294,6 @@ class StockResearchImpl extends React.Component {
                         }
                     });
                 } else {
-                    console.log(realtimeResponse);
                     const watchlists = [...this.state.watchlists];
                     // Getting the required wathclist
                     const targetWatchlist = watchlists.filter(item => item.id === realtimeResponse.watchlistId)[0];
@@ -332,8 +301,8 @@ class StockResearchImpl extends React.Component {
                         // Getiing the required security to update
                         const targetSecurity = targetWatchlist.positions.filter(item => item.name === realtimeResponse.ticker)[0];
                         if (targetSecurity) {
-                            targetSecurity.change = realtimeResponse.output.change;
-                            targetSecurity.price = realtimeResponse.output.current;
+                            targetSecurity.change = (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
+                            targetSecurity.price = Utils.formatMoneyValueMaxTwoDecimals(_.get(realtimeResponse, 'output.current', 0)),
                             this.setState({watchlists});
                         }
                     }
@@ -354,13 +323,7 @@ class StockResearchImpl extends React.Component {
             'type': 'stock',
             'ticker': ticker
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to ${ticker}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     unSubscribeToStock = ticker => {
@@ -371,13 +334,7 @@ class StockResearchImpl extends React.Component {
             'type': 'stock',
             'ticker': ticker
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`UnSubscribed to ${ticker}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     subscribeToWatchList = watchListId => {
@@ -388,10 +345,7 @@ class StockResearchImpl extends React.Component {
             'type': 'watchlist',
             'watchlistId': watchListId
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Subscribed to watchlist ${watchListId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } 
+        Utils.sendWSMessage(msg); 
     }
 
     unsubscribeToWatchlist = watchListId => {
@@ -402,13 +356,7 @@ class StockResearchImpl extends React.Component {
             'type': 'watchlist',
             'watchlistId': watchListId
         };
-        if (_.get(Utils, 'webSocket.readyState', -1) === 1) {
-            console.log(`Un Subscribed to watchlist ${watchListId}`);
-            Utils.webSocket.send(JSON.stringify(msg));
-        } else {
-            Utils.webSocket = undefined;
-            this.setUpSocketConnection();
-        }
+        Utils.sendWSMessage(msg);
     }
 
     toggleWatchListModal = () => {
@@ -440,8 +388,8 @@ class StockResearchImpl extends React.Component {
             targetWatchlist.positions = response.data.securities.map(item => {
                 return {
                     name: item.ticker,
-                    change: 0,
-                    price: 100
+                    change: Number(((_.get(item, 'realtime.changePct', 0.0) || _.get(item, 'eod.ChangePct', 0.0))*100).toFixed(2)) ,
+                    price: Utils.formatMoneyValueMaxTwoDecimals(_.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0))
                 }
             });
             this.setState({watchlists});
@@ -461,8 +409,8 @@ class StockResearchImpl extends React.Component {
                 positions: item.securities.map(item => {
                     return {
                         name: item.ticker,
-                        change: 0,
-                        price: 100
+                        change: Number(((_.get(item, 'realtime.changePct', 0.0) || _.get(item, 'eod.ChangePct', 0.0))*100).toFixed(2)),
+                        price: Utils.formatMoneyValueMaxTwoDecimals(_.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0))
                     }
                 }),
                 id: item._id
@@ -505,7 +453,6 @@ class StockResearchImpl extends React.Component {
             method: 'DELETE'
         })
         .then(response => {
-            console.log(response.data);
             message.success('Watchlist successfully deleted');
             this.getWatchlists();
             if (this.state.watchlists.length > 0) {
@@ -535,16 +482,15 @@ class StockResearchImpl extends React.Component {
     renderWatchlistTabs = () => {
         const watchlists = this.state.watchlists;
         return watchlists.map(item => {
-            // {name: 'TCS', y: 145, change: 1.5, hideCheckbox: true},
-            const tickers = item.positions.map(item => {return {name: item.name, y: item.price, change:item.change, hideCheckbox: true}});
+            const tickers = item.positions.map(it => {return {name: it.name, y: it.price, change:it.change, hideCheckbox: true}});
             return (
                 <TabPane key={item.id} tab={item.name}>
                     <Col span={24}>
                         <WatchList 
-                                tickers={tickers} 
-                                id={item.id} 
-                                name={item.name} 
-                                getWatchlist={this.getWatchlist}
+                            tickers={tickers} 
+                            id={item.id} 
+                            name={item.name} 
+                            getWatchlist={this.getWatchlist}
                         />
                     </Col>
                 </TabPane>
@@ -600,6 +546,7 @@ class StockResearchImpl extends React.Component {
                         <AqPageHeader title="Stock Research" breadCrumbs = {breadCrumbs}/>
                     </React.Fragment>
                 }
+                <Row type="flex" justify="space-between">
                 <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
                     {this.renderDeleteModal()}
                     <Row style={metricStyle}>
@@ -634,7 +581,7 @@ class StockResearchImpl extends React.Component {
                                 <span style={{fontSize: '20px'}}>{latestDetail.ticker}</span>
                             </h1>
                             <h3 style={lastPriceStyle}>
-                                {latestDetail.latestPrice} 
+                                {Utils.formatMoneyValueMaxTwoDecimals(latestDetail.latestPrice)} 
                                 <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
                             </h3>
                             <h5 
@@ -681,6 +628,7 @@ class StockResearchImpl extends React.Component {
                 {
                     !this.props.openAsDialog &&
                     <Col span={6}>
+                    <div style={{...shadowBoxStyle, width: '95%', height: '300px', padding:'0px 10px', marginLeft: 'auto'}}>
                         {/* <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button> */}
                         <Tabs 
                                 onChange={this.handleWatchlistTabChange} 
@@ -694,8 +642,11 @@ class StockResearchImpl extends React.Component {
                         >
                             {this.renderWatchlistTabs()}
                         </Tabs>
+                    </div>
                     </Col>
+                    
                 }
+                </Row>
             </React.Fragment>
         );
     }

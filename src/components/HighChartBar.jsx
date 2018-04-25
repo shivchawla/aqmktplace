@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Col, Row, Radio} from 'antd';
 import HighChart from 'highcharts';
+import {Utils} from '../utils';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
@@ -30,15 +31,19 @@ export class HighChartBar extends React.Component {
                 },
                 yAxis: {
                     labels: {
-                        enabled: true
+                        //enabled: true
                     },
                     title: {
-                        enabled: false
+                        enabled: false,
                     },
                     gridLineColor: 'transparent',
                 },
                 xAxis: {
                     gridLineColor: 'transparent',
+                    title: {
+                        enabled: true,
+                        name: 'Stock'
+                    }
                     // categories: props.categories || null
                 },
                 title: {
@@ -57,7 +62,7 @@ export class HighChartBar extends React.Component {
                         width: '200'
                     },
                     labelFormatter: function() {
-                        return `<h3>${this.name} - <span style="color: #353535">${this.yData[0]}</span></h3>`;
+                        return `<h3>${this.name} - <span style="color: #353535">${Utils.formatMoneyValueMaxTwoDecimals(this.yData[0])}</span></h3>`;
                     },
                     x: -20,
                     itemWidth: 100,
@@ -66,7 +71,7 @@ export class HighChartBar extends React.Component {
                     useHTML: true
                 },
                 credits: {
-                    enabled: false
+                    //enabled: false
                 },
                 tooltip: {
                     enabled: true
@@ -174,7 +179,7 @@ export class HighChartBar extends React.Component {
 
         return (
             <Row style={{height: '320px'}}>
-                <Col span={24} style={{textAlign: alignLegend, ...legendStyle}}>
+                <Col span={24} style={{textAlign: alignLegend, ...legendStyle, marginTop: '5px'}}>
                     <RadioGroup 
                             size="small" 
                             defaultValue="dollarPerformance" 
@@ -185,8 +190,8 @@ export class HighChartBar extends React.Component {
                         <RadioButton value="percentagePerformance" style={{fontSize: '18px'}}>%</RadioButton>
                     </RadioGroup>
                 </Col>
-                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle, marginTop: '-5px'}} id='bar-chart-dollar'></Col>
-                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle, marginTop: '-5px'}} id='bar-chart-percentage'></Col>
+                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle}} id='bar-chart-dollar'></Col>
+                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle}} id='bar-chart-percentage'></Col>
             </Row>
         );
     }

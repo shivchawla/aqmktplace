@@ -2,6 +2,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import {Table, Tooltip} from 'antd';
 import {nameEllipsisStyle} from '../constants';
+import {Utils} from '../utils';
 
 export class AqStockPortfolioTable extends React.Component {
     constructor(props) {
@@ -61,38 +62,45 @@ export class AqStockPortfolioTable extends React.Component {
                 key: 'weight'
             }
         ];
+
+        //Remove the "Last Price" from the table
+        if (this.props.composition) {
+            this.columns.splice(4,1);
+        }
     }
 
-    getPortfolioArray = positions => {
+    getUpdatedPositions = portfolio => {
         let portfolioArray = [];
-        positions.map((position, index) => {
+        portfolio.positions.map((position, index) => {
             portfolioArray.push({
                 key: index,
                 name: _.get(position, 'security.detail.Nse_Name', '-'),
-                weight: 0,
+                weight: Number((_.get(position, 'weightInPortfolio', 0.0) * 100).toFixed(2)),
                 sector: _.get(position, 'security.detail.Sector', '-'),
-                price: _.get(position, 'lastPrice', 0).toFixed(2),
+                price: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'lastPrice', 0)),
                 shares: position.quantity || 0,
                 symbol: _.get(position, 'security.ticker', '-'),
-                avgPrice: _.get(position, 'avgPrice', 0).toFixed(2)
+                avgPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'avgPrice', 0)),
             });
         });
-        portfolioArray = this.updateWeights(portfolioArray);
 
         return portfolioArray;
     }
 
-    updateWeights = portfolioArray => {
-        return portfolioArray.map(item => {
+    updateWeights = portfolio => {
+        const cash = portfolio.cash ? portfolio.cash : 0.0
+        return portfolio.positions.map(item => {
             const price = Number(item.price);
             const shares = Number(item.shares);
             return {
                 ...item,
-                weight: `${((price * shares) / this.getTotalWeight(portfolioArray) * 100).toFixed(2)} %`
+                weight: `${((price * shares) / (this.getTotalWeight(portfolio.positions) + cash) * 100).toFixed(2)} %`,
+                price: Utils.formatMoneyValueMaxTwoDecimals(price)
             }
         });
     }
 
+    //NOT USED
     getTotalWeight = portfolioArray => {
         let totalWeight = 0;
         portfolioArray.map(item => {
@@ -105,21 +113,17 @@ export class AqStockPortfolioTable extends React.Component {
     renderHeaderText = title => <span style={{fontSize: '12px', fontWeight: '700'}}>{title}</span>
 
     render() {
-        console.log('Positions', this.props.positions);
-
         return (
             <Table 
                     size="small"
                     pagination={false} 
-                    columns={this.columns} 
+                    columns={this.columns}
                     style={this.props.style}
                     // processedPosition true means that the positions provided as props are processed into
                     // a certain format required by this table as seen in the columns
-                    dataSource={
-                            this.props.processedPositions 
-                            ? this.updateWeights(this.props.positions)
-                            : this.getPortfolioArray(this.props.positions)
-                        }
+                    dataSource={this.props.processedPositions ?
+                        this.updateWeights(this.props.portfolio) : 
+                        this.getUpdatedPositions(this.props.portfolio)}
             />
         );
     }

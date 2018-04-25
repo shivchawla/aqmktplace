@@ -144,7 +144,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                 }
                 <Col span={24}>
                     <AqStockPortfolioTable 
-                            positions={tickers} 
+                            portfolio ={{positions: tickers}} 
                             processedPositions={true}
                             updateTicker={this.props.toggleStockResearchModal}
                             style={{margin: '5px 15px'}}
@@ -160,7 +160,6 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
         let target = advices.filter(item => item.key === advice.key)[0];
         target['newUnits'] = e.target.value; 
         target.composition = target.composition.map((item, index) => {
-            console.log(e.target.value);
             if (e.target.value.length > 0) {
                 item.transactionalQuantity = item.newShares * Number(e.target.value) - item.shares;
                 // item.modifiedShares = item.shares * Number(e.target.value);
@@ -208,7 +207,6 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
     processComposition = (portfolio, key, advice) => {
         return portfolio.positions.map((item, index) => {
             const targetPosition = advice.composition.filter(advicePosition => advicePosition.symbol === item.security.ticker)[0];
-            console.log('Item Position', item);
             return {
                 key: index,
                 adviceKey: key,
@@ -264,10 +262,11 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                             labelStyle={metricsLabelStyle}
                         />
                     </Col>
-                    <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <Col span={5} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                         <MetricItem 
-                            value={`${advice.profitLoss} %`} 
-                            label="Profit/Loss" 
+                            value={`${advice.profitLoss}`} 
+                            label='Unrealized PnL'
+                            money={true}
                             valueStyle={{...metricsValueStyle, color: profitOrLossColor}}
                             labelStyle={metricsLabelStyle}
                         />
@@ -275,7 +274,8 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                     <Col span={7} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                         <MetricItem 
                             value={advice.netAssetValue} 
-                            label="Net Asset Value" 
+                            label="Net Value"
+                            money={true} 
                             valueStyle={{...metricsValueStyle, textAlign:'center'}}
                             labelStyle={{...metricsLabelStyle, textAlign: 'center'}}
                         />

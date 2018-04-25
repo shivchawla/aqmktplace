@@ -71,6 +71,7 @@ export class Utils{
 	static loggedInUserinfo = reactLocalStorage.getObject('USERINFO');
 	static userInfoString = "USERINFO";
 	static webSocket;
+	static numAttempts = 0;
 
 	static setLoggedInUserInfo(object){
 		this.loggedInUserinfo = object;
@@ -87,7 +88,7 @@ export class Utils{
 
 	static getSocketUrl(){
 		return "wss://developapi.aimsquant.com";
-		// return 'ws://localhost:1337';
+		//return 'ws://localhost:3002';
 	}
 
 	static getBaseUrl(){
@@ -287,7 +288,7 @@ export class Utils{
 
 	static formatMoneyValueMaxTwoDecimals(value){
 		if (value){
-			var x=value.toString();
+			var x = (value/100000) > 1.0 ? value.toFixed(0) : value.toFixed(2);
 			var afterPoint = '';
 			if(x.indexOf('.') > 0)
 			   afterPoint = x.substring(x.indexOf('.'),x.length);
@@ -307,9 +308,25 @@ export class Utils{
 		if (this.webSocket){
 			try{
 				this.webSocket.close();
-			}catch(err){}
+			} catch(err){}
 		}
 		this.webSocket = new WebSocket(this.getSocketUrl());
+
+		this.webSocket.onclose = () => {
+			console.log('Connection Closed');
+			//Utils.webSocket = undefined;
+			this.numAttempts++;
+			var timeOut = Math.min(2 * Utils.numAttempts * 1000, 20000)
+			setTimeout(() => {
+				Utils.openSocketConnection()
+			}, timeOut);
+		}
+		
+		this.webSocket.onopen = () => {
+			console.log('Connection Established');
+			this.numAttempts = 0;
+		}
+		
 	}
 
 	static closeWebSocket(){
@@ -317,6 +334,12 @@ export class Utils{
 			this.webSocket.close();
 		}catch(err){}
 		this.webSocket = undefined;
+	}
+
+	static sendWSMessage(msg) {
+		if (this.webSocket && this.webSocket.readyState == 1) {
+			this.webSocket.send(JSON.stringify(msg));
+		}
 	}
 
 	static firstLetterUppercase(stringy){
@@ -342,9 +365,6 @@ export class Utils{
 			return "";
 		}
 	}
-
-
-
 
 	static saveCommunitySearchString(stringy){
 		let savedData = this.getObjectFromLocalStorage('COMMUNITYFILTERS');
@@ -394,7 +414,6 @@ export class Utils{
 		}
 		return '';
 	}
-
 }
 
 export const getBreadCrumbArray = (array = [], item = []) => {
@@ -417,6 +436,8 @@ export const constructErrorMessage = error => {
 	const message = _.get(error.response, 'data.message', 'N/A');
 	return(`${errorCode} - ${message}`);
 }
+
+Utils.openSocketConnection();
 
 export * from './requests';
 export * from './portfolio';
