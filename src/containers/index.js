@@ -15,3 +15,4 @@ export * from './UpdateAdvisorProfile';
 export * from './AdvisorDashboard';
 export * from './ScreenAdvisors';
 export * from './TokenUpdate';
+export * from './Home';

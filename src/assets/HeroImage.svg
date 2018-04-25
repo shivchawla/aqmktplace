@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="797px" height="778px" viewBox="0 0 797 778" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49.3 (51167) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 19</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <filter x="-52.0%" y="-34.9%" width="204.0%" height="169.9%" filterUnits="objectBoundingBox" id="filter-1">
+            <feGaussianBlur stdDeviation="27.9203571" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <linearGradient x1="3.175543%" y1="52.1069434%" x2="107.779472%" y2="52.1069407%" id="linearGradient-2">
+            <stop stop-color="#1AAAFF" offset="0%"></stop>
+            <stop stop-color="#5EEDFD" offset="100%"></stop>
+        </linearGradient>
+        <filter x="-52.0%" y="-34.9%" width="204.0%" height="169.9%" filterUnits="objectBoundingBox" id="filter-3">
+            <feGaussianBlur stdDeviation="27.9203571" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <filter x="-52.0%" y="-34.9%" width="204.0%" height="169.9%" filterUnits="objectBoundingBox" id="filter-4">
+            <feGaussianBlur stdDeviation="27.9203571" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <filter x="-52.0%" y="-34.9%" width="204.0%" height="169.9%" filterUnits="objectBoundingBox" id="filter-5">
+            <feGaussianBlur stdDeviation="33.4462612" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-6">
+            <stop stop-color="#FBD249" offset="0%"></stop>
+            <stop stop-color="#F5A623" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Desktop-HD-Copy-4" transform="translate(-641.000000, -93.000000)">
+            <g id="Group-19" transform="translate(696.000000, 136.000000)">
+                <path d="M90.5155859,220.010814 L90.5155859,300.742971 L274.599065,300.742971 L274.599065,342.820083" id="Path-3" stroke="#3961FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10"></path>
+                <path d="M349.953669,216.911271 L349.953669,336.03445" id="Path-4" stroke="#3961FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10"></path>
+                <path d="M570.412025,211.812332 L570.412025,289.476432 L435.417473,289.476432 L435.417473,337.571657" id="Path-5" stroke="#3961FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10"></path>
+                <g id="Group-4">
+                    <rect id="shadow" fill="#323C5A" opacity="0.244696553" filter="url(#filter-1)" x="15.0421224" y="27.456" width="161.056163" height="239.712" rx="25.344"></rect>
+                    <rect id="bg" fill="#FFFFFF" x="0.576" y="0" width="189.024" height="239.712" rx="11.616"></rect>
+                    <g id="Advice-Text" transform="translate(24.000000, 105.000000)" fill="#E3F0FF">
+                        <rect id="Rectangle-9" x="0" y="0" width="145" height="17" rx="3"></rect>
+                        <rect id="Rectangle-9-Copy-5" x="0" y="33" width="121" height="17" rx="3"></rect>
+                        <rect id="Rectangle-9-Copy-6" x="0" y="66" width="79" height="17" rx="3"></rect>
+                    </g>
+                    <g id="logo" transform="translate(20.602286, 34.848000)">
+                        <rect id="Rectangle-3" fill="url(#linearGradient-2)" x="0" y="6.3177931" width="38.2166385" height="38.2166385" rx="11.88"></rect>
+                        <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="35.64" font-weight="normal" fill="#FFFFFF">
+                            <tspan x="8.73426261" y="34.2548966">a</tspan>
+                        </text>
+                        <text id="Advice" font-family="AvenirNext-Medium, Avenir Next" font-size="25.344" font-weight="400" letter-spacing="0.528000021" fill="#323C5A">
+                            <tspan x="47.5577143" y="38.728">Advice</tspan>
+                        </text>
+                    </g>
+                </g>
+                <g id="Group-4-Copy" transform="translate(254.000000, 0.000000)">
+                    <rect id="shadow" fill="#323C5A" opacity="0.244696553" filter="url(#filter-3)" x="15.0421224" y="27.456" width="161.056163" height="239.712" rx="25.344"></rect>
+                    <rect id="bg" fill="#FFFFFF" x="0.576" y="0" width="189.024" height="239.712" rx="11.616"></rect>
+                    <g id="Advice-Text" transform="translate(21.000000, 106.000000)" fill="#E3F0FF">
+                        <rect id="Rectangle-9" x="0" y="0" width="145" height="17" rx="3"></rect>
+                        <rect id="Rectangle-9-Copy-5" x="0" y="33" width="121" height="17" rx="3"></rect>
+                        <rect id="Rectangle-9-Copy-6" x="0" y="66" width="79" height="17" rx="3"></rect>
+                    </g>
+                    <g id="logo" transform="translate(20.602286, 34.848000)">
+                        <rect id="Rectangle-3" fill="url(#linearGradient-2)" x="0" y="6.3177931" width="38.2166385" height="38.2166385" rx="11.88"></rect>
+                        <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="35.64" font-weight="normal" fill="#FFFFFF">
+                            <tspan x="8.73426261" y="34.2548966">a</tspan>
+                        </text>
+                        <text id="Advice" font-family="AvenirNext-Medium, Avenir Next" font-size="25.344" font-weight="400" letter-spacing="0.528000021" fill="#323C5A">
+                            <tspan x="47.5577143" y="38.728">Advice</tspan>
+                        </text>
+                    </g>
+                </g>
+                <g id="Group-4-Copy-2" transform="translate(496.000000, 0.000000)">
+                    <rect id="shadow" fill="#323C5A" opacity="0.244696553" filter="url(#filter-4)" x="15.0421224" y="27.456" width="161.056163" height="239.712" rx="25.344"></rect>
+                    <rect id="bg" fill="#FFFFFF" x="0.576" y="0" width="189.024" height="239.712" rx="11.616"></rect>
+                    <g id="Advice-Text-Copy" transform="translate(22.000000, 106.000000)" fill="#E3F0FF">
+                        <rect id="Rectangle-9" x="0" y="0" width="145" height="17" rx="3"></rect>
+                        <rect id="Rectangle-9-Copy-5" x="0" y="33" width="121" height="17" rx="3"></rect>
+                        <rect id="Rectangle-9-Copy-6" x="0" y="66" width="79" height="17" rx="3"></rect>
+                    </g>
+                    <g id="logo" transform="translate(20.602286, 34.848000)">
+                        <rect id="Rectangle-3" fill="url(#linearGradient-2)" x="0" y="6.3177931" width="38.2166385" height="38.2166385" rx="11.88"></rect>
+                        <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="35.64" font-weight="normal" fill="#FFFFFF">
+                            <tspan x="8.73426261" y="34.2548966">a</tspan>
+                        </text>
+                        <text id="Advice" font-family="AvenirNext-Medium, Avenir Next" font-size="25.344" font-weight="400" letter-spacing="0.528000021" fill="#323C5A">
+                            <tspan x="47.5577143" y="38.728">Advice</tspan>
+                        </text>
+                    </g>
+                </g>
+                <g id="Group-8" transform="translate(242.000000, 330.000000)">
+                    <rect id="Rectangle-9-Copy" fill="#323C5A" opacity="0.154501812" filter="url(#filter-5)" x="17.3292092" y="32.89" width="192.931862" height="287.155" rx="30.36"></rect>
+                    <rect id="bg" fill="#FFFFFF" x="0" y="0" width="226.435" height="287.155" rx="13.915"></rect>
+                    <g id="Advice-Text" transform="translate(20.000000, 145.000000)" fill="#FEEDBE">
+                        <rect id="Rectangle-9" x="0" y="0" width="171" height="17" rx="3"></rect>
+                        <rect id="Rectangle-9-Copy-5" x="0" y="33" width="132" height="17" rx="3"></rect>
+                        <rect id="Rectangle-9-Copy-6" x="0" y="66" width="93" height="17" rx="3"></rect>
+                    </g>
+                    <g id="logo" transform="translate(20.194821, 41.745000)">
+                        <rect id="Rectangle-3" fill="url(#linearGradient-6)" x="0" y="7.56818966" width="45.7803483" height="45.7803483" rx="14.23125"></rect>
+                        <text id="p" font-family="AvenirNext-Medium, Avenir Next" font-size="42.69375" font-weight="400" fill="#FFFFFF">
+                            <tspan x="11.50848" y="43.3053448">p</tspan>
+                        </text>
+                        <text id="Portfolio" font-family="AvenirNext-Medium, Avenir Next" font-size="30.36" font-weight="400" letter-spacing="0.632499987" fill="#323C5A">
+                            <tspan x="55.34375" y="45.18">Portfolio</tspan>
+                        </text>
+                    </g>
+                </g>
+                <path d="" id="Path-2" stroke="#979797"></path>
+            </g>
+        </g>
+    </g>
+</svg>

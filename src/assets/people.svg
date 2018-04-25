@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="37px" height="31px" viewBox="0 0 37 31" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49.3 (51167) - http://www.bohemiancoding.com/sketch -->
+    <title>users</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="Desktop-HD-Copy-4" transform="translate(-669.000000, -1037.000000)" stroke="#3961FF" stroke-width="3">
+            <g id="Group-7" transform="translate(31.000000, 982.000000)">
+                <g id="Group-6">
+                    <g id="users" transform="translate(640.000000, 57.000000)">
+                        <path d="M24,27 L24,24 C24,20.6862915 21.3137085,18 18,18 L6,18 C2.6862915,18 3.33066907e-16,20.6862915 0,24 L0,27" id="Shape"></path>
+                        <circle id="Oval" cx="12" cy="6" r="6"></circle>
+                        <path d="M33,27 L33,24 C32.9979604,21.2656766 31.1474982,18.8785803 28.5,18.195" id="Shape"></path>
+                        <path d="M22.5,0.195 C25.1548722,0.874754681 27.0117649,3.26698672 27.0117649,6.0075 C27.0117649,8.74801328 25.1548722,11.1402453 22.5,11.82" id="Shape"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

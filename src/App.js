@@ -21,6 +21,7 @@ import {
     AdvisorDashboard,
     ScreenAdvisors,
     TokenUpdate,
+    Home
 } from './containers'; 
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
@@ -95,6 +96,7 @@ class App extends React.Component {
                             where parent is one of the keys from the <Menu.Item> above.
                             i.e investordashboard, advisordashboard, advice, stockresearch, quantresearch
                          */}
+                        <Route exact={true} path='/' component={Home} />
                         <Route exact={true} path='/advice' component={ScreenAdvices} />
                         <Route exact={true} path='/stockresearch' component={StockResearch} />
                         <Route exact={true} path='/login' component={LoginModal} />
