@@ -1,3 +1,5 @@
+//THIS IS 80% redundant code. Please IMPROVE THIS!!
+
 import * as React from 'react';
 import axios from 'axios';
 import _ from 'lodash';
@@ -11,11 +13,11 @@ const filters = {
     maxNotional: ['100000', '200000', '300000', '500000', '750000', '1000000'],
     rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
     approved: ['Approved', 'UnApproved'],
-    netValue: '0,100000000',
-    sharpe: '-100,100',
+    netValue: '0,600000',
+    sharpe: '-10,10',
     return: '-100,100',
-    volatility: '0,500',
-    rating: '0,10'
+    volatility: '0,5',
+    rating: '0,5'
 };
 const kvp = {
     maxNotional: 'selectMaxNotionalAllFilters',
@@ -95,7 +97,7 @@ export class AdviceFilterComponent extends React.Component {
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         const {netValue, sharpe, volatility, rating} = selectedFilters;
         approved = _.join(approved, ',');
-        const url = `${requestUrl}/advice?all=true&rebalance=${rebalancingFrequency}&return=${selectedFilters.return}&rating=${rating}&volatility=${volatility}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
+        const url = `${requestUrl}/advice?all=true&rebalance=${rebalancingFrequency}&return=${selectedFilters.return/100}&rating=${rating}&volatility=${volatility/100}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
         this.props.updateAdviceUrl(url);
         return url;
     }
@@ -161,10 +163,10 @@ export class AdviceFilterComponent extends React.Component {
     render() {
         const {defaultFilters} = this.state;
         const filterArray = [
-            {type: 'rating', label: 'Rating', range: defaultFilters.rating, min: 0, max: 10},
-            {type: 'sharpe', label: 'Sharpe Ratio', range: defaultFilters.sharpe, min: -100, max: 100, marks: {0: '0'}},
-            {type: 'netValue', label: 'Net Value', range: defaultFilters.netValue, min: 0, max: 100000000},
-            {type: 'volatility', label: 'Volatility', range: defaultFilters.volatility, min: 0, max: 500},
+            {type: 'rating', label: 'Rating', range: defaultFilters.rating, min: 0, max: 5, step: 0.1},
+            {type: 'sharpe', label: 'Sharpe Ratio', range: defaultFilters.sharpe, min: -10, max: 10, marks: {0: '0'}, step: 0.5},
+            {type: 'netValue', label: 'Net Value', range: defaultFilters.netValue, min: 0, max: 600000},
+            {type: 'volatility', label: 'Volatility', range: defaultFilters.volatility, min: 0, max: 50},
             {type: 'return', label: 'Return', range: defaultFilters.return, min: -100, max: 100, marks: {0: '0'}},
         ];
 
