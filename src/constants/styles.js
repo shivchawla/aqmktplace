@@ -136,3 +136,5 @@ export const cashStyle = {
     color: '#455A64',
     fontWeight: 700
 }
+
+export const primaryColor = '#03A7AD';

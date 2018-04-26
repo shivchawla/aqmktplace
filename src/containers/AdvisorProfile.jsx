@@ -103,27 +103,9 @@ export class AdvisorProfile extends React.Component {
         const url = `${requestUrl}/advisor/${advisorIdCurrent}?dashboard=0`;
         const advicesUrl = `${requestUrl}/advice?personal=1`;
         this.setState({loading: true});
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        this.getAdvisorSummary()
         .then(response => {
-            const {latestAnalytics = {}, user} = response.data;
-            this.setState({
-                advisor: response.data,
-                // advices: response.data.advices,
-                metrics: {
-                    name: `${user.firstName} ${user.lastName}`,
-                    numAdvices: _.get(latestAnalytics, 'numAdvices', null),
-                    numFollowers: _.get(latestAnalytics, 'numFollowers', null),
-                    rating: Number(_.get(latestAnalytics, 'rating.current', 0).toFixed(2)),
-                },
-                ownProfile: _.get(response, 'data.isOwner', false),
-                isFollowing: _.get(response.data, 'isFollowing', false),
-                picUrl: _.get(response.data, 'profile.linkedIn.photoUrl', this.state.picUrl),
-                isCompany: response.data.profile ? response.data.profile.isCompany : false
-            });
-            return axios.get(advicesUrl, {headers: Utils.getAuthTokenHeader()})
-        })
-        .then(response => {
-            this.setState({advices: this.processAdvices(response.data)});
+            this.setState({advices: this.processAdvices(response.data.advices)});
         })
         .catch(error => {
             console.log(error);
@@ -135,6 +117,40 @@ export class AdvisorProfile extends React.Component {
             this.setState({loading: false});
         });
     }
+    
+    getAdvisorSummary = (getAdvices = true) => new Promise((resolve, reject) => {
+        const advisorIdCurrent = this.props.match.params.id;
+        const url = `${requestUrl}/advisor/${advisorIdCurrent}?dashboard=0`;
+        const advicesUrl = `${requestUrl}/advice?personal=1`;
+        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        .then(response => {
+            const {latestAnalytics = {}, user} = response.data;
+            this.setState({
+                advisor: response.data,
+                metrics: {
+                    name: `${user.firstName} ${user.lastName}`,
+                    numAdvices: _.get(latestAnalytics, 'numAdvices', null),
+                    numFollowers: _.get(latestAnalytics, 'numFollowers', null),
+                    rating: Number(_.get(latestAnalytics, 'rating.current', 0).toFixed(2)),
+                },
+                ownProfile: _.get(response, 'data.isOwner', false),
+                isFollowing: _.get(response.data, 'isFollowing', false),
+                picUrl: _.get(response.data, 'profile.linkedIn.photoUrl', this.state.picUrl),
+                isCompany: response.data.profile ? response.data.profile.isCompany : false
+            });
+            if (getAdvices) {
+                resolve(axios.get(advicesUrl, {headers: Utils.getAuthTokenHeader()}));
+            } else {
+                resolve(true);
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        });
+    })
 
     processAdvices = (responseAdvices) => {
         const advices = [];
@@ -174,11 +190,15 @@ export class AdvisorProfile extends React.Component {
             headers: Utils.getAuthTokenHeader()
         })
         .then(response => {
-            message.success('Following User');
-            this.getAdvisorDetail();
+            console.log(response.data);
+            message.success('Success');
+            this.getAdvisorSummary(false);
         })
         .catch(error => {
-            message.error('Error occured !')
+            message.error('Error occured !');
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({followLoading: false});
@@ -223,6 +243,7 @@ export class AdvisorProfile extends React.Component {
                         advisorId={Utils.getUserInfo().advisor}
                         toggleModal={this.toggleUpdateModal}
                         advisor={this.state.advisor}
+                        getAdvisorSummary={this.getAdvisorSummary}
                 />
             </Modal>
         );

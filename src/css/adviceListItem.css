@@ -1,0 +1,13 @@
+.advice-card {
+    background-color: #fff;
+    padding: 10px 5px 10px 10px;
+    border: 1px solid #eaeaea;
+    margin: 15px 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(171, 171, 171, 50);
+    transition: all 0.3s ease-in-out;
+}
+
+.advice-card:hover {
+    box-shadow: 0 6px 10px rgba(171, 171, 171, 50);
+}

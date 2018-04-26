@@ -1,6 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
 import _ from 'lodash';
+import {withRouter} from 'react-router';
 import {Input, Button, Form, Icon, Popover, Row, Col, Avatar, Radio, Checkbox, message} from 'antd';
 import {Utils} from '../utils';
 
@@ -16,7 +17,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
         this.state = {
             picUrl: '',
             value: 1,
-            isRegistered: false,
+            isSebiRegistered: false,
             linkedInUserId: ''
         };
     }
@@ -47,10 +48,11 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 phone = '', 
                 isCompany = '', 
                 companyName = '', 
-                registrationNumber = '', 
+                companyRegistrationNum = '', 
                 facebook = '', 
                 twitter = '', 
-                isRegistered = false
+                isSebiRegistered = false,
+                sebiRegistrationNum = ''
             } = _.get(advisor, 'profile', {});
             const {
                 line1 = '', 
@@ -65,7 +67,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 value = 2;
             }
             // url, photoUrl, userId
-            this.setState({value, isRegistered});
+            this.setState({value, isSebiRegistered});
 
             this.props.form.setFieldsValue({
                 webUrl,
@@ -78,7 +80,8 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 phone,
                 linkedIn: _.get(linkedIn, 'url', ''),
                 companyName,
-                registrationNumber,
+                companyRegistrationNum,
+                sebiRegistrationNum,
                 facebook: _.get(facebook, 'url', ''),
                 twitter:  _.get(twitter, 'url', '')
             });
@@ -108,6 +111,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
 
     updateUserProfile = () => {
         const url = `${requestUrl}/advisor/${this.props.advisorId}/profile`;
+        console.log('Data', this.processData());
         axios({
             method: 'PUT',
             url,
@@ -116,10 +120,17 @@ class UpdateAdvisorProfileImpl extends React.Component {
         })
         .then(response => {
             message.success('Successfully updated profile');
+            if (this.props.getAdvisorSummary) {
+                this.props.getAdvisorSummary();
+            }
             this.props.toggleModal();
         })
         .catch(error => {
+            message.error('Error occured while updating profile');
             console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         });
     }
 
@@ -137,8 +148,9 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 country: "IN"
             },
             isCompany: this.state.value === 1 ? true: false,
-            isRegistered: this.state.isRegistered,
-            registrationNumber:  values.registrationNumber,
+            isSebiRegistered: this.state.isSebiRegistered,
+            sebiRegistrationNum:  values.sebiRegistrationNum,
+            companyRegistrationNum: values.companyRegistrationNum,
             phone: values.phone,
             linkedIn: {
                 url: values.linkedIn,
@@ -175,7 +187,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
     }
 
     handleIsRegisteredChange = (e) => {
-        this.setState({isRegistered: e.target.checked});
+        this.setState({isSebiRegistered: e.target.checked});
     }
 
     render() {
@@ -188,22 +200,31 @@ class UpdateAdvisorProfileImpl extends React.Component {
                         {this.renderRadioGroup()}
                     </Col>
                 </Row>
+                <FormItem>
+                    {getFieldDecorator('companyRegistrationNum')(
+                            <Input 
+                                    type="number" 
+                                    placeholder="Company Registration Number" 
+                                    disabled={this.state.value === 2}
+                            />
+                    )}
+                </FormItem>
                 <Row>
                     <Col span={24}>
                         <Checkbox
                                 onChange={this.handleIsRegisteredChange}
-                                checked={this.state.isRegistered}
+                                checked={this.state.isSebiRegistered}
                         >
-                            Is Registered
+                            Is Sebi Registered
                         </Checkbox>
                     </Col>
                 </Row>
                 <FormItem>
-                    {getFieldDecorator('registrationNumber')(
+                    {getFieldDecorator('sebiRegistrationNum')(
                             <Input 
                                     type="number" 
-                                    placeholder="Registration Number" 
-                                    disabled={!this.state.isRegistered}
+                                    placeholder="Sebi Registration Number" 
+                                    disabled={!this.state.isSebiRegistered}
                             />
                     )}
                 </FormItem>
@@ -277,4 +298,4 @@ class UpdateAdvisorProfileImpl extends React.Component {
     }
 }
 
-export const UpdateAdvisorProfile = Form.create()(UpdateAdvisorProfileImpl);
+export const UpdateAdvisorProfile = Form.create()(withRouter(UpdateAdvisorProfileImpl));

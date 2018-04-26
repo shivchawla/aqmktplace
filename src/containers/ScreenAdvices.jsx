@@ -107,7 +107,7 @@ export class ScreenAdvices extends React.PureComponent {
         });
     }
 
-    processUrl = (type) => {
+    processUrl = (type, orderParam = this.state.sortBy) => {
         const {selectedFilters, defaultFilters} = this.state;
         let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
         const personal = '0,1';
@@ -116,7 +116,7 @@ export class ScreenAdvices extends React.PureComponent {
         const maxNotional = selectedFilters.maxNotional.length > 0 ? _.join(selectedFilters.maxNotional, ',') : _.join(defaultFilters.maxNotional, ',');
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         approved = _.join(approved, ',');
-        return `${requestUrl}/advice?search=${this.state.searchValue}&${type}=true&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip * limit}`;
+        return `${requestUrl}/advice?search=${this.state.searchValue}&${type}=true&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip * limit}&orderParam=${orderParam}`;
     }
 
     processAdvices = (responseAdvices) => {
@@ -224,10 +224,10 @@ export class ScreenAdvices extends React.PureComponent {
         });
     }
 
-    handleSortingMenuChange = (value) => {
+    handleSortingMenuChange = value => {
         this.setState({sortBy: value}, () => {
-            const url = `${this.state.adviceUrl}&orderParam=${this.state.sortBy}`;
-            this.getAdvices(url);
+            // const url = this.processUrl(this.state.selectedTab, value);
+            this.getAdvices();
         });
     }
 
@@ -243,7 +243,7 @@ export class ScreenAdvices extends React.PureComponent {
                 <Option value="name">Name</Option>
                 <Option value="volatility">Volatility</Option>
                 <Option value="sharpe">Sharpe</Option>
-                <Option value="maxloss">Max Loss</Option>
+                <Option value="maxLoss">Max Loss</Option>
                 <Option value="numFollowers">Followers</Option>
                 <Option value="numSubscribers">Subscribers</Option>
                 <Option value="createdDate">Created Date</Option>
@@ -396,6 +396,7 @@ export class ScreenAdvices extends React.PureComponent {
                                         toggleModal = {this.toggleFilterModal}
                                         orderParam={this.state.sortBy}
                                         toggleFilter={this.toggleFilter}
+                                        selectedTab={this.state.selectedTab}
                                 />
                             </Col>
                         </Row>

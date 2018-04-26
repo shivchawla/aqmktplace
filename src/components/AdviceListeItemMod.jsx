@@ -5,6 +5,7 @@ import Radium from 'radium';
 import {withRouter} from 'react-router';
 import {Row, Col, Icon, Tag, Rate} from 'antd';
 import {MetricItem} from './MetricItem';
+import {primaryColor} from '../constants';
 import medalIcon from '../assets/award.svg';
 import trendingUpIcon from '../assets/trending-up.svg';
 import sunrise from '../assets/sunrise.svg';
@@ -12,6 +13,7 @@ import pie from '../assets/pie.svg';
 import barChart from '../assets/bar-chart-2.svg';
 import totalReturnIcon from '../assets/totalReturn.svg';
 import {Utils} from '../utils';
+import '../css/adviceListItem.css';
 
 const dateFormat = 'Do MMMM YYYY';
 
@@ -173,10 +175,7 @@ class AdviceListItemImpl extends React.PureComponent {
                 //     data: [180],
                 // }
             }
-        }
-
-        this.handleHover = this.handleHover.bind(this);
-        
+        }        
     }
 
     handleClick = (id) => {
@@ -369,17 +368,10 @@ class AdviceListItemImpl extends React.PureComponent {
         );
     }
 
-    handleHover(){
-        console.log()
-        this.setState({
-            isHovered: !this.state.isHovered
-        });
-    }
-
     render() {
         let {
             name, 
-            advisor = null, 
+            advisor = {}, 
             createdDate = null, 
             heading = null, 
             subscribers, 
@@ -394,26 +386,37 @@ class AdviceListItemImpl extends React.PureComponent {
             rebalancingFrequency
         } = this.props.advice;
         let sectors = _.get(performanceSummary, 'current.sectors', []);
-        
-        const activeCardStyle = this.state.isHovered ? hoverCardStyle : cardStyle;
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
         const statusTagColor = isOwner ? '#3cb44b' : isSubscribed ? '#1890ff' : isFollowing ? '#03a7ad' : '#fff';
         const statusTagLabel = isOwner ? 'Owner' : isSubscribed ? 'Subscribed' : isFollowing ? 'Wishlist' : "";
+        const advisorName = `${_.get(advisor, 'user.firstName')} ${_.get(advisor, 'user.lastName')}`;
+        const advisorId = _.get(advisor, '_id', '');
 
         return (
             <Row 
-                    type="flex" 
-                    style={{...activeCardStyle, backgroundColor: cardBackgroundColor}} 
+                    type="flex"
+                    className="advice-card" 
+                    style={{backgroundColor: cardBackgroundColor}} 
                     align="top" 
                     onClick={e => this.handleClick(id)} 
-                    onMouseEnter={this.handleHover} 
-                    onMouseLeave={this.handleHover}
             >
                 <Col span={24} style={{paddingLeft:'10px', paddingRight:'10px'}}>
                     <Row>
                         <Col span={10}>
                             <Row>
                                 <h3 style={{fontSize: '18px'}}>{name}</h3>
+                            </Row>
+                            <Row
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        this.props.history.push(`/advisordashboard/advisorprofile/${advisorId}`)
+                                    }}
+                            >
+                                <h3 
+                                        style={{fontSize: '14px'}}
+                                >
+                                    By <span style={{color: primaryColor}}>{advisorName}</span>
+                                </h3>
                             </Row>
                             {
                                 sectors.length > 0 && sectors &&

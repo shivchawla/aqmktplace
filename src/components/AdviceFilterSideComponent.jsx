@@ -12,7 +12,7 @@ const filters = {
     rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
     approved: ['Approved', 'UnApproved'],
     owner: ['Personal', 'Others'],
-    netValue: '0,',
+    netValue: '0,200000',
     sharpe: '-10,10',
     return: '-100,100',
     volatility: '0,50',
@@ -33,7 +33,8 @@ export class AdviceFilterSideComponent extends React.Component {
             selectMaxNotionalAllFilters: true,
             selectRebalanceAllFilters: true,
             selectApprovedllFilters: true,
-            selectOwnerAllFilters: true
+            selectOwnerAllFilters: true,
+            limit: 3
         };
     }
 
@@ -92,14 +93,23 @@ export class AdviceFilterSideComponent extends React.Component {
         const {selectedFilters, defaultFilters} = this.state;
         let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
         let personal = selectedFilters.owner.map(item => item === 'Personal' ? 1 : 0);
-        const limit = 10;
+        const limit = this.state.limit;
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         const {netValue, sharpe, volatility, rating} = selectedFilters;
+        console.log('Net Value', netValue);
         approved = _.join(approved, ',');
         personal = _.join(personal, ',');
-        const url = `${requestUrl}/advice?all=true&rebalance=${rebalancingFrequency}&return=${selectedFilters.return/100}&rating=${rating}&volatility=${volatility/100}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
+        const url = `${requestUrl}/advice?&${this.props.selectedTab}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
         this.props.updateAdviceUrl(url);
         return url;
+    }
+
+    convertRangeToDecimal = range => {
+        const rangeArray = range.split(',');
+        const min = Number(rangeArray[0]) / 100;
+        const max = Number(rangeArray[1]) / 100;
+        const modifiedRange = _.join([min, max], ',');
+        return modifiedRange;
     }
 
     handleFilterGroupCheckboxChange = (e, filterType) => {
