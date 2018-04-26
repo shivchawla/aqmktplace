@@ -21,6 +21,8 @@ export class AdviceMetricsItems extends React.Component {
                                     value={item.value} 
                                     label={item.label} 
                                     money={item.money}
+                                    percentage={item.percentage}
+                                    color={item.color}
                                     style={metricItemStyle} 
                                     isNetValue={item.isNetValue}
                                     dailyChange={item.dailyChange || null}
