@@ -252,11 +252,13 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                             label={(advice.id && advice.id.length > 0) ? "Advice":""} 
                             valueStyle={metricsValueStyle}
                             labelStyle={metricsLabelStyle}
+                            noNumeric
                         />
                     </Col>
                     <Col span={4}>
                         <MetricItem 
-                            value={`${advice.weight} %`} 
+                            value={advice.weight}
+                            percentage
                             label="Weight" 
                             valueStyle={metricsValueStyle}
                             labelStyle={metricsLabelStyle}
@@ -264,9 +266,9 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                     </Col>
                     <Col span={5} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                         <MetricItem 
-                            value={`${advice.profitLoss}`} 
+                            value={advice.profitLoss} 
                             label='Unrealized PnL'
-                            money={true}
+                            money
                             valueStyle={{...metricsValueStyle, color: profitOrLossColor}}
                             labelStyle={metricsLabelStyle}
                         />
@@ -275,7 +277,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                         <MetricItem 
                             value={advice.netAssetValue} 
                             label="Net Value"
-                            money={true} 
+                            money
                             valueStyle={{...metricsValueStyle, textAlign:'center'}}
                             labelStyle={{...metricsLabelStyle, textAlign: 'center'}}
                         />

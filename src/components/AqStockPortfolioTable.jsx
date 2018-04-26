@@ -75,7 +75,7 @@ export class AqStockPortfolioTable extends React.Component {
             portfolioArray.push({
                 key: index,
                 name: _.get(position, 'security.detail.Nse_Name', '-'),
-                weight: Number((_.get(position, 'weightInPortfolio', 0.0) * 100).toFixed(2)),
+                weight: (_.get(position, 'weightInPortfolio', 0.0) * 100).toFixed(2)+'%',
                 sector: _.get(position, 'security.detail.Sector', '-'),
                 price: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'lastPrice', 0)),
                 shares: position.quantity || 0,
@@ -113,6 +113,7 @@ export class AqStockPortfolioTable extends React.Component {
     renderHeaderText = title => <span style={{fontSize: '12px', fontWeight: '700'}}>{title}</span>
 
     render() {
+        console.log(this.props.portfolio);
         return (
             <Table 
                     size="small"

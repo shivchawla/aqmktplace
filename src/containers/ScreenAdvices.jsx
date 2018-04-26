@@ -166,7 +166,7 @@ export class ScreenAdvices extends React.PureComponent {
                 heading: advice.heading || '',
                 subscribers: advice.numSubscribers || 0,
                 followers: advice.numFollowers || 0,
-                rating: _.get(advice, 'rating.current', 0).toFixed(2),
+                rating: Number(_.get(advice, 'rating.current', 0).toFixed(2)),
                 performanceSummary: advice.performanceSummary,
                 rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
                 isApproved: _.get(advice, 'approvalStatus', 'N/A'),

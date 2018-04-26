@@ -117,8 +117,10 @@ class StockResearchImpl extends React.Component {
             latestDetail.high = _.get(data, 'latestDetailRT.high', 0) || data.latestDetail.values.High;
             latestDetail.low_52w = Math.min(_.get(data, 'latestDetailRT.low', 0), data.latestDetail.values.Low_52w);
             latestDetail.high_52w = Math.max(_.get(data, 'latestDetailRT.high', 0), data.latestDetail.values.High_52w);
-            latestDetail.change = Number(((_.get(data, 'latestDetailRT.changePct', 0) || data.latestDetail.values.ChangePct)*100).toFixed(2));
+            latestDetail.change = _.get(data, 'latestDetailRT.current', 0) != 0.0 ?  Number(((_.get(data, 'latestDetailRT.changePct', 0) || data.latestDetail.values.ChangePct)*100).toFixed(2)) : "-";
+
             latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
+            
             this.setState({latestDetail}, () => {
                 // Subscribing to real-time data
                 if (!this.props.openAsDialog) {
@@ -290,7 +292,7 @@ class StockResearchImpl extends React.Component {
                         latestDetail: {
                             ...this.state.latestDetail,
                             latestPrice: _.get(realtimeResponse, 'output.current', 0),
-                            change: (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
+                            change: _.get(realtimeResponse, 'output.current', 0) != 0.0 ? (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2) : "-"
                         }
                     });
                 } else {
