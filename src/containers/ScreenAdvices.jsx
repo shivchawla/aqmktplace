@@ -7,6 +7,7 @@ import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, P
 import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, AqPageHeader} from '../components';
 import {newLayoutStyle, pageTitleStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {Utils, getBreadCrumbArray} from '../utils';
+import {adviceFilters as filters} from '../constants/filters';
 import '../css/screenAdvices.css';
 
 const {aimsquantToken, requestUrl} = require('../localConfig');
@@ -15,18 +16,6 @@ const CheckboxGroup = Checkbox.Group;
 const TabPane = Tabs.TabPane;
 const Panel = Collapse.Panel;
 const antIcon = <Icon type="loading" style={{ fontSize: 18 }} spin />;
-
-const filters = {
-    maxNotional: ['100000', '200000', '300000', '500000', '750000', '1000000'],
-    rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
-    approved: ['Approved', 'UnApproved'],
-};
-
-const kvp = {
-    maxNotional: 'selectMaxNotionalAllFilters',
-    rebalancingFrequency: 'selectRebalanceAllFilters',
-    approved: 'selectApprovedllFilters'
-};
 
 const sortValues = ['name', 'updatedAt desc', 'subscribers', 'followers', 'rating'];
 
@@ -37,13 +26,8 @@ export class ScreenAdvices extends React.PureComponent {
             spinning: false,
             adviceUrl: `${requestUrl}/advice?all=true&trending=false&subscribed=false&following=false&order=-1`,
             advices: [],
-            defaultFilters: filters,
             selectedFilters: filters,
-            selectAllFilters: true,
             selectedTab: 'all',
-            selectMaxNotionalAllFilters: true,
-            selectRebalanceAllFilters: true,
-            selectApprovedllFilters: true,
             searchValue: '',
             sortBy: 'rating',
             activeFilterPanel: [],
@@ -107,16 +91,29 @@ export class ScreenAdvices extends React.PureComponent {
         });
     }
 
+    updateSelectedFilters = filters => {
+        this.setState({selectedFilters: filters});
+    }
+
     processUrl = (type, orderParam = this.state.sortBy) => {
-        const {selectedFilters, defaultFilters} = this.state;
+        const {selectedFilters} = this.state;
         let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
-        const personal = '0,1';
+        let personal = selectedFilters.owner.map(item => item === 'Personal' ? 1 : 0);
         const limit = this.state.limit;
-        const skip = this.state.selectedPage - 1;
-        const maxNotional = selectedFilters.maxNotional.length > 0 ? _.join(selectedFilters.maxNotional, ',') : _.join(defaultFilters.maxNotional, ',');
-        const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
+        const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(filters.rebalancingFrequency, ',');
+        const {netValue, sharpe, volatility, rating} = selectedFilters;
         approved = _.join(approved, ',');
-        return `${requestUrl}/advice?search=${this.state.searchValue}&${type}=true&rebalance=${rebalancingFrequency}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip * limit}&orderParam=${orderParam}`;
+        personal = _.join(personal, ',');
+        const url = `${requestUrl}/advice?&${type}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${orderParam}&order=-1`;
+        return url;
+    }
+
+    convertRangeToDecimal = range => {
+        const rangeArray = range.split(',');
+        const min = Number(rangeArray[0]) / 100;
+        const max = Number(rangeArray[1]) / 100;
+        const modifiedRange = _.join([min, max], ',');
+        return modifiedRange;
     }
 
     processAdvices = (responseAdvices) => {
@@ -384,7 +381,7 @@ export class ScreenAdvices extends React.PureComponent {
                                 <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>
                             </Col>
                             <Col span={6} offset={9}>
-                                <Button style={filterBtnStyle} onClick={() => this.getAdvices(this.state.adviceUrl)}>Update</Button>
+                                <Button style={filterBtnStyle} onClick={() => this.getAdvices()}>Update</Button>
                             </Col>
                         </Row>
                         <Row>
@@ -397,6 +394,7 @@ export class ScreenAdvices extends React.PureComponent {
                                         orderParam={this.state.sortBy}
                                         toggleFilter={this.toggleFilter}
                                         selectedTab={this.state.selectedTab}
+                                        updateSelectedFilters={this.updateSelectedFilters}
                                 />
                             </Col>
                         </Row>

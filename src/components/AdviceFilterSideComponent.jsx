@@ -3,21 +3,12 @@ import axios from 'axios';
 import _ from 'lodash';
 import {Button, Checkbox, Row, Col, Icon, Slider, Divider} from 'antd';
 import {IconHeader} from './IconHeader';
+import {adviceFilters as filters} from '../constants/filters';
 import {verticalLayout} from '../constants';
 import '../css/buttons.css';
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
 const CheckboxGroup = Checkbox.Group;
-const filters = {
-    rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
-    approved: ['Approved', 'UnApproved'],
-    owner: ['Personal', 'Others'],
-    netValue: '0,200000',
-    sharpe: '-10,10',
-    return: '-100,100',
-    volatility: '0,50',
-    rating: '0,5'
-};
 const kvp = {
     rebalancingFrequency: 'selectRebalanceAllFilters',
     approved: 'selectApprovedllFilters',
@@ -75,17 +66,8 @@ export class AdviceFilterSideComponent extends React.Component {
             },
             [kvp[type]]: checkedValues.length === this.state.defaultFilters[type].length
         }, () => {
-            this.props.updateAdviceUrl(this.processUrl());
-        });
-    }
-
-    getAdvices = () => {
-        axios.get(this.processUrl(), {headers: {'aimsquant-token': aimsquantToken}})
-        .then(response => {
-            this.props.updateAdvices(response.data);
-        })
-        .catch(error => {
-            console.log(error);
+            this.props.updateSelectedFilters(this.state.selectedFilters);
+            // this.props.updateAdviceUrl(this.processUrl());
         });
     }
 
@@ -100,7 +82,7 @@ export class AdviceFilterSideComponent extends React.Component {
         approved = _.join(approved, ',');
         personal = _.join(personal, ',');
         const url = `${requestUrl}/advice?&${this.props.selectedTab}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
-        this.props.updateAdviceUrl(url);
+        // this.props.updateAdviceUrl(url);
         return url;
     }
 
@@ -121,7 +103,8 @@ export class AdviceFilterSideComponent extends React.Component {
             selectedFilters: {...this.state.selectedFilters, [filterType]: arrray},
             [kvp[filterType]]: e.target.checked
         }, () => {
-            this.props.updateAdviceUrl(this.processUrl());
+            this.props.updateSelectedFilters(this.state.selectedFilters);
+            // this.props.updateAdviceUrl(this.processUrl());
         });
     }
 
@@ -134,7 +117,8 @@ export class AdviceFilterSideComponent extends React.Component {
                 [type]: selectedRange
             }
         }, () => {
-            this.props.updateAdviceUrl(this.processUrl());
+            this.props.updateSelectedFilters(this.state.selectedFilters);
+            // this.props.updateAdviceUrl(this.processUrl());
         });
 
     }
