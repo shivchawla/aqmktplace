@@ -80,7 +80,7 @@ class SubscribedAdvicesImpl extends React.Component {
         const url = `${requestUrl}/advice?subscribed=true`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            response.data.map((advice, index) => {
+            response.data.advices.map((advice, index) => {
                 const adviceUrl = `${requestUrl}/advice/${advice._id}`;
                 axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()})
                 .then(response => {
@@ -103,11 +103,11 @@ class SubscribedAdvicesImpl extends React.Component {
                         createdDate: response.data.createdDate,
                         currentPerformance: [],
                         simulatedPerformance: [],
-                        netValue: _.get(response.data, 'performanceSummary.current.netValue', 0),
-                        dailyChange: _.get(response.data, 'performanceSummary.current.dailyChange', 0),
-                        dailyChangePct: _.get(response.data, 'performanceSummary.current.dailyChangePct', 0),
+                        netValue: _.get(response.data, 'performanceSummary.current.netValueEOD', 0),
+                        dailyChange: _.get(response.data, 'performanceSummary.current.dailyNAVChangeEOD', 0),
+                        dailyChangePct: _.get(response.data, 'performanceSummary.current.dailyNAVChangeEODPct', 0),
                         maxLoss: _.get(response.data, 'performanceSummary.current.maxLoss', 0),
-                        totalReturn: _.get(response.data, 'performanceSummary.current.totalReturn', 0)
+                        totalReturn: _.get(response.data, 'performanceSummary.current.annualReturn', 0)
                     };
                     axios.get(portfolioUrl, {headers: Utils.getAuthTokenHeader()})
                     .then(response => {
@@ -279,15 +279,17 @@ class SubscribedAdvicesImpl extends React.Component {
                 <Col span={6}>
                     <MetricItem 
                         value={advice.name || ''} 
-                        label="Advice" 
+                        label="Advice"
+                        noNumeric 
                         valueStyle={metricsValueStyle}
                         labelStyle={metricsLabelStyle}
                     />
                 </Col>
-                <Col span={4}>
+                {/*<Col span={4}>
                     <MetricItem 
                         value={10} 
-                        value={`${advice.dailyChange.toFixed(2)}`} 
+                        value={advice.dailyChange} 
+                        money
                         label="Daily Change" 
                         valueStyle={{...metricsValueStyle, color: dailyChangeColor}}
                         labelStyle={metricsLabelStyle}
@@ -296,25 +298,29 @@ class SubscribedAdvicesImpl extends React.Component {
                 <Col span={4}>
                     <MetricItem 
                         value={10} 
-                        value={`${(advice.dailyChangePct * 100).toFixed(2)} %`} 
+                        value={advice.dailyChangePct} 
+                        percentage
+                        color
                         label="Daily Change Pct" 
                         valueStyle={{...metricsValueStyle, color: dailyChangePctColor}}
                         labelStyle={metricsLabelStyle}
                     />
-                </Col>
+                </Col>*/}
                 <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                     <MetricItem 
-                        value={11.5} 
-                        value={`${(advice.totalReturn * 100).toFixed(2)} %`} 
+                        value={advice.totalReturn}
+                        percentage 
                         label="Total Return" 
                         valueStyle={{...metricsValueStyle, color: totalReturnColor}}
                         labelStyle={metricsLabelStyle}
                     />
                 </Col>
-                <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                <Col span={6} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                     <MetricItem 
-                        value={1100} 
-                        value={advice.netValue} 
+                        value={advice.netValue}
+                        isNetValue
+                        money
+                        dailyChangePct={(advice.dailyChangePct*100).toFixed(2)} 
                         label="Net Asset Value" 
                         valueStyle={{...metricsValueStyle, textAlign:'center'}}
                         labelStyle={{...metricsLabelStyle, textAlign: 'center'}}
