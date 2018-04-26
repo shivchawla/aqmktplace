@@ -121,7 +121,7 @@ export class AdvisorProfile extends React.Component {
     getAdvisorSummary = (getAdvices = true) => new Promise((resolve, reject) => {
         const advisorIdCurrent = this.props.match.params.id;
         const url = `${requestUrl}/advisor/${advisorIdCurrent}?dashboard=0`;
-        const advicesUrl = `${requestUrl}/advice?personal=1`;
+        const advicesUrl = `${requestUrl}/advice?advisor=${this.props.match.params.id}`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const {latestAnalytics = {}, user} = response.data;

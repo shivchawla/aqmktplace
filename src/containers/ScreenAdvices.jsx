@@ -20,6 +20,7 @@ const antIcon = <Icon type="loading" style={{ fontSize: 18 }} spin />;
 const sortValues = ['name', 'updatedAt desc', 'subscribers', 'followers', 'rating'];
 
 export class ScreenAdvices extends React.PureComponent {
+    mounted = false;
     constructor(props) {
         super(props);
         this.state = {
@@ -61,12 +62,37 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     componentWillMount() {
+        this.mounted = true;
         if (!Utils.isLoggedIn()) {
-            Utils.goToLoginPage(this.props.history, this.props.match.url);
+            this.getDefaultAdvices();
+            // Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
             this.getAdvices();
             this.toggleFilter();
         }
+    }
+
+    componentWillUnmount() {
+        console.log('Component Unmounted');
+        this.mounted = false;
+    }
+
+    getDefaultAdvices = () => {
+        const url = `https://developapi.aimsquant.com/api/v2/advice_default`;
+        this.setState({show: true});
+        axios.get(url)
+        .then(response => {
+            this.setState({
+                advices: this.processAdvices(response.data.advices),
+                limitotalCountt: 1
+            });
+        })
+        .catch(error => {
+            console.log(error);
+        })
+        .finally(() => {
+            this.setState({show: false, loading: false});
+        });
     }
 
     getAdvices = (adviceUrl) => {
@@ -78,16 +104,27 @@ export class ScreenAdvices extends React.PureComponent {
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            this.setState({
-                advices: this.processAdvices(response.data.advices),
-                totalCount: _.get(response.data, 'count', 10)
-            });
+            console.log('Mounted', this.mounted);
+            if (this.mounted) {
+                this.setState({
+                    advices: this.processAdvices(response.data.advices),
+                    totalCount: _.get(response.data, 'count', 10)
+                });
+            }
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            if (error.response) {
+                if (_.get(error, 'response.data.paramName', '') === 'aimsquant-token') {
+                    this.props.history.push('/login');
+                } else {
+                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                }
+            }
         })
         .finally(() => {
-            this.setState({loading: false, show: false});
+            if (this.mounted) {
+                this.setState({loading: false, show: false});
+            }
         });
     }
 

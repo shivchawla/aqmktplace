@@ -475,7 +475,7 @@ class AdviceListItemImpl extends React.PureComponent {
                         <Col span={17}>
                             <Row>
                                 <Col span={12} style={{textAlign: 'center'}}>
-                                    <Rate disabled value={rating}/>
+                                    <Rate disabled value={Number(rating)}/>
                                     {this.renderTrendingApprovedIcon()}
                                 </Col>
                                 <Col span={10} offset={2}>

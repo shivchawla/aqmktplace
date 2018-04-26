@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle} from '../constants';
+import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -511,7 +511,6 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
-
     renderActionButtons = () => {
         const {userId} = this.state;
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
@@ -611,8 +610,11 @@ class AdviceDetailImpl extends React.Component {
                             <h1 style={adviceNameStyle}>{name}</h1>
                             {
                                 advisor.user &&
-                                <h5 style={userStyle}>
-                                    By {advisor.user.firstName} {advisor.user.lastName}
+                                <h5 
+                                        style={{...userStyle, cursor: 'pointer'}} 
+                                        onClick={() => this.props.history.push(`/advisordashboard/advisorProfile/${advisor._id}`)}
+                                >
+                                    By <span style={{color: primaryColor}}>{advisor.user.firstName} {advisor.user.lastName}</span>
                                     <span style={dateStyle}>{updatedDate}</span>
                                 </h5>
                             }

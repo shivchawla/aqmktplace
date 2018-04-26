@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Row, Col, Button} from 'antd';
 import {Motion, spring} from 'react-motion';
+import {Utils} from '../utils';
 import adviceLogo from '../assets/AdviceLogo.svg';
 import portfolioLogo from '../assets/PortfolioLogo.svg';
 import heroImage from '../assets/HeroImageSmall.svg';
@@ -46,7 +47,17 @@ export class Home extends React.Component {
                     <img src={adviceLogo} style={{transform: 'scale(0.8, 0.8)', marginLeft: '-40px'}}/>
                 </Col>
                 <Col span={12} className="tab-content-button-container">
-                    <ButtonComponent text="Become an advisor" />
+                    {
+                        Utils.isLoggedIn()
+                        ?   <ButtonComponent 
+                                    onClick={() => this.props.history.push('/advisordashboard/createadvice')} 
+                                    text="Create an Advice" 
+                            />
+                        :   <ButtonComponent 
+                                    onClick={() => this.props.history.push('/signup')} 
+                                    text="Become an advisor" 
+                            />
+                    }
                 </Col>
             </div>
         );
@@ -96,7 +107,10 @@ export class Home extends React.Component {
                     <img src={portfolioLogo} style={{transform: 'scale(0.8, 0.8)', marginLeft: '-40px'}}/>
                 </Col>
                 <Col span={12} className="tab-content-button-container">
-                    <ButtonComponent text="Become an investor" />
+                    <ButtonComponent 
+                            onClick={() => this.props.history.push('/advice')} 
+                            text="Screen Advices" 
+                    />
                 </Col>
             </div>
         );
@@ -146,7 +160,13 @@ export class Home extends React.Component {
                                     Best investment ideas. Let the experts help you <br></br> build the portfolio your desire.
                                 </h5>
                             </Col>
-                            <Button className="signup-button">SIGN UP</Button>
+                            {
+                                !Utils.isLoggedIn() &&
+                                <Button 
+                                        className="signup-button" 
+                                        onClick={() => this.props.history.push('/signup')}
+                                >SIGN UP</Button>
+                            }
                         </Row>
                     </Col>
                     <Col span={12} className='hero-image'>
@@ -263,9 +283,9 @@ const ButtonComponent = props => {
     const {text} = props;
 
     return (
-        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}} onClick={props.onClick}>
             <span style={{color: '#fff', fontSize: '16px'}}>{text}</span>
-            <img style={{marginLeft: '5px'}} src={chevronRight} />
+            <img style={{marginLeft: '5px', marginTop: '2px'}} src={chevronRight} />
         </div>
     );
 };

@@ -134,7 +134,14 @@ class App extends React.Component {
                                     Utils.isLoggedIn() &&
                                     <Menu.Item key="quantresearch">Quant Research</Menu.Item>
                                 }
-                                
+                                {
+                                    !Utils.isLoggedIn() &&
+                                    <Menu.Item key="login">Login</Menu.Item>
+                                }
+                                {
+                                    !Utils.isLoggedIn() &&
+                                    <Menu.Item key="signup">Signup</Menu.Item>
+                                }
                             </Menu>
                             {
                                 Utils.isLoggedIn() &&
