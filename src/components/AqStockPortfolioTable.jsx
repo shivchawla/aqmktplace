@@ -113,6 +113,7 @@ export class AqStockPortfolioTable extends React.Component {
     renderHeaderText = title => <span style={{fontSize: '12px', fontWeight: '700'}}>{title}</span>
 
     render() {
+        console.log(this.props.portfolio);
         return (
             <Table 
                     size="small"

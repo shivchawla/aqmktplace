@@ -628,7 +628,7 @@ class AdviceDetailImpl extends React.Component {
                     <Row>
                         <Col span={24} style={dividerStyle}></Col>
                     </Row>
-                    <Collapse bordered={false} defaultActiveKey={this.state.barDollarSeries.length > 0 ? ["2"] : ["3"]}>
+                    <Collapse bordered={false} defaultActiveKey={["2"]}>
                         <Panel
                                 key="1"
                                 style={customPanelStyle}
@@ -640,43 +640,8 @@ class AdviceDetailImpl extends React.Component {
                                 </Col>
                             </Row>
                         </Panel>
-                        {
-                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) &&
-                            <Panel
-                                    key="2"
-                                    style={customPanelStyle}
-                                    header={<h3 style={metricsHeaderStyle}>Summary</h3>}
-                            >
-                                {
-                                    this.state.barDollarSeries.length > 0
-                                    ?   <Row className="row-container" gutter={20}>
-                                            <Col span={12}>
-                                                <AqCard title="Portfolio Summary">
-                                                    <HighChartNew series = {this.state.series} />
-                                                </AqCard>
-                                            </Col>
-                                            <Col span={12}>
-                                                <AqCard title="Performance Summary">
-                                                    {/* <ReactHighcharts config = {this.state.performanceConfig} /> */}
-                                                    {/*<Col span={24} style={{paddingTop: '10px'}}>*/}
-                                                        <HighChartBar
-                                                                dollarSeries={this.state.barDollarSeries}
-                                                                percentageSeries={this.state.barPercentageSeries}
-                                                        />
-                                                    {/*</Col>*/}
-                                                </AqCard>
-                                            </Col>
-                                        </Row>
-                                    :   <Row type="flex" align="middle" justify="center">
-                                            <h3>No Data Available</h3>
-                                        </Row>
-                                }
-
-                            </Panel>
-                        }
-
                         <Panel
-                            key="3"
+                            key="2"
                             style={customPanelStyle}
                             header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
                             <Row className="row-container">
@@ -688,12 +653,11 @@ class AdviceDetailImpl extends React.Component {
                             (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) &&
 
                             <Panel
-                                    key="4"
+                                    key="3"
                                     style={customPanelStyle}
                                     header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}
                             >
-                                <Row className="row-container" type="flex" justify="space-between" align="middle">
-                                    {/*<Col span={6}><span style={cashStyle}>Cash: {this.state.cash}</span></Col>*/}
+                                <Row className="row-container" type="flex" justify="end" align="middle">
                                     <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                         {
                                             this.state.adviceDetail.isOwner &&
@@ -707,7 +671,7 @@ class AdviceDetailImpl extends React.Component {
                                     <Col span={24} style={{marginTop: '10px'}}>
                                         <AqStockPortfolioTable
                                             composition
-                                            positions={this.state.positions}
+                                            portfolio={{positions: this.state.positions}}
                                             updateTicker={this.updateTicker}
                                         />
                                     </Col>
