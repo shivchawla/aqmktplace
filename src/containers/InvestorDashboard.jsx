@@ -230,20 +230,23 @@ export class InvestorDashboard extends React.Component {
         .then(() => {
             return this.getInvestorSubscribedAdvices();
         })
-        .then((response) => {
+        .then(() => {
             this.setUpSocketConnection();
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            let messageText = '', errorCode = '';
-            if (error.message === 'Network Error') {
-                messageText = 'You are disconnected from the internet';
-                errorCode = 'no_network';
-            } else {
-                messageText = 'You have not created any portfolio yet. Get started by creating One';
-                errorCode = 'empty_portfolio';
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                let messageText = '', errorCode = '';
+                if (error.message === 'Network Error') {
+                    messageText = 'You are disconnected from the internet';
+                    errorCode = 'no_network';
+                } else {
+                    messageText = 'You have not created any portfolio yet. Get started by creating One';
+                    errorCode = 'empty_portfolio';
+                }
+                this.setState({showEmptyScreen: {error: error.message, status: true, messageText, errorCode}});
             }
-            this.setState({showEmptyScreen: {error: error.message, status: true, messageText, errorCode}});
         })
         .finally(() => {
             this.setState({defaultPortfolioLoading: false});
@@ -261,6 +264,7 @@ export class InvestorDashboard extends React.Component {
             });
         })
         .catch(error => {
+            console.log(error);
             reject(error);
         })
         .finally(() => {
@@ -274,12 +278,12 @@ export class InvestorDashboard extends React.Component {
         this.setState({subscribedAdvicesLoading: true});
         axios.get(subscribedAdvicesUrl, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            this.setState({subscribedAdvices: this.processSubscribedAdvices(response.data)});
+            this.setState({subscribedAdvices: this.processSubscribedAdvices(response.data.advices)});
             return axios.get(followingAdviceUrl, {headers: Utils.getAuthTokenHeader()});
         })
         .then(response => {
             const advices = [...this.state.subscribedAdvices];
-            const followingAdvices = response.data;
+            const followingAdvices = response.data.advices;
             followingAdvices.map((advice, index) => {
                 const {name, performanceSummary} = advice;
                 if(_.findIndex(advices, presentAdvice => presentAdvice.id === advice._id) === -1) {
@@ -295,13 +299,13 @@ export class InvestorDashboard extends React.Component {
                     });
                 }
             });
-            console.log('Advices', advices);
             this.setState({subscribedAdvices: advices}, () => {
                 resolve(true);
             });
         })
         .catch(error => {
-            reject(Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url));
+            console.log(error);
+            reject(error);
         })
         .finally(() => {
             this.setState({subscribedAdvicesLoading: false});
