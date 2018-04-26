@@ -209,7 +209,7 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                <h5 style={{fontSize: "16px"}}>
+                <h5 style={{fontSize: "18px"}}>
                     {(diversity * 100).toFixed(2)} %
                 </h5>
                     {/*<img style={iconStyle} src={pie} />*/}
@@ -231,7 +231,7 @@ class AdviceListItemImpl extends React.PureComponent {
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
                     {/*<img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />*/}
-                    <h5 style={{fontSize: "16px"}}>{beta.toFixed(2)}</h5>
+                    <h5 style={{fontSize: "18px"}}>{beta.toFixed(2)}</h5>
                 </Col>
                 <Col span={24}>
                     <span style={{fontSize: '13px'}}>Beta</span>
@@ -247,7 +247,7 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                    <h5 style={{fontSize: "16px"}}>{(annualReturn * 100).toFixed(2)} %</h5>
+                    <h5 style={{fontSize: "18px"}}>{(annualReturn * 100).toFixed(2)} %</h5>
                     {/*<img style={{transform: 'scale(0.8, 0.8)'}} src={totalReturnIcon} />*/}
                 </Col>
                 <Col span={24}>
@@ -262,7 +262,7 @@ class AdviceListItemImpl extends React.PureComponent {
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
                 {/*<img style={iconStyle} src={sunrise} />*/}
-                <h5 style={{fontSize: "16px"}}>{Number((volatility * 100).toFixed(2))} %</h5>
+                <h5 style={{fontSize: "18px"}}>{Number((volatility * 100).toFixed(2))} %</h5>
                 </Col>
                 <Col span={24}>
                     <span style={{fontSize: '13px'}}>Volatility </span>
