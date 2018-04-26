@@ -1,28 +1,32 @@
 import * as React from 'react';
 import axios from 'axios';
 import _ from 'lodash';
-import {Row, Col, Select} from 'antd';
+import Loading from 'react-loading-bar';
+import {Row, Col, Select, Input} from 'antd';
 import {AdvisorComponent} from '../components';
-import {layoutStyle} from '../constants';
+import {layoutStyle, loadingColor} from '../constants';
 import {Utils} from '../utils';
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
 const Option = Select.Option;
+const Search = Input.Search;
 
 export class ScreenAdvisors extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             advisors: [],
-            sortBy: 'rating'
+            sortBy: 'rating',
+            loading: false
         };
     }
 
     getAdvisors = () => {
         const url = `${requestUrl}/advisor?&orderParam=${this.state.sortBy}&order=-1`;
+        this.setState({loading: true});
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            console.log(response.data);
+            console.log('Advisor List', response.data);
             this.setState({advisors: response.data});
         })
         .catch(error => {
@@ -30,6 +34,9 @@ export class ScreenAdvisors extends React.Component {
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
+        })
+        .finally(() => {
+            this.setState({loading: false});
         })
     }
     
@@ -44,7 +51,7 @@ export class ScreenAdvisors extends React.Component {
                 rating
             };
 
-            return <AdvisorComponent key={index} metrics={metrics} advisorId={advisor._id}/>
+            return <AdvisorComponent key={index} metrics={metrics} advisorId={advisor._id} advisor={advisor}/>
         });
     }
 
@@ -74,6 +81,10 @@ export class ScreenAdvisors extends React.Component {
         );
     }
 
+    handleSearch = value => {
+        console.log(value);
+    }
+
     componentWillMount() {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -84,17 +95,32 @@ export class ScreenAdvisors extends React.Component {
 
     render(){
         return (
-            <Row>
-                <Col span={18} style={layoutStyle}>
-                    <Row>
-                        <Col span={24}>
-                            {this.renderSortingMenu()}
-                        </Col>
-                        <Col span={24}>
-                            {this.renderAdvisors()}
-                        </Col>
-                    </Row>
-                </Col>
+            <Row style={{marginTop: '20px'}}>
+                <Loading
+                        show={this.state.loading}
+                        color={loadingColor}
+                        className="main-loader"
+                        showSpinner={false}
+                />
+                {
+                    !this.state.loading &&
+                    <Col span={18}>
+                        <Row type="flex" justify="space-between">
+                            <Col span={18}>
+                                <Search
+                                        placeholder="Enter advisor name"
+                                        onSearch={this.handleSearch}
+                                />
+                            </Col>
+                            <Col span={4}>
+                                {this.renderSortingMenu()}
+                            </Col>
+                            <Col span={24}>
+                                {this.renderAdvisors()}
+                            </Col>
+                        </Row>
+                    </Col>
+                }
             </Row>
             
         );

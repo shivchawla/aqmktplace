@@ -30,6 +30,7 @@ import {
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
 import {Utils} from './utils';
+import {primaryColor} from './constants';
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
@@ -99,7 +100,10 @@ class App extends React.Component {
                     <Row type="flex">
                         <Col span={4}>
                             <Link to='/home'>
-                                <h1 style={headerColor}>AIMSQUANT</h1>
+                                <h1 
+                                        style={headerColor}>
+                                    ADVICEQUBE <span style={{fontSize: '14px', color: primaryColor}}>&nbsp;Beta</span>
+                                </h1>
                             </Link>
                         </Col>
                         <Col 
@@ -129,10 +133,9 @@ class App extends React.Component {
                                     <Menu.Item key={'home'}>Home</Menu.Item>
                                 }
                                 <Menu.Item key="advice">Screen Advices</Menu.Item>
-                                <Menu.Item key="stockresearch">Stock Research</Menu.Item>
                                 {
                                     Utils.isLoggedIn() &&
-                                    <Menu.Item key="quantresearch">Quant Research</Menu.Item>
+                                    <Menu.Item key="stockresearch">Stock Research</Menu.Item>
                                 }
                                 {
                                     !Utils.isLoggedIn() &&

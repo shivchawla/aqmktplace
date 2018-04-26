@@ -254,6 +254,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
                     <Col span={7}>
                         <MetricItem 
                             value={advice.name} 
+                            noNumeric
                             label={advice.id ? "Advice":""} 
                             valueStyle={metricsValueStyle}
                             labelStyle={metricsLabelStyle}

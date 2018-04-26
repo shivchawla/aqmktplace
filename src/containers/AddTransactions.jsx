@@ -168,6 +168,7 @@ class AddTransactionsImpl extends React.Component {
                         <Col span={12}>
                             <MetricItem 
                                 label="Name"
+                                noNumeric
                                 value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : '-'}
                                 valueStyle={{...metricsValueStyle, fontWeight: 700}}
                                 labelStyle={metricsLabelStyle}
@@ -176,6 +177,7 @@ class AddTransactionsImpl extends React.Component {
                         <Col span={12} style={{textAlign:'right', paddingRight:'40px'}}>
                             <MetricItem 
                                 label="Benchmark"
+                                noNumeric
                                 value={this.state.selectedBenchmark}
                                 valueStyle={{...metricsValueStyle, fontWeight: 700}}
                                 labelStyle={metricsLabelStyle}
@@ -475,7 +477,7 @@ class AddTransactionsImpl extends React.Component {
         return (
             <AqStockPortfolioTable 
                     style={{marginTop: 20}} 
-                    positions={this.state.presentStocks} 
+                    portfolio={{positions: this.state.presentStocks}} 
                     processedPositions={true}
             />
         );

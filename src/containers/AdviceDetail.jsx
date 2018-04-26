@@ -604,7 +604,7 @@ class AdviceDetailImpl extends React.Component {
                         toggleModal={this.toggleModal}
                 />
                 <Col xl={18} md={24} style={shadowBoxStyle}>
-                    <StatusBar color={statusBarColor} />
+                    {/* <StatusBar color={statusBarColor} /> */}
                     <Row className="row-container" type="flex" justify="space-between">
                         <Col span={18}>
                             <h1 style={adviceNameStyle}>{name}</h1>
