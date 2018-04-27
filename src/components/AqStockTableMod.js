@@ -9,9 +9,10 @@ import {getStockData} from '../utils';
 
 const {aimsquantToken, requestUrl} = require('../localConfig.js');
 
-const initialTransactions = () => {
+const initialTransactions = (n) => {
     const data = [];
-    for(let i=0; i < 5; i++) {
+    const rows = n || 5;
+    for(let i=0; i < rows; i++) {
         data.push({
             symbol: '',
             key: Math.random().toString(36),
@@ -252,9 +253,9 @@ export class AqStockTableMod extends React.Component {
             const data = initialTransactions();
             this.setState({data});
         } else {
-            this.setState({data: this.props.data.map(item => {
+            this.setState({data: initialTransactions(1).concat(this.props.data.map(item => {
                     item['weight'] = `${item['weight']} %`; return item; 
-                })
+                }))
             });
         }
     }

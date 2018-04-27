@@ -566,7 +566,6 @@ export class AdviceFormImpl extends React.Component {
         data.map(item => {
             totalValue += item.totalValue;
         });
-        console.log(totalValue);
 
         return totalValue;
     }

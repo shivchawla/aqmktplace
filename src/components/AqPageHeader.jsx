@@ -32,9 +32,11 @@ class AqPageHeaderImpl extends React.Component {
                         </Button>
                     </Col>
                 }
-                <Col span={5} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                    {this.props.children}
-                </Col>
+                {this.props.children && 
+                    <Col span={5} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        {this.props.children}
+                    </Col>
+                }
             </Row>
         );
     }
