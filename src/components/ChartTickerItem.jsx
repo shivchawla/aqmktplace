@@ -2,6 +2,7 @@ import * as React from 'react';
 import moment from 'moment';
 import {Row, Col, Checkbox, Icon} from 'antd';
 import {MetricItem} from '../components';
+import {primaryColor} from '../constants';
 import '../css/chartTickerItem.css';
 
 export class ChartTickerItem extends React.Component {
@@ -39,13 +40,15 @@ export class ChartTickerItem extends React.Component {
         console.log(y);
         return(
             <Row 
-                className='ticker-row' 
-                type="flex"
-                gutter={0} 
-                align="middle" 
-                style={{borderRadius: '4px', padding: '5px 0px', margin: '3px 0px'}}
-                onMouseEnter={this.focus}
-                onMouseLeave={this.clearFocus}>
+                    className='ticker-row' 
+                    type="flex"
+                    gutter={0} 
+                    align="middle" 
+                    style={{borderRadius: '4px', padding: '5px 0px', margin: '3px 0px', cursor: 'pointer'}}
+                    onMouseEnter={this.focus}
+                    onMouseLeave={this.clearFocus}
+                    onClick={() => {this.props.onClick && this.props.onClick(name)}}
+            >
                 {
                     !hideCheckbox &&
                     <Col span={2}>
@@ -53,7 +56,7 @@ export class ChartTickerItem extends React.Component {
                     </Col>
                 }
                 <Col span={nameSpan}>
-                    <h4 style={{fontSize: metricFontSize, color}}>{name}</h4>
+                    <h4 style={{fontSize: metricFontSize, color: primaryColor}}>{name}</h4>
                 </Col>
                 <Col span={10} style={{textAlign: 'left'}}>
                     <MetricItem 

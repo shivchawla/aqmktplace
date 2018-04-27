@@ -22,160 +22,7 @@ class AdviceListItemImpl extends React.PureComponent {
         super(props);
         this.state = {
             isHovered: false,
-            diversityConfig: {
-                chart: {
-                    type: 'pie',
-                    height: 85,
-                    width: 85
-                },
-                title: {
-                    text: '',
-                },
-                tooltip: {
-                    enabled: false
-                },
-                plotOptions: {
-                    pie: {
-                        innerSize: 0
-                    },
-                    series: {
-                        dataLabels: {
-                            enabled: false
-                        }
-                    }
-                },
-                series: [{
-                    name: 'Brands',
-                    colorByPoint: true,
-                    data: [{
-                        name: 'Chrome',
-                        y: 61.41,
-                    }, {
-                        name: 'Internet Explorer',
-                        y: 11.84
-                    }, {
-                        name: 'Firefox',
-                        y: 10.85
-                    }, {
-                        name: 'Edge',
-                        y: 4.67
-                    }, {
-                        name: 'Safari',
-                        y: 4.18
-                    }]
-                }],
-                colors: ["#009688", "#76FF03", "#F44336", "#FFEB3B", "#1DE9B6"],
-            },
-            betaConfig: {
-                chart: {
-                    type: 'bar',
-                    width: 130,
-                    height: 80
-
-                },
-                xAxis: {
-                    categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas'],
-                    labels: {
-                        enabled: false
-                    },
-                    gridLineColor: 'transparent',
-                    visible: false,
-                },
-                tooltip: {
-                    enabled: false
-                },
-                yAxis: {
-                    min: 0,
-                    max: 200,
-                    labels: {
-                        enabled: false
-                    },
-                    title: {
-                        enabled: false
-                    },
-                    gridLineColor: 'transparent',
-                },
-                title: {
-                    style: {
-                        display: 'none'
-                    }
-                },
-                credits: {
-                    enabled: false
-                },
-                legend: {
-                    enabled: false
-                },
-                series: [{
-                    name: 'Market',
-                    data: [100]
-                }],
-                pane: {
-                    center: ['50%', '85%'],
-                    size: '100%',
-                },
-                colors: ['#E19E39', '#3EBB72']
-            },
-            volatilityConfig: {
-                chart: {
-                    type: 'solidgauge',
-                    height: 70
-                },
-                title: null,
-                pane: {
-                    center: ['50%', '85%'],
-                    size: '100%',
-                    startAngle: -90,
-                    endAngle: 90,
-                    background: {
-                        innerRadius: '60%',
-                        outerRadius: '100%',
-                        shape: 'arc'
-                    }
-                },
-                tooltip: {
-                    enabled: false
-                },
-                // the value axis
-                yAxis: {
-                    stops: [
-                        [0.1, '#7CB342'], // green
-                        [0.5, '#FBC02D'], // yellow
-                        [0.9, '#E65100'] // red
-                    ],
-                    min: 0,
-                    max: 200,
-                    lineWidth: 0,
-                    minorTickInterval: null,
-                    tickAmount: 2,
-                    title: {
-                        y: -70
-                    },
-                    labels: {
-                        y: 16
-                    },
-                    visible: false
-                },
-                credits: {
-                    enabled: false
-                },
-                plotOptions: {
-                    solidgauge: {
-                        dataLabels: {
-                            y: 5,
-                            borderWidth: 0,
-                            useHTML: true,
-                            enabled: false
-                        }
-                    }
-                },
-                series: []
-                // {
-                //     name: 'Speed',
-                //     data: [180],
-                // }
-            }
-        }        
+        }
     }
 
     handleClick = (id) => {
@@ -272,19 +119,24 @@ class AdviceListItemImpl extends React.PureComponent {
     }
 
     renderTrendingApprovedIcon = () => {
+        const {isApproved} = this.props.advice;
         return (
             <Row type="flex" justify="center" style={{paddingRight:'40px'}}>
-                <Col span={12}>
-                    <IconItem 
-                        src={medalIcon} 
-                        imageStyle={{transform: 'scale(0.7, 0.7)'}} 
-                        labelStyle={{marginLeft: '5px', color:'teal'}}
-                        label="Approved"
-                    />
-                </Col>
-                <Col span={12}>
+                {
+                    isApproved === 'approved' &&
+                    <Col span={12}>
+                        <IconItem 
+                            src={medalIcon} 
+                            imageStyle={{transform: 'scale(0.7, 0.7)'}} 
+                            labelStyle={{marginLeft: '5px', color:'teal'}}
+                            label="Approved"
+                        />
+                    </Col>
+                }
+                
+                {/* <Col span={12}>
                     <IconItem src={trendingUpIcon} imageStyle={{transform: 'scale(0.7, 0.7)', marginTop: '8px'}} label="Trending" labelStyle={{marginLeft: "9px", color:'#ff4500'}}/>
-                </Col>
+                </Col> */}
                 {/*<Col span={12}>
                     <IconItem src={trendingUpIcon} imageStyle={{transform: 'scale(0.7, 0.7)', marginTop: '8px'}} label="Trending" labelStyle={{marginLeft: "9px"}}/>
                 </Col>*/}
@@ -476,7 +328,7 @@ class AdviceListItemImpl extends React.PureComponent {
                             <Row>
                                 <Col span={12} style={{textAlign: 'center'}}>
                                     <Rate disabled value={Number(rating)}/>
-                                    {/* {this.renderTrendingApprovedIcon()} */}
+                                    {this.renderTrendingApprovedIcon()}
                                 </Col>
                                 <Col span={10} offset={2}>
                                     {this.renderNetValueChange(performanceSummary)}

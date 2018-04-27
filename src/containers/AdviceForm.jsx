@@ -180,6 +180,7 @@ export class AdviceFormImpl extends React.Component {
                     }
                 })
                 .catch((error) => {
+                    Utils.checkForInternet(error, this.props.history);
                     if (error.response) {
                         message.error(constructErrorMessage(error));
                         Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);                        
@@ -246,7 +247,10 @@ export class AdviceFormImpl extends React.Component {
             this.setState({tickers, compositionSeries: series});
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            Utils.checkForInternet(error, this.props.history);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         });
     }
 
@@ -505,15 +509,15 @@ export class AdviceFormImpl extends React.Component {
             }, () => {
                 if (this.state.isOwner) {
                     const benchmarkTicker = _.get(response.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
-                    getStockPerformance(benchmarkTicker)
-                    .then(performance => {
-                        tickers.push({
-                            name: benchmarkTicker,
-                            data: performance,
-                            color: benchmarkColor
-                        });
-                        this.setState({tickers});
+                    // getStockPerformance(benchmarkTicker)
+                    // .then(performance => {
+                    tickers.push({
+                        name: benchmarkTicker,
+                        data: performance,
+                        color: benchmarkColor
                     });
+                    this.setState({tickers});
+                    // });
                 }
             });
             if (isOwner) {
@@ -546,7 +550,10 @@ export class AdviceFormImpl extends React.Component {
             });
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            Utils.checkForInternet(error, this.props.history);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({show: false});
@@ -595,15 +602,16 @@ export class AdviceFormImpl extends React.Component {
                 this.getAdvice(this.props.adviceId);
             } else {
                 const tickers = [...this.state.tickers];
-                getStockPerformance(this.state.selectedBenchmark)
-                .then(performance => {
-                    tickers.push({
-                        name: `BENCHMARK`,
-                        data: performance,
-                        color: benchmarkColor
-                    });
-                    this.setState({tickers});
+                // getStockPerformance(this.state.selectedBenchmark)
+                // .then(performance => {
+                tickers.push({
+                    name: this.state.selectedBenchmark,
+                    // data: performance,
+                    color: benchmarkColor
                 });
+                this.setState({tickers});
+                //     this.setState({tickers});
+                // });
             }
         }
     }

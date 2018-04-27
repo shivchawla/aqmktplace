@@ -30,6 +30,7 @@ export class WatchListImpl extends React.Component {
                     key={index} 
                     legend={ticker} 
                     deleteItem={this.deleteItem} 
+                    onClick={this.props.onClick}
                 />
         );
     }

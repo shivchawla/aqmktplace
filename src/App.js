@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Layout, Menu, Row, Col, Button, notification, Popover, Icon} from 'antd';
-import {Route, withRouter, Link} from 'react-router-dom';
+import {Route, withRouter, Link, Switch} from 'react-router-dom';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import AqBreadCrumb from './components/AqBreadCrumb';
 import Login from './containers/Login';
@@ -25,8 +25,11 @@ import {
     AdvisorDashboard,
     ScreenAdvisors,
     TokenUpdate,
-    Home
+    Home,
+    ForgotPassword, 
+    AuthMessage
 } from './containers'; 
+import {PageNotFound, NoIternetAccess} from './components';
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
 import {Utils} from './utils';
@@ -175,27 +178,33 @@ class App extends React.Component {
                             where parent is one of the keys from the <Menu.Item> above.
                             i.e investordashboard, advisordashboard, advice, stockresearch, quantresearch
                          */}
-                        <Route exact={true} path='/home' component={Home} />
-                        <Route exact={true} path='/advice' component={ScreenAdvices} />
-                        <Route exact={true} path='/stockresearch' component={StockResearch} />
-                        {/* <Route exact={true} path='/login' component={LoginModal} /> */}
-                        <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                        <Route exact={true} path='/quantresearch' component={QuantResearch}/>
-                        <Route exact={true} path='/advice/:id' component={AdviceDetail} />
-                        <Route exact={true} path='/advisordashboard/createadvice' component={CreateAdvice} />
-                        <Route exact={true} path='/investordashboard/createportfolio' component={CreatePortfolio} />
-                        <Route exact={true} path='/advisordashboard/updateadvice/:id' component={UpdateAdvice} />
-                        <Route exact={true} path='/investordashboard/portfolio/:id' component={PortfolioDetail} />
-                        <Route exact={true} path='/investordashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
-                        <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
-                        <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} />
-                        <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
-                        <Route exact={true} path='/advisordashboard/screenadvisors' component={ScreenAdvisors} />
-                        <Route exact={true} path='/dashboard' component={Dashboard} />
-                        <Route path='/policy/policy' component={Policy} />
-                        <Route path='/policy/tnc' component={TnC} />
-                        <Route exact={true} path='/login' component={Login} />
-                        <Route exact={true} path='/signup' component={Signup} />
+                        <Switch>
+                            <Route exact={true} path='/home' component={Home} />
+                            <Route exact={true} path='/advice' component={ScreenAdvices} />
+                            <Route exact={true} path='/stockresearch' component={StockResearch} />
+                            {/* <Route exact={true} path='/login' component={LoginModal} /> */}
+                            <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
+                            <Route exact={true} path='/quantresearch' component={QuantResearch}/>
+                            <Route exact={true} path='/advice/:id' component={AdviceDetail} />
+                            <Route exact={true} path='/advisordashboard/createadvice' component={CreateAdvice} />
+                            <Route exact={true} path='/investordashboard/createportfolio' component={CreatePortfolio} />
+                            <Route exact={true} path='/advisordashboard/updateadvice/:id' component={UpdateAdvice} />
+                            <Route exact={true} path='/investordashboard/portfolio/:id' component={PortfolioDetail} />
+                            <Route exact={true} path='/investordashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
+                            <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
+                            <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} />
+                            <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
+                            <Route exact={true} path='/advisordashboard/screenadvisors' component={ScreenAdvisors} />
+                            <Route exact={true} path='/dashboard' component={Dashboard} />
+                            <Route path='/policy/policy' component={Policy} />
+                            <Route path='/policy/tnc' component={TnC} />
+                            <Route path='/forgotPassword' component={ForgotPassword} />
+                            <Route path='/errorPage' component={NoIternetAccess} />
+                            <Route path='/AuthMessage' component={AuthMessage} />
+                            <Route exact={true} path='/login' component={Login} />
+                            <Route exact={true} path='/signup' component={Signup} />
+                            <Route component={PageNotFound} />
+                        </Switch>
                     </Content>
                 </Layout>
             </Layout>

@@ -313,6 +313,7 @@ class AddTransactionsImpl extends React.Component {
                 })
                 .catch(error => {
                     console.log(error);
+                    Utils.checkForInternet(error, this.props.history);
                     if(error.response) {
                         const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating portfolio');
                         const code = _.get(error.response, 'data.errorCode', 'N/A');
@@ -418,6 +419,7 @@ class AddTransactionsImpl extends React.Component {
             this.setState({tickers});
         })
         .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
             if(error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -843,6 +845,7 @@ class AddTransactionsImpl extends React.Component {
                 })
                 .catch(error => {
                     console.log(error);
+                    Utils.checkForInternet(error, this.props.history);
                     if (error.response) {
                         Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                         if (error.response.status === 400) {

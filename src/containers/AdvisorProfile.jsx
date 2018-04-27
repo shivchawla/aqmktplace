@@ -5,7 +5,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select, message} from 'antd';
 import {Twitter} from 'twitter-node-client';
-import {MetricItem, AdviceListItem, AdviceFilterComponent, AdviceSortingMenu, AdviceListItemMod, AqPageHeader} from '../components';
+import {MetricItem, AdviceListItem, AdviceFilterComponent, AdviceSortingMenu, AdviceListItemMod, AqPageHeader, ForbiddenAccess} from '../components';
 import {UpdateAdvisorProfile} from '../containers';
 import {layoutStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {Utils, getBreadCrumbArray} from '../utils';
@@ -38,6 +38,7 @@ export class AdvisorProfile extends React.Component {
             filterModalVisible: false,
             sortBy: 'rating',
             loading: false,
+            notAuthorized: false,
             followLoading: false
         };
     }
@@ -99,17 +100,18 @@ export class AdvisorProfile extends React.Component {
     }
 
     getAdvisorDetail = () => {
-        const advisorIdCurrent = this.props.match.params.id;
-        const url = `${requestUrl}/advisor/${advisorIdCurrent}?dashboard=0`;
-        const advicesUrl = `${requestUrl}/advice?personal=1`;
         this.setState({loading: true});
         this.getAdvisorSummary()
         .then(response => {
             this.setState({advices: this.processAdvices(response.data.advices)});
         })
         .catch(error => {
-            console.log(error);
+            console.log(error.response);
+            Utils.checkForInternet(error, this.props.history);
             if (error.response) {
+                if (error.response.status === 400) {
+                    this.setState({notAuthorized: true});
+                }
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
         })
@@ -146,11 +148,11 @@ export class AdvisorProfile extends React.Component {
             }
         })
         .catch(error => {
-            console.log(error);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-        });
+            reject(error);
+        })
+        // .finally(() => {
+        //     this.setState({loading: false});
+        // });
     })
 
     processAdvices = (responseAdvices) => {
@@ -197,7 +199,11 @@ export class AdvisorProfile extends React.Component {
         })
         .catch(error => {
             message.error('Error occured !');
+            Utils.checkForInternet(error, this.props.history);
             if (error.response) {
+                if (error.response.status === 400) {
+                    this.setState({notAuthorized: true});
+                }
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
         })
@@ -306,43 +312,45 @@ export class AdvisorProfile extends React.Component {
         ]);
 
         return (
-            <Row>
-                {this.renderUpdateModal()}
-                <AqPageHeader 
-                    title="Advisor Profile"
-                    breadCrumbs={breadCrumbs}
-                />
-                <Col xl={17} md={24} className="row-container" style={{...shadowBoxStyle, marginBottom: '20px'}}>
-                    <Row style={{paddingLeft: '40px', paddingTop: '20px'}}>
-                        {this.renderProfileDetails()}
-                    </Row>
+            this.state.notAuthorized 
+            ?   <ForbiddenAccess />
+            :   <Row>
+                    {this.renderUpdateModal()}
+                    <AqPageHeader 
+                        title="Advisor Profile"
+                        breadCrumbs={breadCrumbs}
+                    />
+                    <Col xl={17} md={24} className="row-container" style={{...shadowBoxStyle, marginBottom: '20px'}}>
+                        <Row style={{paddingLeft: '40px', paddingTop: '20px'}}>
+                            {this.renderProfileDetails()}
+                        </Row>
 
-                    <Row style={{ paddingLeft: '40px'}}>
-                        {/*<Col span={22} style={{marginTop: '20px'}}>
-                            <h3>Advisor Advices</h3>
-                        </Col>*/}
-                        <Col span={22}>
-                            <Row>
-                                {/* <Col span={4}>
-                                    <Icon type="filter" onClick={this.toggleFilterModal}/>
-                                </Col> */}
-                                <Col span={8} offset={12}>
-                                    {/* {this.renderSortingMenu()}  */}
-                                    {/* <AdviceSortingMenu 
-                                            updateAdvices={this.updateAdvices}
-                                            updateSortBy={this.updateSortBy}
-                                            adviceUrl={this.state.adviceUrl}
-                                            sortBy={this.state.sortBy}
-                                    /> */}
-                                </Col>
-                                <Col span={24}>
-                                    {this.renderAdvices()}
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
+                        <Row style={{ paddingLeft: '40px'}}>
+                            {/*<Col span={22} style={{marginTop: '20px'}}>
+                                <h3>Advisor Advices</h3>
+                            </Col>*/}
+                            <Col span={22}>
+                                <Row>
+                                    {/* <Col span={4}>
+                                        <Icon type="filter" onClick={this.toggleFilterModal}/>
+                                    </Col> */}
+                                    <Col span={8} offset={12}>
+                                        {/* {this.renderSortingMenu()}  */}
+                                        {/* <AdviceSortingMenu 
+                                                updateAdvices={this.updateAdvices}
+                                                updateSortBy={this.updateSortBy}
+                                                adviceUrl={this.state.adviceUrl}
+                                                sortBy={this.state.sortBy}
+                                        /> */}
+                                    </Col>
+                                    <Col span={24}>
+                                        {this.renderAdvices()}
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
         );
     }
 

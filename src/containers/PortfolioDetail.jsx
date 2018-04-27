@@ -333,6 +333,7 @@ class PortfolioDetailImpl extends React.Component {
                 });
             })
             .catch(error => {
+                Utils.checkForInternet(error, this.props.history);
                 console.log(error);
                 if (error.response) {
                     if (error.response.status === 400) {
@@ -346,6 +347,10 @@ class PortfolioDetailImpl extends React.Component {
                 this.setState({show: false});
             });
         }
+    }
+
+    handleWatchListClick = name => {
+        this.updateTicker({symbol: name, name});
     }
 
     componentWillUnmount() {
@@ -608,10 +613,35 @@ class PortfolioDetailImpl extends React.Component {
                         </Collapse>
                     </Col>
                     <Col span={6} style={{minHeight:'200px', maxHeight: '500px'}}>
-                        <div style={{...shadowBoxStyle, padding: '0px 10px', width: '95%', marginLeft:'auto'}}>
-                            <WatchList 
-                                tickers={this.state.realtimeSecurities}
-                                preview={true}/>
+                        <div 
+                                style={{
+                                    ...shadowBoxStyle, 
+                                    padding: '0px 10px', 
+                                    width: '95%', 
+                                    marginLeft:'auto', 
+                                    minHeight:'200px', 
+                                    maxHeight: '500px'
+                                }}
+                        >
+                            <Col 
+                                    span={24} 
+                                    style={{
+                                        display: 'flex', 
+                                        flexDirection: 'row', 
+                                        justifyContent: 'space-between', 
+                                        padding: '10px 0px',
+                                        borderBottom: '1px solid #E6E6E6'
+                                    }}
+                            >
+                                <h3 style={{fontSize: '16px'}}>Present Stocks</h3>
+                            </Col>
+                            <Col span={24}>
+                                <WatchList 
+                                    tickers={this.state.realtimeSecurities}
+                                    preview={true}
+                                    onClick={this.handleWatchListClick}
+                                />
+                            </Col>
                         </div>
                     </Col>
                 </Row>

@@ -13,7 +13,6 @@ import {Utils} from '../utils';
 const ReactHighstock = require('react-highcharts/ReactHighstock.src');
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig.js');
-const WebSocket = require('ws');
 
 export class DashboardImpl extends React.Component {
     constructor(props) {

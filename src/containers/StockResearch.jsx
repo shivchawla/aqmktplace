@@ -79,7 +79,10 @@ class StockResearchImpl extends React.Component {
             this.setState({dataSource: this.processSearchResponseData(response.data)})
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            Utils.checkForInternet(error, this.props.history);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({spinning: false});
@@ -133,7 +136,10 @@ class StockResearchImpl extends React.Component {
             this.setState({rollingPerformance: response.data.rollingPerformance.detail});
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            Utils.checkForInternet(error, this.props.history);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({loadingData: false, show: false});
@@ -374,6 +380,7 @@ class StockResearchImpl extends React.Component {
         })
         .catch(error => {
             console.log(error);
+            Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -398,6 +405,7 @@ class StockResearchImpl extends React.Component {
         })
         .catch(error => {
             console.log(error);
+            Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -464,7 +472,8 @@ class StockResearchImpl extends React.Component {
         })
         .catch(error => {
             console.log(error);
-            message.error('Error occured while deleting watchlist. Please try again')
+            message.error('Error occured while deleting watchlist. Please try again');
+            Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -632,18 +641,27 @@ class StockResearchImpl extends React.Component {
                     <Col span={6}>
                     <div style={{...shadowBoxStyle, width: '95%', height: '300px', padding:'0px 10px', marginLeft: 'auto'}}>
                         {/* <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button> */}
-                        <Tabs 
-                                onChange={this.handleWatchlistTabChange} 
-                                tabBarExtraContent={this.watchlistTabBarExtraContent()}
-                                tabBarStyle={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    alignContent: 'center'
-                                }}
+                        <Col 
+                                span={24} 
+                                style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '10px 5px'}}
                         >
-                            {this.renderWatchlistTabs()}
-                        </Tabs>
+                            <h3 style={{fontSize: '16px', display: 'inline-block'}}>Watchlist</h3>
+                            {this.watchlistTabBarExtraContent()}
+                        </Col>
+                        <Col span={24}>
+                            <Tabs 
+                                    onChange={this.handleWatchlistTabChange} 
+                                    // tabBarExtraContent={this.watchlistTabBarExtraContent()}
+                                    tabBarStyle={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        alignContent: 'center'
+                                    }}
+                            >
+                                {this.renderWatchlistTabs()}
+                            </Tabs>
+                        </Col>
                     </div>
                     </Col>
                     

@@ -89,6 +89,7 @@ export class ScreenAdvices extends React.PureComponent {
             });
         })
         .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
             console.log(error);
         })
         .finally(() => {
@@ -114,6 +115,7 @@ export class ScreenAdvices extends React.PureComponent {
             }
         })
         .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 if (_.get(error, 'response.data.paramName', '') === 'aimsquant-token') {
                     this.props.history.push('/login');

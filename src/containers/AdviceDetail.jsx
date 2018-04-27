@@ -8,7 +8,7 @@ import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList} from '../components';
+import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal} from '../utils';
@@ -80,6 +80,7 @@ class AdviceDetailImpl extends React.Component {
                 approved: true,
                 prohibit: false
             },
+            notAuthorized: false,
             approvalLoading: false
         };
     }
@@ -96,6 +97,7 @@ class AdviceDetailImpl extends React.Component {
             message.success('Advice successfully made Public');
         })
         .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
             console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -247,12 +249,16 @@ class AdviceDetailImpl extends React.Component {
             });
         })
         .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
             this.setState({
                 positions: [],
                 series: []
             });
             console.log(error);
             if (error.response) {
+                if (error.response.status === 400) {
+                    this.setState({notAuthorized: true});
+                }
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
         })
@@ -310,6 +316,7 @@ class AdviceDetailImpl extends React.Component {
             this.getAdviceSummary(response);
         })
         .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
             console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -336,6 +343,7 @@ class AdviceDetailImpl extends React.Component {
             this.getAdviceSummary(response);
         })
         .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
             console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -391,8 +399,12 @@ class AdviceDetailImpl extends React.Component {
             this.setState({userId});
         })
         .catch(error => {
-            console.log(error);
+            console.log(error.message);
             if (error.response) {
+                console.log(error.response.status);
+                if (error.response.status === 400) {
+                    this.setState({notAuthorized: true});
+                }
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
         });
@@ -625,6 +637,7 @@ class AdviceDetailImpl extends React.Component {
             this.toggleApprovalModal();
         })
         .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
             message.error('Error Occured');
             console.log(error);
             if (error.response) {
@@ -716,6 +729,7 @@ class AdviceDetailImpl extends React.Component {
     }
 
     updateTicker = record => {
+        console.log(record);
         this.setState({stockResearchModalTicker: record}, () => {
             this.toggleModal();
         });
@@ -737,6 +751,10 @@ class AdviceDetailImpl extends React.Component {
 
     }
 
+    handleWatchListClick = name => {
+        this.updateTicker({symbol: name, name});
+    }
+
     renderPageContent = () => {
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
@@ -748,105 +766,132 @@ class AdviceDetailImpl extends React.Component {
                 : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
 
         return (
-            <Row style={{marginBottom:'20px'}}>
-                <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
-                    {this.renderApprovalButtons()}
-                </AqPageHeader>
-                <StockResearchModal
-                        ticker={this.state.stockResearchModalTicker}
-                        visible={this.state.stockResearchModalVisible}
-                        toggleModal={this.toggleModal}
-                />
-                <Col xl={18} md={24} style={shadowBoxStyle}>
-                    {/* <StatusBar color={statusBarColor} /> */}
-                    <Row className="row-container" type="flex" justify="space-between">
-                        <Col span={18}>
-                            <h1 style={adviceNameStyle}>{name}</h1>
-                            {
-                                advisor.user &&
-                                <h5 
-                                        style={{...userStyle, cursor: 'pointer'}} 
-                                        onClick={() => this.props.history.push(`/advisordashboard/advisorProfile/${advisor._id}`)}
-                                >
-                                    By <span style={{color: primaryColor}}>{advisor.user.firstName} {advisor.user.lastName}</span>
-                                    <span style={dateStyle}>{updatedDate}</span>
-                                </h5>
-                            }
-                            <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
-                        </Col>
-                        <Col span={6}>
-                            {this.renderActionButtons()}
-                        </Col>
-                    </Row>
-                    <Row className="row-container">
-                        {this.renderAdviceMetrics()}
-                    </Row>
-                    <Row>
-                        <Col span={24} style={dividerStyle}></Col>
-                    </Row>
-                    <Collapse bordered={false} defaultActiveKey={["2"]}>
-                        <Panel
-                                key="1"
-                                style={customPanelStyle}
-                                header={<h3 style={metricsHeaderStyle}>Description</h3>}
-                        >
-                            <Row className="row-container">
-                                <Col span={24}>
-                                    <h5 style={{...textStyle, marginTop: '-10px', marginLeft: '20px'}}>{description}</h5>
-                                </Col>
-                            </Row>
-                        </Panel>
-                        <Panel
-                            key="2"
-                            style={customPanelStyle}
-                            header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
-                            <Row className="row-container">
-                                <MyChartNew series={this.state.tickers} />
-                            </Row>
-                        </Panel>
+            this.state.notAuthorized
+            ?   <ForbiddenAccess />
 
-                        {
-                            (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) &&
-
+            :   <Row style={{marginBottom:'20px'}}>
+                    <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
+                        {this.renderApprovalButtons()}
+                    </AqPageHeader>
+                    <StockResearchModal
+                            ticker={this.state.stockResearchModalTicker}
+                            visible={this.state.stockResearchModalVisible}
+                            toggleModal={this.toggleModal}
+                    />
+                    <Col xl={18} md={24} style={shadowBoxStyle}>
+                        {/* <StatusBar color={statusBarColor} /> */}
+                        <Row className="row-container" type="flex" justify="space-between">
+                            <Col span={18}>
+                                <h1 style={adviceNameStyle}>{name}</h1>
+                                {
+                                    advisor.user &&
+                                    <h5 
+                                            style={{...userStyle, cursor: 'pointer'}} 
+                                            onClick={() => this.props.history.push(`/advisordashboard/advisorProfile/${advisor._id}`)}
+                                    >
+                                        By <span style={{color: primaryColor}}>{advisor.user.firstName} {advisor.user.lastName}</span>
+                                        <span style={dateStyle}>{updatedDate}</span>
+                                    </h5>
+                                }
+                                <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
+                            </Col>
+                            <Col span={6}>
+                                {this.renderActionButtons()}
+                            </Col>
+                        </Row>
+                        <Row className="row-container">
+                            {this.renderAdviceMetrics()}
+                        </Row>
+                        <Row>
+                            <Col span={24} style={dividerStyle}></Col>
+                        </Row>
+                        <Collapse bordered={false} defaultActiveKey={["2"]}>
                             <Panel
-                                    key="3"
+                                    key="1"
                                     style={customPanelStyle}
-                                    header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}
+                                    header={<h3 style={metricsHeaderStyle}>Description</h3>}
                             >
-                                <Row className="row-container" type="flex" justify="end" align="middle">
-                                    <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                                        {
-                                            this.state.adviceDetail.isOwner &&
-                                            <DatePicker
-                                                    value={this.state.selectedPortfolioDate}
-                                                    onChange={this.handlePortfolioStartDateChange}
-                                                    allowClear={false}
-                                            />
-                                        }
-                                    </Col>
-                                    <Col span={24} style={{marginTop: '10px'}}>
-                                        <AqStockPortfolioTable
-                                            composition
-                                            portfolio={{positions: this.state.positions}}
-                                            updateTicker={this.updateTicker}
-                                        />
+                                <Row className="row-container">
+                                    <Col span={24}>
+                                        <h5 style={{...textStyle, marginTop: '-10px', marginLeft: '20px'}}>{description}</h5>
                                     </Col>
                                 </Row>
                             </Panel>
-                        }
-                    </Collapse>
-                </Col>
-                {this.state.realtimeSecurities.length > 0 && 
-                    <Col span={6} >
-                        <div style={{...shadowBoxStyle, padding: '0px 10px', width: '95%', marginLeft:'auto', minHeight:'200px', maxHeight: '500px'}}>
-                            <WatchList 
-                                tickers={this.state.realtimeSecurities}
-                                preview={true}
-                            />
-                        </div>
+                            <Panel
+                                key="2"
+                                style={customPanelStyle}
+                                header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
+                                <Row className="row-container">
+                                    <MyChartNew series={this.state.tickers} />
+                                </Row>
+                            </Panel>
+
+                            {
+                                (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) &&
+
+                                <Panel
+                                        key="3"
+                                        style={customPanelStyle}
+                                        header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}
+                                >
+                                    <Row className="row-container" type="flex" justify="end" align="middle">
+                                        <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                            {
+                                                this.state.adviceDetail.isOwner &&
+                                                <DatePicker
+                                                        value={this.state.selectedPortfolioDate}
+                                                        onChange={this.handlePortfolioStartDateChange}
+                                                        allowClear={false}
+                                                />
+                                            }
+                                        </Col>
+                                        <Col span={24} style={{marginTop: '10px'}}>
+                                            <AqStockPortfolioTable
+                                                composition
+                                                portfolio={{positions: this.state.positions}}
+                                                updateTicker={this.updateTicker}
+                                            />
+                                        </Col>
+                                    </Row>
+                                </Panel>
+                            }
+                        </Collapse>
                     </Col>
-                }
-            </Row>
+                    {this.state.realtimeSecurities.length > 0 && 
+                        <Col span={6} >
+                            <div 
+                                    style={{
+                                        ...shadowBoxStyle, 
+                                        padding: '0px 10px', 
+                                        width: '95%', 
+                                        marginLeft:'auto', 
+                                        minHeight:'200px', 
+                                        maxHeight: '500px'
+                                    }}
+                            >
+                                <Col 
+                                        span={24} 
+                                        style={{
+                                            display: 'flex', 
+                                            flexDirection: 'row', 
+                                            justifyContent: 'space-between', 
+                                            padding: '10px 0px',
+                                            borderBottom: '1px solid #E6E6E6'
+                                        }}
+                                >
+                                    <h3 style={{fontSize: '16px'}}>Present Stocks</h3>
+                                </Col>
+                                <Col span={24}>
+                                    <WatchList 
+                                        tickers={this.state.realtimeSecurities}
+                                        preview={true}
+                                        onClick={this.handleWatchListClick}
+                                    />
+                                </Col>
+                            </div>
+                        </Col>
+                    }
+                </Row>
         );
     }
 

@@ -172,7 +172,10 @@ export class AdvisorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            Utils.checkForInternet(error, this.props.history);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
             this.setState({showEmptyScreen: true});
         })
         .finally(() => {
@@ -442,7 +445,10 @@ export class AdvisorDashboard extends React.Component {
             this.setState({tickers: newTickers});
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            Utils.checkForInternet(error, this.props.history);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({advicePerformanceLoading: false});
@@ -493,7 +499,10 @@ export class AdvisorDashboard extends React.Component {
             this.setState({advices: response.data, rawAdvices: response.data});
         })
         .catch(error => {
-            Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            Utils.checkForInternet(error, this.props.history);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
         })
         .finally(() => {
             this.setState({myAdvicesLoading: false});

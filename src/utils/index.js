@@ -434,6 +434,12 @@ export class Utils{
 		return Object.assign(obj, {annualReturn: annualReturn, totalReturn: totalReturn, netValue:netValue, dailyNavChangePct: dailyNavChangePct});
 
 	}
+
+	static checkForInternet (error, history) {
+		if (error.message === 'Network Error') {
+			history.push('/errorPage');
+		}
+	}
 }
 
 export const getBreadCrumbArray = (array = [], item = []) => {
@@ -456,6 +462,12 @@ export const constructErrorMessage = error => {
 	const message = _.get(error.response, 'data.message', 'N/A');
 	return(`${errorCode} - ${message}`);
 }
+
+export const checkForInternet = (error, history) => {
+	if (error.message === 'Network Error') {
+		history.push('/errorPage');
+	}
+};
 
 Utils.openSocketConnection();
 
