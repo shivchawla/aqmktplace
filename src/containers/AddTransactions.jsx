@@ -391,9 +391,9 @@ class AddTransactionsImpl extends React.Component {
                 headers: Utils.getAuthTokenHeader()
             });
         })
-        .then(response => {
-            let performanceSeries = _.get(response.data, 'portfolioPerformance.portfolioValues', []).map((item, index) => {
-                return [moment(item.date, dateFormat).valueOf(), item.netValue];
+        .then(response => { 
+            let performanceSeries = _.get(response.data, 'portfolioPerformance.portfolioValues', {}).map((item, index) => {
+                return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))];
             });
             if (tickers.length < 2) {
                 tickers.push({
@@ -421,15 +421,15 @@ class AddTransactionsImpl extends React.Component {
             <Col span={24}>
                 <Tabs defaultActiveKey="2" animated={false}>
                     <TabPane tab="Portfolio" key="2" style={{padding: '0 20px 20px 20px'}}>
-                        <Row type="flex" justify="space-between" align="middle">
+                        <Row type="flex" justify="space-between" align="bottom" style={{marginBottom: '10px'}}>
                             <Col span={8}>
-                                <h3>Cash: {this.state.previewCash}</h3>
+                                <h4>Cash: {Utils.formatMoneyValueMaxTwoDecimals(this.state.previewCash)}</h4>
                             </Col>
-                            <Col span={8} style={{marginBottom: 5}}>
+                            <Col span={8} style={{textAlign: 'right'}}>
                                 <Radio.Group 
                                         value={this.state.toggleValue} 
                                         onChange={this.toggleView} 
-                                        style={{position: 'absolute', right: 0}}
+                                        //style={{position: 'absolute', right: 0}}
                                         size="small"
                                 >
                                     <Radio.Button value="advice">Advice</Radio.Button>
@@ -458,7 +458,7 @@ class AddTransactionsImpl extends React.Component {
     renderPreviewAdvicePortfolio = () => {
         return (
             <Row>
-                <Col span={24} style={{marginTop: 20, overflowY:'auto'}}>
+                <Col span={24} style={{overflowY:'auto'}}>
                     {
                         // this.state.presentAdvices.length > 0 
                         this.state.presentAdvices.length > 0
@@ -480,7 +480,7 @@ class AddTransactionsImpl extends React.Component {
     renderPreviewStockPortfolio = () => {
         return (
             <AqStockPortfolioTable 
-                style={{marginTop: 20}} 
+                //style={{marginTo}} 
                 portfolio={{positions: this.state.presentStocks, cash: this.state.previewCash}} 
                 processedPositions={true}/>
         );

@@ -238,6 +238,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
+        console.log(advice);
         const profitOrLossColor = advice.profitLoss < 0 ? '#F44336' : '#4CAF50';
         const adviceChangeIconSrc = advice.hasChanged ? 'exclamation-circle' : 'check-circle';
         const adviceChangeIconColor = advice.hasChanged ? metricColor.neutral : metricColor.positive;

@@ -20,7 +20,6 @@ const MetricItemImpl = (props) => {
     const valueColor = props.color ? props.value > 0 ? positiveColor : props.value < 0 ? negativeColor : neutralColor: neutralColor;
     // var dirArrow = props.direction ? props.value > 0 ? '▲' : props.value < 0 ? '▼' : "" : ""; 
     var dirArrow = "";
-    console.log(props);
     var fixed = props.fixed ? props.fixed : props.percentage ? 2 : 0;
     const value = !props.noNumeric ? 
                 props.value ? 
@@ -32,9 +31,6 @@ const MetricItemImpl = (props) => {
                     '-':
                 props.value;
 
-    console.log(label);
-    console.log(value);
-               
     return (
 
         <Row style={{...containerStyle,...style, height, border, padding}}>

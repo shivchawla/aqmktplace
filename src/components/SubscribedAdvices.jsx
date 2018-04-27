@@ -82,57 +82,53 @@ class SubscribedAdvicesImpl extends React.Component {
         .then(response => {
             response.data.advices.map((advice, index) => {
                 const adviceUrl = `${requestUrl}/advice/${advice._id}`;
-                axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()})
-                .then(response => {
-                    const portfolioUrl = `${requestUrl}/advice/${advice._id}/portfolio`;
-                    const performanceUrl = `${requestUrl}/performance/advice/${advice._id}`;
+                const portfolioUrl = `${requestUrl}/advice/${advice._id}/portfolio`;
+                return Promise.all([
+                    axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()}),
+                    axios.get(portfolioUrl, {headers: Utils.getAuthTokenHeader()})
+                ]).then(([adviceResponse, advicePortfolioResponse]) => {
+
+                    var performanceSummary = _.get(adviceResponse.data, 'performanceSummary.current', {});
+                    var portfolioPnlStats = _.get(advicePortfolioResponse.data, 'pnlStats', {});
+
+                    var latestPerformanceSummary = Utils.computeLatestPerformanceSummary(performanceSummary, portfolioPnlStats);
+
                     const newAdvice = {
                         id: advice._id,
                         portfolio: {detail: null},
-                        name: response.data.name,
-                        advisor: response.data.advisor,
-                        updatedDate: moment(response.data.updatedDate).format(dateFormat),
+                        name: adviceResponse.data.name,
+                        advisor: adviceResponse.data.advisor,
+                        updatedDate: moment(adviceResponse.data.updatedDate).format(dateFormat),
                         performance: {},
-                        subscribers: response.data.numSubscribers,
-                        followers: response.data.numFollowers,
+                        subscribers: adviceResponse.data.numSubscribers,
+                        followers: adviceResponse.data.numFollowers,
                         isSelected: false,
                         isAdded: false,
                         disabled: false,
-                        rating: response.data.rating,
+                        rating: adviceResponse.data.rating,
                         date: moment().format(dateFormat),
-                        createdDate: response.data.createdDate,
+                        createdDate: adviceResponse.data.createdDate,
                         currentPerformance: [],
                         simulatedPerformance: [],
-                        netValue: _.get(response.data, 'performanceSummary.current.netValueEOD', 0),
-                        dailyChange: _.get(response.data, 'performanceSummary.current.dailyNAVChangeEOD', 0),
-                        dailyChangePct: _.get(response.data, 'performanceSummary.current.dailyNAVChangeEODPct', 0),
-                        maxLoss: _.get(response.data, 'performanceSummary.current.maxLoss', 0),
-                        totalReturn: _.get(response.data, 'performanceSummary.current.annualReturn', 0)
+                        netValue: _.get(latestPerformanceSummary, 'netValue', 0.0),
+                        dailyChange: _.get(latestPerformanceSummary, 'dailyChange', 0.0),
+                        dailyChangePct: _.get(latestPerformanceSummary, 'dailyNavChangePct', 0.0),
+                        maxLoss: _.get(adviceResponse.data, 'performanceSummary.current.maxLoss', 0),
+                        totalReturn: _.get(latestPerformanceSummary, 'totalReturn', 0.0),
                     };
-                    axios.get(portfolioUrl, {headers: Utils.getAuthTokenHeader()})
-                    .then(response => {
-                        newAdvice.portfolio.detail = response.data.detail;
-                        advices.push(newAdvice);
-                        this.props.updateSubscribedAdvices(advices);
-                        this.setState({advices});
-                    })
-                    .catch(error => {
-                        console.log(error);
-                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-                    })
-                })
-                .catch(error => {
-                    console.log(error);
-                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                 
+                    newAdvice.portfolio.detail = advicePortfolioResponse.data.detail;
+                    advices.push(newAdvice);
+                    this.props.updateSubscribedAdvices(advices);
+                    this.setState({advices});
+                                
                 });
-                
             });
         })
         .catch(error => {
             console.log(error);
             Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
         });
-        
     }
 
     getPerformance = (axiosInstance, adviceid) => {
@@ -263,6 +259,9 @@ class SubscribedAdvicesImpl extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
+
+        console.log(advice);
+
         const performance = _.get(advice, 'performance.historicalPerformance', {});
         const dailyChangeColor = advice.dailyChange >= 0 ? metricColor.positive : metricColor.negative;
         const dailyChangePctColor = advice.dailyChange >= 0 ? metricColor.positive : metricColor.negative;
@@ -285,27 +284,6 @@ class SubscribedAdvicesImpl extends React.Component {
                         labelStyle={metricsLabelStyle}
                     />
                 </Col>
-                {/*<Col span={4}>
-                    <MetricItem 
-                        value={10} 
-                        value={advice.dailyChange} 
-                        money
-                        label="Daily Change" 
-                        valueStyle={{...metricsValueStyle, color: dailyChangeColor}}
-                        labelStyle={metricsLabelStyle}
-                    />
-                </Col>
-                <Col span={4}>
-                    <MetricItem 
-                        value={10} 
-                        value={advice.dailyChangePct} 
-                        percentage
-                        color
-                        label="Daily Change Pct" 
-                        valueStyle={{...metricsValueStyle, color: dailyChangePctColor}}
-                        labelStyle={metricsLabelStyle}
-                    />
-                </Col>*/}
                 <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                     <MetricItem 
                         value={advice.totalReturn}

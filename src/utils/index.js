@@ -87,8 +87,8 @@ export class Utils{
 	}
 
 	static getSocketUrl(){
-		return "wss://developapi.aimsquant.com";
-		//return 'ws://localhost:3002';
+		//return "wss://developapi.aimsquant.com";
+		return 'ws://localhost:3002';
 	}
 
 	static getBaseUrl(){
@@ -413,6 +413,26 @@ export class Utils{
 			return savedData.checkboxes;
 		}
 		return '';
+	}
+
+	static computeLatestPerformanceSummary(eodPerformanceSummary, currentPortfolioPnlStats) {
+		var obj = Object.assign(eodPerformanceSummary, currentPortfolioPnlStats);
+
+		var netValueLatest = _.get(obj, 'netValue', 0);
+		var netValueEOD = _.get(obj, 'netValueEOD', 0);
+
+		var dailyNavChangeEODPct =  _.get(obj, 'dailyNAVChangeEODPct', 0);
+		var dailyNavChangeLatestPct = netValueEOD > 0.0 ? (netValueLatest - netValueEOD)/netValueEOD : 0.0;
+		var dailyNavChangePct = dailyNavChangeLatestPct || dailyNavChangeEODPct;
+
+		var netValue = netValueLatest || netValueEOD;
+
+		var annualReturnEOD  = _.get(obj, 'annualReturn', 0);
+		var annualReturn = Math.pow((1+annualReturnEOD),(251/252))*(1+dailyNavChangeLatestPct) - 1.0;
+		var totalReturn = (1 + _.get(obj, 'totalReturn', 0))*(1+dailyNavChangeLatestPct) - 1.0;
+
+		return Object.assign(obj, {annualReturn: annualReturn, totalReturn: totalReturn, netValue:netValue, dailyNavChangePct: dailyNavChangePct});
+
 	}
 }
 
