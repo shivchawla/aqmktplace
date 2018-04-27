@@ -316,7 +316,7 @@ class AdviceListItemImpl extends React.PureComponent {
                                     <MetricItem 
                                             style={{border: 'none'}} 
                                             value={followers} 
-                                            label="Followers"
+                                            label="Wishlisters"
                                             valueStyle={{fontSize: '20px', fontWeight: '400', color: '#3B3737', paddingLeft: '10px'}}
                                             labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E', paddingLeft: '10px'}}
                                     />
