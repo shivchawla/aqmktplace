@@ -42,7 +42,7 @@ class AddTransactionsImpl extends React.Component {
             stockTransactions: [],
             cashTransactions: [],
             toggleValue: 'stock',
-            selectedBenchmark: 'TCS',
+            selectedBenchmark: benchmarks[0],
             notAuthorized: false,
             show: false,
             portfolioName: '',
@@ -74,6 +74,7 @@ class AddTransactionsImpl extends React.Component {
                     <Button 
                             onClick={this.toggleSubscribedAdviceModal} 
                             style={{right: 0, position: 'absolute'}}
+                            type="primary"
                     >
                         Browse Advice
                     </Button>
@@ -379,8 +380,18 @@ class AddTransactionsImpl extends React.Component {
                     exchange: "NSE"
                 }
             };
+            let presentAdvices = this.processPreviewAdviceTransaction(_.get(response.data, 'detail.subPositions', []));
+            const advicePerformance = _.get(response.data, 'advicePerformance', []);
+            presentAdvices = presentAdvices.map(presentAdvice => {
+                const advice = _.filter(advicePerformance, item => item.advice === presentAdvice.id)[0];
+                if (advice) {
+                    presentAdvice.weight = _.get(advice, 'personal.weightInPortfolio');
+                    presentAdvice.profitLoss = Number(_.get(advice, 'personal.totalPnlPct').toFixed(2));
+                }
+                return presentAdvice;
+            })
             this.setState({
-                presentAdvices: this.processPreviewAdviceTransaction(_.get(response.data, 'detail.subPositions', [])),
+                presentAdvices,
                 presentStocks: this.processPreviewStockTransction(_.get(response.data, 'detail.positions', [])),
                 previewCash: _.get(response.data, 'detail.cash', 0)
             });
@@ -647,7 +658,7 @@ class AddTransactionsImpl extends React.Component {
                     <h3 style={labelStyle}>Benchmark</h3>
                     <Select disabled = {portfolioId}
                             defaultValue={this.state.selectedBenchmark} 
-                            style={{width: 120}} 
+                            style={{width: 180}} 
                             onChange={this.handleBenchmarkChange}
                     >
                         {

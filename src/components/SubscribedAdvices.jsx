@@ -1,10 +1,12 @@
 import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
+import Loading from 'react-loading-bar';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker} from 'antd';
+import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker, Spin} from 'antd';
 import {AqPortfolioCompositionAdvice, MetricItem} from '../components';
+import {loadingColor} from '../constants';
 import {MyChartNew} from '../containers/MyChartNew';
 import {Utils} from '../utils';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
@@ -29,7 +31,8 @@ class SubscribedAdvicesImpl extends React.Component {
         super(props);
         this.state = {
             advices: props.subscribedAdvices,
-            selectedAdvices: []
+            selectedAdvices: [],
+            loading: false
         };
         this.columns = [
             {
@@ -50,7 +53,7 @@ class SubscribedAdvicesImpl extends React.Component {
                 key: 'quantity'
             },
             {
-                title: 'LAST PRICE',
+                title: 'LAST PRICE (\u20B9)',
                 dataIndex: 'lastPrice',
                 key: 'lastPrice'
             },
@@ -78,6 +81,7 @@ class SubscribedAdvicesImpl extends React.Component {
         const {investorId} = this.props;
         let advices = [...this.state.advices];
         const url = `${requestUrl}/advice?subscribed=true`;
+        this.setState({loading: true});
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             response.data.advices.map((advice, index) => {
@@ -86,13 +90,11 @@ class SubscribedAdvicesImpl extends React.Component {
                 return Promise.all([
                     axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()}),
                     axios.get(portfolioUrl, {headers: Utils.getAuthTokenHeader()})
-                ]).then(([adviceResponse, advicePortfolioResponse]) => {
-
+                ])
+                .then(([adviceResponse, advicePortfolioResponse]) => {
                     var performanceSummary = _.get(adviceResponse.data, 'performanceSummary.current', {});
                     var portfolioPnlStats = _.get(advicePortfolioResponse.data, 'pnlStats', {});
-
                     var latestPerformanceSummary = Utils.computeLatestPerformanceSummary(performanceSummary, portfolioPnlStats);
-
                     const newAdvice = {
                         id: advice._id,
                         portfolio: {detail: null},
@@ -116,19 +118,23 @@ class SubscribedAdvicesImpl extends React.Component {
                         maxLoss: _.get(adviceResponse.data, 'performanceSummary.current.maxLoss', 0),
                         totalReturn: _.get(latestPerformanceSummary, 'totalReturn', 0.0),
                     };
-                 
                     newAdvice.portfolio.detail = advicePortfolioResponse.data.detail;
                     advices.push(newAdvice);
                     this.props.updateSubscribedAdvices(advices);
                     this.setState({advices});
-                                
-                });
+                })
+            })
+            .finally(() => {
+                this.setState({loading: false});
             });
         })
         .catch(error => {
             console.log(error);
             Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-        });
+        })
+        .finally(() => {
+            this.setState({loading: false});
+        })
     }
 
     getPerformance = (axiosInstance, adviceid) => {
@@ -211,7 +217,7 @@ class SubscribedAdvicesImpl extends React.Component {
                     name: _.get(item, 'security.detail.Nse_Name', 'N/A'), 
                     symbol: item.security.ticker,
                     quantity: item.quantity,
-                    lastPrice: item.lastPrice,
+                    lastPrice: Utils.formatMoneyValueMaxTwoDecimals(item.lastPrice),
                     costBasic: 200,
                     //averagePrice: _.get(item, 'avgPrice', 0),
                     //unrealizedPL: _.get(item, 'unrealizedPnL', 0),
@@ -259,9 +265,6 @@ class SubscribedAdvicesImpl extends React.Component {
     }
 
     renderHeaderItem = (advice) => {
-
-        console.log(advice);
-
         const performance = _.get(advice, 'performance.historicalPerformance', {});
         const dailyChangeColor = advice.dailyChange >= 0 ? metricColor.positive : metricColor.negative;
         const dailyChangePctColor = advice.dailyChange >= 0 ? metricColor.positive : metricColor.negative;
@@ -305,70 +308,32 @@ class SubscribedAdvicesImpl extends React.Component {
                     />
                 </Col>
             </Row>
-            // <Row>
-            //     <Col span={24}>
-            //         <Row>
-            //             <Col span={2}>
-            //                 <Checkbox 
-            //                         checked={advice.isSelected} 
-            //                         onChange={(e) => this.handleCheckboxChange(e, advice)}
-            //                         disabled={advice.disabled || false}
-            //                 />
-            //             </Col>
-            //             <Col span={22}>
-            //                 <Row>
-            //                     <Col span={24}>
-            //                         <h5>{advice.name || ''}</h5>
-            //                     </Col>
-            //                     <Col span={24}>
-            //                         <h5>
-            //                             By &nbsp;&nbsp;
-            //                             {_.get(advice, 'advisor.user.firstName', '')} &nbsp;&nbsp;
-            //                             {_.get(advice, 'advisor.user.lastName', '')} &nbsp;&nbsp;
-            //                             {_.get(advice, 'updatedDate', '')}
-            //                         </h5>
-            //                     </Col>
-            //                     <Col span={24}>
-            //                         <Row>
-            //                             <Col span={4}>
-            //                                 <MetricItem
-            //                                         value={advice.subscribers || 0}
-            //                                         label="Subscribers"
-            //                                 />
-            //                             </Col>
-            //                             <Col span={4}>
-            //                                 <MetricItem
-            //                                         value={advice.followers || 0}
-            //                                         label="Followers"
-            //                                 />
-            //                             </Col>
-            //                             <Col span={4}>
-            //                                 <MetricItem
-            //                                         value={advice.rating.current.toFixed(2)}
-            //                                         label="Current Rating"
-            //                                 />
-            //                             </Col>
-            //                             <Col span={4}>
-            //                                 <MetricItem
-            //                                         value={advice.rating.simulated.toFixed(2)}
-            //                                         label="Simulated Rating"
-            //                                 />
-            //                             </Col>
-            //                         </Row>
-            //                     </Col>
-            //                 </Row>
-            //             </Col>
-            //         </Row>
-            //     </Col>
-            // </Row>
+        );
+    }
+
+    renderPageContent() {
+        return (
+            <Collapse bordered={false}>
+                {this.renderAdvices()}
+            </Collapse>
         );
     }
 
     render() {
         return (
-            <Collapse bordered={false}>
-                {this.renderAdvices()}
-            </Collapse>
+            <Row style={{position: 'relative'}}>
+                <Loading
+                    style={{position: 'absolute', top: '100px'}}
+                    show={this.state.loading}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+                {
+                    !this.state.loading &&
+                    this.renderPageContent()
+                }
+            </Row>
         );
     }
 }
