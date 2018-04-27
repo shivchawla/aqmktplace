@@ -286,7 +286,7 @@ export class ScreenAdvices extends React.PureComponent {
                 <Option value="volatility">Volatility</Option>
                 <Option value="sharpe">Sharpe</Option>
                 <Option value="maxLoss">Max Loss</Option>
-                <Option value="numFollowers">Followers</Option>
+                <Option value="numFollowers">Wishlisters</Option>
                 <Option value="numSubscribers">Subscribers</Option>
                 <Option value="createdDate">Created Date</Option>
             </Select>
