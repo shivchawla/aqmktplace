@@ -273,7 +273,7 @@ export class ScreenAdvices extends React.PureComponent {
                     style={{fontSize: '14px', width: '120px'}}
             >
                 <Option value="rating">Rating</Option>
-                <Option value="return">Return</Option>
+                <Option value="return">Annual Return</Option>
                 <Option value="name">Name</Option>
                 <Option value="volatility">Volatility</Option>
                 <Option value="sharpe">Sharpe</Option>
@@ -312,7 +312,7 @@ export class ScreenAdvices extends React.PureComponent {
 
             <Row>
                 <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs}/>
-                <Row className="row-container" style={shadowBoxStyle}>
+                <Row className="row-container" style={{...shadowBoxStyle, marginBottom:'20px'}}>
                     {this.renderFilter()}
                     
                     <Col xl={17} md={24} style={{paddingLeft:'20px'}}>

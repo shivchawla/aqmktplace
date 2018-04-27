@@ -43,14 +43,14 @@ export class AdvisorProfile extends React.Component {
     }
 
     renderMetrics = () => {
-        const {numAdvices, numFollowers} = this.state.metrics;
+        const {numAdvices, numSubscribers} = this.state.metrics;
         return (
             <Row>
                 <Col span={4}>
                     <MetricItem key="1" label="Advices" value={numAdvices} />
                 </Col>
                 <Col span={4}>
-                    <MetricItem key="3" label="Followers" value={numFollowers} />
+                    <MetricItem key="3" label="Subscribers" value={numSubscribers} />
                 </Col>
             </Row>
         );
@@ -58,7 +58,7 @@ export class AdvisorProfile extends React.Component {
 
     renderProfileDetails = () => {
         return (
-            <Col span={24} style={{...shadowBoxStyle, padding: '20px 30px', borderRadius: '4px'}}>
+            <Col span={22} style={{...shadowBoxStyle, padding: '20px 30px', borderRadius: '4px'}}>
                 <Row style={{textAlign: 'center'}}>
                     <h3 
                             style={{fontSize: '12px', color: '#909090'}}>
@@ -125,12 +125,13 @@ export class AdvisorProfile extends React.Component {
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const {latestAnalytics = {}, user} = response.data;
+            console.log(latestAnalytics);
             this.setState({
                 advisor: response.data,
                 metrics: {
                     name: `${user.firstName} ${user.lastName}`,
                     numAdvices: _.get(latestAnalytics, 'numAdvices', null),
-                    numFollowers: _.get(latestAnalytics, 'numFollowers', null),
+                    numSubscribers: _.get(latestAnalytics, 'numSubscribers', null),
                     rating: Number(_.get(latestAnalytics, 'rating.current', 0).toFixed(2)),
                 },
                 ownProfile: _.get(response, 'data.isOwner', false),
@@ -218,7 +219,7 @@ export class AdvisorProfile extends React.Component {
                     type="primary"
                     loading={this.state.followLoading}
             >
-                {this.state.isFollowing ? 'UN - Follow' : 'Follow'}
+                {this.state.isFollowing ? 'Unfollow' : 'Follow'}
             </Button>
         );
     }
@@ -311,15 +312,16 @@ export class AdvisorProfile extends React.Component {
                     title="Advisor Profile"
                     breadCrumbs={breadCrumbs}
                 />
-                <Col span={18}>
-                    <Row>
+                <Col xl={17} md={24} className="row-container" style={{...shadowBoxStyle, marginBottom: '20px'}}>
+                    <Row style={{paddingLeft: '40px', paddingTop: '20px'}}>
                         {this.renderProfileDetails()}
                     </Row>
-                    <Row>
-                        <Col span={24} style={{marginTop: '20px'}}>
+
+                    <Row style={{ paddingLeft: '40px'}}>
+                        {/*<Col span={22} style={{marginTop: '20px'}}>
                             <h3>Advisor Advices</h3>
-                        </Col>
-                        <Col span={24}>
+                        </Col>*/}
+                        <Col span={22}>
                             <Row>
                                 {/* <Col span={4}>
                                     <Icon type="filter" onClick={this.toggleFilterModal}/>

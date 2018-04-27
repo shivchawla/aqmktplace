@@ -97,7 +97,7 @@ export class AdviceFilterComponent extends React.Component {
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         const {netValue, sharpe, volatility, rating} = selectedFilters;
         approved = _.join(approved, ',');
-        const url = `${requestUrl}/advice?all=true&rebalance=${rebalancingFrequency}&return=${selectedFilters.return/100}&rating=${rating}&volatility=${volatility/100}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
+        const url = `${requestUrl}/advice?all=true&rebalance=${rebalancingFrequency}&annualReturn=${selectedFilters.return/100}&rating=${rating}&volatility=${volatility/100}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
         this.props.updateAdviceUrl(url);
         return url;
     }

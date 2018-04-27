@@ -4,7 +4,7 @@ import _ from 'lodash';
 import Loading from 'react-loading-bar';
 import {Row, Col, Select, Input} from 'antd';
 import {AdvisorComponent} from '../components';
-import {layoutStyle, loadingColor} from '../constants';
+import {layoutStyle, loadingColor, shadowBoxStyle} from '../constants';
 import {Utils} from '../utils';
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
@@ -97,28 +97,32 @@ export class ScreenAdvisors extends React.Component {
         return (
             <Row style={{marginTop: '20px'}}>
                 <Loading
-                        show={this.state.loading}
-                        color={loadingColor}
-                        className="main-loader"
-                        showSpinner={false}
+                    show={this.state.loading}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
                 />
-                {
-                    !this.state.loading &&
+                
+                {!this.state.loading &&
                     <Col span={18}>
-                        <Row type="flex" justify="space-between">
-                            <Col span={18}>
+                        <Row style={{...shadowBoxStyle, marginBottom:'20px'}}>
+                            <Col xl={17} md={24}>
+                                <Row>
                                 <Search
-                                        placeholder="Enter advisor name"
-                                        onSearch={this.handleSearch}
-                                />
+                                    placeholder="Enter advisor name"
+                                    onSearch={this.handleSearch}/>
+                                </Row>
+
+                                <Row>
+                                    {this.renderSortingMenu()}
+                                </Row>
+                                <Row>
+                                    {this.renderAdvisors()}
+                                </Row>
                             </Col>
-                            <Col span={4}>
-                                {this.renderSortingMenu()}
-                            </Col>
-                            <Col span={24}>
-                                {this.renderAdvisors()}
-                            </Col>
+
                         </Row>
+
                     </Col>
                 }
             </Row>

@@ -32,7 +32,9 @@ const MetricItemImpl = (props) => {
                     '-':
                 props.value;
 
-                    
+    console.log(label);
+    console.log(value);
+               
     return (
 
         <Row style={{...containerStyle,...style, height, border, padding}}>

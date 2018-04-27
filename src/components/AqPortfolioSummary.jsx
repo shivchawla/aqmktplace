@@ -86,7 +86,7 @@ export class AqPortfolioSummary extends React.Component {
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
                                     label="Concentration" 
-                                    value={Number(concentration).toFixed(2)}/>
+                                    value={Number((concentration).toFixed(2))}/>
                             </Col>
                             <Col span={24} style={colStyle}>
                                 <MetricItem 

@@ -170,6 +170,7 @@ class AddTransactionsImpl extends React.Component {
                                 label="Name"
                                 noNumeric
                                 value={this.props.form.getFieldValue('name') ? this.props.form.getFieldValue('name') : '-'}
+                                noNumeric
                                 valueStyle={{...metricsValueStyle, fontWeight: 700}}
                                 labelStyle={metricsLabelStyle}
                             />
@@ -179,6 +180,7 @@ class AddTransactionsImpl extends React.Component {
                                 label="Benchmark"
                                 noNumeric
                                 value={this.state.selectedBenchmark}
+                                noNumeric
                                 valueStyle={{...metricsValueStyle, fontWeight: 700}}
                                 labelStyle={metricsLabelStyle}
                             />
@@ -435,8 +437,8 @@ class AddTransactionsImpl extends React.Component {
                         </Row>
                         {
                             this.state.toggleValue === 'advice'
-                            ? this.renderPreviewAdvicePositions()
-                            : this.renderPreviewStockPositions()
+                            ? this.renderPreviewAdvicePortfolio()
+                            : this.renderPreviewStockPortfolio()
                         }
                     </TabPane>
                     <TabPane tab="Performance" key="1" style={{padding: '0 20px 20px 20px'}}>
@@ -451,7 +453,7 @@ class AddTransactionsImpl extends React.Component {
         );
     }
 
-    renderPreviewAdvicePositions = () => {
+    renderPreviewAdvicePortfolio = () => {
         return (
             <Row>
                 <Col span={24} style={{marginTop: 20, overflowY:'auto'}}>
@@ -473,13 +475,12 @@ class AddTransactionsImpl extends React.Component {
         );
     }
 
-    renderPreviewStockPositions = () => {
+    renderPreviewStockPortfolio = () => {
         return (
             <AqStockPortfolioTable 
-                    style={{marginTop: 20}} 
-                    portfolio={{positions: this.state.presentStocks}} 
-                    processedPositions={true}
-            />
+                style={{marginTop: 20}} 
+                portfolio={{positions: this.state.presentStocks, cash: this.state.previewCash}} 
+                processedPositions={true}/>
         );
     }
 
@@ -703,8 +704,8 @@ class AddTransactionsImpl extends React.Component {
                     name: item.advice !== null ? item.advice.name : 'My Portfolio',
                     key: index,
                     netAssetValue: item.lastPrice * item.quantity,
-                    weight: '12.4',
-                    profitLoss: '+12.4',
+                    weight: 0.0,
+                    profitLoss: 0.0,
                     units: 1,
                     composition: [
                         {
@@ -718,8 +719,8 @@ class AddTransactionsImpl extends React.Component {
                             avgPrice: item.avgPrice,
                             price: item.lastPrice,
                             costBasic: item.avgPrice,
-                            unrealizedPL: 1231,
-                            weight: '12%',
+                            unrealizedPL: 0,
+                            weight: 0,
                         }
                     ]
                 })
@@ -736,8 +737,8 @@ class AddTransactionsImpl extends React.Component {
                     price: item.lastPrice,
                     avgPrice: item.avgPrice,
                     costBasic: item.avgPrice,
-                    unrealizedPL: 1231,
-                    weight: '12%',
+                    unrealizedPL: 0,
+                    weight:0,
                 })
             }
         });
@@ -982,7 +983,7 @@ class AddTransactionsImpl extends React.Component {
                                     </Button>
                                     
                                 </Col>
-                                <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, overflowY:'scroll', minHeight:'580px'}}>
+                                <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, overflowY:'scroll', minHeight:'580px', marginBottom:'20px'}}>
                                     {
                                         <Row type="flex" align="top" justify="space-between" style={{padding: '20px 20px 0px 20px'}}>
                                             <Col span={10} style={{margin:'auto 0'}}>

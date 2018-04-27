@@ -284,6 +284,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
                     <Col span={7} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                         <MetricItem 
                             value={advice.netAssetValue} 
+                            money
                             label="Net Asset Value" 
                             valueStyle={{...metricsValueStyle, textAlign:'center'}}
                             labelStyle={{...metricsLabelStyle, textAlign: 'center'}}
