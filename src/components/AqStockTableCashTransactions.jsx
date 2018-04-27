@@ -192,6 +192,7 @@ export class AqStockTableCashTransaction extends React.Component {
                             <Button 
                                     onClick={this.addItem}
                                     style={{position: 'absolute', right: '20px'}}
+                                    type="primary"
                             >
                                 Add Transaction
                             </Button>

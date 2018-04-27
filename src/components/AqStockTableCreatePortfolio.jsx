@@ -238,7 +238,11 @@ export class AqStockTableCreatePortfolio extends React.Component {
                             </Button>
                         </Col>
                         <Col span={4} offset={16}>
-                            <Button onClick={this.addItem} style={{right: '20px', position: 'absolute'}}>Add Transaction</Button>
+                            <Button 
+                                    onClick={this.addItem} 
+                                    style={{right: '20px', position: 'absolute'}}
+                                    type="primary"
+                            >Add Transaction</Button>
                         </Col>
                     </Row>
                 </Col>

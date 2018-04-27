@@ -91,11 +91,13 @@ export class AqStockPortfolioTable extends React.Component {
         const cash = portfolio.cash ? portfolio.cash : 0.0
         return portfolio.positions.map(item => {
             const price = Number(item.price);
+            const avgPrice = Number(item.avgPrice);
             const shares = Number(item.shares);
             return {
                 ...item,
                 weight: `${((price * shares) / (this.getTotalWeight(portfolio.positions) + cash) * 100).toFixed(2)} %`,
-                price: Utils.formatMoneyValueMaxTwoDecimals(price)
+                price: Utils.formatMoneyValueMaxTwoDecimals(price),
+                avgPrice: Utils.formatMoneyValueMaxTwoDecimals(avgPrice)
             }
         });
     }
