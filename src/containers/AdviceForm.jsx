@@ -5,7 +5,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor} from '../constants';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
@@ -236,7 +236,7 @@ export class AdviceFormImpl extends React.Component {
             );
             if (tickers.length < 2) {
                 tickers.push({
-                    name: 'Portofolio',
+                    name: 'Advice',
                     data: performance,
                     color: performanceColor
                 });
@@ -504,11 +504,13 @@ export class AdviceFormImpl extends React.Component {
                 isOwner
             }, () => {
                 if (this.state.isOwner) {
-                    getStockPerformance(_.get(response.data, 'portfolio.benchmark.ticker', ''))
+                    const benchmarkTicker = _.get(response.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
+                    getStockPerformance(benchmarkTicker)
                     .then(performance => {
                         tickers.push({
-                            name: `BENCHMARK`,
-                            data: performance
+                            name: benchmarkTicker,
+                            data: performance,
+                            color: benchmarkColor
                         });
                         this.setState({tickers});
                     });
@@ -641,7 +643,7 @@ export class AdviceFormImpl extends React.Component {
                     <Col xl={18} lg={18} md={24}>
                         <Form onSubmit={this.handleSubmit}>
                             <Row>
-                                <Col span={24} style={{...newLayoutStyle, padding: '20px', margin: '20px 0', border: '1px solid #eaeaea'}}>
+                                <Col span={24} style={{...shadowBoxStyle, padding: '20px', margin: '20px 0', marginBottom:'20px'}}>
                                     <Row>
                                         <Col span={12}>
                                             <Row>
@@ -746,15 +748,10 @@ export class AdviceFormImpl extends React.Component {
                                         </Col>
                                     </Row>
                                     <Row>
-                                        <DashboardCard 
-                                                title="Preview" xl={24} 
-                                                contentStyle={{boxShadow: '0 0 0 rgba(0,0,0,1)', height: '100%'}}
-
-                                        >
-                                            {
-                                                this.renderPortfolioDetailsTabs()
-                                            }
-                                        </DashboardCard>
+                                        <Col style={{border:' 1px solid #eaeaea'}}>
+                                            <Row> <h3 style={{padding: '10px'}}>Preview</h3></Row>
+                                            <Row >{this.renderPortfolioDetailsTabs()}</Row>
+                                        </Col>
                                     </Row>
                                 </Col>
                             </Row>
