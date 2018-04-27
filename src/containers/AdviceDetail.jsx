@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker} from 'antd';
+import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList} from '../components';
@@ -15,7 +15,9 @@ import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal} from '..
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
+const RadioGroup = Radio.Group;
 const Panel = Collapse.Panel;
+const {TextArea} = Input;
 
 const {aimsquantToken, requestUrl} = require('../localConfig.js');
 const dateFormat = 'Do MMMM YYYY';
@@ -32,6 +34,7 @@ class AdviceDetailImpl extends React.Component {
             adviceDetail: {
                 name: 'Advice Name',
                 description: '',
+                approvalStatus: "pending",
                 heading: '',
                 advisor: {},
                 updatedDate: '',
@@ -41,6 +44,7 @@ class AdviceDetailImpl extends React.Component {
                 maxNotional: 300000,
                 rebalance: '',
                 isPublic: false,
+                isAdmin: false,
                 isOwner: false,
                 isSubscribed: false,
                 isFollowing: false
@@ -67,9 +71,16 @@ class AdviceDetailImpl extends React.Component {
             show: false,
             cash: -10,
             stockResearchModalVisible: false,
+            approvalModalVisible: false,
             stockResearchModalTicker: 'TCS',
             selectedPortfolioDate: moment(),
-            realtimeSecurities: []
+            realtimeSecurities: [],
+            approveObj: {
+                message: '',
+                approved: true,
+                prohibit: false
+            },
+            approvalLoading: false
         };
     }
 
@@ -104,12 +115,14 @@ class AdviceDetailImpl extends React.Component {
             isSubscribed,
             isFollowing,
             isOwner,
+            isAdmin,
             numSubscribers,
             numFollowers,
             portfolio,
             performanceSummary,
             netValue,
-            stocks
+            stocks,
+            approvalStatus
         } = response.data;
         const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks} = _.get(performanceSummary, 'current', {});
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
@@ -130,9 +143,11 @@ class AdviceDetailImpl extends React.Component {
                 description,
                 heading,
                 advisor,
+                approvalStatus,
                 subscribers: numSubscribers,
                 isSubscribed,
                 isOwner,
+                isAdmin,
                 isFollowing,
                 followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
@@ -511,6 +526,143 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
+    renderApprovalButtons = () => {
+        const isAdmin = _.get(this.state, 'adviceDetail.isAdmin', false);
+        const approvalStatus = _.get(this.state, 'adviceDetail.approvalStatus', 'pending');
+        console.log(isAdmin);
+        if (isAdmin && approvalStatus !== 'approved') {
+            return (
+                <React.Fragment>
+                    {/* <Button>Unapprove</Button> */}
+                    <Button 
+                            style={{marginLeft: '20px'}} 
+                            type="primary" 
+                            onClick={this.toggleApprovalModal}
+                    >
+                        Take Approval Action
+                    </Button>
+                </React.Fragment>
+            );
+        }
+
+        return null;
+    }
+
+    renderApprovalModal = () => {
+        const approval = [{label: 'Approve', value: true}, {label: 'Unapprove', value: false}];
+        const prohibit = [{label: 'Prohibit', value: true}, {label: 'Allow', value: false}]
+        return (
+            <Modal
+                    title="Take Approval Action"
+                    onCancel={this.toggleApprovalModal}
+                    visible={this.state.approvalModalVisible}
+                    footer={[
+                        <Button 
+                                key={1} 
+                                type="secondary"
+                                onClick={this.toggleApprovalModal}
+                        >Cancel</Button>,
+                        <Button 
+                                key={2}
+                                type="primary" 
+                                onClick={this.handleApprovalSubmission}
+                                loading={this.state.approvalLoading}
+                        >Done</Button>
+                    ]}
+            >
+                <Col span={24}>
+                    <TextArea 
+                            placeholder="Enter message here" 
+                            autosize={{ minRows: 2, maxRows: 6 }} 
+                            onChange={this.handleApprovalInputChange} 
+                            value={this.state.approveObj.message}
+                    />
+                </Col>
+                <Col span={24} style={{marginTop: '20px'}}>
+                    <h5>Set Approval Action</h5>
+                    <RadioGroup 
+                            style={{marginTop: '10px', fontSize: '14px'}}
+                            onChange={this.handleApprovalRadioChange} 
+                            value={this.state.approveObj.approved}
+                    >
+                        {
+                            approval.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
+                        }
+                    </RadioGroup>
+                </Col>
+                <Col span={24} style={{marginTop: '20px'}}>
+                    <h5>Set Prohibit Action</h5>
+                    <RadioGroup 
+                            style={{marginTop: '10px', fontSize: '14px'}}
+                            onChange={this.handleProhibitRadioChange} 
+                            value={this.state.approveObj.prohibit}
+                    >
+                        {
+                            prohibit.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
+                        }
+                    </RadioGroup>
+                </Col>
+            </Modal>
+        );
+    }
+
+    handleApprovalSubmission = () => {
+        const url = `${requestUrl}/advice/${this.props.match.params.id}/approve`;
+        this.setState({approvalLoading: false});
+        const data = this.state.approveObj;
+        console.log(data);
+        axios({
+            url,
+            method: 'POST',
+            headers: Utils.getAuthTokenHeader(),
+            data: {
+                ...this.state.approveObj,
+                prohibit: false
+            }
+        })
+        .then(response => {
+            message.success('Sucess');
+            this.toggleApprovalModal();
+        })
+        .catch(error => {
+            message.error('Error Occured');
+            console.log(error);
+            if (error.response) {
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        })
+        .finally(() => {
+            this.setState({approvalLoading: false});
+        })
+    }
+
+    handleApprovalRadioChange = e => {
+        this.setState({approveObj: {
+            ...this.state.approveObj,
+            approved: e.target.value
+        }});
+    }
+
+    handleProhibitRadioChange = e => {
+        this.setState({approveObj: {
+            ...this.state.approveObj,
+            prohibit: e.target.value
+        }});
+    }
+
+    handleApprovalInputChange = e => {
+        this.setState({
+            approveObj: {
+                ...this.state.approveObj,
+                message: e.target.value
+            }
+        });
+    }
+
+    toggleApprovalModal = () => {
+        this.setState({approvalModalVisible: !this.state.approvalModalVisible});
+    }
+
     renderActionButtons = () => {
         const {userId} = this.state;
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
@@ -538,25 +690,25 @@ class AdviceDetailImpl extends React.Component {
                     </Col>
                 </Row>
             );
+        } else {
+            return (
+                <Row>
+                    <Col span={24} style={{textAlign: 'right'}}>
+                        {
+                            !this.state.adviceDetail.isPublic
+                            && <Button onClick={this.makeAdvicePublic} style={{width: 150}} type="primary">Publish</Button>}
+                    </Col>
+                    <Col span={24} style={{textAlign: 'right'}}>
+                        <Button
+                                onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
+                                style={{width: 150, marginTop: 10}}
+                        >
+                            Update Advice
+                        </Button>
+                    </Col>
+                </Row>
+            );
         }
-
-        return (
-            <Row>
-                <Col span={24} style={{textAlign: 'right'}}>
-                    {
-                        !this.state.adviceDetail.isPublic
-                        && <Button onClick={this.makeAdvicePublic} style={{width: 150}} type="primary">Publish</Button>}
-                </Col>
-                <Col span={24} style={{textAlign: 'right'}}>
-                    <Button
-                            onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
-                            style={{width: 150, marginTop: 10}}
-                    >
-                        Update Advice
-                    </Button>
-                </Col>
-            </Row>
-        );
     };
 
     handleChange = value => {
@@ -597,7 +749,9 @@ class AdviceDetailImpl extends React.Component {
 
         return (
             <Row style={{marginBottom:'20px'}}>
-                <AqPageHeader title={name} breadCrumbs={breadCrumbs}/>
+                <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
+                    {this.renderApprovalButtons()}
+                </AqPageHeader>
                 <StockResearchModal
                         ticker={this.state.stockResearchModalTicker}
                         visible={this.state.stockResearchModalVisible}
@@ -707,6 +861,7 @@ class AdviceDetailImpl extends React.Component {
                 />
                {this.renderModal()}
                {this.renderUpdateModal()}
+               {this.renderApprovalModal()}
                {
                     !this.state.show &&
                     this.renderPageContent()

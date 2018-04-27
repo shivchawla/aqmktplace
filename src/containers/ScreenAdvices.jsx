@@ -27,14 +27,14 @@ export class ScreenAdvices extends React.PureComponent {
             spinning: false,
             adviceUrl: `${requestUrl}/advice?all=true&trending=false&subscribed=false&following=false&order=-1`,
             advices: [],
-            selectedFilters: filters,
-            selectedTab: 'all',
+            selectedFilters: {...filters, ...Utils.getObjectFromLocalStorage('adviceFilter')},
+            selectedTab: Utils.getFromLocalStorage('selectedTab') || 'all',
             searchValue: '',
-            sortBy: 'rating',
+            sortBy: Utils.getFromLocalStorage('sortBy') || 'rating',
             activeFilterPanel: [],
             filterModalVisible: false,
             loading: true,
-            selectedPage: 1,
+            selectedPage: Utils.getFromLocalStorage('selectedPage') || 1,
             limit: 3,
             totalCount: 3,
             initialCall: true,
@@ -63,6 +63,7 @@ export class ScreenAdvices extends React.PureComponent {
 
     componentWillMount() {
         this.mounted = true;
+        console.log(this.state.selectedFilters);
         if (!Utils.isLoggedIn()) {
             this.getDefaultAdvices();
             // Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -95,7 +96,7 @@ export class ScreenAdvices extends React.PureComponent {
         });
     }
 
-    getAdvices = (adviceUrl) => {
+    getAdvices = adviceUrl => {
         this.setState({
             loading: true,
             show: this.state.initialCall,
@@ -129,7 +130,10 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     updateSelectedFilters = filters => {
-        this.setState({selectedFilters: filters});
+        this.setState({selectedFilters: {
+            ...this.state.selectedFilters,
+            ...filters
+        }});
     }
 
     processUrl = (type, orderParam = this.state.sortBy) => {
@@ -137,11 +141,12 @@ export class ScreenAdvices extends React.PureComponent {
         let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
         let personal = selectedFilters.owner.map(item => item === 'Personal' ? 1 : 0);
         const limit = this.state.limit;
+        const skip = limit * (this.state.selectedPage - 1);
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(filters.rebalancingFrequency, ',');
         const {netValue, sharpe, volatility, rating} = selectedFilters;
         approved = _.join(approved, ',');
         personal = _.join(personal, ',');
-        const url = `${requestUrl}/advice?&${type}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${orderParam}&order=-1`;
+        const url = `${requestUrl}/advice?&${type}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip}&orderParam=${orderParam}&order=-1`;
         return url;
     }
 
@@ -245,6 +250,8 @@ export class ScreenAdvices extends React.PureComponent {
 
     handleTabChange = (key) => {
         this.setState({selectedTab: key, selectedPage: 1}, () => {
+            Utils.localStorageSave('selectedTab', key);
+            Utils.localStorageSave('selectedPage', 1);
             this.getAdvices();
         });
     }
@@ -261,6 +268,7 @@ export class ScreenAdvices extends React.PureComponent {
     handleSortingMenuChange = value => {
         this.setState({sortBy: value}, () => {
             // const url = this.processUrl(this.state.selectedTab, value);
+            Utils.localStorageSave('sortBy', value);
             this.getAdvices();
         });
     }
@@ -300,6 +308,7 @@ export class ScreenAdvices extends React.PureComponent {
     onPaginationChange = (page, pageSize) => {
         this.setState({selectedPage: page}, () => {
             this.getAdvices();
+            Utils.localStorageSave('selectedPage', page);
         })
         console.log('Page', page);
     }   
@@ -357,7 +366,7 @@ export class ScreenAdvices extends React.PureComponent {
                             <Col span={24}>
                                 <Tabs 
                                         animated={false} 
-                                        defaultActiveKey="all" 
+                                        defaultActiveKey={this.state.selectedTab} 
                                         onChange={this.handleTabChange}
                                 >
                                     <TabPane 
@@ -369,7 +378,7 @@ export class ScreenAdvices extends React.PureComponent {
                                             {this.renderAdvices()}
                                         {/* </Spin> */}
                                         <Pagination 
-                                                current={this.state.selectedPage} 
+                                                current={Number(this.state.selectedPage)} 
                                                 total={this.state.totalCount} 
                                                 pageSize={this.state.limit}
                                                 onChange={this.onPaginationChange}
@@ -379,19 +388,20 @@ export class ScreenAdvices extends React.PureComponent {
                                         {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
                                         {/* </Spin> */}
-                                        <Pagination 
-                                                current={this.state.selectedPage} 
+                                        <Pagination
+                                                current={Number(this.state.selectedPage)} 
                                                 total={this.state.totalCount} 
                                                 pageSize={this.state.limit}
                                                 onChange={this.onPaginationChange}
+
                                         />
                                     </TabPane>
                                     <TabPane tab="Subscribed" key="subscribed">
                                         {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
                                         {/* </Spin> */}
-                                        <Pagination 
-                                                current={this.state.selectedPage} 
+                                        <Pagination
+                                                current={Number(this.state.selectedPage)} 
                                                 total={this.state.totalCount} 
                                                 pageSize={this.state.limit}
                                                 onChange={this.onPaginationChange}
@@ -401,8 +411,8 @@ export class ScreenAdvices extends React.PureComponent {
                                         {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
                                         {/* </Spin> */}
-                                        <Pagination 
-                                                current={this.state.selectedPage} 
+                                        <Pagination
+                                                current={Number(this.state.selectedPage)} 
                                                 total={this.state.totalCount} 
                                                 pageSize={this.state.limit} 
                                                 onChange={this.onPaginationChange}

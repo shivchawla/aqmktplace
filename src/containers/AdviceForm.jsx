@@ -10,6 +10,7 @@ import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, F
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {store} from '../store';
+import {benchmarks} from '../constants/benchmarks';
 import {AqStockTableMod} from '../components/AqStockTableMod';
 import {MyChartNew} from '../containers/MyChartNew';
 import {
@@ -54,11 +55,7 @@ export class AdviceFormImpl extends React.Component {
             data: [],
             remainingCash: 100000,
             initialCash: 100000,
-            benchmarks: [
-                'TCS',
-                'NIFTY_50',
-                'HDFC'
-            ],
+            benchmarks,
             selectedBenchmark: 'TCS',
             tickers: [],
             weightSeries: [],

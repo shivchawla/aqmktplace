@@ -15,6 +15,7 @@ import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsV
 import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
 import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice} from'../utils';
+import {benchmarks} from '../constants/benchmarks';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -27,6 +28,7 @@ class AddTransactionsImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            benchmarks,
             tickers: [],
             advices: [],
             transactionalAdvices: [],
@@ -637,7 +639,7 @@ class AddTransactionsImpl extends React.Component {
     }
 
     renderSelectBenchmark = (portfolioId) => {
-        const benchmarkArray = ['TCS', 'NIFTY_50', 'WIPRO', 'LT'];
+        const benchmarkArray = this.state.benchmarks;
 
         return (
             <Row>

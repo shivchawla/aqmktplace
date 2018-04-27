@@ -5,6 +5,7 @@ import {Button, Checkbox, Row, Col, Icon, Slider, Divider} from 'antd';
 import {IconHeader} from './IconHeader';
 import {adviceFilters as filters} from '../constants/filters';
 import {verticalLayout} from '../constants';
+import {Utils} from '../utils';
 import '../css/buttons.css';
 
 const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
@@ -18,13 +19,14 @@ const kvp = {
 export class AdviceFilterSideComponent extends React.Component {
     constructor(props) {
         super(props);
+        const selectedFilters = {...filters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
         this.state = {
             defaultFilters: filters,
-            selectedFilters: filters,
+            selectedFilters,
             selectMaxNotionalAllFilters: true,
-            selectRebalanceAllFilters: true,
-            selectApprovedllFilters: true,
-            selectOwnerAllFilters: true,
+            selectRebalanceAllFilters: _.get(selectedFilters, 'rebalancingFrequency', []).length === filters.rebalancingFrequency.length,
+            selectApprovedllFilters: _.get(selectedFilters, 'approved', []).length === filters.approved.length,
+            selectOwnerAllFilters: _.get(selectedFilters, 'owner', []).length === filters.owner.length,
             limit: 3
         };
     }
@@ -66,7 +68,9 @@ export class AdviceFilterSideComponent extends React.Component {
             },
             [kvp[type]]: checkedValues.length === this.state.defaultFilters[type].length
         }, () => {
+            console.log(this.state.selectedFilters);
             this.props.updateSelectedFilters(this.state.selectedFilters);
+            Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
             // this.props.updateAdviceUrl(this.processUrl());
         });
     }
@@ -104,6 +108,7 @@ export class AdviceFilterSideComponent extends React.Component {
             [kvp[filterType]]: e.target.checked
         }, () => {
             this.props.updateSelectedFilters(this.state.selectedFilters);
+            Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
             // this.props.updateAdviceUrl(this.processUrl());
         });
     }
@@ -118,6 +123,7 @@ export class AdviceFilterSideComponent extends React.Component {
             }
         }, () => {
             this.props.updateSelectedFilters(this.state.selectedFilters);
+            Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
             // this.props.updateAdviceUrl(this.processUrl());
         });
 
@@ -151,13 +157,13 @@ export class AdviceFilterSideComponent extends React.Component {
     }
 
     render() {
-        const {defaultFilters} = this.state;
+        const {selectedFilters} = this.state;
         const filterArray = [
-            {type: 'rating', label: 'Rating', range: defaultFilters.rating, min: 0, max: 5, step:0.1},
-            {type: 'sharpe', label: 'Sharpe Ratio', range: defaultFilters.sharpe, min: -10, max:10, step: 0.5},
-            {type: 'netValue', label: 'Net Value', range: defaultFilters.netValue, min: 0, max: 600000, step: 1000},
-            {type: 'volatility', label: 'Volatility', range: defaultFilters.volatility, min: 0, max: 50},
-            {type: 'return', label: 'Annual Return', range: defaultFilters.return, min: -100, max: 100},
+            {type: 'rating', label: 'Rating', range: selectedFilters.rating, min: 0, max: 5, step:0.1},
+            {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -10, max:10, step: 0.5},
+            {type: 'netValue', label: 'Net Value', range: selectedFilters.netValue, min: 0, max: 600000, step: 1000},
+            {type: 'volatility', label: 'Volatility', range: selectedFilters.volatility, min: 0, max: 50},
+            {type: 'return', label: 'Annual Return', range: selectedFilters.return, min: -100, max: 100},
         ];
 
         return (

@@ -22,7 +22,8 @@ class AqPageHeaderImpl extends React.Component {
                     <h1 style={pageTitleStyle}>{title}</h1>
                     <AqBreadCrumb breadCrumbs={breadCrumbs} />
                 </Col>
-                {button && 
+                {
+                    button && 
                     <Col span={3} style={{textAlign: 'right'}}>
                         <Button 
                             type="primary" 
@@ -31,6 +32,9 @@ class AqPageHeaderImpl extends React.Component {
                         </Button>
                     </Col>
                 }
+                <Col span={5} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                    {this.props.children}
+                </Col>
             </Row>
         );
     }
