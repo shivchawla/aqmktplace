@@ -5,7 +5,7 @@ import _ from 'lodash';
 import Loading from 'react-loading-bar';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} from 'antd';
 import {MyChartNew} from './MyChartNew';
-import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader} from '../components';
+import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader, HighChartNew} from '../components';
 import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor} from '../constants';
 import {dateFormat, Utils, getBreadCrumbArray} from '../utils';
 import '../css/advisorDashboard.css';
@@ -29,43 +29,7 @@ export class AdvisorDashboard extends React.Component {
             adviceUrl: `${requestUrl}/advice?all=true&trending=false&subscribed=false&following=false&order=-1&personal=1`,
             rawAdvices: [], // the advice structure is not changed, it is modified when new network call is done to sort the advices
             staticAdvices: [], // the advice is not changed, it is populated only the first time when getDashboardData is called
-            subsPerAdviceConfig: {
-                chart: {
-                    type: 'pie',
-                    height: 280,
-                },
-                title: {
-                    text: '',
-                    align: 'center',
-                    verticalAlign: 'middle',
-                    y: -5,
-                    style: {
-                        fontSize: '16px'
-                    }
-                },
-                tooltip: {
-                    enabled: false
-                },
-                plotOptions: {
-                    pie: {
-                        innerSize: 150,
-                        cursor: 'pointer',
-                        dataLabels: {
-                            enabled: false,
-                            format: '{point.name} {point.percentage:.1f}%',
-                            distance: -15,
-                            filter: {
-                                property: 'percentage',
-                                operator: '>',
-                                value: 0
-                            }
-                        },
-                        ...this.subsPerAdviceChart()
-                    },
-                },
-                series: [],
-                colors: ["#76DDFB", "#53A8E2", "#2C82BE", "#DBECF8", "#2C9BBE"],
-            },
+            subsPerAdviceSeries: [],
             selectedAdvice: '',
             subscribeScreen: 'total',
             tickers: [],
@@ -142,7 +106,6 @@ export class AdvisorDashboard extends React.Component {
 
     getUserDashboardData = () => {
         const url = `${requestUrl}/advisor/${Utils.getUserInfo().advisor}?dashboard=1`;
-        const subsPerAdviceSeries = [];
         const subsTotalSeries = [];
         const ratingSeries = [];
         const advisorRating = [];
@@ -151,16 +114,15 @@ export class AdvisorDashboard extends React.Component {
         this.setState({dashboardDataLoading: true, myAdvicesLoading: true, show: true});
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            subsPerAdviceSeries.push({
-                type: 'pie',
-                name: 'Browser share',
-                data: this.processSubsPerAdvice(response.data.advices)
-            });
             const currentRating = _.get(response.data, 'advices[0].rating.current', 0).toFixed(2);
             const simulatedRating = _.get(response.data, 'advices[0].rating.simulated', 0).toFixed(2);
             const analytics = _.get(response.data, 'analytics', []);
             const advisorRatingStat = (_.get(analytics[analytics.length - 1], 'rating.current', 0)).toFixed(2);
             const advisorSubscribers = _.get(response.data, 'analytics[response.data.analytics.length - 1].numFollowers', 0);
+            const advices = _.get(response.data, 'advices', []);
+            const validAdviceIndex = this.getValidIndex(advices);
+            const validAdvice = advices[validAdviceIndex] || null;
+            console.log('Valid Advice', validAdvice);
             subscriberRating = {name: 'Total Subscribers', data: this.processTotalSubscribers(_.get(response.data, 'analytics', []))};
             subsTotalSeries.push({
                 name: 'Total Subscribers', 
@@ -182,31 +144,22 @@ export class AdvisorDashboard extends React.Component {
                 data: this.processAdvisorRating(_.get(response.data, 'analytics', [])),
                 color: '#607D8B'
             });
-            subsPerAdviceSeries[0].data.map(obj => {
-                totalSubscribers += obj.y;
-            });
             this.getAdvicePerformance(_.get(response.data, 'advices[0]', []));
             this.setState({
                 selectedAdvice: _.get(response.data, 'advices[0].name', ''),
-                rawAdvices: _.get(response.data, 'advices', []),
-                staticAdvices: _.get(response.data, 'advices', []),
-                showEmptyScreen: _.get(response.data, 'advices', []).length > 0 ? false : true,
-                advices: this.processAdvices(this.sortAdvices(_.get(response.data, 'advices', []))),
-                subsPerAdviceConfig: {
-                    ...this.state.subsPerAdviceConfig, 
-                    series: subsPerAdviceSeries, 
-                    title: this.setSubsPerAdviceTitle({
-                        name: subsPerAdviceSeries[0].data[0].name, 
-                        percentage: Number((subsPerAdviceSeries[0].data[0].y / totalSubscribers) * 100).toFixed(2)
-                    }).title
-                },
+                rawAdvices: advices,
+                staticAdvices: advices,
+                showEmptyScreen: advices.length > 0 ? false : true,
+                advices: this.processAdvices(this.sortAdvices(advices)),
+                subsPerAdviceSeries: this.processSubsPerAdvice(advices),
                 ratingsConfig: {...this.state.ratingsConfig, series: ratingSeries},
                 adviceRating: ratingSeries,
                 advisorRating,
                 subscriberRating: subsTotalSeries,
                 subscriberStats: {
-                    selectedAdviceSubscribers: subsPerAdviceSeries[0].data[0].y, 
-                    totalSubscribers
+                    selectedAdviceSubscribers: _.get(validAdvice, 'latestAnalytics.numSubscribers', 0), 
+                    totalSubscribers: this.getTotalSubscribers(response.data.advices),
+                    name: _.get(validAdvice, 'name', '')
                 },
                 ratingStats: {
                     currentRating,
@@ -225,6 +178,18 @@ export class AdvisorDashboard extends React.Component {
         .finally(() => {
             this.setState({dashboardDataLoading: false, myAdvicesLoading: false, show: false});
         })
+    }
+
+    getValidIndex = advices => {
+        let i = 0;
+        while(i < advices.length) {
+            const numSubscribers = _.get(advices[i], 'latestAnalytics.numSubscribers', 0);
+            if (numSubscribers > 0){ 
+                break;
+            }
+            i++;
+        }
+        return i;
     }
 
     processAdviceData = advices => {
@@ -270,15 +235,26 @@ export class AdvisorDashboard extends React.Component {
     }
 
     processSubsPerAdvice = advices => {
+        const totalSubscribers = this.getTotalSubscribers(advices);
         const responseArray = advices.map((advice, index) => {
-            if (advice.analytics.length > 0) {
-                return {
-                    name: advice.name,
-                    y: _.get(advice, 'analytics[advice.analytics.length - 1].numSubscribers', 0),
-                }
+            const subscribers =_.get(advice, 'latestAnalytics.numSubscribers', 0);
+            return {
+                name: advice.name,
+                y: Number(((subscribers / totalSubscribers) * 100).toFixed(2)),
+                subscribers
             }
         });
+
         return responseArray;
+    }
+
+    getTotalSubscribers = advices => {
+        let totalSubscribers = 0;
+        advices.map(advice => {
+            totalSubscribers += _.get(advice, 'latestAnalytics.numSubscribers', 0)
+        });
+
+        return totalSubscribers;
     }
 
     processTotalSubscribers = advisorAnalytics => {
@@ -338,7 +314,7 @@ export class AdvisorDashboard extends React.Component {
 
     renderSubscriberStatsView = () => {
         const {subscribeScreen, subscriberStats} = this.state;
-        const {totalSubscribers, selectedAdviceSubscribers} = subscriberStats;
+        const {totalSubscribers, selectedAdviceSubscribers, name} = subscriberStats;
 
         return (
             <Spin spinning={this.state.dashboardDataLoading}>
@@ -355,16 +331,22 @@ export class AdvisorDashboard extends React.Component {
                                 </Col>
                                 <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
                                     <Row type="flex" align="middle">
-                                        <StatsMetricItem label="Subscribers" value={this.state.totalSubscribers}/>
+                                        <StatsMetricItem label="Subscribers" value={this.state.subscriberStats.totalSubscribers}/>
                                     </Row>
                                 </Col>
                             </TabPane>
                             <TabPane tab="Subscribers / Advice" key="2" style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                                 <Col span={12}>
-                                    <ReactHighcharts config = {this.state.subsPerAdviceConfig} />
+                                    <HighChartNew 
+                                            series = {
+                                                [{name: 'Subs PerAdvice Composition', data: this.state.subsPerAdviceSeries}]
+                                            } 
+                                            handleChartClick={this.handleChartClick}
+                                    />
                                 </Col>
                                 <Col span={10} style={{marginRight: '20px', marginTop: '-20px'}}>
-                                    <Row type="flex" align="middle">
+                                    <Row type="flex" justify="end">
+                                        <h3 style={{color: '#444444', fontSize: '22px', fontWeight: '700'}}>{name}</h3>
                                         <StatsMetricItem label="Subscribers" value={selectedAdviceSubscribers}/>
                                         <StatsMetricItem label="Total Subscribers" value={totalSubscribers}/>
                                     </Row>
@@ -375,6 +357,17 @@ export class AdvisorDashboard extends React.Component {
                 </Row>
             </Spin>
         );
+    }
+
+    handleChartClick = data => {
+        console.log(data);
+        this.setState({
+            subscriberStats: {
+                ...this.state.subscriberStats,
+                selectedAdviceSubscribers: data.subscribers,
+                name: data.name
+            }
+        });
     }
 
     renderAdvicesMenu = (handleSelect, top = 0, right = 0) => {

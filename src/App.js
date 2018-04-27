@@ -102,7 +102,7 @@ class App extends React.Component {
                             <Link to='/home'>
                                 <h1 
                                         style={headerColor}>
-                                    ADVICEQUBE <span style={{fontSize: '14px', color: primaryColor}}>&nbsp;Beta</span>
+                                    ADVICEQUBE <span style={{fontSize: '12px', color: primaryColor}}>&nbsp;Beta</span>
                                 </h1>
                             </Link>
                         </Col>

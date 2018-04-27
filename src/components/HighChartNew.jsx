@@ -88,12 +88,15 @@ export class HighChartNew extends React.Component {
             click: e => {
                 this.chart.update({
                     title: {
-                        text: `${e.point.name}<br>${e.point.y} %`,
+                        text: !this.props.numeric ? `${e.point.name}<br>${e.point.y} %` : `${e.point.name}<br>${e.point.y}`,
                         style: {
                             color: e.point.color,
                         }
                     }
-                })
+                });
+                if (this.props.handleChartClick) {
+                    this.props.handleChartClick(e.point);
+                }
             }
         }
     })
@@ -146,7 +149,9 @@ export class HighChartNew extends React.Component {
         try {
             this.chart.update({
                 title: {
-                    text: `${series[0].data[titleIndex].name}<br>${series[0].data[titleIndex].y} %`,
+                    text: !this.props.numeric 
+                        ? `${series[0].data[titleIndex].name}<br>${series[0].data[titleIndex].y} %`
+                        : `${series[0].data[titleIndex].name}<br>${series[0].data[titleIndex].y}`,
                     style: {
                         color: series[0].data[titleIndex].color,
                         fontSize: '14px'
