@@ -105,7 +105,7 @@ class AdviceDetailImpl extends React.Component {
         });
     };
 
-    getAdviceSummary = response => {
+    getAdviceSummary = (response, performance = true) => {
         const tickers = [];
         const {
             name,
@@ -137,7 +137,7 @@ class AdviceDetailImpl extends React.Component {
         var annualReturnNew = Math.pow((1+avgDailyReturnOld),251)*(1+dailyNAVChangePct/100) - 1.0;
         
         this.setState({
-            tickers,
+            tickers: performance ? tickers : this.state.tickers,
             adviceResponse: response.data,
             adviceDetail: {
                 ...this.state.adviceDetail,
@@ -340,7 +340,7 @@ class AdviceDetailImpl extends React.Component {
             return axios.get(url, {headers: Utils.getAuthTokenHeader()})
         })
         .then(response => {
-            this.getAdviceSummary(response);
+            this.getAdviceSummary(response, false);
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
