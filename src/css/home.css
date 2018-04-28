@@ -58,7 +58,7 @@ body {
 .middle-section {
     margin: 0 30px;
     box-shadow: 0 13px 31px rgba(189, 189, 189, 0.5);
-    height: 500px;
+    display: inline-block;
     width: 95%;
     border-radius: 4px;
 }

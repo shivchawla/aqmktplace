@@ -543,7 +543,7 @@ class PortfolioDetailImpl extends React.Component {
                         <Row>
                             <Col span={24} style={dividerStyle}></Col>
                         </Row>
-                        <Collapse bordered={false} defaultActiveKey={["3"]}>
+                        <Collapse bordered={false} defaultActiveKey={["2"]}>
                             <Panel
                                     key='1'
                                     style={customPanelStyle}

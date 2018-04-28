@@ -121,7 +121,7 @@ export class AdvisorProfile extends React.Component {
                                 {
                                     isCompany &&
                                     <Tooltip title="This is a company">
-                                        <Icon type="global" style={socialIconStyle} />
+                                        <Icon type="global" style={{...socialIconStyle, fontSize: '18px'}} />
                                     </Tooltip>
                                 }
                                 {

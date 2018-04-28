@@ -283,7 +283,7 @@ const ButtonComponent = props => {
     const {text} = props;
 
     return (
-        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}} onClick={props.onClick}>
+        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '-140px'}} onClick={props.onClick}>
             <span style={{color: '#fff', fontSize: '16px'}}>{text}</span>
             <img style={{marginLeft: '5px', marginTop: '2px'}} src={chevronRight} />
         </div>
