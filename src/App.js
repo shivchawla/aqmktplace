@@ -102,12 +102,11 @@ class App extends React.Component {
                 <Header style={headerStyle}>
                     <Row type="flex">
                         <Col span={4}>
-                            <Link to='/home'>
-                                <h1 
-                                        style={headerColor}>
-                                    ADVICEQUBE <span style={{fontSize: '12px', color: primaryColor}}>&nbsp;Beta</span>
-                                </h1>
-                            </Link>
+                            <h1
+                                    onClick={() => this.props.history.push('/home')} 
+                                    style={{...headerColor, cursor: 'pointer'}}>
+                                ADVICEQUBE <span style={{fontSize: '12px', color: primaryColor}}>&nbsp;Beta</span>
+                            </h1>
                         </Col>
                         <Col 
                                 span={20} 
@@ -180,6 +179,7 @@ class App extends React.Component {
                          */}
                         <Switch>
                             <Route exact={true} path='/home' component={Home} />
+                            <Route exact={true} path='/' component={Home} />
                             <Route exact={true} path='/advice' component={ScreenAdvices} />
                             <Route exact={true} path='/stockresearch' component={StockResearch} />
                             {/* <Route exact={true} path='/login' component={LoginModal} /> */}

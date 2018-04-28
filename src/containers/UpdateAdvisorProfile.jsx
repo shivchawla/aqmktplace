@@ -159,12 +159,12 @@ class UpdateAdvisorProfileImpl extends React.Component {
             },
             companyName: values.companyName,
             facebook: {
-                url: '',
+                url: values.facebook,
                 photoUrl: '',
                 id: ''
             },
             twitter: {
-                url: '',
+                url: values.twitter,
                 photoUrl: '',
                 id: ''
             }

@@ -237,29 +237,29 @@ export class Home extends React.Component {
                         <h5 className="footer-group-header">Products</h5>
                         <div className="footer-list">
                             <a className="footer-link" href="#">MarketPlace</a>
-                            <a className="footer-link" href="#">Research Platform</a>
+                            <a className="footer-link" href="https://www.aimsquant.com/">Research Platform</a>
                         </div>
                     </Col>
-                    <Col span={4} className="footer-container">
+                    {/* <Col span={4} className="footer-container">
                         <h5 className="footer-group-header">Company</h5>
                         <div className="footer-list">
                             <a className="footer-link" href="#">Contact Us</a>
                             <a className="footer-link" href="#">Career</a>
                             <a className="footer-link" href="#">People</a>
                         </div>
-                    </Col>
+                    </Col> */}
                     <Col span={4} className="footer-container">
                         <h5 className="footer-group-header">Policies</h5>
                         <div className="footer-list">
-                            <a className="footer-link" href="#">Terms of use</a>
-                            <a className="footer-link" href="#">Privacy Policy</a>
+                            <a className="footer-link" href="/policy/policy">Terms of use</a>
+                            <a className="footer-link" href="/policy/tnc">Privacy Policy</a>
                         </div>
                     </Col>
                     <Col span={4} className="footer-container">
                         <h5 className="footer-group-header">AimsQuant</h5>
                         <div className="footer-list">
-                            <a className="footer-link" href="#">Community</a>
-                            <a className="footer-link" href="#">Research</a>
+                            <a className="footer-link" href="https://www.aimsquant.com/research/community">Community</a>
+                            <a className="footer-link" href="https://www.aimsquant.com/research/strategy">Research</a>
                         </div>
                     </Col>
                 </Row>

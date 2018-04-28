@@ -163,7 +163,7 @@ class Signup extends Component {
       <div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
         'minHeight': '500px', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'}}>
         <div className="card" style={{'padding': '20px', 'background': 'white',
-          'borderRadius': '2px', 'textAlign': 'center', 'minWidth': '340px'}}>
+          'borderRadius': '2px', 'textAlign': 'center', 'minWidth': '340px', width: '500px'}}>
           <img alt="" style={{'height': '60px', 'width': 'auto'}} src='./assets/images/Logo.png' />
           <p style={{'fontSize': '30px', 'fontWeight': '300', 'margin': '0px'}}>
             <span style={{'color': 'teal'}}>Advice</span>
@@ -174,21 +174,21 @@ class Signup extends Component {
             Invest in your Ideas
           </p>
           <Form onSubmit={this.handleSubmit}>
-            <FormItem className="signup-form-item">
+            <FormItem className="signup-form-item" style={{marginBottom: '10px', marginTop: '20px'}}>
               {getFieldDecorator('firstName', {
                 rules: [{ required: true, message: 'Please input your firstName!', whitespace: true }],
               })(
                 <Input placeholder="First Name"/>
               )}
             </FormItem>
-            <FormItem className="signup-form-item">
+            <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
               {getFieldDecorator('lastName', {
                 rules: [{ required: true, message: 'Please input your lastName!', whitespace: true }],
               })(
                 <Input placeholder="Last Name"/>
               )}
             </FormItem>
-            <FormItem className="signup-form-item">
+            <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
               {getFieldDecorator('email', {
                 rules: [{
                   type: 'email', message: 'The input is not valid E-mail!',
@@ -199,7 +199,7 @@ class Signup extends Component {
                 <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-Mail"/>
               )}
             </FormItem>
-            <FormItem className="signup-form-item">
+            <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
               {getFieldDecorator('password', {
                 rules: [{
                   required: true, message: 'Please input your password!',
@@ -212,7 +212,7 @@ class Signup extends Component {
                 <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password"/>
               )}
             </FormItem>
-            <FormItem className="signup-form-item">
+            <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
               {getFieldDecorator('confirm', {
                 rules: [{
                   required: true, message: 'Please confirm your password!',

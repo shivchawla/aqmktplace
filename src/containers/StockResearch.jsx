@@ -515,12 +515,12 @@ class StockResearchImpl extends React.Component {
                 <Icon 
                         onClick={() => this.toggleDeleteModalVisible(this.state.selectedWatchlistTab)} 
                         type="delete" 
-                        style={{fontSize: '18px', color: '#F44336', cursor: 'pointer'}} 
+                        style={{fontSize: '21px', color: '#F44336', cursor: 'pointer', marginRight: '10px'}} 
                 />
                 <Icon 
                         onClick={this.toggleWatchListModal}
                         type="plus-circle-o" 
-                        style={{fontSize: '18px', color: '#009688', cursor: 'pointer', marginLeft: '8px'}} 
+                        style={{fontSize: '20px', color: '#009688', cursor: 'pointer', marginLeft: '8px'}} 
                 />
             </div>
         );

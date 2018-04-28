@@ -5,7 +5,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
-import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary} from '../components';
+import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate} from '../components';
 import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {generateColorData, getMetricColor, Utils, getBreadCrumbArray} from '../utils';
@@ -62,6 +62,7 @@ export class InvestorDashboard extends React.Component {
             showAdvisorDashboardToggle: false,
             defaultPortfolioName: 'Default Portfolio',
             defaultPortfolioId: '',
+            notAuthorized: false,
             topLoader: false
         };
         this.stockPositionColumns = [
@@ -137,7 +138,7 @@ export class InvestorDashboard extends React.Component {
                 title: this.renderColumnHeader('RATING'),
                 dataIndex: 'rating',
                 key: 'rating',
-                render: text => <Rate style={{fontSize: '13px'}} disabled value={Number(text) / 2}/>
+                render: text => <AqRate style={{fontSize: '13px'}} value={Number(text) / 2}/>
             },
             {
                 title: '',
@@ -242,6 +243,8 @@ export class InvestorDashboard extends React.Component {
                 if (error.message === 'Network Error') {
                     messageText = 'You are disconnected from the internet';
                     errorCode = 'no_network';
+                } else if (error.response.status === 400 || error.response.status === 403) {
+                    this.setState({notAuthorized: true});
                 } else {
                     messageText = 'You have not created any portfolio yet. Get started by creating One';
                     errorCode = 'empty_portfolio';
@@ -924,95 +927,99 @@ export class InvestorDashboard extends React.Component {
     renderPageContent = () => {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);
         const button = !this.state.showEmptyScreen.status ? {route: '/investordashboard/createportfolio', title: 'Create Portfolio'} : null;
-        return (
-            <Row>
-                <AqPageHeader title="Investor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
-                {this.state.showEmptyScreen.status ?
-                <Col span={24} style={emptyPortfolioStyle}>
-                    {
-                        this.state.showEmptyScreen.errorCode === 'empty_portfolio'
-                        ?   <div style={{textAlign: 'center'}}>
-                                <h1>{this.state.showEmptyScreen.messageText}</h1>
-                                <Button 
-                                        type="primary" 
-                                        onClick={() => this.props.history.push('/investordashboard/createportfolio')}
-                                        style={{marginTop: '20px'}}
+        if (this.state.notAuthorized) {
+            return <ForbiddenAccess />
+        } else {
+            return (
+                <Row>
+                    <AqPageHeader title="Investor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
+                    {this.state.showEmptyScreen.status ?
+                    <Col span={24} style={emptyPortfolioStyle}>
+                        {
+                            this.state.showEmptyScreen.errorCode === 'empty_portfolio'
+                            ?   <div style={{textAlign: 'center'}}>
+                                    <h1>{this.state.showEmptyScreen.messageText}</h1>
+                                    <Button 
+                                            type="primary" 
+                                            onClick={() => this.props.history.push('/investordashboard/createportfolio')}
+                                            style={{marginTop: '20px'}}
+                                    >
+                                        Create Portfolio
+                                    </Button>
+                                </div>
+                            : <h1>{this.state.showEmptyScreen.messageText}</h1>
+                        }
+                    </Col>
+                :   
+                    <Col style={{paddingBottom: '20px'}}>
+                        <Row gutter={12}>
+                            <Col xl={12} lg={24}>
+                                <DashboardCard 
+                                        title="SUMMARY" 
+                                        loading={this.state.defaultPortfolioLoading}
+                                        cardStyle={{height:'425px'}} 
+                                        headerStyle={headerStyle}
+                                        menu={this.renderPortfolioMenu()}
                                 >
-                                    Create Portfolio
-                                </Button>
-                            </div>
-                        : <h1>{this.state.showEmptyScreen.messageText}</h1>
-                    }
-                </Col>
-            :   
-                <Col style={{paddingBottom: '20px'}}>
-                    <Row gutter={12}>
-                        <Col xl={12} lg={24}>
-                            <DashboardCard 
-                                    title="SUMMARY" 
-                                    loading={this.state.defaultPortfolioLoading}
-                                    cardStyle={{height:'425px'}} 
-                                    headerStyle={headerStyle}
-                                    menu={this.renderPortfolioMenu()}
-                            >
-                                    <Row type="flex" justify="space-around" style={{marginTop: '10px', marginBottom: '10px'}}>
-                                        <Col span={20}>{this.renderSummaryMetrics()}</Col>
-                                    </Row>
+                                        <Row type="flex" justify="space-around" style={{marginTop: '10px', marginBottom: '10px'}}>
+                                            <Col span={20}>{this.renderSummaryMetrics()}</Col>
+                                        </Row>
 
-                                    <Row type="flex">
-                                        <Col span={12}>{this.renderOverviewPieChart()}</Col>
-                                        <Col style={{left: '20%', marginTop: '5%'}} span={12}>{this.renderOverviewMetrics()}</Col>
-                                    </Row>
-                            </DashboardCard>
-                        </Col>
-                        
-                        <Col xl={12} lg={24}>
-                            <DashboardCard 
-                                    title="PERFORMANCE CHART" 
-                                    loading={this.state.defaultPortfolioLoading}
-                                    cardStyle={{height: '425px'}} 
-                                    headerStyle={headerStyle}
-                                    menu={this.renderPortfolioMenu()}
-                            >
-
-                                <Row style={{padding: '10px'}}>
-                                    <MyChartNew series={this.state.tickers}/>
-                                </Row>
+                                        <Row type="flex">
+                                            <Col span={12}>{this.renderOverviewPieChart()}</Col>
+                                            <Col style={{left: '20%', marginTop: '5%'}} span={12}>{this.renderOverviewMetrics()}</Col>
+                                        </Row>
+                                </DashboardCard>
+                            </Col>
                             
-                            </DashboardCard>
-                        </Col>
+                            <Col xl={12} lg={24}>
+                                <DashboardCard 
+                                        title="PERFORMANCE CHART" 
+                                        loading={this.state.defaultPortfolioLoading}
+                                        cardStyle={{height: '425px'}} 
+                                        headerStyle={headerStyle}
+                                        menu={this.renderPortfolioMenu()}
+                                >
 
-                        
-                    </Row>
+                                    <Row style={{padding: '10px'}}>
+                                        <MyChartNew series={this.state.tickers}/>
+                                    </Row>
+                                
+                                </DashboardCard>
+                            </Col>
 
-                    <Row gutter={12}>
-                        <Col xl={12} lg={24}>
-                            <DashboardCard 
-                                    title="MY PORTFOLIOS" 
-                                    loading={this.state.portfolioLoading}
-                                    headerStyle={headerStyle}
-                                    cardStyle={{marginTop:'12px', height: '450px'}} 
-                                    contentStyle={{...contentStyle, height: '90%'}}
-                            >
-                                {this.renderPortfolios()}
-                            </DashboardCard>
-                        </Col>
+                            
+                        </Row>
 
-                        <Col xl={12} lg={24}>
-                            <DashboardCard 
-                                    title="MY ADVICES" 
-                                    cardStyle={{marginTop:'12px', height: '450px'}}
-                                    loading={this.state.subscribedAdvicesLoading}
-                                    headerStyle={headerStyle}
-                            >
-                                {this.renderSubscribedAdvices()}
-                            </DashboardCard>
-                        </Col>
-                    </Row>
-                </Col>
-            }
-            </Row>
-        );
+                        <Row gutter={12}>
+                            <Col xl={12} lg={24}>
+                                <DashboardCard 
+                                        title="MY PORTFOLIOS" 
+                                        loading={this.state.portfolioLoading}
+                                        headerStyle={headerStyle}
+                                        cardStyle={{marginTop:'12px', height: '450px'}} 
+                                        contentStyle={{...contentStyle, height: '90%'}}
+                                >
+                                    {this.renderPortfolios()}
+                                </DashboardCard>
+                            </Col>
+
+                            <Col xl={12} lg={24}>
+                                <DashboardCard 
+                                        title="MY ADVICES" 
+                                        cardStyle={{marginTop:'12px', height: '450px'}}
+                                        loading={this.state.subscribedAdvicesLoading}
+                                        headerStyle={headerStyle}
+                                >
+                                    {this.renderSubscribedAdvices()}
+                                </DashboardCard>
+                            </Col>
+                        </Row>
+                    </Col>
+                }
+                </Row>
+            );
+        }
     }
 
     render() {

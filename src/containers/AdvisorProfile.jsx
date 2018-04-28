@@ -3,7 +3,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
-import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select, message} from 'antd';
+import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select, message, Tooltip} from 'antd';
 import {Twitter} from 'twitter-node-client';
 import {MetricItem, AdviceListItem, AdviceFilterComponent, AdviceSortingMenu, AdviceListItemMod, AqPageHeader, ForbiddenAccess} from '../components';
 import {UpdateAdvisorProfile} from '../containers';
@@ -58,6 +58,13 @@ export class AdvisorProfile extends React.Component {
     }
 
     renderProfileDetails = () => {
+        const facebookUrl = _.get(this.state, 'advisor.profile.facebook.url', null);
+        const linkedinUrl = _.get(this.state, 'advisor.profile.linkedIn.url', null);
+        const twitterUrl = _.get(this.state, 'advisor.profile.twitter.url', null);
+        const isCompany = _.get(this.state, 'advisor.profile.isCompany', false);
+        const isSebiReigstered = _.get(this.state, 'advisor.profile.isSebiRegistered', false);
+        const companyName = _.get(this.state, 'advisor.profile.companyName', null);
+
         return (
             <Col span={22} style={{...shadowBoxStyle, padding: '20px 30px', borderRadius: '4px'}}>
                 <Row style={{textAlign: 'center'}}>
@@ -82,9 +89,49 @@ export class AdvisorProfile extends React.Component {
                         {this.renderActionButtons()}
                     </Col>
                 </Row>
-                <Row style={{marginTop: 20}}>
-                    <Col span={24}>
+                <Row style={{marginTop: 20}} type="flex" justify="space-between">
+                    <Col span={16}>
                         {this.renderMetrics()}
+                    </Col>
+                    <Col span={8}>
+                        <Row>
+                            <Col span={24} style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+                                {linkedinUrl && <Icon onClick={() => window.location.assign(linkedinUrl)} type="linkedin" style={socialIconStyle}/>}
+                                {twitterUrl && <Icon onClick={() => window.location.assign(twitterUrl)} type="twitter" style={socialIconStyle}/>}
+                                {facebookUrl && <Icon onClick={() => window.location.assign(facebookUrl)} type="facebook" style={socialIconStyle}/>}
+                            </Col>
+                            <Col 
+                                    span={24} 
+                                    style={{
+                                        display: 'flex', 
+                                        flexDirection: 'row', 
+                                        justifyContent: 'flex-end', 
+                                        marginTop: '20px',
+                                        alignItems: 'center'
+                                    }}
+                            >
+                                {
+                                    companyName &&
+                                    <h3 
+                                            style={{fontSize: '12px', color: '#7A7878'}}
+                                    >
+                                        Company <span style={{fontSize: '14px', color: '#444'}}>{companyName}</span>
+                                    </h3>
+                                }
+                                {
+                                    isCompany &&
+                                    <Tooltip title="This is a company">
+                                        <Icon type="global" style={socialIconStyle} />
+                                    </Tooltip>
+                                }
+                                {
+                                    isSebiReigstered &&
+                                    <Tooltip title="Sebi Registered">
+                                        <Icon type="safety" style={socialIconStyle} />
+                                    </Tooltip>
+                                }
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
             </Col>
@@ -370,4 +417,14 @@ export class AdvisorProfile extends React.Component {
             </React.Fragment>
         );
     }
+}
+
+const socialIconStyle = {
+    fontSize: '20px',
+    margin: '0 10px',
+    cursor: 'pointer'
+}
+
+const disabledSocialIconStyle = {
+    color: '#AAAAAA'
 }

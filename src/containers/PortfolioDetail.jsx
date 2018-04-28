@@ -6,7 +6,7 @@ import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip} from 'antd';
-import {ForbiddenAccess, StockResearchModal, WatchList} from '../components';
+import {ForbiddenAccess, StockResearchModal, WatchList, AqRate} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
 import {loadingColor, pageTitleStyle, metricColor, cashStyle} from '../constants';

@@ -8,7 +8,7 @@ import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
 import {UpdateAdvice} from './UpdateAdvice';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess} from '../components';
+import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal} from '../utils';
@@ -793,7 +793,7 @@ class AdviceDetailImpl extends React.Component {
                                         <span style={dateStyle}>{updatedDate}</span>
                                     </h5>
                                 }
-                                <Rate value={this.state.adviceDetail.rating} disabled allowHalf/>
+                                <AqRate value={this.state.adviceDetail.rating} />
                             </Col>
                             <Col span={6}>
                                 {this.renderActionButtons()}
