@@ -364,8 +364,9 @@ export class ScreenAdvices extends React.PureComponent {
                                 </Col>
                             </Row>
                         </Row>
+                        
                         <Row>
-                            <Col span={24}>
+                            <Col span={24} style={{minHeight: '600px'}}>
                                 <Tabs 
                                         animated={false} 
                                         defaultActiveKey={this.state.selectedTab} 
@@ -379,49 +380,56 @@ export class ScreenAdvices extends React.PureComponent {
                                         {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
                                         {/* </Spin> */}
-                                        <Pagination 
+                                        {/*<Pagination 
                                                 current={Number(this.state.selectedPage)} 
                                                 total={this.state.totalCount} 
                                                 pageSize={this.state.limit}
                                                 onChange={this.onPaginationChange}
-                                        />
+                                        />*/}
                                     </TabPane>
                                     <TabPane tab="Trending" key="trending">
                                         {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
                                         {/* </Spin> */}
-                                        <Pagination
+                                        {/*<Pagination
                                                 current={Number(this.state.selectedPage)} 
                                                 total={this.state.totalCount} 
                                                 pageSize={this.state.limit}
                                                 onChange={this.onPaginationChange}
 
-                                        />
+                                        />*/}
                                     </TabPane>
                                     <TabPane tab="Subscribed" key="subscribed">
                                         {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
                                         {/* </Spin> */}
-                                        <Pagination
+                                        {/*<Pagination
                                                 current={Number(this.state.selectedPage)} 
                                                 total={this.state.totalCount} 
                                                 pageSize={this.state.limit}
                                                 onChange={this.onPaginationChange}
-                                        />
+                                        />*/}
                                     </TabPane>
                                     <TabPane tab="Wishlist" key="following">
                                         {/* <Spin size="large" spinning={this.state.loading}> */}
                                             {this.renderAdvices()}
                                         {/* </Spin> */}
-                                        <Pagination
+                                        {/*<Pagination
                                                 current={Number(this.state.selectedPage)} 
                                                 total={this.state.totalCount} 
                                                 pageSize={this.state.limit} 
                                                 onChange={this.onPaginationChange}
-                                        />
+                                        />*/}
                                     </TabPane>
                                 </Tabs>
                             </Col>
+                        </Row>
+                        <Row style={{textAlign: 'center'}}>
+                                <Pagination
+                                    current={Number(this.state.selectedPage)} 
+                                    total={this.state.totalCount} 
+                                    pageSize={this.state.limit}
+                                    onChange={this.onPaginationChange}/>
                         </Row>                  
                     </Col>
                     <Col xl={6} md={0} offset={1} style={{...newLayoutStyle, padding: '0'}}>

@@ -797,14 +797,27 @@ export class InvestorDashboard extends React.Component {
         // Utils.closeWebSocket();
     }
 
+    
     setUpSocketConnection = () => {
-        console.log('Setting Up connection');
-        Utils.webSocket.onmessage = this.processRealtimeMessage;
         Utils.webSocket.onopen = () => {
+            Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takeAction();
-        };
+            clearInterval(this.interval);
+        }
+
+        Utils.webSocket.onclose = () => {
+            this.interval = setInterval(function() {
+                Utils.webSocket.onopen = () => {
+                    Utils.webSocket.onmessage = this.processRealtimeMessage;
+                    this.takeAction();
+                    clearInterval(this.interval);
+                }}, 2000);
+        }
+       
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
         this.takeAction();
     }
+
 
     subscribeToAllPortfolios = (portfolios = []) => {
         console.log('Subscribing to all Portfolios');

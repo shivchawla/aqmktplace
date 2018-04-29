@@ -270,10 +270,22 @@ class StockResearchImpl extends React.Component {
     }
 
     setUpSocketConnection = () => {
-        Utils.webSocket.onmessage = this.processRealtimeMessage;
         Utils.webSocket.onopen = () => {
+            Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takeAction();
-        };
+            clearInterval(this.interval);
+        }
+
+        Utils.webSocket.onclose = () => {
+            this.interval = setInterval(function() {
+                Utils.webSocket.onopen = () => {
+                    Utils.webSocket.onmessage = this.processRealtimeMessage;
+                    this.takeAction();
+                    clearInterval(this.interval);
+                }}, 2000);
+        }
+       
+        Utils.webSocket.onmessage = this.processRealtimeMessage;
         this.takeAction();
     }
 

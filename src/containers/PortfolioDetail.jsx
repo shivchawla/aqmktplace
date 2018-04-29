@@ -361,12 +361,25 @@ class PortfolioDetailImpl extends React.Component {
         });
     }
 
+
     setUpSocketConnection = () => {
         Utils.webSocket.onopen = () => {
+            Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takePortfolioAction();
-        };
-        this.takePortfolioAction();
+            clearInterval(this.interval);
+        }
+
+        Utils.webSocket.onclose = () => {
+            this.interval = setInterval(function() {
+                Utils.webSocket.onopen = () => {
+                    Utils.webSocket.onmessage = this.processRealtimeMessage;
+                    this.takePortfolioAction();
+                    clearInterval(this.interval);
+                }}, 2000);
+        }
+       
         Utils.webSocket.onmessage = this.processRealtimeMessage;
+        this.takePortfolioAction();
     }
 
     takePortfolioAction = () => {

@@ -369,7 +369,6 @@ export class AdvisorDashboard extends React.Component {
     }
 
     handleChartClick = data => {
-        console.log(data);
         this.setState({
             subscriberStats: {
                 ...this.state.subscriberStats,
@@ -560,9 +559,20 @@ export class AdvisorDashboard extends React.Component {
 
     setUpSocketConnection = () => {
         Utils.webSocket.onopen = () => {
-            console.log('Connection Openend');
+            Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takeAction();
+            clearInterval(this.interval);
         }
+
+        Utils.webSocket.onclose = () => {
+            this.interval = setInterval(function() {
+                Utils.webSocket.onopen = () => {
+                    Utils.webSocket.onmessage = this.processRealtimeMessage;
+                    this.takeAction();
+                    clearInterval(this.interval);
+                }}, 2000);
+        }
+       
         Utils.webSocket.onmessage = this.processRealtimeMessage;
         this.takeAction();
     }
@@ -646,7 +656,7 @@ export class AdvisorDashboard extends React.Component {
                         <ListMetricItem 
                                 valueColor={returnColor} 
                                 value={`${Number((_.get(advice, 'performanceSummary.current.totalReturn', 0) * 100).toFixed(2))} %`} 
-                                label="Return" 
+                                label="Daily Chg (%)" 
                         />
                     </Col>
                     <Col span={7}>
