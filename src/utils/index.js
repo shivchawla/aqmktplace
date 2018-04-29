@@ -82,7 +82,6 @@ export class Utils{
 	}
 
 	static getShouldUpdateToken(){
-		// console.log(this.getFromLocalStorage('SHOULDUPDATETOKEN'));
 		return this.getFromLocalStorage('SHOULDUPDATETOKEN');
 	}
 
