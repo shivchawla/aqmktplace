@@ -35,7 +35,7 @@ export class ScreenAdvices extends React.PureComponent {
             filterModalVisible: false,
             loading: true,
             selectedPage: Utils.getFromLocalStorage('selectedPage') || 1,
-            limit: 3,
+            limit: 10,
             totalCount: 3,
             initialCall: true,
             show: false
@@ -85,7 +85,7 @@ export class ScreenAdvices extends React.PureComponent {
         .then(response => {
             this.setState({
                 advices: this.processAdvices(response.data.advices),
-                limitotalCountt: 1
+                totalCount: 1
             });
         })
         .catch(error => {
@@ -347,12 +347,11 @@ export class ScreenAdvices extends React.PureComponent {
                                 <Col span={10} style={{...filterSortContainerStyle, marginBottom: '-40px', zIndex:'4'}}>
                                     <Row type="flex" align="middle" justify="end">
                                         <Col xs={3} md={3} xl={0} style={{marginTop: '5px'}}>
-                                            <Icon   onClick={this.toggleFilterModal} 
-                                                    style={{cursor: 'pointer'}}
-                                                    type="bars" 
-                                                    //onClick={this.toggleFilter} 
-                                                    style={{ fontSize: 20, cursor: 'pointer'}}
-                                            />
+                                            <Icon   
+                                                onClick={this.toggleFilterModal} 
+                                                style={{cursor: 'pointer'}}
+                                                type="bars" 
+                                                style={{ fontSize: 20, cursor: 'pointer'}}/>
                                         </Col>
                                         <Col span={4}>
                                             <h5 style={{fontSize: '14px', color: '#6C6C6C'}}>Sort By</h5>
@@ -368,68 +367,34 @@ export class ScreenAdvices extends React.PureComponent {
                         <Row>
                             <Col span={24} style={{minHeight: '600px'}}>
                                 <Tabs 
-                                        animated={false} 
-                                        defaultActiveKey={this.state.selectedTab} 
-                                        onChange={this.handleTabChange}
-                                >
-                                    <TabPane 
-                                            tab="All" 
-                                            key="all" 
-                                            // style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}
-                                    >
-                                        {/* <Spin size="large" spinning={this.state.loading}> */}
-                                            {this.renderAdvices()}
-                                        {/* </Spin> */}
-                                        {/*<Pagination 
-                                                current={Number(this.state.selectedPage)} 
-                                                total={this.state.totalCount} 
-                                                pageSize={this.state.limit}
-                                                onChange={this.onPaginationChange}
-                                        />*/}
+                                    animated={false} 
+                                    defaultActiveKey={this.state.selectedTab} 
+                                    onChange={this.handleTabChange}>
+                                    
+                                    <TabPane tab="All" key="all">
+                                        {this.renderAdvices()}
                                     </TabPane>
+                                    
                                     <TabPane tab="Trending" key="trending">
-                                        {/* <Spin size="large" spinning={this.state.loading}> */}
-                                            {this.renderAdvices()}
-                                        {/* </Spin> */}
-                                        {/*<Pagination
-                                                current={Number(this.state.selectedPage)} 
-                                                total={this.state.totalCount} 
-                                                pageSize={this.state.limit}
-                                                onChange={this.onPaginationChange}
-
-                                        />*/}
+                                        {this.renderAdvices()}
                                     </TabPane>
+                                    
                                     <TabPane tab="Subscribed" key="subscribed">
-                                        {/* <Spin size="large" spinning={this.state.loading}> */}
-                                            {this.renderAdvices()}
-                                        {/* </Spin> */}
-                                        {/*<Pagination
-                                                current={Number(this.state.selectedPage)} 
-                                                total={this.state.totalCount} 
-                                                pageSize={this.state.limit}
-                                                onChange={this.onPaginationChange}
-                                        />*/}
+                                        {this.renderAdvices()}
                                     </TabPane>
+                                    
                                     <TabPane tab="Wishlist" key="following">
-                                        {/* <Spin size="large" spinning={this.state.loading}> */}
-                                            {this.renderAdvices()}
-                                        {/* </Spin> */}
-                                        {/*<Pagination
-                                                current={Number(this.state.selectedPage)} 
-                                                total={this.state.totalCount} 
-                                                pageSize={this.state.limit} 
-                                                onChange={this.onPaginationChange}
-                                        />*/}
+                                        {this.renderAdvices()}
                                     </TabPane>
                                 </Tabs>
                             </Col>
                         </Row>
                         <Row style={{textAlign: 'center'}}>
-                                <Pagination
-                                    current={Number(this.state.selectedPage)} 
-                                    total={this.state.totalCount} 
-                                    pageSize={this.state.limit}
-                                    onChange={this.onPaginationChange}/>
+                            <Pagination
+                                current={Number(this.state.selectedPage)} 
+                                total={this.state.totalCount} 
+                                pageSize={this.state.limit}
+                                onChange={this.onPaginationChange}/>
                         </Row>                  
                     </Col>
                     <Col xl={6} md={0} offset={1} style={{...newLayoutStyle, padding: '0'}}>
