@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import Utils from '../NewUtils';
+import Utils from '../Utils';
+import {requestUrl} from '../localConfig';
 import { Spin, Form, Icon, Input, Button } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
@@ -25,7 +26,7 @@ class ForgotPasswordImpl extends Component {
           });
           axios({
               method: 'get',
-              url: Utils.getBaseUrl() + '/user/forgotpassword?email='+values.email,
+              url: `${requestUrl}/user/forgotpassword?email=${values.email}`,
             }, {
             cancelToken: new axios.CancelToken( (c) => {
               this.cancelForgotPasswordCall = c;

@@ -4,7 +4,7 @@ import {reactLocalStorage} from 'reactjs-localstorage';
 import {graphColors, metricColor} from '../constants';
 import {getStockData} from './requests';
 
-const {requestUrl} = require('../localConfig');
+const {requestUrl, webSocketUrl} = require('../localConfig');
 
 export const dateFormat = 'Do MMMM YYYY';
 
@@ -84,16 +84,6 @@ export class Utils{
 	static getShouldUpdateToken(){
 		// console.log(this.getFromLocalStorage('SHOULDUPDATETOKEN'));
 		return this.getFromLocalStorage('SHOULDUPDATETOKEN');
-	}
-
-	static getSocketUrl(){
-		//return "wss://developapi.aimsquant.com";
-		return 'ws://localhost:3002';
-	}
-
-	static getBaseUrl(){
-		return "https://devaqdashapi.aimsquant.com/api/v2";
-		// return "https://api.aimsquant.com/api/v2";
 	}
 
 	static getAnnouncementUrl(){
@@ -183,8 +173,8 @@ export class Utils{
 		return reactLocalStorage.getObject(key);
 	}	
 
-	static isLoggedIn(){
-		if (this.loggedInUserinfo && this.loggedInUserinfo['token']){
+	static isLoggedIn() {
+		if (this.loggedInUserinfo && this.loggedInUserinfo['token']) {
 			return true;
 		}else{
 			return false;
@@ -311,7 +301,7 @@ export class Utils{
 			} catch(err){}
 		}
 
-		this.webSocket = new WebSocket(this.getSocketUrl());
+		this.webSocket = new WebSocket(webSocketUrl);
 		
 		if (this.webSocket && this.webSocket.readyState == WebSocket.CLOSED) {
 			console.log('Server unavailable');
