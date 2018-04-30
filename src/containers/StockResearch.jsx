@@ -108,9 +108,12 @@ class StockResearchImpl extends React.Component {
         if (initialCall === false) {
             //this.unSubscribeToStock(this.state.latestDetail.ticker);
         }
-        getStockData(value, 'latestDetail')
-        .then(response => {
-            const {data} = response;
+        Promise.all([
+            getStockData(value, 'latestDetail'),
+            getStockData(value, 'rollingPerformance')
+        ])
+        .then(([latestDetailResponse, performanceResponse]) => {
+            const {data} = latestDetailResponse;
             latestDetail.ticker = data.security.ticker;
             latestDetail.exchange = data.security.exchange;
             latestDetail.close = data.latestDetail.values.Close;
@@ -124,16 +127,15 @@ class StockResearchImpl extends React.Component {
 
             latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
             
-            this.setState({latestDetail}, () => {
+            this.setState({
+                selectedPerformanceScreen: 'YTD', 
+                rollingPerformance: performanceResponse.data.rollingPerformance.detail,
+                latestDetail}, () => {
                 // Subscribing to real-time data
                 if (!this.props.openAsDialog) {
                     this.setUpSocketConnection();
                 }
             });
-            return getStockData(value, 'rollingPerformance');
-        })
-        .then(response => {
-            this.setState({rollingPerformance: response.data.rollingPerformance.detail});
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
@@ -159,7 +161,7 @@ class StockResearchImpl extends React.Component {
                 {label: 'Beta', value: ratios.beta},
                 {label: 'Sharpe Ratio', value: ratios.sharperatio},
                 {label: 'Alpha', value: `${(ratios.alpha * 100).toFixed(2)} %`},
-                {label: 'Max Loss', value: `${(drawdown.currentdrawdown * 100).toFixed(2)} %`},
+                {label: 'Max Loss', value: `${(drawdown.maxdrawdown * 100).toFixed(2)} %`},
             ];
 
             return this.renderPerformanceMetricsItems(metricsData);
@@ -250,7 +252,6 @@ class StockResearchImpl extends React.Component {
 
     renderPerformanceMetrics = () => {
         const selectedScreen = this.state.selectedPerformanceScreen;
-        
         return this.renderRollingPerformanceData(selectedScreen.toLowerCase());
     }
 
