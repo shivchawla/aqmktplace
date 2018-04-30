@@ -34,7 +34,7 @@ class StockResearchImpl extends React.Component {
             loadingData: true,
             latestDetail: {
                 latestPrice: 0,
-                ticker: 'TCS',
+                ticker: 'NIFTY_50',
                 exchange: '',
                 closePrice: 0,
                 change: '',

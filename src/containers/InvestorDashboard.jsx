@@ -691,8 +691,8 @@ export class InvestorDashboard extends React.Component {
         const colStyle = {marginBottom: '20px'};
         let nStocks = 0, nSectors = 0, nIndustries = 0, maxPosSize = {y: 0}, minPosSize = {y: 0};
         try {
-            if (defaultComposition.length){
-                nStocks = defaultComposition[0].data.filter(item => {return item.ticker !="CASH_INR"}).length;
+            if (defaultComposition.length) {
+                nStocks = defaultComposition[0].data.filter(item => {return item.name !="CASH_INR"}).length;
                 nSectors = this.processSectorsForChart(positions, defaultComposition[0].data)[0].data.length;
                 nIndustries = this.processIndustriesForChart(positions, defaultComposition[0].data)[0].data.length;
                 maxPosSize = _.maxBy(defaultComposition[0].data, item => item.y);
@@ -716,7 +716,7 @@ export class InvestorDashboard extends React.Component {
                                 <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
-                                    label="Concentration" 
+                                    label="Diversity Index" 
                                     value={concentration}
                                 />
                             </Col>
@@ -740,10 +740,10 @@ export class InvestorDashboard extends React.Component {
 
     renderOverviewPieChart = () => {
         return (
-            <Col>
+            <Col style={{marginTop:'-10px'}}>
                 <HighChartNew series = {this.state.composition} />
                 
-                <Row style={{textAlign: 'center', marginTop: '-60px'}}>
+                <Row style={{textAlign: 'center', marginTop: '-50px'}}>
                     <RadioGroup onChange={this.handleOverviewSelectChange} defaultValue="stocks" size="small">
                         <RadioButton value="stocks">Stocks</RadioButton>
                         <RadioButton value="sectors">Sectors</RadioButton>
