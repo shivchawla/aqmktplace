@@ -25,13 +25,12 @@ export class WatchListImpl extends React.Component {
         // {name: 'TCS', y: 145, change: 1.5, hideCheckbox: true}
         const {tickers = [], preview = true} = this.props;
         return tickers.map((ticker, index) => 
-                <ChartTickerItem 
-                    watchlist={true}
-                    key={index} 
-                    legend={ticker} 
-                    deleteItem={this.deleteItem} 
-                    onClick={this.props.onClick}
-                />
+            <ChartTickerItem 
+                watchlist={true}
+                key={index} 
+                legend={ticker} 
+                deleteItem={this.deleteItem} 
+                onClick={this.props.onClick}/>
         );
     }
 

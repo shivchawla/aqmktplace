@@ -316,13 +316,19 @@ class StockResearchImpl extends React.Component {
             try {
                 const realtimeResponse = JSON.parse(msg.data);
                 if (realtimeResponse.type === 'stock' && realtimeResponse.ticker === this.state.latestDetail.ticker) {
-                    this.setState({
-                        latestDetail: {
-                            ...this.state.latestDetail,
-                            latestPrice: _.get(realtimeResponse, 'output.current', 0),
-                            change: _.get(realtimeResponse, 'output.current', 0) != 0.0 ? (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2) : "-"
-                        }
-                    });
+                    
+                    var validCurrentPrice = _.get(realtimeResponse, 'output.current', 0) != 0.0;
+
+                    if (validCurrentPrice) {
+                        this.setState({
+                            latestDetail: {
+                                ...this.state.latestDetail,
+                                latestPrice: _.get(realtimeResponse, 'output.current', 0),
+                                change: validCurrentPrice ? (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2) : "-"
+                            }                    
+                        });
+                    }
+
                 } else {
                     const watchlists = [...this.state.watchlists];
                     // Getting the required wathclist
@@ -331,8 +337,11 @@ class StockResearchImpl extends React.Component {
                         // Getiing the required security to update
                         const targetSecurity = targetWatchlist.positions.filter(item => item.name === realtimeResponse.ticker)[0];
                         if (targetSecurity) {
-                            targetSecurity.change = (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2)
-                            targetSecurity.price = _.get(realtimeResponse, 'output.current', 0),
+                            var validCurrentPrice = _.get(realtimeResponse, 'output.current', 0) != 0.0;
+                            if(validCurrentPrice) {
+                                targetSecurity.change = validCurrentPrice ? (_.get(realtimeResponse, 'output.changePct', 0) * 100).toFixed(2) : "-";
+                                targetSecurity.price = _.get(realtimeResponse, 'output.current', 0);
+                            }
                             this.setState({watchlists});
                         }
                     }
@@ -443,9 +452,10 @@ class StockResearchImpl extends React.Component {
             return {
                 name: item.name,
                 positions: item.securities.map(item => {
+                    var validCurrentPrice = _.get(item, 'realtime.current', 0.0) != 0.0;
                     return {
                         name: item.ticker,
-                        change: Number(((_.get(item, 'realtime.changePct', 0.0) || _.get(item, 'eod.ChangePct', 0.0))*100).toFixed(2)),
+                        change: validCurrentPrice ? Number(((_.get(item, 'realtime.changePct', 0.0) || _.get(item, 'eod.ChangePct', 0.0))*100).toFixed(2)) : '-',
                         price: _.get(item, 'realtime.current', 0.0) || _.get(item, 'eod.Close', 0.0)
                     }
                 }),
@@ -526,7 +536,7 @@ class StockResearchImpl extends React.Component {
             const tickers = item.positions.map(it => {return {name: it.name, y: it.price, change:it.change, hideCheckbox: true}});
             return (
                 <TabPane key={item.id} tab={item.name}>
-                    <Col span={24}>
+                    <Col span={24} style={{overflow:'hidden', overflowY:'scroll', height:'500px'}}>
                         <WatchList 
                             tickers={tickers} 
                             id={item.id} 
@@ -588,7 +598,7 @@ class StockResearchImpl extends React.Component {
                     </React.Fragment>
                 }
                 <Row type="flex" justify="space-between">
-                <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
+                <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom:'20px'}}>
                     {this.renderDeleteModal()}
                     <Row style={metricStyle}>
                         {
@@ -669,7 +679,7 @@ class StockResearchImpl extends React.Component {
                 {
                     !this.props.openAsDialog &&
                     <Col span={6}>
-                    <div style={{...shadowBoxStyle, width: '95%', height: '300px', padding:'0px 10px', marginLeft: 'auto'}}>
+                    <div style={{...shadowBoxStyle, width: '95%', minHeight: '300px', padding:'0px 10px', marginLeft: 'auto'}}>
                         {/* <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button> */}
                         <Col 
                                 span={24} 
