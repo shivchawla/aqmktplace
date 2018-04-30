@@ -318,11 +318,12 @@ export class ScreenAdvices extends React.PureComponent {
     renderPageContent = () => {
         const antIcon = <Icon type="loading" style={{ fontSize: 36 }} spin />;
         const breadCrumbs = getBreadCrumbArray([{name: 'Screen Advices'}]);
+        const button = {route: '/advisordashboard/createadvice', title: 'Create Advice'};
 
         return (
 
             <Row>
-                <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs}/>
+                <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs} button={button}/>
                 <Row className="row-container" style={{...shadowBoxStyle, marginBottom:'20px'}}>
                     {this.renderFilter()}
                     

@@ -8,11 +8,12 @@ export const CreatePortfolioCrumb = [
 ];
 
 export const AdviceDetailCrumb = [
-    {name: 'Advices', url: '/advice'}
+    {name: 'Screen Advices', url: '/advice'}
 ];
 
 export const UpdateAdviceCrumb = [
-    ...AdviceDetailCrumb
+    //...AdviceDetailCrumb
+   ...CreateAdviceCrumb
 ];
 
 export const PortfolioDetailCrumb = [

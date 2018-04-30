@@ -650,7 +650,7 @@ export class AdviceFormImpl extends React.Component {
                     <Col xl={18} lg={18} md={24}>
                         <Form onSubmit={this.handleSubmit}>
                             <Row>
-                                <Col span={24} style={{...shadowBoxStyle, padding: '20px', margin: '20px 0', marginBottom:'20px'}}>
+                                <Col span={24} style={{...shadowBoxStyle, padding: '20px', margin: '20px 0', marginBottom:'20px', minHeight: '600px'}}>
                                     <Row>
                                         <Col span={12}>
                                             <Row>
