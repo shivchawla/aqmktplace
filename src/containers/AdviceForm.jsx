@@ -5,7 +5,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle} from '../constants';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
@@ -25,6 +25,7 @@ import {
     message, 
     Dropdown, 
     Menu, 
+    Tooltip,
     Icon, 
     Spin, 
     Checkbox, 
@@ -42,8 +43,8 @@ const Option = Select.Option;
 
 const dateFormat = 'YYYY-MM-DD';
 const dateOffset = 5;
-const maxNotional = [10000, 20000, 50000, 75000, 100000, 200000, 300000, 500000, 750000, 1000000];
-const rebalancingFrequency = ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'];
+const maxNotional = [20000, 50000, 100000, 200000, 300000, 500000];
+const rebalancingFrequency = [ 'Monthly', 'Daily', 'Weekly', 'Bi-Weekly', 'Quartely'];
 
 export class AdviceFormImpl extends React.Component {
     constructor(props) {
@@ -56,8 +57,8 @@ export class AdviceFormImpl extends React.Component {
             remainingCash: 100000,
             initialCash: 100000,
             benchmarks,
-            selectedBenchmark: 'TCS',
-            tickers: [],
+            selectedBenchmark: 'NIFTY_50',
+            tickers: [{name:'Advice', color: performanceColor, data:[]}, {name:'', color: benchmarkColor, data:[]}],
             weightSeries: [],
             rebalancingFrequency: rebalancingFrequency[0],
             maxNotional: maxNotional[0],
@@ -235,15 +236,14 @@ export class AdviceFormImpl extends React.Component {
                     })
                 }
             );
-            if (tickers.length < 2) {
-                tickers.push({
-                    name: 'Advice',
-                    data: performance,
-                    color: performanceColor
-                });
-            } else {
-                tickers[1].data = performance;
-            }
+
+            console.log(tickers);
+            
+            var idx = tickers.map(item => item.name).indexOf("Advice");
+            if (idx != -1) {
+                tickers[idx].data = performance;
+            } 
+
             this.setState({tickers, compositionSeries: series});
         })
         .catch(error => {
@@ -330,8 +330,8 @@ export class AdviceFormImpl extends React.Component {
         const tickers = [...this.state.tickers];
         getStockPerformance(ticker)
         .then(performance => {
-            tickers[0].name = ticker;
-            tickers[0].data = performance;
+            tickers[1].name = ticker;
+            tickers[1].data = performance;
             this.setState({tickers, selectedBenchmark: ticker});
         });
     }
@@ -417,7 +417,7 @@ export class AdviceFormImpl extends React.Component {
         // const editOperations = <Button onClick={this.toggleAddTickerModal} style={{marginRight: '10px'}}>{buttonText}</Button>;
         const series = [...this.state.compositionSeries];
         return (
-            <Tabs animated={false} defaultActiveKey="1">
+            <Tabs animated={false} defaultActiveKey="2">
                 <TabPane key="1" tab="Overview" style={{padding: '0 10px'}}>
                     {
                         this.getVerifiedTransactions().length > 0
@@ -456,21 +456,49 @@ export class AdviceFormImpl extends React.Component {
     }
 
     renderPortfolioTable = () => {
-        const data = this.getVerifiedTransactions().map(transaction => {
+        var verifiedTransactions = this.getVerifiedTransactions();
+        
+        var netValue = 0.0;
+        verifiedTransactions.forEach(transaction => {
+            netValue+=transaction.totalValue;
+        });
+
+        var netValueValid = netValue <= this.state.maxNotional * 1.05;
+        const netValueValidIconSrc = !netValueValid ? 'exclamation-circle' : 'check-circle';
+        const netValueValidIconColor = !netValueValid ? metricColor.negative : metricColor.positive;
+
+        const tooltipText = netValueValid ? "Advice value within Max. National" : "Advice value exceeds Max. National by more than 5%"
+        const data = verifiedTransactions.map(transaction => {
             return {
                 ...transaction,
+                totalValue: Utils.formatMoneyValueMaxTwoDecimals(transaction.totalValue),
                 weight: `${transaction.weight} %`
             }
         });
 
         return (
-            <Table 
-                    size="small" 
-                    columns={this.columns} 
-                    dataSource={data}
-                    pagination={false}
-                    style={{marginBottom: '20px'}}
-            />
+            <Col>
+                <Row>
+                    <div style={{textAlign: 'left', marginBottom: '5px', fontSize: '16px'}}>
+                        Total Advice Value: 
+                        <span style={{color: netValueValidIconColor, marginLeft: '5px'}}>{Utils.formatMoneyValueMaxTwoDecimals(netValue)}</span> 
+                        <Tooltip title={tooltipText}>
+                            <Icon 
+                                type={netValueValidIconSrc} 
+                                style={{fontSize: '20px', marginLeft: '10px', color: netValueValidIconColor}}
+                            />
+                        </Tooltip>
+                    </div>
+                </Row>
+                <Row>
+                    <Table 
+                        size="small" 
+                        columns={this.columns} 
+                        dataSource={data}
+                        pagination={false}
+                        style={{marginBottom: '20px'}}/>
+                </Row>
+            </Col>
         );
     }
 
@@ -511,11 +539,12 @@ export class AdviceFormImpl extends React.Component {
                     const benchmarkTicker = _.get(response.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
                     // getStockPerformance(benchmarkTicker)
                     // .then(performance => {
-                    tickers.push({
+                    tickers[1] = {
                         name: benchmarkTicker,
                         data: performance,
                         color: benchmarkColor
-                    });
+                    };
+
                     this.setState({tickers});
                     // });
                 }
@@ -604,11 +633,7 @@ export class AdviceFormImpl extends React.Component {
                 const tickers = [...this.state.tickers];
                 // getStockPerformance(this.state.selectedBenchmark)
                 // .then(performance => {
-                tickers.push({
-                    name: this.state.selectedBenchmark,
-                    // data: performance,
-                    color: benchmarkColor
-                });
+                tickers[1].name = this.state.selectedBenchmark,
                 this.setState({tickers});
                 //     this.setState({tickers});
                 // });

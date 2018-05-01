@@ -660,13 +660,12 @@ class StockResearchImpl extends React.Component {
                             </Row>
                         </Col>
                     </Row>
-                    <Row style={metricStyle}>  
+                    <Row style={{...metricStyle, marginBottom:'10px'}}>  
                         <DashboardCard 
-                                xl={24} 
-                                title="Performance" 
-                                headerStyle={{borderBottom: '1px solid #eaeaea'}}
-                                contentStyle={{height: '405px', marginTop: '10px'}}
-                        >
+                            xl={24} 
+                            title="Performance" 
+                            headerStyle={{borderBottom: '1px solid #eaeaea'}}
+                            contentStyle={{height: '350px', marginTop: '10px'}}>
                             <MyChartNew 
                                     series = {this.state.tickers} 
                                     deleteItem = {this.deleteItem}
