@@ -18,7 +18,7 @@ const TabPane = Tabs.TabPane;
 const ReactHighcharts = require('react-highcharts');
 const {requestUrl, aimsquantToken} = require('../localConfig');
 
-export class AdvisorDashboard extends React.Component {
+export default class AdvisorDashboard extends React.Component {
     numberOfTimeSocketConnectionCalled = 1;
     mounted = false;
 
@@ -87,7 +87,7 @@ export class AdvisorDashboard extends React.Component {
                 });
             },
             load: () => {
-                console.log('Successfully loaded');
+                // console.log('Successfully loaded');
             }
         }
     })
@@ -124,7 +124,7 @@ export class AdvisorDashboard extends React.Component {
             const advices = _.get(response.data, 'advices', []);
             const validAdviceIndex = this.getValidIndex(advices);
             const validAdvice = advices[validAdviceIndex] || null;
-            console.log('Valid Advice', validAdvice);
+            // console.log('Valid Advice', validAdvice);
             subscriberRating = {name: 'Total Subscribers', data: this.processTotalSubscribers(_.get(response.data, 'analytics', []))};
             subsTotalSeries.push({
                 name: 'Total Subscribers', 
@@ -592,7 +592,7 @@ export class AdvisorDashboard extends React.Component {
     }
 
     unSubscribeToAllAdvices = (advices = []) => {
-        console.log('Un Subscribing to all advices');
+        // console.log('Un Subscribing to all advices');
         advices.map(advice => {
             this.unSubscribeToAdvice(advice.id);
         });
@@ -610,7 +610,7 @@ export class AdvisorDashboard extends React.Component {
     }
 
     unSubscribeToAdvice = adviceId => {
-        console.log('UnSubscription to advice ' + adviceId);
+        // console.log('UnSubscription to advice ' + adviceId);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',

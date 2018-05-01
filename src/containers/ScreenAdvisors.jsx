@@ -26,11 +26,11 @@ export class ScreenAdvisors extends React.Component {
         this.setState({loading: true});
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            console.log('Advisor List', response.data);
+            // console.log('Advisor List', response.data);
             this.setState({advisors: response.data});
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -82,7 +82,7 @@ export class ScreenAdvisors extends React.Component {
     }
 
     handleSearch = value => {
-        console.log(value);
+        // console.log(value);
     }
 
     componentWillMount() {

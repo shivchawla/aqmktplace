@@ -303,7 +303,7 @@ export class Utils{
 		this.webSocket = new WebSocket(webSocketUrl);
 		
 		if (this.webSocket && this.webSocket.readyState == WebSocket.CLOSED) {
-			console.log('Server unavailable');
+			// console.log('Server unavailable');
 			this.numAttempts++;
 			var timeOut = Math.min(2 * Utils.numAttempts * 1000, 20000)
 			setTimeout(() => {
@@ -312,7 +312,7 @@ export class Utils{
 		}
 
 		this.webSocket.onclose = () => {
-			console.log('Connection Closed');
+			// console.log('Connection Closed');
 			this.numAttempts++;
 			var timeOut = Math.min(2 * Utils.numAttempts * 1000, 20000)
 			setTimeout(() => {
@@ -321,7 +321,7 @@ export class Utils{
 		}
 
 		this.webSocket.onopen = () => {
-			console.log('Connection Established');
+			// console.log('Connection Established');
 			this.numAttempts = 0;
 		}
 	}

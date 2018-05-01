@@ -165,7 +165,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                 // item.modifiedShares = item.shares * Number(e.target.value);
                 // netAssetValue += (item.newShares * Number(e.target.value)) * item.price;
             } else {
-                console.log('Empty Units');
+                // console.log('Empty Units');
                 item.transactionalQuantity = item.newShares - item.shares;
             }
             return item;
@@ -197,7 +197,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -234,11 +234,11 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
     }
 
     datePickerOpened = e => {
-        console.log(e);
+        // console.log(e);
     }
 
     renderHeaderItem = (advice) => {
-        console.log(advice);
+        // console.log(advice);
         const profitOrLossColor = advice.profitLoss < 0 ? '#F44336' : '#4CAF50';
         const adviceChangeIconSrc = advice.hasChanged ? 'exclamation-circle' : 'check-circle';
         const adviceChangeIconColor = advice.hasChanged ? metricColor.neutral : metricColor.positive;

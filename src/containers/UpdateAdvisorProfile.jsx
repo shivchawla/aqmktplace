@@ -36,7 +36,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
     }
 
     componentDidMount() {
-        console.log(this.props.advisor);
+        // console.log(this.props.advisor);
         if (!Utils.isLoggedIn()){
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
@@ -103,15 +103,15 @@ class UpdateAdvisorProfileImpl extends React.Component {
     }
 
     resultCallback = response => {
-        console.log(response);
+        // console.log(response);
         this.props.form.setFieldsValue({linkedIn: response.values[0].publicProfileUrl});
-        console.log(response);
+        // console.log(response);
         this.setState({picUrl: response.values[0].pictureUrl})
     }
 
     updateUserProfile = () => {
         const url = `${requestUrl}/advisor/${this.props.advisorId}/profile`;
-        console.log('Data', this.processData());
+        // console.log('Data', this.processData());
         axios({
             method: 'PUT',
             url,
@@ -127,7 +127,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
         })
         .catch(error => {
             message.error('Error occured while updating profile');
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }

@@ -134,7 +134,7 @@ export class AqStockTableMod extends React.Component {
         let target = newData.filter(item => item.key === key)[0];
         if (target) {
             target[column] = value;
-            console.log('Target', target);
+            // console.log('Target', target);
             if(column === 'symbol') {
                 // target['tickerValidationtarget['shares'] = 1;
                 this.asyncGetTarget(value)
@@ -189,7 +189,7 @@ export class AqStockTableMod extends React.Component {
     getRowSelection = () => {
         return {
             onChange: (selectedRowKeys, selectedRows) => {
-                console.log(selectedRows);
+                // console.log(selectedRows);
                 this.setState((prevState) => {
                     return {
                         selectedRows

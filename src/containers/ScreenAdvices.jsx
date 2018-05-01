@@ -19,7 +19,7 @@ const antIcon = <Icon type="loading" style={{ fontSize: 18 }} spin />;
 
 const sortValues = ['name', 'updatedAt desc', 'subscribers', 'followers', 'rating'];
 
-export class ScreenAdvices extends React.PureComponent {
+export default class ScreenAdvices extends React.PureComponent {
     mounted = false;
     constructor(props) {
         super(props);
@@ -63,7 +63,7 @@ export class ScreenAdvices extends React.PureComponent {
 
     componentWillMount() {
         this.mounted = true;
-        console.log(this.state.selectedFilters);
+        // console.log(this.state.selectedFilters);
         if (!Utils.isLoggedIn()) {
             this.getDefaultAdvices();
             // Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -74,7 +74,7 @@ export class ScreenAdvices extends React.PureComponent {
     }
 
     componentWillUnmount() {
-        console.log('Component Unmounted');
+        // console.log('Component Unmounted');
         this.mounted = false;
     }
 
@@ -90,7 +90,7 @@ export class ScreenAdvices extends React.PureComponent {
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
-            console.log(error);
+            // console.log(error);
         })
         .finally(() => {
             this.setState({show: false, loading: false});
@@ -106,7 +106,7 @@ export class ScreenAdvices extends React.PureComponent {
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            console.log('Mounted', this.mounted);
+            // console.log('Mounted', this.mounted);
             if (this.mounted) {
                 this.setState({
                     advices: this.processAdvices(response.data.advices),
@@ -163,7 +163,7 @@ export class ScreenAdvices extends React.PureComponent {
     processAdvices = (responseAdvices) => {
         const advices = [];
         responseAdvices.map((advice, index) => {
-            console.log('Advice Item', advice);
+            // console.log('Advice Item', advice);
             advices.push({
                 isFollowing: advice.isFollowing || false,
                 id: advice._id || 0,
@@ -312,7 +312,7 @@ export class ScreenAdvices extends React.PureComponent {
             this.getAdvices();
             Utils.localStorageSave('selectedPage', page);
         })
-        console.log('Page', page);
+        // console.log('Page', page);
     }   
 
     renderPageContent = () => {

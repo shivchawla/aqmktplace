@@ -19,7 +19,7 @@ export class AdviceSortingMenu extends React.Component {
             this.props.updateAdvices(response.data);
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
         });
     }
 

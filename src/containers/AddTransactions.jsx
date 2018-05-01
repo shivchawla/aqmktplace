@@ -312,7 +312,7 @@ class AddTransactionsImpl extends React.Component {
                     }
                 })
                 .catch(error => {
-                    console.log(error);
+                    // console.log(error);
                     Utils.checkForInternet(error, this.props.history);
                     if(error.response) {
                         const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating portfolio');
@@ -844,7 +844,7 @@ class AddTransactionsImpl extends React.Component {
                     this.setState({advices: unionAdvices});
                 })
                 .catch(error => {
-                    console.log(error);
+                    // console.log(error);
                     Utils.checkForInternet(error, this.props.history);
                     if (error.response) {
                         Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -953,8 +953,8 @@ class AddTransactionsImpl extends React.Component {
     }
 
     componentWillUpdate(nextProps, nextState) {
-        console.log('Advices', nextState.advices);
-        console.log('Subscribed Advices', nextState.subscribedAdvices);
+        // console.log('Advices', nextState.advices);
+        // console.log('Subscribed Advices', nextState.subscribedAdvices);
     }
 
     renderPageContent = () => {

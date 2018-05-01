@@ -129,7 +129,7 @@ class SubscribedAdvicesImpl extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);

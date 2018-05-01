@@ -37,7 +37,7 @@ export class ChartTickerItem extends React.Component {
         const metricFontSize = this.props.watchlist ? '13px' : '13px';
         const nameSpan = this.props.watchlist ? 12 : 11;
         //const metricSpan = this.props.watchlist ? 9 : 11;
-        console.log(y);
+        // console.log(y);
         return(
             <Row 
                     className='ticker-row' 

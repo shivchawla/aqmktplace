@@ -24,7 +24,7 @@ export class HocExampleImpl extends React.Component {
    
     addTicker = (tickerName = this.state.tickerName) => {
         // const tickerName = name === undefined ? this.state.tickerName : name;
-        console.log(tickerName);
+        // console.log(tickerName);
         const series = [...this.state.series];
         getStockPerformance(tickerName)
         .then(performance => {

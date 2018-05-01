@@ -21,7 +21,7 @@ export class AqPortfolioSummary extends React.Component {
                 this.updateSeries(nextProps.series);
             }
         } else {
-            console.log('Same');
+            // console.log('Same');
         }
     }
 
@@ -51,7 +51,7 @@ export class AqPortfolioSummary extends React.Component {
                 composition: series,
             });
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         }
     }
 
@@ -100,7 +100,7 @@ export class AqPortfolioSummary extends React.Component {
                 </Row>
             );
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         }
     }
 

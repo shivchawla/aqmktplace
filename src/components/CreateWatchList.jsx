@@ -65,7 +65,7 @@ class CreateWatchListImpl extends React.Component {
     }
 
     handleNewSearch = query => {
-        console.log('Query', query);
+        // console.log('Query', query);
         if (this.mounted) {
             const url = `${requestUrl}/stock?search=${query}`;
             axios.get(url, {headers: Utils.getAuthTokenHeader()})
@@ -131,7 +131,7 @@ class CreateWatchListImpl extends React.Component {
             })
             .catch(error => {
                 message.error('Error occured while creating watchlist');
-                console.log(error);
+                // console.log(error);
                 if (error.response) {
                     Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                 }
@@ -164,7 +164,7 @@ class CreateWatchListImpl extends React.Component {
         try {
             this.setState({name: e.target.value});
         } catch(error) {
-            console.log(error);
+            // console.log(error);
         }
     }
 

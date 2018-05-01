@@ -116,7 +116,7 @@ export class HighChartNew extends React.Component {
                 this.updateSeries(nextProps.series);
             }
         } else {
-            console.log('Same');
+            // console.log('Same');
         }
     }
 
@@ -164,7 +164,7 @@ export class HighChartNew extends React.Component {
                 }
             });
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         }
     }
 

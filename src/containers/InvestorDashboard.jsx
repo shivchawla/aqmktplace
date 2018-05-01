@@ -18,7 +18,7 @@ const TabPane = Tabs.TabPane;
 const Option = Select.Option;
 const dateFormat = 'YYYY-MM-DD';
 
-export class InvestorDashboard extends React.Component {
+export default class InvestorDashboard extends React.Component {
     numberOfTimeSocketConnectionCalled = 1;
     mounted = false;
     constructor(props) {
@@ -235,7 +235,7 @@ export class InvestorDashboard extends React.Component {
             this.setUpSocketConnection();
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -268,7 +268,7 @@ export class InvestorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             reject(error);
         })
         .finally(() => {
@@ -308,7 +308,7 @@ export class InvestorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             reject(error);
         })
         .finally(() => {
@@ -552,7 +552,7 @@ export class InvestorDashboard extends React.Component {
             });
             return [{name: 'Chart Data', data: sectorData}];
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         }
         
     }
@@ -582,7 +582,7 @@ export class InvestorDashboard extends React.Component {
     
             return [{name: 'Chart Data', data: industryData}];
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         }
     }
 
@@ -625,7 +625,7 @@ export class InvestorDashboard extends React.Component {
                 composition: series,
             });
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         }
     }
 
@@ -734,7 +734,7 @@ export class InvestorDashboard extends React.Component {
                 </Row>
             );
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         }
     }
 
@@ -820,14 +820,14 @@ export class InvestorDashboard extends React.Component {
 
 
     subscribeToAllPortfolios = (portfolios = []) => {
-        console.log('Subscribing to all Portfolios');
+        // console.log('Subscribing to all Portfolios');
         portfolios.map(portfolio => {
             this.subscribeToPortfolio(portfolio.id);
         });
     }
 
     unSubscribeToAllPortfolios = (portfolios = []) => {
-        console.log('Un Subscribing to all portfolios');
+        // console.log('Un Subscribing to all portfolios');
         portfolios.map(portfolio => {
             this.unSubscribeToPortfolio(portfolio.id);
         });
@@ -840,7 +840,7 @@ export class InvestorDashboard extends React.Component {
     }
 
     unSubscribeToAllAdvices = (advices = []) => {
-        console.log('Un Subscribing to all Advices');
+        // console.log('Un Subscribing to all Advices');
         advices.map(advice => {
             this.unSubscribeToAdvice(advice.id);
         });
@@ -859,7 +859,7 @@ export class InvestorDashboard extends React.Component {
     processRealtimeMessage = msg => {
         if (this.mounted) {
             const realtimeData = JSON.parse(msg.data);
-            console.log(realtimeData);
+            // console.log(realtimeData);
             if (realtimeData.type === 'portfolio') {
                 const investorPortfolios = [...this.state.investorPortfolios];
                 const targetPortfolio = investorPortfolios.filter(portfolio => portfolio.id === realtimeData.portfolioId)[0];
@@ -904,7 +904,7 @@ export class InvestorDashboard extends React.Component {
     }
 
     unSubscribeToPortfolio = portfolioId => {
-        console.log('UnSubscription to portfolio ' + portfolioId);
+        // console.log('UnSubscription to portfolio ' + portfolioId);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -926,7 +926,7 @@ export class InvestorDashboard extends React.Component {
     }
 
     unSubscribeToAdvice = adviceId => {
-        console.log('UnSubscription to advice ' + adviceId);
+        // console.log('UnSubscription to advice ' + adviceId);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',

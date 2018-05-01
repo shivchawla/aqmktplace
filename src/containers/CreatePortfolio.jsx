@@ -13,4 +13,4 @@ export class CreatePortfolioImpl extends React.Component {
     }
 }
 
-export const CreatePortfolio = withRouter(CreatePortfolioImpl);
+export default withRouter(CreatePortfolioImpl);

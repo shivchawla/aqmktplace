@@ -35,7 +35,7 @@ class TokenUpdateImpl extends Component {
             })
           .then((response) => {
               Utils.setShouldUpdateToken(false);
-              console.log(Utils.getShouldUpdateToken());
+              // console.log(Utils.getShouldUpdateToken());
               if(response.data && response.data.token){
                 Utils.updateUserToken(response.data.token);
                 if (this.redirectUrl){
@@ -58,7 +58,7 @@ class TokenUpdateImpl extends Component {
 
   componentDidMount(){
     this._mounted = true;
-    // console.log(Utils.getShouldUpdateToken());
+    // // console.log(Utils.getShouldUpdateToken());
     if (Utils.getShouldUpdateToken() === 'true' ||
       Utils.getShouldUpdateToken() === true){
       this.updateToken();

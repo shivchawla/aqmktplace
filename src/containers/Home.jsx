@@ -19,7 +19,7 @@ import performance from '../assets/performance.svg';
 
 import '../css/home.css';
 
-export class Home extends React.Component { 
+export default class Home extends React.Component { 
     constructor(props) {
         super(props);
         this.state = {

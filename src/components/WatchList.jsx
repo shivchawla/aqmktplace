@@ -83,7 +83,7 @@ export class WatchListImpl extends React.Component {
                 this.props.getWatchlist(this.props.id);
             })
             .catch(error => {
-                console.log(error);
+                // console.log(error);
                 if (error.response) {
                     Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                 }
@@ -93,7 +93,7 @@ export class WatchListImpl extends React.Component {
     }
 
     deleteItem = name => {
-        console.log(name);
+        // console.log(name);
         const tickers = this.props.tickers.map(item => item.name);
         const newTickers = _.pull(tickers, name);
         const url = `${requestUrl}/watchlist/${this.props.id}`;
@@ -112,7 +112,7 @@ export class WatchListImpl extends React.Component {
             this.props.getWatchlist(this.props.id);
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             message.error(`Error occured while deleting ${name} from wishlist`);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);

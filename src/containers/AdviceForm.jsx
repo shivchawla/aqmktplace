@@ -237,7 +237,7 @@ export class AdviceFormImpl extends React.Component {
                 }
             );
 
-            console.log(tickers);
+            // console.log(tickers);
             
             var idx = tickers.map(item => item.name).indexOf("Advice");
             if (idx != -1) {
@@ -608,7 +608,7 @@ export class AdviceFormImpl extends React.Component {
 
     getDisabeldDate = current => {
         if (current) {
-            console.log(current.weekday());
+            // console.log(current.weekday());
         }
         return current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
     }

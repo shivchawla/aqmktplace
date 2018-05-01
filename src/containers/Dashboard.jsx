@@ -51,7 +51,7 @@ export class DashboardImpl extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error.message);
+            // console.log(error.message);
         })
     }
 
@@ -77,8 +77,8 @@ export class DashboardImpl extends React.Component {
     }
 
     // handleData = data => {
-    //     console.log('Called');
-    //     console.log(data);
+    //     // console.log('Called');
+    //     // console.log(data);
     // }
 
     render() {

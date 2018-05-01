@@ -68,7 +68,7 @@ export class AdviceFilterSideComponent extends React.Component {
             },
             [kvp[type]]: checkedValues.length === this.state.defaultFilters[type].length
         }, () => {
-            console.log(this.state.selectedFilters);
+            // console.log(this.state.selectedFilters);
             this.props.updateSelectedFilters(this.state.selectedFilters);
             Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
             // this.props.updateAdviceUrl(this.processUrl());
@@ -82,7 +82,7 @@ export class AdviceFilterSideComponent extends React.Component {
         const limit = this.state.limit;
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         const {netValue, sharpe, volatility, rating} = selectedFilters;
-        console.log('Net Value', netValue);
+        // console.log('Net Value', netValue);
         approved = _.join(approved, ',');
         personal = _.join(personal, ',');
         const url = `${requestUrl}/advice?&${this.props.selectedTab}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;

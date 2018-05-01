@@ -91,7 +91,7 @@ module.exports.getFirstMonday = function(offset) {
 		//return nextDate;
 	} else if(offset == "3M" || offset == "3m" || offset == "1Q" || offset == "1q") {
         var firstDateAfterThreeMonths = exports.getDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 3, 1));
-        console.log(firstDateAfterThreeMonths);
+        // console.log(firstDateAfterThreeMonths);
 		return exports.getLatestWeekday(firstDateAfterThreeMonths);
 		/*var lastMonday = _getLastMonday(firstDateAfterThreeMonths);
 		var nextDate = lastMonday;
@@ -120,10 +120,10 @@ module.exports.getNextWeekday = function(date) {
 	} else if (day == 5) { //Friday
 		date.setDate(date.getDate() + 3);
 	} else {
-        console.log(date);
+        // console.log(date);
 		date.setDate(date.getDate() + 1);
 	}
 
-    console.log(date);
+    // console.log(date);
 	return exports.getDate(date);
 };

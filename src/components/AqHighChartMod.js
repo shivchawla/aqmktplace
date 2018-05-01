@@ -93,7 +93,7 @@ export class AqHighChartMod extends React.Component {
             message.success(successMessage);
         })
         .catch(error => {
-            console.log(error.message);
+            // console.log(error.message);
             message.error('Error occurred while load initial benchmark');
         })
         .finally(() => {
@@ -109,19 +109,19 @@ export class AqHighChartMod extends React.Component {
             if (tickers.length === 1) {
                 const ticker = tickers[0];
                 if (series.length == 0) { // empty array
-                    console.log(ticker);
+                    // console.log(ticker);
                     this.addTickerToEmptyArray(ticker);
                 } else if (series.length == 1) { // series[0] should be updated
                     if (ticker.name.toUpperCase() !== legendItems[0].name) {
-                        console.log(ticker);
-                        console.log('series[0] should be updated');
+                        // console.log(ticker);
+                        // console.log('series[0] should be updated');
                         this.updateTicker(ticker);
                     }
                 } else { // Items more than 1, array should be destroyed and current ticker should be added
                     this.destroyAndAddTicker(ticker);
                 }
             } else if (tickers.length > legendItems.length) { // Item should be added
-                console.log("Item will be added");
+                // console.log("Item will be added");
                 // Check to see if the no. of tickers added is lesser than max count
                 if (legendItems.length < this.state.maxTickerCount) { 
                     this.addTickersToCompare(tickers);
@@ -143,7 +143,7 @@ export class AqHighChartMod extends React.Component {
             })
             .catch(error => {
                 message.error('Error occurred');
-                console.log(error);
+                // console.log(error);
             })
             .finally(() => {
                 this.setState({spinning: false});
@@ -167,7 +167,7 @@ export class AqHighChartMod extends React.Component {
             })
             .catch(error => {
                 message.error(error.message);
-                console.log(error);
+                // console.log(error);
             }) 
             .finally(() => {
                 this.setState({spinning: false});
@@ -190,7 +190,7 @@ export class AqHighChartMod extends React.Component {
             })
             .catch(error => {
                 message.error(error.message);
-                console.log(error);
+                // console.log(error);
             })
             .finally(() => {
                 this.setState({spinning: false});
@@ -212,7 +212,7 @@ export class AqHighChartMod extends React.Component {
                         this.addTickerToSeries(ticker, performance);
                     })
                     .catch(error => {
-                        console.log(error);
+                        // console.log(error);
                         message.error(error.message);
                     })
                     .finally(() => {
@@ -250,14 +250,14 @@ export class AqHighChartMod extends React.Component {
     }
 
     deleteTickerFromSeries = (ticker) => {
-        console.log('Deleting ' + ticker);
+        // console.log('Deleting ' + ticker);
         const legendItems = [...this.state.legendItems];
         const series = [...this.state.config.series];
         _.remove(series, item => item.name === ticker);
         _.remove(legendItems, item => item.name === ticker);
-        console.log(legendItems);
+        // console.log(legendItems);
         this.setState({config: {...this.state.config, series}, legendItems}, () => {
-            console.log(legendItems);
+            // console.log(legendItems);
         });
     }
 
@@ -334,7 +334,7 @@ export class AqHighChartMod extends React.Component {
 
     lodInitialBenchmarkPerformance = () => {
         const {tickers} = this.props;
-        console.log(tickers[0]);
+        // console.log(tickers[0]);
         const {config, legendItems} = this.state;
 
         return new Promise((resolve, reject) => {
@@ -353,7 +353,7 @@ export class AqHighChartMod extends React.Component {
                     });
                 })
                 .catch(error => {
-                    console.log(error);
+                    // console.log(error);
                     reject(error);
                 })
                 .finally(() => {

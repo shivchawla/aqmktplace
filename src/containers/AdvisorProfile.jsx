@@ -15,7 +15,7 @@ const {requestUrl, aimsquantToken} = require('../localConfig');
 const dateFormat = 'YYYY-MM-DD';
 const Option = Select.Option;
 
-export class AdvisorProfile extends React.Component {
+export default class AdvisorProfile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -153,7 +153,7 @@ export class AdvisorProfile extends React.Component {
             this.setState({advices: this.processAdvices(response.data.advices)});
         })
         .catch(error => {
-            console.log(error.response);
+            // console.log(error.response);
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 if (error.response.status === 400) {
@@ -174,7 +174,7 @@ export class AdvisorProfile extends React.Component {
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const {latestAnalytics = {}, user} = response.data;
-            console.log(latestAnalytics);
+            // console.log(latestAnalytics);
             this.setState({
                 advisor: response.data,
                 metrics: {
@@ -205,7 +205,7 @@ export class AdvisorProfile extends React.Component {
     processAdvices = (responseAdvices) => {
         const advices = [];
         responseAdvices.map((advice, index) => {
-            console.log('Advice Item', advice);
+            // console.log('Advice Item', advice);
             advices.push({
                 isFollowing: advice.isFollowing || false,
                 id: advice._id || 0,
@@ -240,7 +240,7 @@ export class AdvisorProfile extends React.Component {
             headers: Utils.getAuthTokenHeader()
         })
         .then(response => {
-            console.log(response.data);
+            // console.log(response.data);
             message.success('Success');
             this.getAdvisorSummary(false);
         })
@@ -304,11 +304,11 @@ export class AdvisorProfile extends React.Component {
     }
 
     error = (err, response, body) => {
-        console.log('ERROR [%s]', err);
+        // console.log('ERROR [%s]', err);
     }
 
     success = (data) => {
-        console.log(data);
+        // console.log(data);
     }
 
     updateAdvices = (advices) => {

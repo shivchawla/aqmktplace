@@ -84,7 +84,7 @@ export class AdviceFilterComponent extends React.Component {
             this.props.updateAdvices(response.data);
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
         });
     }
 
@@ -121,7 +121,7 @@ export class AdviceFilterComponent extends React.Component {
     }
 
     handleSliderChange = (value, type) => {
-        console.log(value);
+        // console.log(value);
         const selectedFilters = [...this.state.selectedFilters];
         const selectedRange = value.join(',');
         this.setState({

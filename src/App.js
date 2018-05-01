@@ -10,34 +10,34 @@ import TnC from './containers/TnC';
 import {LoginModal} from './components/LoginModal'; 
 import {AuthRoute} from './components/AuthRoute';
 import {
-    Dashboard, 
-    QuantResearch, 
-    StockResearch, 
-    ScreenAdvices, 
-    AdviceDetail, 
-    CreateAdvice, 
-    CreatePortfolio,
-    PortfolioDetail,
-    UpdateAdvice,
-    PortfolioAddTransactions,
-    InvestorDashboard,
-    AdvisorProfile,
-    AdvisorDashboard,
-    ScreenAdvisors,
     TokenUpdate,
-    Home,
     ForgotPassword, 
     AuthMessage
-} from './containers'; 
+} from './containers';
+
 import {PageNotFound, NoIternetAccess} from './components';
+import AppliedRoute from './components/AppliedRoute';
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
 import {Utils} from './utils';
 import {primaryColor} from './constants';
+import asyncComponent from './components/AsyncComponent';
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
 const {Header, Content} = Layout;
+const StockResearch = asyncComponent(() => import("./containers/StockResearch"));
+const InvestorDashboard = asyncComponent(() => import("./containers/InvestorDashboard"));
+const AdvisorDashboard = asyncComponent(() => import("./containers/AdvisorDashboard"));
+const PortfolioDetail = asyncComponent(() => import("./containers/PortfolioDetail"));
+const AdviceDetail = asyncComponent(() => import("./containers/AdviceDetail"));
+const CreatePortfolio = asyncComponent(() => import("./containers/CreatePortfolio"));
+const PortfolioAddTransactions = asyncComponent(() => import("./containers/PortfolioAddTransactions"));
+const CreateAdvice = asyncComponent(() => import("./containers/CreateAdvice"));
+const UpdateAdvice = asyncComponent(() => import("./containers/UpdateAdvice"));
+const ScreenAdvices = asyncComponent(() => import("./containers/ScreenAdvices"));
+const AdvisorProfile = asyncComponent(() => import("./containers/AdvisorProfile"));
+const Home = asyncComponent(() => import("./containers/Home"));
 
 class App extends React.Component {
     constructor(props) {
@@ -180,10 +180,8 @@ class App extends React.Component {
                         <Route exact={true} path='/home' component={Home} />
                         <Route exact={true} path='/' component={Home} />
                         <Route exact={true} path='/advice' component={ScreenAdvices} />
-                        <Route exact={true} path='/stockresearch' component={StockResearch} />
-                        {/* <Route exact={true} path='/login' component={LoginModal} /> */}
+                        <Route path="/stockresearch" exact component={StockResearch} />
                         <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                        <Route exact={true} path='/quantresearch' component={QuantResearch}/>
                         <Route exact={true} path='/advice/:id' component={AdviceDetail} />
                         <Route exact={true} path='/advisordashboard/createadvice' component={CreateAdvice} />
                         <Route exact={true} path='/investordashboard/createportfolio' component={CreatePortfolio} />
@@ -193,8 +191,6 @@ class App extends React.Component {
                         <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
                         <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} />
                         <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
-                        <Route exact={true} path='/advisordashboard/screenadvisors' component={ScreenAdvisors} />
-                        <Route exact={true} path='/dashboard' component={Dashboard} />
                         <Route path='/policy/policy' component={Policy} />
                         <Route path='/policy/tnc' component={TnC} />
                         <Route path='/forgotPassword' component={ForgotPassword} />

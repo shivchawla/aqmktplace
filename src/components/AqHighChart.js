@@ -59,7 +59,7 @@ export class AqHighChart extends React.Component {
         });
         highStockConfig.series = seriesData;
         this.setState({highStockConfig: _.cloneDeep(highStockConfig), tickerItems: props.series}, () =>{
-            console.log(this.state.tickerItems);
+            // console.log(this.state.tickerItems);
         });
     }
 

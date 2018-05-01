@@ -41,7 +41,7 @@ export class HighChartSpline extends React.Component {
             try {
                 this.updateSeries(nextProps.series);
             } catch(err) {
-                console.log(err);
+                // console.log(err);
             }
         }
     }
@@ -56,7 +56,7 @@ export class HighChartSpline extends React.Component {
         try {
             this.updateSeries(series);
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         } 
     }
 

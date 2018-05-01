@@ -139,8 +139,8 @@ export class AqStockTableCreatePortfolio extends React.Component {
     getRowSelection = () => {
         return {
             onChange: (selectedRowKeys, selectedRows) => {
-                console.log(selectedRows);
-                console.log(selectedRowKeys);
+                // console.log(selectedRows);
+                // console.log(selectedRowKeys);
                 this.setState(prevState => {
                     return {
                         selectedRows

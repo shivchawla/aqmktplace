@@ -160,13 +160,13 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
         let target = advices.filter(item => item.key === advice.key)[0];
         target['newUnits'] = e.target.value; 
         target.composition = target.composition.map((item, index) => {
-            console.log(e.target.value);
+            // console.log(e.target.value);
             if (e.target.value.length > 0) {
                 item.transactionalQuantity = item.newShares * Number(e.target.value) - item.shares;
                 // item.modifiedShares = item.shares * Number(e.target.value);
                 // netAssetValue += (item.newShares * Number(e.target.value)) * item.price;
             } else {
-                console.log('Empty Units');
+                // console.log('Empty Units');
                 item.transactionalQuantity = item.newShares - item.shares;
             }
             return item;
@@ -199,7 +199,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
             this.props.updateAdvices(advices);
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -236,7 +236,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
     }
 
     datePickerOpened = e => {
-        console.log(e);
+        // console.log(e);
     }
 
     renderHeaderItem = (advice) => {

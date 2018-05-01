@@ -334,12 +334,12 @@ class PortfolioDetailImpl extends React.Component {
             })
             .catch(error => {
                 Utils.checkForInternet(error, this.props.history);
-                console.log(error);
+                // console.log(error);
                 if (error.response) {
                     if (error.response.status === 400) {
                         this.setState({notAuthorized: true});
                     }
-                    console.log(error.message);
+                    // console.log(error.message);
                     Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                 }
             })
@@ -409,7 +409,7 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     unSubscribeToPortfolio = portfolioId => {
-        console.log('UnSubscription');
+        // console.log('UnSubscription');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -420,7 +420,7 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     subscribeToStock = ticker => {
-        console.log('Subscription Started for stock ' + ticker);
+        // console.log('Subscription Started for stock ' + ticker);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -431,7 +431,7 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     unSubscribeToStock = ticker => {
-        console.log('Unsubscription Started');
+        // console.log('Unsubscription Started');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -679,7 +679,7 @@ class PortfolioDetailImpl extends React.Component {
     }
 }
 
-export const PortfolioDetail =  withRouter(PortfolioDetailImpl);
+export default withRouter(PortfolioDetailImpl);
 
 const metricItemStyle = {
     padding: '10px'

@@ -7,7 +7,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
-import {UpdateAdvice} from './UpdateAdvice';
+import UpdateAdvice from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
@@ -98,7 +98,7 @@ class AdviceDetailImpl extends React.Component {
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -254,7 +254,7 @@ class AdviceDetailImpl extends React.Component {
                 positions: [],
                 series: []
             });
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 if (error.response.status === 400) {
                     this.setState({notAuthorized: true});
@@ -317,7 +317,7 @@ class AdviceDetailImpl extends React.Component {
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -344,7 +344,7 @@ class AdviceDetailImpl extends React.Component {
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -399,9 +399,9 @@ class AdviceDetailImpl extends React.Component {
             this.setState({userId});
         })
         .catch(error => {
-            console.log(error.message);
+            // console.log(error.message);
             if (error.response) {
-                console.log(error.response.status);
+                // console.log(error.response.status);
                 if (error.response.status === 400) {
                     this.setState({notAuthorized: true});
                 }
@@ -475,7 +475,7 @@ class AdviceDetailImpl extends React.Component {
     }
 
     unSubscribeToAdvice = adviceId => {
-        console.log('UnSubscription');
+        // console.log('UnSubscription');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -487,7 +487,7 @@ class AdviceDetailImpl extends React.Component {
     }
 
     subscribeToStock = ticker => {
-        console.log('Subscription Started');
+        // console.log('Subscription Started');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -498,7 +498,7 @@ class AdviceDetailImpl extends React.Component {
     }
 
     unSubscribeToStock = ticker => {
-        console.log('Unsubscription Started');
+        // console.log('Unsubscription Started');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -553,7 +553,7 @@ class AdviceDetailImpl extends React.Component {
     renderApprovalButtons = () => {
         const isAdmin = _.get(this.state, 'adviceDetail.isAdmin', false);
         const approvalStatus = _.get(this.state, 'adviceDetail.approvalStatus', 'pending');
-        console.log(isAdmin);
+        // console.log(isAdmin);
         if (isAdmin && approvalStatus !== 'approved') {
             return (
                 <React.Fragment>
@@ -634,7 +634,7 @@ class AdviceDetailImpl extends React.Component {
         const url = `${requestUrl}/advice/${this.props.match.params.id}/approve`;
         this.setState({approvalLoading: false});
         const data = this.state.approveObj;
-        console.log(data);
+        // console.log(data);
         axios({
             url,
             method: 'POST',
@@ -651,7 +651,7 @@ class AdviceDetailImpl extends React.Component {
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
             message.error('Error Occured');
-            console.log(error);
+            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -741,7 +741,7 @@ class AdviceDetailImpl extends React.Component {
     }
 
     updateTicker = record => {
-        console.log(record);
+        // console.log(record);
         this.setState({stockResearchModalTicker: record}, () => {
             this.toggleModal();
         });
@@ -929,7 +929,7 @@ class AdviceDetailImpl extends React.Component {
     }
 }
 
-export const AdviceDetail = withRouter(AdviceDetailImpl);
+export default withRouter(AdviceDetailImpl);
 
 const cardItemStyle = {
     border: '1px solid #444'

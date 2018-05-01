@@ -29,7 +29,7 @@ export const stockTable = (state = initialState, action) => {
             return state.update('transactionData', transactionData => transactionData.push(action.payload));
 
         case "UPDATE_TRANSACTION":
-            console.log(action.payload.key);
+            // console.log(action.payload.key);
             return state.updateIn(['transactionData', action.payload.key], item => item.mergeDeep(action.payload));
 
         case "ADD_HIGHSTOCK_SERIES":

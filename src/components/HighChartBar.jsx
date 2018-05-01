@@ -91,7 +91,7 @@ export class HighChartBar extends React.Component {
 
     componentDidMount() {
         this.initializeChart();
-        console.log('Categories', this.props.categories);
+        // console.log('Categories', this.props.categories);
     }
 
     componentWillReceiveProps(nextProps, nextState) {
@@ -100,7 +100,7 @@ export class HighChartBar extends React.Component {
                 this.updateDollarSeries(nextProps.dollarSeries);
                 this.updatePercentageSeries(nextProps.percentageSeries)
             } catch(err) {
-                console.log(err);
+                // console.log(err);
             }
         }
     }
@@ -118,7 +118,7 @@ export class HighChartBar extends React.Component {
             this.updateDollarSeries(dollarSeries);
             this.updatePercentageSeries(percentageSeries)
         } catch(err) {
-            console.log(err);
+            // console.log(err);
         } 
     }
 
@@ -126,7 +126,7 @@ export class HighChartBar extends React.Component {
         if (series.length > 0) {
             this.clearDollarSeries();
             const categories = series.map(item => item.name);
-            console.log('Categories', categories);
+            // console.log('Categories', categories);
             series.map((item, index) => {
                 this.dollarChart.addSeries({
                     name: item.name,

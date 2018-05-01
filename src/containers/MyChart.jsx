@@ -79,7 +79,7 @@ export class MyChart extends React.Component {
                 point: {
                     events: {
                         mouseOver: (e) =>  {
-                            // console.log(e.target.series.name);
+                            // // console.log(e.target.series.name);
                             const legendItems = [...this.state.legendItems];
                             const legendIndex = _.findIndex(legendItems, legend => legend.name.toUpperCase() === e.target.series.name.toUpperCase());
                             legendItems[legendIndex].x = moment(e.target.x).format('YYYY-MM-DD');
@@ -161,8 +161,8 @@ export class MyChart extends React.Component {
     }
 
     updateSeries = (series) => {
-        console.log(this.chart.series);
-        console.log(series);
+        // console.log(this.chart.series);
+        // console.log(series);
     }
 
     addItemToLegend = series => {
@@ -210,7 +210,7 @@ export class MyChart extends React.Component {
     }
 
     addItem = () => {
-        console.log(this.chart.series);
+        // console.log(this.chart.series);
     }
 
     render() {

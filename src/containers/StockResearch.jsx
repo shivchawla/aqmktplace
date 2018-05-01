@@ -104,7 +104,7 @@ class StockResearchImpl extends React.Component {
         let tickers = [];
         tickers.push({name: value, destroy: true});
         this.setState({tickers, show: true});
-        //console.log('Initial Call' , initialCall);
+        //// console.log('Initial Call' , initialCall);
         if (initialCall === false) {
             //this.unSubscribeToStock(this.state.latestDetail.ticker);
         }
@@ -186,7 +186,7 @@ class StockResearchImpl extends React.Component {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
             if (!this.props.openAsDialog) {
-                //console.log("Downloading Watchlists");
+                //// console.log("Downloading Watchlists");
                 this.getWatchlists();
                 this.onSelect("NIFTY_50", true);
             } else {
@@ -271,19 +271,19 @@ class StockResearchImpl extends React.Component {
     }
 
     setUpSocketConnection = () => {
-        //console.log("Setting up connection");
+        //// console.log("Setting up connection");
         Utils.webSocket.onopen = () => {
-            //console.log("On Open - Stock Research");
+            //// console.log("On Open - Stock Research");
             Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takeAction();
             clearInterval(this.interval);
         }
 
         Utils.webSocket.onclose = () => {
-            //console.log("On Close - Stock Research");
+            //// console.log("On Close - Stock Research");
             this.interval = setInterval(function() {
-                //console.log("Reconnecting handler");
-                //console.log(Utils.webSocket.readyState);
+                //// console.log("Reconnecting handler");
+                //// console.log(Utils.webSocket.readyState);
                 Utils.webSocket.onopen = () => {
                     Utils.webSocket.onmessage = this.processRealtimeMessage;
                     this.takeAction();
@@ -296,10 +296,10 @@ class StockResearchImpl extends React.Component {
     }
 
     takeAction = () => {
-        //console.log(`Taking Action: ${this.mounted}`);
+        //// console.log(`Taking Action: ${this.mounted}`);
         if (this.mounted) {
-            //console.log(this.state.latestDetail.ticker);
-            //console.log(this.state.selectedWatchlistTab);
+            //// console.log(this.state.latestDetail.ticker);
+            //// console.log(this.state.selectedWatchlistTab);
 
             this.subscribeToStock(this.state.latestDetail.ticker);
             this.subscribeToWatchList(this.state.selectedWatchlistTab);
@@ -312,7 +312,7 @@ class StockResearchImpl extends React.Component {
     }
 
     processRealtimeMessage = msg => {
-        //console.log(msg);
+        //// console.log(msg);
         if (this.mounted) {
             try {
                 const realtimeResponse = JSON.parse(msg.data);
@@ -356,7 +356,7 @@ class StockResearchImpl extends React.Component {
     }
 
     subscribeToStock = ticker => {
-        //console.log(`Subscription Started for ${ticker}`);
+        //// console.log(`Subscription Started for ${ticker}`);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -367,7 +367,7 @@ class StockResearchImpl extends React.Component {
     }
 
     unSubscribeToStock = ticker => {
-        //console.log(`Unsubscription Started for ${ticker}`);
+        //// console.log(`Unsubscription Started for ${ticker}`);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -378,7 +378,7 @@ class StockResearchImpl extends React.Component {
     }
 
     subscribeToWatchList = watchListId => {
-        //console.log(`Subscription Started to Watchlist: ${watchListId}`);
+        //// console.log(`Subscription Started to Watchlist: ${watchListId}`);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -389,7 +389,7 @@ class StockResearchImpl extends React.Component {
     }
 
     unsubscribeToWatchlist = watchListId => {
-        //console.log('Un Subscription Started');
+        //// console.log('Un Subscription Started');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -414,7 +414,7 @@ class StockResearchImpl extends React.Component {
             this.subscribeToWatchList(this.state.selectedWatchlistTab);
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -440,7 +440,7 @@ class StockResearchImpl extends React.Component {
             this.setState({watchlists});
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -508,7 +508,7 @@ class StockResearchImpl extends React.Component {
             this.toggleDeleteModalVisible();
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
             message.error('Error occured while deleting watchlist. Please try again');
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
@@ -730,7 +730,7 @@ class StockResearchImpl extends React.Component {
     }
 }
 
-export const StockResearch = withRouter(StockResearchImpl);
+export default withRouter(StockResearchImpl);
 
 const metricStyle = {
     // marginTop: '20px',

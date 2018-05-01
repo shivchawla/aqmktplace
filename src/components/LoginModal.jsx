@@ -41,7 +41,7 @@ export class LoginModal extends React.Component {
               }
         })
         .catch(err => {
-            console.log(err);
+            // console.log(err);
         });
     }
 
