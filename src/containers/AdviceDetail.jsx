@@ -222,26 +222,28 @@ class AdviceDetailImpl extends React.Component {
     getAdviceData = (startDate = moment().format('YYYY-MM-DD')) => {
         const adviceId = this.props.match.params.id;
         const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
+        const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
         this.setState({show: true});
         
-        return fetchAjax(adviceSummaryUrl) 
-        .then(adviceSummaryResponse => {
+        return Promise.all([
+            fetchAjax(adviceSummaryUrl),
+            fetchAjax(advicePerformanceUrl)
+        ]) 
+        .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
             this.getAdviceSummary(adviceSummaryResponse);
+            this.getAdvicePerformance(advicePerformanceResponse);
+            
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
             //ADVICE SUMMARY IN BACKEND first calculated full performance
             //With the right output from backend, this call (advice performance) can be
             //made redundant 
-            const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
-            const authorizedToViewPortfolio = this.state.isSubscribed || this.state.isOwner || this.state.isAdmin;
-
-            return Promise.all([
-                fetchAjax(advicePerformanceUrl),
-                authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null,
-            ]); 
-        })
-        .then(([advicePerformanceResponse, advicePortfolioResponse])  => {
             
-            this.getAdvicePerformance(advicePerformanceResponse);
+            const adviceDetail = this.state.adviceDetail;
+            const authorizedToViewPortfolio = adviceDetail.isSubscribed || adviceDetail.isOwner || adviceDetail.isAdmin;
+
+            return authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null;
+        })
+        .then(advicePortfolioResponse  => {
 
             let positions = [];
             if (advicePortfolioResponse) {
@@ -319,7 +321,7 @@ class AdviceDetailImpl extends React.Component {
     };
 
     subscribeAdvice = () => {
-        const url = `${requestUrl}/advice/${this.props.match.params.id}`;
+        
         this.setState({disableSubscribeButton: true});
         axios({
             method: 'POST',
@@ -329,11 +331,18 @@ class AdviceDetailImpl extends React.Component {
         .then(response => {
             this.toggleDialog();
             // this.getAdviceData();
-            message.success('Success');
-            return axios.get(url, {headers: Utils.getAuthTokenHeader()})
+            //message.success('Success');
+            const portfolioUrl = `${requestUrl}/advice/${this.props.match.params.id}/portfolio`;
+            const summaryUrl = `${requestUrl}/advice/${this.props.match.params.id}`;
+
+            return Promise.all([
+                fetchAjax(portfolioUrl),
+                fetchAjax(summaryUrl)
+            ]);
         })
-        .then(response => {
-            this.getAdviceSummary(response);
+        .then(([advicePortfolioResponse, adviceSummaryResponse]) => {
+            this.getAdviceDetail(advicePortfolioResponse);
+            this.getAdviceSummary(adviceSummaryResponse);
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
@@ -717,17 +726,17 @@ class AdviceDetailImpl extends React.Component {
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
                                 onClick={this.toggleDialog}
-                                style={{width: 170}}
+                                style={{width: 190}}
                                 type="primary"
                                 disabled={this.state.disableSubscribeButton}
                         >
-                            {!this.state.adviceDetail.isSubscribed ? "SUBSCRIBE" : "UNSUBSCRIBE"}
+                            {!this.state.adviceDetail.isSubscribed ? "PURCHASE ADVICE" : "CANCEL SUBSCRIPTION"}
                         </Button>
                     </Col>
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
                                 onClick={this.followAdvice}
-                                style={{width: 170, marginTop: 10}}
+                                style={{width: 190, marginTop: 10}}
                                 disabled={this.state.disableFollowButton}
                         >
                             {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
@@ -741,12 +750,12 @@ class AdviceDetailImpl extends React.Component {
                     <Col span={24} style={{textAlign: 'right'}}>
                         {
                             !this.state.adviceDetail.isPublic
-                            && <Button onClick={this.makeAdvicePublic} style={{width: 150}} type="primary">Publish</Button>}
+                            && <Button onClick={this.makeAdvicePublic} style={{width: 180}} type="primary">POST TO MARKETPLACE</Button>}
                     </Col>
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
                                 onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
-                                style={{width: 150, marginTop: 10}}
+                                style={{width: 180, marginTop: 10}}
                         >
                             Update Advice
                         </Button>
@@ -798,7 +807,7 @@ class AdviceDetailImpl extends React.Component {
                 : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
 
 
-        const defaultActiveKey = this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner ? ["2"] : ["3"];
+        const defaultActiveKey = this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner ? ["2","3"] : ["3"];
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />

@@ -79,7 +79,7 @@ export default class ScreenAdvices extends React.PureComponent {
     }
 
     getDefaultAdvices = () => {
-        const url = `https://developapi.aimsquant.com/api/v2/advice_default`;
+        const url = `${requestUrl}/advice_default`;
         this.setState({show: true});
         axios.get(url)
         .then(response => {

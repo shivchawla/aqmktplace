@@ -259,16 +259,14 @@ class AdviceListItemImpl extends React.PureComponent {
                             <Row>
                                 <h3 style={{fontSize: '18px'}}>{name}</h3>
                             </Row>
-                            <Row
-                                    onClick={e => {
+                            <Row>
+                                <h3 style={{fontSize: '14px'}}>
+                                    By
+                                    <span id ="advisorName" style={{color: primaryColor}}
+                                        onClick={e => {
                                         e.stopPropagation();
-                                        this.props.history.push(`/advisordashboard/advisorprofile/${advisorId}`)
-                                    }}
-                            >
-                                <h3 
-                                        style={{fontSize: '14px'}}
-                                >
-                                    By <span style={{color: primaryColor}}>{advisorName}</span>
+                                        this.props.history.push(`/advisordashboard/advisorprofile/${advisorId}`)}}>{` ${advisorName}`}
+                                    </span>
                                 </h3>
                             </Row>
                             {

@@ -212,13 +212,18 @@ export class AdviceFormImpl extends React.Component {
               exchange: "NSE"
             }
         };
-        axios({
-            headers: Utils.getAuthTokenHeader(),
-            data: requestData,
-            method: 'POST',
-            url
-        })
-        .then(response => {
+        
+
+        const hasBenchmarkData = this.state.tickers && this.state.tickers[1].data && this.state.tickers[1].data.length > 0;
+        Promise.all([
+            axios({
+                headers: Utils.getAuthTokenHeader(),
+                data: requestData,
+                method: 'POST',
+                url
+            }), !hasBenchmarkData ? getStockPerformance(this.state.selectedBenchmark) : null
+        ])
+        .then(([response, benchmarkPerformanceData]) => {
             let performance = _.get(response.data, 'portfolioPerformance.portfolioValues', []).map(
                 item => {
                     return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))]
@@ -243,6 +248,10 @@ export class AdviceFormImpl extends React.Component {
             if (idx != -1) {
                 tickers[idx].data = performance;
             } 
+
+            if(benchmarkPerformanceData) {
+                tickers[1].data = benchmarkPerformanceData;
+            }
 
             this.setState({tickers, compositionSeries: series});
         })
@@ -388,6 +397,8 @@ export class AdviceFormImpl extends React.Component {
                     onOk={this.toggleAddTickerModal}
                     onCancel={this.toggleAddTickerModal}
                     width={980}
+                    bodyStyle={{height: 'calc(100vh - 100px)', overflow: 'hidden', overflowY: 'scroll'}}
+                    style={{top: 20}}
                     footer={null}
             >
                 <Row type="flex">
@@ -418,39 +429,45 @@ export class AdviceFormImpl extends React.Component {
         const series = [...this.state.compositionSeries];
         return (
             <Tabs animated={false} defaultActiveKey="2">
-                <TabPane key="1" tab="Overview" style={{padding: '0 10px'}}>
+                <TabPane key="1" tab="Portfolio" style={{padding: '0 15px 20px 15px'}}>
+                    {this.getVerifiedTransactions().length > 0 ?
+                        <Row>
+                            <Col span={16}>
+                                {this.renderPortfolioTable()}
+                            </Col>
+                        
+                            <Col span={8}>
+                                <Row>
+                                    <Col span={24}>
+                                        <h4 style={{textAlign: 'center', fontSize: '16px'}}>Composition</h4>
+                                    </Col>
+                                </Row>
+                                <Row style={{marginLeft: '10px'}}>
+                                    {
+                                        series.length > 0 && series[0].data.length > 0 && series[0].data[0].y > 0 &&
+                                        <HighChartNew series={series}/>
+                                    }
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        : this.renderEmptyAdviceBox()
+                    }
+                </TabPane>
+
+                <TabPane key="2" tab="Performance" style={{padding: '0 10px'}}>
                     {
                         this.getVerifiedTransactions().length > 0
                         ?   <Row type="flex" justfy="center" align="middle">
-                                <Col span={16}>
+                                <Col span={24}>
                                     <MyChartNew series={this.state.tickers}/>
                                 </Col>
-                                <Col span={8}>
-                                    <Row>
-                                        <Col span={24}>
-                                            <h4 style={{textAlign: 'center', fontSize: '16px'}}>Composition</h4>
-                                        </Col>
-                                    </Row>
-                                    <Row style={{marginLeft: '10px'}}>
-                                        {
-                                            series.length > 0 &&series[0].data.length > 0 && series[0].data[0].y > 0 &&
-                                            <HighChartNew series={series}/>
-                                        }
-                                    </Row>
-                                </Col>
+                                
                             </Row>
                         : this.renderEmptyAdviceBox()
                     }
                 </TabPane>
-                <TabPane key="2" tab="Portfolio" style={{padding: '0 15px 20px 15px'}}>
-                    <Col span={24}>
-                        {
-                            this.getVerifiedTransactions().length > 0 
-                            ? this.renderPortfolioTable()
-                            : this.renderEmptyAdviceBox()
-                        }
-                    </Col>
-                </TabPane>
+                
             </Tabs>
         );
     }
@@ -463,11 +480,13 @@ export class AdviceFormImpl extends React.Component {
             netValue+=transaction.totalValue;
         });
 
-        var netValueValid = netValue <= this.state.maxNotional * 1.05;
+        /*var netValueValid = netValue <= this.state.maxNotional * 1.05;
         const netValueValidIconSrc = !netValueValid ? 'exclamation-circle' : 'check-circle';
-        const netValueValidIconColor = !netValueValid ? metricColor.negative : metricColor.positive;
+        const netValueValidIconColor = !netValueValid ? metricColor.negative : metricColor.positive;    
+        const tooltipText = netValueValid ? "Advice value within Max. National" : "Advice value exceeds Max. National by more than 5%"*/
 
-        const tooltipText = netValueValid ? "Advice value within Max. National" : "Advice value exceeds Max. National by more than 5%"
+        const netValueValidIconColor = metricColor.neutral;
+
         const data = verifiedTransactions.map(transaction => {
             return {
                 ...transaction,
@@ -482,12 +501,12 @@ export class AdviceFormImpl extends React.Component {
                     <div style={{textAlign: 'left', marginBottom: '5px', fontSize: '16px'}}>
                         Total Advice Value: 
                         <span style={{color: netValueValidIconColor, marginLeft: '5px'}}>{Utils.formatMoneyValueMaxTwoDecimals(netValue)}</span> 
-                        <Tooltip title={tooltipText}>
+                        {/*<Tooltip title={tooltipText}>
                             <Icon 
                                 type={netValueValidIconSrc} 
                                 style={{fontSize: '20px', marginLeft: '10px', color: netValueValidIconColor}}
                             />
-                        </Tooltip>
+                        </Tooltip>*/}
                     </div>
                 </Row>
                 <Row>
@@ -537,16 +556,17 @@ export class AdviceFormImpl extends React.Component {
             }, () => {
                 if (this.state.isOwner) {
                     const benchmarkTicker = _.get(response.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
-                    // getStockPerformance(benchmarkTicker)
-                    // .then(performance => {
-                    tickers[1] = {
-                        name: benchmarkTicker,
-                        data: performance,
-                        color: benchmarkColor
-                    };
+                    
+                    getStockPerformance(benchmarkTicker)
+                    .then(performance => {
+                        tickers[1] = {
+                            name: benchmarkTicker,
+                            data: performance,
+                            color: benchmarkColor
+                        };
 
-                    this.setState({tickers});
-                    // });
+                        this.setState({tickers});
+                    });
                 }
             });
             if (isOwner) {
@@ -606,10 +626,7 @@ export class AdviceFormImpl extends React.Component {
         return totalValue;
     }
 
-    getDisabeldDate = current => {
-        if (current) {
-            // console.log(current.weekday());
-        }
+    getDisabledDate = current => {
         return current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
     }
 
@@ -631,12 +648,12 @@ export class AdviceFormImpl extends React.Component {
                 this.getAdvice(this.props.adviceId);
             } else {
                 const tickers = [...this.state.tickers];
-                // getStockPerformance(this.state.selectedBenchmark)
-                // .then(performance => {
-                tickers[1].name = this.state.selectedBenchmark,
-                this.setState({tickers});
-                //     this.setState({tickers});
-                // });
+                
+                getStockPerformance(this.state.selectedBenchmark)
+                .then(performance => {
+                    tickers[1].name = this.state.selectedBenchmark,
+                    this.setState({tickers});
+                });
             }
         }
     }
@@ -664,20 +681,18 @@ export class AdviceFormImpl extends React.Component {
                     <AqPageHeader title={this.props.isUpdate ? "Update Advice" : "Create Advice"} breadCrumbs={breadCrumbs}/>
                     <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
                         <Button 
-                                style={buttonStyle} 
-                                type="primary" 
-                                onClick={this.handleSubmit} 
-                        >
-                            Save
+                            style={{...buttonStyle, width: '200px'}} 
+                            type="primary" 
+                            onClick={this.handleSubmit}>
+                        {this.props.isUpdate ? "UPDATE ADVICE" : "POST TO MARKETPLACE"}
                         </Button>
-                        <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
                     </Col>
                     <Col xl={18} lg={18} md={24}>
                         <Form onSubmit={this.handleSubmit}>
                             <Row>
                                 <Col span={24} style={{...shadowBoxStyle, padding: '20px', margin: '20px 0', marginBottom:'20px', minHeight: '600px'}}>
                                     <Row>
-                                        <Col span={12}>
+                                        <Col span={24}>
                                             <Row>
                                                 <Col span={24}>
                                                     <h3 style={inputHeaderStyle}>
@@ -716,14 +731,15 @@ export class AdviceFormImpl extends React.Component {
                                                 </Col>
                                             </Row>
                                         </Col>
-                                        <Col span={11} offset={1}>
-                                            <Row>
+
+                                        <Col span={24}>
+                                            {/*<Row>
                                                 <Col span={24}>
                                                     <h3 style={inputHeaderStyle}>Settings</h3>
                                                 </Col>
-                                            </Row>
-                                            <Row type="flex" justify="space-between">
-                                                <Col span={11} style={{marginTop: '10px'}}>
+                                            </Row>*/}
+
+                                                {/*<Col span={11} style={{marginTop: '10px'}}>
                                                     <h4 style={labelStyle}>Max Notional</h4>
                                                     {
                                                         this.renderMenu(
@@ -732,8 +748,9 @@ export class AdviceFormImpl extends React.Component {
                                                             this.state.maxNotional
                                                         )
                                                     }
-                                                </Col>
-                                                <Col span={11} offset={2} style={{marginTop: '10px'}}>
+                                                </Col>*/}
+                                            <Row style={{marginTop: '10px'}}>
+                                                <Col span={8} >
                                                     <h4 style={labelStyle}>Rebalancing Freq.</h4>
                                                     {
                                                         this.renderMenu(
@@ -743,23 +760,23 @@ export class AdviceFormImpl extends React.Component {
                                                         )
                                                     }
                                                 </Col>
-                                                <Col span={11} style={{marginTop: '20px'}}>
+
+                                                <Col span={8} >
                                                     <h4 style={labelStyle}>Start Date</h4>
                                                     <FormItem>
                                                         {getFieldDecorator('startDate', {
                                                             rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
                                                         })(
                                                             <DatePicker 
-                                                                // onChange={this.onStartDateChange} 
                                                                 format={dateFormat}
                                                                 style={{...inputStyle, width: 150}}
-                                                                // disabled={this.state.isPublic}
-                                                                disabledDate={this.getDisabeldDate}
+                                                                disabledDate={this.getDisabledDate}
                                                             /> 
                                                         )}
                                                     </FormItem>
                                                 </Col>
-                                                <Col span={11} offset={2} style={{marginTop: '20px'}}>
+
+                                                <Col span={8} >
                                                     <h4 style={labelStyle}>Benchmark</h4>
                                                     {
                                                         this.renderMenu(
@@ -772,16 +789,25 @@ export class AdviceFormImpl extends React.Component {
                                             </Row>
                                         </Col>
                                     </Row>
-                                    <Row style={{marginBottom: '10px', marginTop: '20px'}}>
+                                    {/*<Row style={{marginBottom: '10px', marginTop: '20px'}}>
                                         <Col span={24} style={{textAlign: 'right'}}>
                                             <Button onClick={this.toggleAddTickerModal} type="primary">
                                                 {buttonText}
                                             </Button>
                                         </Col>
-                                    </Row>
+                                    </Row>*/}
                                     <Row>
-                                        <Col style={{border:' 1px solid #eaeaea'}}>
-                                            <Row> <h3 style={{padding: '10px'}}>Preview</h3></Row>
+                                        <Col style={{border:' 1px solid #eaeaea', marginTop: '20px'}}>
+                                            <Row style={{padding: '10px'}}> 
+                                                <Col span={8}>
+                                                    <h3>Preview</h3>
+                                                </Col>
+                                                <Col span={16} style={{textAlign: 'right'}}>
+                                                    <Button onClick={this.toggleAddTickerModal} type="primary">
+                                                        {buttonText}
+                                                    </Button>
+                                                </Col>
+                                            </Row>
                                             <Row >{this.renderPortfolioDetailsTabs()}</Row>
                                         </Col>
                                     </Row>
@@ -793,15 +819,12 @@ export class AdviceFormImpl extends React.Component {
                         <Row>
                             <Col span={24}>
                                 <Button 
-                                        style={buttonStyle} 
+                                        style={{...buttonStyle, width: '200px'}}
                                         type="primary" 
                                         onClick={this.handleSubmit} 
                                 >
-                                    Save
+                                {this.props.isUpdate ? "UPDATE ADVICE" : "POST TO MARKETPLACE"}
                                 </Button>
-                            </Col>
-                            <Col span={24}>
-                                <Button style={buttonStyle} onClick={() => {this.props.history.goBack()}}>Cancel</Button>
                             </Col>
                         </Row>
                     </Col>

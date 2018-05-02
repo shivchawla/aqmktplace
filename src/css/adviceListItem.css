@@ -11,3 +11,7 @@
 .advice-card:hover {
     box-shadow: 0 6px 10px rgba(171, 171, 171, 50);
 }
+
+#advisorName:hover {
+	text-decoration: underline;
+}
