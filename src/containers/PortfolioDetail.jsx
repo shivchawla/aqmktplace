@@ -9,7 +9,7 @@ import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Too
 import {ForbiddenAccess, StockResearchModal, WatchList, AqRate} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
-import {loadingColor, pageTitleStyle, metricColor, cashStyle} from '../constants';
+import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor} from '../constants';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
 import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio} from '../utils';
@@ -246,6 +246,7 @@ class PortfolioDetailImpl extends React.Component {
                 if (response.data.benchmark) {
                     tickers.push({ // Pushing data to get the benchmark performance to performance graph
                         name: response.data.benchmark.ticker,
+                        color: benchmarkColor,
                     });
                 }
                 pnlStats = _.get(response.data, 'pnlStats', {});
@@ -268,19 +269,29 @@ class PortfolioDetailImpl extends React.Component {
             })
             .then(response => { // Getting Portfolio Performance
                 const colorData = generateColorData(positions);
-                let performanceSeries = [];
-                if (response.data.simulated !== undefined) {
-                    performanceSeries = _.get(response.data, 'simulated.portfolioValues', []).map((item, index) => {
+                let simulatedPerformanceSeries = [];
+                let truePerformanceSeries = [];
+                if (response.data.simulated) {
+                    simulatedPerformanceSeries = _.get(response.data, 'simulated.portfolioValues', []).map((item, index) => {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue];
                     });
-                } else {
-                    performanceSeries = _.get(response.data, 'current.portfolioValues', []).map((item, index) => {
+                }
+
+                if (response.data.current){
+                    truePerformanceSeries = _.get(response.data, 'current.portfolioValues', []).map((item, index) => {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue];
                     });
                 }
                 tickers.push({ // Pushing advice performance to performance graph
-                    name: 'Portfolio',
-                    data: performanceSeries
+                    name: 'PORTFOLIO (True)',
+                    data: truePerformanceSeries,
+                    color: '#0082c8', //'#e6194b','#3cb44b''
+                });
+
+                tickers.push({ // Pushing advice performance to performance graph
+                    name: 'PORTFOLIO (Simulated)',
+                    data: simulatedPerformanceSeries,
+                    color: '#3cb44b',
                 });
 
                 const portfolioMetrics = Object.assign(_.get(response.data, 'summary.current', {}), pnlStats);

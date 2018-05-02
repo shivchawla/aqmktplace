@@ -11,7 +11,7 @@ import UpdateAdvice from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
-import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal} from '../utils';
+import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax} from '../utils';
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
@@ -187,7 +187,7 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
-    getAdvicePerformance = (response, series = []) => {
+    getAdvicePerformance = (response) => {
         const tickers = [...this.state.tickers];
         if (response.data.simulated) {
             tickers.push({
@@ -212,41 +212,61 @@ class AdviceDetailImpl extends React.Component {
         })
     }
 
+
+    //THIS IS BUGGY - 02/05/2018
+    //ADVICE PORTFOLIO IS FETCHED ONLY WHEN USER IS AUTHORIZED
+    //Also, choose the right variable name
+    //Just "response" is a poor name, 
+    //Choose adviceSummaryResponse or advicePortfolioResponse etc.
+    
     getAdviceData = (startDate = moment().format('YYYY-MM-DD')) => {
         const adviceId = this.props.match.params.id;
-        const url = `${requestUrl}/advice/${adviceId}`;
-        const performanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
-        let positions = [];
+        const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
         this.setState({show: true});
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
-        .then(response => {
-            this.getAdviceSummary(response);
-            return axios.get(`${url}/portfolio?date=${startDate}`, {headers: Utils.getAuthTokenHeader()});
+        
+        return fetchAjax(adviceSummaryUrl) 
+        .then(adviceSummaryResponse => {
+            this.getAdviceSummary(adviceSummaryResponse);
+            const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
+            //ADVICE SUMMARY IN BACKEND first calculated full performance
+            //With the right output from backend, this call (advice performance) can be
+            //made redundant 
+            const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
+            const authorizedToViewPortfolio = this.state.isSubscribed || this.state.isOwner || this.state.isAdmin;
+
+            return Promise.all([
+                fetchAjax(advicePerformanceUrl),
+                authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null,
+            ]); 
         })
-        .then(response => {
-            this.getAdviceDetail(response);
-            positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
-            return axios.get(performanceUrl, {headers: Utils.getAuthTokenHeader()});
-        })
-        .then(response => {
-            const series = [];
-            const colorData = generateColorData(positions);
-            const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition', []).map((item, index) =>{
-                return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
-            });
-            const constituentDollarPerformance = _.get(response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
-                return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
-            });
-            const constituentPercentagePerformance = _.get(response.data, 'current.metrics.constituentPerformance', []).map(item => {
-                return {name: item.ticker, data: [item.pnl_pct], color: colorData[item.ticker]};
-            });
-            series.push({name: 'Composition', data: portfolioComposition});
-            this.getAdvicePerformance(response, series);
-            this.setState({
-                series,
-                barDollarSeries: constituentDollarPerformance,
-                barPercentageSeries: constituentPercentagePerformance
-            });
+        .then(([advicePerformanceResponse, advicePortfolioResponse])  => {
+            
+            this.getAdvicePerformance(advicePerformanceResponse);
+
+            let positions = [];
+            if (advicePortfolioResponse) {
+                this.getAdviceDetail(advicePortfolioResponse);
+                //positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
+
+                /*const series = [];
+                const colorData = generateColorData(positions);
+                const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition', []).map((item, index) =>{
+                    return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
+                });
+                const constituentDollarPerformance = _.get(response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
+                    return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
+                });
+                const constituentPercentagePerformance = _.get(response.data, 'current.metrics.constituentPerformance', []).map(item => {
+                    return {name: item.ticker, data: [item.pnl_pct], color: colorData[item.ticker]};
+                });
+                series.push({name: 'Composition', data: portfolioComposition});
+                
+                this.setState({
+                    series,
+                    barDollarSeries: constituentDollarPerformance,
+                    barPercentageSeries: constituentPercentagePerformance
+                });*/
+            }
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
@@ -777,6 +797,8 @@ class AdviceDetailImpl extends React.Component {
                 ? statusColor.owner
                 : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
 
+
+        const defaultActiveKey = this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner ? ["2"] : ["3"];
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />
@@ -817,7 +839,7 @@ class AdviceDetailImpl extends React.Component {
                         <Row>
                             <Col span={24} style={dividerStyle}></Col>
                         </Row>
-                        <Collapse bordered={false} defaultActiveKey={["2"]}>
+                        <Collapse bordered={false} defaultActiveKey={defaultActiveKey}>
                             <Panel
                                     key="1"
                                     style={customPanelStyle}
@@ -829,23 +851,14 @@ class AdviceDetailImpl extends React.Component {
                                     </Col>
                                 </Row>
                             </Panel>
-                            <Panel
-                                key="2"
-                                style={customPanelStyle}
-                                header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
-                                <Row className="row-container">
-                                    <MyChartNew series={this.state.tickers} />
-                                </Row>
-                            </Panel>
 
                             {
                                 (this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner) &&
 
                                 <Panel
-                                        key="3"
-                                        style={customPanelStyle}
-                                        header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}
-                                >
+                                    key="2"
+                                    style={customPanelStyle}
+                                    header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
                                     <Row className="row-container" type="flex" justify="end" align="middle">
                                         <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                             {
@@ -867,6 +880,17 @@ class AdviceDetailImpl extends React.Component {
                                     </Row>
                                 </Panel>
                             }
+
+                            <Panel
+                                key="3"
+                                style={customPanelStyle}
+                                header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
+                                <Row className="row-container">
+                                    <MyChartNew series={this.state.tickers} />
+                                </Row>
+                            </Panel>
+
+                            
                         </Collapse>
                     </Col>
                     {this.state.realtimeSecurities.length > 0 && 

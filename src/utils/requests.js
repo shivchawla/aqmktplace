@@ -9,3 +9,7 @@ export const getStockData = (ticker, field='priceHistory') => {
         headers: Utils.getAuthTokenHeader()
     });
 };
+
+export const fetchAjax = (url, header=true) => {
+	return axios.get(url, header ? {headers: Utils.getAuthTokenHeader()} : {});
+};

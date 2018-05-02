@@ -453,8 +453,8 @@ export default class InvestorDashboard extends React.Component {
                 id: portfolio._id,
                 name: portfolio.name.length < 1 ? 'Undefined' : portfolio.name,
                 netValue: netValue || netValueEOD,
-                return: (_.get(portfolio, 'performance.totalReturn', 0) || 0).toFixed(2),
-                volatility: (_.get(portfolio, 'performance.volatility', 0) || 0).toFixed(2),
+                return: ((_.get(portfolio, 'performance.totalReturn', 0) || 0) * 100).toFixed(2),
+                volatility: ((_.get(portfolio, 'performance.volatility', 0) || 0) * 100).toFixed(2),
                 dailyNavChangePct: dailyNavChangePct,
                 dailyChangeDollar: (_.get(portfolio, 'performance.dailyChange', 0) || 0).toFixed(2)
             }

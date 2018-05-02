@@ -175,7 +175,7 @@ class MyChartNewImpl extends React.Component {
         const legendIndex = _.findIndex(legendItems, legendItem => legendItem.name.toUpperCase() === name.toUpperCase());
         if (seriesIndex === -1) {
             this.chart.addSeries({
-                name: name, //name.toUpperCase(),
+                name: name, 
                 data,
                 visible: this.chart.series.length < 5,
                 selected: true,
@@ -188,7 +188,7 @@ class MyChartNewImpl extends React.Component {
                     return {
                         legendItems: [
                             {
-                                name: name.toUpperCase(),
+                                name: name, //.toUpperCase(),
                                 x: '1994-16-02',
                                 y: 0,
                                 change: 0,
@@ -201,7 +201,7 @@ class MyChartNewImpl extends React.Component {
                 } else {
                     return {
                         legendItems: [...prevState.legendItems, {
-                            name: name.toUpperCase(),
+                            name: name , //toUpperCase(),
                             x: '1994-16-02',
                             y: 0,
                             change: 0,
@@ -219,8 +219,8 @@ class MyChartNewImpl extends React.Component {
         const legendItems = [...this.state.legendItems];
         try {
             if (this.chart.series[index] !== undefined) {
-                this.chart.series[index].update({name: name.toUpperCase(), data}, false);
-                legendItems[index].name = name.toUpperCase();
+                this.chart.series[index].update({name: name, /*.toUpperCase()*/ data}, false);
+                legendItems[index].name = name; //.toUpperCase();
                 this.setState({legendItems});
                 this.chart.redraw();
             }
@@ -542,7 +542,7 @@ class MyChartNewImpl extends React.Component {
                     
                     <Row style={{position:'absolute', width: '300px'}}>{this.renderHorizontalLegendList()}</Row>
                 }
-                <Row id={chartId}></Row>
+                <Row style={{marginTop:'30px'}} id={chartId}></Row>
             </Col>
         );
     }
