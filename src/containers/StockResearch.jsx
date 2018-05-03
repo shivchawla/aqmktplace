@@ -271,16 +271,16 @@ class StockResearchImpl extends React.Component {
     }
 
    setUpSocketConnection = () => {
-        Utils.webSocket.onopen = () => {
-            Utils.webSocket.onmessage = this.processRealtimeMessage;
-            this.takeAction();
-        }
+        if (Utils.webSocket && Utils.webSocket.readyState == WebSocket.OPEN) {
+            Utils.webSocket.onopen = () => {
+                Utils.webSocket.onmessage = this.processRealtimeMessage;
+                this.takeAction();
+            }
 
-        Utils.webSocket.onclose = () => {
-            this.setUpSocketConnection();
-        }
+            Utils.webSocket.onclose = () => {
+                this.setUpSocketConnection();
+            }
        
-        if (Utils.webSocket.readyState == WebSocket.OPEN) {
             Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takeAction();
         } else {

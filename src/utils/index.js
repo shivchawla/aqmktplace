@@ -426,11 +426,12 @@ export class Utils{
 
 		var netValue = netValueLatest || netValueEOD;
 
-		var annualReturnEOD  = _.get(obj, 'annualReturn', 0);
-		var annualReturn = Math.pow((1+annualReturnEOD),(251/252))*(1+dailyNavChangeLatestPct) - 1.0;
-		var totalReturn = (1 + _.get(obj, 'totalReturn', 0))*(1+dailyNavChangeLatestPct) - 1.0;
+		//var annualReturnEOD  = _.get(obj, 'annualReturn', 0);
+		//var annualReturn = Math.pow((1+annualReturnEOD),(251/252))*(1+dailyNavChangeLatestPct) - 1.0;
+		//var totalReturn = (1 + _.get(obj, 'totalReturn', 0))*(1+dailyNavChangeLatestPct) - 1.0;
 
-		return Object.assign(obj, {annualReturn: annualReturn, totalReturn: totalReturn, netValue:netValue, dailyNavChangePct: dailyNavChangePct});
+		//return Object.assign(obj, {annualReturn: annualReturn, totalReturn: totalReturn, netValue:netValue, dailyNavChangePct: dailyNavChangePct});
+		return Object.assign(obj, {netValue:netValue, dailyNavChangePct: dailyNavChangePct});
 
 	}
 

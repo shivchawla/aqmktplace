@@ -54,7 +54,8 @@ class AdviceDetailImpl extends React.Component {
                 volatility:0,
                 maxLoss:0,
                 dailyNAVChangePct: 0,
-                netValue: 0
+                netValue: 0,
+                period:0,
             },
             tickers: [],
             isDialogVisible: false,
@@ -126,15 +127,15 @@ class AdviceDetailImpl extends React.Component {
             stocks,
             approvalStatus
         } = response.data;
-        const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks} = _.get(performanceSummary, 'current', {});
+        const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks, period} = _.get(performanceSummary, 'current', {});
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         tickers.push({name: benchmark, color: benchmarkColor});
 
         //Compute change in NAV from EOD nav
         var dailyNAVChangePct = Number(((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
-        var annualReturnOld = annualReturn;
-        var avgDailyReturnOld = Math.pow((1+annualReturnOld), (1/252)) - 1.0;
-        var annualReturnNew = Math.pow((1+avgDailyReturnOld),251)*(1+dailyNAVChangePct/100) - 1.0;
+        var annualReturnEOD = annualReturn;
+        
+        //var annualReturnNew = Math.pow(((1+annualReturnEOD)*(1+dailyNAVChangePct/100)), (252/(period+1))) - 1.0;
         
         this.setState({
             tickers: performance ? tickers : this.state.tickers,
@@ -159,7 +160,7 @@ class AdviceDetailImpl extends React.Component {
             metrics: {
                 ...this.state.metrics,
                 nstocks,
-                annualReturn: annualReturnNew,
+                annualReturn: annualReturnEOD,
                 volatility,
                 maxLoss,
                 dailyNAVChangePct,
@@ -459,7 +460,7 @@ class AdviceDetailImpl extends React.Component {
 
 
     setUpSocketConnection = () => {
-        if (Utils.webSocket.readyState == WebSocket.OPEN) {
+        if (Utils.webSocket && Utils.webSocket.readyState == WebSocket.OPEN) {
             Utils.webSocket.onopen = () => {
                 Utils.webSocket.onmessage = this.processRealtimeMessage;
                 this.takeAdviceAction();
@@ -544,12 +545,12 @@ class AdviceDetailImpl extends React.Component {
                 const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
                 const dailyNAVChangePct = Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2));
                 var annualReturnOld = this.state.metrics.annualReturn;
-                var avgDailyReturnOld = Math.pow((1+this.state.metrics.annualReturn), (1/252)) - 1.0;
-                var annualReturnNew = Math.pow((1+avgDailyReturnOld),251)*(1+dailyNAVChangePct/100) - 1.0;
+                //var avgDailyReturnOld = Math.pow((1+this.state.metrics.annualReturn), (1/252)) - 1.0;
+                //var annualReturnNew = Math.pow((1+avgDailyReturnOld),251)*(1+dailyNAVChangePct/100) - 1.0;
                 this.setState({
                     metrics: {
                         ...this.state.metrics,
-                        annualReturn: annualReturnNew,
+                        annualReturn: annualReturnOld,
                         dailyNAVChangePct,
                         netValue
                     },

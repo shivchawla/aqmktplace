@@ -319,7 +319,7 @@ class PortfolioDetailImpl extends React.Component {
                 const rtNAVChangePct = eodNAV > 0.0 ? (realtimeNAV - eodNAV)/eodNAV : 0.0;
 
                 //Update return for recent NAV change
-                annualReturn = Math.pow((1 + (annualReturn ? annualReturn : 0.0)), (251/252))*(1+rtNAVChangePct) - 1.0;
+                //annualReturn = Math.pow((1 + (annualReturn ? annualReturn : 0.0)), (251/252))*(1+rtNAVChangePct) - 1.0;
                 totalReturn = (1 + (totalReturn ? totalReturn : 0.0))*(1+rtNAVChangePct) - 1.0;
                 
                 const volatility = _.get(portfolioMetrics, 'volatility', null);
@@ -374,16 +374,16 @@ class PortfolioDetailImpl extends React.Component {
 
 
    setUpSocketConnection = () => {
-        Utils.webSocket.onopen = () => {
-            Utils.webSocket.onmessage = this.processRealtimeMessage;
-            this.takePortfolioAction();
-        }
+        if (Utils.webSocket && Utils.webSocket.readyState == WebSocket.OPEN) {
+            Utils.webSocket.onopen = () => {
+                Utils.webSocket.onmessage = this.processRealtimeMessage;
+                this.takePortfolioAction();
+            }
 
-        Utils.webSocket.onclose = () => {
-            this.setUpSocketConnection();
-        }
+            Utils.webSocket.onclose = () => {
+                this.setUpSocketConnection();
+            }
        
-        if (Utils.webSocket.readyState == WebSocket.OPEN) {
             Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takePortfolioAction();
         } else {

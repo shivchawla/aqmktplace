@@ -116,8 +116,9 @@ class SubscribedAdvicesImpl extends React.Component {
                         dailyChange: _.get(latestPerformanceSummary, 'dailyChange', 0.0),
                         dailyChangePct: _.get(latestPerformanceSummary, 'dailyNavChangePct', 0.0),
                         maxLoss: _.get(adviceResponse.data, 'performanceSummary.current.maxLoss', 0),
-                        totalReturn: _.get(latestPerformanceSummary, 'totalReturn', 0.0),
+                        totalReturn: _.get(adviceResponse.data, 'performanceSummary.current.totalReturn', 0),
                     };
+                    
                     newAdvice.portfolio.detail = advicePortfolioResponse.data.detail;
                     advices.push(newAdvice);
                     this.props.updateSubscribedAdvices(advices);
