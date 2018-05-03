@@ -373,26 +373,25 @@ class PortfolioDetailImpl extends React.Component {
     }
 
 
-    setUpSocketConnection = () => {
+   setUpSocketConnection = () => {
         Utils.webSocket.onopen = () => {
             Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takePortfolioAction();
-            clearInterval(this.interval);
         }
 
         Utils.webSocket.onclose = () => {
-            this.interval = setInterval(function() {
-                Utils.webSocket.onopen = () => {
-                    Utils.webSocket.onmessage = this.processRealtimeMessage;
-                    this.takePortfolioAction();
-                    clearInterval(this.interval);
-                }}, 2000);
+            this.setUpSocketConnection();
         }
        
-        Utils.webSocket.onmessage = this.processRealtimeMessage;
-        this.takePortfolioAction();
+        if (Utils.webSocket.readyState == WebSocket.OPEN) {
+            Utils.webSocket.onmessage = this.processRealtimeMessage;
+            this.takePortfolioAction();
+        } else {
+            setTimeout(function() {
+                this.setUpSocketConnection()
+            }, 5000);
+        }
     }
-
     takePortfolioAction = () => {
         if (this.mounted) {
             this.subscribeToPortfolio(this.props.match.params.id);

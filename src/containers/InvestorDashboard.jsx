@@ -802,20 +802,20 @@ export default class InvestorDashboard extends React.Component {
         Utils.webSocket.onopen = () => {
             Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takeAction();
-            clearInterval(this.interval);
         }
 
         Utils.webSocket.onclose = () => {
-            this.interval = setInterval(function() {
-                Utils.webSocket.onopen = () => {
-                    Utils.webSocket.onmessage = this.processRealtimeMessage;
-                    this.takeAction();
-                    clearInterval(this.interval);
-                }}, 2000);
+            this.setUpSocketConnection();
         }
        
-        Utils.webSocket.onmessage = this.processRealtimeMessage;
-        this.takeAction();
+        if (Utils.webSocket.readyState == WebSocket.OPEN) {
+            Utils.webSocket.onmessage = this.processRealtimeMessage;
+            this.takeAction();
+        } else {
+            setTimeout(function() {
+                this.setUpSocketConnection()
+            }, 5000);
+        }
     }
 
 

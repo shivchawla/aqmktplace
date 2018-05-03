@@ -294,35 +294,37 @@ export class Utils{
 	}
 
 	static openSocketConnection() {
-		if (this.webSocket) {
-			try{
-				this.webSocket.close();
-			} catch(err){}
-		}
+		if (!this.webSocket || this.webSocket.readyState != WebSocket.OPEN) {
+			if (this.webSocket) {
+				try{
+					this.webSocket.close();
+				} catch(err){}
+			}
 
-		this.webSocket = new WebSocket(webSocketUrl);
-		
-		if (this.webSocket && this.webSocket.readyState == WebSocket.CLOSED) {
-			// console.log('Server unavailable');
-			this.numAttempts++;
-			var timeOut = Math.min(2 * Utils.numAttempts * 1000, 20000)
-			setTimeout(() => {
-				Utils.openSocketConnection()
-			}, timeOut);
-		}
+			this.webSocket = new WebSocket(webSocketUrl);
+			
+			if (this.webSocket && this.webSocket.readyState == WebSocket.CLOSED) {
+				// console.log('Server unavailable');
+				this.numAttempts++;
+				var timeOut = Math.min(2 * Utils.numAttempts * 1000, 20000)
+				setTimeout(() => {
+					Utils.openSocketConnection()
+				}, timeOut);
+			}
 
-		this.webSocket.onclose = () => {
-			// console.log('Connection Closed');
-			this.numAttempts++;
-			var timeOut = Math.min(2 * Utils.numAttempts * 1000, 20000)
-			setTimeout(() => {
-				Utils.openSocketConnection()
-			}, timeOut);
-		}
+			this.webSocket.onclose = () => {
+				// console.log('Connection Closed');
+				this.numAttempts++;
+				var timeOut = Math.min(2 * Utils.numAttempts * 1000, 20000)
+				setTimeout(() => {
+					Utils.openSocketConnection()
+				}, timeOut);
+			}
 
-		this.webSocket.onopen = () => {
-			// console.log('Connection Established');
-			this.numAttempts = 0;
+			this.webSocket.onopen = () => {
+				// console.log('Connection Established');
+				this.numAttempts = 0;
+			}
 		}
 	}
 
@@ -466,7 +468,7 @@ export const checkForInternet = (error, history) => {
 	}
 };
 
-Utils.openSocketConnection();
+setInterval(function(){Utils.openSocketConnection();}, 60000);
 
 export * from './requests';
 export * from './portfolio';
