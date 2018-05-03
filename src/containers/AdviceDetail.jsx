@@ -459,22 +459,22 @@ class AdviceDetailImpl extends React.Component {
 
 
     setUpSocketConnection = () => {
-        Utils.webSocket.onopen = () => {
-            Utils.webSocket.onmessage = this.processRealtimeMessage;
-            this.takeAdviceAction();
-        }
-
-        Utils.webSocket.onclose = () => {
-            this.setUpSocketConnection();
-        }
-       
         if (Utils.webSocket.readyState == WebSocket.OPEN) {
+            Utils.webSocket.onopen = () => {
+                Utils.webSocket.onmessage = this.processRealtimeMessage;
+                this.takeAdviceAction();
+            }
+
+            Utils.webSocket.onclose = () => {
+                this.setUpSocketConnection();
+            }
+            
             Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takeAdviceAction();
         } else {
             setTimeout(function() {
                 this.setUpSocketConnection()
-            }, 5000);
+            }.bind(this), 5000);
         }
     }
 

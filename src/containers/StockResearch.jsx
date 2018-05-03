@@ -286,7 +286,7 @@ class StockResearchImpl extends React.Component {
         } else {
             setTimeout(function() {
                 this.setUpSocketConnection()
-            }, 5000);
+            }.bind(this), 5000);
         }
     }
 

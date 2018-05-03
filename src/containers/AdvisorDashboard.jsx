@@ -561,21 +561,22 @@ export default class AdvisorDashboard extends React.Component {
         Utils.webSocket.onopen = () => {
             Utils.webSocket.onmessage = this.processRealtimeMessage;
             this.takeAction();
-            clearInterval(this.interval);
         }
 
         Utils.webSocket.onclose = () => {
-            this.interval = setInterval(function() {
-                Utils.webSocket.onopen = () => {
-                    Utils.webSocket.onmessage = this.processRealtimeMessage;
-                    this.takeAction();
-                    clearInterval(this.interval);
-                }}, 2000);
+            this.setUpSocketConnection();
         }
        
-        Utils.webSocket.onmessage = this.processRealtimeMessage;
-        this.takeAction();
+        if (Utils.webSocket.readyState == WebSocket.OPEN) {
+            Utils.webSocket.onmessage = this.processRealtimeMessage;
+            this.takeAction();
+        } else {
+            setTimeout(function() {
+                this.setUpSocketConnection()
+            }.bind(this), 5000);
+        }
     }
+
 
     takeAction = () => {
         if (this.mounted) {
