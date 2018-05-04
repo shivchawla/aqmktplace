@@ -165,8 +165,8 @@ export class AdviceFilterComponent extends React.Component {
         const {defaultFilters} = this.state;
         const filterArray = [
             {type: 'rating', label: 'Rating', range: defaultFilters.rating, min: 0, max: 5, step: 0.1},
-            {type: 'sharpe', label: 'Sharpe Ratio', range: defaultFilters.sharpe, min: -10, max: 10, marks: {0: '0'}, step: 0.5},
-            {type: 'netValue', label: 'Net Value', range: defaultFilters.netValue, min: 0, max: 600000},
+            {type: 'sharpe', label: 'Sharpe Ratio', range: defaultFilters.sharpe, min: -5, max: 5, marks: {0: '0'}, step: 0.5},
+            {type: 'netValue', label: 'Net Value', range: defaultFilters.netValue, min: 0, max: 200000},
             {type: 'volatility', label: 'Volatility', range: defaultFilters.volatility, min: 0, max: 50},
             {type: 'return', label: 'Return', range: defaultFilters.return, min: -100, max: 100, marks: {0: '0'}},
         ];

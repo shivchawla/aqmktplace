@@ -14,12 +14,14 @@ import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax} from '../utils';
 import '../css/adviceDetail.css';
 
+
 const TabPane = Tabs.TabPane;
 const RadioGroup = Radio.Group;
 const Panel = Collapse.Panel;
 const {TextArea} = Input;
 
 const {aimsquantToken, requestUrl} = require('../localConfig.js');
+const DateHelper = require('../utils/date');
 const dateFormat = 'Do MMMM YYYY';
 
 class AdviceDetailImpl extends React.Component {
@@ -140,6 +142,7 @@ class AdviceDetailImpl extends React.Component {
         //Compute change in NAV from EOD nav
         var dailyNAVChangePct = Number(((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
         var annualReturnEOD = annualReturn;
+        var effTotalReturn = netValueEOD > 0 ? (1 + _.get(this.performanceSummary, 'current.totalReturn', 0.0)) * (1+dailyNAVChangePct/100) - 1.0 : 0;
 
         this.setState({
             tickers: performance ? tickers : this.state.tickers,
@@ -165,7 +168,7 @@ class AdviceDetailImpl extends React.Component {
                 ...this.state.metrics,
                 //nstocks,
                 annualReturn: annualReturnEOD,
-                totalReturn: totalReturn,
+                totalReturn: effTotalReturn,
                 volatility,
                 maxLoss,
                 dailyNAVChangePct,
@@ -553,8 +556,12 @@ class AdviceDetailImpl extends React.Component {
                 //Effectvive total return is valid is current summary has past netvalueEOD
                 //otherwie it means, it is a new advice and current changes have no significance
                 const netValueEOD = _.get(this.performanceSummary, 'current.netValueEOD', 0);
-                var effTotalReturn = netValueEOD > 0 ? (1 + _.get(this.performanceSummary, 'current.totalReturn', 0.0)) * (1+dailyNAVChangePct/100) - 1.0 : 0;
+                const netValueEODDate = _.get(this.performanceSummary, 'current.netValueEODDate', 0);
                 const dailyNAVChangePct = netValueEOD > 0 ? Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2)) : 0.0;
+                var currentDate = DateHelper.getCurrentDate();
+                var effTotalReturn = netValueEOD > 0 && 
+                            DateHelper.compareDates(netValueEODDate, currentDate) == -1 && 
+                            currentDate.getDay() != 0 && currentDate.getDay() != 6 ? (1 + _.get(this.performanceSummary, 'current.totalReturn', 0.0)) * (1+dailyNAVChangePct/100) - 1.0 : 0;
 
                 this.setState({
                     metrics: {
