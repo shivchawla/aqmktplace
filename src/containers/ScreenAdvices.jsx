@@ -179,7 +179,8 @@ export default class ScreenAdvices extends React.PureComponent {
                 isApproved: _.get(advice, 'approvalStatus', 'N/A'),
                 isOwner: _.get(advice, 'isOwner', false),
                 isSubscribed: _.get(advice, 'isSubscribed', false),
-                isTrending: false
+                isTrending: false,
+                netValue: advice.netValue,
             })
         });
 

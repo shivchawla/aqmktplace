@@ -57,16 +57,18 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                <h5 style={{fontSize: "18px"}}>
-                    {(diversity * 100).toFixed(2)} %
-                </h5>
-                    {/*<img style={iconStyle} src={pie} />*/}
-                </Col>
-                <Col span={24}>
-                    <span style={{fontSize: '13px'}}>
+                    <span style={{fontSize: '12px'}}>
                         Diversity Index
                     </span>
                 </Col>
+
+                <Col span={24}>
+                    <h5 style={{fontSize: "18px"}}>
+                        {(diversity * 100).toFixed(2)} %
+                    </h5>
+                    {/*<img style={iconStyle} src={pie} />*/}
+                </Col>
+                
                 {/*<Col span={24}>
                     <img style={iconStyle} src={pie} />
                 </Col>*/}
@@ -78,11 +80,11 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                    {/*<img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />*/}
-                    <h5 style={{fontSize: "18px"}}>{beta.toFixed(2)}</h5>
+                    <span style={{fontSize: '12px'}}>Beta</span>
                 </Col>
                 <Col span={24}>
-                    <span style={{fontSize: '13px'}}>Beta</span>
+                    {/*<img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />*/}
+                    <h5 style={{fontSize: "18px"}}>{beta.toFixed(2)}</h5>
                 </Col>
                 {/*<Col span={24}>
                     <img style={{transform: 'scale(0.8, 0.8)'}} src={barChart} />
@@ -95,11 +97,12 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
-                    <h5 style={{fontSize: "18px"}}>{(annualReturn * 100).toFixed(2)} %</h5>
+                    <span style={{fontSize: '12px'}}>1 Year Return</span>
+
                     {/*<img style={{transform: 'scale(0.8, 0.8)'}} src={totalReturnIcon} />*/}
                 </Col>
                 <Col span={24}>
-                    <span style={{fontSize: '13px'}}>Ann. Return</span>
+                    <h5 style={{fontSize: "18px"}}>{(annualReturn * 100).toFixed(2)} %</h5>
                 </Col>
             </Row>
         );
@@ -109,12 +112,14 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row style={{textAlign: 'center'}}>
                 <Col span={24}>
+                    <span style={{fontSize: '12px'}}>Volatility </span>
+                </Col>    
+
+                <Col span={24}>
                 {/*<img style={iconStyle} src={sunrise} />*/}
                 <h5 style={{fontSize: "18px"}}>{Number((volatility * 100).toFixed(2))} %</h5>
                 </Col>
-                <Col span={24}>
-                    <span style={{fontSize: '13px'}}>Volatility </span>
-                </Col>
+                
             </Row>
         );
     }
@@ -122,9 +127,8 @@ class AdviceListItemImpl extends React.PureComponent {
     renderTrendingApprovedIcon = () => {
         const {isApproved} = this.props.advice;
         return (
-            <Row type="flex" justify="center" style={{paddingRight:'40px'}}>
-                {
-                    isApproved === 'approved' &&
+            <Row>
+                {isApproved === 'approved' &&
                     <Col span={12}>
                         <IconItem 
                             src={medalIcon} 
@@ -145,30 +149,30 @@ class AdviceListItemImpl extends React.PureComponent {
         );
     }
 
-    renderMetricIcons = performanceSummary => {
-        return (
-            <Row>
-                <Col span={6}>
-                    {this.renderDiversityChart(_.get(performanceSummary, 'current.concentration', 0))}
-                </Col>
-                {
-                    performanceSummary.current && 
+    /*<Col span={6}>
+                        {this.renderDiversityChart(_.get(performanceSummary, 'current.concentration', 0))}
+                    </Col>
+                
                     <Col span={6}>
                         {this.renderBetaChart(_.get(performanceSummary,'current.beta', 0))}
-                    </Col>
-                }
-                {
-                    performanceSummary.current && 
-                    <Col span={6}>
-                        {this.renderVolatilityChart(performanceSummary.current.volatility)}
-                    </Col>
-                }
-                {
-                    performanceSummary.current && 
-                    <Col span={6}>
-                        {this.renderAnnualReturnIcon(performanceSummary.current.annualReturn)}
-                    </Col>
-                }
+                    </Col>*/
+             
+
+    renderMetricIcons = performanceSummary => {
+        return (      
+            <Row type="flex" justify="end">
+                <Col span={6}>
+                    {performanceSummary.simulated && 
+                        this.renderVolatilityChart(performanceSummary.simulated.volatility)}
+                </Col>
+                <Col span={6}>
+                    {performanceSummary.simulated && 
+                        this.renderAnnualReturnIcon(performanceSummary.simulated.annualReturn)}
+                </Col>
+                
+                {/*<Col span={8}>
+                    {this.renderNetValueChange(performanceSummary)}
+                </Col>*/}
             </Row>
         );
     }
@@ -176,21 +180,25 @@ class AdviceListItemImpl extends React.PureComponent {
     renderNetValueChange = performanceSummary => {
         let netValue = 0, dailyChange = 0, dailyChangePct = 0, totalReturn;
         if (performanceSummary ) {
-            netValue = _.get(performanceSummary, 'current.netValueEOD', NaN);
-            dailyChange = _.get(performanceSummary, 'current.dailyNAVChangeEOD', NaN);
-            dailyChangePct = _.get(performanceSummary, 'current.dailyNAVChangeEODPct', NaN);
+            netValue = _.get(performanceSummary, 'netValue', 0) || _.get(performanceSummary, 'current.netValueEOD', 0);
+            dailyChange = _.get(performanceSummary, 'current.dailyNAVChangeEOD', 0);
+            dailyChangePct = _.get(performanceSummary, 'current.dailyNAVChangeEODPct', 0);
         }
         var str1 = "Daily Chg (\u20B9)";
         var str2 = "| Daily Chg (%)";
       
         return (
-            <Row type="flex"  style={{marginTop:'-10px'}}>
-                <Col span={24}>
-                    <h3 style={netValueStyle}>
-                        {`\u20B9 ${Utils.formatMoneyValueMaxTwoDecimals(netValue)}`}
-                    </h3>
+            <Row type="flex" style={{marginRight:'15px'}}>
+                <Col span={24} style={{textAlign: 'right'}}>
+                    <span style={{fontSize: '12px'}}>Min. Investment Value</span>
+                </Col>    
 
-                    <Row align="bottom" >
+                <Col span={24}>
+                    <h5 style={{...netValueStyle, color:'green'}}>
+                        {`\u20B9 ${Utils.formatMoneyValueMaxTwoDecimals(netValue)}`}
+                    </h5>
+
+                    {/*<Row align="bottom" >
                         <Col span={12} style={{
                                 fontSize: '15px',
                                 marginTop:'-2px',
@@ -215,7 +223,7 @@ class AdviceListItemImpl extends React.PureComponent {
                         <Col span={12} style={{fontSize: '13px', textAlign:'left', paddingLeft:'0px'}}>
                             {str2}
                     </Col>
-                    </Row>
+                    </Row>*/}
                 </Col>
             </Row>
         );
@@ -236,7 +244,8 @@ class AdviceListItemImpl extends React.PureComponent {
             isSubscribed,
             isApproved,
             isOwner,
-            rebalancingFrequency
+            rebalancingFrequency,
+            netValue,
         } = this.props.advice;
         let sectors = _.get(performanceSummary, 'current.sectors', []);
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
@@ -244,99 +253,121 @@ class AdviceListItemImpl extends React.PureComponent {
         const statusTagLabel = isOwner ? 'Owner' : isSubscribed ? 'Subscribed' : isFollowing ? 'Wishlist' : "";
         const advisorName = `${_.get(advisor, 'user.firstName')} ${_.get(advisor, 'user.lastName')}`;
         const advisorId = _.get(advisor, '_id', '');
-
+        const statusTagStyle = {border:'1px solid', borderColor:statusTagColor};
         return (
+
             <Row 
-                    type="flex"
-                    className="advice-card" 
-                    style={{backgroundColor: cardBackgroundColor}} 
-                    align="top" 
-                    onClick={e => this.handleClick(id)} 
-            >
+                type="flex"
+                className="advice-card" 
+                style={{backgroundColor: cardBackgroundColor}} 
+                align="top" 
+                onClick={e => this.handleClick(id)}>
+
                 <Col span={24} style={{paddingLeft:'10px', paddingRight:'10px'}}>
-                    <Row>
-                        <Col span={10}>
+                    <Row type="flex" justify="space-between">
+                        <Col span={12}>
                             <Row>
                                 <h3 style={{fontSize: '18px'}}>{name}</h3>
                             </Row>
+                            
                             <Row>
-                                <h3 style={{fontSize: '14px'}}>
+                                <Col span={14}>
                                     By
-                                    <span id ="advisorName" style={{color: primaryColor}}
+                                    <span id ="advisorName" style={{color: primaryColor, marginRight: '5px'}}
                                         onClick={e => {
                                         e.stopPropagation();
                                         this.props.history.push(`/advisordashboard/advisorprofile/${advisorId}`)}}>{` ${advisorName}`}
                                     </span>
-                                </h3>
-                            </Row>
-                            {
-                                sectors.length > 0 && sectors &&
-                                <Row style={{margin: '5px 0'}}>
-                                    {this.renderSectors(sectors)}
-                                </Row>
-                            }
-                            <Row style={{fontSize: '15px'}} >
-                                <Col span={7}>
-                                    <Tag color='#f58231' style={{color:'#fff', border:'none', width:'85px', paddingTop:'1px'}}>
-                                        <Icon type="clock-circle-o" style={{fontWeight: '400'}}/>
-                                        <span style={{marginLeft: '5px'}}>{rebalancingFrequency}</span>
-                                    </Tag>
-                                </Col>
-                                {statusTagLabel!="" &&
-                                    <Col span={11}>
-                                        <Tag color={statusTagColor} style={{color:'#fff'}}>
-                                            <span style={{marginLeft: '5px'}}>{statusTagLabel}</span>
+
+                                    {statusTagLabel!="" &&
+                                        <Tag style={{...statusTagStyle, color:'black'}}>
+                                            <span style={{color: statusTagColor}}>{statusTagLabel}</span>
                                         </Tag>
-                                    </Col>
-                                 }
+                                    }
+                                </Col>
+                            </Row>
+
+                        </Col>
+
+                        <Col span={12} style={{textAlign: 'center'}}>
+                            <Row>
+                                {this.renderMetricIcons(performanceSummary)}
                             </Row>
                         </Col>
 
-                        <Col span={14} offset={0}>
-                            {this.renderMetricIcons(performanceSummary)}
-                        </Col>
-                    
                     </Row>
                 
-                    <Row style={{marginTop: '20px'}}>
-                        <Col span={7} style={{marginTop: '5px'}}>
-                            <Col span={8}>
-                                <MetricItem 
+                    <Row style={{marginTop: '5px'}} type="flex" justify="space-between">
+
+                        <Col span={8} style={{marginTop: '-5px'}}>
+                            <Row>
+                                <AqRate value={Number(rating)}/>
+                            </Row>
+                            
+                            <Row style={{marginTop: '5px'}}>
+                                <Tag color='f58231' style={{color:'black', border:'1px solid #f58231', width:'85px', paddingTop:'1px'}}>
+                                    <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
+                                    <span style={{marginLeft: '5px', color:'#f58231'}}>{rebalancingFrequency}</span>
+                                </Tag>
+                            </Row>
+
+                        </Col>
+
+                        <Col span={7}>
+                            {this.renderNetValueChange(Object.assign({netValue:netValue}, performanceSummary))}
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col span={8}>
+
+                            <Row>
+                                {this.renderTrendingApprovedIcon()}
+                            </Row>
+
+                            {/*<Row>
+                                <Tag color='f58231' style={{color:'black', border:'1px solid #f58231', width:'85px', paddingTop:'1px'}}>
+                                    <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
+                                    <span style={{marginLeft: '5px', color:'#f58231'}}>{rebalancingFrequency}</span>
+                                </Tag>
+                            </Row>*/}
+
+                            {/*sectors.length > 0 && sectors &&
+                                <Row>
+                                    <Col span={8} style={{marginTop: '10px', textAlign:'right'}}>
+                                        {this.renderSectors(sectors)}
+                                    </Col>
+                                </Row>
+                            */}
+                        </Col>
+
+                        
+                        {/*<Col span={8} style={{textAlign: 'right'}}>
+                            <Row>
+                                <Col span={8}>
+                                    <MetricItem 
                                         style={{border: 'none'}} 
                                         value={subscribers} 
                                         label="Subscribers"
                                         valueStyle={{fontSize: '20px', fontWeight: '400', color: '#3B3737'}}
-                                        labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E'}}
-                                />
-                            </Col>
-                            {
-                                performanceSummary.current && 
-                                <Col span={8}>
-                                    <MetricItem 
+                                        labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E'}}/>
+                                </Col>
+                                {
+                                    performanceSummary.current && 
+                                    <Col span={8}>
+                                        <MetricItem 
                                             style={{border: 'none'}} 
                                             value={followers} 
                                             label="Wishlisters"
                                             valueStyle={{fontSize: '20px', fontWeight: '400', color: '#3B3737', paddingLeft: '10px'}}
-                                            labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E', paddingLeft: '10px'}}
-                                    />
-                                </Col>
-                            }
-                        </Col>
-                        
-                        <Col span={17}>
-                            <Row>
-                                <Col span={12} style={{textAlign: 'center'}}>
-                                    <AqRate value={Number(rating)}/>
-                                    {this.renderTrendingApprovedIcon()}
-                                </Col>
-                                <Col span={10} offset={2}>
-                                    {this.renderNetValueChange(performanceSummary)}
-                                </Col>
+                                            labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E', paddingLeft: '10px'}}/>
+                                    </Col>
+                                }
                             </Row>
-                        </Col>
+                        </Col>*/}
+
                     </Row>
                 </Col>
-                <Row style={{marginTop: '10px'}}></Row>
             </Row>
         );
     }
@@ -346,7 +377,7 @@ export const AdviceListItemMod = withRouter(Radium(AdviceListItemImpl));
 
 const IconItem = ({src, label, imageStyle={}, labelStyle={}}) => {
     return (
-        <Row type="flex" justify="center" align="center">
+        <Row>
             <Col span={3} style={iconItemImageStyle}>
                 <img style={imageStyle} src={src} />
             </Col>
@@ -412,10 +443,10 @@ const headingStyle = {
 };
 
 const netValueStyle = {
-    fontSize: '22px',
+    fontSize: '20px',
     fontWeight: 400,
     color: '#3B3737',
-    textAlign: 'center',
+    textAlign: 'right',
     //marginRight: '25px'
 };
 

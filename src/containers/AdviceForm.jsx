@@ -627,7 +627,9 @@ export class AdviceFormImpl extends React.Component {
     }
 
     getDisabledDate = current => {
-        return current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
+        return this.props.isUpdate && this.state.public ? 
+            current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1) : 
+            current && (current < moment().startOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
     }
 
     updateTicker = record => {
@@ -797,7 +799,7 @@ export class AdviceFormImpl extends React.Component {
                                         </Col>
                                     </Row>*/}
                                     <Row>
-                                        <Col style={{border:' 1px solid #eaeaea', marginTop: '20px'}}>
+                                        <Col style={{border:' 1px solid #eaeaea', marginTop: '50px'}}>
                                             <Row style={{padding: '10px'}}> 
                                                 <Col span={8}>
                                                     <h3>Preview</h3>

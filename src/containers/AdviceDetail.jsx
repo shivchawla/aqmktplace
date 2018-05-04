@@ -134,7 +134,7 @@ class AdviceDetailImpl extends React.Component {
         //Compute change in NAV from EOD nav
         var dailyNAVChangePct = Number(((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
         var annualReturnEOD = annualReturn;
-        
+            
         //var annualReturnNew = Math.pow(((1+annualReturnEOD)*(1+dailyNAVChangePct/100)), (252/(period+1))) - 1.0;
         
         this.setState({
@@ -727,7 +727,7 @@ class AdviceDetailImpl extends React.Component {
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
                                 onClick={this.toggleDialog}
-                                style={{width: 190}}
+                                style={{width: 190, fontWeight: '300'}}
                                 type="primary"
                                 disabled={this.state.disableSubscribeButton}
                         >
@@ -751,12 +751,12 @@ class AdviceDetailImpl extends React.Component {
                     <Col span={24} style={{textAlign: 'right'}}>
                         {
                             !this.state.adviceDetail.isPublic
-                            && <Button onClick={this.makeAdvicePublic} style={{width: 180}} type="primary">POST TO MARKETPLACE</Button>}
+                            && <Button onClick={this.makeAdvicePublic} style={{width: 190, fontWeight:'300'}} type="primary">POST  TO MARKETPLACE</Button>}
                     </Col>
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
                                 onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
-                                style={{width: 180, marginTop: 10}}
+                                style={{width: 190, marginTop: 10}}
                         >
                             Update Advice
                         </Button>
@@ -849,7 +849,7 @@ class AdviceDetailImpl extends React.Component {
                         <Row>
                             <Col span={24} style={dividerStyle}></Col>
                         </Row>
-                        <Collapse bordered={false} defaultActiveKey={defaultActiveKey}>
+                        <Collapse bordered={false} defaultActiveKey={defaultActiveKey} onChange={this.onCollapseChange}>
                             <Panel
                                     key="1"
                                     style={customPanelStyle}
@@ -868,19 +868,23 @@ class AdviceDetailImpl extends React.Component {
                                 <Panel
                                     key="2"
                                     style={customPanelStyle}
-                                    header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}>
+                                    header={
+                                        <Row type="flex" justify="space-between">
+                                            <Col span={6}>
+                                                <h3 style={metricsHeaderStyle}>Portfolio</h3>
+                                            </Col>
+                                        </Row>
+                                    }>
                                     <Row className="row-container" type="flex" justify="end" align="middle">
-                                        <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                                            {
-                                                this.state.adviceDetail.isOwner &&
+                                        {this.state.adviceDetail.isOwner &&
+                                            <Col span={6} style={{display: 'flex', justifyContent: 'flex-end', marginTop: '-78px', position:'absolute'}}>
                                                 <DatePicker
-                                                        value={this.state.selectedPortfolioDate}
-                                                        onChange={this.handlePortfolioStartDateChange}
-                                                        allowClear={false}
-                                                />
-                                            }
-                                        </Col>
-                                        <Col span={24} style={{marginTop: '10px'}}>
+                                                    value={this.state.selectedPortfolioDate}
+                                                    onChange={this.handlePortfolioStartDateChange}
+                                                    allowClear={false}/>
+                                            </Col>
+                                        }
+                                        <Col span={24} style={{marginTop: '-10px'}}>
                                             <AqStockPortfolioTable
                                                 composition
                                                 portfolio={{positions: this.state.positions}}
