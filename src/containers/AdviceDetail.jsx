@@ -51,6 +51,7 @@ class AdviceDetailImpl extends React.Component {
             },
             metrics: {
                 annualReturn: 0,
+                totalReturn:0,
                 volatility:0,
                 maxLoss:0,
                 dailyNAVChangePct: 0,
@@ -84,6 +85,8 @@ class AdviceDetailImpl extends React.Component {
             notAuthorized: false,
             approvalLoading: false
         };
+
+        this.performanceSummary = {};
     }
 
     makeAdvicePublic = () => {
@@ -127,6 +130,9 @@ class AdviceDetailImpl extends React.Component {
             stocks,
             approvalStatus
         } = response.data;
+
+        this.performanceSummary = performanceSummary;
+        
         const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks, period} = _.get(performanceSummary, 'current', {});
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         tickers.push({name: benchmark, color: benchmarkColor});
@@ -134,9 +140,7 @@ class AdviceDetailImpl extends React.Component {
         //Compute change in NAV from EOD nav
         var dailyNAVChangePct = Number(((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
         var annualReturnEOD = annualReturn;
-            
-        //var annualReturnNew = Math.pow(((1+annualReturnEOD)*(1+dailyNAVChangePct/100)), (252/(period+1))) - 1.0;
-        
+
         this.setState({
             tickers: performance ? tickers : this.state.tickers,
             adviceResponse: response.data,
@@ -159,8 +163,9 @@ class AdviceDetailImpl extends React.Component {
             },
             metrics: {
                 ...this.state.metrics,
-                nstocks,
+                //nstocks,
                 annualReturn: annualReturnEOD,
+                totalReturn: totalReturn,
                 volatility,
                 maxLoss,
                 dailyNAVChangePct,
@@ -309,7 +314,8 @@ class AdviceDetailImpl extends React.Component {
             {value: nstocks, label: 'Num. of Stocks'},
             {value: annualReturn, label: 'Annual Return', percentage: true, color:true, fixed: 2},
             {value: volatility, label: 'Volatility', percentage: true, fixed: 2},
-            {value: maxLoss, label: 'Max. Loss', percentage: true, fixed: 2},
+            {value: totalReturn, label: 'Total Return', percentage: true, color:true, fixed: 2},
+            //{value: maxLoss, label: 'Max. Loss', percentage: true, fixed: 2},
             {value: netValue, label: 'Net Value', money:true, isNetValue:true, dailyChangePct:dailyNAVChangePct},
         ]
 
@@ -543,16 +549,19 @@ class AdviceDetailImpl extends React.Component {
             const realtimeData = JSON.parse(msg.data);
             if (realtimeData.type === 'advice') {
                 const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
-                const dailyNAVChangePct = Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2));
-                var annualReturnOld = this.state.metrics.annualReturn;
-                //var avgDailyReturnOld = Math.pow((1+this.state.metrics.annualReturn), (1/252)) - 1.0;
-                //var annualReturnNew = Math.pow((1+avgDailyReturnOld),251)*(1+dailyNAVChangePct/100) - 1.0;
+                
+                //Effectvive total return is valid is current summary has past netvalueEOD
+                //otherwie it means, it is a new advice and current changes have no significance
+                const netValueEOD = _.get(this.performanceSummary, 'current.netValueEOD', 0);
+                var effTotalReturn = netValueEOD > 0 ? (1 + _.get(this.performanceSummary, 'current.totalReturn', 0.0)) * (1+dailyNAVChangePct/100) - 1.0 : 0;
+                const dailyNAVChangePct = netValueEOD > 0 ? Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2)) : 0.0;
+
                 this.setState({
                     metrics: {
                         ...this.state.metrics,
-                        annualReturn: annualReturnOld,
                         dailyNAVChangePct,
-                        netValue
+                        netValue,
+                        totalReturn: effTotalReturn
                     },
                     positions: _.get(realtimeData, 'output.detail.positions', [])
                 });
@@ -807,7 +816,6 @@ class AdviceDetailImpl extends React.Component {
                 ? statusColor.owner
                 : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
 
-
         const defaultActiveKey = this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner ? ["2","3"] : ["3"];
         return (
             this.state.notAuthorized
@@ -877,7 +885,7 @@ class AdviceDetailImpl extends React.Component {
                                     }>
                                     <Row className="row-container" type="flex" justify="end" align="middle">
                                         {this.state.adviceDetail.isOwner &&
-                                            <Col span={6} style={{display: 'flex', justifyContent: 'flex-end', marginTop: '-78px', position:'absolute'}}>
+                                            <Col span={6} style={{display: 'flex', justifyContent: 'flex-end', marginTop: '-125px', position:'absolute', zIndex:'2'}}>
                                                 <DatePicker
                                                     value={this.state.selectedPortfolioDate}
                                                     onChange={this.handlePortfolioStartDateChange}
