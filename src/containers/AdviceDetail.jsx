@@ -140,9 +140,12 @@ class AdviceDetailImpl extends React.Component {
         tickers.push({name: benchmark, color: benchmarkColor});
 
         //Compute change in NAV from EOD nav
-        var dailyNAVChangePct = Number(((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
+        //Number(((netValueEOD > 0.0 && netValue > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
+
+        var dailyNAVChangePct = 0.0
         var annualReturnEOD = annualReturn;
-        var effTotalReturn = netValueEOD > 0 ? (1 + _.get(this.performanceSummary, 'current.totalReturn', 0.0)) * (1+dailyNAVChangePct/100) - 1.0 : 0;
+        var effTotalReturn = _.get(this.performanceSummary, 'current.totalReturn', 0.0);
+            //(1 + ) * (1+dailyNAVChangePct/100) - 1.0 : 0;
 
         this.setState({
             tickers: performance ? tickers : this.state.tickers,
@@ -171,7 +174,7 @@ class AdviceDetailImpl extends React.Component {
                 totalReturn: effTotalReturn,
                 volatility,
                 maxLoss,
-                dailyNAVChangePct,
+                dailyNAVChangePct: 0,
                 netValue
             }
         });
@@ -553,15 +556,21 @@ class AdviceDetailImpl extends React.Component {
             if (realtimeData.type === 'advice') {
                 const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
                 
+                const realtimeDate = DateHelper.getDate(_.get(realtimeData, 'date', null));
+
                 //Effectvive total return is valid is current summary has past netvalueEOD
                 //otherwie it means, it is a new advice and current changes have no significance
                 const netValueEOD = _.get(this.performanceSummary, 'current.netValueEOD', 0);
-                const netValueEODDate = _.get(this.performanceSummary, 'current.netValueEODDate', 0);
-                const dailyNAVChangePct = netValueEOD > 0 ? Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2)) : 0.0;
-                var currentDate = DateHelper.getCurrentDate();
-                var effTotalReturn = netValueEOD > 0 && 
-                            DateHelper.compareDates(netValueEODDate, currentDate) == -1 && 
-                            currentDate.getDay() != 0 && currentDate.getDay() != 6 ? (1 + _.get(this.performanceSummary, 'current.totalReturn', 0.0)) * (1+dailyNAVChangePct/100) - 1.0 : 0;
+                const netValueEODDate = _.get(this.performanceSummary, 'current.netValueDate', 0);
+                const dailyNAVChangePct = DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
+                        Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2)) : 
+                        Number((_.get(this.performanceSummary, 'current.dailyNAVChangeEODPct', 0) * 100).toFixed(2));
+                
+                var totalReturn = _.get(this.performanceSummary, 'current.totalReturn', 0.0);
+                
+                var effTotalReturn = DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
+                            (1 + totalReturn) * (1+dailyNAVChangePct/100) - 1.0 : 
+                            totalReturn;
 
                 this.setState({
                     metrics: {
@@ -572,6 +581,7 @@ class AdviceDetailImpl extends React.Component {
                     },
                     positions: _.get(realtimeData, 'output.detail.positions', [])
                 });
+
             } else if (realtimeData.type === 'stock') {
                 const realtimeSecurities = [...this.state.realtimeSecurities];
                 const targetSecurity = realtimeSecurities.filter(item => item.name === realtimeData.ticker)[0];
