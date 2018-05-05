@@ -567,7 +567,7 @@ class AdviceDetailImpl extends React.Component {
                         Number((_.get(this.performanceSummary, 'current.dailyNAVChangeEODPct', 0) * 100).toFixed(2));
                 
                 var totalReturn = _.get(this.performanceSummary, 'current.totalReturn', 0.0);
-                
+
                 var effTotalReturn = DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
                             (1 + totalReturn) * (1+dailyNAVChangePct/100) - 1.0 : 
                             totalReturn;
@@ -902,7 +902,7 @@ class AdviceDetailImpl extends React.Component {
                                     }>
                                     <Row className="row-container" type="flex" justify="end" align="middle">
                                         {this.state.adviceDetail.isOwner &&
-                                            <Col span={6} style={{display: 'flex', justifyContent: 'flex-end', marginTop: '-125px', position:'absolute', zIndex:'2'}}>
+                                            <Col span={6} style={{display: 'flex', justifyContent: 'flex-end', top: '225px', position:'absolute', zIndex:'2'}}>
                                                 <DatePicker
                                                     value={this.state.selectedPortfolioDate}
                                                     onChange={this.handlePortfolioStartDateChange}
