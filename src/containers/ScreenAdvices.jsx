@@ -3,7 +3,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import moment from 'moment';
 import _ from 'lodash';
-import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal, Pagination} from 'antd';
+import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal, Pagination, Radio} from 'antd';
 import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, AqPageHeader} from '../components';
 import {newLayoutStyle, pageTitleStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {Utils, getBreadCrumbArray} from '../utils';
@@ -15,6 +15,8 @@ const Option = Select.Option;
 const CheckboxGroup = Checkbox.Group;
 const TabPane = Tabs.TabPane;
 const Panel = Collapse.Panel;
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
 const antIcon = <Icon type="loading" style={{ fontSize: 18 }} spin />;
 
 const sortValues = ['name', 'updatedAt desc', 'subscribers', 'followers', 'rating'];
@@ -38,7 +40,9 @@ export default class ScreenAdvices extends React.PureComponent {
             limit: 10,
             totalCount: 3,
             initialCall: true,
-            show: false
+            show: false,
+            questionnaireModalVisible: false,
+            questionnaireFilters: {}
         }
     }
 
@@ -64,6 +68,7 @@ export default class ScreenAdvices extends React.PureComponent {
     componentWillMount() {
         this.mounted = true;
         // console.log(this.state.selectedFilters);
+        this.getQustionnaireModal();
         if (!Utils.isLoggedIn()) {
             this.getDefaultAdvices();
             // Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -71,6 +76,148 @@ export default class ScreenAdvices extends React.PureComponent {
             this.getAdvices();
             this.toggleFilter();
         }
+    }
+
+    getQustionnaireModal = () => {
+        const isFirstTime = Utils.getFromLocalStorage('isFirstTime') === 'false' ? false : true || true;
+        if (isFirstTime) {
+            console.log('This is the first time');
+            this.setState({questionnaireModalVisible: isFirstTime});
+        } else {
+            console.log('This is not the first time');
+        }
+    }
+
+    toggleQuestionnaireModal = () => {
+        this.setState({questionnaireModalVisible: !this.state.questionnaireModalVisible});
+        Utils.localStorageSave('isFirstTime', false);
+    }
+
+    handleQuestionnaireRadioChange = (e, type) => {
+        switch(type) {
+            case "netValue":
+                this.getNetValueFilterData(e.target.value);
+                break;
+            case "return":
+                this.getReturnFilterData(e.target.value);
+            default:
+                break;
+        }
+    }
+
+    getNetValueFilterData = value => {
+        let absoluteValue = '';
+        switch(value) {
+            case "min":
+                absoluteValue = '0,20000';
+                break;
+            case "middle":
+                absoluteValue = '20001,50000';
+                break;
+            case "max":
+                absoluteValue = '50001,1000000';
+                break;
+            default:
+                break;
+        }
+        this.setState({questionnaireFilters: {
+            ...this.state.questionnaireFilters,
+            netValue: absoluteValue
+        }});
+    } 
+    
+    getReturnFilterData = value => {
+        let absoluteValue = '';
+        switch(value) {
+            case "min":
+                absoluteValue = '5,15';
+                break;
+            case "middle":
+                absoluteValue = '15,25';
+                break;
+            case "max":
+                absoluteValue = '25,100';
+                break;
+            default:
+                break;
+        }
+        this.setState({questionnaireFilters: {
+            ...this.state.questionnaireFilters,
+            return: absoluteValue
+        }});
+    }
+
+    handleQuestionnaireFilterChange = () => {
+        this.setState({
+            selectedFilters: {
+                ...this.state.selectedFilters,
+                ...this.state.questionnaireFilters
+            }
+        }, () => {
+            this.getAdvices();
+            Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
+            this.toggleQuestionnaireModal();
+        });
+    }
+
+    renderQuestionnaireDialog = () => {
+        return (
+            <Modal 
+                    title="Select Preferences"
+                    visible={this.state.questionnaireModalVisible}
+                    footer={[
+                        <Button key="skip" onClick={this.toggleQuestionnaireModal}>Skip</Button>,
+                        <Button key="submit" type="primary" onClick={this.handleQuestionnaireFilterChange}>Done</Button>
+                    ]}
+            >
+                <Row>
+                    <Col span={24}>
+                        <h3>How much would you like to invest ?</h3>
+                        <Row style={{marginTop: '10px'}}>
+                            <RadioGroup 
+                                    onChange={(e) => this.handleQuestionnaireRadioChange(e, 'netValue')}
+                            >
+                                <RadioButton 
+                                        style={{marginRight: '20px', borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px'}} 
+                                        value="min"
+                                >
+                                    <h4>0 - 20k</h4>
+                                </RadioButton>
+                                <RadioButton style={{marginRight: '20px'}} value="middle"><h4>20k - 50k</h4></RadioButton>
+                                <RadioButton 
+                                        value="max"
+                                        style={{borderTopRightRadius: '0px', borderBottomRightRadius: '0px'}}
+                                >
+                                    <h4>50k and above</h4>
+                                </RadioButton>
+                            </RadioGroup>
+                        </Row>
+                    </Col>
+                    <Col span={24} style={{marginTop: '30px'}}>
+                        <h3>What is your return expectation ?</h3>
+                        <Row style={{marginTop: '10px'}}>
+                            <RadioGroup 
+                                    onChange={(e) => this.handleQuestionnaireRadioChange(e, 'return')}
+                            >
+                                <RadioButton 
+                                        style={{marginRight: '20px', borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px'}} 
+                                        value="min"
+                                >
+                                    <h4>5% - 25%</h4>
+                                </RadioButton>
+                                <RadioButton style={{marginRight: '20px'}} value="middle"><h4>15% - 25%</h4></RadioButton>
+                                <RadioButton 
+                                        value="max"
+                                        style={{borderTopRightRadius: '0px', borderBottomRightRadius: '0px'}}
+                                >
+                                    <h4>25% and above</h4>
+                                </RadioButton>
+                            </RadioGroup>
+                        </Row>
+                    </Col>
+                </Row>            
+            </Modal>
+        );
     }
 
     componentWillUnmount() {
@@ -322,8 +469,8 @@ export default class ScreenAdvices extends React.PureComponent {
         const button = {route: '/advisordashboard/createadvice', title: 'Create Advice'};
 
         return (
-
             <Row>
+                {this.renderQuestionnaireDialog()}
                 <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs} button={button}/>
                 <Row className="row-container" style={{...shadowBoxStyle, marginBottom:'20px'}}>
                     {this.renderFilter()}

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
 import _ from 'lodash';
+import $ from 'jquery';
 import {Button, Checkbox, Row, Col, Icon, Slider, Divider} from 'antd';
 import {IconHeader} from './IconHeader';
 import {adviceFilters as filters} from '../constants/filters';
@@ -32,7 +33,13 @@ export class AdviceFilterSideComponent extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        this.setState({owner: nextProps.owner});
+        const selectedFilters = {...filters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
+        // console.log(selectedFilters);
+        this.setState({
+            selectedFilters,
+            owner: nextProps.owner
+        });
+        // this.setState({owner: nextProps.owner});
     }
 
     renderRebalancingFreqFilter = () => (
@@ -142,7 +149,7 @@ export class AdviceFilterSideComponent extends React.Component {
                             <Slider 
                                     onChange={value => this.handleSliderChange(value, filter.type)} 
                                     range 
-                                    defaultValue={filter.range.split(',').map(item => Number(item.trim()))} 
+                                    value={filter.range.split(',').map(item => Number(item.trim()))} 
                                     min={filter.min}
                                     max={filter.max}
                                     marks={filter.marks ? filter.marks : {}}
@@ -158,6 +165,7 @@ export class AdviceFilterSideComponent extends React.Component {
 
     render() {
         const {selectedFilters} = this.state;
+        console.log(selectedFilters);
         const filterArray = [
             {type: 'rating', label: 'Rating', range: selectedFilters.rating, min: 0, max: 5, step:0.1},
             {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, step: 0.5},

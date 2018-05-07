@@ -470,7 +470,6 @@ class AdviceDetailImpl extends React.Component {
         this.mounted = false;
     }
 
-
     setUpSocketConnection = () => {
         if (Utils.webSocket && Utils.webSocket.readyState == WebSocket.OPEN) {
             Utils.webSocket.onopen = () => {
