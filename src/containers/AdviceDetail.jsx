@@ -224,6 +224,19 @@ class AdviceDetailImpl extends React.Component {
         })
     }
 
+    getDefaultAdviceData = () => {
+        const adviceId = this.props.match.params.id;
+        const adviceSummaryUrl = `${requestUrl}/advice_default/${adviceId}`;
+        this.setState({show: true});
+        fetchAjax(adviceSummaryUrl)
+        .then(summaryResponse => {
+            this.getAdviceSummary(summaryResponse);
+        })
+        .finally(() => {
+            this.setState({show: false});
+        });
+    }
+
 
     //THIS IS BUGGY - 02/05/2018
     //ADVICE PORTFOLIO IS FETCHED ONLY WHEN USER IS AUTHORIZED
@@ -455,7 +468,7 @@ class AdviceDetailImpl extends React.Component {
     componentWillMount() {
         this.mounted = true;
         if (!Utils.isLoggedIn()) {
-            Utils.goToLoginPage(this.props.history, this.props.match.url);
+            this.getDefaultAdviceData();
         } else {
             this.getUserData();
             this.getAdviceData();
@@ -832,7 +845,9 @@ class AdviceDetailImpl extends React.Component {
                 ? statusColor.owner
                 : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
 
-        const defaultActiveKey = this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner ? ["2","3"] : ["3"];
+        const defaultActiveKey = !Utils.isLoggedIn() 
+                ? "1" // Show description
+                : this.state.adviceDetail.isSubscribed || this.state.adviceDetail.isOwner ? ["2","3"] : ["3"];
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />
@@ -863,7 +878,7 @@ class AdviceDetailImpl extends React.Component {
                                 }
                                 <AqRate value={this.state.adviceDetail.rating} />
                             </Col>
-                            <Col span={6}>
+                            <Col xl={0} md={6}>
                                 {this.renderActionButtons()}
                             </Col>
                         </Row>
@@ -918,20 +933,24 @@ class AdviceDetailImpl extends React.Component {
                                     </Row>
                                 </Panel>
                             }
-
-                            <Panel
-                                key="3"
-                                style={customPanelStyle}
-                                header={<h3 style={metricsHeaderStyle}>Performance</h3>}>
-                                <Row className="row-container">
-                                    <MyChartNew series={this.state.tickers} />
-                                </Row>
-                            </Panel>
-
-                            
+                            {
+                                Utils.isLoggedIn() &&
+                                <Panel
+                                        key="3"
+                                        style={customPanelStyle}
+                                        header={<h3 style={metricsHeaderStyle}>Performance</h3>}
+                                    >
+                                    <Row className="row-container">
+                                        <MyChartNew series={this.state.tickers} />
+                                    </Row>
+                                </Panel>
+                            }
                         </Collapse>
                     </Col>
-                    {this.state.realtimeSecurities.length > 0 && 
+                    <Col span={6}>
+                        {this.renderActionButtons()}
+                    </Col>
+                    {/* {this.state.realtimeSecurities.length > 0 && 
                         <Col span={6} >
                             <div 
                                     style={{
@@ -964,7 +983,7 @@ class AdviceDetailImpl extends React.Component {
                                 </Col>
                             </div>
                         </Col>
-                    }
+                    } */}
                 </Row>
         );
     }

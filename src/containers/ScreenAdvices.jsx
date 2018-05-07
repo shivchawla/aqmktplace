@@ -37,7 +37,7 @@ export default class ScreenAdvices extends React.PureComponent {
             filterModalVisible: false,
             loading: true,
             selectedPage: Utils.getFromLocalStorage('selectedPage') || 1,
-            limit: 10,
+            limit: 3,
             totalCount: 3,
             initialCall: true,
             show: false,
@@ -463,6 +463,13 @@ export default class ScreenAdvices extends React.PureComponent {
         // console.log('Page', page);
     }   
 
+    handleFilterChange = () => {
+        this.setState({selectedPage: 1}, () => {
+            this.getAdvices();
+            Utils.localStorageSave('selectedPage', 1);
+        });
+    }
+
     renderPageContent = () => {
         const antIcon = <Icon type="loading" style={{ fontSize: 36 }} spin />;
         const breadCrumbs = getBreadCrumbArray([{name: 'Screen Advices'}]);
@@ -552,7 +559,7 @@ export default class ScreenAdvices extends React.PureComponent {
                                 <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>
                             </Col>
                             <Col span={6} offset={9}>
-                                <Button style={filterBtnStyle} onClick={() => this.getAdvices()}>Update</Button>
+                                <Button style={filterBtnStyle} onClick={this.handleFilterChange}>Update</Button>
                             </Col>
                         </Row>
                         <Row>
