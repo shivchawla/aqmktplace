@@ -344,7 +344,6 @@ class MyChartNewImpl extends React.Component {
     initializeChart() {
         const {chartId='highchart-container'} = this.props;
         this.chart = new HighStock['StockChart'](chartId, this.state.config);
-        // // console.log(this.props.series);
         this.setState({series: this.props.series}, () => {
             this.updateSeries(this.state.series);
         });

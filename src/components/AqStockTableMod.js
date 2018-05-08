@@ -117,6 +117,7 @@ export class AqStockTableMod extends React.Component {
             target['totalValue'] = value >= 0 ? Number((value * target['lastPrice']).toFixed(2)) : 0;
             this.updateAllWeights(newData);
             this.setState({data: newData});
+            this.props.onChange(newData);
         }
     }
 
@@ -142,7 +143,9 @@ export class AqStockTableMod extends React.Component {
                     target = Object.assign(target, response);
                     target['totalValue'] = target['shares'] * response.lastPrice;
                     this.setState({data: newData});
-                    // this.props.onChange(newData);
+                    if (target['shares'] > 0) {
+                        this.props.onChange(newData);
+                    }        
                 });
             }
         }
@@ -161,7 +164,6 @@ export class AqStockTableMod extends React.Component {
                 this.updateAllWeights(newData);
             }
             this.setState({data: newData});
-            // this.props.onChange(newData);
         }
     }
 
@@ -171,7 +173,12 @@ export class AqStockTableMod extends React.Component {
         return new Promise((resolve, reject) => {
             getStockData(ticker, 'latestDetail')
             .then(response => {
+                console.log(response.data);
+                const name = _.get(response.data, 'security.detail.Nse_Name', '');
+                const sector = _.get(response.data, 'security.detail.Sector', '');
                 const lastPrice = response.data.latestDetail.values.Close;
+                target['name'] = name;
+                target['sector'] = sector;
                 target['lastPrice'] = lastPrice;
                 target['tickerValidationStatus'] = 'success';
                 target['sharesDisabledStatus'] = false;
@@ -211,6 +218,8 @@ export class AqStockTableMod extends React.Component {
         const data = [...this.state.data];
         data.push({
             symbol: '',
+            name: '',
+            sector: '',
             key: Math.random().toString(36),
             shares: 0,
             lastPrice: 0,
@@ -273,7 +282,13 @@ export class AqStockTableMod extends React.Component {
                         </Button>
                     </Col>
                     <Col span={4} offset={16} style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-                        <Button type="primary" onClick={this.addItem}>Add Position</Button>
+                        <Button  
+                                type="primary" 
+                                onClick={this.addItem}
+                                style={{width: '150px'}}
+                        >
+                            Add Position
+                        </Button>
                     </Col>
                 </Row>
                 <Table 
@@ -285,12 +300,12 @@ export class AqStockTableMod extends React.Component {
                         size="middle"
                         rowClassName="stock-table-col"
                 />
-                <Row style={{marginTop: '20px'}}>
+                {/* <Row style={{marginTop: '20px'}}>
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button style={{marginRight: '20px'}} onClick={this.props.toggleModal}>Cancel</Button>
                         <Button type="primary" onClick={this.handleDoneClick}>Done</Button>
                     </Col>
-                </Row>
+                </Row> */}
             </Col>
         );
     }

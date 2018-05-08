@@ -20,8 +20,16 @@ const {TextArea} = Input;
 
 class AdviceDetailContentImpl extends React.Component {
     renderAdviceMetrics = () => {
-        const {annualReturn, volatility, maxLoss, dailyNAVChangePct, netValue, totalReturn, nstocks} = this.props.metrics;
-        const {followers, subscribers} = this.props.adviceDetail;
+        const {
+            annualReturn = 0, 
+            volatility = 0, 
+            maxLoss = 0, 
+            dailyNAVChangePct = 0, 
+            netValue = 0, 
+            totalReturn = 0, 
+            nstocks = 0
+        } = this.props.metrics || {};
+        const {followers = 0, subscribers = 0} = this.props.adviceDetail || {};
         const metricsItems = [
             {value: subscribers, label: 'Subscribers'},
             {value: nstocks, label: 'Num. of Stocks'},
@@ -37,15 +45,29 @@ class AdviceDetailContentImpl extends React.Component {
 
 
     render() {
-        const {name, heading, description, advisor, updatedDate, isSubscribed, isOwner, rating} = this.props.adviceDetail;
-        const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.props.metrics;
-        // const {defaultActiveKey} = this.props;
+        const {
+            name = '', 
+            heading = '', 
+            description = '', 
+            advisor = '', 
+            updatedDate = '', 
+            isSubscribed = false, 
+            isOwner = false, 
+            rating = 0
+        } = this.props.adviceDetail || {};
+        const {
+            annualReturn = 0, 
+            totalReturns = 0, 
+            averageReturns = 0, 
+            dailyReturns = 0
+        } = this.props.metrics || {};
         const defaultActiveKey = !Utils.isLoggedIn() 
                 ? "1" // Show description
                 : isSubscribed || isOwner ? ["2","3"] : ["3"];
-                
+        const tickers = _.get(this.props, 'tickers', []);
+
         return (
-            <Col xl={18} md={24} style={shadowBoxStyle}>
+            <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
                 <Row className="row-container" type="flex" justify="space-between">
                     <Col span={18}>
                         <h1 style={adviceNameStyle}>{name}</h1>
@@ -59,10 +81,13 @@ class AdviceDetailContentImpl extends React.Component {
                                 <span style={dateStyle}>{updatedDate}</span>
                             </h5>
                         }
-                        <AqRate value={rating} />
+                        {
+                            !this.props.preview &&
+                            <AqRate value={rating} />
+                        }
                     </Col>
                     <Col xl={0} md={6}>
-                        {this.props.renderActionButtons()}
+                        {this.props.renderActionButtons && this.props.renderActionButtons()}
                     </Col>
                 </Row>
                 <Row className="row-container">
@@ -98,7 +123,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 </Row>
                             }>
                             <Row className="row-container" type="flex" justify="end" align="middle">
-                                {isOwner &&
+                                {isOwner && this.props.handlePortfolioStartDateChange  &&
                                     <Col span={6} style={{display: 'flex', justifyContent: 'flex-end', top: '225px', position:'absolute', zIndex:'2'}}>
                                         <DatePicker
                                             value={this.props.selectedPortfolioDate}
@@ -109,8 +134,9 @@ class AdviceDetailContentImpl extends React.Component {
                                 <Col span={24} style={{marginTop: '-10px'}}>
                                     <AqStockPortfolioTable
                                         composition
-                                        portfolio={{positions: this.props.positions}}
+                                        portfolio={{positions: this.props.positions || []}}
                                         updateTicker={this.props.updateTicker}
+                                        processedPositions={this.props.preview}
                                     />
                                 </Col>
                             </Row>
@@ -124,7 +150,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 header={<h3 style={metricsHeaderStyle}>Performance</h3>}
                             >
                             <Row className="row-container">
-                                <MyChartNew series={this.props.tickers} />
+                                <MyChartNew series={tickers} chartId="advice-detail-chart"/>
                             </Row>
                         </Panel>
                     }

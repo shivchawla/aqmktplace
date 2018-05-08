@@ -5,6 +5,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
+import {AdviceDetailContent} from './AdviceDetailContent';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate} from '../utils';
@@ -43,7 +44,7 @@ const Option = Select.Option;
 
 const dateFormat = 'YYYY-MM-DD';
 const dateOffset = 5;
-const maxNotional = [20000, 50000, 100000, 200000, 300000, 500000];
+const maxNotional = [500000, 50000, 100000, 200000, 300000, 500000];
 const rebalancingFrequency = [ 'Monthly', 'Daily', 'Weekly', 'Bi-Weekly', 'Quartely'];
 
 export class AdviceFormImpl extends React.Component {
@@ -73,11 +74,13 @@ export class AdviceFormImpl extends React.Component {
             public: false,
             isPublic: false,
             isOwner: false,
-            addTickerModalVisible: false,
+            performanceModalVisible: false,
             compositionSeries: [],
             show: false,
             stockResearchModalVisible: false,
             stockResearchModalTicker: {},
+            preview: false,
+            portfolioMetrics: {}
         };
         this.columns = [
             {
@@ -129,7 +132,7 @@ export class AdviceFormImpl extends React.Component {
         return current && current < moment().startOf('day');
     }
 
-    handleSubmit = (e) => {
+    handleSubmit = (e, publish = false) => {
         if (e.preventDefault) {
             e.preventDefault();
         }
@@ -177,11 +180,21 @@ export class AdviceFormImpl extends React.Component {
                     const adviceId = _.get(response.data, '_id', null);
                     const successMessage = isUpdate ? 'Advice Updated successfully' : 'Advice Created successfully';
                     message.success(successMessage);
-                    if (adviceId) {
-                        this.props.history.push(`/advice/${adviceId}`);
+                    if (method === 'POST' && publish) {
+                        return axios({
+                            url: `${requestUrl}/advice/${adviceId}/publish`,
+                            method: 'POST',
+                            headers: Utils.getAuthTokenHeader()
+                        })
                     } else {
-                        this.props.history.push('/advisordashboard');
+                        this.props.history.push(`/advice/${adviceId}`);
+                        return null;
                     }
+                })
+                .then(response => {
+                    const adviceId = _.get(response.data, 'adviceId', null);
+                    this.props.history.push(`/advice/${adviceId}`);
+                    message.success('Succesfully Created Advice');
                 })
                 .catch((error) => {
                     Utils.checkForInternet(error, this.props.history);
@@ -232,6 +245,7 @@ export class AdviceFormImpl extends React.Component {
                     return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))]
                 }
             );
+            const portfolioMetrics = _.get(response.data, 'portfolioPerformance.value.true', {});
             let series = [];
             series.push(
                 {
@@ -257,7 +271,11 @@ export class AdviceFormImpl extends React.Component {
                 tickers[1].data = benchmarkPerformanceData;
             }
 
-            this.setState({tickers, compositionSeries: series});
+            this.setState({
+                tickers, 
+                compositionSeries: series,
+                portfolioMetrics
+            });
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
@@ -390,100 +408,71 @@ export class AdviceFormImpl extends React.Component {
     }
 
     toggleAddTickerModal = () => {
-        this.setState({addTickerModalVisible: !this.state.addTickerModalVisible});
+        this.setState({performanceModalVisible: !this.state.performanceModalVisible});
     }
-
-    renderAddTickerModal = () => {
-        console.log(this.state.data);
+    
+    renderPerformanceModal = () => {
         return (
             <Modal
-                    title="Add Positions"
-                    visible={this.state.addTickerModalVisible}
+                    title="Performance View"
+                    visible={this.state.performanceModalVisible}
                     onOk={this.toggleAddTickerModal}
                     onCancel={this.toggleAddTickerModal}
                     width={980}
-                    bodyStyle={{height: 'calc(100vh - 100px)', overflow: 'hidden', overflowY: 'scroll'}}
+                    bodyStyle={{overflow: 'hidden', overflowY: 'scroll'}}
                     style={{top: 20}}
                     footer={null}
             >
-                <Row type="flex">
-                    {
-                        this.props.isUpdate
-                        ?   <AqStockTableMod 
-                                adviceId = {this.props.adviceId} 
-                                isUpdate={true}
-                                onChange = {this.onChange}
-                                setFieldsValue = {this.setFieldsValue}
-                                data={this.state.data}
-                                toggleModal={this.toggleAddTickerModal}
-                            />
-                        :   <AqStockTableMod 
-                                onChange = {this.onChange}
-                                setFieldsValue = {this.setFieldsValue}
-                                toggleModal={this.toggleAddTickerModal}
-                            />
-                    }
-                </Row>
+                {this.renderPortfolioDetailsTabs()}
             </Modal>
         );
     }
-    
+
     renderPortfolioDetailsTabs = () => {
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
-        // const editOperations = <Button onClick={this.toggleAddTickerModal} style={{marginRight: '10px'}}>{buttonText}</Button>;
         const series = [...this.state.compositionSeries];
         return (
-            <Tabs animated={false} defaultActiveKey="2">
-                <TabPane key="1" tab="Portfolio" style={{padding: '0 15px 20px 15px'}}>
-                    {this.getVerifiedTransactions().length > 0 ?
-                        <Row>
-                            <Col span={16}>
-                                {this.renderPortfolioTable()}
-                            </Col>
-                        
-                            <Col span={8}>
-                                <Row>
-                                    <Col span={24}>
-                                        <h4 style={{textAlign: 'center', fontSize: '16px'}}>Composition</h4>
-                                    </Col>
-                                </Row>
-                                <Row style={{marginLeft: '10px'}}>
-                                    {
-                                        series.length > 0 && series[0].data.length > 0 && series[0].data[0].y > 0 &&
-                                        <HighChartNew series={series}/>
-                                    }
-                                </Row>
-                            </Col>
-                        </Row>
-
-                        : this.renderEmptyAdviceBox()
-                    }
-                </TabPane>
-
-                <TabPane key="2" tab="Performance" style={{padding: '0 10px'}}>
+            <Row type="flex" align="middle">
+                <Col span={16}>
+                    <MyChartNew series={this.state.tickers} chartId="advice-form-performance-chart"/>
+                </Col>
+                <Col span={8}>
                     {
-                        this.getVerifiedTransactions().length > 0
-                        ?   <Row type="flex" justfy="center" align="middle">
-                                <Col span={24}>
-                                    <MyChartNew series={this.state.tickers}/>
-                                </Col>
-                                
-                            </Row>
-                        : this.renderEmptyAdviceBox()
+                        series.length > 0 && series[0].data.length > 0 && series[0].data[0].y > 0 &&
+                        <div type="flex" justify="center" align="middle">
+                            <h3 style={{fontSize: '16px'}}>Portfolio Composition</h3>
+                            <HighChartNew series={series}/>
+                        </div>
                     }
-                </TabPane>
-                
-            </Tabs>
+                </Col>
+            </Row>
         );
     }
 
-    renderPortfolioTable = () => {
-        var verifiedTransactions = this.getVerifiedTransactions();
+    getNetValue = () => {
+        const verifiedTransactions = this.getVerifiedTransactions();
         
-        var netValue = 0.0;
+        let netValue = 0.0;
         verifiedTransactions.forEach(transaction => {
             netValue+=transaction.totalValue;
         });
+
+        return netValue;
+    }
+
+    getNumberofStocks = () => {
+        const verifiedTransactions = this.getVerifiedTransactions();
+        let nStocks = 0;
+        verifiedTransactions.forEach(transaction => {
+            nStocks += Number(transaction.shares);
+        });
+
+        return nStocks;
+    }
+
+    renderPortfolioTable = () => {
+        const verifiedTransactions = this.getVerifiedTransactions();
+        const netValue =this.getNetValue();
 
         /*var netValueValid = netValue <= this.state.maxNotional * 1.05;
         const netValueValidIconSrc = !netValueValid ? 'exclamation-circle' : 'check-circle';
@@ -592,6 +581,8 @@ export class AdviceFormImpl extends React.Component {
             portfolio.map((item, index) => {
                 positions.push({
                     key: index,
+                    name: _.get(item, 'security.detail.Nse_Name', ''),
+                    sector: _.get(item, 'security.detail.Sector'),
                     lastPrice: item.lastPrice,
                     shares: item.quantity,
                     symbol: item.security.ticker,
@@ -600,7 +591,6 @@ export class AdviceFormImpl extends React.Component {
                 });
             });
 
-            console.log(positions);
             this.updateAllWeights(positions);
             this.setState({data: positions, startDate: advicePortfolio.detail.startDate, show: false}, () => {
                 this.getPortfolioPerformance();
@@ -647,7 +637,6 @@ export class AdviceFormImpl extends React.Component {
 
         return this.props.isUpdate && this.state.isPublic ? 
             moment(getFirstMonday(offset)) : moment().startOf('day');
-        
     }
 
     getDisabledDate = current => {
@@ -683,7 +672,7 @@ export class AdviceFormImpl extends React.Component {
                 this.getAdvice(this.props.adviceId);
             } else {
                 const tickers = [...this.state.tickers];
-                
+                this.props.form.setFieldsValue({startDate: this.getFirstValidDate()});
                 getStockPerformance(this.state.selectedBenchmark)
                 .then(performance => {
                     tickers[1].name = this.state.selectedBenchmark,
@@ -693,10 +682,252 @@ export class AdviceFormImpl extends React.Component {
         }
     }
 
-    renderPageContent = () => {
-        const {startDate, endDate} = this.state;
+    togglePreview = () => {
+        this.setState({preview: !this.state.preview});
+    }
+
+    renderForm = () => {
         const {getFieldDecorator} = this.props.form;
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
+
+        return (
+            <Col xl={18} lg={18} md={24} style={{display: this.state.preview ? 'none' : 'block'}}>
+                <Row>
+                    <Col span={24} style={{...shadowBoxStyle, padding: '20px', marginBottom:'20px', minHeight: '600px'}}>
+                        <Row>
+                            <Col span={24}>
+                                <Row>
+                                    <Col span={24}>
+                                        <h3 style={inputHeaderStyle}>
+                                            Advice Name
+                                        </h3>
+                                    </Col>
+                                    <Col span={24}>
+                                        <FormItem>
+                                            {getFieldDecorator('name', {
+                                                rules: [{required: true, message: 'Please enter Advice Name'}]
+                                            })(
+                                                <Input style={inputStyle} disabled={this.state.isPublic}/>
+                                            )}
+                                            
+                                        </FormItem>
+                                    </Col>
+                                </Row>
+                                <Row style={{marginTop: '10px'}}>
+                                    <Col span={24}>
+                                        <h3 style={inputHeaderStyle}>
+                                            Description
+                                        </h3>
+                                    </Col>
+                                    <Col span={24}>
+                                        <FormItem>
+                                            {getFieldDecorator('description', {
+                                                rules: [{required: true, message: 'Please enter Description'}]
+                                            })(
+                                                <TextArea 
+                                                        style={inputStyle} 
+                                                        autosize={{minRows: 3, maxRows: 6}}
+                                                        disabled={this.state.isPublic}
+                                                />
+                                            )}
+                                        </FormItem>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col span={24}>
+                                <Row style={{marginTop: '10px'}}>
+                                    <Col span={8} >
+                                        <h4 style={labelStyle}>Rebalancing Freq.</h4>
+                                        {
+                                            this.renderMenu(
+                                                rebalancingFrequency, 
+                                                this.handleRebalanceMenuClick,
+                                                this.state.rebalancingFrequency
+                                            )
+                                        }
+                                    </Col>
+
+                                    <Col span={8} >
+                                        <h4 style={labelStyle}>Start Date</h4>
+                                        <FormItem>
+                                            {getFieldDecorator('startDate', {
+                                                rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
+                                            })(
+                                                <DatePicker 
+                                                    format={dateFormat}
+                                                    style={{...inputStyle, width: 150}}
+                                                    disabledDate={this.getDisabledDate}
+                                                /> 
+                                            )}
+                                        </FormItem>
+                                    </Col>
+
+                                    <Col span={8} >
+                                        <h4 style={labelStyle}>Benchmark</h4>
+                                        {
+                                            this.renderMenu(
+                                                this.state.benchmarks, 
+                                                this.onBenchmarkSelected, 
+                                                this.state.selectedBenchmark
+                                            )
+                                        }
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col style={{border:' 1px solid #eaeaea', marginTop: '50px'}}>
+                                <Row style={{padding: '10px'}}> 
+                                    <Col span={8}>
+                                        <h3>Preview</h3>
+                                    </Col>
+                                    <Col span={16} style={{textAlign: 'right'}}>
+                                        <Button 
+                                                onClick={this.toggleAddTickerModal} 
+                                                style={{width: '150px'}}
+                                                disabled={this.getVerifiedTransactions().length < 1}
+                                        >
+                                            View Performance
+                                        </Button>
+                                    </Col>
+                                </Row>
+                                <Row type="flex" style={{margin: '0 10px'}}>
+                                    {
+                                        this.props.isUpdate
+                                        ?   <AqStockTableMod 
+                                                adviceId = {this.props.adviceId} 
+                                                isUpdate={true}
+                                                onChange = {this.onChange}
+                                                setFieldsValue = {this.setFieldsValue}
+                                                data={this.state.data}
+                                                toggleModal={this.toggleAddTickerModal}
+                                            />
+                                        :   <AqStockTableMod 
+                                                onChange = {this.onChange}
+                                                setFieldsValue = {this.setFieldsValue}
+                                                toggleModal={this.toggleAddTickerModal}
+                                            />
+                                    }
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+            </Col>
+        );
+    }
+
+    checkFormValidation = () => {
+        const name = this.props.form.getFieldValue('name') || '';
+        const description = this.props.form.getFieldValue('description') || '';
+        const startDate = this.props.form.getFieldValue('startDate') || undefined;
+        if(name.length > 0 && description.length > 0 && startDate !== undefined && this.getVerifiedTransactions().length > 0){
+            return false;
+        }
+        return true;
+    }
+
+    renderActionButtons = () => {
+        return (
+            <Row>
+                <Col span={24}>
+                    {
+                        !this.state.preview 
+                        ?   <React.Fragment>
+                                <Button 
+                                        style={{...buttonStyle, width: '200px'}}
+                                        type="primary" 
+                                        disabled={this.checkFormValidation()}
+                                        onClick={this.togglePreview} 
+                                >
+                                    PREVIEW ADVICE
+                                </Button>
+                                <Button 
+                                        style={{...buttonStyle, width: '200px'}}
+                                        disabled={this.checkFormValidation()}
+                                        onClick={(e) => this.handleSubmit(e, true)} 
+                                >
+                                    POST TO MARKET PLACE
+                                </Button>
+                            </React.Fragment>
+                        :   <React.Fragment>
+                                <Button 
+                                        style={{...buttonStyle, width: '200px'}}
+                                        type="primary" 
+                                        onClick={(e) => this.handleSubmit(e, true)} 
+                                >
+                                    POST NOW
+                                </Button>
+                                {
+                                    !this.props.isUpdate &&
+                                    <Button 
+                                            style={{...buttonStyle, width: '200px'}}
+                                            onClick={this.handleSubmit} 
+                                    >
+                                        SAVE FOR LATER
+                                    </Button>
+                                }
+                                <Button 
+                                        style={{...buttonStyle, width: '200px'}}
+                                        onClick={this.togglePreview} 
+                                >
+                                    EDIT
+                                </Button>
+                            </React.Fragment>
+                    }
+                </Col>
+            </Row>
+        );
+    }
+
+    renderPreview = () => {
+        const {name, description} = this.props.form.getFieldsValue();
+        const {portfolioMetrics} = this.state;
+        const adviceDetail = {
+            isOwner: true,
+            name,
+            description,
+            advisor: {
+                user: {
+                    firstName: _.get(Utils.getUserInfo(), 'firstName', null),
+                    lastName: _.get(Utils.getUserInfo(), 'lastName', null)
+                },
+                _id: _.get(Utils.getUserInfo(), 'advisor', null)
+            }
+        };
+        const metrics = {
+            annualReturn: _.get(portfolioMetrics, 'returns.annualreturn', 0),
+            volatility: _.get(portfolioMetrics, 'ratios.stability', 0),
+            totalReturn: _.get(portfolioMetrics, 'returns.totalreturn', 0),
+            netValue: this.getNetValue(),
+            nstocks: this.getNumberofStocks()
+        };
+        
+        const positions = this.getVerifiedTransactions().map(item => {
+            return {
+                name: item.name,
+                symbol: item.symbol,
+                shares: Number(item.shares),
+                price: item.lastPrice,
+                sector: item.sector,
+                weight: item.weight
+            }
+        });
+        return (
+            <AdviceDetailContent 
+                    tickers={this.state.tickers}
+                    adviceDetail={adviceDetail}
+                    metrics={metrics}
+                    positions={positions}
+                    preview={true}
+                    style={{display: this.state.preview ? 'block' : 'none'}}
+            />
+        );
+    }
+
+    renderPageContent = () => {
+        const {startDate, endDate} = this.state;
         const breadCrumbs = this.props.isUpdate
                 ? getBreadCrumbArray(UpdateAdviceCrumb, [
                     {name: this.state.adviceName, url: `/advice/${this.props.adviceId}`},
@@ -713,155 +944,27 @@ export class AdviceFormImpl extends React.Component {
                             visible={this.state.stockResearchModalVisible}
                             toggleModal={this.toggleModal}
                     />
-                    <AqPageHeader title={this.props.isUpdate ? "Update Advice" : "Create Advice"} breadCrumbs={breadCrumbs}/>
+                    <AqPageHeader 
+                            title={
+                                this.state.preview 
+                                ? 'Preview Advice' 
+                                : this.props.isUpdate ? "Update Advice" : "Create Advice"} 
+                            breadCrumbs={breadCrumbs}
+                    />
                     <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>
-                        <Button 
-                            style={{...buttonStyle, width: '200px'}} 
-                            type="primary" 
-                            onClick={this.handleSubmit}>
-                        {this.props.isUpdate ? "UPDATE ADVICE" : "POST TO MARKETPLACE"}
-                        </Button>
+                        {this.renderActionButtons()}
                     </Col>
-                    <Col xl={18} lg={18} md={24}>
-                        <Form onSubmit={this.handleSubmit}>
-                            <Row>
-                                <Col span={24} style={{...shadowBoxStyle, padding: '20px', margin: '20px 0', marginBottom:'20px', minHeight: '600px'}}>
-                                    <Row>
-                                        <Col span={24}>
-                                            <Row>
-                                                <Col span={24}>
-                                                    <h3 style={inputHeaderStyle}>
-                                                        Advice Name
-                                                    </h3>
-                                                </Col>
-                                                <Col span={24}>
-                                                    <FormItem>
-                                                        {getFieldDecorator('name', {
-                                                            rules: [{required: true, message: 'Please enter Advice Name'}]
-                                                        })(
-                                                            <Input style={inputStyle} disabled={this.state.isPublic}/>
-                                                        )}
-                                                        
-                                                    </FormItem>
-                                                </Col>
-                                            </Row>
-                                            <Row style={{marginTop: '10px'}}>
-                                                <Col span={24}>
-                                                    <h3 style={inputHeaderStyle}>
-                                                        Description
-                                                    </h3>
-                                                </Col>
-                                                <Col span={24}>
-                                                    <FormItem>
-                                                        {getFieldDecorator('description', {
-                                                            rules: [{required: true, message: 'Please enter Description'}]
-                                                        })(
-                                                            <TextArea 
-                                                                    style={inputStyle} 
-                                                                    autosize={{minRows: 3, maxRows: 6}}
-                                                                    disabled={this.state.isPublic}
-                                                            />
-                                                        )}
-                                                    </FormItem>
-                                                </Col>
-                                            </Row>
-                                        </Col>
-
-                                        <Col span={24}>
-                                            {/*<Row>
-                                                <Col span={24}>
-                                                    <h3 style={inputHeaderStyle}>Settings</h3>
-                                                </Col>
-                                            </Row>*/}
-
-                                                {/*<Col span={11} style={{marginTop: '10px'}}>
-                                                    <h4 style={labelStyle}>Max Notional</h4>
-                                                    {
-                                                        this.renderMenu(
-                                                            maxNotional, 
-                                                            this.handleMaxNotionalClick,
-                                                            this.state.maxNotional
-                                                        )
-                                                    }
-                                                </Col>*/}
-                                            <Row style={{marginTop: '10px'}}>
-                                                <Col span={8} >
-                                                    <h4 style={labelStyle}>Rebalancing Freq.</h4>
-                                                    {
-                                                        this.renderMenu(
-                                                            rebalancingFrequency, 
-                                                            this.handleRebalanceMenuClick,
-                                                            this.state.rebalancingFrequency
-                                                        )
-                                                    }
-                                                </Col>
-
-                                                <Col span={8} >
-                                                    <h4 style={labelStyle}>Start Date</h4>
-                                                    <FormItem>
-                                                        {getFieldDecorator('startDate', {
-                                                            rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
-                                                        })(
-                                                            <DatePicker 
-                                                                format={dateFormat}
-                                                                style={{...inputStyle, width: 150}}
-                                                                disabledDate={this.getDisabledDate}
-                                                            /> 
-                                                        )}
-                                                    </FormItem>
-                                                </Col>
-
-                                                <Col span={8} >
-                                                    <h4 style={labelStyle}>Benchmark</h4>
-                                                    {
-                                                        this.renderMenu(
-                                                            this.state.benchmarks, 
-                                                            this.onBenchmarkSelected, 
-                                                            this.state.selectedBenchmark
-                                                        )
-                                                    }
-                                                </Col>
-                                            </Row>
-                                        </Col>
-                                    </Row>
-                                    {/*<Row style={{marginBottom: '10px', marginTop: '20px'}}>
-                                        <Col span={24} style={{textAlign: 'right'}}>
-                                            <Button onClick={this.toggleAddTickerModal} type="primary">
-                                                {buttonText}
-                                            </Button>
-                                        </Col>
-                                    </Row>*/}
-                                    <Row>
-                                        <Col style={{border:' 1px solid #eaeaea', marginTop: '50px'}}>
-                                            <Row style={{padding: '10px'}}> 
-                                                <Col span={8}>
-                                                    <h3>Preview</h3>
-                                                </Col>
-                                                <Col span={16} style={{textAlign: 'right'}}>
-                                                    <Button onClick={this.toggleAddTickerModal} type="primary">
-                                                        {buttonText}
-                                                    </Button>
-                                                </Col>
-                                            </Row>
-                                            <Row >{this.renderPortfolioDetailsTabs()}</Row>
-                                        </Col>
-                                    </Row>
-                                </Col>
-                            </Row>
-                        </Form>
-                    </Col>
-                    <Col xl={6} lg={6} md={0} sm={0} xs={0} style={{marginTop: '20px'}}>
-                        <Row>
-                            <Col span={24}>
-                                <Button 
-                                        style={{...buttonStyle, width: '200px'}}
-                                        type="primary" 
-                                        onClick={this.handleSubmit} 
-                                >
-                                {this.props.isUpdate ? "UPDATE ADVICE" : "POST TO MARKETPLACE"}
-                                </Button>
-                            </Col>
-                        </Row>
+                    <Form onSubmit={this.handleSubmit} style={{marginTop: '20px'}}>
+                        {
+                            this.renderForm(this.state.preview)
+                        }
+                        {
+                            this.renderPreview(this.state.preview)
+                            
+                        }
+                    </Form>
+                    <Col xl={6} lg={6} md={0} sm={0} xs={0}>
+                        {this.renderActionButtons()}
                     </Col>
                 </React.Fragment>
             :   <ForbiddenAccess />
@@ -869,9 +972,10 @@ export class AdviceFormImpl extends React.Component {
     }
 
     render() {
+              
         return (
             <Row>
-                {this.renderAddTickerModal()}
+                {this.renderPerformanceModal()}
                 <Loading
                     show={this.state.show}
                     color={loadingColor}

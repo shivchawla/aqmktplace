@@ -826,10 +826,7 @@ class AdviceDetailImpl extends React.Component {
         const breadCrumbs = getBreadCrumbArray(AdviceDetailCrumb, [
             {name, url: '#'}
         ]);
-        const statusBarColor = this.state.adviceDetail.isOwner
-                ? statusColor.owner
-                : (this.state.adviceDetail.isSubscribed ? statusColor.subscribed : statusColor.notSubscribed);
-
+        
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />
@@ -856,40 +853,6 @@ class AdviceDetailImpl extends React.Component {
                     <Col span={6}>
                         {this.renderActionButtons()}
                     </Col>
-                    {/* {this.state.realtimeSecurities.length > 0 && 
-                        <Col span={6} >
-                            <div 
-                                    style={{
-                                        ...shadowBoxStyle, 
-                                        padding: '0px 10px', 
-                                        width: '95%', 
-                                        marginLeft:'auto', 
-                                        minHeight:'200px', 
-                                        maxHeight: '500px'
-                                    }}
-                            >
-                                <Col 
-                                        span={24} 
-                                        style={{
-                                            display: 'flex', 
-                                            flexDirection: 'row', 
-                                            justifyContent: 'space-between', 
-                                            padding: '10px 0px',
-                                            borderBottom: '1px solid #E6E6E6'
-                                        }}
-                                >
-                                    <h3 style={{fontSize: '16px'}}>Present Stocks</h3>
-                                </Col>
-                                <Col span={24}>
-                                    <WatchList 
-                                        tickers={this.state.realtimeSecurities}
-                                        preview={true}
-                                        onClick={this.handleWatchListClick}
-                                    />
-                                </Col>
-                            </div>
-                        </Col>
-                    } */}
                 </Row>
         );
     }
