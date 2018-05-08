@@ -246,7 +246,7 @@ class MyChartNewImpl extends React.Component {
         if (series.length == 1 && series[0].destroy) { // Items needs to be destroyed
             // console.log("Items will be destroyed");
             const item = series[0];
-            if (item.data === undefined || item.data.length < 1) {
+            if ((item.data === undefined || item.data.length < 1) && (item.noLoadData === undefined || item.noLoadData === false)) {
                 this.showLoader();
                 getStockPerformance(item.name.toUpperCase())
                 .then(performance => {
@@ -267,7 +267,7 @@ class MyChartNewImpl extends React.Component {
                 series.map(item => {
                     const seriesIndex = _.findIndex(this.chart.series, seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
                     if (seriesIndex === -1) {
-                        if (item.data === undefined || item.data.length < 1) { // When no data is passed
+                        if ((item.data === undefined || item.data.length < 1) && (item.noLoadData === undefined || item.noLoadData === false)) { // When no data is passed
                             // // console.log('Network call required', item.name);
                             this.showLoader();
                             getStockPerformance(item.name)
@@ -308,7 +308,7 @@ class MyChartNewImpl extends React.Component {
                     const seriesIndex = _.findIndex(this.chart.series, 
                                 seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
                     // if (seriesIndex === -1) {
-                        if (item.data === undefined || item.data.length < 1) { // When no data is passed
+                        if ((item.data === undefined || item.data.length < 1) && (item.noLoadData === undefined || item.noLoadData === false)) { // When no data is passed
                             this.showLoader();
                             getStockPerformance(item.name.toUpperCase())
                             .then(performance => {

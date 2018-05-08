@@ -105,7 +105,7 @@ class App extends React.Component {
                             <h1
                                     onClick={() => this.props.history.push('/home')} 
                                     style={{...headerColor, cursor: 'pointer'}}>
-                                    <span style={biggerFont}>A</span>DVICEQUB<span style={biggerFont}>E</span>
+                                    <span style={biggerFont}>A</span>DVICE<span style={biggerFont}>Q</span>UBE
                                 {/* ADVICEQUBE <span style={{fontSize: '12px', color: primaryColor}}>&nbsp;Beta</span> */}
                             </h1>
                         </Col>
@@ -227,7 +227,8 @@ const headerColor = {
 
 const biggerFont = {
     fontSize: '24px',
-    fontWeight: '700'
+    fontWeight: '400',
+    color: primaryColor
 }
 
 const contentLayoutStyle = {

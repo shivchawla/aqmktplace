@@ -58,7 +58,10 @@ export class AdviceFormImpl extends React.Component {
             initialCash: 100000,
             benchmarks,
             selectedBenchmark: 'NIFTY_50',
-            tickers: [{name:'Advice', color: performanceColor, data:[]}, {name:'', color: benchmarkColor, data:[]}],
+            tickers: [
+                {name:'Advice', color: performanceColor, data:[], noLoadData: true}, 
+                {name:'', color: benchmarkColor, data:[], noLoadData: true}
+            ],
             weightSeries: [],
             rebalancingFrequency: rebalancingFrequency[0],
             maxNotional: maxNotional[0],
@@ -250,6 +253,7 @@ export class AdviceFormImpl extends React.Component {
             } 
 
             if(benchmarkPerformanceData) {
+                tickers[1].name = this.state.selectedBenchmark;
                 tickers[1].data = benchmarkPerformanceData;
             }
 
