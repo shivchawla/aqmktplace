@@ -629,7 +629,7 @@ class StockResearchImpl extends React.Component {
                             </h1>
                             <h3 style={lastPriceStyle}>
                                 {Utils.formatMoneyValueMaxTwoDecimals(latestDetail.latestPrice)} 
-                                <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change} %</span>
+                                <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change}%</span>
                             </h3>
                             <h5 
                                     style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}

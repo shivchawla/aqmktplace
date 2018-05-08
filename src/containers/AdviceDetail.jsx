@@ -169,7 +169,7 @@ class AdviceDetailImpl extends React.Component {
             },
             metrics: {
                 ...this.state.metrics,
-                //nstocks,
+                nstocks,
                 annualReturn: annualReturnEOD,
                 totalReturn: effTotalReturn,
                 volatility,
@@ -574,7 +574,7 @@ class AdviceDetailImpl extends React.Component {
                 //otherwie it means, it is a new advice and current changes have no significance
                 const netValueEOD = _.get(this.performanceSummary, 'current.netValueEOD', 0);
                 const netValueEODDate = _.get(this.performanceSummary, 'current.netValueDate', 0);
-                const dailyNAVChangePct = DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
+                const dailyNAVChangePct = netValueEOD > 0.0 && DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
                         Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2)) : 
                         Number((_.get(this.performanceSummary, 'current.dailyNAVChangeEODPct', 0) * 100).toFixed(2));
                 

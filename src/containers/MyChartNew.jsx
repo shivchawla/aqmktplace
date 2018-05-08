@@ -90,7 +90,10 @@ class MyChartNewImpl extends React.Component {
                 plotOptions: {
                     series: {
                         compare: 'percent',
-                    }
+                        dataGrouping: {
+                            groupPixelWidth: 10,
+                        },
+                    },
                 },
                 yAxis: {
                     //gridLineColor: 'transparent',

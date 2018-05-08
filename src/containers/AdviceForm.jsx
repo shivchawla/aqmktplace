@@ -7,7 +7,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
-import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage} from '../utils';
+import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {store} from '../store';
 import {benchmarks} from '../constants/benchmarks';
@@ -390,6 +390,7 @@ export class AdviceFormImpl extends React.Component {
     }
 
     renderAddTickerModal = () => {
+        console.log(this.state.data);
         return (
             <Modal
                     title="Add Positions"
@@ -537,7 +538,7 @@ export class AdviceFormImpl extends React.Component {
     getAdvice = (id) => {
         const {requestUrl, aimsquantToken, userId} = localConfig;
         const adviceUrl =`${requestUrl}/advice/${id}`;
-        const adviceDetailUrl = `${adviceUrl}/detail`;
+        const advicePortfolioUrl = `${adviceUrl}/portfolio`;
         const tickers = [...this.state.tickers];
         this.setState({show: true});
         axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()})
@@ -573,15 +574,17 @@ export class AdviceFormImpl extends React.Component {
                 this.setState({show: false}, () => {
                     this.props.form.setFieldsValue({name, description, headline: heading});
                 });
-                return axios.get(adviceDetailUrl, {headers: Utils.getAuthTokenHeader()});
+                return axios.get(advicePortfolioUrl, {headers: Utils.getAuthTokenHeader()});
             } else {
                 this.setState({show: false});
                 return null;
             }
         })
-        .then(response => {
+        .then(advicePortfolioResponse => {
+            const advicePortfolio = advicePortfolioResponse.data;
+            console.log(advicePortfolio);
             const positions = [...this.state.positions];
-            const portfolio = _.get(response.data, 'portfolio.detail.positions', []);
+            const portfolio = _.get(advicePortfolio, 'detail.positions', []);
             portfolio.map((item, index) => {
                 positions.push({
                     key: index,
@@ -592,8 +595,10 @@ export class AdviceFormImpl extends React.Component {
                     totalValue: Number((item.quantity * item.lastPrice).toFixed(2))
                 });
             });
+
+            console.log(positions);
             this.updateAllWeights(positions);
-            this.setState({data: positions, startDate: response.data.portfolio.detail.startDate, show: false}, () => {
+            this.setState({data: positions, startDate: advicePortfolio.detail.startDate, show: false}, () => {
                 this.getPortfolioPerformance();
                 this.props.form.setFieldsValue({startDate: moment(this.state.startDate)});
             });
@@ -626,9 +631,33 @@ export class AdviceFormImpl extends React.Component {
         return totalValue;
     }
 
+    getFirstValidDate = () => {
+       var offset = '1d';
+        switch(this.state.rebalancingFrequency) {
+            case "Daily": offset = '1d'; break;
+            case "Weekly": offset = '1w'; break;
+            case "Bi-Weekly": offset = '2w'; break;
+            case "Monthly": offset = '1m'; break;
+            case "Quartely": offset = '1q'; break;
+        }
+
+        return this.props.isUpdate && this.state.isPublic ? 
+            moment(getFirstMonday(offset)) : moment().startOf('day');
+        
+    }
+
     getDisabledDate = current => {
-        return this.props.isUpdate && this.state.public ? 
-            current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1) : 
+        let offset;
+        switch(this.state.rebalancingFrequency) {
+            case "Daily": offset = '1d'; break;
+            case "Weekly": offset = '1w'; break;
+            case "Bi-Weekly": offset = '2w'; break;
+            case "Monthly": offset = '1m'; break;
+            case "Quartely": offset = '1q'; break;
+        }
+
+        return this.props.isUpdate && this.state.isPublic ? 
+            current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1 || compareDates(getDate(current.toDate()), getFirstMonday(offset)) != 0)  : 
             current && (current < moment().startOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
     }
 
