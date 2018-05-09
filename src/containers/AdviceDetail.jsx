@@ -200,22 +200,24 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
-    getAdvicePerformance = (response) => {
+    getAdvicePerformance = (performance) => {
         const tickers = [...this.state.tickers];
-        if (response.data.simulated) {
+        if (performance.simulated) {
             tickers.push({
                 name: 'Simulated Performance',
-                data: this.processPerformanceData(_.get(response.data, 'simulated.portfolioValues', [])),
+                data: this.processPerformanceData(_.get(performance, 'simulated.portfolioValues', [])),
                 color: simulatedPerformanceColor
             });
         }
-        if (response.data.current) {
+
+        if (performance.current) {
             tickers.push({
                 name: 'True Performance',
-                data: this.processPerformanceData(_.get(response.data, 'current.portfolioValues', [])),
+                data: this.processPerformanceData(_.get(performance, 'current.portfolioValues', [])),
                 color: currentPerformanceColor
             });
         }
+        
         this.setState({tickers});
     }
 
@@ -227,11 +229,13 @@ class AdviceDetailImpl extends React.Component {
 
     getDefaultAdviceData = () => {
         const adviceId = this.props.match.params.id;
-        const adviceSummaryUrl = `${requestUrl}/advice_default/${adviceId}`;
+        const adviceSummaryUrl = `${requestUrl}/advice_default/${adviceId}?fullperformance=true`;
         this.setState({show: true});
+        
         fetchAjax(adviceSummaryUrl)
         .then(summaryResponse => {
             this.getAdviceSummary(summaryResponse);
+            this.getAdvicePerformance(summaryResponse.data.performance);
         })
         .finally(() => {
             this.setState({show: false});
@@ -257,7 +261,7 @@ class AdviceDetailImpl extends React.Component {
         ]) 
         .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
             this.getAdviceSummary(adviceSummaryResponse);
-            this.getAdvicePerformance(advicePerformanceResponse);
+            this.getAdvicePerformance(advicePerformanceResponse.data);
             
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
             //ADVICE SUMMARY IN BACKEND first calculated full performance
