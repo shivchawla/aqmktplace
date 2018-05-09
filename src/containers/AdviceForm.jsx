@@ -74,6 +74,7 @@ export class AdviceFormImpl extends React.Component {
             public: false,
             isPublic: false,
             isOwner: false,
+            loadingPerformance: false,
             performanceModalVisible: false,
             compositionSeries: [],
             show: false,
@@ -228,9 +229,8 @@ export class AdviceFormImpl extends React.Component {
               exchange: "NSE"
             }
         };
-        
-
         const hasBenchmarkData = this.state.tickers && this.state.tickers[1].data && this.state.tickers[1].data.length > 0;
+        this.setState({loadingPerformance: true});
         Promise.all([
             axios({
                 headers: Utils.getAuthTokenHeader(),
@@ -282,6 +282,9 @@ export class AdviceFormImpl extends React.Component {
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
+        })
+        .finally(() => {
+            this.setState({loadingPerformance: false});
         });
     }
 
@@ -424,7 +427,9 @@ export class AdviceFormImpl extends React.Component {
                     style={{top: 20}}
                     footer={null}
             >
-                {this.renderPortfolioDetailsTabs()}
+                <Spin spinning={this.state.loadingPerformance}>
+                    {this.renderPortfolioDetailsTabs()}
+                </Spin>
             </Modal>
         );
     }
@@ -756,6 +761,7 @@ export class AdviceFormImpl extends React.Component {
                                                 rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
                                             })(
                                                 <DatePicker 
+                                                    allowClear={false}
                                                     format={dateFormat}
                                                     style={{...inputStyle, width: 150}}
                                                     disabledDate={this.getDisabledDate}
@@ -781,19 +787,24 @@ export class AdviceFormImpl extends React.Component {
                             <Col style={{border:' 1px solid #eaeaea', marginTop: '50px'}}>
                                 <Row style={{padding: '10px'}}> 
                                     <Col span={8}>
-                                        <h3>Preview</h3>
+                                        <h3>Portfolio</h3>
                                     </Col>
-                                    <Col span={16} style={{textAlign: 'right'}}>
+                                </Row>
+                                <Row type="flex" style={{margin: '0 10px', position: 'relative'}}>
                                         <Button 
                                                 onClick={this.toggleAddTickerModal} 
-                                                style={{width: '150px'}}
+                                                style={{
+                                                    width: '150px', 
+                                                    position: 'absolute', 
+                                                    right: '0px', 
+                                                    top: '5px',
+                                                    zIndex: 20
+                                                }}
+                                                type="primary"
                                                 disabled={this.getVerifiedTransactions().length < 1}
                                         >
                                             View Performance
                                         </Button>
-                                    </Col>
-                                </Row>
-                                <Row type="flex" style={{margin: '0 10px'}}>
                                     {
                                         this.props.isUpdate
                                         ?   <AqStockTableMod 
@@ -978,7 +989,6 @@ export class AdviceFormImpl extends React.Component {
     }
 
     render() {
-              
         return (
             <Row>
                 {this.renderPerformanceModal()}

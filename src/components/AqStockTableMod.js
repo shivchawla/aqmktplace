@@ -273,23 +273,17 @@ export class AqStockTableMod extends React.Component {
         return (
             <Col span={24}>
                 <Row style={{marginBottom: '20px'}}>
-                    <Col span={4}>
-                        <Button 
-                                disabled={this.state.selectedRows.length > 0 ? false : true} 
-                                onClick={this.deleteItems}
-                        >
-                            Delete Selected
-                        </Button>
-                    </Col>
-                    <Col span={4} offset={16} style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-                        <Button  
-                                type="primary" 
-                                onClick={this.addItem}
-                                style={{width: '150px'}}
-                        >
-                            Add Position
-                        </Button>
-                    </Col>
+                    <Button
+                            shape="circle" icon="delete" size="large" 
+                            disabled={this.state.selectedRows.length > 0 ? false : true} 
+                            onClick={this.deleteItems}
+                    />
+                    <Button  
+                            shape="circle" icon="plus" size="large" 
+                            type="primary" 
+                            onClick={this.addItem}
+                            style={{marginLeft: '20px'}}
+                    />
                 </Row>
                 <Table 
                         rowSelection={this.getRowSelection()} 
