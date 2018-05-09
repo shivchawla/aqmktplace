@@ -150,7 +150,7 @@ export default class Home extends React.Component {
                     {/* <Col span={24}>
                         <h3 className="page-header">AimsQube</h3>
                     </Col> */}
-                    <Col span={12}>
+                    <Col span={12} style={{paddingLeft: '40px'}}>
                         <Row>
                             <Col span={24}>
                                 <h1 className="hero-text">Expert-Sourced<br></br>Investment Portfolio</h1>
@@ -180,7 +180,7 @@ export default class Home extends React.Component {
                         </Row>
                     </Col>
                     <Col span={12} className='hero-image'>
-                        <img src={heroImage} />
+                        <img style={{marginLeft: '-20px'}} src={heroImage} />
                     </Col>
                 </Row>
                 <Row className="middle-section">
