@@ -40,7 +40,17 @@ class AuthMessageImpl extends Component {
             </Link>
           </React.Fragment>
         );
-      }else if (this.params.get('mode') === 'forgotpassword'){
+      } else if (this.params.get('mode') === 'activationComplete') {
+          return (
+            <React.Fragment>
+              <h2 style={{'fontSize': '24px', 'color': 'teal'}}>
+                You have successfully activated your account!!
+              </h2>
+              <Button type="primary" onClick={() => this.props.history.push('/login')} style={{'marginTop': '20px'}}>LOGIN</Button>
+            </React.Fragment>
+          );
+      } 
+      else if (this.params.get('mode') === 'forgotpassword'){
         return (
           <React.Fragment>
             <h2 style={{'fontSize': '24px', 'color': 'teal'}}>
