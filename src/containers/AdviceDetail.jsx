@@ -61,6 +61,11 @@ class AdviceDetailImpl extends React.Component {
                 netValue: 0,
                 period:0,
             },
+            performance: {
+                current: {},
+                simulated: {}
+            },
+            performanceType: 'Current',
             tickers: [],
             isDialogVisible: false,
             isUpdateDialogVisible: false,
@@ -135,8 +140,9 @@ class AdviceDetailImpl extends React.Component {
         } = response.data;
 
         this.performanceSummary = performanceSummary;
-        
-        const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks, period} = _.get(performanceSummary, 'current', {});
+        const currentPerformance = _.get(performanceSummary, 'current', {});
+        const simulatedPerformance = _.get(performanceSummary, 'simulated', {});
+        const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks, period} = currentPerformance;
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         tickers.push({name: benchmark, color: benchmarkColor});
 
@@ -177,6 +183,10 @@ class AdviceDetailImpl extends React.Component {
                 maxLoss,
                 dailyNAVChangePct: 0,
                 netValue
+            },
+            performance: {
+                current: currentPerformance,
+                simulated: simulatedPerformance
             }
         });
     }
@@ -824,6 +834,31 @@ class AdviceDetailImpl extends React.Component {
         this.updateTicker({symbol: name, name});
     }
 
+    handlePerformanceToggleChange = checked => {
+        const {
+            annualReturn = 0, 
+            dailyNAVChangeEODPct = 0,
+            netValueEOD = 0, 
+            totalReturn = 0, 
+            volatility = 0, 
+            maxLoss = 0, 
+            nstocks = 0, 
+            period = 0
+        } = checked ? this.state.performance.current : this.state.performance.simulated;
+        this.setState({
+            metrics: {
+                ...this.state.metrics,
+                annualReturn,
+                totalReturn,
+                volatility,
+                maxLoss,
+                dailyNAVChangePct: 0,
+                netValue: netValueEOD
+            },
+            performanceType: checked ? 'Current' : 'Simulated'
+        })
+    }
+
     renderPageContent = () => {
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
@@ -853,6 +888,9 @@ class AdviceDetailImpl extends React.Component {
                             updateTicker={this.updateTicker}
                             tickers={this.state.tickers}
                             renderActionButtons={this.renderActionButtons}
+                            showPerformanceToggle={Utils.isLoggedIn()}
+                            handlePerformanceToggleChange={this.handlePerformanceToggleChange}
+                            performanceType={this.state.performanceType}
                     />
                     <Col span={6}>
                         {this.renderActionButtons()}

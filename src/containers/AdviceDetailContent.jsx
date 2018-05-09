@@ -43,7 +43,6 @@ class AdviceDetailContentImpl extends React.Component {
         return <AdviceMetricsItems metrics={metricsItems} />
     };
 
-
     render() {
         const {
             name = '', 
@@ -90,10 +89,16 @@ class AdviceDetailContentImpl extends React.Component {
                     </Col>
                 </Row>
                 <Row className="row-container">
-                    <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
-                        <h3 style={{fontSize: '14px', display: 'inline-block', marginRight: '5px'}}>Current</h3>
-                        <Switch defaultChecked />,
-                    </Col>
+                    { this.props.showPerformanceToggle &&
+                        <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
+                            <h3 
+                                    style={{fontSize: '14px', display: 'inline-block', marginRight: '5px'}}
+                            >
+                                {this.props.performanceType}
+                            </h3>
+                            <Switch defaultChecked onChange={this.props.handlePerformanceToggleChange} />
+                        </Col>
+                    }
                     <Col span={24}>
                         {this.renderAdviceMetrics()}
                     </Col>
