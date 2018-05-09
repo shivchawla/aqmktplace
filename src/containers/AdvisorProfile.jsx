@@ -289,8 +289,9 @@ export default class AdvisorProfile extends React.Component {
                     onOk={this.toggleUpdateModal}
                     onCancel={this.toggleUpdateModal}
                     footer={null}
-                    bodyStyle={{height: '600px', overflow: 'hidden', overflowY: 'scroll'}}
+                    bodyStyle={{height: '665px', overflow: 'hidden', overflowY: 'scroll'}}
                     width={900}
+                    style={{top: 20}}
             >
                 <UpdateAdvisorProfile 
                         isCompany={this.state.isCompany}

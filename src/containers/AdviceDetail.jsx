@@ -787,7 +787,11 @@ class AdviceDetailImpl extends React.Component {
                 <Row type="flex">
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
-                                onClick={this.toggleDialog}
+                                onClick={() => 
+                                    Utils.isLoggedIn() 
+                                    ? this.toggleDialog() 
+                                    : this.props.history.push('/login')
+                                }
                                 className='action-button'
                                 style={{fontWeight: '300'}}
                                 type="primary"
@@ -798,7 +802,11 @@ class AdviceDetailImpl extends React.Component {
                     </Col>
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
-                                onClick={this.followAdvice}
+                                onClick={() => 
+                                    Utils.isLoggedIn()
+                                    ? this.followAdvice()
+                                    : this.props.history.push('/login') 
+                                }
                                 className='action-button'
                                 style={{marginTop: 10}}
                                 disabled={this.state.disableFollowButton}

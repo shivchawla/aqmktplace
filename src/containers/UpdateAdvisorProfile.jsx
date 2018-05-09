@@ -112,29 +112,58 @@ class UpdateAdvisorProfileImpl extends React.Component {
         this.setState({picUrl: response.values[0].pictureUrl})
     }
 
-    updateUserProfile = () => {
+    updateUserProfile = e => {
+        e.preventDefault();
         const url = `${requestUrl}/advisor/${this.props.advisorId}/profile`;
-        // console.log('Data', this.processData());
-        axios({
-            method: 'PUT',
-            url,
-            headers: Utils.getAuthTokenHeader(),
-            data: this.processData()
-        })
-        .then(response => {
-            message.success('Successfully updated profile');
-            if (this.props.getAdvisorSummary) {
-                this.props.getAdvisorSummary();
-            }
-            this.props.toggleModal();
-        })
-        .catch(error => {
-            message.error('Error occured while updating profile');
-            // console.log(error);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                if (!this.checkSebiValidation()) {
+                    message.error('Please provide your SEBI registration number');
+                    return;
+                }
+                if (!this.checkCompanyValidation()) {
+                    message.error('Please provide a Company name and Company registration number');
+                    return;
+                }
+                axios({
+                    method: 'PUT',
+                    url,
+                    headers: Utils.getAuthTokenHeader(),
+                    data: this.processData()
+                })
+                .then(response => {
+                    message.success('Successfully updated profile');
+                    if (this.props.getAdvisorSummary) {
+                        this.props.getAdvisorSummary();
+                    }
+                    this.props.toggleModal();
+                })
+                .catch(error => {
+                    message.error('Error occured while updating profile');
+                    if (error.response) {
+                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                    }
+                });
+            } else {
+                console.log('Error ', err);
             }
         });
+    }
+
+    checkSebiValidation = () => {
+        if (this.state.isSebiRegistered) {
+            return this.props.form.getFieldValue('sebiRegistrationNum').length > 0;
+        } 
+        return true;
+    }
+
+    checkCompanyValidation = () => {
+        console.log(this.props.form.getFieldValue('companyRegistrationNum'));
+        console.log(this.props.form.getFieldValue('companyName'));
+        if (this.state.isCompany) {
+            return this.props.form.getFieldValue('companyRegistrationNum').length > 0 && this.props.form.getFieldValue('companyName').length > 0;
+        }
+        return true;
     }
 
     processData = () => {
@@ -206,12 +235,14 @@ class UpdateAdvisorProfileImpl extends React.Component {
         this.setState({isSebiRegistered: e.target.checked});
     }
 
-    renderInput = (name, label, disabled = false) => {
+    renderInput = (name, label, required = false, disabled = false) => {
         const {getFieldDecorator} = this.props.form;
 
         return (
             <FormItem>
-                {getFieldDecorator(name)(
+                {getFieldDecorator(name, {
+                    rules: [{ required, message: 'This is a required field' }],
+                })(
                     <Input 
                         type="text" 
                         disabled={disabled}
@@ -226,106 +257,155 @@ class UpdateAdvisorProfileImpl extends React.Component {
         const {getFieldDecorator} = this.props.form;
 
         return (
-            <Form onSubmit={this.handleSubmit}>
-                <Row type="flex" justify="start">
+            <Form onSubmit={this.updateUserProfile}>
+                <Row type="flex" justify="start" style={{...sectionContainerStyle, marginTop: '0px'}}>
+                    <Col span={24}>
+                        <h3 style={sectionHeaderStyle}>Personal Details</h3>
+                    </Col>
                     <Col span={11}>
-                        {this.renderInput('firstName', 'First Name', true)}
-                    </Col>
-                    <Col span={10} style={{marginLeft: '10px'}}>
-                        {this.renderInput('lastName', 'Last Name', true)}
-                    </Col>
-                </Row>
-                <Row style={{height: '45px'}} type="flex" align="middle">
-                    <Col span={11}>
-                        <h3 style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}>Are you a company ?</h3>
-                        {this.renderRadioGroup()}
-                    </Col>
-                    <Col span={11} style={{marginLeft: '10px', display: this.state.isCompany ? 'block' : 'none'}}>
-                        {this.renderInput('companyRegistrationNum', 'Company Registration Number')}
-                    </Col>
-                </Row>
-                <Row>
-                    <Col span={11}>
-                        {this.renderInput('companyName', 'Company Name')}
+                        {this.renderInput('firstName', 'First Name', false, true)}
                     </Col>
                     <Col span={11} style={{marginLeft: '10px'}}>
-                        {this.renderInput('webUrl', 'Web Url')}
+                        {this.renderInput('lastName', 'Last Name', false, true)}
+                    </Col>
+                    <Col span={24}>
+                        <Row style={{height: '45px'}} type="flex" align="middle">
+                            <Col span={11}>
+                                <h3 
+                                        style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}
+                                >
+                                    Are you SEBI registered ?
+                                </h3>
+                                {this.renderSebiRegisteredGroup()}
+                            </Col>
+                            <Col 
+                                    span={11} 
+                                    style={{marginLeft: '10px', display: this.state.isSebiRegistered ? 'block' : 'none'}}
+                            >
+                                {this.renderInput('sebiRegistrationNum', 'Sebi Reg. Number')}
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
-                <Row style={{height: '45px'}} type="flex" align="middle">
-                    <Col span={11}>
-                        <h3 style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}>Are you SEBI registered ?</h3>
-                        {this.renderSebiRegisteredGroup()}
+                <Row style={sectionContainerStyle}>
+                    <Col span={24}>
+                        <h3 style={sectionHeaderStyle}>Company Details</h3>
                     </Col>
-                    <Col span={11} style={{marginLeft: '10px', display: this.state.isSebiRegistered ? 'block' : 'none'}}>
-                        {this.renderInput('sebiRegistrationNum', 'Sebi Registration Number')}
-                    </Col>
-                </Row>
-                <h3>Address</h3>
-                <Row>
-                    <Col span={11}>
-                        {this.renderInput('line1', 'Line 1')}
-                    </Col>
-                    <Col span={11} style={{marginLeft: '10px'}}>
-                        {this.renderInput('line2', 'Line 2')}
-                    </Col>
-                </Row>
-                <Row>
-                    <Col span={7}>
-                        {this.renderInput('city', 'City')}
-                    </Col>
-                    <Col span={7} style={{marginLeft: '10px'}}>
-                        {this.renderInput('state', 'State')}
-                    </Col>
-                    <Col span={7} style={{marginLeft: '10px'}}>
-                        {this.renderInput('pincode', 'Pincode')}
+                    <Col span={24}>
+                        <Row style={{height: '45px'}} type="flex" align="middle">
+                            <Col span={11}>
+                                <h3 style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}>Are you a company ?</h3>
+                                {this.renderRadioGroup()}
+                            </Col>
+                        </Row>
+                        <Row style={{display: this.state.isCompany ? 'block' : 'none'}}>
+                            <Col span={11}>
+                                {this.renderInput('companyRegistrationNum', 'Company Registration Number')}
+                            </Col>
+                            <Col span={11} style={{marginLeft: '10px'}}>
+                                {this.renderInput('companyName', 'Company Name')}
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
-                <h3>Others</h3>
-                <Row>
-                    <Col span={11}>
-                        {this.renderInput('phone', 'Phone')}
+                <Row style={sectionContainerStyle}>
+                    <Col span={24}>
+                        <h3 style={sectionHeaderStyle}>Address</h3>
+                    </Col>
+                    <Col span={24}>
+                        <Row>
+                            <Col span={11}>
+                                {this.renderInput('line1', 'Line 1')}
+                            </Col>
+                            <Col span={11} style={{marginLeft: '10px'}}>
+                                {this.renderInput('line2', 'Line 2')}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={11}>
+                                {this.renderInput('city', 'City')}
+                            </Col>
+                            <Col span={11} style={{marginLeft: '10px'}}>
+                                {this.renderInput('state', 'State')}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={11}>
+                                {this.renderInput('pincode', 'Pincode')}
+                            </Col>
+                            <Col span={11} style={{marginLeft: '10px'}}>
+                                {this.renderInput('phone', 'Phone')}
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
-                <Row>
-                    <Col span={11}>
-                        <FormItem>
-                            {getFieldDecorator('linkedIn')(
-                                    <Input placeholder="LinkedIn Public Profile Url" addonBefore={
-                                        <Icon type="linkedin" onClick={this.authenticateLN} />
-                                    } />
-                            )}
-                        </FormItem>
+                <Row style={sectionContainerStyle}>
+                    <Col span={24}>
+                        <h3 style={sectionHeaderStyle}>Social</h3>
                     </Col>
-                    <Col span={11} style={{marginLeft: '10px'}}>
-                        <FormItem>
-                            {getFieldDecorator('twitter')(
-                                <Input placeholder="Twitter Public Profile Url" addonBefore={
-                                    <Icon type="twitter" onClick={this.handleIconClick}/>
-                                } />
-                            )}
-                        </FormItem>
+                    <Col span={24}>
+                        <Row>
+                            <Col span={11}>
+                                <FormItem>
+                                    {getFieldDecorator('linkedIn')(
+                                            <Input placeholder="LinkedIn Public Profile Url" addonBefore={
+                                                <Icon type="linkedin" onClick={this.authenticateLN} />
+                                            } />
+                                    )}
+                                </FormItem>
+                            </Col>
+                            <Col span={11} style={{marginLeft: '10px'}}>
+                                <FormItem>
+                                    {getFieldDecorator('twitter')(
+                                        <Input placeholder="Twitter Public Profile Url" addonBefore={
+                                            <Icon type="twitter" onClick={this.handleIconClick}/>
+                                        } />
+                                    )}
+                                </FormItem>
+                            </Col>
+                            <Col span={11}>
+                                <FormItem>
+                                    {getFieldDecorator('facebook')(
+                                        <Input placeholder="Facebook Public Profile Url" addonBefore={
+                                            <Icon type="facebook" onClick={this.handleIconClick}/>
+                                        } />
+                                    )}
+                                </FormItem>
+                            </Col>
+                            <Col span={11} style={{marginLeft: '10px'}}>
+                                <FormItem>
+                                    {getFieldDecorator('webUrl')(
+                                        <Input placeholder="Facebook Public Profile Url" addonBefore={
+                                            <Icon type="global" onClick={this.handleIconClick}/>
+                                        } />
+                                    )}
+                                </FormItem>
+                            </Col>
+                        </Row>       
                     </Col>
-                    <Col span={11}>
-                        <FormItem>
-                            {getFieldDecorator('facebook')(
-                                <Input placeholder="Facebook Public Profile Url" addonBefore={
-                                    <Icon type="facebook" onClick={this.handleIconClick}/>
-                                } />
-                            )}
-                        </FormItem>
+                </Row>
+                <Row type="flex" justify="end" style={{marginTop: '20px'}}>
+                    <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <Button type="primary" htmlType="submit">Update</Button>
                     </Col>
-                </Row>                
-                <FormItem>
-                    <Row type="flex" justify="end" style={{marginTop: '20px'}}>
-                        <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                            <Button type="primary" htmlType="submit" onClick={this.updateUserProfile}>Update</Button>
-                        </Col>
-                    </Row>
-                </FormItem>
+                </Row>
             </Form>
         );
     }
 }
 
 export const UpdateAdvisorProfile = Form.create()(withRouter(UpdateAdvisorProfileImpl));
+
+const sectionContainerStyle = {
+    padding: '10px', 
+    marginTop: '10px', 
+    border: '1px solid #eaeaea',
+    borderRadius: '4px',
+    transition: 'all 0.4s ease-in-out'
+};
+
+const sectionHeaderStyle = {
+    fontSize: '14px',
+    color: '#323C5A',
+    fontWeight: 700
+}
