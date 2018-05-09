@@ -705,7 +705,7 @@ export default class AdvisorDashboard extends React.Component {
                             {this.renderFilterModal()}
                             <Col span={24} style={{marginTop: '10px'}}>
                                 <Row gutter={12}>
-                                    <Col span={12}>
+                                    <Col xl={12} lg={24}>
                                         <DashboardCard 
                                                 headerStyle={headerStyle}
                                                 title=" MY ADVICES"
@@ -717,7 +717,7 @@ export default class AdvisorDashboard extends React.Component {
                                             {this.renderAdvices()}
                                         </DashboardCard>
                                     </Col>
-                                    <Col span={12}>
+                                    <Col xl={12} lg={24}>
                                         <DashboardCard 
                                                 headerStyle={headerStyle}
                                                 cardStyle={{marginTop:'10px', height:'425px'}} 
@@ -733,15 +733,15 @@ export default class AdvisorDashboard extends React.Component {
                                         </DashboardCard>
                                     </Col>
                                 </Row>
-                                <Row style={{marginTop: '12px'}}>
-                                    <Col xl={12} md={24} style={{paddingRight: '5px'}} >
+                                <Row gutter={12}>
+                                    <Col xl={12} lg={24} style={{marginTop: '12px'}}>
                                         <Row style={{height: '380px', ...shadowBoxStyle, ...noOverflowStyle}}>
                                             <Col span={24}>
                                                 {this.renderSubscriberStatsView()}
                                             </Col>
                                         </Row>
                                     </Col>
-                                    <Col xl={12} md={24} style={{paddingLeft: '5px'}}>
+                                    <Col xl={12} lg={24} style={{marginTop: '12px'}}>
                                         <Spin spinning={this.state.dashboardDataLoading}>
                                             <Row style={{height: '380px', ...shadowBoxStyle, ...noOverflowStyle}}>
                                                 <Col span={24}>

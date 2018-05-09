@@ -4,7 +4,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker, Spin} from 'antd';
+import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker, Spin, Button} from 'antd';
 import {AqPortfolioCompositionAdvice, MetricItem} from '../components';
 import {loadingColor} from '../constants';
 import {MyChartNew} from '../containers/MyChartNew';
@@ -181,35 +181,54 @@ class SubscribedAdvicesImpl extends React.Component {
 
     renderAdvices = () => {
         const {advices = []} = this.state;
-
-        return advices.map((item, index) => {
-            const data = this.processComposition(item);
-            const adviceSeries = [
-                {name: 'Current Performance', data: item.currentPerformance, color: currentPerformanceColor},
-                {name: 'Simulated Performance', data: item.simulatedPerformance, color: simulatedPerformanceColor}
-            ];
-
+        if (advices.length > 0) {
+            return advices.map((item, index) => {
+                const data = this.processComposition(item);
+                const adviceSeries = [
+                    {name: 'Current Performance', data: item.currentPerformance, color: currentPerformanceColor},
+                    {name: 'Simulated Performance', data: item.simulatedPerformance, color: simulatedPerformanceColor}
+                ];
+    
+                return (
+                    <Panel 
+                            header={this.renderHeaderItem(item)} 
+                            key={index}
+                            
+                    >
+                        <Tabs animated={false} tabBarExtraContent={this.renderDatePicker(item)}>
+                            <TabPane tab="Composition" key="1">
+                                <Row>
+                                    <Col span={24} style={{marginTop: 20, padding: '0 20px'}}>
+                                        <Table size="small" columns={this.columns} dataSource={data} pagination={false}/>
+                                    </Col>
+                                </Row>
+                            </TabPane>
+                            {/* <TabPane tab="Performance" key="2">
+                                <MyChartNew series={adviceSeries} chartId={`${item.name}-chart-container`}/>
+                            </TabPane> */}
+                        </Tabs>
+                    </Panel>
+                );
+            });
+        } else {
             return (
-                <Panel 
-                        header={this.renderHeaderItem(item)} 
-                        key={index}
-                        
-                >
-                    <Tabs animated={false} tabBarExtraContent={this.renderDatePicker(item)}>
-                        <TabPane tab="Composition" key="1">
-                            <Row>
-                                <Col span={24} style={{marginTop: 20, padding: '0 20px'}}>
-                                    <Table size="small" columns={this.columns} dataSource={data} pagination={false}/>
-                                </Col>
-                            </Row>
-                        </TabPane>
-                        {/* <TabPane tab="Performance" key="2">
-                            <MyChartNew series={adviceSeries} chartId={`${item.name}-chart-container`}/>
-                        </TabPane> */}
-                    </Tabs>
-                </Panel>
+                <Row type="flex" style={{width: '100%', height: '100%', marginTop: '15%'}}>
+                    <Col span={24} style={{textAlign: 'center'}}>
+                        <h3 style={{fontSize: '26px'}}>You haven't subscribed to any advices yet</h3>
+                    </Col>
+                    <Col span={24} style={{textAlign: 'center'}}>
+                        <Button 
+                                type="primary" 
+                                style={{width: '200', height: '35px', marginTop: '20px'}}
+                                onClick={() => this.props.history.push('/advice')}
+                        >
+                            Screen Advices
+                        </Button>
+                    </Col>
+                </Row>
             );
-        });
+        }
+        
     }
 
     processComposition = (advice) => {

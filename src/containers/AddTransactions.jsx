@@ -51,7 +51,8 @@ class AddTransactionsImpl extends React.Component {
             stockResearchModalTicker: {name: 'TCS', symbol: 'TCS'},
             submitButtonLoading: false,
             previewCash: 0,
-            loadingPreviewData: false
+            loadingPreviewData: false,
+            defaultChecked: false
         };
         this.adviceKey = 0;
     }
@@ -287,7 +288,8 @@ class AddTransactionsImpl extends React.Component {
                 const data = {
                     preview: false,
                     transactions,
-                    ...additionalData
+                    ...additionalData,
+                    setdefault: this.state.defaultChecked
                 };
                 this.setState({submitButtonLoading: true});
                 axios({
@@ -952,6 +954,10 @@ class AddTransactionsImpl extends React.Component {
         return transactions.length;
     }
 
+    handleDefaultChange = (e) => {
+        this.setState({defaultChecked: e.target.checked});
+    }
+
     componentWillUpdate(nextProps, nextState) {
         // console.log('Advices', nextState.advices);
         // console.log('Subscribed Advices', nextState.subscribedAdvices);
@@ -987,14 +993,16 @@ class AddTransactionsImpl extends React.Component {
                                     <Button 
                                             type="primary" 
                                             onClick={this.handleSubmit} 
-                                            style={{marginRight: '20px'}}
+                                            style={{marginRight: '20px', width: '200px'}}
                                     >
                                         SAVE
                                     </Button>
                                     
                                     <Button 
-                                        onClick={this.togglePreviewModal} 
-                                        style={{marginRight: '20px'}}>
+                                            onClick={this.togglePreviewModal} 
+                                            style={{width: '200px'}}
+                                            disabled={!this.checkPreviewButtonDisabled()}
+                                    >
                                         Preview
                                     </Button>
                                     
@@ -1003,13 +1011,14 @@ class AddTransactionsImpl extends React.Component {
                                     {
                                         <Row type="flex" align="top" justify="space-between" style={{padding: '20px 20px 0px 20px'}}>
                                             <Col span={10} style={{margin:'auto 0'}}>
+                                                <h3 style={metricsLabelStyle}>Portfolio Name</h3>
                                                 <FormItem>
                                                     {getFieldDecorator('name', {
                                                         rules: [{required: true, message: 'Please enter Portfolio Name'}]
                                                     })(
                                                         <Input 
                                                                 disabled={this.props.portfolioId ? true : false} 
-                                                                style={{fontSize: '22px', height:'48px', padding:'10px'}} 
+                                                                style={{padding:'10px'}} 
                                                                 placeholder="Portfolio Name" 
                                                         />
                                                     )}
@@ -1020,11 +1029,14 @@ class AddTransactionsImpl extends React.Component {
                                             </Col>
                                         </Row>
                                     }
-                                    <Row style={{marginLeft: '20px', marginBottom: '20px'}}>
-                                        <Col span={24}>
-                                            <Checkbox>Make Default Portfolio</Checkbox>
-                                        </Col>
-                                    </Row>
+                                    {
+                                        !this.props.portfolioId &&
+                                        <Row style={{marginLeft: '20px', marginBottom: '20px'}}>
+                                            <Col span={24}>
+                                                <Checkbox onChange={this.handleDefaultChange}>Make Default Portfolio</Checkbox>
+                                            </Col>
+                                        </Row>
+                                    }
                                     <Row style={{marginTop: '5px'}}>
                                         <Col span={24}>
                                             <Tabs defaultActiveKey="2" animated={false} style={{paddingBottom: '20px'}}>

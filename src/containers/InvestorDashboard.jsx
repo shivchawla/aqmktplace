@@ -966,7 +966,7 @@ export default class InvestorDashboard extends React.Component {
                 :   
                     <Col style={{paddingBottom: '20px'}}>
                         <Row gutter={12}>
-                            <Col xl={12} lg={24}>
+                            <Col xl={12} lg={24} style={{marginTop: '20px'}}>
                                 <DashboardCard 
                                         title="SUMMARY" 
                                         loading={this.state.defaultPortfolioLoading}
@@ -985,7 +985,7 @@ export default class InvestorDashboard extends React.Component {
                                 </DashboardCard>
                             </Col>
                             
-                            <Col xl={12} lg={24}>
+                            <Col xl={12} lg={24} style={{marginTop: '20px'}}>
                                 <DashboardCard 
                                         title="PERFORMANCE CHART" 
                                         loading={this.state.defaultPortfolioLoading}

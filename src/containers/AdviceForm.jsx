@@ -918,7 +918,7 @@ export class AdviceFormImpl extends React.Component {
             volatility: _.get(portfolioMetrics, 'ratios.stability', 0),
             totalReturn: _.get(portfolioMetrics, 'returns.totalreturn', 0),
             netValue: this.getNetValue(),
-            nstocks: this.getNumberofStocks()
+            nstocks: this.getVerifiedTransactions().length
         };
         
         const positions = this.getVerifiedTransactions().map(item => {
