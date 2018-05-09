@@ -70,7 +70,7 @@ export default class ScreenAdvices extends React.PureComponent {
         // console.log(this.state.selectedFilters);
         this.getQustionnaireModal();
         if (!Utils.isLoggedIn()) {
-            this.getDefaultAdvices();
+            this.getAdvices();
             // Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
             this.getAdvices();
@@ -165,6 +165,7 @@ export default class ScreenAdvices extends React.PureComponent {
             <Modal 
                     title="Select Preferences"
                     visible={this.state.questionnaireModalVisible}
+                    onCancel={this.toggleQuestionnaireModal}
                     footer={[
                         <Button key="skip" onClick={this.toggleQuestionnaireModal}>Skip</Button>,
                         <Button key="submit" type="primary" onClick={this.handleQuestionnaireFilterChange}>Done</Button>
@@ -295,7 +296,8 @@ export default class ScreenAdvices extends React.PureComponent {
         const {netValue, sharpe, volatility, rating} = selectedFilters;
         approved = _.join(approved, ',');
         personal = _.join(personal, ',');
-        const url = `${requestUrl}/advice?&${type}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip}&orderParam=${orderParam}&order=-1`;
+        const adviceRequestType = Utils.isLoggedIn() ?  'advice' : 'advice_default'
+        const url = `${requestUrl}/${adviceRequestType}?&${type}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip}&orderParam=${orderParam}&order=-1`;
         return url;
     }
 

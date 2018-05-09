@@ -43,6 +43,7 @@ class Login extends Component {
                   Utils.localStorageSaveObject(Utils.userInfoString, response.data);
                 }
                 Utils.setLoggedInUserInfo(response.data);
+                Utils.localStorageSave('selectedPage', 1);
                 const redirectUrl = Utils.getRedirectAfterLoginUrl();
                 if (redirectUrl){
                   this.props.history.push(redirectUrl);

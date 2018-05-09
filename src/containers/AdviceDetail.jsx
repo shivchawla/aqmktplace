@@ -258,6 +258,19 @@ class AdviceDetailImpl extends React.Component {
             this.getAdviceSummary(summaryResponse);
             this.getAdvicePerformance(summaryResponse.data.performance);
         })
+        .catch(error => {
+            Utils.checkForInternet(error, this.props.history);
+            this.setState({
+                positions: [],
+                series: []
+            });
+            if (error.response) {
+                if (error.response.status === 400) {
+                    this.setState({notAuthorized: true});
+                }
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        })
         .finally(() => {
             this.setState({show: false});
         });
@@ -327,7 +340,7 @@ class AdviceDetailImpl extends React.Component {
                 positions: [],
                 series: []
             });
-            // console.log(error);
+            console.log(error);
             if (error.response) {
                 if (error.response.status === 400) {
                     this.setState({notAuthorized: true});

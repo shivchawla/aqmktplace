@@ -160,7 +160,7 @@ class App extends React.Component {
                                             type="primary" 
                                             shape="circle"
                                             style={{marginTop: '18px'}}
-                                            onClick={this.openPopOverMenu}
+                                            // onClick={this.openPopOverMenu}
                                     >
                                         {Utils.getLoggedInUserInitials()} 
                                     </Button>
