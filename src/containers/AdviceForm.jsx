@@ -359,11 +359,12 @@ export class AdviceFormImpl extends React.Component {
 
     onBenchmarkSelected = (ticker) => {
         const tickers = [...this.state.tickers];
+        this.setState({selectedBenchmark: ticker});
         getStockPerformance(ticker)
         .then(performance => {
             tickers[1].name = ticker;
             tickers[1].data = performance;
-            this.setState({tickers, selectedBenchmark: ticker});
+            this.setState({tickers});
         });
     }
 
@@ -716,7 +717,7 @@ export class AdviceFormImpl extends React.Component {
                                 <Row style={{marginTop: '10px'}}>
                                     <Col span={24}>
                                         <h3 style={inputHeaderStyle}>
-                                            Description
+                                            Investment Objective
                                         </h3>
                                     </Col>
                                     <Col span={24}>

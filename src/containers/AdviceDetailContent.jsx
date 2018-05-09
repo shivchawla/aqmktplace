@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input} from 'antd';
+import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate} from '../components';
@@ -91,7 +91,13 @@ class AdviceDetailContentImpl extends React.Component {
                     </Col>
                 </Row>
                 <Row className="row-container">
-                    {this.renderAdviceMetrics()}
+                    <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
+                        <h3 style={{fontSize: '14px', display: 'inline-block', marginRight: '5px'}}>Current</h3>
+                        <Switch defaultChecked />,
+                    </Col>
+                    <Col span={24}>
+                        {this.renderAdviceMetrics()}
+                    </Col>
                 </Row>
                 <Row>
                     <Col span={24} style={dividerStyle}></Col>

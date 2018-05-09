@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
+import ReactQuill from 'react-quill';
 import {Utils} from '../utils';
 import { Spin, Icon } from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import Loading from 'react-loading-bar'
 import 'react-loading-bar/dist/index.css'
+import 'react-quill/dist/quill.snow.css';
 
 class TnC extends Component {
 
@@ -64,6 +66,10 @@ class TnC extends Component {
     const antIconLoading = <Icon type="loading" style={{ fontSize: 34 }} spin />;
 
     const getTnCDiv = () => {
+      const modules = {
+        toolbar: false
+      };
+
       if (this.state.loading){
         return (
           <div style={{'display': 'flex',
@@ -74,7 +80,7 @@ class TnC extends Component {
         );
       }else if (this.state.tnc){
         return (
-          <div dangerouslySetInnerHTML={{__html: this.state.tnc}}></div>
+          <ReactQuill value={this.state.tnc} toolbar={false} modules={modules} readOnly/>
         );
       }else{
         return (

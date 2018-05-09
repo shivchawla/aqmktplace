@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
+import ReactQuill from 'react-quill';
 import {Utils} from '../utils';
 import { Spin, Icon } from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import Loading from 'react-loading-bar'
 import 'react-loading-bar/dist/index.css'
+import 'react-quill/dist/quill.snow.css';
 
 const {requestUrl} = require('../localConfig');
 
@@ -65,6 +67,9 @@ class Policy extends Component {
     const antIconLoading = <Icon type="loading" style={{ fontSize: 34 }} spin />;
 
     const getPolicyDiv = () => {
+      const modules = {
+        toolbar: false
+      };
       if (this.state.loading){
         return (
           <div style={{'display': 'flex',
@@ -75,7 +80,8 @@ class Policy extends Component {
         );
       }else if (this.state.privacyPolicy){
         return (
-          <div dangerouslySetInnerHTML={{__html: this.state.privacyPolicy}}></div>
+          // <div dangerouslySetInnerHTML={{__html: this.state.privacyPolicy}}></div>
+          <ReactQuill value={this.state.privacyPolicy} toolbar={false} modules={modules} readOnly/>
         );
       }else{
         return (

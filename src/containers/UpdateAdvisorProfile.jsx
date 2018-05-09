@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {withRouter} from 'react-router';
 import {Input, Button, Form, Icon, Popover, Row, Col, Avatar, Radio, Checkbox, message} from 'antd';
 import {Utils} from '../utils';
+import {primaryColor} from '../constants';
 
 const {TextArea} = Input;
 const FormItem = Form.Item;
@@ -16,7 +17,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
         super(props);
         this.state = {
             picUrl: '',
-            value: 1,
+            isCompany: false,
             isSebiRegistered: false,
             linkedInUserId: ''
         };
@@ -46,7 +47,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 webUrl = '', 
                 linkedIn = '', 
                 phone = '', 
-                isCompany = '', 
+                isCompany = false, 
                 companyName = '', 
                 companyRegistrationNum = '', 
                 facebook = '', 
@@ -54,6 +55,10 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 isSebiRegistered = false,
                 sebiRegistrationNum = ''
             } = _.get(advisor, 'profile', {});
+            const {
+                firstName = '',
+                lastName = ''
+            } = _.get(advisor, 'user', {});
             const {
                 line1 = '', 
                 line2 = '', 
@@ -63,12 +68,8 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 pincode = '', 
                 state = ''
             } = _.get(advisor, 'profile.address', {});
-            if (!isCompany) {
-                value = 2;
-            }
             // url, photoUrl, userId
-            this.setState({value, isSebiRegistered});
-
+            this.setState({isCompany, isSebiRegistered});
             this.props.form.setFieldsValue({
                 webUrl,
                 line1,
@@ -80,10 +81,12 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 phone,
                 linkedIn: _.get(linkedIn, 'url', ''),
                 companyName,
+                facebook: _.get(facebook, 'url', ''),
+                twitter:  _.get(twitter, 'url', ''),
                 companyRegistrationNum,
                 sebiRegistrationNum,
-                facebook: _.get(facebook, 'url', ''),
-                twitter:  _.get(twitter, 'url', '')
+                firstName, 
+                lastName
             });
         }
     }
@@ -147,7 +150,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
                 pincode: Number(values.pincode),
                 country: "IN"
             },
-            isCompany: this.state.value === 1 ? true: false,
+            isCompany: this.state.isCompany,
             isSebiRegistered: this.state.isSebiRegistered,
             sebiRegistrationNum:  values.sebiRegistrationNum,
             companyRegistrationNum: values.companyRegistrationNum,
@@ -175,19 +178,48 @@ class UpdateAdvisorProfileImpl extends React.Component {
 
     renderRadioGroup = () => {
         return (
-            <RadioGroup value={this.state.value} onChange={this.handleRadioChange}>
-                <Radio value={1}>Is Company</Radio>
-                <Radio value={2}>Is Individual</Radio>
+            <RadioGroup value={this.state.isCompany} onChange={this.handleRadioChange}>
+                <Radio value={true}>Yes</Radio>
+                <Radio value={false}>No</Radio>
+            </RadioGroup>
+        );
+    }
+
+    renderSebiRegisteredGroup = () => {
+        return (
+            <RadioGroup value={this.state.isSebiRegistered} onChange={this.handleSebiRadioChange}>
+                <Radio value={true}>Yes</Radio>
+                <Radio value={false}>No</Radio>
             </RadioGroup>
         );
     }
 
     handleRadioChange = (e) => {
-        this.setState({value: e.target.value});
+        this.setState({isCompany: e.target.value});
+    }
+
+    handleSebiRadioChange = e => {
+        this.setState({isSebiRegistered: e.target.value});
     }
 
     handleIsRegisteredChange = (e) => {
         this.setState({isSebiRegistered: e.target.checked});
+    }
+
+    renderInput = (name, label, disabled = false) => {
+        const {getFieldDecorator} = this.props.form;
+
+        return (
+            <FormItem>
+                {getFieldDecorator(name)(
+                    <Input 
+                        type="text" 
+                        disabled={disabled}
+                        addonBefore={<h3 style={{fontSize: '12px', color: primaryColor}}>{label}</h3>}
+                    />
+                )}
+            </FormItem>
+        );
     }
 
     render() {
@@ -195,97 +227,95 @@ class UpdateAdvisorProfileImpl extends React.Component {
 
         return (
             <Form onSubmit={this.handleSubmit}>
-                <Row>
-                    <Col span={24}>
+                <Row type="flex" justify="start">
+                    <Col span={11}>
+                        {this.renderInput('firstName', 'First Name', true)}
+                    </Col>
+                    <Col span={10} style={{marginLeft: '10px'}}>
+                        {this.renderInput('lastName', 'Last Name', true)}
+                    </Col>
+                </Row>
+                <Row style={{height: '45px'}} type="flex" align="middle">
+                    <Col span={11}>
+                        <h3 style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}>Are you a company ?</h3>
                         {this.renderRadioGroup()}
                     </Col>
-                </Row>
-                <FormItem>
-                    {getFieldDecorator('companyRegistrationNum')(
-                            <Input 
-                                    type="number" 
-                                    placeholder="Company Registration Number" 
-                                    disabled={this.state.value === 2}
-                            />
-                    )}
-                </FormItem>
-                <Row>
-                    <Col span={24}>
-                        <Checkbox
-                                onChange={this.handleIsRegisteredChange}
-                                checked={this.state.isSebiRegistered}
-                        >
-                            Is Sebi Registered
-                        </Checkbox>
+                    <Col span={11} style={{marginLeft: '10px', display: this.state.isCompany ? 'block' : 'none'}}>
+                        {this.renderInput('companyRegistrationNum', 'Company Registration Number')}
                     </Col>
                 </Row>
-                <FormItem>
-                    {getFieldDecorator('sebiRegistrationNum')(
-                            <Input 
-                                    type="number" 
-                                    placeholder="Sebi Registration Number" 
-                                    disabled={!this.state.isSebiRegistered}
-                            />
-                    )}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('companyName')(<Input placeholder="Company Name" />)}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('webUrl')(<Input placeholder="Web Url" />)}
-                </FormItem>
+                <Row>
+                    <Col span={11}>
+                        {this.renderInput('companyName', 'Company Name')}
+                    </Col>
+                    <Col span={11} style={{marginLeft: '10px'}}>
+                        {this.renderInput('webUrl', 'Web Url')}
+                    </Col>
+                </Row>
+                <Row style={{height: '45px'}} type="flex" align="middle">
+                    <Col span={11}>
+                        <h3 style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}>Are you SEBI registered ?</h3>
+                        {this.renderSebiRegisteredGroup()}
+                    </Col>
+                    <Col span={11} style={{marginLeft: '10px', display: this.state.isSebiRegistered ? 'block' : 'none'}}>
+                        {this.renderInput('sebiRegistrationNum', 'Sebi Registration Number')}
+                    </Col>
+                </Row>
                 <h3>Address</h3>
-                <FormItem>
-                    {getFieldDecorator('line1')(<Input  placeholder="Line 1" />)}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('line2')(<Input  placeholder="Line 2" />)}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('line3')(<Input  placeholder="Line 3" />)}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('city')(<Input  placeholder="City" />)}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('state')(<Input  placeholder="State" />)}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('pincode')(<Input  placeholder="Pincode" />)}
-                </FormItem>
+                <Row>
+                    <Col span={11}>
+                        {this.renderInput('line1', 'Line 1')}
+                    </Col>
+                    <Col span={11} style={{marginLeft: '10px'}}>
+                        {this.renderInput('line2', 'Line 2')}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col span={7}>
+                        {this.renderInput('city', 'City')}
+                    </Col>
+                    <Col span={7} style={{marginLeft: '10px'}}>
+                        {this.renderInput('state', 'State')}
+                    </Col>
+                    <Col span={7} style={{marginLeft: '10px'}}>
+                        {this.renderInput('pincode', 'Pincode')}
+                    </Col>
+                </Row>
                 <h3>Others</h3>
-                <FormItem>
-                    {getFieldDecorator('phone')(<Input type="number"  placeholder="Phone" />)}
-                </FormItem>
-                <FormItem>
-                    <Row>
-                        <Col span={2}>
-                            <Avatar
-                                    size="large" icon="user"
-                                    src={this.state.picUrl}
-                            />
-                        </Col>
-                    </Row>
-                    {getFieldDecorator('linkedIn')(
-                            <Input placeholder="LinkedIn Public Profile Url" addonBefore={
-                                <Icon type="linkedin" onClick={this.authenticateLN} />
-                            } />
-                    )}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('twitter')(
-                        <Input placeholder="Twitter Public Profile Url" addonBefore={
-                            <Icon type="twitter" onClick={this.handleIconClick}/>
-                        } />
-                    )}
-                </FormItem>
-                <FormItem>
-                    {getFieldDecorator('facebook')(
-                        <Input placeholder="Facebook Public Profile Url" addonBefore={
-                            <Icon type="facebook" onClick={this.handleIconClick}/>
-                        } />
-                    )}
-                </FormItem>
+                <Row>
+                    <Col span={11}>
+                        {this.renderInput('phone', 'Phone')}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col span={11}>
+                        <FormItem>
+                            {getFieldDecorator('linkedIn')(
+                                    <Input placeholder="LinkedIn Public Profile Url" addonBefore={
+                                        <Icon type="linkedin" onClick={this.authenticateLN} />
+                                    } />
+                            )}
+                        </FormItem>
+                    </Col>
+                    <Col span={11} style={{marginLeft: '10px'}}>
+                        <FormItem>
+                            {getFieldDecorator('twitter')(
+                                <Input placeholder="Twitter Public Profile Url" addonBefore={
+                                    <Icon type="twitter" onClick={this.handleIconClick}/>
+                                } />
+                            )}
+                        </FormItem>
+                    </Col>
+                    <Col span={11}>
+                        <FormItem>
+                            {getFieldDecorator('facebook')(
+                                <Input placeholder="Facebook Public Profile Url" addonBefore={
+                                    <Icon type="facebook" onClick={this.handleIconClick}/>
+                                } />
+                            )}
+                        </FormItem>
+                    </Col>
+                </Row>                
                 <FormItem>
                     <Row type="flex" justify="end" style={{marginTop: '20px'}}>
                         <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>

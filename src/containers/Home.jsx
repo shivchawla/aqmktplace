@@ -157,33 +157,25 @@ export default class Home extends React.Component {
                             </Col>
                             <Col span={24}>
                                 <h5 className="hero-description-text">
-                                    Best investment ideas. Let the experts help you <br></br> build the portfolio your desire.
+                                    Best investment ideas.<br></br>Let the experts help you build the portfolio your desire.
                                 </h5>
                             </Col>
                             {
-                                !Utils.isLoggedIn() 
-                                ?   <Button 
-                                            className="signup-button" 
-                                            onClick={() => this.props.history.push('/signup')}
+                                <Row>
+                                    <Button 
+                                            className="signup-button"
+                                            onClick={() => this.props.history.push('/advice')}
                                     >
-                                        SIGN UP
+                                        Find Investment Ideas
                                     </Button>
-                                :   <Row>
-                                        <Button 
-                                                className="signup-button"
-                                                style={{width: 'inherit'}}
-                                                onClick={() => this.props.history.push('/advice')}
-                                        >
-                                            Find Investment Ideas
-                                        </Button>
-                                        <Button 
-                                                style={{marginLeft: '20px'}}
-                                                className="action-buttons"
-                                                onClick={() => this.props.history.push('/advisordashboard/createadvice')}
-                                        >
-                                            Create Financial Advice
-                                        </Button>
-                                    </Row>
+                                    <Button 
+                                            style={{marginLeft: '20px'}}
+                                            className="action-buttons"
+                                            onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                                    >
+                                        Create Financial Advice
+                                    </Button>
+                                </Row>
                             }
                         </Row>
                     </Col>
