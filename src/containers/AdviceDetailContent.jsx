@@ -61,9 +61,8 @@ class AdviceDetailContentImpl extends React.Component {
             averageReturns = 0, 
             dailyReturns = 0
         } = this.props.metrics || {};
-        const defaultActiveKey = !Utils.isLoggedIn() 
-                ? "1" // Show description
-                : isSubscribed || isOwner ? ["2","3"] : ["3"];
+        const defaultActiveKey = Utils.isLoggedIn() 
+                ? (isSubscribed || isOwner) ? ["2","3"] : ["3"] : ["3"];
         const tickers = _.get(this.props, 'tickers', []);
 
         return (
@@ -142,18 +141,15 @@ class AdviceDetailContentImpl extends React.Component {
                             </Row>
                         </Panel>
                     }
-                    {
-                        Utils.isLoggedIn() &&
-                        <Panel
-                                key="3"
-                                style={customPanelStyle}
-                                header={<h3 style={metricsHeaderStyle}>Performance</h3>}
-                            >
-                            <Row className="row-container">
-                                <MyChartNew series={tickers} chartId="advice-detail-chart"/>
-                            </Row>
-                        </Panel>
-                    }
+                    <Panel
+                            key="3"
+                            style={customPanelStyle}
+                            header={<h3 style={metricsHeaderStyle}>Performance</h3>}
+                        >
+                        <Row className="row-container">
+                            <MyChartNew series={tickers} chartId="advice-detail-chart"/>
+                        </Row>
+                    </Panel>
                 </Collapse>
             </Col>
         )
