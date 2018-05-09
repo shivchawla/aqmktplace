@@ -28,9 +28,9 @@ export const getUnixStockData = (data) => {
     })
 }
 
-export const getStockPerformance = (tickerName) => {
+export const getStockPerformance = (tickerName, detailType='detail') => {
     return new Promise((resolve, reject) => {
-        getStockData(tickerName)
+        getStockData(tickerName, 'priceHistory', detailType)
         .then(performance => {
             const data = performance.data.priceHistory;
             if (data.length > 0) { // Check if ticker is valid

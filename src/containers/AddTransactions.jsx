@@ -1041,7 +1041,7 @@ class AddTransactionsImpl extends React.Component {
                                         </Col>
                                     </Row>
                                 </Col>
-                                <Col xl={5} lg={5} md={0} sm={0} xs={0} offset={1}>
+                                <Col xl={6} lg={6} md={0} sm={0} xs={0} >
                                     <Row type="flex">
                                         <Col span={24}>
                                             <Button 
@@ -1049,6 +1049,7 @@ class AddTransactionsImpl extends React.Component {
                                                     onClick={this.handleSubmit} 
                                                     style={buttonStyle}
                                                     loading={this.state.submitButtonLoading}
+                                                    className='action-button'
                                             >
                                                 SAVE
                                             </Button>
@@ -1058,6 +1059,7 @@ class AddTransactionsImpl extends React.Component {
                                                     onClick={this.togglePreviewModal} 
                                                     style={buttonStyle}
                                                     disabled={!this.checkPreviewButtonDisabled()}
+                                                    className='action-button'
                                             >
                                                 Preview
                                             </Button>

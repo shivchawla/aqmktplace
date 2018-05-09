@@ -193,3 +193,7 @@ h1, h2, h3, h4, h5 {
 .signup-form-item {
   margin-bottom: 10px;
 }
+
+.action-button {
+  width: 90%;
+}

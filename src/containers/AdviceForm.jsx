@@ -837,41 +837,46 @@ export class AdviceFormImpl extends React.Component {
                         !this.state.preview 
                         ?   <React.Fragment>
                                 <Button 
-                                        style={{...buttonStyle, width: '200px'}}
+                                        style={{...buttonStyle}}
                                         type="primary" 
                                         disabled={this.checkFormValidation()}
                                         onClick={this.togglePreview} 
+                                        className='action-button'
                                 >
                                     PREVIEW ADVICE
                                 </Button>
                                 <Button 
-                                        style={{...buttonStyle, width: '200px'}}
+                                        style={{...buttonStyle}}
                                         disabled={this.checkFormValidation()}
                                         onClick={(e) => this.handleSubmit(e, true)} 
+                                        className='action-button'
                                 >
                                     POST TO MARKET PLACE
                                 </Button>
                             </React.Fragment>
                         :   <React.Fragment>
                                 <Button 
-                                        style={{...buttonStyle, width: '200px'}}
+                                        style={{...buttonStyle}}
                                         type="primary" 
                                         onClick={(e) => this.handleSubmit(e, true)} 
+                                        className='action-button'
                                 >
                                     POST NOW
                                 </Button>
                                 {
                                     !this.props.isUpdate &&
                                     <Button 
-                                            style={{...buttonStyle, width: '200px'}}
+                                            style={{...buttonStyle}}
                                             onClick={this.handleSubmit} 
+                                            className='action-button'
                                     >
                                         SAVE FOR LATER
                                     </Button>
                                 }
                                 <Button 
-                                        style={{...buttonStyle, width: '200px'}}
+                                        style={{...buttonStyle}}
                                         onClick={this.togglePreview} 
+                                        className='action-button'
                                 >
                                     EDIT
                                 </Button>

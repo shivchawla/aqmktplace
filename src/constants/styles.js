@@ -97,7 +97,7 @@ export const nameEllipsisStyle = {
 };
 
 export const buttonStyle = {
-    width: '100px',
+    // width: '100px',
     marginBottom: '10px',
     marginLeft: '20px'
 };

@@ -12,7 +12,7 @@ import {AdviceDetailContent} from './AdviceDetailContent';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
-import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax} from '../utils';
+import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax, getStockPerformance} from '../utils';
 import '../css/adviceDetail.css';
 
 
@@ -118,7 +118,6 @@ class AdviceDetailImpl extends React.Component {
     };
 
     getAdviceSummary = (response, performance = true) => {
-        const tickers = [];
         const {
             name,
             description,
@@ -144,7 +143,19 @@ class AdviceDetailImpl extends React.Component {
         const simulatedPerformance = _.get(performanceSummary, 'simulated', {});
         const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks, period} = currentPerformance;
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
-        tickers.push({name: benchmark, color: benchmarkColor});
+        if (!Utils.isLoggedIn()) {
+            getStockPerformance(benchmark, 'detail_benchmark')
+            .then(performanceArray => {
+                const benchMarkticker = {name: benchmark, color: benchmarkColor, data: performanceArray};
+                this.setState({tickers: performance ? [...this.state.tickers, benchMarkticker] : this.state.tickers});
+            })
+        } else {
+            getStockPerformance(benchmark)
+            .then(performanceArray => {
+                const benchMarkticker = {name: benchmark, color: benchmarkColor, data: performanceArray};
+                this.setState({tickers: performance ? [...this.state.tickers, benchMarkticker] : this.state.tickers});
+            })
+        }
 
         //Compute change in NAV from EOD nav
         //Number(((netValueEOD > 0.0 && netValue > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
@@ -155,7 +166,7 @@ class AdviceDetailImpl extends React.Component {
             //(1 + ) * (1+dailyNAVChangePct/100) - 1.0 : 0;
 
         this.setState({
-            tickers: performance ? tickers : this.state.tickers,
+            // tickers: performance ? tickers : this.state.tickers,
             adviceResponse: response.data,
             adviceDetail: {
                 ...this.state.adviceDetail,
@@ -220,7 +231,7 @@ class AdviceDetailImpl extends React.Component {
             });
         }
 
-        if (performance.current) {
+        if (performance.current && Utils.isLoggedIn()) {
             tickers.push({
                 name: 'True Performance',
                 data: this.processPerformanceData(_.get(performance, 'current.portfolioValues', [])),
@@ -626,7 +637,7 @@ class AdviceDetailImpl extends React.Component {
                 <React.Fragment>
                     {/* <Button>Unapprove</Button> */}
                     <Button 
-                            style={{marginLeft: '20px'}} 
+                            className='action-button'
                             type="primary" 
                             onClick={this.toggleApprovalModal}
                     >
@@ -760,11 +771,12 @@ class AdviceDetailImpl extends React.Component {
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
         if (userId !== advisorId) {
             return (
-                <Row>
+                <Row type="flex">
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
                                 onClick={this.toggleDialog}
-                                style={{width: 190, fontWeight: '300'}}
+                                className='action-button'
+                                style={{fontWeight: '300'}}
                                 type="primary"
                                 disabled={this.state.disableSubscribeButton}
                         >
@@ -774,7 +786,8 @@ class AdviceDetailImpl extends React.Component {
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
                                 onClick={this.followAdvice}
-                                style={{width: 190, marginTop: 10}}
+                                className='action-button'
+                                style={{marginTop: 10}}
                                 disabled={this.state.disableFollowButton}
                         >
                             {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
@@ -786,14 +799,18 @@ class AdviceDetailImpl extends React.Component {
             return (
                 <Row>
                     <Col span={24} style={{textAlign: 'right'}}>
+                        {this.renderApprovalButtons()}
+                    </Col>
+                    <Col span={24} style={{textAlign: 'right'}}>
                         {
                             !this.state.adviceDetail.isPublic
-                            && <Button onClick={this.makeAdvicePublic} style={{width: 190, fontWeight:'300'}} type="primary">POST  TO MARKETPLACE</Button>}
+                            && <Button onClick={this.makeAdvicePublic} className='action-button' style={{fontWeight:'300'}} type="primary">POST  TO MARKETPLACE</Button>}
                     </Col>
                     <Col span={24} style={{textAlign: 'right'}}>
                         <Button
                                 onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
-                                style={{width: 190, marginTop: 10}}
+                                className='action-button'
+                                style={{marginTop: 10}}
                         >
                             Update Advice
                         </Button>
@@ -871,9 +888,7 @@ class AdviceDetailImpl extends React.Component {
             ?   <ForbiddenAccess />
 
             :   <Row style={{marginBottom:'20px'}}>
-                    <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
-                        {this.renderApprovalButtons()}
-                    </AqPageHeader>
+                    <AqPageHeader title={name} breadCrumbs={breadCrumbs} />
                     <StockResearchModal
                             ticker={this.state.stockResearchModalTicker}
                             visible={this.state.stockResearchModalVisible}
@@ -892,7 +907,7 @@ class AdviceDetailImpl extends React.Component {
                             handlePerformanceToggleChange={this.handlePerformanceToggleChange}
                             performanceType={this.state.performanceType}
                     />
-                    <Col span={6}>
+                    <Col xl={6} md={0} xs={0} sm={0}>
                         {this.renderActionButtons()}
                     </Col>
                 </Row>
