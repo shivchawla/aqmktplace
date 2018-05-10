@@ -261,8 +261,8 @@ export default class Home extends React.Component {
                     <Col span={4} className="footer-container">
                         <h5 className="footer-group-header">Policies</h5>
                         <div className="footer-list">
-                            <a className="footer-link" href="/policy/policy">Terms of use</a>
-                            <a className="footer-link" href="/policy/tnc">Privacy Policy</a>
+                            <a className="footer-link" href="/policies/tnc">Terms of use</a>
+                            <a className="footer-link" href="/policies/privacy">Privacy Policy</a>
                         </div>
                     </Col>
                     <Col span={4} className="footer-container">

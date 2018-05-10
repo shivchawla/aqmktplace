@@ -142,7 +142,8 @@ class AdviceDetailImpl extends React.Component {
         this.performanceSummary = performanceSummary;
         const currentPerformance = _.get(performanceSummary, 'current', {});
         const simulatedPerformance = _.get(performanceSummary, 'simulated', {});
-        const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, nstocks, period} = currentPerformance;
+        const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, period} = simulatedPerformance;
+        const {nstocks = 0} = currentPerformance;
         const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
         if (!Utils.isLoggedIn()) {
             getStockPerformance(benchmark, 'detail_benchmark')
@@ -159,7 +160,6 @@ class AdviceDetailImpl extends React.Component {
         }
         var dailyNAVChangePct = 0.0
         var annualReturnEOD = annualReturn;
-        var effTotalReturn = _.get(this.performanceSummary, 'current.totalReturn', 0.0);
         this.setState({
             adviceResponse: response.data,
             adviceDetail: {
@@ -184,7 +184,7 @@ class AdviceDetailImpl extends React.Component {
                 ...this.state.metrics,
                 nstocks,
                 annualReturn: annualReturnEOD,
-                totalReturn: effTotalReturn,
+                totalReturn,
                 volatility,
                 maxLoss,
                 dailyNAVChangePct: 0,

@@ -176,7 +176,7 @@ class AdviceDetailContentImpl extends React.Component {
                         { this.props.showPerformanceToggle &&
                             <div style={{marginLeft: '5px'}}>
                                 <RadioGroup 
-                                        defaultValue={true} 
+                                        defaultValue={false} 
                                         size="small" onChange={this.props.handlePerformanceToggleChange}>
                                     <RadioButton value={true}>Realized</RadioButton>
                                     <RadioButton value={false}>Simulated</RadioButton>

@@ -990,12 +990,14 @@ class AddTransactionsImpl extends React.Component {
                             <AqPageHeader 
                                     title={this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"} 
                                     breadCrumbs={breadCrumbs}
+                                    showTitle={true}
                             >
                                 <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right', marginBottom:'10px'}}>
                                     <Button 
                                             type="primary" 
                                             onClick={this.handleSubmit} 
                                             style={{marginRight: '20px', width: '200px'}}
+                                            disabled={!this.checkPreviewButtonDisabled()}
                                     >
                                         SAVE
                                     </Button>
@@ -1064,6 +1066,7 @@ class AddTransactionsImpl extends React.Component {
                                                     onClick={this.handleSubmit} 
                                                     style={buttonStyle}
                                                     loading={this.state.submitButtonLoading}
+                                                    disabled={!this.checkPreviewButtonDisabled()}
                                                     className='action-button'
                                             >
                                                 SAVE

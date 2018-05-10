@@ -964,6 +964,7 @@ export class AdviceFormImpl extends React.Component {
                                     this.state.preview 
                                     ? 'Preview Advice' 
                                     : this.props.isUpdate ? "Update Advice" : "Create Advice"} 
+                                showTitle={true}
                                 breadCrumbs={breadCrumbs}
                         >
                             <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right'}}>

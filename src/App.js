@@ -96,6 +96,35 @@ class App extends React.Component {
         );
     }
 
+    getAddPopOverContent = () => {
+        return (
+            <div>
+                <div className="loggedinuser-menu-popup-header">
+                    {/* <div>
+                        <h3>{Utils.getLoggedInUserName()}</h3>
+                        <p>{Utils.getLoggedInUserEmail()}</p>
+                    </div> */}
+                </div>
+                <div className="loggedinuser-menu-popup-content">
+                    <div 
+                            className="row" 
+                            onClick={
+                                () => 
+                                    {this.props.history.push(`/advisordashboard/createadvice`)}
+                            }
+                    >
+                        <Icon type="file-text" className="icon" />
+                        Create Advice
+                    </div>
+                    <div className="row" onClick={() => {Utils.logoutUser(); this.props.history.push('/investordashboard/createportfolio')}}>
+                        <Icon type="line-chart" className="icon" />
+                        Create Portfolio
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     render() {
         return (
             <Layout style={{backgroundColor: '#f9f9f9', height:'auto'}}>
@@ -151,20 +180,36 @@ class App extends React.Component {
                             </Menu>
                             {
                                 Utils.isLoggedIn() &&
-                                <Popover
-                                    placement="bottomRight" 
-                                    content={this.getPopOverContent()} 
-                                    trigger="click"
-                                >
+                                <React.Fragment>
                                     <Button 
                                             type="primary" 
-                                            shape="circle"
-                                            style={{marginTop: '18px'}}
-                                            // onClick={this.openPopOverMenu}
+                                            onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                                            style={{marginTop: '18px', marginRight: '20px'}}
                                     >
-                                        {Utils.getLoggedInUserInitials()} 
+                                        Create Advice
                                     </Button>
-                                </Popover>
+                                    {/* <Button 
+                                            type="primary"
+                                            onClick={() => this.props.history.push('/investordashboard/createportfolio')}
+                                            style={{marginLeft: '20px', marginTop: '18px', marginRight: '20px'}}
+                                    >
+                                        Create Portfolio
+                                    </Button> */}
+                                    <Popover
+                                        placement="bottomRight" 
+                                        content={this.getPopOverContent()} 
+                                        trigger="click"
+                                    >
+                                        <Button 
+                                                type="primary" 
+                                                shape="circle"
+                                                style={{marginTop: '18px'}}
+                                                // onClick={this.openPopOverMenu}
+                                        >
+                                            {Utils.getLoggedInUserInitials()} 
+                                        </Button>
+                                    </Popover>
+                                </React.Fragment>
                             }
                         </Col> 
                     </Row>
