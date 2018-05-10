@@ -776,14 +776,12 @@ export class AdviceFormImpl extends React.Component {
                                 </Col>
                             </Form>
                         </Row>
-                        <Row>
-                            <Col style={{border:' 1px solid #eaeaea', marginTop: '50px'}}>
-                                <Row style={{padding: '10px'}}> 
-                                    <Col span={8}>
-                                        <h3>Portfolio</h3>
-                                    </Col>
-                                </Row>
-                                <Row type="flex" style={{margin: '0 10px', position: 'relative'}}>
+                        <Row style={{marginTop: '20px'}}>
+                            <Col span={24}>
+                                <h3 style={inputHeaderStyle}>Portfolio</h3>
+                            </Col>
+                            <Col span={24} style={{border:' 1px solid #eaeaea', marginTop: '5px'}}>
+                                <Row type="flex" style={{margin: '10px 10px 0 10px', position: 'relative'}}>
                                         <Button 
                                                 onClick={this.togglePerformanceModal} 
                                                 style={{

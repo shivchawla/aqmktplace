@@ -620,29 +620,32 @@ class StockResearchImpl extends React.Component {
                             </Col>
                         }
                     </Row>
-                    <Row style={metricStyle} type="flex" justify="space-between">
-                        <Col span={7} style={cardStyle}>
-                            <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
-                            <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
-                                <span>{latestDetail.exchange}:</span>
-                                <span style={{fontSize: '20px'}}>{latestDetail.ticker}</span>
-                            </h1>
-                            <h3 style={lastPriceStyle}>
-                                {Utils.formatMoneyValueMaxTwoDecimals(latestDetail.latestPrice)} 
-                                <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change}%</span>
-                            </h3>
-                            <h5 
-                                    style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
-                            >
-                                * Data is delayed by 15 min
-                            </h5>
+                    <Row style={metricStyle} type="flex" gutter={8}>
+                        <Col span={8}>
+                            <Row style={cardStyle}>
+                                <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
+                                <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
+                                    <span>{latestDetail.exchange}:</span>
+                                    <span style={{fontSize: '20px'}}>{latestDetail.ticker}</span>
+                                </h1>
+                                <h3 style={lastPriceStyle}>
+                                    {Utils.formatMoneyValueMaxTwoDecimals(latestDetail.latestPrice)} 
+                                    <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change}%</span>
+                                </h3>
+                                <h5 style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
+                                >
+                                    * Data is delayed by 15 min
+                                </h5>
+                            </Row>
                         </Col>
-                        <Col span={6} style={cardStyle}>
-                            <h3 style={cardHeaderStyle}>Price Metrics</h3>
-                            {this.renderPriceMetrics(priceMetrics)}
+                        <Col span={6}>
+                            <Row  style={cardStyle}>
+                                <h3 style={cardHeaderStyle}>Price Metrics</h3>
+                                {this.renderPriceMetrics(priceMetrics)}
+                            </Row>
                         </Col>
-                        <Col span={10} style={cardStyle}>
-                            <Row>
+                        <Col span={10}>
+                            <Row style={cardStyle}>
                                 <Col span={24}>
                                     <h3 style={cardHeaderStyle}>Performance Metrics</h3>
                                 </Col>
@@ -758,6 +761,7 @@ const cardStyle = {
     border: '1px solid #eaeaea',
     padding: '10px',
     borderRadius: '4px',
+    height: '100%'
 };
 
 const cardHeaderStyle = {

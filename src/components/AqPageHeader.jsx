@@ -19,7 +19,7 @@ class AqPageHeaderImpl extends React.Component {
         return (
             <Row type="flex" justify="space-between" align="middle" style={{backgroundColor: '#f9f9f9', paddingTop:'10px', marginBottom:'5px'}}>
                 <Col span={12}>
-                    <h1 style={pageTitleStyle}>{title}</h1>
+                    {/*<h1 style={pageTitleStyle}>{title}</h1>*/}
                     <AqBreadCrumb breadCrumbs={breadCrumbs} />
                 </Col>
                 {
