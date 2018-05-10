@@ -33,7 +33,7 @@ export default class AdvisorProfile extends React.Component {
             picUrl: "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
             ownProfile: false,
             isFollowing: false,
-            updateModalVisible: true,
+            updateModalVisible: false,
             isCompany: false,
             filterModalVisible: false,
             sortBy: 'rating',
