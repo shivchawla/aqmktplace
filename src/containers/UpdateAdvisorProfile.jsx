@@ -375,7 +375,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
                             <Col span={11} style={{marginLeft: '10px'}}>
                                 <FormItem>
                                     {getFieldDecorator('webUrl')(
-                                        <Input placeholder="Facebook Public Profile Url" addonBefore={
+                                        <Input placeholder="Web Url" addonBefore={
                                             <Icon type="global" onClick={this.handleIconClick}/>
                                         } />
                                     )}

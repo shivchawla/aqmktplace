@@ -987,8 +987,10 @@ class AddTransactionsImpl extends React.Component {
                                 visible={this.state.stockResearchModalVisible}
                                 toggleModal={this.toggleModal}
                         />
-                            <AqPageHeader title={this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"} breadCrumbs={breadCrumbs}/>
-                            <Form>
+                            <AqPageHeader 
+                                    title={this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"} 
+                                    breadCrumbs={breadCrumbs}
+                            >
                                 <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right', marginBottom:'10px'}}>
                                     <Button 
                                             type="primary" 
@@ -1005,8 +1007,9 @@ class AddTransactionsImpl extends React.Component {
                                     >
                                         Preview
                                     </Button>
-                                    
                                 </Col>
+                            </AqPageHeader>
+                            <Form>
                                 <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, overflowY:'scroll', minHeight:'580px', marginBottom:'20px'}}>
                                     {
                                         <Row type="flex" align="top" justify="space-between" style={{padding: '20px 20px 0px 20px'}}>

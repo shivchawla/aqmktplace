@@ -82,9 +82,11 @@ class SubscribedAdvicesImpl extends React.Component {
         let advices = [...this.state.advices];
         const url = `${requestUrl}/advice?subscribed=true`;
         this.setState({loading: true});
+        let completedAdviceCall = 0;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            response.data.advices.map((advice, index) => {
+            const subscribedAdvices = response.data.advices;
+            subscribedAdvices.map((advice, index) => {
                 const adviceUrl = `${requestUrl}/advice/${advice._id}`;
                 const portfolioUrl = `${requestUrl}/advice/${advice._id}/portfolio`;
                 return Promise.all([
@@ -118,16 +120,17 @@ class SubscribedAdvicesImpl extends React.Component {
                         maxLoss: _.get(adviceResponse.data, 'performanceSummary.current.maxLoss', 0),
                         totalReturn: _.get(adviceResponse.data, 'performanceSummary.current.totalReturn', 0),
                     };
-                    
                     newAdvice.portfolio.detail = advicePortfolioResponse.data.detail;
                     advices.push(newAdvice);
                     this.props.updateSubscribedAdvices(advices);
                     this.setState({advices});
+                    completedAdviceCall++;
+                    console.log(`Network Call Completed for ${adviceResponse.data.name}`);
+                    if (completedAdviceCall === subscribedAdvices.length) { // All the network calls completed
+                        this.setState({loading: false});
+                    }
                 })
             })
-            .finally(() => {
-                this.setState({loading: false});
-            });
         })
         .catch(error => {
             // console.log(error);
@@ -135,9 +138,6 @@ class SubscribedAdvicesImpl extends React.Component {
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
-        })
-        .finally(() => {
-            this.setState({loading: false});
         })
     }
 
@@ -345,17 +345,11 @@ class SubscribedAdvicesImpl extends React.Component {
     render() {
         return (
             <Row style={{position: 'relative'}}>
-                <Loading
-                    style={{position: 'absolute', top: '100px'}}
-                    show={this.state.loading}
-                    color={loadingColor}
-                    className="main-loader"
-                    showSpinner={false}
-                />
-                {
-                    !this.state.loading &&
-                    this.renderPageContent()
-                }
+                <Spin
+                    spinning={this.state.loading}
+                >
+                    {this.renderPageContent()}
+                </Spin>
             </Row>
         );
     }

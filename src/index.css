@@ -198,3 +198,11 @@ h1, h2, h3, h4, h5 {
   width: 90%;
   height: 65px;
 }
+
+.action-button-small {
+  width: 200px;
+}
+
+.ant-spin-blur {
+  opacity: 0 !important;
+}

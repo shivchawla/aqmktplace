@@ -173,7 +173,7 @@ export class AqStockTableMod extends React.Component {
         return new Promise((resolve, reject) => {
             getStockData(ticker, 'latestDetail')
             .then(response => {
-                console.log(response.data);
+                // console.log(response.data);
                 const name = _.get(response.data, 'security.detail.Nse_Name', '');
                 const sector = _.get(response.data, 'security.detail.Sector', '');
                 const lastPrice = response.data.latestDetail.values.Close;
@@ -244,10 +244,10 @@ export class AqStockTableMod extends React.Component {
         return totalValue;
     }
 
-    handleDoneClick = () => {
-        this.props.onChange(this.state.data);
-        this.props.toggleModal();
-    }
+    // handleDoneClick = () => {
+    //     this.props.onChange(this.state.data);
+    //     this.props.toggleModal();
+    // }
 
     componentWillReceiveProps(nextProps) {
         let data = [];

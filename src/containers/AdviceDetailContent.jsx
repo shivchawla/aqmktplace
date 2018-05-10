@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch} from 'antd';
+import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate} from '../components';
@@ -40,10 +40,14 @@ class AdviceDetailContentImpl extends React.Component {
             {value: netValue, label: 'Net Value', money:true, isNetValue:true, dailyChangePct:dailyNAVChangePct},
         ]
 
-        return <AdviceMetricsItems metrics={metricsItems} />
+        return (
+            <Spin spinning={this.props.loading}>
+                <AdviceMetricsItems metrics={metricsItems} />
+            </Spin>
+        );
     };
 
-    render() {
+    renderPageContent() {
         const {
             name = '', 
             heading = '', 
@@ -85,7 +89,7 @@ class AdviceDetailContentImpl extends React.Component {
                         }
                     </Col>
                     <Col xl={0} md={6}>
-                        {this.props.renderActionButtons && this.props.renderActionButtons()}
+                        {this.props.renderActionButtons && this.props.renderActionButtons(true)}
                     </Col>
                 </Row>
                 <Row className="row-container">
@@ -158,12 +162,31 @@ class AdviceDetailContentImpl extends React.Component {
                             header={<h3 style={metricsHeaderStyle}>Performance</h3>}
                         >
                         <Row className="row-container">
-                            <MyChartNew series={tickers} chartId="advice-detail-chart"/>
+                            <Spin spinning={this.props.loading}>
+                                <MyChartNew series={tickers} chartId="advice-detail-chart"/>
+                            </Spin>
                         </Row>
                     </Panel>
                 </Collapse>
             </Col>
         )
+    }
+
+    render() {
+        return (
+            <React.Fragment>
+                {/* <Loading
+                    show={this.props.loading}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                /> */}
+                {
+                    // !this.props.loading && 
+                    this.renderPageContent()
+                }
+            </React.Fragment>
+        );
     }
 }
 

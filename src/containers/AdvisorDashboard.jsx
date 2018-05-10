@@ -495,7 +495,7 @@ export default class AdvisorDashboard extends React.Component {
 
     handleSortingMenuChange = (value) => {
         this.setState({sortBy: value}, () => {
-            const url = `${this.state.adviceUrl}&orderParam=${this.state.sortBy}&personal=1`;
+            const url = `${this.state.adviceUrl}&orderParam=${this.state.sortBy}`;
             this.getAdvices(url);
         });
     }
@@ -504,7 +504,7 @@ export default class AdvisorDashboard extends React.Component {
         this.setState({myAdvicesLoading: true});
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            this.setState({advices: response.data, rawAdvices: response.data});
+            this.setState({advices: response.data.advices, rawAdvices: response.data.advices});
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);

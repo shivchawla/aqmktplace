@@ -7,21 +7,21 @@ export class DashboardCard extends React.Component {
         const {cardStyle, children, title, menu = null, loading = false, xl=12, lg=24, headerSpan=10, menuSpan=12} = this.props;
 
         return (
-            <Spin spinning={loading}>
-                <Col span={24} style={{...shadowBoxStyle, ...cardStyle, ...noOverflowStyle}}>
-                    <Row style={{...headerStyle, ...this.props.headerStyle}} type="flex" justify="space-between">
-                        <Col span={headerSpan}>
-                            <h3 style={{marginLeft: '20px'}}>{title}</h3>
-                        </Col>
-                        <Col span={menuSpan} style={{textAlign: 'right'}}>
-                            {menu}
-                        </Col>
-                    </Row>
-                    <Row style={{...contentStyle, ...this.props.contentStyle}}>
+            <Col span={24} style={{...shadowBoxStyle, ...cardStyle, ...noOverflowStyle}}>
+                <Row style={{...headerStyle, ...this.props.headerStyle}} type="flex" justify="space-between">
+                    <Col span={headerSpan}>
+                        <h3 style={{marginLeft: '20px'}}>{title}</h3>
+                    </Col>
+                    <Col span={menuSpan} style={{textAlign: 'right'}}>
+                        {menu}
+                    </Col>
+                </Row>
+                <Row style={{...contentStyle, ...this.props.contentStyle}}>
+                    <Spin spinning={loading}>
                         {children}
-                    </Row>
-                </Col>
-            </Spin>
+                    </Spin>
+                </Row>
+            </Col>
         );
     }
 }
