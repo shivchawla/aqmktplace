@@ -77,7 +77,6 @@ export class AqStockTableMod extends React.Component {
         this.state = {
             selectedRows: [],
             data: [],
-            positions: [],
         };
     }
 
@@ -254,7 +253,14 @@ export class AqStockTableMod extends React.Component {
         if (this.props.data !== nextProps.data) {
             data = nextProps.data;
             this.setState({data});
-        }
+        } 
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.state.data !== nextState.data) {
+            return true;
+        } 
+        return false;
     }
 
     componentWillMount() {
@@ -270,6 +276,8 @@ export class AqStockTableMod extends React.Component {
     }
 
     render() {
+        console.log('Render Called of AqStockTableMod');
+        
         return (
             <Col span={24}>
                 <Row style={{marginBottom: '20px'}}>
