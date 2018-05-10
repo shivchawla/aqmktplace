@@ -163,6 +163,7 @@ export class AqStockTableMod extends React.Component {
                 this.updateAllWeights(newData);
             }
             this.setState({data: newData});
+            this.props.onChange(newData);
         }
     }
 
@@ -243,11 +244,6 @@ export class AqStockTableMod extends React.Component {
         return totalValue;
     }
 
-    // handleDoneClick = () => {
-    //     this.props.onChange(this.state.data);
-    //     this.props.toggleModal();
-    // }
-
     componentWillReceiveProps(nextProps) {
         let data = [];
         if (this.props.data !== nextProps.data) {
@@ -257,7 +253,7 @@ export class AqStockTableMod extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.state.data !== nextState.data) {
+        if (this.state !== nextState) {
             return true;
         } 
         return false;
@@ -302,12 +298,6 @@ export class AqStockTableMod extends React.Component {
                         size="middle"
                         rowClassName="stock-table-col"
                 />
-                {/* <Row style={{marginTop: '20px'}}>
-                    <Col span={24} style={{textAlign: 'right'}}>
-                        <Button style={{marginRight: '20px'}} onClick={this.props.toggleModal}>Cancel</Button>
-                        <Button type="primary" onClick={this.handleDoneClick}>Done</Button>
-                    </Col>
-                </Row> */}
             </Col>
         );
     }

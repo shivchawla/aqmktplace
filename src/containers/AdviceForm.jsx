@@ -324,7 +324,7 @@ export class AdviceFormImpl extends React.Component {
     getVerifiedTransactions = () => {
         const data = [...this.state.data];
         const verifiedTransactions = data.filter((item, index) => {
-            return item.symbol.length > 1;
+            return item.symbol.length > 1 && Number(item.shares) > 0 && item.shares.length > 0;
         });
 
         return verifiedTransactions;
