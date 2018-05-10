@@ -45,21 +45,20 @@ class AdviceDetailImpl extends React.Component {
                 rating: 0,
                 subscribers: -1,
                 maxNotional: 300000,
-                rebalance: '',
+                rebalanceFrequency: '',
                 isPublic: false,
                 isAdmin: false,
                 isOwner: false,
                 isSubscribed: false,
-                isFollowing: false
+                isFollowing: false,
             },
-            netValue: 0,
             metrics: {
                 annualReturn: 0,
                 totalReturn:0,
                 volatility:0,
                 maxLoss:0,
                 dailyNAVChangePct: 0,
-                //netValue: 0,
+                netValue: 0,
                 period:0,
             },
             performance: {
@@ -136,9 +135,10 @@ class AdviceDetailImpl extends React.Component {
             performanceSummary,
             netValue,
             stocks,
-            approvalStatus
+            approvalStatus,
+            rebalance
         } = response.data;
-
+        
         this.performanceSummary = performanceSummary;
         const currentPerformance = _.get(performanceSummary, 'current', {});
         const simulatedPerformance = _.get(performanceSummary, 'simulated', {});
@@ -157,17 +157,10 @@ class AdviceDetailImpl extends React.Component {
                 this.setState({tickers: performance ? [...this.state.tickers, benchMarkticker] : this.state.tickers});
             })
         }
-
-        //Compute change in NAV from EOD nav
-        //Number(((netValueEOD > 0.0 && netValue > 0.0 ? (netValue - netValueEOD)/netValueEOD : dailyNAVChangeEODPct)*100).toFixed(2));
-
         var dailyNAVChangePct = 0.0
         var annualReturnEOD = annualReturn;
         var effTotalReturn = _.get(this.performanceSummary, 'current.totalReturn', 0.0);
-            //(1 + ) * (1+dailyNAVChangePct/100) - 1.0 : 0;
-
         this.setState({
-            // tickers: performance ? tickers : this.state.tickers,
             adviceResponse: response.data,
             adviceDetail: {
                 ...this.state.adviceDetail,
@@ -181,6 +174,7 @@ class AdviceDetailImpl extends React.Component {
                 isOwner,
                 isAdmin,
                 isFollowing,
+                rebalanceFrequency: rebalance,
                 followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
                 rating: Number(rating.current.toFixed(2)),
@@ -194,8 +188,8 @@ class AdviceDetailImpl extends React.Component {
                 volatility,
                 maxLoss,
                 dailyNAVChangePct: 0,
+                netValue
             },
-            netValue: netValue,
             performance: {
                 current: currentPerformance,
                 simulated: simulatedPerformance
@@ -313,26 +307,6 @@ class AdviceDetailImpl extends React.Component {
             let positions = [];
             if (advicePortfolioResponse) {
                 this.getAdviceDetail(advicePortfolioResponse);
-                //positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
-
-                /*const series = [];
-                const colorData = generateColorData(positions);
-                const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition', []).map((item, index) =>{
-                    return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
-                });
-                const constituentDollarPerformance = _.get(response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
-                    return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
-                });
-                const constituentPercentagePerformance = _.get(response.data, 'current.metrics.constituentPerformance', []).map(item => {
-                    return {name: item.ticker, data: [item.pnl_pct], color: colorData[item.ticker]};
-                });
-                series.push({name: 'Composition', data: portfolioComposition});
-                
-                this.setState({
-                    series,
-                    barDollarSeries: constituentDollarPerformance,
-                    barPercentageSeries: constituentPercentagePerformance
-                });*/
             }
         })
         .catch(error => {
@@ -559,7 +533,6 @@ class AdviceDetailImpl extends React.Component {
             'action': 'unsubscribe-mktplace',
             'type': 'advice',
             'adviceId': adviceId,
-            // 'detail': true
         };
         Utils.sendWSMessage(msg);
     }
@@ -613,8 +586,6 @@ class AdviceDetailImpl extends React.Component {
                     metrics: {
                         ...this.state.metrics,
                         dailyNAVChangePct,
-                        //netValue,
-                        //totalReturn: this.state.performanceType == "Current" ? effTotalReturn : this.state.metrics.totalReturn,
                     },
                     positions: _.get(realtimeData, 'output.detail.positions', [])
                 });
@@ -651,7 +622,6 @@ class AdviceDetailImpl extends React.Component {
         if (isAdmin && approvalStatus !== 'approved') {
             return (
                 <React.Fragment>
-                    {/* <Button>Unapprove</Button> */}
                     <Button 
                             className={className}
                             type="primary" 
@@ -790,35 +760,31 @@ class AdviceDetailImpl extends React.Component {
         if (userId !== advisorId) {
             return (
                 <React.Fragment>
-                    {/* <Col span={24} style={{textAlign: 'right'}}> */}
-                        <Button
-                                onClick={() => 
-                                    Utils.isLoggedIn() 
-                                    ? this.toggleDialog() 
-                                    : this.props.history.push('/login')
-                                }
-                                className={className}
-                                style={buttonStyle}
-                                type="primary"
-                                disabled={this.state.disableSubscribeButton}
-                        >
-                            {!this.state.adviceDetail.isSubscribed ? "PURCHASE ADVICE" : "CANCEL SUBSCRIPTION"}
-                        </Button>
-                    {/* </Col> */}
-                    {/* <Col span={24} style={{textAlign: 'right'}}> */}
-                        <Button
-                                onClick={() => 
-                                    Utils.isLoggedIn()
-                                    ? this.followAdvice()
-                                    : this.props.history.push('/login') 
-                                }
-                                className={className}
-                                style={buttonStyle}
-                                disabled={this.state.disableFollowButton}
-                        >
-                            {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
-                        </Button>
-                    {/* </Col> */}
+                    <Button
+                            onClick={() => 
+                                Utils.isLoggedIn() 
+                                ? this.toggleDialog() 
+                                : this.props.history.push('/login')
+                            }
+                            className={className}
+                            style={buttonStyle}
+                            type="primary"
+                            disabled={this.state.disableSubscribeButton}
+                    >
+                        {!this.state.adviceDetail.isSubscribed ? "PURCHASE ADVICE" : "CANCEL SUBSCRIPTION"}
+                    </Button>
+                    <Button
+                            onClick={() => 
+                                Utils.isLoggedIn()
+                                ? this.followAdvice()
+                                : this.props.history.push('/login') 
+                            }
+                            className={className}
+                            style={buttonStyle}
+                            disabled={this.state.disableFollowButton}
+                    >
+                        {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
+                    </Button>
                 </React.Fragment>
             );
         } else {
@@ -926,7 +892,6 @@ class AdviceDetailImpl extends React.Component {
                     />
                     <AdviceDetailContent 
                             adviceDetail={this.state.adviceDetail}
-                            netValue={this.state.netValue}
                             metrics={this.state.metrics}
                             handlePortfolioStartDateChange={this.handlePortfolioStartDateChange}
                             selectedPortfolioDate={this.state.selectedPortfolioDate}

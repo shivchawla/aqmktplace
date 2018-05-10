@@ -896,6 +896,7 @@ export class AdviceFormImpl extends React.Component {
             isOwner: true,
             name,
             description,
+            rebalanceFrequency: this.state.rebalancingFrequency,
             advisor: {
                 user: {
                     firstName: _.get(Utils.getUserInfo(), 'firstName', null),

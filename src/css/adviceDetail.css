@@ -4,3 +4,6 @@
 .arrow {
     left: 0
 }
+.ant-collapse-content {
+    overflow: initial;
+}

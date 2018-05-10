@@ -5,11 +5,12 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch, Icon} from 'antd';
+import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch, Icon, Tag} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, metricsLabelStyle, metricsValueStyle} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate} from '../components';
+import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate, IconItem} from '../components';
 import {MyChartNew} from './MyChartNew';
+import medalIcon from '../assets/award.svg';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax} from '../utils';
 import '../css/adviceDetail.css';
 
@@ -48,6 +49,22 @@ class AdviceDetailContentImpl extends React.Component {
         );
     };
 
+    renderTrendingApprovedIcon = () => {
+        if (this.props.adviceDetail.approvalStatus === 'approved') {
+            return (
+                <IconItem 
+                    src={medalIcon} 
+                    imageStyle={{transform: 'scale(0.7, 0.7)'}} 
+                    labelStyle={{marginLeft: '5px', color:'teal'}}
+                    label="Approved"
+                />
+            );
+    
+        }
+
+        return null;
+    }
+
     renderPageContent() {
         const {
             name = '', 
@@ -67,8 +84,7 @@ class AdviceDetailContentImpl extends React.Component {
         } = this.props.metrics || {};
         const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["2","3"] : ["3"] : ["3"];
         const tickers = _.get(this.props, 'tickers', []);
-        const {dailyNAVChangePct = 0} = this.props.metrics || {};
-        const netValue  = this.props.netValue || 0;
+        const {netValue = 0, dailyNAVChangePct = 0} = this.props.metrics || {};
         const netValueMetricItem = {
             value: netValue, 
             label: 'Net Value', 
@@ -97,14 +113,15 @@ class AdviceDetailContentImpl extends React.Component {
                             <AqRate value={rating} />
                         }
                     </Col>
-                    {/* <Col xl={0} md={6}>
-                        {this.props.renderActionButtons && this.props.renderActionButtons(true)}
-                    </Col> */}
                     <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
                         <Spin spinning={this.props.loading}>
-                            {/* <AdviceMetricsItems metrics={[netValueMetricItem]} /> */}
                             <MetricItem 
-                                    valueStyle = {{...metricsValueStyle, fontSize: '24px'}} 
+                                    valueStyle = {{
+                                        ...metricsValueStyle, 
+                                        fontSize: '24px', 
+                                        fontWeight: '700', 
+                                        color: '#323C5A'
+                                    }} 
                                     labelStyle={metricsLabelStyle} 
                                     value={netValueMetricItem.value} 
                                     label={netValueMetricItem.label} 
@@ -118,9 +135,31 @@ class AdviceDetailContentImpl extends React.Component {
                                 />
                         </Spin>
                     </Col>
+                    <Col 
+                            span={24} 
+                            style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}
+                    >
+                        <Tag 
+                                color='f58231' 
+                                style={{
+                                    color:'black', 
+                                    border:'1px solid #f58231', 
+                                    width:'85px', 
+                                    paddingTop:'1px', 
+                                }}
+                        >
+                            <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
+                            <span 
+                                    style={{marginLeft: '5px', color:'#f58231'}}
+                            >
+                                {this.props.adviceDetail.rebalanceFrequency}
+                            </span>
+                        </Tag>
+                        {this.renderTrendingApprovedIcon()}
+                    </Col>
                 </Row>
                 <div style={{width: '100%', height: '1px', backgroundColor: '#e8e8e8'}}></div>
-                <Row className="row-container" style={{marginTop: '0px'}}>
+                <Row className="row-container" style={{marginTop: '5px'}}>
                     <Col 
                             span={24} 
                             style={{
@@ -142,7 +181,6 @@ class AdviceDetailContentImpl extends React.Component {
                                     <RadioButton value={true}>Realized</RadioButton>
                                     <RadioButton value={false}>Simulated</RadioButton>
                                 </RadioGroup>
-                                {/* <Switch defaultChecked onChange={this.props.handlePerformanceToggleChange} /> */}
                             </div>
                         }
                     </Col>
@@ -153,7 +191,11 @@ class AdviceDetailContentImpl extends React.Component {
                 <Row>
                     <Col span={24} style={dividerStyle}></Col>
                 </Row>
-                <Collapse bordered={false} defaultActiveKey={defaultActiveKey} onChange={this.onCollapseChange}>
+                <Collapse 
+                        bordered={false} 
+                        defaultActiveKey={defaultActiveKey} 
+                        onChange={this.onCollapseChange}
+                >
                     <Panel
                             key="1"
                             style={customPanelStyle}
@@ -179,16 +221,25 @@ class AdviceDetailContentImpl extends React.Component {
                                     </Col>
                                 </Row>
                             }>
-                            <Row className="row-container" type="flex" justify="end" align="middle">
+                            <Row className="row-container" type="flex" justify="end" align="middle" style={{position: 'relative'}}>
                                 {isOwner && this.props.handlePortfolioStartDateChange  &&
-                                    <Col span={6} style={{display: 'flex', justifyContent: 'flex-end', top: '225px', position:'absolute', zIndex:'2'}}>
+                                    <Col 
+                                            span={6} 
+                                            style={{
+                                                display: 'flex', 
+                                                justifyContent: 'flex-end', 
+                                                top: '-40px', 
+                                                position:'absolute', 
+                                                zIndex:'10000'
+                                            }}
+                                    >
                                         <DatePicker
                                             value={this.props.selectedPortfolioDate}
                                             onChange={this.props.handlePortfolioStartDateChange}
                                             allowClear={false}/>
                                     </Col>
                                 }
-                                <Col span={24} style={{marginTop: '-10px'}}>
+                                <Col span={24}>
                                     <AqStockPortfolioTable
                                         composition
                                         portfolio={{positions: this.props.positions || []}}
@@ -276,8 +327,9 @@ const valueStyle = {
 };
 
 const adviceNameStyle = {
-    fontSize: '20px',
-    color: '#353535'
+    fontSize: '24px',
+    color: '#353535',
+    // fontWeight: 700
 };
 
 const customPanelStyle = {

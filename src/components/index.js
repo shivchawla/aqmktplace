@@ -40,3 +40,4 @@ export * from './WatchList';
 export * from './CreateWatchList';
 export * from './AqRate';
 export * from './AsyncComponent';
+export * from './IconItem';
