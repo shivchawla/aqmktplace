@@ -7,6 +7,7 @@ import { withRouter } from 'react-router-dom';
 import Loading from 'react-loading-bar'
 import 'react-loading-bar/dist/index.css'
 import 'react-quill/dist/quill.snow.css';
+import '../css/quillContainer.css';
 
 const {requestUrl} = require('../localConfig');
 
@@ -81,7 +82,7 @@ class Policy extends Component {
       }else if (this.state.privacyPolicy){
         return (
           // <div dangerouslySetInnerHTML={{__html: this.state.privacyPolicy}}></div>
-          <ReactQuill value={this.state.privacyPolicy} toolbar={false} modules={modules} readOnly/>
+          <ReactQuill style={{fontSize: '16px', border: 'none', fontFamily:'Lato, sans-serif'}} value={this.state.privacyPolicy} toolbar={false} modules={modules} readOnly/>
         );
       }else{
         return (
@@ -120,5 +121,6 @@ class Policy extends Component {
     );
   }
 }
+
 
 export default withRouter(Policy);
