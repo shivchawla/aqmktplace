@@ -257,7 +257,8 @@ class UpdateAdvisorProfileImpl extends React.Component {
         const {getFieldDecorator} = this.props.form;
 
         return (
-            <Form onSubmit={this.updateUserProfile}>
+            <div >
+            <Form onSubmit={this.updateUserProfile} style={{height: '520px'}}>
                 <Row type="flex" justify="start" style={{...sectionContainerStyle, marginTop: '0px'}}>
                     <Col span={24}>
                         <h3 style={sectionHeaderStyle}>Personal Details</h3>
@@ -268,47 +269,46 @@ class UpdateAdvisorProfileImpl extends React.Component {
                     <Col span={11} style={{marginLeft: '10px'}}>
                         {this.renderInput('lastName', 'Last Name', false, true)}
                     </Col>
-                    <Col span={24}>
-                        <Row style={{height: '45px'}} type="flex" align="middle">
-                            <Col span={11}>
-                                <h3 
-                                        style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}
-                                >
-                                    Are you SEBI registered ?
-                                </h3>
-                                {this.renderSebiRegisteredGroup()}
-                            </Col>
-                            <Col 
-                                    span={11} 
-                                    style={{marginLeft: '10px', display: this.state.isSebiRegistered ? 'block' : 'none'}}
-                            >
-                                {this.renderInput('sebiRegistrationNum', 'Sebi Reg. Number')}
-                            </Col>
-                        </Row>
+                </Row>
+
+                <Row style={{marginTop: '10px'}} type="flex" align="middle">
+                    <Col span={11}>
+                        <h3 style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}>Are you a company ?</h3>
+                        {this.renderRadioGroup()}
                     </Col>
                 </Row>
-                <Row style={sectionContainerStyle}>
-                    <Col span={24}>
-                        <h3 style={sectionHeaderStyle}>Company Details</h3>
+
+                {this.state.isCompany &&
+                    <Row style={sectionContainerStyle}>
+                        <Col span={24}>
+                            <h3 style={sectionHeaderStyle}>Company Details</h3>
+                        </Col>
+                        <Col span={24}>
+                            <Row style={{display: this.state.isCompany ? 'block' : 'none'}} gutter={8}>
+                                <Col span={12}>
+                                    {this.renderInput('companyName', 'Company Name')}
+                                </Col>
+                                <Col span={12}>
+                                    {this.renderInput('companyRegistrationNum', 'Company Reg. #')}
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                }
+                <Row style={{height: '45px'}} type="flex" align="middle" gutter={16}>
+                    <Col span={12}>
+                        <h3 style={{display: 'inline-block', fontSize: '14px', marginRight:'10px'}}>
+                            Are you a SEBI Registered Investment Advisor?
+                        </h3>
+                        {this.renderSebiRegisteredGroup()}
                     </Col>
-                    <Col span={24}>
-                        <Row style={{height: '45px'}} type="flex" align="middle">
-                            <Col span={11}>
-                                <h3 style={{display: 'inline-block', marginRight: '20px', fontSize: '14px'}}>Are you a company ?</h3>
-                                {this.renderRadioGroup()}
-                            </Col>
-                        </Row>
-                        <Row style={{display: this.state.isCompany ? 'block' : 'none'}}>
-                            <Col span={11}>
-                                {this.renderInput('companyRegistrationNum', 'Company Registration Number')}
-                            </Col>
-                            <Col span={11} style={{marginLeft: '10px'}}>
-                                {this.renderInput('companyName', 'Company Name')}
-                            </Col>
-                        </Row>
+                    <Col span={12} 
+                        style={{display: this.state.isSebiRegistered ? 'block' : 'none'}}>
+                        {this.renderInput('sebiRegistrationNum', 'Sebi Reg. #')}
                     </Col>
                 </Row>
-                <Row style={sectionContainerStyle}>
+
+                {/*<Row style={sectionContainerStyle}>
                     <Col span={24}>
                         <h3 style={sectionHeaderStyle}>Address</h3>
                     </Col>
@@ -339,6 +339,8 @@ class UpdateAdvisorProfileImpl extends React.Component {
                         </Row>
                     </Col>
                 </Row>
+                */}
+
                 <Row style={sectionContainerStyle}>
                     <Col span={24}>
                         <h3 style={sectionHeaderStyle}>Social</h3>
@@ -384,12 +386,13 @@ class UpdateAdvisorProfileImpl extends React.Component {
                         </Row>       
                     </Col>
                 </Row>
-                <Row type="flex" justify="end" style={{marginTop: '20px'}}>
-                    <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                        <Button type="primary" htmlType="submit">Update</Button>
-                    </Col>
-                </Row>
             </Form>
+            <Row type="flex" justify="end" align="bottom" style={{marginTop: '10px'}}>
+                <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                    <Button type="primary" htmlType="submit">Update</Button>
+                </Col>
+            </Row>
+            </div>
         );
     }
 }
@@ -407,5 +410,6 @@ const sectionContainerStyle = {
 const sectionHeaderStyle = {
     fontSize: '14px',
     color: '#323C5A',
-    fontWeight: 700
+    fontWeight: 700,
+    marginBottom: '10px'
 }

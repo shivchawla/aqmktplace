@@ -27,7 +27,6 @@ class AdviceDetailContentImpl extends React.Component {
             volatility = 0, 
             maxLoss = 0, 
             dailyNAVChangePct = 0, 
-            netValue = 0, 
             totalReturn = 0, 
             nstocks = 0
         } = this.props.metrics || {};
@@ -68,7 +67,8 @@ class AdviceDetailContentImpl extends React.Component {
         } = this.props.metrics || {};
         const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["2","3"] : ["3"] : ["3"];
         const tickers = _.get(this.props, 'tickers', []);
-        const {netValue = 0, dailyNAVChangePct = 0} = this.props.metrics || {};
+        const {dailyNAVChangePct = 0} = this.props.metrics || {};
+        const netValue  = this.props.netValue || 0;
         const netValueMetricItem = {
             value: netValue, 
             label: 'Net Value', 

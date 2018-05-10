@@ -52,13 +52,14 @@ class AdviceDetailImpl extends React.Component {
                 isSubscribed: false,
                 isFollowing: false
             },
+            netValue: 0,
             metrics: {
                 annualReturn: 0,
                 totalReturn:0,
                 volatility:0,
                 maxLoss:0,
                 dailyNAVChangePct: 0,
-                netValue: 0,
+                //netValue: 0,
                 period:0,
             },
             performance: {
@@ -193,8 +194,8 @@ class AdviceDetailImpl extends React.Component {
                 volatility,
                 maxLoss,
                 dailyNAVChangePct: 0,
-                netValue
             },
+            netValue: netValue,
             performance: {
                 current: currentPerformance,
                 simulated: simulatedPerformance
@@ -603,16 +604,17 @@ class AdviceDetailImpl extends React.Component {
                 
                 var totalReturn = _.get(this.performanceSummary, 'current.totalReturn', 0.0);
 
-                var effTotalReturn = DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
+                var effTotalReturn = netValueEOD > 0.0 && DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
                             (1 + totalReturn) * (1+dailyNAVChangePct/100) - 1.0 : 
                             totalReturn;
 
                 this.setState({
+                    netValue,
                     metrics: {
                         ...this.state.metrics,
                         dailyNAVChangePct,
-                        netValue,
-                        totalReturn: effTotalReturn
+                        //netValue,
+                        //totalReturn: this.state.performanceType == "Current" ? effTotalReturn : this.state.metrics.totalReturn,
                     },
                     positions: _.get(realtimeData, 'output.detail.positions', [])
                 });
@@ -895,8 +897,6 @@ class AdviceDetailImpl extends React.Component {
                 totalReturn,
                 volatility,
                 maxLoss,
-                dailyNAVChangePct: 0,
-                netValue: netValueEOD
             },
             performanceType: e.target.value ? 'Current' : 'Simulated'
         })
@@ -926,6 +926,7 @@ class AdviceDetailImpl extends React.Component {
                     />
                     <AdviceDetailContent 
                             adviceDetail={this.state.adviceDetail}
+                            netValue={this.state.netValue}
                             metrics={this.state.metrics}
                             handlePortfolioStartDateChange={this.handlePortfolioStartDateChange}
                             selectedPortfolioDate={this.state.selectedPortfolioDate}
