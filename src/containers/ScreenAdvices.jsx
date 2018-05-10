@@ -254,6 +254,7 @@ export default class ScreenAdvices extends React.PureComponent {
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
+            console.log(response.data.advices);
             // console.log('Mounted', this.mounted);
             if (this.mounted) {
                 this.setState({

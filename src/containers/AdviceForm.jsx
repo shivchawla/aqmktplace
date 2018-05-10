@@ -720,7 +720,7 @@ export class AdviceFormImpl extends React.Component {
                                         <Col span={24}>
                                             <FormItem>
                                                 {getFieldDecorator('description', {
-                                                    rules: [{required: true, message: 'Please enter Description'}]
+                                                    rules: [{required: true, message: 'Please enter Investment Objective'}]
                                                 })(
                                                     <TextArea 
                                                             style={inputStyle} 

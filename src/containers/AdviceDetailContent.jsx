@@ -114,7 +114,7 @@ class AdviceDetailContentImpl extends React.Component {
                     <Panel
                             key="1"
                             style={customPanelStyle}
-                            header={<h3 style={metricsHeaderStyle}>Description</h3>}
+                            header={<h3 style={metricsHeaderStyle}>Investment Objective</h3>}
                     >
                         <Row className="row-container">
                             <Col span={24}>

@@ -192,8 +192,8 @@ class App extends React.Component {
                         <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
                         <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} />
                         <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
-                        <Route path='/policy/policy' component={Policy} />
-                        <Route path='/policy/tnc' component={TnC} />
+                        <Route path='/policies/privacy' component={Policy} />
+                        <Route path='/policies/tnc' component={TnC} />
                         <Route path='/forgotPassword' component={ForgotPassword} />
                         <Route path='/errorPage' component={NoIternetAccess} />
                         <Route path='/AuthMessage' component={AuthMessage} />

@@ -7,6 +7,7 @@ import { withRouter } from 'react-router-dom';
 import Loading from 'react-loading-bar'
 import 'react-loading-bar/dist/index.css'
 import 'react-quill/dist/quill.snow.css';
+import '../css/quillContainer.css';
 
 class TnC extends Component {
 
