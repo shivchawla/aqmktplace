@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
+import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, buttonStyle} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AdviceDetailContent} from './AdviceDetailContent';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate} from '../components';
@@ -641,20 +641,22 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
-    renderApprovalButtons = () => {
+    renderApprovalButtons = (small = false) => {
         const isAdmin = _.get(this.state, 'adviceDetail.isAdmin', false);
         const approvalStatus = _.get(this.state, 'adviceDetail.approvalStatus', 'pending');
+        const className = small ? 'action-button action-button-small' : 'action-button';
         // console.log(isAdmin);
         if (isAdmin && approvalStatus !== 'approved') {
             return (
                 <React.Fragment>
                     {/* <Button>Unapprove</Button> */}
                     <Button 
-                            className='action-button'
+                            className={className}
                             type="primary" 
+                            style={buttonStyle}
                             onClick={this.toggleApprovalModal}
                     >
-                        Take Approval Action
+                        TAKE APPROVAL ACTION
                     </Button>
                 </React.Fragment>
             );
@@ -779,64 +781,67 @@ class AdviceDetailImpl extends React.Component {
         this.setState({approvalModalVisible: !this.state.approvalModalVisible});
     }
 
-    renderActionButtons = () => {
+    renderActionButtons = (small=false) => {
         const {userId} = this.state;
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
+        const className = small ? 'action-button action-button-small' : 'action-button';
         if (userId !== advisorId) {
             return (
-                <Row type="flex">
-                    <Col span={24} style={{textAlign: 'right'}}>
+                <React.Fragment>
+                    {/* <Col span={24} style={{textAlign: 'right'}}> */}
                         <Button
                                 onClick={() => 
                                     Utils.isLoggedIn() 
                                     ? this.toggleDialog() 
                                     : this.props.history.push('/login')
                                 }
-                                className='action-button'
-                                style={{fontWeight: '300'}}
+                                className={className}
+                                style={buttonStyle}
                                 type="primary"
                                 disabled={this.state.disableSubscribeButton}
                         >
                             {!this.state.adviceDetail.isSubscribed ? "PURCHASE ADVICE" : "CANCEL SUBSCRIPTION"}
                         </Button>
-                    </Col>
-                    <Col span={24} style={{textAlign: 'right'}}>
+                    {/* </Col> */}
+                    {/* <Col span={24} style={{textAlign: 'right'}}> */}
                         <Button
                                 onClick={() => 
                                     Utils.isLoggedIn()
                                     ? this.followAdvice()
                                     : this.props.history.push('/login') 
                                 }
-                                className='action-button'
-                                style={{marginTop: 10}}
+                                className={className}
+                                style={buttonStyle}
                                 disabled={this.state.disableFollowButton}
                         >
                             {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
                         </Button>
-                    </Col>
-                </Row>
+                    {/* </Col> */}
+                </React.Fragment>
             );
         } else {
             return (
-                <Row>
-                    <Col span={24} style={{textAlign: 'right'}}>
-                        {this.renderApprovalButtons()}
-                    </Col>
-                    <Col span={24} style={{textAlign: 'right'}}>
-                        {
-                            !this.state.adviceDetail.isPublic
-                            && <Button onClick={this.makeAdvicePublic} className='action-button' style={{fontWeight:'300'}} type="primary">POST  TO MARKETPLACE</Button>}
-                    </Col>
-                    <Col span={24} style={{textAlign: 'right'}}>
-                        <Button
-                                onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
-                                className='action-button'
-                                style={{marginTop: 10}}
+                <React.Fragment>
+                    {this.renderApprovalButtons(small)}
+                    {
+                        !this.state.adviceDetail.isPublic && 
+                        <Button 
+                                onClick={this.makeAdvicePublic} 
+                                className={className} 
+                                style={buttonStyle} 
+                                type="primary"
                         >
-                            Update Advice
+                            POST  TO MARKETPLACE
                         </Button>
-                    </Col>
-                </Row>
+                    }
+                    <Button
+                            onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
+                            className={className}
+                            style={buttonStyle}
+                    >
+                        Update Advice
+                    </Button>
+                </React.Fragment>
             );
         }
     };
@@ -872,7 +877,7 @@ class AdviceDetailImpl extends React.Component {
         this.updateTicker({symbol: name, name});
     }
 
-    handlePerformanceToggleChange = checked => {
+    handlePerformanceToggleChange = e => {
         const {
             annualReturn = 0, 
             dailyNAVChangeEODPct = 0,
@@ -882,7 +887,7 @@ class AdviceDetailImpl extends React.Component {
             maxLoss = 0, 
             nstocks = 0, 
             period = 0
-        } = checked ? this.state.performance.current : this.state.performance.simulated;
+        } = e.target.value ? this.state.performance.current : this.state.performance.simulated;
         this.setState({
             metrics: {
                 ...this.state.metrics,
@@ -893,7 +898,7 @@ class AdviceDetailImpl extends React.Component {
                 dailyNAVChangePct: 0,
                 netValue: netValueEOD
             },
-            performanceType: checked ? 'Current' : 'Simulated'
+            performanceType: e.target.value ? 'Current' : 'Simulated'
         })
     }
 
@@ -909,7 +914,11 @@ class AdviceDetailImpl extends React.Component {
             ?   <ForbiddenAccess />
 
             :   <Row style={{marginBottom:'20px'}}>
-                    <AqPageHeader title={name} breadCrumbs={breadCrumbs} />
+                    <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
+                        <Col xl={0} xs={24} md={24} style={{textAlign: 'right'}}>
+                            {this.renderActionButtons(true)}
+                        </Col>
+                    </AqPageHeader>
                     <StockResearchModal
                             ticker={this.state.stockResearchModalTicker}
                             visible={this.state.stockResearchModalVisible}
@@ -923,12 +932,12 @@ class AdviceDetailImpl extends React.Component {
                             positions={this.state.positions}
                             updateTicker={this.updateTicker}
                             tickers={this.state.tickers}
-                            renderActionButtons={this.renderActionButtons}
                             showPerformanceToggle={Utils.isLoggedIn()}
                             handlePerformanceToggleChange={this.handlePerformanceToggleChange}
                             performanceType={this.state.performanceType}
+                            loading={false}
                     />
-                    <Col xl={6} md={0} xs={0} sm={0}>
+                    <Col xl={6} md={0} sm={0} xs={0}>
                         {this.renderActionButtons()}
                     </Col>
                 </Row>

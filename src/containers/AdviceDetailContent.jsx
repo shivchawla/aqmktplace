@@ -5,8 +5,8 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor} from '../constants';
+import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch, Icon} from 'antd';
+import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, metricsLabelStyle, metricsValueStyle} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -14,11 +14,13 @@ import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
+const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 const Panel = Collapse.Panel;
 const {TextArea} = Input;
 
 class AdviceDetailContentImpl extends React.Component {
+    
     renderAdviceMetrics = () => {
         const {
             annualReturn = 0, 
@@ -37,7 +39,7 @@ class AdviceDetailContentImpl extends React.Component {
             {value: volatility, label: 'Volatility', percentage: true, fixed: 2},
             {value: totalReturn, label: 'Total Return', percentage: true, color:true, fixed: 2},
             //{value: maxLoss, label: 'Max. Loss', percentage: true, fixed: 2},
-            {value: netValue, label: 'Net Value', money:true, isNetValue:true, dailyChangePct:dailyNAVChangePct},
+            // {value: netValue, label: 'Net Value', money:true, isNetValue:true, dailyChangePct:dailyNAVChangePct},
         ]
 
         return (
@@ -64,13 +66,20 @@ class AdviceDetailContentImpl extends React.Component {
             averageReturns = 0, 
             dailyReturns = 0
         } = this.props.metrics || {};
-        const defaultActiveKey = Utils.isLoggedIn() 
-                ? (isSubscribed || isOwner) ? ["2","3"] : ["3"] : ["3"];
+        const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["2","3"] : ["3"] : ["3"];
         const tickers = _.get(this.props, 'tickers', []);
+        const {netValue = 0, dailyNAVChangePct = 0} = this.props.metrics || {};
+        const netValueMetricItem = {
+            value: netValue, 
+            label: 'Net Value', 
+            money:true, 
+            isNetValue:true, 
+            dailyChangePct:dailyNAVChangePct
+        };
 
         return (
             <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
-                <Row className="row-container" type="flex" justify="space-between">
+                <Row className="row-container" type="flex" justify="space-between" align="middle">
                     <Col span={18}>
                         <h1 style={adviceNameStyle}>{name}</h1>
                         {
@@ -88,21 +97,55 @@ class AdviceDetailContentImpl extends React.Component {
                             <AqRate value={rating} />
                         }
                     </Col>
-                    <Col xl={0} md={6}>
+                    {/* <Col xl={0} md={6}>
                         {this.props.renderActionButtons && this.props.renderActionButtons(true)}
+                    </Col> */}
+                    <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <Spin spinning={this.props.loading}>
+                            {/* <AdviceMetricsItems metrics={[netValueMetricItem]} /> */}
+                            <MetricItem 
+                                    valueStyle = {{...metricsValueStyle, fontSize: '24px'}} 
+                                    labelStyle={metricsLabelStyle} 
+                                    value={netValueMetricItem.value} 
+                                    label={netValueMetricItem.label} 
+                                    money={netValueMetricItem.money}
+                                    percentage={netValueMetricItem.percentage}
+                                    color={netValueMetricItem.color}
+                                    style={{padding: '20px'}} 
+                                    isNetValue={netValueMetricItem.isNetValue}
+                                    dailyChange={netValueMetricItem.dailyChange || null}
+                                    dailyChangePct={netValueMetricItem.dailyChangePct || null}
+                                />
+                        </Spin>
                     </Col>
                 </Row>
-                <Row className="row-container">
-                    { this.props.showPerformanceToggle &&
-                        <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
-                            <h3 
-                                    style={{fontSize: '14px', display: 'inline-block', marginRight: '5px'}}
-                            >
-                                {this.props.performanceType}
-                            </h3>
-                            <Switch defaultChecked onChange={this.props.handlePerformanceToggleChange} />
-                        </Col>
-                    }
+                <div style={{width: '100%', height: '1px', backgroundColor: '#e8e8e8'}}></div>
+                <Row className="row-container" style={{marginTop: '0px'}}>
+                    <Col 
+                            span={24} 
+                            style={{
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center',
+                                marginBottom: '10px',
+                            }}
+                    >
+                        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginLeft: '-5px'}}>
+                            <Icon type="right" />
+                            <h3 style={{fontSize: '14px', fontWeight: 700, marginLeft: '10px'}}>Metrics</h3>
+                        </div>
+                        { this.props.showPerformanceToggle &&
+                            <div style={{marginLeft: '5px'}}>
+                                <RadioGroup 
+                                        defaultValue={true} 
+                                        size="small" onChange={this.props.handlePerformanceToggleChange}>
+                                    <RadioButton value={true}>Realized</RadioButton>
+                                    <RadioButton value={false}>Simulated</RadioButton>
+                                </RadioGroup>
+                                {/* <Switch defaultChecked onChange={this.props.handlePerformanceToggleChange} /> */}
+                            </div>
+                        }
+                    </Col>
                     <Col span={24}>
                         {this.renderAdviceMetrics()}
                     </Col>
