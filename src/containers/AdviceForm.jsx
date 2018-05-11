@@ -324,7 +324,7 @@ export class AdviceFormImpl extends React.Component {
     getVerifiedTransactions = () => {
         const data = [...this.state.data];
         const verifiedTransactions = data.filter((item, index) => {
-            return item.symbol.length > 1 && Number(item.shares) > 0 && item.shares.length > 0;
+            return item.symbol.length > 1 && Number(item.shares) > 0 && item.shares.toString().length > 0;
         });
 
         return verifiedTransactions;
@@ -819,14 +819,26 @@ export class AdviceFormImpl extends React.Component {
         );
     }
 
-    checkFormValidation = () => {
+    checkFormValidationSuccess = () => {
         const name = this.props.form.getFieldValue('name') || '';
         const description = this.props.form.getFieldValue('description') || '';
         const startDate = this.props.form.getFieldValue('startDate') || undefined;
-        if(name.length > 0 && description.length > 0 && startDate !== undefined && this.getVerifiedTransactions().length > 0){
-            return false;
-        }
-        return true;
+        console.log(
+            this.getVerifiedTransactions(),
+            this.state.data
+        );
+        console.log(
+            name.length > 0 
+            && description.length > 0 
+            && startDate !== undefined 
+            && this.getVerifiedTransactions().length > 0
+        );
+        return  (
+            name.length > 0 
+            && description.length > 0 
+            && startDate !== undefined 
+            && this.getVerifiedTransactions().length > 0
+        );
     }
 
     renderActionButtons = (small = false) => {
@@ -841,7 +853,7 @@ export class AdviceFormImpl extends React.Component {
                                 <Button 
                                         style={{...buttonStyle}}
                                         type="primary" 
-                                        disabled={this.checkFormValidation()}
+                                        disabled={!this.checkFormValidationSuccess()}
                                         onClick={this.togglePreview} 
                                         className={`action-button ${className}`}
                                 >
@@ -849,7 +861,7 @@ export class AdviceFormImpl extends React.Component {
                                 </Button>
                                 <Button 
                                         style={{...buttonStyle}}
-                                        disabled={this.checkFormValidation()}
+                                        disabled={!this.checkFormValidationSuccess()}
                                         onClick={(e) => this.handleSubmit(e, true)} 
                                         className={`action-button ${className}`}
                                 >
@@ -948,7 +960,7 @@ export class AdviceFormImpl extends React.Component {
                     {name: 'Update Advice'}
                 ])
                 : getBreadCrumbArray(UpdateAdviceCrumb, [
-                    {name: 'Create Advice'}
+                    {name: this.state.preview ? 'Preview Advice' : 'Create Advice'}
                 ]);
         return (
             this.state.isOwner || !this.props.isUpdate

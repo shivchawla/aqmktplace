@@ -108,7 +108,7 @@ export class AqStockTableMod extends React.Component {
         let target = newData.filter(item => item.key === key)[0];
         if (target) {
             if (type === 'number') {
-                target[column] = value >= 0 ? value : 0;
+                target[column] = value >= 0 ? Number(value) : 0;
             } else {
                 target[column] = value;
             }
