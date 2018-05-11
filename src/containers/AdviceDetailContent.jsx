@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch, Icon, Tag} from 'antd';
+import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch, Icon, Tag, Tooltip} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, metricsLabelStyle, metricsValueStyle} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate, IconItem} from '../components';
@@ -35,10 +35,10 @@ class AdviceDetailContentImpl extends React.Component {
         const metricsItems = [
             {value: subscribers, label: 'Subscribers'},
             {value: nstocks, label: 'Num. of Stocks'},
-            {value: annualReturn, label: 'Annual Return', percentage: true, color:true, fixed: 2},
-            {value: volatility, label: 'Volatility', percentage: true, fixed: 2},
-            {value: totalReturn, label: 'Total Return', percentage: true, color:true, fixed: 2},
-            //{value: maxLoss, label: 'Max. Loss', percentage: true, fixed: 2},
+            {value: annualReturn, label: 'Annual Return', percentage: true, color: true, fixed: 2, tooltipText: 'This is your Annual Return'},
+            {value: volatility, label: 'Volatility', percentage: true, fixed: 2, tooltipText: 'This is your Volatility'},
+            {value: totalReturn, label: 'Total Return', percentage: true, color:true, fixed: 2, tooltipText: 'This is your Total Return'},
+            {value: maxLoss, label: 'Max. Loss', percentage: true, fixed: 2, tooltipText: 'This is your Max Loss'},
             // {value: netValue, label: 'Net Value', money:true, isNetValue:true, dailyChangePct:dailyNAVChangePct},
         ]
 
@@ -137,24 +137,27 @@ class AdviceDetailContentImpl extends React.Component {
                     </Col>
                     <Col 
                             span={24} 
-                            style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}
+                            style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}
                     >
-                        <Tag 
-                                color='f58231' 
-                                style={{
-                                    color:'black', 
-                                    border:'1px solid #f58231', 
-                                    width:'85px', 
-                                    paddingTop:'1px', 
-                                }}
-                        >
-                            <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
-                            <span 
-                                    style={{marginLeft: '5px', color:'#f58231'}}
+                        <Tooltip title="Rebalancing Frequency" placement="rightBottom">
+                            <Tag 
+                                    color='f58231' 
+                                    style={{
+                                        color:'black', 
+                                        border:'1px solid #f58231', 
+                                        width:'85px', 
+                                        paddingTop:'1px',
+                                        cursor: 'auto' 
+                                    }}
                             >
-                                {this.props.adviceDetail.rebalanceFrequency}
-                            </span>
-                        </Tag>
+                                <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
+                                <span 
+                                        style={{marginLeft: '5px', color:'#f58231'}}
+                                >
+                                    {this.props.adviceDetail.rebalanceFrequency}
+                                </span>
+                            </Tag>
+                        </Tooltip>
                         {this.renderTrendingApprovedIcon()}
                     </Col>
                 </Row>

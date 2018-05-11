@@ -27,6 +27,7 @@ export class AdviceMetricsItems extends React.Component {
                                     isNetValue={item.isNetValue}
                                     dailyChange={item.dailyChange || null}
                                     dailyChangePct={item.dailyChangePct || null}
+                                    tooltipText={item.tooltipText || null}
                                 />
                             </Col>
                         );

@@ -81,10 +81,7 @@ export default class ScreenAdvices extends React.PureComponent {
     getQustionnaireModal = () => {
         const isFirstTime = Utils.getFromLocalStorage('isFirstTime') === 'false' ? false : true || true;
         if (isFirstTime) {
-            console.log('This is the first time');
             this.setState({questionnaireModalVisible: isFirstTime});
-        } else {
-            console.log('This is not the first time');
         }
     }
 
@@ -254,7 +251,6 @@ export default class ScreenAdvices extends React.PureComponent {
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
-            console.log(response.data.advices);
             // console.log('Mounted', this.mounted);
             if (this.mounted) {
                 this.setState({

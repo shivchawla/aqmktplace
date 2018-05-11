@@ -210,8 +210,6 @@ class AdviceDetailImpl extends React.Component {
                 rebalance
             },
             portfolio: response.data.portfolio
-        }, () => {
-            this.setUpSocketConnection();
         });
     }
 
@@ -438,6 +436,7 @@ class AdviceDetailImpl extends React.Component {
         if (!Utils.isLoggedIn()) {
             this.getDefaultAdviceData();
         } else {
+            this.setUpSocketConnection();
             this.getUserData();
             this.getAdviceData();
         }

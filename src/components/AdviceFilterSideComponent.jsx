@@ -165,7 +165,7 @@ export class AdviceFilterSideComponent extends React.Component {
 
     render() {
         const {selectedFilters} = this.state;
-        console.log(selectedFilters);
+        // console.log(selectedFilters);
         const filterArray = [
             {type: 'rating', label: 'Rating', range: selectedFilters.rating, min: 0, max: 5, step:0.1},
             {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, step: 0.5},

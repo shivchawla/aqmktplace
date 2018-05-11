@@ -572,7 +572,6 @@ export class AdviceFormImpl extends React.Component {
                             data: performance,
                             color: benchmarkColor
                         };
-
                         this.setState({tickers});
                     });
                 }
@@ -589,7 +588,6 @@ export class AdviceFormImpl extends React.Component {
         })
         .then(advicePortfolioResponse => {
             const advicePortfolio = advicePortfolioResponse.data;
-            console.log(advicePortfolio);
             const positions = [...this.state.positions];
             const portfolio = _.get(advicePortfolio, 'detail.positions', []);
             portfolio.map((item, index) => {
@@ -815,12 +813,10 @@ export class AdviceFormImpl extends React.Component {
                                                 adviceId = {this.props.adviceId} 
                                                 isUpdate={true}
                                                 onChange = {this.onChange}
-                                                setFieldsValue = {this.setFieldsValue}
                                                 data={this.state.data}
                                             />
                                         :   <AqStockTableMod 
                                                 onChange = {this.onChange}
-                                                setFieldsValue = {this.setFieldsValue}
                                             />
                                     }
                                 </Row>
