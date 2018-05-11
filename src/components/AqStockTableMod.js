@@ -108,7 +108,7 @@ export class AqStockTableMod extends React.Component {
         let target = newData.filter(item => item.key === key)[0];
         if (target) {
             if (type === 'number') {
-                target[column] = value >= 0 ? Number(value) : 0;
+                target[column] = value >= 0 ? value : 0;
             } else {
                 target[column] = value;
             }
@@ -134,13 +134,12 @@ export class AqStockTableMod extends React.Component {
         let target = newData.filter(item => item.key === key)[0];
         if (target) {
             target[column] = value;
-            // console.log('Target', target);
             if(column === 'symbol') {
-                // target['tickerValidationtarget['shares'] = 1;
                 this.asyncGetTarget(value)
                 .then(response => {
                     target = Object.assign(target, response);
                     target['totalValue'] = target['shares'] * response.lastPrice;
+                    this.updateAllWeights(newData);
                     this.setState({data: newData});
                     if (target['shares'] > 0) {
                         this.props.onChange(newData);
@@ -272,8 +271,6 @@ export class AqStockTableMod extends React.Component {
     }
 
     render() {
-        console.log('Render Called of AqStockTableMod');
-        
         return (
             <Col span={24}>
                 <Row style={{marginBottom: '20px'}}>

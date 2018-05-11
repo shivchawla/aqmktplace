@@ -37,7 +37,7 @@ export default class ScreenAdvices extends React.PureComponent {
             filterModalVisible: false,
             loading: true,
             selectedPage: Utils.getFromLocalStorage('selectedPage') || 1,
-            limit: 3,
+            limit: 10,
             totalCount: 3,
             initialCall: true,
             show: false,

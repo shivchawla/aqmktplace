@@ -823,16 +823,6 @@ export class AdviceFormImpl extends React.Component {
         const name = this.props.form.getFieldValue('name') || '';
         const description = this.props.form.getFieldValue('description') || '';
         const startDate = this.props.form.getFieldValue('startDate') || undefined;
-        console.log(
-            this.getVerifiedTransactions(),
-            this.state.data
-        );
-        console.log(
-            name.length > 0 
-            && description.length > 0 
-            && startDate !== undefined 
-            && this.getVerifiedTransactions().length > 0
-        );
         return  (
             name.length > 0 
             && description.length > 0 

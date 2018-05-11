@@ -19,7 +19,6 @@ export class EditableCell extends React.Component {
                         value={value} 
                         onChange={e => onChange(e.target.value)} 
                         size="small"
-                        min={0}
                 />
             </FormItem>
         );
