@@ -471,7 +471,8 @@ export const checkForInternet = (error, history) => {
 	}
 };
 
-setInterval(function(){Utils.openSocketConnection();}, 60000);
+Utils.openSocketConnection();
+setInterval(function(){Utils.openSocketConnection();}, 10000);
 
 export * from './requests';
 export * from './portfolio';

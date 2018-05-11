@@ -156,12 +156,12 @@ class StockResearchImpl extends React.Component {
             const deviation = rollingPerformance[key].deviation;
             const drawdown = rollingPerformance[key].drawdown;
             const metricsData = [
-                {label: 'Ann. Return', value: `${(returns.annualreturn * 100).toFixed(2)} %`},
-                {label: 'Volatility', value: `${(deviation.annualstandarddeviation * 100).toFixed(2)} %`},
+                {label: 'Ann. Return', value: `${(returns.annualreturn * 100).toFixed(2)}%`},
+                {label: 'Volatility', value: `${(deviation.annualstandarddeviation * 100).toFixed(2)}%`},
                 {label: 'Beta', value: ratios.beta},
                 {label: 'Sharpe Ratio', value: ratios.sharperatio},
-                {label: 'Alpha', value: `${(ratios.alpha * 100).toFixed(2)} %`},
-                {label: 'Max Loss', value: `${(drawdown.maxdrawdown * 100).toFixed(2)} %`},
+                {label: 'Alpha', value: `${(ratios.alpha * 100).toFixed(2)}%`},
+                {label: 'Max Loss', value: `${(drawdown.maxdrawdown * 100).toFixed(2)}%`},
             ];
 
             return this.renderPerformanceMetricsItems(metricsData);
