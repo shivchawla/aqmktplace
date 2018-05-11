@@ -15,7 +15,7 @@ import {
     AuthMessage
 } from './containers';
 
-import {PageNotFound, NoIternetAccess} from './components';
+import {PageNotFound, NoIternetAccess, ForbiddenAccess} from './components';
 import AppliedRoute from './components/AppliedRoute';
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
@@ -241,6 +241,7 @@ class App extends React.Component {
                         <Route path='/policies/tnc' component={TnC} />
                         <Route path='/forgotPassword' component={ForgotPassword} />
                         <Route path='/errorPage' component={NoIternetAccess} />
+                        <Route path='/forbiddenAccess' component={ForbiddenAccess} />
                         <Route path='/AuthMessage' component={AuthMessage} />
                         <Route exact={true} path='/login' component={Login} />
                         <Route exact={true} path='/signup' component={Signup} />

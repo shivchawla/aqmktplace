@@ -12,7 +12,7 @@ import {MyChartNew} from './MyChartNew';
 import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor} from '../constants';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
-import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio} from '../utils';
+import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio, fetchAjax} from '../utils';
 import {
     AqPortfolioCompositionAdvice,
     AqHighChartMod,
@@ -240,7 +240,7 @@ class PortfolioDetailImpl extends React.Component {
             const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${this.props.match.params.id}`;
             this.setState({show: true});
             let pnlStats;
-            axios.get(url, {headers: Utils.getAuthTokenHeader()})
+            fetchAjax(url, this.props.history, this.props.match.url)
             .then(response => { // Getting details of portfolio
 
                 if (response.data.benchmark) {
@@ -265,7 +265,7 @@ class PortfolioDetailImpl extends React.Component {
                     // Subscribing to real-time data
                     this.setUpSocketConnection();
                 });
-                return axios.get(performanceUrl, {headers: Utils.getAuthTokenHeader()});
+                return fetchAjax(performanceUrl, this.props.history, this.props.match.url);
             })
             .then(response => { // Getting Portfolio Performance
                 const colorData = generateColorData(positions);
@@ -343,17 +343,7 @@ class PortfolioDetailImpl extends React.Component {
                     pieSeries: series,
                 });
             })
-            .catch(error => {
-                Utils.checkForInternet(error, this.props.history);
-                // console.log(error);
-                if (error.response) {
-                    if (error.response.status === 400) {
-                        this.setState({notAuthorized: true});
-                    }
-                    // console.log(error.message);
-                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-                }
-            })
+            .catch(error => error)
             .finally(() => {
                 this.setState({show: false});
             });

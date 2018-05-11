@@ -8,7 +8,7 @@ import {MyChartNew} from './MyChartNew';
 import {graphColors} from '../constants';
 import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader, HighChartNew, ForbiddenAccess, AqRate} from '../components';
 import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor} from '../constants';
-import {dateFormat, Utils, getBreadCrumbArray} from '../utils';
+import {dateFormat, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import '../css/advisorDashboard.css';
 
 const RadioGroup = Radio.Group;
@@ -114,7 +114,7 @@ export default class AdvisorDashboard extends React.Component {
         let subscriberRating = {};
         let totalSubscribers = 0;
         this.setState({dashboardDataLoading: true, myAdvicesLoading: true, show: true});
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const currentRating = _.get(response.data, 'advices[0].rating.current', 0).toFixed(2);
             const simulatedRating = _.get(response.data, 'advices[0].rating.simulated', 0).toFixed(2);
@@ -173,16 +173,7 @@ export default class AdvisorDashboard extends React.Component {
                 this.setUpSocketConnection();
             });
         })
-        .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                if (error.response.status === 400 || error.response.status === 403) {
-                    this.setState({notAuthorized: true});
-                }
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-            this.setState({showEmptyScreen: true});
-        })
+        .catch(error => error)
         .finally(() => {
             this.setState({dashboardDataLoading: false, myAdvicesLoading: false, show: false});
         })
@@ -435,7 +426,7 @@ export default class AdvisorDashboard extends React.Component {
         const newTickers = [];
         const url = `${requestUrl}/performance/advice/${advice._id}`;
         this.setState({advicePerformanceLoading: true});
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const data = _.get(response.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
@@ -448,15 +439,6 @@ export default class AdvisorDashboard extends React.Component {
                 color: benchmarkColor
             });
             this.setState({tickers: newTickers});
-        })
-        .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                if (error.response.status === 400 || error.response.status === 403) {
-                    this.setState({notAuthorized: true});
-                }
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
         })
         .finally(() => {
             this.setState({advicePerformanceLoading: false});
@@ -502,18 +484,9 @@ export default class AdvisorDashboard extends React.Component {
 
     getAdvices = (url) => {
         this.setState({myAdvicesLoading: true});
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             this.setState({advices: response.data.advices, rawAdvices: response.data.advices});
-        })
-        .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                if (error.response.status === 400 || error.response.status === 403) {
-                    this.setState({notAuthorized: true});
-                }
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
         })
         .finally(() => {
             this.setState({myAdvicesLoading: false});
@@ -686,7 +659,7 @@ export default class AdvisorDashboard extends React.Component {
         } else {
             return (
                 <Row>
-                    <AqPageHeader title="Advisor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
+                    <AqPageHeader title="Advisor Dashboard" breadCrumbs = {breadCrumbArray} />
                 {
                     this.state.showEmptyScreen
                     ?   <Row>

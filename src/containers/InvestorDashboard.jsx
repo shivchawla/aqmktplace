@@ -8,7 +8,7 @@ import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} 
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate} from '../components';
 import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
-import {generateColorData, getMetricColor, Utils, getBreadCrumbArray} from '../utils';
+import {generateColorData, getMetricColor, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import 'react-loading-bar/dist/index.css'
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
@@ -161,7 +161,7 @@ export default class InvestorDashboard extends React.Component {
         const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}`;
         const tickers = [...this.state.tickers];
         this.setState({defaultPortfolioLoading: true});
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const positions = _.get(response.data, 'defaultPortfolio.detail.positions', []);
             const positionModdedForColors = positions.map(item => item.security.ticker);
@@ -234,24 +234,7 @@ export default class InvestorDashboard extends React.Component {
         .then(() => {
             this.setUpSocketConnection();
         })
-        .catch(error => {
-            // console.log(error);
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-                let messageText = '', errorCode = '';
-                if (error.message === 'Network Error') {
-                    messageText = 'You are disconnected from the internet';
-                    errorCode = 'no_network';
-                } else if (error.response.status === 400 || error.response.status === 403) {
-                    this.setState({notAuthorized: true});
-                } else {
-                    messageText = 'You have not created any portfolio yet. Get started by creating One';
-                    errorCode = 'empty_portfolio';
-                }
-                this.setState({showEmptyScreen: {error: error.message, status: true, messageText, errorCode}});
-            }
-        })
+        .catch(error => error)
         .finally(() => {
             this.setState({defaultPortfolioLoading: false});
         });
@@ -260,7 +243,7 @@ export default class InvestorDashboard extends React.Component {
     getInvestorPortfolios = () => new Promise((resolve, reject) => {
         const investorPortfolioUrl = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio`;
         this.setState({portfolioLoading: true});
-        axios.get(investorPortfolioUrl, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(investorPortfolioUrl, this.props.history, this.props.match.url)
         .then(response => {
             const subscribedAdvicesUrl = `${requestUrl}/advice?subscribed=true`;
             this.setState({investorPortfolios: this.processPortfolios(response.data)}, () => {
@@ -280,10 +263,10 @@ export default class InvestorDashboard extends React.Component {
         const subscribedAdvicesUrl = `${requestUrl}/advice?subscribed=true`;
         const followingAdviceUrl = `${requestUrl}/advice?following=true`;
         this.setState({subscribedAdvicesLoading: true});
-        axios.get(subscribedAdvicesUrl, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(subscribedAdvicesUrl, this.props.history, this.props.match.url)
         .then(response => {
             this.setState({subscribedAdvices: this.processSubscribedAdvices(response.data.advices)});
-            return axios.get(followingAdviceUrl, {headers: Utils.getAuthTokenHeader()});
+            return fetchAjax(followingAdviceUrl, this.props.history, this.props.match.url)
         })
         .then(response => {
             const advices = [...this.state.subscribedAdvices];
