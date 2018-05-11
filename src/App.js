@@ -87,7 +87,15 @@ class App extends React.Component {
                     <Icon type="user" className="icon" />
                     ADVISOR PROFILE
                 </div>
-                <div className="row" onClick={() => {Utils.logoutUser(); this.props.history.push('/login')}}>
+                <div 
+                        className="row" 
+                        onClick={
+                            () => {
+                                Utils.logoutUser(); 
+                                this.props.history.push('/login')
+                            }
+                        }
+                >
                     <Icon type="logout" className="icon" />
                     SIGN OUT
                 </div>

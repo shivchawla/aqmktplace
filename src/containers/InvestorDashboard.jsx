@@ -163,21 +163,31 @@ export default class InvestorDashboard extends React.Component {
         this.setState({defaultPortfolioLoading: true});
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
-            const positions = _.get(response.data, 'defaultPortfolio.detail.positions', []);
+            const defaultPortfolio = _.get(response.data, 'defaultPortfolio', null);
+            const defaultPerformance = _.get(response.data, 'defaultPerformance', null);
+            if (defaultPortfolio === null) {
+                this.setState({showEmptyScreen: {
+                    errorCode: "empty_portfolio",
+                    messageText: "You haven't created any portfolio yet. Please create one.",
+                    status: true
+                }});
+                return;
+            }
+            const positions = _.get(defaultPortfolio, 'detail.positions', []);
             const positionModdedForColors = positions.map(item => item.security.ticker);
             const colorData = generateColorData(positionModdedForColors);
-            const portfolioMetrics = _.get(response.data, 'defaultPerformance.current.metrics.portfolioMetrics', {});
+            const portfolioMetrics = _.get(defaultPerformance, 'current.metrics.portfolioMetrics', {});
             const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
-            const performance = _.get(response.data, 'defaultPerformance.current.metrics.portfolioPerformance.true', {});
+            const performance = _.get(defaultPerformance, 'current.metrics.portfolioPerformance.true', {});
             
             const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${response.data.defaultPortfolio._id}`;
-            const performanceData = _.get(response.data, 'defaultPerformance.simulated.portfolioValues', []).map(item => {
+            const performanceData = _.get(defaultPerformance, 'simulated.portfolioValues', []).map(item => {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue]
             });
             const pieChartTitle = composition[0].data.length > 1 && `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
             const summary = Object.assign(
-                _.get(response.data, 'defaultPerformance.summary.current', {}),
-                _.get(response.data, 'defaultPortfolio.pnlStats', {})
+                _.get(defaultPerformance, 'summary.current', {}),
+                _.get(defaultPortfolio, 'pnlStats', {})
             );
 
             var netValue = summary.netValue || summary.netValueEOD;
@@ -186,7 +196,7 @@ export default class InvestorDashboard extends React.Component {
             var totalPnl = summary.totalPnl;
 
             tickers.push({
-                name: _.get(response.data, 'defaultPortfolio.benchmark.ticker', ''),
+                name: _.get(defaultPortfolio, 'benchmark.ticker', ''),
                 show: true,
                 color: benchmarkColor
             });
@@ -195,7 +205,7 @@ export default class InvestorDashboard extends React.Component {
                 data: performanceData,
                 show: true
             });
-            const constituentPerformance = _.get(response.data, 'defaultPerformance.current.metrics.constituentPerformance', []);
+            const constituentPerformance = _.get(defaultPerformance, 'current.metrics.constituentPerformance', []);
             const dollarPerformance = constituentPerformance.map(item => {
                 return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]};
             });
@@ -203,8 +213,8 @@ export default class InvestorDashboard extends React.Component {
                 return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]};
             });
             this.setState({
-                defaultPortfolioName: _.get(response.data, 'defaultPortfolio.name', ''),
-                defaultPortfolioId: _.get(response.data, 'defaultPortfolio._id', ''),
+                defaultPortfolioName: _.get(defaultPortfolio, 'name', ''),
+                defaultPortfolioId: _.get(defaultPortfolio, '_id', ''),
                 positions,
                 showEmptyScreen: {...this.state.showEmptyScreen, status: positions.length > 0 ? false : true},
                 composition,

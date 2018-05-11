@@ -153,6 +153,8 @@ export class Utils{
 
 	static logoutUser(){
 		this.localStorageSaveObject('USERINFO', {});
+		this.localStorageSaveObject('adviceFilter', {});
+		this.localStorageSave('selectedPage', 1);
 		this.setLoggedInUserInfo({});
 	}
 

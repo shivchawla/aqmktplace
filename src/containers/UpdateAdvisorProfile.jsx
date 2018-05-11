@@ -158,10 +158,12 @@ class UpdateAdvisorProfileImpl extends React.Component {
     }
 
     checkCompanyValidation = () => {
-        console.log(this.props.form.getFieldValue('companyRegistrationNum'));
-        console.log(this.props.form.getFieldValue('companyName'));
+        const companyRegistrationNum = this.props.form.getFieldValue('companyRegistrationNum') || '';
+        const companyName = this.props.form.getFieldValue('companyName') || '';
+        console.log(companyRegistrationNum);
+        console.log(companyName);
         if (this.state.isCompany) {
-            return this.props.form.getFieldValue('companyRegistrationNum').length > 0 && this.props.form.getFieldValue('companyName').length > 0;
+            return companyRegistrationNum.length > 0 && companyName.length > 0;
         }
         return true;
     }
@@ -170,15 +172,15 @@ class UpdateAdvisorProfileImpl extends React.Component {
         const values = this.props.form.getFieldsValue();
         const data = {
             webUrl: values.webUrl,
-            address: {
-                line1: values.line1,
-                line2: values.line2,
-                line3: values.line3,
-                city: values.city,
-                state: values.state,
-                pincode: Number(values.pincode),
-                country: "IN"
-            },
+            // address: {
+            //     line1: values.line1,
+            //     line2: values.line2,
+            //     line3: values.line3,
+            //     city: values.city,
+            //     state: values.state,
+            //     pincode: Number(values.pincode),
+            //     country: "IN"
+            // },
             isCompany: this.state.isCompany,
             isSebiRegistered: this.state.isSebiRegistered,
             sebiRegistrationNum:  values.sebiRegistrationNum,
@@ -257,7 +259,6 @@ class UpdateAdvisorProfileImpl extends React.Component {
         const {getFieldDecorator} = this.props.form;
 
         return (
-            <div >
             <Form onSubmit={this.updateUserProfile} style={{height: '520px'}}>
                 <Row type="flex" justify="start" style={{...sectionContainerStyle, marginTop: '0px'}}>
                     <Col span={24}>
@@ -386,13 +387,12 @@ class UpdateAdvisorProfileImpl extends React.Component {
                         </Row>       
                     </Col>
                 </Row>
+                <Row type="flex" justify="end" align="bottom" style={{marginTop: '10px'}}>
+                    <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <Button type="primary" htmlType="submit">Update</Button>
+                    </Col>
+                </Row>
             </Form>
-            <Row type="flex" justify="end" align="bottom" style={{marginTop: '10px'}}>
-                <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                    <Button type="primary" htmlType="submit">Update</Button>
-                </Col>
-            </Row>
-            </div>
         );
     }
 }

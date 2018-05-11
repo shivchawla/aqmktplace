@@ -80,6 +80,7 @@ class AdviceDetailImpl extends React.Component {
             show: false,
             cash: -10,
             stockResearchModalVisible: false,
+            unsubscriptionModalVisible: false,
             approvalModalVisible: false,
             stockResearchModalTicker: 'TCS',
             selectedPortfolioDate: moment(),
@@ -426,7 +427,7 @@ class AdviceDetailImpl extends React.Component {
         const url = `${requestUrl}/me`;
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
-            const userId = response.data._id;
+            const userId = _.get(response.data, '_id', '');
             this.setState({userId});
         });
     };
@@ -722,9 +723,29 @@ class AdviceDetailImpl extends React.Component {
         this.setState({approvalModalVisible: !this.state.approvalModalVisible});
     }
 
+    renderUnsubscriptionModal = () => {
+        const unsubscriptionPendingDays = _.get(this.state, 'adviceResponse.subscriptionDetail.subscriptionPendingDays'); 
+
+        return (
+            <Modal
+                    title="Unsubscription Process Pending"
+                    visible={this.state.unsubscriptionModalVisible}
+                    onCancel={this.toggleUnsubscriptionModal}
+                    footer={null}
+            >
+                <h3>Unsubscription process is pending {unsubscriptionPendingDays} days left</h3>
+            </Modal>
+        );
+    }
+
+    toggleUnsubscriptionModal = () => {
+        this.setState({unsubscriptionModalVisible: !this.state.unsubscriptionModalVisible});
+    }
+
     renderActionButtons = (small=false) => {
         const {userId} = this.state;
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
+        const unsubscriptionPending = _.get(this.state, 'adviceResponse.subscriptionDetail.unsubscriptionPending', false);
         const className = small ? 'action-button action-button-small' : 'action-button';
         if (userId !== advisorId) {
             return (
@@ -732,7 +753,7 @@ class AdviceDetailImpl extends React.Component {
                     <Button
                             onClick={() => 
                                 Utils.isLoggedIn() 
-                                ? this.toggleDialog() 
+                                ? unsubscriptionPending ? this.toggleUnsubscriptionModal() : this.toggleDialog() 
                                 : this.props.history.push('/login')
                             }
                             className={className}
@@ -740,7 +761,11 @@ class AdviceDetailImpl extends React.Component {
                             type="primary"
                             disabled={this.state.disableSubscribeButton}
                     >
-                        {!this.state.adviceDetail.isSubscribed ? "PURCHASE ADVICE" : "CANCEL SUBSCRIPTION"}
+                        {
+                            !this.state.adviceDetail.isSubscribed 
+                            ? "PURCHASE ADVICE" 
+                            : unsubscriptionPending ? "Unsubscription Pending" : "CANCEL SUBSCRIPTION"
+                        }
                     </Button>
                     <Button
                             onClick={() => 
@@ -891,6 +916,7 @@ class AdviceDetailImpl extends React.Component {
                {this.renderModal()}
                {this.renderUpdateModal()}
                {this.renderApprovalModal()}
+               {this.renderUnsubscriptionModal()}
                {
                     !this.state.show &&
                     this.renderPageContent()

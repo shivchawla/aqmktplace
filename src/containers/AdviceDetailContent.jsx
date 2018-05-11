@@ -233,7 +233,6 @@ class AdviceDetailContentImpl extends React.Component {
                                                 justifyContent: 'flex-end', 
                                                 top: '-40px', 
                                                 position:'absolute', 
-                                                zIndex:'10000'
                                             }}
                                     >
                                         <DatePicker

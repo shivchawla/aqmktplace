@@ -477,7 +477,7 @@ export default class ScreenAdvices extends React.PureComponent {
         return (
             <Row>
                 {this.renderQuestionnaireDialog()}
-                <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs} button={button}/>
+                <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs} />
                 <Row className="row-container" style={{...shadowBoxStyle, marginBottom:'20px'}}>
                     {this.renderFilter()}
                     

@@ -122,6 +122,11 @@ export default class AdvisorDashboard extends React.Component {
             const advisorRatingStat = (_.get(analytics[analytics.length - 1], 'rating.current', 0)).toFixed(2);
             const advisorSubscribers = _.get(response.data, 'analytics[response.data.analytics.length - 1].numFollowers', 0);
             const advices = _.get(response.data, 'advices', []);
+            console.log('Advices', advices);
+            if (advices.length < 1) {
+                this.setState({showEmptyScreen: true});
+                return;
+            }
             const validAdviceIndex = this.getValidIndex(advices);
             const validAdvice = advices[validAdviceIndex] || null;
             // console.log('Valid Advice', validAdvice);
@@ -173,7 +178,9 @@ export default class AdvisorDashboard extends React.Component {
                 this.setUpSocketConnection();
             });
         })
-        .catch(error => error)
+        .catch(error => {
+            console.log(error);
+        })
         .finally(() => {
             this.setState({dashboardDataLoading: false, myAdvicesLoading: false, show: false});
         })

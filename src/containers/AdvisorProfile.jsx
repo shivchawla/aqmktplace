@@ -140,10 +140,28 @@ export default class AdvisorProfile extends React.Component {
 
     renderAdvices = () => {
         const {advices} = this.state;
-
-        return advices.map((advice, index) => {
-            return <AdviceListItemMod key={index} advice={advice}/>
-        })
+        if (advices.length > 0) {
+            return advices.map((advice, index) => {
+                return <AdviceListItemMod key={index} advice={advice}/>
+            });    
+        } else {
+            return (
+                <Row style={{marginTop: '40px'}}>
+                    <Col span={24} style={{textAlign: 'center'}}>
+                        <h3>You haven't created any advices yet.</h3>
+                    </Col>
+                    <Col span={24} style={{textAlign: 'center', marginTop: '20px'}}>
+                        <Button 
+                                style={{width: '150px', height: '40px', fontSize: '16px'}}
+                                type="primary" 
+                                onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                        >
+                            Create One
+                        </Button>
+                    </Col>
+                </Row>
+            );
+        }
     }
 
     getAdvisorDetail = () => {
