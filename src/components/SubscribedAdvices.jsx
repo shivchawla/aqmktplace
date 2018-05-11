@@ -125,7 +125,6 @@ class SubscribedAdvicesImpl extends React.Component {
                     this.props.updateSubscribedAdvices(advices);
                     this.setState({advices});
                     completedAdviceCall++;
-                    console.log(`Network Call Completed for ${adviceResponse.data.name}`);
                     if (completedAdviceCall === subscribedAdvices.length) { // All the network calls completed
                         this.setState({loading: false});
                     }

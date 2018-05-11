@@ -924,14 +924,15 @@ export class AdviceFormImpl extends React.Component {
             nstocks: this.getVerifiedTransactions().length
         };
         
-        const positions = this.getVerifiedTransactions().map(item => {
+        const positions = this.getVerifiedTransactions().map((item, index) => {
             return {
                 name: item.name,
                 symbol: item.symbol,
                 shares: Number(item.shares),
                 price: item.lastPrice,
                 sector: item.sector,
-                weight: item.weight
+                weight: item.weight,
+                key: index
             }
         });
         if(this.state.preview) {
