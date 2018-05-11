@@ -36,15 +36,15 @@
                 <g id="Group-19">
                     <rect id="shadow" fill="#323C5A" opacity="0.244696553" filter="url(#filter-1)" x="10.944" y="20.52" width="121.068" height="180.576" rx="19.0688256"></rect>
                     <rect id="bg" fill="#FFFFFF" x="0" y="0" width="142.272" height="180.576" rx="8.7398784"></rect>
-                    <g id="Group-5-Copy-2" transform="translate(17.784000, 63.612000)" fill="#323C5A">
-                        <text id="16%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
-                            <tspan x="0" y="32.732">16%</tspan>
+                    <g id="Group-5-Copy-2" transform="translate(17.784000, 111.612000)" fill="#323C5A">
+                        <text id="Medium" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                            <tspan x="0" y="32.732">Medium</tspan>
                         </text>
-                        <text id="Volatility" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
-                            <tspan x="0" y="11">Volatility</tspan>
+                        <text id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                            <tspan x="0" y="11">Risk</tspan>
                         </text>
                     </g>
-                    <g id="Group-4" transform="translate(19.836000, 112.176000)" fill="#323C5A">
+                    <g id="Group-4" transform="translate(19.836000, 64.176000)" fill="#323C5A">
                         <text id="26%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                             <tspan x="0" y="32.732">26%</tspan>
                         </text>
@@ -89,17 +89,17 @@
                 </mask>
                 <use id="bg" fill="#FFFFFF" xlink:href="#path-4"></use>
                 <g id="Group-5" mask="url(#mask-5)">
-                    <g transform="translate(12.996000, 64.296000)">
-                        <text id="12%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
-                            <tspan x="0" y="32.732" fill="#323C5A">12%</tspan>
+                    <g transform="translate(12.996000, 111.296000)">
+                        <text id="Low" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                            <tspan x="0" y="32.732" fill="#323C5A">Low</tspan>
                         </text>
-                        <text id="Volatility" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
-                            <tspan x="0" y="11" fill="#323C5A">Volatility</tspan>
+                        <text id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                            <tspan x="0" y="11" fill="#323C5A">Risk</tspan>
                         </text>
                     </g>
                 </g>
                 <g id="Group-4" mask="url(#mask-5)">
-                    <g transform="translate(12.996000, 112.176000)">
+                    <g transform="translate(12.996000, 64.176000)">
                         <text id="20.5%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                             <tspan x="0" y="32.732" fill="#323C5A">20.5%</tspan>
                         </text>
@@ -138,7 +138,7 @@
             <g id="Group-26" transform="translate(400.140000, 0.000000)">
                 <rect id="shadow" fill="#323C5A" opacity="0.244696553" filter="url(#filter-6)" x="10.944" y="20.52" width="121.068" height="180.576" rx="19.0688256"></rect>
                 <rect id="bg" fill="#FFFFFF" x="0" y="0" width="142.272" height="180.576" rx="8.7398784"></rect>
-                <g id="Group-4" transform="translate(12.996000, 112.176000)" fill="#323C5A">
+                <g id="Group-4" transform="translate(15.996000, 64.176000)" fill="#323C5A">
                     <text id="30%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                         <tspan x="0" y="32.732">30%</tspan>
                     </text>
@@ -146,15 +146,15 @@
                         <tspan x="0" y="11">Return</tspan>
                     </text>
                 </g>
-                <g id="Group-5-Copy-3" transform="translate(16.416000, 63.612000)" fill="#323C5A">
-                    <text id="22%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
-                        <tspan x="0" y="32.732">22%</tspan>
+                <g id="Group-5-Copy-3" transform="translate(16.416000, 111.612000)" fill="#323C5A">
+                    <text id="High" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                        <tspan x="0" y="32.732">High</tspan>
                     </text>
-                    <text id="Volatility" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
-                        <tspan x="0" y="11">Volatility</tspan>
+                    <text id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                        <tspan x="0" y="11">Risk</tspan>
                     </text>
                 </g>
-                <g id="logo" transform="translate(12.996000, 19.152000)">
+                <g id="logo" transform="translate(15.996000, 19.152000)">
                     <rect id="Rectangle-3" fill="url(#linearGradient-2)" x="0" y="4.32137048" width="26.1401808" height="26.1401808" rx="8.12592"></rect>
                     <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="24.37776" font-weight="normal" fill="#FFFFFF">
                         <tspan x="5.97423563" y="24.1743492">a</tspan>
@@ -194,17 +194,17 @@
                         </g>
                     </g>
                     <g id="Group-5-Copy" mask="url(#mask-9)">
-                        <g transform="translate(14.364000, 77.292000)">
-                            <text id="17%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
-                                <tspan x="0" y="32.732" fill="#323C5A">17%</tspan>
+                        <g transform="translate(14.364000, 124.292000)">
+                            <text id="Low" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                                <tspan x="0" y="32.732" fill="#323C5A">Low</tspan>
                             </text>
-                            <text id="Volatility" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
-                                <tspan x="0" y="11" fill="#323C5A">Volatility</tspan>
+                            <text id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                                <tspan x="0" y="11" fill="#323C5A">Risk</tspan>
                             </text>
                         </g>
                     </g>
                     <g id="Group-4-Copy-3" mask="url(#mask-9)">
-                        <g transform="translate(14.364000, 125.172000)">
+                        <g transform="translate(14.364000, 77.172000)">
                             <text id="26.5%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                                 <tspan x="0" y="32.732" fill="#323C5A">26.5%</tspan>
                             </text>
