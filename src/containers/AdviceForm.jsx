@@ -6,9 +6,9 @@ import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor} from '../constants';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
-import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate} from '../utils';
+import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate, fetchAjax} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {store} from '../store';
 import {benchmarks} from '../constants/benchmarks';
@@ -81,7 +81,8 @@ export class AdviceFormImpl extends React.Component {
             stockResearchModalVisible: false,
             stockResearchModalTicker: {},
             preview: false,
-            portfolioMetrics: {}
+            portfolioMetrics: {},
+            performanceError: false
         };
         this.columns = [
             {
@@ -197,13 +198,7 @@ export class AdviceFormImpl extends React.Component {
                     this.props.history.push(`/advice/${adviceId}`);
                     message.success('Succesfully Created Advice');
                 })
-                .catch((error) => {
-                    Utils.checkForInternet(error, this.props.history);
-                    if (error.response) {
-                        message.error(constructErrorMessage(error));
-                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);                        
-                    }
-                });
+                .catch(error => error);
             }
         });
     }
@@ -217,16 +212,16 @@ export class AdviceFormImpl extends React.Component {
         const requestData = {
             name: '',
             detail: {
-              startDate,
-              endDate,
-              positions: this.processTransactions(),
-              cash: 0
+                startDate,
+                endDate,
+                positions: this.processTransactions(),
+                cash: 0
             },
             benchmark: {
-              ticker: this.state.selectedBenchmark,
-              securityType: "EQ",
-              country: "IN",
-              exchange: "NSE"
+                ticker: this.state.selectedBenchmark,
+                securityType: "EQ",
+                country: "IN",
+                exchange: "NSE"
             }
         };
         const hasBenchmarkData = this.state.tickers && this.state.tickers[1].data && this.state.tickers[1].data.length > 0;
@@ -254,13 +249,11 @@ export class AdviceFormImpl extends React.Component {
                         return {
                             name: item.symbol,
                             y: item.weight,
+                            color: graphColors[index] || '#fff'
                         }
                     })
                 }
             );
-
-            // console.log(tickers);
-            
             var idx = tickers.map(item => item.name).indexOf("Advice");
             if (idx != -1) {
                 tickers[idx].data = performance;
@@ -277,12 +270,7 @@ export class AdviceFormImpl extends React.Component {
                 portfolioMetrics
             });
         })
-        .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-        })
+        .catch(error => error)
         .finally(() => {
             this.setState({loadingPerformance: false, show: false});
         });
@@ -424,7 +412,7 @@ export class AdviceFormImpl extends React.Component {
                     onOk={this.togglePerformanceModal}
                     onCancel={this.togglePerformanceModal}
                     width={980}
-                    bodyStyle={{overflow: 'hidden', overflowY: 'scroll'}}
+                    bodyStyle={{overflow: 'hidden', overflowY: 'scroll', height: '500px'}}
                     style={{top: 20}}
                     footer={null}
             >
@@ -440,18 +428,51 @@ export class AdviceFormImpl extends React.Component {
         const series = [...this.state.compositionSeries];
         return (
             <Row type="flex" align="middle">
-                <Col span={16}>
-                    <MyChartNew series={this.state.tickers} chartId="advice-form-performance-chart"/>
-                </Col>
-                <Col span={8}>
-                    {
-                        series.length > 0 && series[0].data.length > 0 && series[0].data[0].y > 0 &&
-                        <div type="flex" justify="center" align="middle">
-                            <h3 style={{fontSize: '16px'}}>Portfolio Composition</h3>
-                            <HighChartNew series={series}/>
-                        </div>
-                    }
-                </Col>
+                {
+                    !this.state.performanceError
+                    ?   <React.Fragment>
+                            <Col span={16}>
+                                <MyChartNew series={this.state.tickers} chartId="advice-form-performance-chart"/>
+                            </Col>
+                            <Col span={8}>
+                                {
+                                    series.length > 0 && series[0].data.length > 0 && series[0].data[0].y > 0 &&
+                                    <div type="flex" justify="center" align="middle">
+                                        <h3 style={{fontSize: '16px'}}>Portfolio Composition</h3>
+                                        <HighChartNew series={series}/>
+                                    </div>
+                                }
+                            </Col>
+                        </React.Fragment>
+                    :   <Col 
+                                span={24} 
+                                style={{height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+                        >
+                            <Row>
+                                <Col span={24}>
+                                    <h3 
+                                            style={{
+                                                fontSize: '26px', 
+                                                fontWeight: '400', 
+                                                color: '#585858', 
+                                                textAlign: 'center'
+                                            }}
+                                    >
+                                        Something wrong happened while getting the performance!
+                                    </h3>
+                                </Col>
+                                <Col span={24} style={{textAlign: 'center'}}>
+                                    <Button 
+                                            type="primary" 
+                                            style={{width: '150px', height: '40px', marginTop: '20px'}}
+                                            onClick={this.getPortfolioPerformance}
+                                    >
+                                        Try Again
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Col>
+                }
             </Row>
         );
     }
@@ -528,7 +549,7 @@ export class AdviceFormImpl extends React.Component {
         const advicePortfolioUrl = `${adviceUrl}/portfolio`;
         const tickers = [...this.state.tickers];
         this.setState({show: true});
-        axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(adviceUrl, this.props.history, this.props.match.url)
         .then(response => {
             const {name, description, heading} = response.data;
             const isOwner = _.get(response.data, 'isOwner', false);
@@ -544,7 +565,6 @@ export class AdviceFormImpl extends React.Component {
             }, () => {
                 if (this.state.isOwner) {
                     const benchmarkTicker = _.get(response.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
-                    
                     getStockPerformance(benchmarkTicker)
                     .then(performance => {
                         tickers[1] = {
@@ -561,7 +581,7 @@ export class AdviceFormImpl extends React.Component {
                 this.setState({show: false}, () => {
                     this.props.form.setFieldsValue({name, description, headline: heading});
                 });
-                return axios.get(advicePortfolioUrl, {headers: Utils.getAuthTokenHeader()});
+                return fetchAjax(advicePortfolioUrl, this.props.history, this.props.match.url);
             } else {
                 this.setState({show: false});
                 return null;
@@ -584,19 +604,12 @@ export class AdviceFormImpl extends React.Component {
                     totalValue: Number((item.quantity * item.lastPrice).toFixed(2))
                 });
             });
-
             this.updateAllWeights(positions);
             this.setState({data: positions, startDate: advicePortfolio.detail.startDate, show: false}, () => {
-                // this.getPortfolioPerformance();
                 this.props.form.setFieldsValue({startDate: moment(this.state.startDate)});
             });
         })
-        .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-        })
+        .catch(error => error)
         .finally(() => {
             this.setState({show: false});
         });

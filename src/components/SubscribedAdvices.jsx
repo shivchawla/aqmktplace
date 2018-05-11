@@ -8,7 +8,7 @@ import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker, Spin, Button} fro
 import {AqPortfolioCompositionAdvice, MetricItem} from '../components';
 import {loadingColor} from '../constants';
 import {MyChartNew} from '../containers/MyChartNew';
-import {Utils} from '../utils';
+import {Utils, fetchAjax} from '../utils';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
 import {
     currentPerformanceColor, 
@@ -83,15 +83,15 @@ class SubscribedAdvicesImpl extends React.Component {
         const url = `${requestUrl}/advice?subscribed=true`;
         this.setState({loading: true});
         let completedAdviceCall = 0;
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const subscribedAdvices = response.data.advices;
             subscribedAdvices.map((advice, index) => {
                 const adviceUrl = `${requestUrl}/advice/${advice._id}`;
                 const portfolioUrl = `${requestUrl}/advice/${advice._id}/portfolio`;
                 return Promise.all([
-                    axios.get(adviceUrl, {headers: Utils.getAuthTokenHeader()}),
-                    axios.get(portfolioUrl, {headers: Utils.getAuthTokenHeader()})
+                    fetchAjax(adviceUrl, this.props.history, this.props.match.url),
+                    fetchAjax(portfolioUrl, this.props.history, this.props.match.url),
                 ])
                 .then(([adviceResponse, advicePortfolioResponse]) => {
                     var performanceSummary = _.get(adviceResponse.data, 'performanceSummary.current', {});
@@ -132,13 +132,7 @@ class SubscribedAdvicesImpl extends React.Component {
                 })
             })
         })
-        .catch(error => {
-            // console.log(error);
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-        })
+        .catch(error => error);
     }
 
     getPerformance = (axiosInstance, adviceid) => {

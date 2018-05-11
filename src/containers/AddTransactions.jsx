@@ -14,7 +14,7 @@ import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransac
 import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle, benchmarkColor, metricColor, performanceColor} from '../constants';
 import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
-import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice} from'../utils';
+import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax} from'../utils';
 import {benchmarks} from '../constants/benchmarks';
 
 const TabPane = Tabs.TabPane;
@@ -320,6 +320,9 @@ class AddTransactionsImpl extends React.Component {
                         const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating portfolio');
                         const code = _.get(error.response, 'data.errorCode', 'N/A');
                         message.error(`Code - ${code}: ${errorMessage}`);
+                        if (error.response.status === 400 || error.response.status === 403) {
+                            this.props.history.push('/forbiddenAccess');
+                        }
                         Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                     }
                 })
@@ -423,6 +426,9 @@ class AddTransactionsImpl extends React.Component {
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
             if(error.response) {
+                if (error.response.status === 400 || error.response.status === 403) {
+                    this.props.history.push('/forbiddenAccess');
+                }
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
         })
@@ -791,7 +797,7 @@ class AddTransactionsImpl extends React.Component {
                 this.setState({show: true});
                 const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
                 const unionAdvices = [];
-                axios.get(url, {headers: Utils.getAuthTokenHeader()})
+                fetchAjax(url, this.props.history, this.props.match.url)
                 .then(response => {
                     this.props.form.setFieldsValue({name: _.get(response.data, 'name', '-')})
                     const advicePerformance = _.get(response.data, 'advicePerformance', []);
@@ -845,16 +851,7 @@ class AddTransactionsImpl extends React.Component {
                     });
                     this.setState({advices: unionAdvices});
                 })
-                .catch(error => {
-                    // console.log(error);
-                    Utils.checkForInternet(error, this.props.history);
-                    if (error.response) {
-                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-                        if (error.response.status === 400) {
-                            this.setState({notAuthorized: true});
-                        }
-                    }
-                })
+                .catch(error => error)
                 .finally(() => {
                     this.setState({show: false});
                 });
@@ -897,9 +894,8 @@ class AddTransactionsImpl extends React.Component {
 
     getSubscribedAdvicesRequest = advices => {
         const adviceRequests = advices.map(
-            advice => 
-                axios.get(`${requestUrl}/advice/${advice.id}/portfolio`, {headers: Utils.getAuthTokenHeader()}
-            )
+            advice => fetchAjax(`${requestUrl}/advice/${advice.id}/portfolio`, this.props.history, this.props.match.url)
+            
         );
         return Promise.all(adviceRequests)        
     }

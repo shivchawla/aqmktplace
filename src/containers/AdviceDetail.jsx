@@ -29,7 +29,6 @@ class AdviceDetailImpl extends React.Component {
     socketOpenConnectionTimeout = 1000;
     numberOfTimeSocketConnectionCalled = 1;
     mounted = false;
-
     constructor(props) {
         super(props);
         this.state = {
@@ -247,24 +246,16 @@ class AdviceDetailImpl extends React.Component {
         const adviceId = this.props.match.params.id;
         const adviceSummaryUrl = `${requestUrl}/advice_default/${adviceId}?fullperformance=true`;
         this.setState({show: true});
-        
-        fetchAjax(adviceSummaryUrl)
+        fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url)
         .then(summaryResponse => {
             this.getAdviceSummary(summaryResponse);
             this.getAdvicePerformance(summaryResponse.data.performance);
         })
         .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
             this.setState({
                 positions: [],
                 series: []
             });
-            if (error.response) {
-                if (error.response.status === 400) {
-                    this.setState({notAuthorized: true});
-                }
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
         })
         .finally(() => {
             this.setState({show: false});
@@ -283,10 +274,9 @@ class AdviceDetailImpl extends React.Component {
         const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
         const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
         this.setState({show: true});
-        
         return Promise.all([
-            fetchAjax(adviceSummaryUrl),
-            fetchAjax(advicePerformanceUrl)
+            fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
+            fetchAjax(advicePerformanceUrl, this.props.history, this.props.match.url)
         ]) 
         .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
             this.getAdviceSummary(adviceSummaryResponse);
@@ -303,25 +293,17 @@ class AdviceDetailImpl extends React.Component {
             return authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null;
         })
         .then(advicePortfolioResponse  => {
-
             let positions = [];
             if (advicePortfolioResponse) {
                 this.getAdviceDetail(advicePortfolioResponse);
             }
         })
         .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
             this.setState({
                 positions: [],
                 series: []
             });
-            console.log(error);
-            if (error.response) {
-                if (error.response.status === 400) {
-                    this.setState({notAuthorized: true});
-                }
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
+            return error;
         })
         .finally(() => {
             this.setState({show: false});
@@ -345,7 +327,6 @@ class AdviceDetailImpl extends React.Component {
     };
 
     subscribeAdvice = () => {
-        
         this.setState({disableSubscribeButton: true});
         axios({
             method: 'POST',
@@ -358,10 +339,9 @@ class AdviceDetailImpl extends React.Component {
             //message.success('Success');
             const portfolioUrl = `${requestUrl}/advice/${this.props.match.params.id}/portfolio`;
             const summaryUrl = `${requestUrl}/advice/${this.props.match.params.id}`;
-
             return Promise.all([
-                fetchAjax(portfolioUrl),
-                fetchAjax(summaryUrl)
+                fetchAjax(portfolioUrl, this.props.history, this.props.match.url),
+                fetchAjax(summaryUrl, this.props.history, this.props.match.url)
             ]);
         })
         .then(([advicePortfolioResponse, adviceSummaryResponse]) => {
@@ -446,20 +426,10 @@ class AdviceDetailImpl extends React.Component {
 
     getUserData = () => {
         const url = `${requestUrl}/me`;
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const userId = response.data._id;
             this.setState({userId});
-        })
-        .catch(error => {
-            // console.log(error.message);
-            if (error.response) {
-                // console.log(error.response.status);
-                if (error.response.status === 400) {
-                    this.setState({notAuthorized: true});
-                }
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
         });
     };
 
@@ -582,9 +552,9 @@ class AdviceDetailImpl extends React.Component {
                             totalReturn;
 
                 this.setState({
-                    netValue,
                     metrics: {
                         ...this.state.metrics,
+                        netValue,
                         dailyNAVChangePct,
                     },
                     positions: _.get(realtimeData, 'output.detail.positions', [])
@@ -832,7 +802,7 @@ class AdviceDetailImpl extends React.Component {
     handlePortfolioStartDateChange = date => {
         const startDate = date.format('YYYY-MM-DD');
         const url = `${requestUrl}/advice/${this.props.match.params.id}`;
-        axios.get(`${url}/portfolio?date=${startDate}`, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(`${url}/portfolio?date=${startDate}`, this.props.history, this.props.match.url)
         .then(response => {
             this.setState({selectedPortfolioDate: date}, () => {
                 this.getAdviceDetail(response);
