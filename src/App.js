@@ -154,19 +154,18 @@ class App extends React.Component {
                                     height: '64px', 
                                     // alignItems: 'center'
                                 }}
-                        >
+                        >   
                             <Menu
-                                    style={{marginTop: '10px'}} 
-                                    mode="horizontal"
-                                    onClick={this.handleNavMenuClick}
-                                    selectedKeys={[this.state.parentPath]}
-                            >
+                                style={{marginTop: '10px'}} 
+                                mode="horizontal"
+                                onClick={this.handleNavMenuClick}
+                                selectedKeys={[this.state.parentPath]}>
                                 {
                                     Utils.isLoggedIn() &&
-                                    <SubMenu title="Dashboard">
-                                        <Menu.Item key="investordashboard">Investor Dashboard</Menu.Item>
-                                        <Menu.Item key="advisordashboard">Advisor Dashboard</Menu.Item>
-                                    </SubMenu>
+                                        <SubMenu title="Dashboard">
+                                            <Menu.Item key="investordashboard">Investor Dashboard</Menu.Item>
+                                            <Menu.Item key="advisordashboard">Advisor Dashboard</Menu.Item>
+                                        </SubMenu>
                                 }
                                 {
                                     !Utils.isLoggedIn() &&
@@ -189,13 +188,6 @@ class App extends React.Component {
                             {
                                 Utils.isLoggedIn() &&
                                 <React.Fragment>
-                                    <Button 
-                                            type="primary" 
-                                            onClick={() => this.props.history.push('/advisordashboard/createadvice')}
-                                            style={{marginTop: '18px', marginRight: '20px'}}
-                                    >
-                                        Create Advice
-                                    </Button>
                                     {/* <Button 
                                             type="primary"
                                             onClick={() => this.props.history.push('/investordashboard/createportfolio')}
@@ -217,6 +209,18 @@ class App extends React.Component {
                                             {Utils.getLoggedInUserInitials()} 
                                         </Button>
                                     </Popover>
+
+                                    <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/>
+
+                                    <Button 
+                                        type="primary" 
+                                        onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                                        style={{marginTop: '18px'}}>
+                                        Create Advice
+                                    </Button>
+
+                                    
+
                                 </React.Fragment>
                             }
                         </Col> 

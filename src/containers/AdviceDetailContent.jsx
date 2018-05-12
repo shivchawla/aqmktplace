@@ -35,10 +35,10 @@ class AdviceDetailContentImpl extends React.Component {
         const metricsItems = [
             {value: subscribers, label: 'Subscribers'},
             {value: nstocks, label: 'Num. of Stocks'},
-            {value: annualReturn, label: 'Annual Return', percentage: true, color: true, fixed: 2, tooltipText: 'This is your Annual Return'},
-            {value: volatility, label: 'Volatility', percentage: true, fixed: 2, tooltipText: 'This is your Volatility'},
-            {value: totalReturn, label: 'Total Return', percentage: true, color:true, fixed: 2, tooltipText: 'This is your Total Return'},
-            {value: maxLoss, label: 'Max. Loss', percentage: true, fixed: 2, tooltipText: 'This is your Max Loss'},
+            {value: annualReturn, label: 'Annual Return', percentage: true, color: true, fixed: 2, tooltipText: `Compounded annual growth rate ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
+            {value: volatility, label: 'Volatility', percentage: true, fixed: 2, tooltipText: `Annualized standard deviation of daily returns ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
+            {value: totalReturn, label: 'Total Return', percentage: true, color:true, fixed: 2, tooltipText: `Total return ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
+            {value: -1*maxLoss, color:true, label: 'Maximum Loss', percentage: true, fixed: 2, tooltipText: `Maximum drop from the peak return ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
             // {value: netValue, label: 'Net Value', money:true, isNetValue:true, dailyChangePct:dailyNAVChangePct},
         ]
 
@@ -139,17 +139,15 @@ class AdviceDetailContentImpl extends React.Component {
                             span={24} 
                             style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}
                     >
-                        <Tooltip title="Rebalancing Frequency" placement="rightBottom">
+                        <Tooltip title="Rebalancing Frequency: The advice is rebalanced/updated at this frequency" placement="rightBottom">
                             <Tag 
-                                    color='f58231' 
-                                    style={{
-                                        color:'black', 
-                                        border:'1px solid #f58231', 
-                                        width:'85px', 
-                                        paddingTop:'1px',
-                                        cursor: 'auto' 
-                                    }}
-                            >
+                                color='f58231' 
+                                style={{
+                                    color:'black', 
+                                    border:'1px solid #f58231', 
+                                    width:'85px', 
+                                    paddingTop:'1px',
+                                    cursor: 'auto'}}>
                                 <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
                                 <span 
                                         style={{marginLeft: '5px', color:'#f58231'}}
@@ -173,7 +171,7 @@ class AdviceDetailContentImpl extends React.Component {
                             }}
                     >
                         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginLeft: '-5px'}}>
-                            <Icon type="right" />
+                            <Icon type="down"/>
                             <h3 style={{fontSize: '14px', fontWeight: 700, marginLeft: '10px'}}>Metrics</h3>
                         </div>
                         { this.props.showPerformanceToggle &&

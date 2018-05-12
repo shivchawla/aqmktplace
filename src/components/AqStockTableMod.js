@@ -6,10 +6,11 @@ import {Table, Button, Row, Col} from 'antd';
 import {AutoCompleteEditableCell} from './AutoCompleteEditableCell';
 import {EditableCell} from './AqEditableCell';
 import {getStockData} from '../utils';
+import {Utils} from '../utils';
 
 const {aimsquantToken, requestUrl} = require('../localConfig.js');
 
-const initialTransactions = (n) => {
+const emptyPositions = (n) => {
     const data = [];
     const rows = n || 5;
     for(let i=0; i < rows; i++) {
@@ -59,19 +60,21 @@ export class AqStockTableMod extends React.Component {
                 dataIndex: 'lastPrice',
                 key: 'lastPrice',
                 width: 150,
+                render: val => <span>{Utils.formatMoneyValueMaxTwoDecimals(val)}</span>
             },
             {
                 title: 'TOTAL',
                 dataIndex: 'totalValue',
                 key: 'totalValue',
                 width: 150,
+                render: val => <span>{Utils.formatMoneyValueMaxTwoDecimals(val)}</span>
             },
             {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
                 width: 150,
-                render: text => <span>{text} %</span>
+                render: val => <span>{Utils.formatMoneyValueMaxTwoDecimals(val)}%</span>
             }
         ];
         this.state = {
@@ -260,13 +263,10 @@ export class AqStockTableMod extends React.Component {
 
     componentWillMount() {
         if (!this.props.isUpdate) {
-            const data = initialTransactions();
+            const data = emptyPositions();
             this.setState({data});
         } else {
-            this.setState({data: initialTransactions(1).concat(this.props.data.map(item => {
-                    item['weight'] = `${item['weight']} %`; return item; 
-                }))
-            });
+            this.setState({data: emptyPositions(1).concat(this.props.data)});
         }
     }
 

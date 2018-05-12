@@ -498,6 +498,7 @@ export class AdviceFormImpl extends React.Component {
         return nStocks;
     }
 
+    //IS this in USE???
     renderPortfolioTable = () => {
         const verifiedTransactions = this.getVerifiedTransactions();
         const netValue =this.getNetValue();
@@ -576,6 +577,9 @@ export class AdviceFormImpl extends React.Component {
                     });
                 }
             });
+
+            //What is this code?
+            //Why do we set show false...if we are launching another AJAX call?
             if (isOwner) {
                 this.setState({show: false}, () => {
                     this.props.form.setFieldsValue({name, description, headline: heading});
@@ -599,11 +603,11 @@ export class AdviceFormImpl extends React.Component {
                     shares: item.quantity,
                     symbol: item.security.ticker,
                     ticker: item.security.ticker,
-                    totalValue: Number((item.quantity * item.lastPrice).toFixed(2))
+                    totalValue: item.quantity * item.lastPrice,
                 });
             });
             this.updateAllWeights(positions);
-            this.setState({data: positions, startDate: advicePortfolio.detail.startDate, show: false}, () => {
+            this.setState({data: positions, startDate: advicePortfolio.detail.startDate}, () => {
                 this.props.form.setFieldsValue({startDate: moment(this.state.startDate)});
             });
         })
@@ -617,6 +621,8 @@ export class AdviceFormImpl extends React.Component {
         const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
         return data.map((item, index) => {
             item['weight'] = totalSummation > 0 ? Number((item['totalValue'] * 100 / totalSummation).toFixed(2)) : 0;
+            //item['lastPrice'] = Utils.formatMoneyValueMaxTwoDecimals(item.lastPrice);
+            //item['totalValue'] = Utils.formatMoneyValueMaxTwoDecimals(item.totalValue);
             return item;
         });
     }
@@ -703,7 +709,7 @@ export class AdviceFormImpl extends React.Component {
                 <Row>
                     <Col span={24} style={{...shadowBoxStyle, padding: '20px', marginBottom:'20px', minHeight: '600px'}}>
                         <Row>
-                            <Form onSubmit={this.handleSubmit} style={{marginTop: '20px'}}>
+                            <Form onSubmit={this.handleSubmit} style={{marginTop: '0px'}}>
                                 <Col span={24}>
                                     <Row>
                                         <Col span={24}>
@@ -807,7 +813,8 @@ export class AdviceFormImpl extends React.Component {
                                         >
                                             View Performance
                                         </Button>
-                                    {
+                                    {   
+                                        //Use a better component name!!!
                                         this.props.isUpdate
                                         ?   <AqStockTableMod 
                                                 adviceId = {this.props.adviceId} 
@@ -918,8 +925,9 @@ export class AdviceFormImpl extends React.Component {
         };
         const metrics = {
             annualReturn: _.get(portfolioMetrics, 'returns.annualreturn', 0),
-            volatility: _.get(portfolioMetrics, 'ratios.stability', 0),
+            volatility: _.get(portfolioMetrics, 'deviation.annualstandarddeviation', 0),
             totalReturn: _.get(portfolioMetrics, 'returns.totalreturn', 0),
+            maxLoss: _.get(portfolioMetrics, 'drawdown.maxdrawdown', 0),
             netValue: this.getNetValue(),
             nstocks: this.getVerifiedTransactions().length
         };
@@ -935,16 +943,20 @@ export class AdviceFormImpl extends React.Component {
                 key: index
             }
         });
+
+        console.log(positions);
+
         if(this.state.preview) {
             return (
                 <AdviceDetailContent 
-                        tickers={this.state.tickers}
-                        adviceDetail={adviceDetail}
-                        metrics={metrics}
-                        positions={positions}
-                        preview={true}
-                        loading={this.state.loadingPerformance}
-                        style={{display: this.state.preview ? 'block' : 'none'}}
+                    tickers={this.state.tickers}
+                    adviceDetail={adviceDetail}
+                    metrics={metrics}
+                    positions={positions}
+                    preview={true}
+                    loading={this.state.loadingPerformance}
+                    style={{display: this.state.preview ? 'block' : 'none'}}
+                    performanceType={"Simulated"}
                 />
             );
         } else {

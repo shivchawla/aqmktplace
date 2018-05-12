@@ -167,11 +167,11 @@ export class AdviceFilterSideComponent extends React.Component {
         const {selectedFilters} = this.state;
         // console.log(selectedFilters);
         const filterArray = [
+            {type: 'return', label: 'Annual Return', range: selectedFilters.return, min: -100, max: 100},
             {type: 'rating', label: 'Rating', range: selectedFilters.rating, min: 0, max: 5, step:0.1},
-            {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, step: 0.5},
             {type: 'netValue', label: 'Net Value', range: selectedFilters.netValue, min: 0, max: 200000, step: 10000},
             {type: 'volatility', label: 'Volatility', range: selectedFilters.volatility, min: 0, max: 50},
-            {type: 'return', label: 'Annual Return', range: selectedFilters.return, min: -100, max: 100},
+            {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, step: 0.5},
         ];
 
         return (
