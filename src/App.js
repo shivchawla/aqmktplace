@@ -23,6 +23,8 @@ import {Utils} from './utils';
 import {primaryColor} from './constants';
 import asyncComponent from './components/AsyncComponent';
 
+import logo from "./assets/logo-advq-new.png";
+
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
 const {Header, Content} = Layout;
@@ -138,16 +140,22 @@ class App extends React.Component {
             <Layout style={{backgroundColor: '#f9f9f9', height:'auto'}}>
                 <Header style={headerStyle}>
                     <Row type="flex">
-                        <Col span={4}>
-                            <h1
-                                    onClick={() => this.props.history.push('/home')} 
-                                    style={{...headerColor, cursor: 'pointer'}}>
-                                    <span style={biggerFont}>A</span>DVICE<span style={biggerFont}>Q</span>UBE
-                                {/* ADVICEQUBE <span style={{fontSize: '12px', color: primaryColor}}>&nbsp;Beta</span> */}
+                        <Col span={1}>
+                            <img src={logo} style={{height: '40px'}}/>
+                        </Col>
+                        <Col span={3} style={{marginLeft: '5px'}}>
+                            <h1 onClick={() => this.props.history.push('/home')} 
+                                style={{...headerColor, cursor: 'pointer'}}>
+
+                                <span style={{...biggerFont, color:primaryColor}}>A</span>
+                                <span style={{color: primaryColor}}>DVICE</span>
+                                <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                                <span style={{color: '#e06666'}}>UBE</span>
+
                             </h1>
                         </Col>
                         <Col 
-                                span={20} 
+                                span={19} 
                                 style={{
                                     display: 'flex', 
                                     justifyContent: 'flex-end', 
@@ -274,7 +282,8 @@ const headerStyle = {
     //position: 'fixed',
     width: '100%',
     //zIndex: '1000'
-    height:'64px'
+    height:'64px',
+    padding:'0 0 0 30px'
 
 };
 
@@ -286,7 +295,7 @@ const headerColor = {
 const biggerFont = {
     fontSize: '24px',
     fontWeight: '400',
-    color: primaryColor
+    //color: primaryColor
 }
 
 const contentLayoutStyle = {

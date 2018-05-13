@@ -3,7 +3,7 @@ import {Utils} from '../utils';
 import { Spin, Form, Icon, Input, Button, Checkbox } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
-
+import logo from "../assets/logo-advq-new.png";
 const {requestUrl} = require('../localConfig');
 
 class Login extends Component {
@@ -136,14 +136,16 @@ class Login extends Component {
         'minHeight': '500px', 'display': 'flex', flexDirection: 'column', 'alignItems': 'center', 'justifyContent': 'center'}}>
         <div className="card" style={{'padding': '20px', 'background': 'white',
           'borderRadius': '2px', 'textAlign': 'center', 'minWidth': '340px'}}>
-          <img alt="" style={{'height': '60px', 'width': 'auto'}} src='./assets/images/Logo.png' />
-          <p style={{'fontSize': '30px', 'fontWeight': '300', 'margin': '0px'}}>
-            <span style={{'color': 'teal'}}>Advice</span>
-            <span style={{'color': '#cc6666'}}>Qube</span>
+          <img style={{'height': '60px', 'width': 'auto'}} src={logo}/>
+          <p style={{'fontSize': '30px', 'fontWeight': '400', 'margin': '0px'}}>
+            <span style={{'color': 'teal'}}>A</span>
+            <span style={{'color': 'teal', fontSize: '18px'}}>DVICE</span>
+            <span style={{'color': '#e06666'}}>Q</span>
+            <span style={{'color': '#e06666',fontSize: '18px'}}>UBE</span>
           </p>
           <p style={{'color': '#37474F', 'fontStyle': 'italic',
             'fontSize': '15px', 'margin': '0px'}}>
-            Invest in your Ideas
+            Expert-Sourced Investment Portfolio
           </p>
           <Form onSubmit={this.handleSubmit} className="login-form">
             <FormItem>
