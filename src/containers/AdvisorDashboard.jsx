@@ -122,7 +122,6 @@ export default class AdvisorDashboard extends React.Component {
             const advisorRatingStat = (_.get(analytics[analytics.length - 1], 'rating.current', 0)).toFixed(2);
             const advisorSubscribers = _.get(response.data, 'analytics[response.data.analytics.length - 1].numFollowers', 0);
             const advices = _.get(response.data, 'advices', []);
-            console.log('Advices', advices);
             if (advices.length < 1) {
                 this.setState({showEmptyScreen: true});
                 return;
@@ -609,8 +608,8 @@ export default class AdvisorDashboard extends React.Component {
                 const rawAdvices = [...this.state.rawAdvices];
                 const targetAdvice = rawAdvices.filter(advice => advice._id === realtimeData.adviceId)[0];
                 if (targetAdvice) {
-                    targetAdvice.performanceSummary.current.netValue = _.get(realtimeData, 'output.summary.nav', 0);
-                    targetAdvice.performanceSummary.current.totalReturn = _.get(realtimeData, 'output.summary.dailyPnlChangePct', 0);
+                    targetAdvice.performanceSummary.current.netValue = _.get(realtimeData, 'output.summary.netValue', 0);
+                    targetAdvice.performanceSummary.current.totalReturn = _.get(realtimeData, 'output.summary.dailyNavChangePct', 0);
                     this.setState({rawAdvices});
                 }
             }
@@ -631,7 +630,7 @@ export default class AdvisorDashboard extends React.Component {
                         <ListMetricItem label="Name" value={advice.name} />
                     </Col>
                     <Col span={6}>
-                        <ListMetricItem value={_.get(advice, 'performanceSummary.current.netValue', 0).toFixed(2)} label="Net Value" />
+                        <ListMetricItem value={_.get(advice, 'performanceSummary.current.netValueEOD', 0).toFixed(2)} label="Net Value" />
                     </Col>
                     <Col span={4}>
                         <ListMetricItem 

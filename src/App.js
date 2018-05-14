@@ -61,6 +61,34 @@ class App extends React.Component {
         const locationArray = location.split('/');
         // Getting the parent path of any route
         // For eg. if route is /advice/{adviceId} then parent path is advice
+        const regexArray = [
+            {regExp: '^\/advice$', title: 'Screen Advices'},
+            {regExp: '^\/home$', title: 'Home'},
+            {regExp: '^\/forgotPassword$', title: 'Forgot Password'},
+            {regExp: '^\/errorPage$', title: 'No Internet Access'},
+            {regExp: '^\/forbiddenAccess$', title: 'Forbidden Access'},
+            {regExp: '^\/$', title: 'Home'},
+            {regExp: '^\/policies\/tnc$', title: 'Terms and Conditions'},
+            {regExp: '^\/policies\/privacy$', title: 'Privacy Policy'},
+            {regExp: '^\/investordashboard$', title: 'Investor Dashboard'},
+            {regExp: '^\/investordashboard\/createportfolio$', title: 'Create Portfolio'},
+            {regExp: '^\/advisordashboard$', title: 'Advisor Dashboard'},
+            {regExp: '^\/stockresearch$', title: 'Stock Research'},
+            {regExp: '^\/login$', title: 'Login'},
+            {regExp: '^\/signup$', title: 'Register'},
+            {regExp: '^\/advice\/[A-Za-z0-9]+$', title: 'Advice Detail'},
+            {regExp: '^\/advisordashboard\/updateadvice\/[A-Za-z0-9]+$', title: 'Update Advice'},
+            {regExp: '^\/advisordashboard\/advisorprofile\/[A-Za-z0-9]+$', title: 'Advisor Profile'},
+            {regExp: '^\/investordashboard\/portfolio\/[A-Za-z0-9]+$', title: 'Portfolio Detail'},
+            {regExp: '^\/investordashboard\/portfolio\/transactions\/[A-Za-z0-9]+$', title: 'Update Portfolio'},
+        ];
+        regexArray.map((item, index) => {
+            const expression = new RegExp(item.regExp);
+            if (expression.test(location)) {
+                document.title = item.title;
+                return;
+            }
+        });
         const parentPath = locationArray.length > 0 ? locationArray[1] : '/'; 
         this.setState({parentPath});
     }

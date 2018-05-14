@@ -139,17 +139,33 @@ class AdviceDetailContentImpl extends React.Component {
                             span={24} 
                             style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}
                     >
+                        <Tooltip title="Rebalancing Frequency: The advice is rebalanced/updated at this frequency" placement="rightBottom">
+                            <Tag 
+                                style={{
+                                    color:'black', 
+                                    border:'1px solid #f58231', 
+                                    width:'85px', 
+                                    paddingTop:'1px',
+                                    cursor: 'auto'}}>
+                                <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
+                                <span 
+                                        style={{marginLeft: '5px', color:'#f58231'}}
+                                >
+                                    {this.props.adviceDetail.rebalanceFrequency}
+                                </span>
+                            </Tag>
+                        </Tooltip>
                         {
                             this.props.adviceDetail.isOwner &&
                             <Tag 
-                                color={primaryColor} 
                                 style={{
                                     width:'65px', 
                                     paddingTop:'1px',
-                                    cursor: 'auto'
+                                    cursor: 'auto',
+                                    border: '1px solid #3cb44b'
                                 }}>
                                 <span 
-                                        style={{marginLeft: '5px', color:'#fff'}}
+                                        style={{marginLeft: '5px', color:'#3cb44b'}}
                                 >
                                     Owner
                                 </span>
@@ -174,22 +190,6 @@ class AdviceDetailContentImpl extends React.Component {
                                 </span>
                             </Tag>
                         }
-                        <Tooltip title="Rebalancing Frequency: The advice is rebalanced/updated at this frequency" placement="rightBottom">
-                            <Tag 
-                                style={{
-                                    color:'black', 
-                                    border:'1px solid #f58231', 
-                                    width:'85px', 
-                                    paddingTop:'1px',
-                                    cursor: 'auto'}}>
-                                <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
-                                <span 
-                                        style={{marginLeft: '5px', color:'#f58231'}}
-                                >
-                                    {this.props.adviceDetail.rebalanceFrequency}
-                                </span>
-                            </Tag>
-                        </Tooltip>
                         {this.renderTrendingApprovedIcon()}
                     </Col>
                 </Row>

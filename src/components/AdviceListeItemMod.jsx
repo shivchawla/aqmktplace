@@ -3,7 +3,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import Radium from 'radium';
 import {withRouter} from 'react-router';
-import {Row, Col, Icon, Tag, Rate} from 'antd';
+import {Row, Col, Icon, Tag, Rate, Tooltip} from 'antd';
 import {AqRate} from '../components';
 import {MetricItem} from './MetricItem';
 import {primaryColor} from '../constants';
@@ -278,12 +278,6 @@ class AdviceListItemImpl extends React.PureComponent {
                                         e.stopPropagation();
                                         this.props.history.push(`/advisordashboard/advisorprofile/${advisorId}`)}}>{` ${advisorName}`}
                                     </span>
-
-                                    {statusTagLabel!="" &&
-                                        <Tag style={{...statusTagStyle, color:'black'}}>
-                                            <span style={{color: statusTagColor}}>{statusTagLabel}</span>
-                                        </Tag>
-                                    }
                                 </Col>
                             </Row>
 
@@ -305,10 +299,24 @@ class AdviceListItemImpl extends React.PureComponent {
                             </Row>
                             
                             <Row style={{marginTop: '5px'}}>
-                                <Tag color='f58231' style={{color:'black', border:'1px solid #f58231', width:'85px', paddingTop:'1px'}}>
-                                    <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
-                                    <span style={{marginLeft: '5px', color:'#f58231'}}>{rebalancingFrequency}</span>
-                                </Tag>
+                                <Tooltip 
+                                        title="Rebalancing Frequency: The advice is rebalanced/updated at this frequency" 
+                                        placement="bottom"
+                                >
+                                    <Tag 
+                                            color='f58231' 
+                                            style={{color:'black', border:'1px solid #f58231', width:'85px', paddingTop:'1px', cursor: 'auto'}}
+                                        >
+                                        <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
+                                        <span style={{marginLeft: '5px', color:'#f58231'}}>{rebalancingFrequency}</span>
+                                    </Tag>
+                                </Tooltip>
+                                
+                                {statusTagLabel!="" &&
+                                    <Tag style={{...statusTagStyle, color:'black', cursor: 'auto'}}>
+                                        <span style={{color: statusTagColor}}>{statusTagLabel}</span>
+                                    </Tag>
+                                }
                             </Row>
 
                         </Col>

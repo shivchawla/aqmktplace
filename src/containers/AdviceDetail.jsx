@@ -64,7 +64,7 @@ class AdviceDetailImpl extends React.Component {
                 current: {},
                 simulated: {}
             },
-            performanceType: 'Current',
+            performanceType: 'Simulated',
             tickers: [],
             isDialogVisible: false,
             isUpdateDialogVisible: false,

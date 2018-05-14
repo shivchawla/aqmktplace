@@ -161,6 +161,11 @@ export default class InvestorDashboard extends React.Component {
         const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}`;
         const tickers = [...this.state.tickers];
         this.setState({defaultPortfolioLoading: true});
+        Promise.all([
+            fetchAjax(url, this.props.history, this.props.match.url),
+            this.getInvestorPortfolios(),
+            this.getInvestorSubscribedAdvices()
+        ])
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const defaultPortfolio = _.get(response.data, 'defaultPortfolio', null);
@@ -237,12 +242,6 @@ export default class InvestorDashboard extends React.Component {
                 tickers,
             });
             return this.getInvestorPortfolios();
-        })
-        .then(() => {
-            return this.getInvestorSubscribedAdvices();
-        })
-        .then(() => {
-            this.setUpSocketConnection();
         })
         .catch(error => error)
         .finally(() => {
@@ -777,6 +776,7 @@ export default class InvestorDashboard extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
+            this.setUpSocketConnection();
             this.getDefaultPortfolioData();
             // this.getInvestorPortfolios();
             // this.getInvestorSubscribedAdvices();
@@ -852,7 +852,6 @@ export default class InvestorDashboard extends React.Component {
     processRealtimeMessage = msg => {
         if (this.mounted) {
             const realtimeData = JSON.parse(msg.data);
-            // console.log(realtimeData);
             if (realtimeData.type === 'portfolio') {
                 const investorPortfolios = [...this.state.investorPortfolios];
                 const targetPortfolio = investorPortfolios.filter(portfolio => portfolio.id === realtimeData.portfolioId)[0];
@@ -878,9 +877,11 @@ export default class InvestorDashboard extends React.Component {
             } else if (realtimeData.type === 'advice') {
                 const subscribedAdvices = [...this.state.subscribedAdvices];
                 const targetAdvice = subscribedAdvices.filter(advice => advice.id === realtimeData.adviceId)[0];
-                targetAdvice.netValue = _.get(realtimeData, 'output.summary.netValue', 0);
-                targetAdvice.return = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
-                this.setState({subscribedAdvices});
+                if (targetAdvice) {
+                    targetAdvice.netValue = _.get(realtimeData, 'output.summary.netValue', 0);
+                    targetAdvice.return = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
+                    this.setState({subscribedAdvices});
+                }
             }
         }
     }

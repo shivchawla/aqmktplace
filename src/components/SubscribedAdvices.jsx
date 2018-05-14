@@ -86,6 +86,9 @@ class SubscribedAdvicesImpl extends React.Component {
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const subscribedAdvices = response.data.advices;
+            if (subscribedAdvices.length < 1) {
+                this.setState({loading: false});
+            }
             subscribedAdvices.map((advice, index) => {
                 const adviceUrl = `${requestUrl}/advice/${advice._id}`;
                 const portfolioUrl = `${requestUrl}/advice/${advice._id}/portfolio`;
