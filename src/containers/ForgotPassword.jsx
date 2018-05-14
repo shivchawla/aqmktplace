@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Utils from '../utils';
+import {Utils} from '../utils';
 import {requestUrl} from '../localConfig';
 import { Spin, Form, Icon, Input, Button } from 'antd';
 import {Link, withRouter} from 'react-router-dom';

@@ -16,6 +16,7 @@ import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
 import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax} from'../utils';
 import {benchmarks} from '../constants/benchmarks';
+import {portfolioLimit} from '../constants';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -52,7 +53,9 @@ class AddTransactionsImpl extends React.Component {
             submitButtonLoading: false,
             previewCash: 0,
             loadingPreviewData: false,
-            defaultChecked: false
+            defaultChecked: false,
+            portfolioLimitExceededVisible: false,
+            portfolioCount: 0
         };
         this.adviceKey = 0;
     }
@@ -319,10 +322,11 @@ class AddTransactionsImpl extends React.Component {
                     if(error.response) {
                         const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating portfolio');
                         const code = _.get(error.response, 'data.errorCode', 'N/A');
-                        message.error(`Code - ${code}: ${errorMessage}`);
-                        if (error.response.status === 400 || error.response.status === 403) {
-                            this.props.history.push('/forbiddenAccess');
-                        }
+                        notification.open({
+                            message: <span style={{color: '#f81d22'}}>Error</span>,
+                            description: `Portfolio with name ${values.name} already exists, please select a different name`,
+                            duration: 0
+                          });
                         Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                     }
                 })
@@ -788,11 +792,44 @@ class AddTransactionsImpl extends React.Component {
         return stockPositions;
     }
 
+    getUserPortfolios = () => {
+        this.setState({show: true});
+        fetchAjax(`${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio`)
+        .then(response => {
+            this.setState({portfolioCount: response.data.length});
+        })
+        .catch(error => error)
+        .finally(() => {
+            this.setState({show: false});
+        });
+    }
+
+    togglePortfolioLimitExceededModal = () => {
+        this.setState({portfolioLimitExceededVisible: !this.state.portfolioLimitExceededVisible});
+    }
+
+    renderPortfolioLimitExceededModal = () => {
+        return (
+            <Modal
+                    title="Portfolio Limit Exceeded"
+                    visible={this.state.portfolioLimitExceededVisible}
+                    onCancel={this.togglePortfolioLimitExceededModal}
+                    footer={null}
+            >
+                <Row>
+                    <Col span={24}>
+                        <h3 style={{fontSize: '16px'}}>You have exceeded your free Portfolio Limit of {portfolioLimit}. To create more please complete the payment procedure</h3>
+                    </Col>
+                </Row>
+            </Modal>
+        );
+    }
+
     componentWillMount() {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            if (this.props.portfolioId) {
+            if (this.props.portfolioId) { // Portfolio will be updated
                 // Check if the user is authorized to access this page
                 this.setState({show: true});
                 const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
@@ -857,6 +894,7 @@ class AddTransactionsImpl extends React.Component {
                 });
             } else {
                 const tickers = [...this.state.tickers];
+                this.getUserPortfolios();
                 tickers.push({
                     name: this.state.selectedBenchmark,
                     color: benchmarkColor
@@ -991,7 +1029,11 @@ class AddTransactionsImpl extends React.Component {
                                 <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right', marginBottom:'10px'}}>
                                     <Button 
                                             type="primary" 
-                                            onClick={this.handleSubmit} 
+                                            onClick={e => {
+                                                this.state.portfolioCount >= portfolioLimit 
+                                                ? this.togglePortfolioLimitExceededModal()
+                                                : this.handleSubmit(e)
+                                            }} 
                                             style={{marginRight: '20px', width: '200px'}}
                                             disabled={!this.checkPreviewButtonDisabled()}
                                     >
@@ -1059,7 +1101,11 @@ class AddTransactionsImpl extends React.Component {
                                         <Col span={24}>
                                             <Button 
                                                     type="primary" 
-                                                    onClick={this.handleSubmit} 
+                                                    onClick={e => {
+                                                        this.state.portfolioCount >= portfolioLimit 
+                                                        ? this.togglePortfolioLimitExceededModal()
+                                                        : this.handleSubmit(e)
+                                                    }} 
                                                     style={buttonStyle}
                                                     loading={this.state.submitButtonLoading}
                                                     disabled={!this.checkPreviewButtonDisabled()}
@@ -1092,6 +1138,7 @@ class AddTransactionsImpl extends React.Component {
             <Row>
                 {this.renderSubscribedAdviceModal()}
                 {this.renderPreviewModal()}
+                {this.renderPortfolioLimitExceededModal()}
                 <Loading
                     show={this.state.show}
                     color={loadingColor}

@@ -139,9 +139,43 @@ class AdviceDetailContentImpl extends React.Component {
                             span={24} 
                             style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}
                     >
+                        {
+                            this.props.adviceDetail.isOwner &&
+                            <Tag 
+                                color={primaryColor} 
+                                style={{
+                                    width:'65px', 
+                                    paddingTop:'1px',
+                                    cursor: 'auto'
+                                }}>
+                                <span 
+                                        style={{marginLeft: '5px', color:'#fff'}}
+                                >
+                                    Owner
+                                </span>
+                            </Tag>
+                        }
+                        {
+                            (this.props.adviceDetail.isSubscribed || this.props.adviceDetail.isFollowing) &&
+                            <Tag 
+                                style={{
+                                    paddingTop:'1px',
+                                    cursor: 'auto',
+                                    border: '1px solid rgb(24, 144, 255)'
+                                }}>
+                                <span 
+                                        style={{marginLeft: '5px', color:'rgb(24, 144, 255)'}}
+                                >
+                                    {
+                                        this.props.adviceDetail.isSubscribed 
+                                        ? "Subscribed"
+                                        : "Wishlisted"
+                                    }
+                                </span>
+                            </Tag>
+                        }
                         <Tooltip title="Rebalancing Frequency: The advice is rebalanced/updated at this frequency" placement="rightBottom">
                             <Tag 
-                                color='f58231' 
                                 style={{
                                     color:'black', 
                                     border:'1px solid #f58231', 

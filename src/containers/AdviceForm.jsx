@@ -6,7 +6,7 @@ import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors} from '../constants';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors, primaryColor} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate, fetchAjax} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
@@ -32,8 +32,10 @@ import {
     Checkbox, 
     Modal,
     Tabs,
-    Select
+    Select,
+    notification
 } from 'antd';
+import {adviceLimit} from '../constants';
 
 const localConfig = require('../localConfig.js');
 
@@ -55,6 +57,7 @@ export class AdviceFormImpl extends React.Component {
             endDate: '',
             endDateEditable: false,
             data: [],
+            dataSnapshot: [],
             remainingCash: 100000,
             initialCash: 100000,
             benchmarks,
@@ -82,7 +85,11 @@ export class AdviceFormImpl extends React.Component {
             stockResearchModalTicker: {},
             preview: false,
             portfolioMetrics: {},
-            performanceError: false
+            performanceError: false,
+            portfolioChanged: false,
+            postWarningModalVisible: false,
+            adviceLimitExceededModalVisible: false,
+            adviceCount: 0
         };
         this.columns = [
             {
@@ -198,7 +205,19 @@ export class AdviceFormImpl extends React.Component {
                     this.props.history.push(`/advice/${adviceId}`);
                     message.success('Succesfully Created Advice');
                 })
-                .catch(error => error);
+                .catch(error => {
+                    Utils.checkForInternet(error, this.props.history);
+                    if (error.response) {
+                        const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating advice');
+                        notification.open({
+                            message: <span style={{color: '#f81d22'}}>Error</span>,
+                            description: errorMessage,
+                            duration: 0
+                        }); 
+                        this.setState({postWarningModalVisible: false});                       
+                        Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+                    }
+                });
             }
         });
     }
@@ -337,13 +356,33 @@ export class AdviceFormImpl extends React.Component {
         return newPositions;
     }
   
-    onChange = (data) => {
+    onChange = data => {
         let totalCash = 0;
         const remainingCash = this.state.initialCash - totalCash;
         this.setState({
             data: _.cloneDeep(data), 
             remainingCash,
+            portfolioChanged: this.hasPortfolioChanged(data)
         });
+    }
+
+    hasPortfolioChanged = data => {
+        const differenceArray = _.differenceWith(this.state.dataSnapshot, data, this.checkEquality);
+        const otherDifferenceArray = _.differenceWith(data, this.state.dataSnapshot, this.checkEquality);
+        if(differenceArray.length > 0 || otherDifferenceArray.length > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    checkEquality = (arrVal, othVal) => {
+        return (
+            arrVal.lastPrice === othVal.lastPrice 
+            &&  arrVal.name === othVal.name 
+            &&  arrVal.shares === othVal.shares 
+            &&  arrVal.symbol === othVal.symbol 
+            &&  arrVal.totalValue === othVal.totalValue 
+        );
     }
 
     onBenchmarkSelected = (ticker) => {
@@ -607,8 +646,12 @@ export class AdviceFormImpl extends React.Component {
                 });
             });
             this.updateAllWeights(positions);
-            this.setState({data: positions, startDate: advicePortfolio.detail.startDate}, () => {
-                this.props.form.setFieldsValue({startDate: moment(this.state.startDate)});
+            this.setState({
+                data: positions, 
+                dataSnapshot: positions, // To store the original portfolio
+                startDate: advicePortfolio.detail.startDate
+            }, () => {
+                this.props.form.setFieldsValue({startDate: this.getFirstValidDate()});
             });
         })
         .catch(error => error)
@@ -675,6 +718,22 @@ export class AdviceFormImpl extends React.Component {
         this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});        
     }
 
+    getUserAdvices = () => {
+        const {requestUrl} = localConfig;
+        this.setState({show: true});
+        fetchAjax(`${requestUrl}/advice?personal=1`)
+        .then(response => {
+            const adviceCount = _.get(response.data, 'count', 0);
+            this.setState({adviceCount});
+        })
+        .catch(error => error)
+        .finally(() => {
+            this.setState({show: false}, () => {
+                this.props.form.setFieldsValue({startDate: this.getFirstValidDate()});
+            });
+        });
+    }
+
     componentDidMount() {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -683,7 +742,7 @@ export class AdviceFormImpl extends React.Component {
                 this.getAdvice(this.props.adviceId);
             } else {
                 const tickers = [...this.state.tickers];
-                this.props.form.setFieldsValue({startDate: this.getFirstValidDate()});
+                this.getUserAdvices();
                 getStockPerformance(this.state.selectedBenchmark)
                 .then(performance => {
                     tickers[1].name = this.state.selectedBenchmark,
@@ -844,6 +903,56 @@ export class AdviceFormImpl extends React.Component {
             && description.length > 0 
             && startDate !== undefined 
             && this.getVerifiedTransactions().length > 0
+            && this.state.portfolioChanged
+        );
+    }
+
+    togglePostWarningModal = () => {
+        this.setState({postWarningModalVisible: !this.state.postWarningModalVisible});
+    }
+
+    toggleAdviceLimitExceededModal = () => {
+        this.setState({adviceLimitExceededModalVisible: !this.state.adviceLimitExceededModalVisible});
+    }
+
+    renderAdviceLimitExceededModal = () => {
+        return (
+            <Modal
+                    title="Advice Limit Exceeded"
+                    visible={this.state.adviceLimitExceededModalVisible}
+                    bodyStyle={{height: '200px'}}
+                    onOk={this.toggleAdviceLimitExceededModal}
+                    onCancel={this.toggleAdviceLimitExceededModal}
+                    footer={null}
+            >
+                <Row>
+                    <Col span={24}>
+                        <h3>You can only create 5 advices for free. To create more please complete our payment procedure</h3>
+                    </Col>
+                </Row>
+            </Modal>
+        );
+    }
+
+    renderPostWarningModal = () => {
+        return (
+            <Modal
+                    visible={this.state.postWarningModalVisible}
+                    title="Warning"
+                    onOk={(e) => this.handleSubmit(e, true)}
+                    onCancel={this.togglePostWarningModal}
+                    bodyStyle={{height: '200px', top: '20'}}
+            >   
+                <Row>
+                    <Col span={24}>
+                        <h3 style={{fontSize: '16px'}}>
+                            Modifications to the advice, except <span style={{color: primaryColor}}>Start Date</span> 
+                            &nbsp;and <span style={{color: primaryColor}}>Portfolio</span>&nbsp;
+                            will not be possible after you post to MarketPlace.
+                        </h3>
+                    </Col>
+                </Row>
+            </Modal>
         );
     }
 
@@ -868,7 +977,13 @@ export class AdviceFormImpl extends React.Component {
                                 <Button 
                                         style={{...buttonStyle}}
                                         disabled={!this.checkFormValidationSuccess()}
-                                        onClick={(e) => this.handleSubmit(e, true)} 
+                                        onClick={
+                                            (e) => {
+                                                this.state.adviceCount >= adviceLimit && !this.props.isUpdate
+                                                ? this.toggleAdviceLimitExceededModal()
+                                                : this.togglePostWarningModal()
+                                            }
+                                        }
                                         className={`action-button ${className}`}
                                 >
                                     POST TO MARKET PLACE
@@ -878,7 +993,13 @@ export class AdviceFormImpl extends React.Component {
                                 <Button 
                                         style={{...buttonStyle}}
                                         type="primary" 
-                                        onClick={(e) => this.handleSubmit(e, true)} 
+                                        onClick={
+                                            (e) => {
+                                                this.state.adviceCount >= adviceLimit && !this.props.isUpdate
+                                                ? this.toggleAdviceLimitExceededModal()
+                                                : this.togglePostWarningModal()
+                                            }
+                                        }
                                         className={`action-button ${className}`}
                                 >
                                     POST NOW
@@ -887,7 +1008,13 @@ export class AdviceFormImpl extends React.Component {
                                     !this.props.isUpdate &&
                                     <Button 
                                             style={{...buttonStyle}}
-                                            onClick={this.handleSubmit} 
+                                            onClick={
+                                                (e) => {
+                                                    this.state.adviceCount >= adviceLimit && !this.props.isUpdate
+                                                    ? this.toggleAdviceLimitExceededModal()
+                                                    : this.handleSubmit(e)
+                                                }
+                                            }
                                             className={`action-button ${className}`}
                                     >
                                         SAVE FOR LATER
@@ -943,9 +1070,6 @@ export class AdviceFormImpl extends React.Component {
                 key: index
             }
         });
-
-        console.log(positions);
-
         if(this.state.preview) {
             return (
                 <AdviceDetailContent 
@@ -1018,6 +1142,8 @@ export class AdviceFormImpl extends React.Component {
         return (
             <Row>
                 {this.renderPerformanceModal()}
+                {this.renderPostWarningModal()}
+                {this.renderAdviceLimitExceededModal()}
                 <Loading
                     show={this.state.show}
                     color={loadingColor}

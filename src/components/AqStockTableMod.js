@@ -115,7 +115,7 @@ export class AqStockTableMod extends React.Component {
             } else {
                 target[column] = value;
             }
-            value = value.length > 0 ? value : "0";   
+            value = value.length > 0 ? value : 0;   
             target['totalValue'] = value >= 0 ? Number((value * target['lastPrice']).toFixed(2)) : 0;
             this.updateAllWeights(newData);
             this.setState({data: newData});

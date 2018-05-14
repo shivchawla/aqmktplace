@@ -285,8 +285,8 @@ export default class ScreenAdvices extends React.PureComponent {
 
     processUrl = (type, orderParam = this.state.sortBy) => {
         const {selectedFilters} = this.state;
-        let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
-        let personal = selectedFilters.owner.map(item => item === 'Personal' ? 1 : 0);
+        let approved = selectedFilters.approved.map(item => item === 'Approved' ? '1' : '0');
+        let personal = selectedFilters.owner.map(item => item === 'Personal' ? '1' : '0');
         const limit = this.state.limit;
         const skip = limit * (this.state.selectedPage - 1);
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(filters.rebalancingFrequency, ',');
@@ -333,7 +333,7 @@ export default class ScreenAdvices extends React.PureComponent {
         return advices;
     }
 
-    renderAdvices = () => {
+    renderAdvices = (type = 'all') => {
         const {advices} = this.state;
         return (
             <div 
@@ -357,7 +357,15 @@ export default class ScreenAdvices extends React.PureComponent {
                 {
                     !this.state.loading &&
                     advices.map((advice, index) => {
-                        return <AdviceListItemMod key={index} advice={advice}/>;
+                        if (type === 'following') {
+                            if (advice.isFollowing && !advice.isSubscribed) {
+                                return <AdviceListItemMod key={index} advice={advice}/>;
+                            } else {
+                                return null;
+                            }
+                        } else {
+                            return <AdviceListItemMod key={index} advice={advice}/>;
+                        }
                     })
                 }
             </div>
@@ -527,19 +535,19 @@ export default class ScreenAdvices extends React.PureComponent {
                                     onChange={this.handleTabChange}>
                                     
                                     <TabPane tab="All" key="all">
-                                        {this.renderAdvices()}
+                                        {this.renderAdvices('all')}
                                     </TabPane>
                                     
                                     <TabPane tab="Trending" key="trending">
-                                        {this.renderAdvices()}
+                                        {this.renderAdvices('trending')}
                                     </TabPane>
                                     
                                     <TabPane tab="Subscribed" key="subscribed">
-                                        {this.renderAdvices()}
+                                        {this.renderAdvices('subscribed')}
                                     </TabPane>
                                     
                                     <TabPane tab="Wishlist" key="following">
-                                        {this.renderAdvices()}
+                                        {this.renderAdvices('following')}
                                     </TabPane>
                                 </Tabs>
                             </Col>
