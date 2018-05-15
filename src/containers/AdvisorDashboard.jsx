@@ -7,8 +7,8 @@ import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} f
 import {MyChartNew} from './MyChartNew';
 import {graphColors} from '../constants';
 import {AqHighChartMod, AdviceFilterComponent, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader, HighChartNew, ForbiddenAccess, AqRate} from '../components';
-import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor} from '../constants';
-import {dateFormat, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
+import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor, simulatedPerformanceColor} from '../constants';
+import {dateFormat, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/advisorDashboard.css';
 
 const RadioGroup = Radio.Group;
@@ -429,19 +429,25 @@ export default class AdvisorDashboard extends React.Component {
     }
 
     getAdvicePerformance = advice => {
+        console.log(advice);
         const newTickers = [];
         const url = `${requestUrl}/performance/advice/${advice._id}`;
         this.setState({advicePerformanceLoading: true});
-        fetchAjax(url, this.props.history, this.props.match.url)
-        .then(response => {
-            const data = _.get(response.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
+        Promise.all([
+            fetchAjax(url, this.props.history, this.props.match.url),
+            getStockPerformance('NIFTY_50', 'detail_benchmark')
+        ])
+        .then(([adviceResponse, benchmarkResponse]) => {
+            // console.log(benchmarkResponse);
+            const data = _.get(adviceResponse.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
                 name: advice.name,
-                data
+                data,
+                color: simulatedPerformanceColor
             });
             newTickers.push({
                 name: "NIFTY_50",
-                show: true,
+                data: benchmarkResponse,
                 color: benchmarkColor
             });
             this.setState({tickers: newTickers});

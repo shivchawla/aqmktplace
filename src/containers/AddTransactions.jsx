@@ -14,7 +14,7 @@ import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransac
 import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle, benchmarkColor, metricColor, performanceColor} from '../constants';
 import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
-import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax} from'../utils';
+import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax, getStockPerformance} from'../utils';
 import {benchmarks} from '../constants/benchmarks';
 import {portfolioLimit} from '../constants';
 
@@ -405,15 +405,18 @@ class AddTransactionsImpl extends React.Component {
                 presentStocks: this.processPreviewStockTransction(_.get(response.data, 'detail.positions', [])),
                 previewCash: _.get(response.data, 'detail.cash', 0)
             });
-            return axios({
-                url: `${requestUrl}/performance`,
-                method: 'POST',
-                data: performanceData,
-                headers: Utils.getAuthTokenHeader()
-            });
+            return Promise.all([
+                axios({
+                    url: `${requestUrl}/performance`,
+                    method: 'POST',
+                    data: performanceData,
+                    headers: Utils.getAuthTokenHeader()
+                }),
+                getStockPerformance(this.state.selectedBenchmark, 'detail_benchmark')
+            ])
         })
-        .then(response => { 
-            let performanceSeries = _.get(response.data, 'portfolioPerformance.portfolioValues', {}).map((item, index) => {
+        .then(([portfolioResponse, benchmarkResponse]) => { 
+            let performanceSeries = _.get(portfolioResponse.data, 'portfolioPerformance.portfolioValues', {}).map((item, index) => {
                 return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))];
             });
             if (tickers.length < 2) {
@@ -425,6 +428,7 @@ class AddTransactionsImpl extends React.Component {
             } else{
                 tickers[1].data = performanceSeries;
             }
+            tickers[0].data = benchmarkResponse;
             this.setState({tickers});
         })
         .catch(error => {
@@ -655,7 +659,8 @@ class AddTransactionsImpl extends React.Component {
         if (tickers.length < 1) {
             tickers.push({
                 name: value,
-                color: benchmarkColor
+                color: benchmarkColor,
+                noLoadData: true
             });
         } else {
             tickers[0].name = value;
@@ -848,7 +853,8 @@ class AddTransactionsImpl extends React.Component {
                     const tickers = [...this.state.tickers];
                     tickers.push({
                         name: this.state.selectedBenchmark,
-                        color: '#e91e63'
+                        color: '#e91e63',
+                        noLoadData: true
                     });
                     this.setState({
                         tickers, notAuthorized: false, 
@@ -897,7 +903,8 @@ class AddTransactionsImpl extends React.Component {
                 this.getUserPortfolios();
                 tickers.push({
                     name: this.state.selectedBenchmark,
-                    color: benchmarkColor
+                    color: benchmarkColor,
+                    noLoadData: true
                 });
                 this.setState({tickers});
             }

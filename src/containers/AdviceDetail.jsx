@@ -13,6 +13,7 @@ import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, H
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax, getStockPerformance} from '../utils';
+import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import '../css/adviceDetail.css';
 
 
@@ -50,6 +51,7 @@ class AdviceDetailImpl extends React.Component {
                 isOwner: false,
                 isSubscribed: false,
                 isFollowing: false,
+                benchmark: ''
             },
             metrics: {
                 annualReturn: 0,
@@ -144,20 +146,6 @@ class AdviceDetailImpl extends React.Component {
         const simulatedPerformance = _.get(performanceSummary, 'simulated', {});
         const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, period} = simulatedPerformance;
         const {nstocks = 0} = currentPerformance;
-        const benchmark = _.get(portfolio, 'benchmark.ticker', 'N/A');
-        if (!Utils.isLoggedIn()) {
-            getStockPerformance(benchmark, 'detail_benchmark')
-            .then(performanceArray => {
-                const benchMarkticker = {name: benchmark, color: benchmarkColor, data: performanceArray};
-                this.setState({tickers: performance ? [...this.state.tickers, benchMarkticker] : this.state.tickers});
-            })
-        } else {
-            getStockPerformance(benchmark)
-            .then(performanceArray => {
-                const benchMarkticker = {name: benchmark, color: benchmarkColor, data: performanceArray};
-                this.setState({tickers: performance ? [...this.state.tickers, benchMarkticker] : this.state.tickers});
-            })
-        }
         var dailyNAVChangePct = 0.0
         var annualReturnEOD = annualReturn;
         this.setState({
@@ -214,25 +202,33 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
-    getAdvicePerformance = (performance) => {
+    getAdvicePerformance = (performance, benchmark = 'NIFTY_50') => {
         const tickers = [...this.state.tickers];
-        if (performance.simulated) {
+        const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
+        getStockPerformance(benchmark, benchmarkRequestType)
+        .then(benchmarkResponse => {
+            if (performance.simulated) {
+                tickers.push({
+                    name: 'Simulated Performance',
+                    data: this.processPerformanceData(_.get(performance, 'simulated.portfolioValues', [])),
+                    color: simulatedPerformanceColor
+                });
+            }
+    
+            if (performance.current && Utils.isLoggedIn()) {
+                tickers.push({
+                    name: 'True Performance',
+                    data: this.processPerformanceData(_.get(performance, 'current.portfolioValues', [])),
+                    color: currentPerformanceColor
+                });
+            }
             tickers.push({
-                name: 'Simulated Performance',
-                data: this.processPerformanceData(_.get(performance, 'simulated.portfolioValues', [])),
-                color: simulatedPerformanceColor
+                name: benchmark,
+                color: benchmarkColor,
+                data: benchmarkResponse
             });
-        }
-
-        if (performance.current && Utils.isLoggedIn()) {
-            tickers.push({
-                name: 'True Performance',
-                data: this.processPerformanceData(_.get(performance, 'current.portfolioValues', [])),
-                color: currentPerformanceColor
-            });
-        }
-        
-        this.setState({tickers});
+            this.setState({tickers});
+        })
     }
 
     processPerformanceData = performanceData => {
@@ -247,8 +243,9 @@ class AdviceDetailImpl extends React.Component {
         this.setState({show: true});
         fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url)
         .then(summaryResponse => {
+            const benchmark = _.get(summaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
             this.getAdviceSummary(summaryResponse);
-            this.getAdvicePerformance(summaryResponse.data.performance);
+            this.getAdvicePerformance(summaryResponse.data.performance, benchmark);
         })
         .catch(error => {
             this.setState({
@@ -278,8 +275,9 @@ class AdviceDetailImpl extends React.Component {
             fetchAjax(advicePerformanceUrl, this.props.history, this.props.match.url)
         ]) 
         .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
+            const benchmark = _.get(adviceSummaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
             this.getAdviceSummary(adviceSummaryResponse);
-            this.getAdvicePerformance(advicePerformanceResponse.data);
+            this.getAdvicePerformance(advicePerformanceResponse.data, benchmark);
             
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
             //ADVICE SUMMARY IN BACKEND first calculated full performance
@@ -680,8 +678,13 @@ class AdviceDetailImpl extends React.Component {
             }
         })
         .then(response => {
+            const adviceUrl = `${requestUrl}/advice/${this.props.match.params.id}`;
             message.success('Sucess');
             this.toggleApprovalModal();
+            return fetchAjax(adviceUrl, this.props.history, this.props.match.url);
+        })
+        .then(response => {
+            this.getAdviceSummary(response, false);
         })
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
@@ -750,6 +753,7 @@ class AdviceDetailImpl extends React.Component {
         if (userId !== advisorId) {
             return (
                 <React.Fragment>
+                    {this.renderApprovalButtons(small)}
                     <Button
                             onClick={() => 
                                 Utils.isLoggedIn() 

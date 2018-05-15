@@ -6,7 +6,7 @@ import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal, Pagination, Radio} from 'antd';
 import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, AqPageHeader} from '../components';
 import {newLayoutStyle, pageTitleStyle, shadowBoxStyle, loadingColor} from '../constants';
-import {Utils, getBreadCrumbArray} from '../utils';
+import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {adviceFilters as filters} from '../constants/filters';
 import '../css/screenAdvices.css';
 
@@ -226,17 +226,14 @@ export default class ScreenAdvices extends React.PureComponent {
     getDefaultAdvices = () => {
         const url = `${requestUrl}/advice_default`;
         this.setState({show: true});
-        axios.get(url)
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             this.setState({
                 advices: this.processAdvices(response.data.advices),
                 totalCount: 1
             });
         })
-        .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
-            // console.log(error);
-        })
+        .catch(error => error)
         .finally(() => {
             this.setState({show: false, loading: false});
         });
@@ -249,7 +246,7 @@ export default class ScreenAdvices extends React.PureComponent {
             initialCall: false,
         });
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             // console.log('Mounted', this.mounted);
             if (this.mounted) {
@@ -259,16 +256,7 @@ export default class ScreenAdvices extends React.PureComponent {
                 });
             }
         })
-        .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                if (_.get(error, 'response.data.paramName', '') === 'aimsquant-token') {
-                    this.props.history.push('/login');
-                } else {
-                    Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-                }
-            }
-        })
+        .catch(error => error)
         .finally(() => {
             if (this.mounted) {
                 this.setState({loading: false, show: false});

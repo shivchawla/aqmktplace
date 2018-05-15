@@ -10,9 +10,10 @@ import {ForbiddenAccess, StockResearchModal, WatchList, AqRate} from '../compone
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
 import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor} from '../constants';
+import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
-import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio, fetchAjax} from '../utils';
+import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio, fetchAjax, getStockPerformance} from '../utils';
 import {
     AqPortfolioCompositionAdvice,
     AqHighChartMod,
@@ -230,6 +231,7 @@ class PortfolioDetailImpl extends React.Component {
 
     componentWillMount() {
         this.mounted = true;
+        let benchmark = '';
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
@@ -242,13 +244,8 @@ class PortfolioDetailImpl extends React.Component {
             let pnlStats;
             fetchAjax(url, this.props.history, this.props.match.url)
             .then(response => { // Getting details of portfolio
-
-                if (response.data.benchmark) {
-                    tickers.push({ // Pushing data to get the benchmark performance to performance graph
-                        name: response.data.benchmark.ticker,
-                        color: benchmarkColor,
-                    });
-                }
+                benchmark = _.get(response.data, 'benchmark.ticker', 'NIFTY_50');
+                const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
                 pnlStats = _.get(response.data, 'pnlStats', {});
                 const advicePerformance = _.get(response.data, 'advicePerformance', []);
                 const subPositions = _.get(response.data, 'detail.subPositions', []);
@@ -260,14 +257,16 @@ class PortfolioDetailImpl extends React.Component {
                     stockPositions: _.get(response.data, 'detail.positions', []),
                     realtimeSecurities: this.processPositionToWatchlistData(_.get(response.data, 'detail.positions', [])),
                     cash: _.get(response.data, 'detail.cash', 0),
-                    tickers
                 }, () => {
                     // Subscribing to real-time data
                     this.setUpSocketConnection();
                 });
-                return fetchAjax(performanceUrl, this.props.history, this.props.match.url);
+                return Promise.all([
+                    fetchAjax(performanceUrl, this.props.history, this.props.match.url),
+                    getStockPerformance(benchmark, benchmarkRequestType)
+                ]);
             })
-            .then(response => { // Getting Portfolio Performance
+            .then(([response, benchmarkResponse]) => { // Getting Portfolio Performance
                 const colorData = generateColorData(positions);
                 let simulatedPerformanceSeries = [];
                 let truePerformanceSeries = [];
@@ -276,7 +275,6 @@ class PortfolioDetailImpl extends React.Component {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue];
                     });
                 }
-
                 if (response.data.current){
                     truePerformanceSeries = _.get(response.data, 'current.portfolioValues', []).map((item, index) => {
                         return [moment(item.date, dateFormat).valueOf(), item.netValue];
@@ -287,13 +285,16 @@ class PortfolioDetailImpl extends React.Component {
                     data: truePerformanceSeries,
                     color: '#0082c8', //'#e6194b','#3cb44b''
                 });
-
                 tickers.push({ // Pushing advice performance to performance graph
                     name: 'PORTFOLIO (Simulated)',
                     data: simulatedPerformanceSeries,
                     color: '#3cb44b',
                 });
-
+                tickers.push({ // // Pushing benchmark performance to performance graph
+                    name: benchmark,
+                    data: benchmarkResponse,
+                    color: benchmarkColor
+                });
                 const portfolioMetrics = Object.assign(_.get(response.data, 'summary.current', {}), pnlStats);
 
                 const constituentDollarPerformance = _.get(
@@ -343,7 +344,9 @@ class PortfolioDetailImpl extends React.Component {
                     pieSeries: series,
                 });
             })
-            .catch(error => error)
+            .catch(error => {
+                return error;
+            })
             .finally(() => {
                 this.setState({show: false});
             });

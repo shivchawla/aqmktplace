@@ -8,7 +8,8 @@ import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} 
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate} from '../components';
 import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
-import {generateColorData, getMetricColor, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
+import {generateColorData, getMetricColor, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
+import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import 'react-loading-bar/dist/index.css'
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
@@ -164,10 +165,9 @@ export default class InvestorDashboard extends React.Component {
         Promise.all([
             fetchAjax(url, this.props.history, this.props.match.url),
             this.getInvestorPortfolios(),
-            this.getInvestorSubscribedAdvices()
+            this.getInvestorSubscribedAdvices(),
         ])
-        fetchAjax(url, this.props.history, this.props.match.url)
-        .then(response => {
+        .then(([response]) => {
             const defaultPortfolio = _.get(response.data, 'defaultPortfolio', null);
             const defaultPerformance = _.get(response.data, 'defaultPerformance', null);
             if (defaultPortfolio === null) {
@@ -184,6 +184,8 @@ export default class InvestorDashboard extends React.Component {
             const portfolioMetrics = _.get(defaultPerformance, 'current.metrics.portfolioMetrics', {});
             const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
             const performance = _.get(defaultPerformance, 'current.metrics.portfolioPerformance.true', {});
+            const benchmark = _.get(defaultPortfolio, 'benchmark.ticker', 'NIFTY_50');
+            const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
             
             const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${response.data.defaultPortfolio._id}`;
             const performanceData = _.get(defaultPerformance, 'simulated.portfolioValues', []).map(item => {
@@ -199,17 +201,21 @@ export default class InvestorDashboard extends React.Component {
             var netValueEOD = summary.netValueEOD;
             var dailyNavChangePct = (((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : 0) || summary.dailyNAVChangeEODPct)*100).toFixed(2);
             var totalPnl = summary.totalPnl;
-
-            tickers.push({
-                name: _.get(defaultPortfolio, 'benchmark.ticker', ''),
-                show: true,
-                color: benchmarkColor
-            });
-            tickers.push({
-                name: 'Portfolio',
-                data: performanceData,
-                show: true
-            });
+            getStockPerformance(benchmark, benchmarkRequestType)
+            .then(benchmarkResponse => {
+                tickers.push({
+                    name: benchmark,
+                    show: true,
+                    color: benchmarkColor,
+                    data: benchmarkResponse
+                });
+                tickers.push({
+                    name: 'Portfolio',
+                    data: performanceData,
+                    show: true
+                });
+                this.setState({tickers});
+            })
             const constituentPerformance = _.get(defaultPerformance, 'current.metrics.constituentPerformance', []);
             const dollarPerformance = constituentPerformance.map(item => {
                 return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]};
@@ -239,7 +245,7 @@ export default class InvestorDashboard extends React.Component {
                 },
                 dollarPerformance,
                 percentagePerformance,
-                tickers,
+                // tickers,
             });
             return this.getInvestorPortfolios();
         })
@@ -274,12 +280,13 @@ export default class InvestorDashboard extends React.Component {
         this.setState({subscribedAdvicesLoading: true});
         fetchAjax(subscribedAdvicesUrl, this.props.history, this.props.match.url)
         .then(response => {
-            this.setState({subscribedAdvices: this.processSubscribedAdvices(response.data.advices)});
+            const advices = _.get(response.data, 'advices', []);
+            this.setState({subscribedAdvices: this.processSubscribedAdvices(advices)});
             return fetchAjax(followingAdviceUrl, this.props.history, this.props.match.url)
         })
         .then(response => {
             const advices = [...this.state.subscribedAdvices];
-            const followingAdvices = response.data.advices;
+            const followingAdvices = _.get(response.data, 'advices', []);
             followingAdvices.map((advice, index) => {
                 const {name, performanceSummary} = advice;
                 if(_.findIndex(advices, presentAdvice => presentAdvice.id === advice._id) === -1) {
@@ -434,7 +441,7 @@ export default class InvestorDashboard extends React.Component {
     }
 
     // Also used to subscribe to realtime updates of individual portfolios
-    processPortfolios = (portfolios) => {
+    processPortfolios = (portfolios = []) => {
         return portfolios.map(portfolio => {
             // this.subscribeToPortfolio(portfolio._id);
             var dailyNAVChangeEODPct = _.get(portfolio, 'performance.dailyNAVChangeEODPct', 0);
