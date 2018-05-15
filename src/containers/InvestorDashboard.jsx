@@ -162,12 +162,14 @@ export default class InvestorDashboard extends React.Component {
         const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}`;
         const tickers = [...this.state.tickers];
         this.setState({defaultPortfolioLoading: true});
-        Promise.all([
+        
+        return Promise.all([
             fetchAjax(url, this.props.history, this.props.match.url),
             this.getInvestorPortfolios(),
             this.getInvestorSubscribedAdvices(),
         ])
         .then(([response]) => {
+            //return;
             const defaultPortfolio = _.get(response.data, 'defaultPortfolio', null);
             const defaultPerformance = _.get(response.data, 'defaultPerformance', null);
             if (defaultPortfolio === null) {

@@ -17,7 +17,7 @@ export class DashboardCard extends React.Component {
                     </Col>
                 </Row>
                 <Row style={{...contentStyle, ...this.props.contentStyle}}>
-                    <Spin spinning={loading}>
+                    <Spin spinning={loading} style={{position: 'absolute'}}>
                         {children}
                     </Spin>
                 </Row>

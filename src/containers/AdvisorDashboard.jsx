@@ -429,7 +429,6 @@ export default class AdvisorDashboard extends React.Component {
     }
 
     getAdvicePerformance = advice => {
-        console.log(advice);
         const newTickers = [];
         const url = `${requestUrl}/performance/advice/${advice._id}`;
         this.setState({advicePerformanceLoading: true});
@@ -636,7 +635,10 @@ export default class AdvisorDashboard extends React.Component {
                         <ListMetricItem label="Name" value={advice.name} />
                     </Col>
                     <Col span={6}>
-                        <ListMetricItem value={_.get(advice, 'performanceSummary.current.netValueEOD', 0).toFixed(2)} label="Net Value" />
+                        <ListMetricItem 
+                                value={(_.get(advice, 'performanceSummary.current.netValueEOD', 0) || 0).toFixed(2)} 
+                                label="Net Value" 
+                        />
                     </Col>
                     <Col span={4}>
                         <ListMetricItem 

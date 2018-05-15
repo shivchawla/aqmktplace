@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Layout, Menu, Row, Col, Button, notification, Popover, Icon} from 'antd';
+import {Layout, Menu, Row, Col, Button, Popover, Icon} from 'antd';
 import {Route, withRouter, Link, Switch} from 'react-router-dom';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import AqBreadCrumb from './components/AqBreadCrumb';
@@ -21,6 +21,8 @@ import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
 import {Utils} from './utils';
 import {primaryColor} from './constants';
+// import AdvisorDashboard from './containers/AdvisorDashboard';
+// import InvestorDashboard from './containers/InvestorDashboard';
 import asyncComponent from './components/AsyncComponent';
 
 import logo from "./assets/logo-advq-new.png";
@@ -40,6 +42,7 @@ const UpdateAdvice = asyncComponent(() => import("./containers/UpdateAdvice"));
 const ScreenAdvices = asyncComponent(() => import("./containers/ScreenAdvices"));
 const AdvisorProfile = asyncComponent(() => import("./containers/AdvisorProfile"));
 const Home = asyncComponent(() => import("./containers/Home"));
+const FAQ = asyncComponent(() => import("./containers/FAQ"));
 
 class App extends React.Component {
     constructor(props) {
@@ -62,25 +65,26 @@ class App extends React.Component {
         // Getting the parent path of any route
         // For eg. if route is /advice/{adviceId} then parent path is advice
         const regexArray = [
-            {regExp: '^\/advice$', title: 'Screen Advices'},
-            {regExp: '^\/home$', title: 'Home'},
-            {regExp: '^\/forgotPassword$', title: 'Forgot Password'},
-            {regExp: '^\/errorPage$', title: 'No Internet Access'},
-            {regExp: '^\/forbiddenAccess$', title: 'Forbidden Access'},
-            {regExp: '^\/$', title: 'Home'},
-            {regExp: '^\/policies\/tnc$', title: 'Terms and Conditions'},
-            {regExp: '^\/policies\/privacy$', title: 'Privacy Policy'},
-            {regExp: '^\/investordashboard$', title: 'Investor Dashboard'},
-            {regExp: '^\/investordashboard\/createportfolio$', title: 'Create Portfolio'},
-            {regExp: '^\/advisordashboard$', title: 'Advisor Dashboard'},
-            {regExp: '^\/stockresearch$', title: 'Stock Research'},
-            {regExp: '^\/login$', title: 'Login'},
-            {regExp: '^\/signup$', title: 'Register'},
-            {regExp: '^\/advice\/[A-Za-z0-9]+$', title: 'Advice Detail'},
-            {regExp: '^\/advisordashboard\/updateadvice\/[A-Za-z0-9]+$', title: 'Update Advice'},
-            {regExp: '^\/advisordashboard\/advisorprofile\/[A-Za-z0-9]+$', title: 'Advisor Profile'},
-            {regExp: '^\/investordashboard\/portfolio\/[A-Za-z0-9]+$', title: 'Portfolio Detail'},
-            {regExp: '^\/investordashboard\/portfolio\/transactions\/[A-Za-z0-9]+$', title: 'Update Portfolio'},
+            {regExp: '^\/advice$', title: 'Screen Advices - AdviceQube'},
+            {regExp: '^\/home$', title: 'Home - AdviceQube'},
+            {regExp: '^\/faq$', title: 'FAQ - AdviceQube'},
+            {regExp: '^\/forgotPassword$', title: 'Forgot Password - AdviceQube'},
+            {regExp: '^\/errorPage$', title: 'No Internet Access - AdviceQube'},
+            {regExp: '^\/forbiddenAccess$', title: 'Forbidden Access - AdviceQube'},
+            {regExp: '^\/$', title: 'Home - AdviceQube'},
+            {regExp: '^\/policies\/tnc$', title: 'Terms and Conditions - AdviceQube'},
+            {regExp: '^\/policies\/privacy$', title: 'Privacy Policy - AdviceQube'},
+            {regExp: '^\/investordashboard$', title: 'Investor Dashboard - AdviceQube'},
+            {regExp: '^\/investordashboard\/createportfolio$', title: 'Create Portfolio - AdviceQube'},
+            {regExp: '^\/advisordashboard$', title: 'Advisor Dashboard - AdviceQube'},
+            {regExp: '^\/stockresearch$', title: 'Stock Research - AdviceQube'},
+            {regExp: '^\/login$', title: 'Login - AdviceQube'},
+            {regExp: '^\/signup$', title: 'Register - AdviceQube'},
+            {regExp: '^\/advice\/[A-Za-z0-9]+$', title: 'Advice Detail - AdviceQube'},
+            {regExp: '^\/advisordashboard\/updateadvice\/[A-Za-z0-9]+$', title: 'Update Advice - AdviceQube'},
+            {regExp: '^\/advisordashboard\/advisorprofile\/[A-Za-z0-9]+$', title: 'Advisor Profile - AdviceQube'},
+            {regExp: '^\/investordashboard\/portfolio\/[A-Za-z0-9]+$', title: 'Portfolio Detail - AdviceQube'},
+            {regExp: '^\/investordashboard\/portfolio\/transactions\/[A-Za-z0-9]+$', title: 'Update Portfolio - AdviceQube'},
         ];
         regexArray.map((item, index) => {
             const expression = new RegExp(item.regExp);
@@ -293,6 +297,7 @@ class App extends React.Component {
                         <Route path='/AuthMessage' component={AuthMessage} />
                         <Route exact={true} path='/login' component={Login} />
                         <Route exact={true} path='/signup' component={Signup} />
+                        <Route exact={true} path='/faq' component={FAQ} />
                         <Route component={PageNotFound} />
                     </Switch>
                 </Content>

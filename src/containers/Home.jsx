@@ -272,6 +272,12 @@ export default class Home extends React.Component {
                             <a className="footer-link" href="https://www.aimsquant.com/research/strategy">Research</a>
                         </div>
                     </Col>
+                    <Col span={4} className="footer-container">
+                        <h5 className="footer-group-header">Help</h5>
+                        <div className="footer-list">
+                            <a className="footer-link" href="/faq">FAQ</a>
+                        </div>
+                    </Col>
                 </Row>
             </Col>
         );
