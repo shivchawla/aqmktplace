@@ -396,7 +396,7 @@ class AddTransactionsImpl extends React.Component {
                 const advice = _.filter(advicePerformance, item => item.advice === presentAdvice.id)[0];
                 if (advice) {
                     presentAdvice.weight = _.get(advice, 'personal.weightInPortfolio');
-                    presentAdvice.profitLoss = Number(_.get(advice, 'personal.totalPnlPct').toFixed(2));
+                    presentAdvice.profitLoss = Number(_.get(advice, 'personal.totalPnl').toFixed(2));
                 }
                 return presentAdvice;
             })
@@ -489,7 +489,6 @@ class AddTransactionsImpl extends React.Component {
             <Row>
                 <Col span={24} style={{overflowY:'auto'}}>
                     {
-                        // this.state.presentAdvices.length > 0 
                         this.state.presentAdvices.length > 0
                         ? <AqPortfolioCompositionAdvice
                                 preview 
@@ -727,12 +726,12 @@ class AddTransactionsImpl extends React.Component {
                 if (item.advice) {
                     return advice.id === item.advice._id;
                 } else {
-                    return advice.id === 100
+                    return advice.id === "";
                 }      
             });
             if (adviceIndex === -1) {
                 advices.push({
-                    id: item.advice ? item.advice._id : 100,
+                    id: item.advice ? item.advice._id : "",
                     name: item.advice !== null ? item.advice.name : 'My Portfolio',
                     key: index,
                     netAssetValue: item.lastPrice * item.quantity,

@@ -306,8 +306,12 @@ class PortfolioDetailImpl extends React.Component {
                     return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]}
                 });
                 const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition')
-                        .map((item, index) =>{
-                    return {name: item.ticker, y: Math.round(item.weight * 10000) / 100, color: colorData[item.ticker]};
+                        .map((item, index) => {
+                    return {
+                        name: item.ticker, 
+                        y: Math.round(item.weight * 10000) / 100, 
+                        color: colorData[item.ticker],
+                    };
                 });
 
                 series.push({name: 'Composition', data: portfolioComposition});
@@ -559,7 +563,7 @@ class PortfolioDetailImpl extends React.Component {
                         <Row>
                             <Col span={24} style={dividerStyle}></Col>
                         </Row>
-                        <Collapse bordered={false} defaultActiveKey={["2"]}>
+                        <Collapse bordered={false} defaultActiveKey={["1"]}>
                             <Panel
                                     key='1'
                                     style={customPanelStyle}

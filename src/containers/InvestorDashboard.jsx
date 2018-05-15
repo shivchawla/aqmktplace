@@ -858,37 +858,41 @@ export default class InvestorDashboard extends React.Component {
 
     processRealtimeMessage = msg => {
         if (this.mounted) {
-            const realtimeData = JSON.parse(msg.data);
-            if (realtimeData.type === 'portfolio') {
-                const investorPortfolios = [...this.state.investorPortfolios];
-                const targetPortfolio = investorPortfolios.filter(portfolio => portfolio.id === realtimeData.portfolioId)[0];
-                if (targetPortfolio) {
-                    let defaultPorfolio = false;
-                    // Checking if it's a default portfolio
-                    if (realtimeData.portfolioId === this.state.defaultPortfolioId) {
-                        defaultPorfolio = true;
+            try {
+                const realtimeData = JSON.parse(msg.data);
+                if (realtimeData.type === 'portfolio') {
+                    const investorPortfolios = [...this.state.investorPortfolios];
+                    const targetPortfolio = investorPortfolios.filter(portfolio => portfolio.id === realtimeData.portfolioId)[0];
+                    if (targetPortfolio) {
+                        let defaultPorfolio = false;
+                        // Checking if it's a default portfolio
+                        if (realtimeData.portfolioId === this.state.defaultPortfolioId) {
+                            defaultPorfolio = true;
+                        }
+                        targetPortfolio.dailyNavChangePct = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
+                        targetPortfolio.netValue = _.get(realtimeData, 'output.summary.netValue', 0)
+                        this.setState({
+                            investorPortfolios,
+                            metrics: defaultPorfolio 
+                                    ?   {
+                                            ...this.state.metrics,
+                                            dailyNavChangePct: (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0)*100).toFixed(2),
+                                            netValue: _.get(realtimeData, 'output.summary.netValue', 0)
+                                        }
+                                    :   this.state.metrics
+                        });
                     }
-                    targetPortfolio.dailyNavChangePct = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
-                    targetPortfolio.netValue = _.get(realtimeData, 'output.summary.netValue', 0)
-                    this.setState({
-                        investorPortfolios,
-                        metrics: defaultPorfolio 
-                                ?   {
-                                        ...this.state.metrics,
-                                        dailyNavChangePct: (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0)*100).toFixed(2),
-                                        netValue: _.get(realtimeData, 'output.summary.netValue', 0)
-                                    }
-                                :   this.state.metrics
-                    });
+                } else if (realtimeData.type === 'advice') {
+                    const subscribedAdvices = [...this.state.subscribedAdvices];
+                    const targetAdvice = subscribedAdvices.filter(advice => advice.id === realtimeData.adviceId)[0];
+                    if (targetAdvice) {
+                        targetAdvice.netValue = _.get(realtimeData, 'output.summary.netValue', 0);
+                        targetAdvice.return = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
+                        this.setState({subscribedAdvices});
+                    }
                 }
-            } else if (realtimeData.type === 'advice') {
-                const subscribedAdvices = [...this.state.subscribedAdvices];
-                const targetAdvice = subscribedAdvices.filter(advice => advice.id === realtimeData.adviceId)[0];
-                if (targetAdvice) {
-                    targetAdvice.netValue = _.get(realtimeData, 'output.summary.netValue', 0);
-                    targetAdvice.return = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
-                    this.setState({subscribedAdvices});
-                }
+            } catch(error) {
+                // console.log(error);
             }
         }
     }

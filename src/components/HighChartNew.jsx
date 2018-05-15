@@ -133,7 +133,7 @@ export class HighChartNew extends React.Component {
     updateSeries = series => {
         if (series.length > 0) {
             this.clearSeries();
-            const validIndex = 0; //this.getValidIndex(series);
+            const validIndex = this.getValidIndex(series);
             series.map((item, index) => {
                 this.chart.addSeries({
                     name: item.name,
@@ -150,7 +150,7 @@ export class HighChartNew extends React.Component {
     }
 
     updateTitle = series => {
-        const titleIndex = 0; //this.getValidIndex(series);
+        const titleIndex = this.getValidIndex(series);
         try {
             this.chart.update({
                 title: {
