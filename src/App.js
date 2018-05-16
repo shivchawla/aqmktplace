@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Layout, Menu, Row, Col, Button, Popover, Icon} from 'antd';
-import {Route, withRouter, Link, Switch} from 'react-router-dom';
+import {BrowserRouter as Router, Route, withRouter, Link, Switch} from 'react-router-dom';
+import ReactGA from 'react-ga';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import AqBreadCrumb from './components/AqBreadCrumb';
 import Login from './containers/Login';
@@ -43,11 +44,13 @@ const ScreenAdvices = asyncComponent(() => import("./containers/ScreenAdvices"))
 const AdvisorProfile = asyncComponent(() => import("./containers/AdvisorProfile"));
 const Home = asyncComponent(() => import("./containers/Home"));
 const FAQ = asyncComponent(() => import("./containers/FAQ"));
+const {gaTrackingId} = require('./localConfig');
 
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {parentPath: '/'};
+        ReactGA.initialize(gaTrackingId); //Unique Google Analytics tracking number
     }
 
     componentWillMount() {
@@ -57,7 +60,13 @@ class App extends React.Component {
     componentDidUpdate(prevProps) {
         if (this.props.location !== prevProps.location) { // Route changed
             this.onRouteChanged(this.props.location.pathname);
+            this.fireTracking();
         }
+    }
+
+    fireTracking = () => {
+        // console.log(window.location.href);
+        ReactGA.pageview(window.location.href);
     }
 
     onRouteChanged = location => {

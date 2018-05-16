@@ -98,6 +98,8 @@ module.exports.getFirstMonday = function(offset) {
 		nextDate.setDate(nextDate.getDate() + 7);
 		return nextDate;*/
 	} 
+
+	return currentDate;
 };
 
 module.exports.getLatestWeekday = function(date) {

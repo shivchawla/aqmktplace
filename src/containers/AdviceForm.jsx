@@ -177,7 +177,7 @@ export class AdviceFormImpl extends React.Component {
                     },
                     rebalance: this.state.rebalancingFrequency,
                     maxNotional: this.state.maxNotional,
-                    // public: this.state.public
+                    // public: publish
                 };
                 axios({
                     method,
@@ -358,17 +358,21 @@ export class AdviceFormImpl extends React.Component {
   
     onChange = data => {
         let totalCash = 0;
+        console.log('On Change called');
         const remainingCash = this.state.initialCash - totalCash;
         this.setState({
+            portfolioChanged: this.hasPortfolioChanged(data),
             data: _.cloneDeep(data), 
             remainingCash,
-            portfolioChanged: this.hasPortfolioChanged(data)
         });
     }
 
     hasPortfolioChanged = data => {
-        const differenceArray = _.differenceWith(this.state.dataSnapshot, data, this.checkEquality);
-        const otherDifferenceArray = _.differenceWith(data, this.state.dataSnapshot, this.checkEquality);
+        const dataSnapshot = [...this.state.dataSnapshot];
+        console.log('Data Snapshot', dataSnapshot);
+        console.log('Data', data);
+        const differenceArray = _.differenceWith(dataSnapshot, data, this.checkEquality);
+        const otherDifferenceArray = _.differenceWith(data, dataSnapshot, this.checkEquality);
         if(differenceArray.length > 0 || otherDifferenceArray.length > 0) {
             return true;
         }
@@ -631,7 +635,7 @@ export class AdviceFormImpl extends React.Component {
         })
         .then(advicePortfolioResponse => {
             const advicePortfolio = advicePortfolioResponse.data;
-            const positions = [...this.state.positions];
+            const positions = [];
             const portfolio = _.get(advicePortfolio, 'detail.positions', []);
             portfolio.map((item, index) => {
                 positions.push({
@@ -648,7 +652,7 @@ export class AdviceFormImpl extends React.Component {
             this.updateAllWeights(positions);
             this.setState({
                 data: positions, 
-                dataSnapshot: positions, // To store the original portfolio
+                dataSnapshot: [...positions], // To store the original portfolio
                 startDate: advicePortfolio.detail.startDate
             }, () => {
                 this.props.form.setFieldsValue({startDate: this.getFirstValidDate()});
@@ -704,6 +708,8 @@ export class AdviceFormImpl extends React.Component {
         }
 
         return this.props.isUpdate && this.state.isPublic ? 
+            this.state.rebalancingFrequency==="Daily" ? 
+            current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1) :
             current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1 || compareDates(getDate(current.toDate()), getFirstMonday(offset)) != 0)  : 
             current && (current < moment().startOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
     }
