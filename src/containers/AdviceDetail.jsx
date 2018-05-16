@@ -532,9 +532,9 @@ class AdviceDetailImpl extends React.Component {
             const realtimeData = JSON.parse(msg.data);
             if (realtimeData.type === 'advice') {
                 const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
-                
+                let positions = _.get(realtimeData, 'output.detail.positions', []);
+                const staticPositions = this.state.positions; // old positions from state
                 const realtimeDate = DateHelper.getDate(_.get(realtimeData, 'date', null));
-
                 //Effectvive total return is valid is current summary has past netvalueEOD
                 //otherwie it means, it is a new advice and current changes have no significance
                 const netValueEOD = _.get(this.performanceSummary, 'current.netValueEOD', 0);
@@ -548,6 +548,13 @@ class AdviceDetailImpl extends React.Component {
                 var effTotalReturn = netValueEOD > 0.0 && DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
                             (1 + totalReturn) * (1+dailyNAVChangePct/100) - 1.0 : 
                             totalReturn;
+                positions = positions.map(item => {
+                    const targetPosition = staticPositions.filter(
+                            positionItem => positionItem.security.ticker === item.security.ticker)[0];
+                    item.avgPrice === 0 ? targetPosition.avgPrice : item.avgPrice;
+                    item.lastPrice === 0 ? targetPosition.lastPrice : item.lastPrice;
+                    return item;
+                });
 
                 this.setState({
                     metrics: {
@@ -555,7 +562,7 @@ class AdviceDetailImpl extends React.Component {
                         netValue,
                         dailyNAVChangePct,
                     },
-                    positions: _.get(realtimeData, 'output.detail.positions', [])
+                    positions
                 });
 
             } else if (realtimeData.type === 'stock') {

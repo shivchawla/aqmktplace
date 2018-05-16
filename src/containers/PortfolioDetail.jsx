@@ -5,11 +5,11 @@ import Loading from 'react-loading-bar';
 import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
-import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip} from 'antd';
-import {ForbiddenAccess, StockResearchModal, WatchList, AqRate} from '../components';
+import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip, Tag} from 'antd';
+import {ForbiddenAccess, StockResearchModal, WatchList} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
-import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor} from '../constants';
+import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor, buttonStyle, primaryColor} from '../constants';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
@@ -71,7 +71,9 @@ class PortfolioDetailImpl extends React.Component {
             cash: -10,
             stockResearchModalVisible: false,
             stockResearchModalTicker: 'TCS',
-            hasChangedCount: 0
+            hasChangedCount: 0,
+            isDefault: false,
+            makeDefaultLoading: false
         };
 
         this.columns = [
@@ -229,6 +231,31 @@ class PortfolioDetailImpl extends React.Component {
         this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});
     }
 
+    getPortfolioDetail = () => new Promise((resolve, reject) => {
+        const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
+
+        fetchAjax(url, this.props.history, this.props.match.url)
+        .then(response => { // Getting details of portfolio
+            const benchmark = _.get(response.data, 'benchmark.ticker', 'NIFTY_50');
+            const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
+            const pnlStats = _.get(response.data, 'pnlStats', {});
+            const advicePerformance = _.get(response.data, 'advicePerformance', []);
+            const subPositions = _.get(response.data, 'detail.subPositions', []);
+            const advices = this.processPresentAdvicePortfolio(subPositions, advicePerformance);
+            const positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
+            this.setState({
+                name: response.data.name,
+                isDefault: _.get(response.data, 'isDefaultPortfolio', false),
+                presentAdvices: advices,
+                stockPositions: _.get(response.data, 'detail.positions', []),
+                realtimeSecurities: this.processPositionToWatchlistData(_.get(response.data, 'detail.positions', [])),
+                cash: _.get(response.data, 'detail.cash', 0),
+            });
+            resolve({pnlStats, benchmark, positions, benchmarkRequestType});
+        })
+        .catch(error => reject(error))
+    })
+
     componentWillMount() {
         this.mounted = true;
         let benchmark = '';
@@ -237,33 +264,20 @@ class PortfolioDetailImpl extends React.Component {
         } else {
             const series = [];
             let positions = [];
-            const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
             const tickers = [...this.state.tickers];
             const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${this.props.match.params.id}`;
             this.setState({show: true});
             let pnlStats;
-            fetchAjax(url, this.props.history, this.props.match.url)
-            .then(response => { // Getting details of portfolio
-                benchmark = _.get(response.data, 'benchmark.ticker', 'NIFTY_50');
-                const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
-                pnlStats = _.get(response.data, 'pnlStats', {});
-                const advicePerformance = _.get(response.data, 'advicePerformance', []);
-                const subPositions = _.get(response.data, 'detail.subPositions', []);
-                const advices = this.processPresentAdvicePortfolio(subPositions, advicePerformance);
-                positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
-                this.setState({
-                    name: response.data.name,
-                    presentAdvices: advices,
-                    stockPositions: _.get(response.data, 'detail.positions', []),
-                    realtimeSecurities: this.processPositionToWatchlistData(_.get(response.data, 'detail.positions', [])),
-                    cash: _.get(response.data, 'detail.cash', 0),
-                }, () => {
-                    // Subscribing to real-time data
-                    this.setUpSocketConnection();
-                });
+            this.getPortfolioDetail()
+            .then(portfolioData => {
+                this.setUpSocketConnection();
+                benchmark = portfolioData.benchmark;
+                positions = portfolioData.positions;
+                pnlStats = portfolioData.pnlStats;
+
                 return Promise.all([
                     fetchAjax(performanceUrl, this.props.history, this.props.match.url),
-                    getStockPerformance(benchmark, benchmarkRequestType)
+                    getStockPerformance(benchmark, portfolioData.benchmarkRequestType)
                 ]);
             })
             .then(([response, benchmarkResponse]) => { // Getting Portfolio Performance
@@ -454,7 +468,8 @@ class PortfolioDetailImpl extends React.Component {
 
             if (realtimeData.type === 'portfolio') {
                 const subPositions = _.get(realtimeData, 'output.detail.subPositions', []);
-                const positions = _.get(realtimeData, 'output.detail.positions', []);
+                let positions = _.get(realtimeData, 'output.detail.positions', []); // realtime positions
+                const staticPositions = this.state.stockPositions; // old positions from state
                 const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
                 const dailyNAVChangePct = (_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2);
                 const totalPnl = _.get(realtimeData, 'output.summary.totalPnl', 0);
@@ -470,7 +485,13 @@ class PortfolioDetailImpl extends React.Component {
                         portfolioMetrics[idx] = item;
                     }
                 });
-                
+                positions = positions.map(item => {
+                    const targetPosition = staticPositions.filter(
+                            positionItem => positionItem.security.ticker === item.security.ticker)[0];
+                    item.avgPrice === 0 ? targetPosition.avgPrice : item.avgPrice;
+                    item.lastPrice === 0 ? targetPosition.lastPrice : item.lastPrice;
+                    return item;
+                });
                 this.setState({
                     portfolioMetrics,
                     stockPositions: positions
@@ -499,6 +520,25 @@ class PortfolioDetailImpl extends React.Component {
         });
     }
 
+    makeDefaultPortfolio = () => {
+        const {investor} = Utils.getUserInfo();
+        const portfolioId = this.props.match.params.id;
+        const url = `${requestUrl}/investor/${investor}/portfolio/${portfolioId}/defaultPortfolio`;
+        this.setState({makeDefaultLoading: true});
+        axios({
+            url,
+            method: 'POST',
+            headers: Utils.getAuthTokenHeader()
+        })
+        .then(response => {
+            this.getPortfolioDetail();
+        })
+        .catch(error => error)
+        .finally(() => {
+            this.setState({makeDefaultLoading: false});
+        })
+    }
+
     renderPageContent = () => {
         const breadCrumbs = getBreadCrumbArray(PortfolioDetailCrumb, [{
             name: this.state.name,
@@ -518,15 +558,35 @@ class PortfolioDetailImpl extends React.Component {
                     <AqPageHeader 
                             title={this.state.name} 
                             breadCrumbs={breadCrumbs} 
-                            button={{route:'/investordashboard/createportfolio', title:'Create Portfolio'}}
-                    />
+                    >
+                        <Col xl={0} lg={0} md={24} style={{textAlign: 'right'}}>
+                            <Button
+                                    type="primary"
+                                    onClick={() => {this.props.history.push('/investordashboard/createportfolio')}}
+                            >
+                                Create Portfolio
+                            </Button>
+                        </Col>
+                    </AqPageHeader>
 
-                    <Col xl={18} md={24} style={{...shadowBoxStyle, padding: '0'}}>
+                    <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, padding: '0'}}>
                         <Row style={{padding: '20px 30px'}}>
                             <Col span={24}>
                                 <Row type="flex" justify="space-between">
-                                    <Col span={10}>
-                                        <h2 style={pageHeaderStyle}>{this.state.name}</h2>
+                                    <Col 
+                                            span={10} 
+                                            style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}
+                                    >
+                                        <h2 style={{...pageHeaderStyle, marginBottom: 0}}>{this.state.name}</h2>
+                                        {
+                                            this.state.isDefault &&
+                                            <Tag 
+                                                    color={primaryColor} 
+                                                    style={{marginLeft: '10px', marginTop: '2px'}}
+                                            >
+                                                Default Portfolio
+                                            </Tag>
+                                        }
                                     </Col>
                                     <Col span={6} style={{textAlign: 'right'}}>
                                         <Tooltip title={tooltipText}>
@@ -554,6 +614,23 @@ class PortfolioDetailImpl extends React.Component {
                                     </Col>
                                 </Row>
                             </Col>
+                            {
+                                !this.state.isDefault &&
+                                <Col span={24}>
+                                    <Button
+                                            style={{
+                                                fontSize: '12px', 
+                                                height: '25px', 
+                                                border: `1px solid ${primaryColor}`,
+                                                color: primaryColor
+                                            }}
+                                            onClick={this.makeDefaultPortfolio}
+                                            loading={this.state.makeDefaultLoading}
+                                    >
+                                        Make Default Portfolio
+                                    </Button>
+                                </Col>
+                            }
                             <Col span={24} style={{marginTop: '10px'}}>
                                 <Row>
                                     {this.renderMetrics()}
@@ -632,37 +709,46 @@ class PortfolioDetailImpl extends React.Component {
                             </Panel>
                         </Collapse>
                     </Col>
-                    <Col span={6} style={{minHeight:'200px', maxHeight: '500px'}}>
-                        <div 
-                                style={{
-                                    ...shadowBoxStyle, 
-                                    padding: '0px 10px', 
-                                    width: '95%', 
-                                    marginLeft:'auto', 
-                                    minHeight:'200px', 
-                                    maxHeight: '500px'
-                                }}
-                        >
-                            <Col 
-                                    span={24} 
+                    <Col xl={6} lg={6} md={0} sm={0} xs={0} style={{minHeight:'200px', maxHeight: '500px'}}>
+                        <Row>
+                            <Button 
+                                    className="action-button" 
+                                    type="primary"
+                                    style={{...buttonStyle, width: '95%', marginLeft: '16px'}}
+                            >
+                                Create Portfolio
+                            </Button>
+                            <div 
                                     style={{
-                                        display: 'flex', 
-                                        flexDirection: 'row', 
-                                        justifyContent: 'space-between', 
-                                        padding: '10px 0px',
-                                        borderBottom: '1px solid #E6E6E6'
+                                        ...shadowBoxStyle, 
+                                        padding: '0px 10px', 
+                                        width: '95%', 
+                                        marginLeft:'auto', 
+                                        minHeight:'200px', 
+                                        maxHeight: '500px'
                                     }}
                             >
-                                <h3 style={{fontSize: '16px'}}>Present Stocks</h3>
-                            </Col>
-                            <Col span={24}>
-                                <WatchList 
-                                    tickers={this.state.realtimeSecurities}
-                                    preview={true}
-                                    onClick={this.handleWatchListClick}
-                                />
-                            </Col>
-                        </div>
+                                <Col 
+                                        span={24} 
+                                        style={{
+                                            display: 'flex', 
+                                            flexDirection: 'row', 
+                                            justifyContent: 'space-between', 
+                                            padding: '10px 0px',
+                                            borderBottom: '1px solid #E6E6E6'
+                                        }}
+                                >
+                                    <h3 style={{fontSize: '16px'}}>Present Stocks</h3>
+                                </Col>
+                                <Col span={24}>
+                                    <WatchList 
+                                        tickers={this.state.realtimeSecurities}
+                                        preview={true}
+                                        onClick={this.handleWatchListClick}
+                                    />
+                                </Col>
+                            </div>
+                        </Row>
                     </Col>
                 </Row>
         );

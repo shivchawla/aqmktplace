@@ -22,7 +22,6 @@ export default function asyncComponent(importComponent) {
       }
 
       getLoadingComponent = () => {
-        console.log('Loading');
         return (
           <Col span={24} className='loader'>
             <Spin spinning={true} style={{marginTop: '100px'}}>Loading</Spin>
@@ -31,9 +30,7 @@ export default function asyncComponent(importComponent) {
       }
   
       render() {
-        const C = this.state.component;
-        console.log(C);
-  
+        const C = this.state.component;  
         return C ? <C {...this.props} /> : this.getLoadingComponent();
       }
     }

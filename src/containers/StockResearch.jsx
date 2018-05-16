@@ -7,7 +7,7 @@ import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio, Mo
 import {List} from 'immutable';
 import {AqLink, DashboardCard, AqPageHeader, WatchList, CreateWatchList} from '../components';
 import {pageTitleStyle, newLayoutStyle, shadowBoxStyle, loadingColor} from '../constants';
-import {getStockData, Utils, getBreadCrumbArray} from '../utils';
+import {getStockData, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
 
@@ -74,16 +74,11 @@ class StockResearchImpl extends React.Component {
     handleSearch = query => {
         this.setState({spinning: true});
         const url = `${requestUrl}/stock?search=${query}`;
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             this.setState({dataSource: this.processSearchResponseData(response.data)})
         })
-        .catch(error => {
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-        })
+        .catch(error => error)
         .finally(() => {
             this.setState({spinning: false});
         });
@@ -400,7 +395,7 @@ class StockResearchImpl extends React.Component {
 
     getWatchlists = () => {
         const url = `${requestUrl}/watchlist`;
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const watchlists = this.processWatchlistData(response.data);
             this.setState({watchlists, selectedWatchlistTab: watchlists[0].id});
@@ -408,18 +403,12 @@ class StockResearchImpl extends React.Component {
             //Launch WS request to subscrie watchlist
             this.subscribeToWatchList(this.state.selectedWatchlistTab);
         })
-        .catch(error => {
-            // console.log(error);
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-        });
+        .catch(error => error);
     }
 
     getWatchlist = id => {
         const url = `${requestUrl}/watchlist/${id}`;
-        axios.get(url, {headers: Utils.getAuthTokenHeader()})
+        fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             this.subscribeToWatchList(id);
             
@@ -434,13 +423,7 @@ class StockResearchImpl extends React.Component {
             });
             this.setState({watchlists});
         })
-        .catch(error => {
-            // console.log(error);
-            Utils.checkForInternet(error, this.props.history);
-            if (error.response) {
-                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
-            }
-        })
+        .catch(error => error);
     }
 
     processWatchlistData = watchlistResponse => {
