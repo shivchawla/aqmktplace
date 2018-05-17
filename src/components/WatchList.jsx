@@ -168,7 +168,7 @@ export class WatchListImpl extends React.Component {
                         </AutoComplete>
                     }
                 </Col>
-                 <Col span={24}>
+                 <Col span={24} style={{overflow: 'hidden', overflowY: 'scroll', height: '240px', paddingLeft: '5px'}}>
                     {this.renderTickers()}
                 </Col>
             </Row>

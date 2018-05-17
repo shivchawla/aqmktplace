@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactQuill from 'react-quill';
 import {Utils} from '../utils';
+import {Footer} from '../components';
 import { Spin, Icon } from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
@@ -101,6 +102,7 @@ class TnC extends Component {
               'padding': '40px 5% 40px 5%'}}>
               {getTnCDiv()}
             </div>
+            <Footer />
           </div>
         );
       }

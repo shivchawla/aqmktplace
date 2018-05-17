@@ -16,6 +16,7 @@ import realtime from '../assets/realtime.svg';
 import test from '../assets/test.svg';
 import track from '../assets/track.svg';
 import performance from '../assets/performance.svg';
+import {Footer} from '../components/Footer';
 
 import '../css/home.css';
 
@@ -241,44 +242,7 @@ export default class Home extends React.Component {
                         />
                     </Col>
                 </Row>
-                <Row className="footer">
-                    <h3 className="footer-header">AdviceQube</h3>
-                    <Col span={4} className="footer-container">
-                        <h5 className="footer-group-header">Products</h5>
-                        <div className="footer-list">
-                            <a className="footer-link" href="#">MarketPlace</a>
-                            <a className="footer-link" href="https://www.aimsquant.com/">Research Platform</a>
-                        </div>
-                    </Col>
-                    {/* <Col span={4} className="footer-container">
-                        <h5 className="footer-group-header">Company</h5>
-                        <div className="footer-list">
-                            <a className="footer-link" href="#">Contact Us</a>
-                            <a className="footer-link" href="#">Career</a>
-                            <a className="footer-link" href="#">People</a>
-                        </div>
-                    </Col> */}
-                    <Col span={4} className="footer-container">
-                        <h5 className="footer-group-header">Policies</h5>
-                        <div className="footer-list">
-                            <a className="footer-link" href="/policies/tnc">Terms of use</a>
-                            <a className="footer-link" href="/policies/privacy">Privacy Policy</a>
-                        </div>
-                    </Col>
-                    <Col span={4} className="footer-container">
-                        <h5 className="footer-group-header">AimsQuant</h5>
-                        <div className="footer-list">
-                            <a className="footer-link" href="https://www.aimsquant.com/research/community">Community</a>
-                            <a className="footer-link" href="https://www.aimsquant.com/research/strategy">Research</a>
-                        </div>
-                    </Col>
-                    <Col span={4} className="footer-container">
-                        <h5 className="footer-group-header">Help</h5>
-                        <div className="footer-list">
-                            <a className="footer-link" href="/faq">FAQ</a>
-                        </div>
-                    </Col>
-                </Row>
+                <Footer />
             </Col>
         );
     }

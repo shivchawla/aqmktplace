@@ -4,11 +4,12 @@ import Loading from 'react-loading-bar';
 import moment from 'moment';
 import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal, Pagination, Radio} from 'antd';
-import {AdviceListItemMod, AdviceFilterComponent, AdviceFilterSideComponent, AqPageHeader} from '../components';
+import {AdviceListItemMod, AdviceFilterSideComponent, AqPageHeader} from '../components';
 import {newLayoutStyle, pageTitleStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {adviceFilters as filters} from '../constants/filters';
 import '../css/screenAdvices.css';
+import { Footer } from '../components/Footer';
 
 const {aimsquantToken, requestUrl} = require('../localConfig');
 const Option = Select.Option;
@@ -360,23 +361,34 @@ export default class ScreenAdvices extends React.PureComponent {
         );
     }
 
+    getFilterComponent = (modal = false) => {
+        return (
+            <AdviceFilterSideComponent 
+                    owner={false}
+                    updateAdvices={this.updateAdvices}
+                    updateAdviceUrl={this.updateAdviceUrl}
+                    toggleModal = {this.toggleFilterModal}
+                    orderParam={this.state.sortBy}
+                    toggleFilter={this.toggleFilter}
+                    selectedTab={this.state.selectedTab}
+                    updateSelectedFilters={this.updateSelectedFilters}
+                    modal={modal}
+            />
+        );
+    }
+
     renderFilter = () => {
         return (
             <Modal
                     title="Apply Filters"
                     visible={this.state.filterModalVisible}
                     onCancel={this.toggleFilterModal}
-                    footer={null}
+                    onOk={this.handleFilterChange}
                     width={700}
+                    style={{top: 20}}
+                    bodyStyle={{padding: '10px'}}
             >
-                <AdviceFilterComponent 
-                        personal="0"
-                        updateAdvices={this.updateAdvices}
-                        updateAdviceUrl={this.updateAdviceUrl}
-                        toggleModal = {this.toggleFilterModal}
-                        orderParam={this.state.sortBy}
-                        toggleFilter={this.toggleFilter}
-                />
+                {this.getFilterComponent(true)}
             </Modal>
         );
     }
@@ -462,6 +474,7 @@ export default class ScreenAdvices extends React.PureComponent {
         this.setState({selectedPage: 1}, () => {
             this.getAdvices();
             Utils.localStorageSave('selectedPage', 1);
+            this.setState({filterModalVisible: false});
         });
     }
 
@@ -559,20 +572,12 @@ export default class ScreenAdvices extends React.PureComponent {
                         </Row>
                         <Row>
                             <Col span={24}>
-                                <AdviceFilterSideComponent 
-                                        owner={false}
-                                        updateAdvices={this.updateAdvices}
-                                        updateAdviceUrl={this.updateAdviceUrl}
-                                        toggleModal = {this.toggleFilterModal}
-                                        orderParam={this.state.sortBy}
-                                        toggleFilter={this.toggleFilter}
-                                        selectedTab={this.state.selectedTab}
-                                        updateSelectedFilters={this.updateSelectedFilters}
-                                />
+                                {this.getFilterComponent()}
                             </Col>
                         </Row>
                     </Col>
                 </Row>
+                <Footer />
             </Row>
         );
     }

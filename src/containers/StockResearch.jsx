@@ -5,8 +5,8 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio, Modal, message} from 'antd';
 import {List} from 'immutable';
-import {AqLink, DashboardCard, AqPageHeader, WatchList, CreateWatchList} from '../components';
-import {pageTitleStyle, newLayoutStyle, shadowBoxStyle, loadingColor} from '../constants';
+import {AqLink, DashboardCard, AqPageHeader, WatchList, CreateWatchList, Footer} from '../components';
+import {pageTitleStyle, newLayoutStyle, shadowBoxStyle, loadingColor, primaryColor} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
@@ -54,7 +54,8 @@ class StockResearchImpl extends React.Component {
             createWatchlistSecurities: [],
             // appInitialized: false
             selectedWatchlistTab: '',
-            isDeleteModalVisible: false
+            isDeleteModalVisible: false,
+            aimsquantRedirectModalVisible: false
         }; 
     }
 
@@ -515,7 +516,7 @@ class StockResearchImpl extends React.Component {
             const tickers = item.positions.map(it => {return {name: it.name, y: it.price, change:it.change, hideCheckbox: true}});
             return (
                 <TabPane key={item.id} tab={item.name}>
-                    <Col span={24} style={{overflow:'hidden', overflowY:'scroll', height:'500px'}}>
+                    <Col span={24} style={{overflow:'hidden', overflowY:'scroll'}}>
                         <WatchList 
                             tickers={tickers} 
                             id={item.id} 
@@ -545,6 +546,31 @@ class StockResearchImpl extends React.Component {
         );
     }
 
+    toggleAimsquantRedirectModal = () => {
+        this.setState({aimsquantRedirectModalVisible: !this.state.aimsquantRedirectModalVisible});
+    }
+
+    renderAimsquantRedirectModal = () => {
+        return (
+            <Modal
+                    title="Redirection Warning"
+                    onOk={() => {
+                        window.location.href = 'https://www.aimsquant.com/'
+                    }}
+                    onCancel={this.toggleAimsquantRedirectModal}
+                    visible={this.state.aimsquantRedirectModalVisible}
+            >
+                <Row>
+                    <Col span={24}>
+                        <h1 style={{fontSize: '16px'}}>
+                            You will be redirected to AimsQuant
+                        </h1> 
+                    </Col>
+                </Row>
+            </Modal>
+        );
+    }
+
     renderPageContent = () => {
         const {dataSource, latestDetail} = this.state;
         const breadCrumbs = getBreadCrumbArray([{name: 'Stock Research'}]);
@@ -567,6 +593,7 @@ class StockResearchImpl extends React.Component {
                 />;
         // chartId is required so that we have the option to have multiple HighStock component in the same page with different Id
         const {xl=18, chartId='highchart-container'} = this.props; 
+        const sideCardStyle = {...shadowBoxStyle, width: '95%', height: '300px', padding:'0px 10px', marginLeft: 'auto'};
 
         return (
             <React.Fragment>
@@ -577,115 +604,143 @@ class StockResearchImpl extends React.Component {
                     </React.Fragment>
                 }
                 <Row type="flex" justify="space-between">
-                <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom:'20px'}}>
-                    {this.renderDeleteModal()}
-                    <Row style={metricStyle}>
-                        {
-                            !this.props.openAsDialog &&
-                            <Col span={24}>
-                                <AutoComplete
-                                    size="large"
-                                    style={{ width: '100%' }}
-                                    dataSource={dataSource.map(this.renderOption)}
-                                    onSelect={value => this.onSelect(value)}
-                                    onSearch={this.handleSearch}
-                                    placeholder="Search stocks"
-                                    optionLabelProp="value"
-                                >
-                                    <Input 
-                                        suffix={(
-                                            <div>
-                                                <Spin indicator={spinIcon} spinning={this.state.spinning}/>
-                                                <Icon style={searchIconStyle} type="search" />
-                                            </div>
-                                        )} />
-                                </AutoComplete>
+                    <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom:'20px'}}>
+                        {this.renderDeleteModal()}
+                        <Row style={metricStyle}>
+                            {
+                                !this.props.openAsDialog &&
+                                <Col span={24}>
+                                    <AutoComplete
+                                        size="large"
+                                        style={{ width: '100%' }}
+                                        dataSource={dataSource.map(this.renderOption)}
+                                        onSelect={value => this.onSelect(value)}
+                                        onSearch={this.handleSearch}
+                                        placeholder="Search stocks"
+                                        optionLabelProp="value"
+                                    >
+                                        <Input 
+                                            suffix={(
+                                                <div>
+                                                    <Spin indicator={spinIcon} spinning={this.state.spinning}/>
+                                                    <Icon style={searchIconStyle} type="search" />
+                                                </div>
+                                            )} />
+                                    </AutoComplete>
+                                </Col>
+                            }
+                        </Row>
+                        <Row style={metricStyle} type="flex" gutter={8}>
+                            <Col span={8}>
+                                <Row style={cardStyle}>
+                                    <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
+                                    <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
+                                        <span>{latestDetail.exchange}:</span>
+                                        <span style={{fontSize: '20px'}}>{latestDetail.ticker}</span>
+                                    </h1>
+                                    <h3 style={lastPriceStyle}>
+                                        {Utils.formatMoneyValueMaxTwoDecimals(latestDetail.latestPrice)} 
+                                        <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change}%</span>
+                                    </h3>
+                                    <h5 style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
+                                    >
+                                        * Data is delayed by 15 min
+                                    </h5>
+                                </Row>
                             </Col>
-                        }
-                    </Row>
-                    <Row style={metricStyle} type="flex" gutter={8}>
-                        <Col span={8}>
-                            <Row style={cardStyle}>
-                                <h3 style={{fontSize: '14px'}}>{latestDetail.name}</h3>
-                                <h1 style={{...tickerNameStyle, marginTop: '10px'}}>
-                                    <span>{latestDetail.exchange}:</span>
-                                    <span style={{fontSize: '20px'}}>{latestDetail.ticker}</span>
-                                </h1>
-                                <h3 style={lastPriceStyle}>
-                                    {Utils.formatMoneyValueMaxTwoDecimals(latestDetail.latestPrice)} 
-                                    <span style={{...changeStyle, color: percentageColor, marginLeft: '5px'}}>{latestDetail.change}%</span>
-                                </h3>
-                                <h5 style={{fontSize: '12px', fontWeight: 400, color: '#000', position: 'absolute', bottom: '10px', paddingRight: '10px'}}
-                                >
-                                    * Data is delayed by 15 min
-                                </h5>
-                            </Row>
-                        </Col>
-                        <Col span={6}>
-                            <Row  style={cardStyle}>
-                                <h3 style={cardHeaderStyle}>Price Metrics</h3>
-                                {this.renderPriceMetrics(priceMetrics)}
-                            </Row>
-                        </Col>
-                        <Col span={10}>
-                            <Row style={cardStyle}>
-                                <Col span={24}>
-                                    <h3 style={cardHeaderStyle}>Performance Metrics</h3>
-                                </Col>
-                                <Col span={24} style={{textAlign: 'right'}}>
-                                    {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
-                                </Col>
-                                <Col span={24}>
-                                    {this.renderPerformanceMetrics()}
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                    <Row style={{...metricStyle, marginBottom:'10px'}}>  
-                        <DashboardCard 
-                            xl={24} 
-                            title="Performance" 
-                            headerStyle={{borderBottom: '1px solid #eaeaea'}}
-                            contentStyle={{height: '350px', marginTop: '10px'}}>
-                            <MyChartNew 
-                                    series = {this.state.tickers} 
-                                    deleteItem = {this.deleteItem}
-                                    addItem = {this.addItem}
-                                    verticalLegend = {true}
-                                    chartId={chartId}
-                            /> 
-                        </DashboardCard>
-                    </Row>
-                </Col>
+                            <Col span={6}>
+                                <Row  style={cardStyle}>
+                                    <h3 style={cardHeaderStyle}>Price Metrics</h3>
+                                    {this.renderPriceMetrics(priceMetrics)}
+                                </Row>
+                            </Col>
+                            <Col span={10}>
+                                <Row style={cardStyle}>
+                                    <Col span={24}>
+                                        <h3 style={cardHeaderStyle}>Performance Metrics</h3>
+                                    </Col>
+                                    <Col span={24} style={{textAlign: 'right'}}>
+                                        {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
+                                    </Col>
+                                    <Col span={24}>
+                                        {this.renderPerformanceMetrics()}
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+                        <Row style={{...metricStyle, marginBottom:'10px'}}>  
+                            <DashboardCard 
+                                xl={24} 
+                                title="Performance" 
+                                headerStyle={{borderBottom: '1px solid #eaeaea'}}
+                                contentStyle={{height: '350px', marginTop: '10px'}}>
+                                <MyChartNew 
+                                        series = {this.state.tickers} 
+                                        deleteItem = {this.deleteItem}
+                                        addItem = {this.addItem}
+                                        verticalLegend = {true}
+                                        chartId={chartId}
+                                /> 
+                            </DashboardCard>
+                        </Row>
+                    </Col>
                 {
                     !this.props.openAsDialog &&
-                    <Col span={6}>
-                    <div style={{...shadowBoxStyle, width: '95%', minHeight: '300px', padding:'0px 10px', marginLeft: 'auto'}}>
-                        {/* <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button> */}
-                        <Col 
-                                span={24} 
-                                style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '10px 5px'}}
-                        >
-                            <h3 style={{fontSize: '16px', display: 'inline-block'}}>Watchlist</h3>
-                            {this.watchlistTabBarExtraContent()}
-                        </Col>
-                        <Col span={24}>
-                            <Tabs 
-                                    onChange={this.handleWatchlistTabChange} 
-                                    // tabBarExtraContent={this.watchlistTabBarExtraContent()}
-                                    tabBarStyle={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        alignContent: 'center'
+                    <Col xl={6} md={0} xs={0} sm={0}>
+                        <Row style={{...sideCardStyle, height: '375px'}}>
+                            {/* <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button> */}
+                            <Col 
+                                    span={24} 
+                                    style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '10px 5px'}}
+                            >
+                                <h3 style={{fontSize: '16px', display: 'inline-block'}}>Watchlist</h3>
+                                {this.watchlistTabBarExtraContent()}
+                            </Col>
+                            <Col span={24}>
+                                <Tabs 
+                                        onChange={this.handleWatchlistTabChange} 
+                                        // tabBarExtraContent={this.watchlistTabBarExtraContent()}
+                                        tabBarStyle={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            alignContent: 'center',
+                                        }}
+                                >
+                                    {this.renderWatchlistTabs()}
+                                </Tabs>
+                            </Col>
+                        </Row>
+                        <Row style={{...sideCardStyle, marginTop: '30px'}}>
+                            <Col 
+                                    style={{
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center', 
+                                        height: '100%',
+                                        position: 'relative'
                                     }}
                             >
-                                {this.renderWatchlistTabs()}
-                            </Tabs>
-                        </Col>
-                    </div>
+                                <h1 style={{position: 'absolute', top: '10px', fontSize: '26px'}}>
+                                    <span style={{color: primaryColor}}>Aims</span>
+                                    <span style={{color: 'rgb(224, 102, 102)'}}>Quant</span>
+                                </h1> 
+                                <h3 style={{textAlign: 'center'}}>To Systematically Research investment ideas check out AimsQuant</h3>
+                                <Button 
+                                        type="primary" 
+                                        style={{marginTop: '20px', width: '150px'}}
+                                        onClick={this.toggleAimsquantRedirectModal}
+                                >
+                                    TAKE ME THERE
+                                </Button>
+                            </Col>
+                        </Row>
                     </Col>
-                    
+                }
+                {
+                    !this.props.openAsDialog &&
+                    <Footer />
                 }
                 </Row>
             </React.Fragment>
@@ -696,6 +751,7 @@ class StockResearchImpl extends React.Component {
         return (
             <React.Fragment>
                 {this.renderCreateWatchListModal()}
+                {this.renderAimsquantRedirectModal()}
                 <Loading
                     show={this.state.show}
                     color={loadingColor}

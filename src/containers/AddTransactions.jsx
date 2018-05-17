@@ -6,7 +6,7 @@ import moment from 'moment';
 import {withRouter} from 'react-router'
 import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table, notification, Spin} from 'antd';
 import {adviceTransactions} from '../mockData/AdviceTransaction';
-import {AqPortfolioCompositionAdvice, AqPortfolioTransactionAdvice, AqStockPortfolioTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, AqPageHeader, StockResearchModal} from '../components';
+import {AqPortfolioCompositionAdvice, AqPortfolioTransactionAdvice, AqStockPortfolioTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, AqPageHeader, StockResearchModal, Footer} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
@@ -1021,119 +1021,121 @@ class AddTransactionsImpl extends React.Component {
                 {
                     this.state.notAuthorized 
                     ?   <ForbiddenAccess />
-                    :   <Col span={24}>
-                        <StockResearchModal 
-                                ticker={this.state.stockResearchModalTicker} 
-                                visible={this.state.stockResearchModalVisible}
-                                toggleModal={this.toggleModal}
-                        />
-                            <AqPageHeader 
-                                    title={this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"} 
-                                    breadCrumbs={breadCrumbs}
-                                    showTitle={true}
-                            >
-                                <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right', marginBottom:'10px'}}>
-                                    <Button 
-                                            type="primary" 
-                                            onClick={e => {
-                                                this.state.portfolioCount >= portfolioLimit 
-                                                ? this.togglePortfolioLimitExceededModal()
-                                                : this.handleSubmit(e)
-                                            }} 
-                                            style={{marginRight: '20px', width: '200px'}}
-                                            disabled={!this.checkPreviewButtonDisabled()}
-                                    >
-                                        SAVE
-                                    </Button>
-                                    
-                                    <Button 
-                                            onClick={this.togglePreviewModal} 
-                                            style={{width: '200px'}}
-                                            disabled={!this.checkPreviewButtonDisabled()}
-                                    >
-                                        Preview
-                                    </Button>
-                                </Col>
-                            </AqPageHeader>
-                            <Form>
-                                <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, overflowY:'scroll', minHeight:'580px', marginBottom:'20px'}}>
-                                    {
-                                        <Row type="flex" align="top" justify="space-between" style={{padding: '20px 20px 0px 20px'}}>
-                                            <Col span={10} style={{margin:'auto 0'}}>
-                                                <h3 style={metricsLabelStyle}>Portfolio Name</h3>
-                                                <FormItem>
-                                                    {getFieldDecorator('name', {
-                                                        rules: [{required: true, message: 'Please enter Portfolio Name'}]
-                                                    })(
-                                                        <Input 
-                                                                disabled={this.props.portfolioId ? true : false} 
-                                                                style={{padding:'10px'}} 
-                                                                placeholder="Portfolio Name" 
-                                                        />
-                                                    )}
-                                                </FormItem>
-                                            </Col>
-                                            <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                                                {this.renderSelectBenchmark(this.props.portfolioId ? true : false)}
-                                            </Col>
-                                        </Row>
-                                    }
-                                    {
-                                        !this.props.portfolioId &&
-                                        <Row style={{marginLeft: '20px', marginBottom: '20px'}}>
+                    :   <React.Fragment>
+                            <Col span={24}>
+                                <StockResearchModal 
+                                        ticker={this.state.stockResearchModalTicker} 
+                                        visible={this.state.stockResearchModalVisible}
+                                        toggleModal={this.toggleModal}
+                                />
+                                <AqPageHeader 
+                                        title={this.props.portfolioId ? "Update Portfolio" : "Create Portfolio"} 
+                                        breadCrumbs={breadCrumbs}
+                                        showTitle={true}
+                                >
+                                    <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right', marginBottom:'10px'}}>
+                                        <Button 
+                                                type="primary" 
+                                                onClick={e => {
+                                                    this.state.portfolioCount >= portfolioLimit 
+                                                    ? this.togglePortfolioLimitExceededModal()
+                                                    : this.handleSubmit(e)
+                                                }} 
+                                                style={{marginRight: '20px', width: '200px'}}
+                                                disabled={!this.checkPreviewButtonDisabled()}
+                                        >
+                                            SAVE
+                                        </Button>
+                                        
+                                        <Button 
+                                                onClick={this.togglePreviewModal} 
+                                                style={{width: '200px'}}
+                                                disabled={!this.checkPreviewButtonDisabled()}
+                                        >
+                                            Preview
+                                        </Button>
+                                    </Col>
+                                </AqPageHeader>
+                                <Form>
+                                    <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, overflowY:'scroll', minHeight:'580px', marginBottom:'20px'}}>
+                                        {
+                                            <Row type="flex" align="top" justify="space-between" style={{padding: '20px 20px 0px 20px'}}>
+                                                <Col span={10} style={{margin:'auto 0'}}>
+                                                    <h3 style={metricsLabelStyle}>Portfolio Name</h3>
+                                                    <FormItem>
+                                                        {getFieldDecorator('name', {
+                                                            rules: [{required: true, message: 'Please enter Portfolio Name'}]
+                                                        })(
+                                                            <Input 
+                                                                    disabled={this.props.portfolioId ? true : false} 
+                                                                    style={{padding:'10px'}} 
+                                                                    placeholder="Portfolio Name" 
+                                                            />
+                                                        )}
+                                                    </FormItem>
+                                                </Col>
+                                                <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                                    {this.renderSelectBenchmark(this.props.portfolioId ? true : false)}
+                                                </Col>
+                                            </Row>
+                                        }
+                                        {
+                                            !this.props.portfolioId &&
+                                            <Row style={{marginLeft: '20px', marginBottom: '20px'}}>
+                                                <Col span={24}>
+                                                    <Checkbox onChange={this.handleDefaultChange}>Make Default Portfolio</Checkbox>
+                                                </Col>
+                                            </Row>
+                                        }
+                                        <Row style={{marginTop: '5px'}}>
                                             <Col span={24}>
-                                                <Checkbox onChange={this.handleDefaultChange}>Make Default Portfolio</Checkbox>
+                                                <Tabs defaultActiveKey="2" animated={false} style={{paddingBottom: '20px'}}>
+                                                    <TabPane tab="Stock Transaction" key="1" style={{minHeight: '300px'}}>
+                                                        {this.renderStockTransactions()}
+                                                    </TabPane> 
+                                                    <TabPane tab="Advice Transaction" key="2" style={{minHeight: '300px'}}>
+                                                        {this.renderAdviceTransactions()}
+                                                    </TabPane> 
+                                                    <TabPane tab="Cash Transaction" key="3" style={{minHeight: '300px'}}>
+                                                        {this.renderCashTransactions()}
+                                                    </TabPane> 
+                                                </Tabs>
                                             </Col>
                                         </Row>
-                                    }
-                                    <Row style={{marginTop: '5px'}}>
-                                        <Col span={24}>
-                                            <Tabs defaultActiveKey="2" animated={false} style={{paddingBottom: '20px'}}>
-                                                <TabPane tab="Stock Transaction" key="1" style={{minHeight: '300px'}}>
-                                                    {this.renderStockTransactions()}
-                                                </TabPane> 
-                                                <TabPane tab="Advice Transaction" key="2" style={{minHeight: '300px'}}>
-                                                    {this.renderAdviceTransactions()}
-                                                </TabPane> 
-                                                <TabPane tab="Cash Transaction" key="3" style={{minHeight: '300px'}}>
-                                                    {this.renderCashTransactions()}
-                                                </TabPane> 
-                                            </Tabs>
-                                        </Col>
-                                    </Row>
-                                </Col>
-                                <Col xl={6} lg={6} md={0} sm={0} xs={0} >
-                                    <Row type="flex">
-                                        <Col span={24}>
-                                            <Button 
-                                                    type="primary" 
-                                                    onClick={e => {
-                                                        this.state.portfolioCount >= portfolioLimit 
-                                                        ? this.togglePortfolioLimitExceededModal()
-                                                        : this.handleSubmit(e)
-                                                    }} 
-                                                    style={buttonStyle}
-                                                    loading={this.state.submitButtonLoading}
-                                                    disabled={!this.checkPreviewButtonDisabled()}
-                                                    className='action-button'
-                                            >
-                                                SAVE
-                                            </Button>
-                                        </Col>
-                                        <Col span={24} style={{marginTop: 10}}>
-                                            <Button 
-                                                    onClick={this.togglePreviewModal} 
-                                                    style={buttonStyle}
-                                                    disabled={!this.checkPreviewButtonDisabled()}
-                                                    className='action-button'
-                                            >
-                                                Preview
-                                            </Button>
-                                        </Col>
-                                    </Row>
-                                </Col>
-                            </Form>
-                        </Col>
+                                    </Col>
+                                    <Col xl={6} lg={6} md={0} sm={0} xs={0} >
+                                        <Row type="flex">
+                                            <Col span={24}>
+                                                <Button 
+                                                        type="primary" 
+                                                        onClick={e => {
+                                                            this.state.portfolioCount >= portfolioLimit 
+                                                            ? this.togglePortfolioLimitExceededModal()
+                                                            : this.handleSubmit(e)
+                                                        }} 
+                                                        style={buttonStyle}
+                                                        loading={this.state.submitButtonLoading}
+                                                        disabled={!this.checkPreviewButtonDisabled()}
+                                                        className='action-button'
+                                                >
+                                                    SAVE
+                                                </Button>
+                                            </Col>
+                                            <Col span={24} style={{marginTop: 10}}>
+                                                <Button 
+                                                        onClick={this.togglePreviewModal} 
+                                                        style={buttonStyle}
+                                                        disabled={!this.checkPreviewButtonDisabled()}
+                                                        className='action-button'
+                                                >
+                                                    Preview
+                                                </Button>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Form>
+                            </Col>
+                        </React.Fragment>
                 }
             </Row>
         );

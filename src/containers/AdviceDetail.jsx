@@ -9,7 +9,7 @@ import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, D
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, buttonStyle} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate} from '../components';
+import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate, Footer} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax, getStockPerformance} from '../utils';
@@ -529,51 +529,53 @@ class AdviceDetailImpl extends React.Component {
 
     processRealtimeMessage = msg => {
         if (this.mounted) {
-            const realtimeData = JSON.parse(msg.data);
-            if (realtimeData.type === 'advice') {
-                const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
-                let positions = _.get(realtimeData, 'output.detail.positions', []);
-                const staticPositions = this.state.positions; // old positions from state
-                const realtimeDate = DateHelper.getDate(_.get(realtimeData, 'date', null));
-                //Effectvive total return is valid is current summary has past netvalueEOD
-                //otherwie it means, it is a new advice and current changes have no significance
-                const netValueEOD = _.get(this.performanceSummary, 'current.netValueEOD', 0);
-                const netValueEODDate = _.get(this.performanceSummary, 'current.netValueDate', 0);
-                const dailyNAVChangePct = netValueEOD > 0.0 && DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
-                        Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2)) : 
-                        Number((_.get(this.performanceSummary, 'current.dailyNAVChangeEODPct', 0) * 100).toFixed(2));
-                
-                var totalReturn = _.get(this.performanceSummary, 'current.totalReturn', 0.0);
+            try {
+                const realtimeData = JSON.parse(msg.data);
+                if (realtimeData.type === 'advice') {
+                    const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
+                    let positions = _.get(realtimeData, 'output.detail.positions', []);
+                    const staticPositions = this.state.positions; // old positions from state
+                    const realtimeDate = DateHelper.getDate(_.get(realtimeData, 'date', null));
+                    //Effectvive total return is valid is current summary has past netvalueEOD
+                    //otherwie it means, it is a new advice and current changes have no significance
+                    const netValueEOD = _.get(this.performanceSummary, 'current.netValueEOD', 0);
+                    const netValueEODDate = _.get(this.performanceSummary, 'current.netValueDate', 0);
+                    const dailyNAVChangePct = netValueEOD > 0.0 && DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
+                            Number((_.get(realtimeData, 'output.summary.dailyNavChangePct', 0) * 100).toFixed(2)) : 
+                            Number((_.get(this.performanceSummary, 'current.dailyNAVChangeEODPct', 0) * 100).toFixed(2));
+                    
+                    var totalReturn = _.get(this.performanceSummary, 'current.totalReturn', 0.0);
 
-                var effTotalReturn = netValueEOD > 0.0 && DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
-                            (1 + totalReturn) * (1+dailyNAVChangePct/100) - 1.0 : 
-                            totalReturn;
-                positions = positions.map(item => {
-                    const targetPosition = staticPositions.filter(
-                            positionItem => positionItem.security.ticker === item.security.ticker)[0];
-                    item.avgPrice === 0 ? targetPosition.avgPrice : item.avgPrice;
-                    item.lastPrice === 0 ? targetPosition.lastPrice : item.lastPrice;
-                    return item;
-                });
+                    var effTotalReturn = netValueEOD > 0.0 && DateHelper.compareDates(netValueEODDate, realtimeDate) == -1 ? 
+                                (1 + totalReturn) * (1+dailyNAVChangePct/100) - 1.0 : 
+                                totalReturn;
+                    positions = positions.map(item => {
+                        const targetPosition = staticPositions.filter(
+                                positionItem => positionItem.security.ticker === item.security.ticker)[0];
+                        item.avgPrice === 0 ? (targetPosition ? targetPosition.avgPrice : 0) : item.avgPrice;
+                        item.lastPrice === 0 ? (targetPosition ? targetPosition.lastPrice : 0) : item.lastPrice;
+                        return item;
+                    });
 
-                this.setState({
-                    metrics: {
-                        ...this.state.metrics,
-                        netValue,
-                        dailyNAVChangePct,
-                    },
-                    positions
-                });
+                    this.setState({
+                        metrics: {
+                            ...this.state.metrics,
+                            netValue,
+                            dailyNAVChangePct,
+                        },
+                        positions
+                    });
 
-            } else if (realtimeData.type === 'stock') {
-                const realtimeSecurities = [...this.state.realtimeSecurities];
-                const targetSecurity = realtimeSecurities.filter(item => item.name === realtimeData.ticker)[0];
-                if (targetSecurity) {
-                    targetSecurity.change = (realtimeData.output.changePct * 100).toFixed(2);
-                    targetSecurity.y = realtimeData.output.current < 1 ? realtimeData.output.close : realtimeData.output.current;
-                    this.setState({realtimeSecurities});
+                } else if (realtimeData.type === 'stock') {
+                    const realtimeSecurities = [...this.state.realtimeSecurities];
+                    const targetSecurity = realtimeSecurities.filter(item => item.name === realtimeData.ticker)[0];
+                    if (targetSecurity) {
+                        targetSecurity.change = (realtimeData.output.changePct * 100).toFixed(2);
+                        targetSecurity.y = realtimeData.output.current < 1 ? realtimeData.output.close : realtimeData.output.current;
+                        this.setState({realtimeSecurities});
+                    }
                 }
-            }
+            } catch(error) {return error;}
         }
     }
 
@@ -812,7 +814,7 @@ class AdviceDetailImpl extends React.Component {
                             className={className}
                             style={buttonStyle}
                     >
-                        Update Advice
+                        UPDATE ADVICE
                     </Button>
                 </React.Fragment>
             );
@@ -884,34 +886,37 @@ class AdviceDetailImpl extends React.Component {
             this.state.notAuthorized
             ?   <ForbiddenAccess />
 
-            :   <Row style={{marginBottom:'20px'}}>
-                    <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
-                        <Col xl={0} xs={24} md={24} style={{textAlign: 'right'}}>
-                            {this.renderActionButtons(true)}
+            :   <React.Fragment>
+                    <Row style={{marginBottom:'20px'}}>
+                        <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
+                            <Col xl={0} xs={24} md={24} style={{textAlign: 'right'}}>
+                                {this.renderActionButtons(true)}
+                            </Col>
+                        </AqPageHeader>
+                        <StockResearchModal
+                                ticker={this.state.stockResearchModalTicker}
+                                visible={this.state.stockResearchModalVisible}
+                                toggleModal={this.toggleModal}
+                        />
+                        <AdviceDetailContent 
+                                adviceDetail={this.state.adviceDetail}
+                                metrics={this.state.metrics}
+                                handlePortfolioStartDateChange={this.handlePortfolioStartDateChange}
+                                selectedPortfolioDate={this.state.selectedPortfolioDate}
+                                positions={this.state.positions}
+                                updateTicker={this.updateTicker}
+                                tickers={this.state.tickers}
+                                showPerformanceToggle={Utils.isLoggedIn()}
+                                handlePerformanceToggleChange={this.handlePerformanceToggleChange}
+                                performanceType={this.state.performanceType}
+                                loading={false}
+                        />
+                        <Col xl={6} md={0} sm={0} xs={0}>
+                            {this.renderActionButtons()}
                         </Col>
-                    </AqPageHeader>
-                    <StockResearchModal
-                            ticker={this.state.stockResearchModalTicker}
-                            visible={this.state.stockResearchModalVisible}
-                            toggleModal={this.toggleModal}
-                    />
-                    <AdviceDetailContent 
-                            adviceDetail={this.state.adviceDetail}
-                            metrics={this.state.metrics}
-                            handlePortfolioStartDateChange={this.handlePortfolioStartDateChange}
-                            selectedPortfolioDate={this.state.selectedPortfolioDate}
-                            positions={this.state.positions}
-                            updateTicker={this.updateTicker}
-                            tickers={this.state.tickers}
-                            showPerformanceToggle={Utils.isLoggedIn()}
-                            handlePerformanceToggleChange={this.handlePerformanceToggleChange}
-                            performanceType={this.state.performanceType}
-                            loading={false}
-                    />
-                    <Col xl={6} md={0} sm={0} xs={0}>
-                        {this.renderActionButtons()}
-                    </Col>
-                </Row>
+                    </Row>
+                    <Footer />
+                </React.Fragment>
         );
     }
 

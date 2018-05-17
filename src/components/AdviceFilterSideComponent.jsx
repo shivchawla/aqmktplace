@@ -139,7 +139,7 @@ export class AdviceFilterSideComponent extends React.Component {
     renderSliderFilters = (filterArray) => {
         return filterArray.map((filter, index) => {
             return (
-                <Col span={24} key={index} style={{marginBottom: 20}}>
+                <Col span={this.props.modal ? 12 : 24} key={index} style={{marginBottom: 20}}>
                     <IconHeader 
                             icon={filter.icon} 
                             label={filter.label}
@@ -175,55 +175,59 @@ export class AdviceFilterSideComponent extends React.Component {
         ];
 
         return (
-            <Col span={24} style={filterLayoutStyle}>
-                <Row>
-                    <Col span={24} style={{marginBottom: '20px'}}>
-                        <IconHeader 
-                                icon="clock-circle-o" 
-                                label="Rebalancing Frequency"
-                                checked={this.state.selectRebalanceAllFilters}
-                                filterType="rebalancingFrequency"
-                                onChange={this.handleFilterGroupCheckboxChange}
-                        />
-                        <Row>
-                            <Col span={24}>
-                                {this.renderRebalancingFreqFilter()}
-                            </Col>
+            <Row>
+                <Col span={24} style={filterLayoutStyle}>
+                    <Row gutter={16}>
+                        <Col span={24} style={{marginBottom: '20px'}}>
+                            <IconHeader 
+                                    icon="clock-circle-o" 
+                                    label="Rebalancing Frequency"
+                                    checked={this.state.selectRebalanceAllFilters}
+                                    filterType="rebalancingFrequency"
+                                    onChange={this.handleFilterGroupCheckboxChange}
+                            />
+                            <Row>
+                                <Col span={24}>
+                                    {this.renderRebalancingFreqFilter()}
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Col span={this.props.modal ? 12 : 24} style={{marginBottom: '20px'}}>
+                            <IconHeader 
+                                    icon="check-circle" 
+                                    label="Status"
+                                    checked={this.state.selectApprovedllFilters}
+                                    filterType="approved"
+                                    onChange={this.handleFilterGroupCheckboxChange}
+                            />
+                            <Row>
+                                <Col span={24}>
+                                    {this.renderStatusFilter()}
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Col span={this.props.modal ? 12 : 24} style={{marginBottom: '20px'}}>
+                            <IconHeader 
+                                    icon="check-circle" 
+                                    label="Ownership"
+                                    checked={this.state.selectOwnerAllFilters}
+                                    filterType="owner"
+                                    onChange={this.handleFilterGroupCheckboxChange}
+                            />
+                            <Row>
+                                <Col span={24}>
+                                    {this.renderAdviceFilter()}
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Row gutter={16}>
+                        {
+                            this.renderSliderFilters(filterArray)
+                        }
                         </Row>
-                    </Col>
-                    <Col span={24} style={{marginBottom: '20px'}}>
-                        <IconHeader 
-                                icon="check-circle" 
-                                label="Status"
-                                checked={this.state.selectApprovedllFilters}
-                                filterType="approved"
-                                onChange={this.handleFilterGroupCheckboxChange}
-                        />
-                        <Row>
-                            <Col span={24}>
-                                {this.renderStatusFilter()}
-                            </Col>
-                        </Row>
-                    </Col>
-                    <Col span={24} style={{marginBottom: '20px'}}>
-                        <IconHeader 
-                                icon="check-circle" 
-                                label="Ownership"
-                                checked={this.state.selectOwnerAllFilters}
-                                filterType="owner"
-                                onChange={this.handleFilterGroupCheckboxChange}
-                        />
-                        <Row>
-                            <Col span={24}>
-                                {this.renderAdviceFilter()}
-                            </Col>
-                        </Row>
-                    </Col>
-                    {
-                        this.renderSliderFilters(filterArray)
-                    }
-                </Row>
-            </Col>
+                    </Row>
+                </Col>
+            </Row>
         );
     }
 }

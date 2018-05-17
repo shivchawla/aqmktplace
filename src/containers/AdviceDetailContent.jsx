@@ -144,7 +144,6 @@ class AdviceDetailContentImpl extends React.Component {
                                 style={{
                                     color:'black', 
                                     border:'1px solid #f58231', 
-                                    width:'85px', 
                                     paddingTop:'1px',
                                     cursor: 'auto'}}>
                                 <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
@@ -159,11 +158,12 @@ class AdviceDetailContentImpl extends React.Component {
                             this.props.adviceDetail.isOwner &&
                             <Tag 
                                 style={{
-                                    width:'65px', 
+                                    // width:'65px', 
                                     paddingTop:'1px',
                                     cursor: 'auto',
                                     border: '1px solid #3cb44b'
                                 }}>
+                                <Icon type="user" style={{fontWeight: '400', color:'#3cb44b'}}/>
                                 <span 
                                         style={{marginLeft: '5px', color:'#3cb44b'}}
                                 >

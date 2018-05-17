@@ -1,8 +1,8 @@
 import * as React from 'react';
+import ReactGA from 'react-ga';
 import {Layout, Menu, Row, Col, Button, Popover, Icon} from 'antd';
 import {BrowserRouter as Router, Route, withRouter, Link, Switch} from 'react-router-dom';
-import ReactGA from 'react-ga';
-import TransitionGroup from 'react-transition-group/TransitionGroup';
+import {slide as SideMenu} from 'react-burger-menu'
 import AqBreadCrumb from './components/AqBreadCrumb';
 import Login from './containers/Login';
 import Signup from './containers/Signup';
@@ -30,7 +30,7 @@ import logo from "./assets/logo-advq-new.png";
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
-const {Header, Content} = Layout;
+const {Header, Content, Footer, Sider} = Layout;
 const StockResearch = asyncComponent(() => import("./containers/StockResearch"));
 const InvestorDashboard = asyncComponent(() => import("./containers/InvestorDashboard"));
 const AdvisorDashboard = asyncComponent(() => import("./containers/AdvisorDashboard"));
@@ -49,7 +49,7 @@ const {gaTrackingId} = require('./localConfig');
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {parentPath: '/'};
+        this.state = {parentPath: '/', sideMenuOpen: true};
         ReactGA.initialize(gaTrackingId); //Unique Google Analytics tracking number
     }
 
@@ -176,141 +176,158 @@ class App extends React.Component {
         );
     }
 
+    renderBurgerMenu = () => {
+        return (
+            <SideMenu isOpen={this.state.sideMenuOpen}>
+                <Row style={{backgroundColor: '#fff', height: '100%'}}>
+                    <Menu mode="inline">
+                        <SubMenu key="sub-dashboard" title="Dashboard">
+                            <Menu.Item key="sub-investor-dashboard">Investor Dashboard</Menu.Item>
+                            <Menu.Item key="sub-advisor-dashboard">Advisor Dashboard</Menu.Item>
+                        </SubMenu>
+                        <Menu.Item key="sub-screen-advices">Screen Advices</Menu.Item>
+                    </Menu>
+                </Row>
+            </SideMenu>
+        );
+    }
+
     render() {
         return (
-            <Layout style={{backgroundColor: '#f9f9f9', height:'auto'}}>
-                <Header style={headerStyle}>
-                    <Row type="flex">
-                        <Col span={1}>
-                            <img src={logo} style={{height: '40px'}}/>
-                        </Col>
-                        <Col span={3} style={{marginLeft: '5px'}}>
-                            <h1 onClick={() => this.props.history.push('/home')} 
-                                style={{...headerColor, cursor: 'pointer'}}>
+            <React.Fragment>
+                {/* {this.renderBurgerMenu()} */}
+                <Layout style={{backgroundColor: '#f9f9f9', height:'auto'}}>
+                    <Header style={headerStyle}>
+                        <Row type="flex">
+                            <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                <img src={logo} style={{height: '40px'}}/>
+                                <h1 onClick={() => this.props.history.push('/home')} 
+                                    style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
 
-                                <span style={{...biggerFont, color:primaryColor}}>A</span>
-                                <span style={{color: primaryColor}}>DVICE</span>
-                                <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                                <span style={{color: '#e06666'}}>UBE</span>
+                                    <span style={{...biggerFont, color:primaryColor}}>A</span>
+                                    <span style={{color: primaryColor}}>DVICE</span>
+                                    <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                                    <span style={{color: '#e06666'}}>UBE</span>
 
-                            </h1>
-                        </Col>
-                        <Col 
-                                span={19} 
-                                style={{
-                                    display: 'flex', 
-                                    justifyContent: 'flex-end', 
-                                    height: '64px', 
-                                    // alignItems: 'center'
-                                }}
-                        >   
-                            <Menu
-                                style={{marginTop: '10px'}} 
-                                mode="horizontal"
-                                onClick={this.handleNavMenuClick}
-                                selectedKeys={[this.state.parentPath]}>
+                                </h1>
+                            </Col>
+                            <Col 
+                                    span={20}
+                                    style={{
+                                        display: 'flex', 
+                                        justifyContent: 'flex-end', 
+                                        height: '64px', 
+                                        paddingRight: '10px',
+                                    }}
+                            >   
+                                <Menu
+                                    style={{marginTop: '10px'}} 
+                                    mode="horizontal"
+                                    onClick={this.handleNavMenuClick}
+                                    selectedKeys={[this.state.parentPath]}>
+                                    {
+                                        Utils.isLoggedIn() &&
+                                            <SubMenu title="Dashboard">
+                                                <Menu.Item key="investordashboard">Investor Dashboard</Menu.Item>
+                                                <Menu.Item key="advisordashboard">Advisor Dashboard</Menu.Item>
+                                            </SubMenu>
+                                    }
+                                    {
+                                        !Utils.isLoggedIn() &&
+                                        <Menu.Item key={'home'}>Home</Menu.Item>
+                                    }
+                                    <Menu.Item key="advice">Screen Advices</Menu.Item>
+                                    {
+                                        Utils.isLoggedIn() &&
+                                        <Menu.Item key="stockresearch">Stock Research</Menu.Item>
+                                    }
+                                    {
+                                        !Utils.isLoggedIn() &&
+                                        <Menu.Item key="login">Login</Menu.Item>
+                                    }
+                                    {
+                                        !Utils.isLoggedIn() &&
+                                        <Menu.Item key="signup">Signup</Menu.Item>
+                                    }
+                                </Menu>
                                 {
                                     Utils.isLoggedIn() &&
-                                        <SubMenu title="Dashboard">
-                                            <Menu.Item key="investordashboard">Investor Dashboard</Menu.Item>
-                                            <Menu.Item key="advisordashboard">Advisor Dashboard</Menu.Item>
-                                        </SubMenu>
-                                }
-                                {
-                                    !Utils.isLoggedIn() &&
-                                    <Menu.Item key={'home'}>Home</Menu.Item>
-                                }
-                                <Menu.Item key="advice">Screen Advices</Menu.Item>
-                                {
-                                    Utils.isLoggedIn() &&
-                                    <Menu.Item key="stockresearch">Stock Research</Menu.Item>
-                                }
-                                {
-                                    !Utils.isLoggedIn() &&
-                                    <Menu.Item key="login">Login</Menu.Item>
-                                }
-                                {
-                                    !Utils.isLoggedIn() &&
-                                    <Menu.Item key="signup">Signup</Menu.Item>
-                                }
-                            </Menu>
-                            {
-                                Utils.isLoggedIn() &&
-                                <React.Fragment>
-                                    {/* <Button 
-                                            type="primary"
-                                            onClick={() => this.props.history.push('/investordashboard/createportfolio')}
-                                            style={{marginLeft: '20px', marginTop: '18px', marginRight: '20px'}}
-                                    >
-                                        Create Portfolio
-                                    </Button> */}
-                                    <Popover
-                                        placement="bottomRight" 
-                                        content={this.getPopOverContent()} 
-                                        trigger="click"
-                                    >
-                                        <Button 
-                                                type="primary" 
-                                                shape="circle"
-                                                style={{marginTop: '18px'}}
-                                                // onClick={this.openPopOverMenu}
+                                    <React.Fragment>
+                                        {/* <Button 
+                                                type="primary"
+                                                onClick={() => this.props.history.push('/investordashboard/createportfolio')}
+                                                style={{marginLeft: '20px', marginTop: '18px', marginRight: '20px'}}
                                         >
-                                            {Utils.getLoggedInUserInitials()} 
+                                            Create Portfolio
+                                        </Button> */}
+                                        <Popover
+                                            placement="bottomRight" 
+                                            content={this.getPopOverContent()} 
+                                            trigger="click"
+                                        >
+                                            <Button 
+                                                    type="primary" 
+                                                    shape="circle"
+                                                    style={{marginTop: '18px'}}
+                                                    // onClick={this.openPopOverMenu}
+                                            >
+                                                {Utils.getLoggedInUserInitials()} 
+                                            </Button>
+                                        </Popover>
+
+                                        <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/>
+
+                                        <Button 
+                                            type="primary" 
+                                            onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                                            style={{marginTop: '18px'}}>
+                                            Create Advice
                                         </Button>
-                                    </Popover>
 
-                                    <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/>
+                                        
 
-                                    <Button 
-                                        type="primary" 
-                                        onClick={() => this.props.history.push('/advisordashboard/createadvice')}
-                                        style={{marginTop: '18px'}}>
-                                        Create Advice
-                                    </Button>
+                                    </React.Fragment>
+                                }
+                            </Col> 
+                        </Row>
+                    </Header>
 
-                                    
-
-                                </React.Fragment>
-                            }
-                        </Col> 
-                    </Row>
-                </Header>
-
-                <Content style={contentLayoutStyle}>
-                    {/*
-                        Add Routes in the following format if it is to be synced with header navigation
-                        path='/parent/child/grandChild/....'
-                        where parent is one of the keys from the <Menu.Item> above.
-                        i.e investordashboard, advisordashboard, advice, stockresearch, quantresearch
-                     */}
-                    <Switch>
-                        <Route exact={true} path='/home' component={Home} />
-                        <Route exact={true} path='/' component={Home} />
-                        <Route exact={true} path='/advice' component={ScreenAdvices} />
-                        <Route path="/stockresearch" exact component={StockResearch} />
-                        <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                        <Route exact={true} path='/advice/:id' component={AdviceDetail} />
-                        <Route exact={true} path='/advisordashboard/createadvice' component={CreateAdvice} />
-                        <Route exact={true} path='/investordashboard/createportfolio' component={CreatePortfolio} />
-                        <Route exact={true} path='/advisordashboard/updateadvice/:id' component={UpdateAdvice} />
-                        <Route exact={true} path='/investordashboard/portfolio/:id' component={PortfolioDetail} />
-                        <Route exact={true} path='/investordashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} />
-                        <Route exact={true} path='/investordashboard' component={InvestorDashboard} />
-                        <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} />
-                        <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} />
-                        <Route path='/policies/privacy' component={Policy} />
-                        <Route path='/policies/tnc' component={TnC} />
-                        <Route path='/forgotPassword' component={ForgotPassword} />
-                        <Route path='/errorPage' component={NoIternetAccess} />
-                        <Route path='/forbiddenAccess' component={ForbiddenAccess} />
-                        <Route path='/AuthMessage' component={AuthMessage} />
-                        <Route exact={true} path='/login' component={Login} />
-                        <Route exact={true} path='/signup' component={Signup} />
-                        <Route exact={true} path='/faq' component={FAQ} />
-                        <Route component={PageNotFound} />
-                    </Switch>
-                </Content>
-            </Layout>
+                    <Content style={contentLayoutStyle}>
+                        {/*
+                            Add Routes in the following format if it is to be synced with header navigation
+                            path='/parent/child/grandChild/....'
+                            where parent is one of the keys from the <Menu.Item> above.
+                            i.e investordashboard, advisordashboard, advice, stockresearch, quantresearch
+                        */}
+                        <Switch>
+                            <Route exact={true} path='/home' component={Home} /> {/* Page */}
+                            <Route exact={true} path='/' component={Home} /> {/* Page */}
+                            <Route exact={true} path='/advice' component={ScreenAdvices} /> {/* Page */}
+                            <Route path="/stockresearch" exact component={StockResearch} /> {/* Page */}
+                            <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
+                            <Route exact={true} path='/advice/:id' component={AdviceDetail} /> {/* Page */}
+                            <Route exact={true} path='/advisordashboard/createadvice' component={CreateAdvice} /> {/* Page */}
+                            <Route exact={true} path='/investordashboard/createportfolio' component={CreatePortfolio} /> {/* Page */}
+                            <Route exact={true} path='/advisordashboard/updateadvice/:id' component={UpdateAdvice} /> {/* Page */}
+                            <Route exact={true} path='/investordashboard/portfolio/:id' component={PortfolioDetail} /> {/* Page */}
+                            <Route exact={true} path='/investordashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> {/* Page */}
+                            <Route exact={true} path='/investordashboard' component={InvestorDashboard} /> {/* Page */}
+                            <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} /> {/* Page */}
+                            <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} /> {/* Page */}
+                            <Route path='/policies/privacy' component={Policy} /> {/* Page */}
+                            <Route path='/policies/tnc' component={TnC} /> {/* Page */}
+                            <Route path='/forgotPassword' component={ForgotPassword} /> {/* Page */}
+                            <Route path='/errorPage' component={NoIternetAccess} /> {/* Page */}
+                            <Route path='/forbiddenAccess' component={ForbiddenAccess} /> {/* Page */}
+                            <Route path='/AuthMessage' component={AuthMessage} /> 
+                            <Route exact={true} path='/login' component={Login} /> {/* Page */}
+                            <Route exact={true} path='/signup' component={Signup} /> {/* Page */}
+                            <Route exact={true} path='/faq' component={FAQ} /> {/* Page */}
+                            <Route component={PageNotFound} />
+                        </Switch>
+                    </Content>
+                </Layout>
+            </React.Fragment>
         );
     }
 }

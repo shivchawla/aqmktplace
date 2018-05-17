@@ -7,7 +7,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 import {AdviceDetailContent} from './AdviceDetailContent';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors, primaryColor} from '../constants';
-import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader} from '../components';
+import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader, Footer} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate, fetchAjax} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {store} from '../store';
@@ -1139,6 +1139,7 @@ export class AdviceFormImpl extends React.Component {
                     <Col xl={6} lg={6} md={0} sm={0} xs={0}>
                         {this.renderActionButtons()}
                     </Col>
+                    <Footer />
                 </Row>
             :   <ForbiddenAccess />
         );

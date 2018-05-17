@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Row, Col, Collapse} from 'antd';
+import {Footer} from '../components';
 import {shadowBoxStyle} from '../constants';
 
 const Panel = Collapse.Panel;
@@ -110,18 +111,23 @@ export default class FAQ extends React.Component {
         ];
 
         return (
-            <Col span={18} style={{...shadowBoxStyle, marginTop: '20px'}}>
-                <Row style={{padding: '20px'}}>
-                    <Col span={24}>
-                        <h1>FAQ</h1>
-                    </Col>
-                    <Col span={24}>
-                        <FAQGroup name='General' qas={generalQAS}/>
-                        <FAQGroup name='Advice' qas={adviceQAS}/>
-                        <FAQGroup name='Advisor' qas={advisorQAS}/>
+            <React.Fragment>
+                <Row>
+                    <Col span={18} style={{...shadowBoxStyle, marginTop: '20px'}}>
+                        <Row style={{padding: '20px'}}>
+                            <Col span={24}>
+                                <h1>FAQ</h1>
+                            </Col>
+                            <Col span={24}>
+                                <FAQGroup name='General' qas={generalQAS}/>
+                                <FAQGroup name='Advice' qas={adviceQAS}/>
+                                <FAQGroup name='Advisor' qas={advisorQAS}/>
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
-            </Col>
+                <Footer />
+            </React.Fragment>
         );
     }
 }

@@ -5,7 +5,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
-import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate} from '../components';
+import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate, Footer} from '../components';
 import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {generateColorData, getMetricColor, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
@@ -1037,6 +1037,7 @@ export default class InvestorDashboard extends React.Component {
                         </Row>
                     </Col>
                 }
+                <Footer />
                 </Row>
             );
         }

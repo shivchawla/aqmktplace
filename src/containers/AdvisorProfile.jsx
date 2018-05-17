@@ -5,11 +5,12 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select, message, Tooltip} from 'antd';
 import {Twitter} from 'twitter-node-client';
-import {MetricItem, AdviceListItem, AdviceFilterComponent, AdviceSortingMenu, AdviceListItemMod, AqPageHeader, ForbiddenAccess} from '../components';
+import {MetricItem, AdviceListItem, AdviceSortingMenu, AdviceListItemMod, AqPageHeader, ForbiddenAccess} from '../components';
 import {UpdateAdvisorProfile} from '../containers';
 import {layoutStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {Utils, getBreadCrumbArray} from '../utils';
 import {AdvisorProfileCrumb} from '../constants/breadcrumbs';
+import { Footer } from '../components/Footer';
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
 const dateFormat = 'YYYY-MM-DD';
@@ -342,23 +343,23 @@ export default class AdvisorProfile extends React.Component {
         this.setState({filterModalVisible: !this.state.filterModalVisible});
     }
 
-    renderFilterModal = () => {
-        return (
-            <Modal
-                    title="Apply Filters"
-                    visible={this.state.filterModalVisible}
-                    footer={null}
-                    onCancel={this.toggleFilterModal}
-            >
-                <AdviceFilterComponent 
-                        updateAdvices={this.updateAdvices}
-                        updateAdviceUrl={this.updateAdviceUrl}
-                        toggleModal = {this.toggleFilterModal}
-                        orderParam={this.state.sortBy}
-                />
-            </Modal>
-        );
-    }
+    // renderFilterModal = () => {
+    //     return (
+    //         <Modal
+    //                 title="Apply Filters"
+    //                 visible={this.state.filterModalVisible}
+    //                 footer={null}
+    //                 onCancel={this.toggleFilterModal}
+    //         >
+    //             <AdviceFilterComponent 
+    //                     updateAdvices={this.updateAdvices}
+    //                     updateAdviceUrl={this.updateAdviceUrl}
+    //                     toggleModal = {this.toggleFilterModal}
+    //                     orderParam={this.state.sortBy}
+    //             />
+    //         </Modal>
+    //     );
+    // }
 
     updateSortBy = sortBy => {
         this.setState({sortBy});
@@ -431,7 +432,10 @@ export default class AdvisorProfile extends React.Component {
                 />
                 {
                     !this.state.loading &&
-                    this.renderPageContent()
+                    <React.Fragment>
+                        {this.renderPageContent()}
+                        <Footer />
+                    </React.Fragment>
                 }
             </React.Fragment>
         );
