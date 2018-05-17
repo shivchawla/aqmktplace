@@ -233,7 +233,7 @@ class PortfolioDetailImpl extends React.Component {
 
     getPortfolioDetail = () => new Promise((resolve, reject) => {
         const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
-
+        const series = [];
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => { // Getting details of portfolio
             const benchmark = _.get(response.data, 'benchmark.ticker', 'NIFTY_50');
@@ -243,6 +243,17 @@ class PortfolioDetailImpl extends React.Component {
             const subPositions = _.get(response.data, 'detail.subPositions', []);
             const advices = this.processPresentAdvicePortfolio(subPositions, advicePerformance);
             const positions = _.get(response.data, 'detail.positions', []).map(item => item.security.ticker);
+            const colorData = generateColorData(positions);
+            const portfolioComposition = _.get(response.data, 'detail.positions')
+                        .map((item, index) => {
+                    return {
+                        name: _.get(item, 'security.ticker', 'Invalid'), 
+                        y: Math.round(item.weightInPortfolio * 10000) / 100, 
+                        color: colorData[item.ticker],
+                    };
+                });
+            series.push({name: 'Composition', data: portfolioComposition});
+
             this.setState({
                 name: response.data.name,
                 isDefault: _.get(response.data, 'isDefaultPortfolio', false),
@@ -250,6 +261,7 @@ class PortfolioDetailImpl extends React.Component {
                 stockPositions: _.get(response.data, 'detail.positions', []),
                 realtimeSecurities: this.processPositionToWatchlistData(_.get(response.data, 'detail.positions', [])),
                 cash: _.get(response.data, 'detail.cash', 0),
+                pieSeries: series,
             });
             resolve({pnlStats, benchmark, positions, benchmarkRequestType});
         })
@@ -319,16 +331,16 @@ class PortfolioDetailImpl extends React.Component {
                         .map((item, index) => {
                     return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]}
                 });
-                const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition')
-                        .map((item, index) => {
-                    return {
-                        name: item.ticker, 
-                        y: Math.round(item.weight * 10000) / 100, 
-                        color: colorData[item.ticker],
-                    };
-                });
+                // const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition')
+                //         .map((item, index) => {
+                //     return {
+                //         name: item.ticker, 
+                //         y: Math.round(item.weight * 10000) / 100, 
+                //         color: colorData[item.ticker],
+                //     };
+                // });
 
-                series.push({name: 'Composition', data: portfolioComposition});
+                // series.push({name: 'Composition', data: portfolioComposition});
 
                 var annualReturn = _.get(portfolioMetrics, 'annualReturn', null);
                 var totalReturn = _.get(portfolioMetrics, 'totalReturn', null);
@@ -359,7 +371,7 @@ class PortfolioDetailImpl extends React.Component {
                     tickers,
                     performanceDollarSeries: constituentDollarPerformance,
                     performancepercentageSeries: constituentPercentagePerformance,
-                    pieSeries: series,
+                    // pieSeries: series,
                 });
             })
             .catch(error => {

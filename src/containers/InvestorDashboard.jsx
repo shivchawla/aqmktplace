@@ -1037,7 +1037,6 @@ export default class InvestorDashboard extends React.Component {
                         </Row>
                     </Col>
                 }
-                <Footer />
                 </Row>
             );
         }
@@ -1054,7 +1053,10 @@ export default class InvestorDashboard extends React.Component {
                 />
                {
                    !this.state.defaultPortfolioLoading &&
-                   this.renderPageContent()
+                   <React.Fragment>
+                        {this.renderPageContent()}
+                        <Footer />
+                    </React.Fragment>
                }
             </Col>
         );

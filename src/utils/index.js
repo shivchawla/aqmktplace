@@ -155,6 +155,7 @@ export class Utils{
 		this.localStorageSaveObject('USERINFO', {});
 		this.localStorageSaveObject('adviceFilter', {});
 		this.localStorageSave('selectedPage', 1);
+		this.localStorageSave('selectedTab', 'all');
 		this.setLoggedInUserInfo({});
 	}
 

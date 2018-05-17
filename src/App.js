@@ -44,6 +44,7 @@ const ScreenAdvices = asyncComponent(() => import("./containers/ScreenAdvices"))
 const AdvisorProfile = asyncComponent(() => import("./containers/AdvisorProfile"));
 const Home = asyncComponent(() => import("./containers/Home"));
 const FAQ = asyncComponent(() => import("./containers/FAQ"));
+const ResetPassword = asyncComponent(() => import("./containers/ResetPassword"));
 const {gaTrackingId} = require('./localConfig');
 
 class App extends React.Component {
@@ -319,10 +320,11 @@ class App extends React.Component {
                             <Route path='/forgotPassword' component={ForgotPassword} /> {/* Page */}
                             <Route path='/errorPage' component={NoIternetAccess} /> {/* Page */}
                             <Route path='/forbiddenAccess' component={ForbiddenAccess} /> {/* Page */}
-                            <Route path='/AuthMessage' component={AuthMessage} /> 
+                            <Route path='/authMessage' component={AuthMessage} /> 
                             <Route exact={true} path='/login' component={Login} /> {/* Page */}
                             <Route exact={true} path='/signup' component={Signup} /> {/* Page */}
                             <Route exact={true} path='/faq' component={FAQ} /> {/* Page */}
+                            <Route exact={true} path='/resetPassword' component={ResetPassword} /> {/* Page */}
                             <Route component={PageNotFound} />
                         </Switch>
                     </Content>

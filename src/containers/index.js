@@ -21,3 +21,4 @@ export * from './Signup';
 export * from './ForgotPassword';
 export * from './AuthMessage';
 export * from './FAQ';
+export * from './ResetPassword';
