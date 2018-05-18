@@ -121,30 +121,30 @@ class AdviceDetailImpl extends React.Component {
 
     getAdviceSummary = (response, performance = true) => {
         const {
-            name,
-            description,
-            heading,
-            advisor,
-            updatedDate,
+            name = '',
+            description = '',
+            heading = '',
+            advisor = '',
+            updatedDate = '',
             rating = {current: 0, simulated: 0},
-            isSubscribed,
-            isFollowing,
-            isOwner,
-            isAdmin,
-            numSubscribers,
-            numFollowers,
-            portfolio,
-            performanceSummary,
-            netValue,
-            stocks,
-            approvalStatus,
-            rebalance
+            isSubscribed = false,
+            isFollowing = false,
+            isOwner = false,
+            isAdmin = false,
+            numSubscribers = 0,
+            numFollowers = 0,
+            portfolio = {},
+            performanceSummary = {},
+            netValue = 0,
+            stocks = 0,
+            approvalStatus = 'pending',
+            rebalance = ''
         } = response.data;
         
         this.performanceSummary = performanceSummary;
         const currentPerformance = _.get(performanceSummary, 'current', {});
         const simulatedPerformance = _.get(performanceSummary, 'simulated', {});
-        const {annualReturn, dailyNAVChangeEODPct, netValueEOD, totalReturn, volatility, maxLoss, period} = simulatedPerformance;
+        const {annualReturn = 0, dailyNAVChangeEODPct = 0, netValueEOD = 0, totalReturn = 0, volatility = 0, maxLoss = 0, period = 0} = simulatedPerformance;
         const {nstocks = 0} = currentPerformance;
         var dailyNAVChangePct = 0.0
         var annualReturnEOD = annualReturn;
@@ -165,7 +165,7 @@ class AdviceDetailImpl extends React.Component {
                 rebalanceFrequency: rebalance,
                 followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
-                rating: Number(rating.current.toFixed(2)),
+                rating: Number((rating.current || 0).toFixed(2)),
                 isPublic: response.data.public,
             },
             metrics: {
