@@ -180,7 +180,7 @@ export default class Home extends React.Component {
                         </Row>
                     </Col>
                     <Col span={12} className='hero-image'>
-                        <img style={{marginLeft: '-20px'}} src={heroImage} />
+                        <object type="image/svg+xml" style={{marginLeft: '-20px'}} data={heroImage}></object>
                     </Col>
                 </Row>
                 <Row className="middle-section">

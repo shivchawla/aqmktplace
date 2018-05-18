@@ -209,3 +209,7 @@ body {
     font-family: Lato, sans-serif;
     color: yellow;
 }
+
+.new-advice {
+    fill: red;
+}

@@ -358,7 +358,6 @@ export class AdviceFormImpl extends React.Component {
   
     onChange = data => {
         let totalCash = 0;
-        console.log('On Change called');
         const remainingCash = this.state.initialCash - totalCash;
         this.setState({
             portfolioChanged: this.hasPortfolioChanged(data),
@@ -369,8 +368,6 @@ export class AdviceFormImpl extends React.Component {
 
     hasPortfolioChanged = data => {
         const dataSnapshot = [...this.state.dataSnapshot];
-        console.log('Data Snapshot', dataSnapshot);
-        console.log('Data', data);
         const differenceArray = _.differenceWith(dataSnapshot, data, this.checkEquality);
         const otherDifferenceArray = _.differenceWith(data, dataSnapshot, this.checkEquality);
         if(differenceArray.length > 0 || otherDifferenceArray.length > 0) {
@@ -383,7 +380,7 @@ export class AdviceFormImpl extends React.Component {
         return (
             arrVal.lastPrice === othVal.lastPrice 
             &&  arrVal.name === othVal.name 
-            &&  arrVal.shares === othVal.shares 
+            &&  Number(arrVal.shares) === Number(othVal.shares) 
             &&  arrVal.symbol === othVal.symbol 
             &&  arrVal.totalValue === othVal.totalValue 
         );
@@ -636,6 +633,7 @@ export class AdviceFormImpl extends React.Component {
         .then(advicePortfolioResponse => {
             const advicePortfolio = advicePortfolioResponse.data;
             const positions = [];
+            const newPositions = [];
             const portfolio = _.get(advicePortfolio, 'detail.positions', []);
             portfolio.map((item, index) => {
                 positions.push({
@@ -652,7 +650,7 @@ export class AdviceFormImpl extends React.Component {
             this.updateAllWeights(positions);
             this.setState({
                 data: positions, 
-                dataSnapshot: [...positions], // To store the original portfolio
+                dataSnapshot: _.cloneDeep(positions), // To store the original portfolio
                 startDate: advicePortfolio.detail.startDate
             }, () => {
                 this.props.form.setFieldsValue({startDate: this.getFirstValidDate()});

@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="../css/home.css" type="text/css"?>
 <svg width="635px" height="544px" viewBox="0 0 635 544" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 50 (54983) - http://www.bohemiancoding.com/sketch -->
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
     <title>Group 29</title>
     <desc>Created with Sketch.</desc>
-    <style type="text/css">
-        @import url('https://fonts.googleapis.com/css?family=Lato:400,700');
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Lato:400,700|Montserrat:400,500,600');
+        .advice {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+        }
+        .return {
+            font-family: 'Lato', sans-serif;
+            font-weight: 400;
+        }
+        .return-value {
+            font-family: 'Lato', sans-serif;
+            font-weight: 700;
+        }
     </style>
     <defs>
         <filter x="-52.1%" y="-34.9%" width="204.1%" height="169.8%" filterUnits="objectBoundingBox" id="filter-1">
             <feGaussianBlur stdDeviation="21.0072767" in="SourceGraphic"></feGaussianBlur>
         </filter>
         <linearGradient x1="3.175543%" y1="52.1069434%" x2="107.779472%" y2="52.1069407%" id="linearGradient-2">
-            <stop stop-color="#1AAAFF" offset="0%"></stop>
+            <stop stop-color="#00A2A2" offset="0%"></stop>
             <stop stop-color="#5EEDFD" offset="100%"></stop>
         </linearGradient>
         <filter x="-52.1%" y="-34.9%" width="204.1%" height="169.8%" filterUnits="objectBoundingBox" id="filter-3">
@@ -32,35 +45,35 @@
     </defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="Group-29" transform="translate(49.000000, 33.000000)">
-            <path d="M70.794,151.677 L70.794,206.897796 L250.5721,206.897796 L250.5721,235.67854" id="Path-3" stroke="#3961FF" stroke-width="2.052" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6.839999818801879"></path>
-            <path d="M272.574,157.32 L272.574,238.800255" id="Path-4" stroke="#3961FF" stroke-width="2.052" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6.839999818801879"></path>
-            <path d="M473.666273,153.9 L473.666273,207.022244 L292.41,207.022244 L292.41,239.919378" id="Path-5" stroke="#3961FF" stroke-width="2.052" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6.839999818801879"></path>
+            <path d="M70.794,151.677 L70.794,206.897796 L250.5721,206.897796 L250.5721,235.67854" id="Path-3" stroke="#00A2A2" stroke-width="2.052" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6.839999818801879"></path>
+            <path d="M272.574,157.32 L272.574,238.800255" id="Path-4" stroke="#00A2A2" stroke-width="2.052" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6.839999818801879"></path>
+            <path d="M473.666273,153.9 L473.666273,207.022244 L292.41,207.022244 L292.41,239.919378" id="Path-5" stroke="#00A2A2" stroke-width="2.052" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6.839999818801879"></path>
             <g id="Group-25" transform="translate(200.925000, 0.000000)">
                 <g id="Group-19">
                     <rect id="shadow" fill="#323C5A" opacity="0.244696553" filter="url(#filter-1)" x="10.944" y="20.52" width="121.068" height="180.576" rx="19.0688256"></rect>
                     <rect id="bg" fill="#FFFFFF" x="0" y="0" width="142.272" height="180.576" rx="8.7398784"></rect>
                     <g id="Group-5-Copy-2" transform="translate(17.784000, 111.612000)" fill="#323C5A">
-                        <text id="Medium" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                        <text class="return-value" id="Medium" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                             <tspan x="0" y="32.732">Medium</tspan>
                         </text>
-                        <text id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                        <text class="return" id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
                             <tspan x="0" y="11">Risk</tspan>
                         </text>
                     </g>
                     <g id="Group-4" transform="translate(19.836000, 64.176000)" fill="#323C5A">
-                        <text id="26%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                        <text class="return-value" id="26%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                             <tspan x="0" y="32.732">26%</tspan>
                         </text>
-                        <text id="Return" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                        <text class="return" id="Return" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
                             <tspan x="0" y="11">Return</tspan>
                         </text>
                     </g>
                     <g id="logo" transform="translate(19.836000, 19.152000)">
                         <rect id="Rectangle-3" fill="url(#linearGradient-2)" x="0" y="4.32137048" width="26.1401808" height="26.1401808" rx="8.12592"></rect>
-                        <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="24.37776" font-weight="normal" fill="#FFFFFF">
+                        <text  class="return" id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="24.37776" font-weight="normal" fill="#FFFFFF">
                             <tspan x="5.97423563" y="24.1743492">a</tspan>
                         </text>
-                        <text id="Advice" font-family="AvenirNext-Medium, Avenir Next" font-size="17.335296" font-weight="400" letter-spacing="0.361152004" fill="#323C5A">
+                        <text class="advice" id="Advice" font-family="AvenirNext-Medium, Avenir Next" font-size="17.335296" font-weight="400" letter-spacing="0.361152004" fill="#323C5A">
                             <tspan x="32.5294766" y="26.389952">Advice</tspan>
                         </text>
                     </g>
@@ -93,30 +106,30 @@
                 <use id="bg" fill="#FFFFFF" xlink:href="#path-4"></use>
                 <g id="Group-5" mask="url(#mask-5)">
                     <g transform="translate(12.996000, 111.296000)">
-                        <text id="Low" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                        <text class="return-value" id="Low" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                             <tspan x="0" y="32.732" fill="#323C5A">Low</tspan>
                         </text>
-                        <text id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                        <text class="return" id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
                             <tspan x="0" y="11" fill="#323C5A">Risk</tspan>
                         </text>
                     </g>
                 </g>
                 <g id="Group-4" mask="url(#mask-5)">
                     <g transform="translate(12.996000, 64.176000)">
-                        <text id="20.5%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                        <text class="return-value" id="20.5%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                             <tspan x="0" y="32.732" fill="#323C5A">20.5%</tspan>
                         </text>
-                        <text id="Return" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                        <text class="return" id="Return" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
                             <tspan x="0" y="11" fill="#323C5A">Return</tspan>
                         </text>
                     </g>
                 </g>
                 <g id="logo" transform="translate(12.996000, 19.152000)">
                     <rect id="Rectangle-3" fill="url(#linearGradient-2)" x="0" y="4.32137048" width="26.1401808" height="26.1401808" rx="8.12592"></rect>
-                    <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="24.37776" font-weight="normal" fill="#FFFFFF">
+                    <text class="return" id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="24.37776" font-weight="normal" fill="#FFFFFF">
                         <tspan x="5.97423563" y="24.1743492">a</tspan>
                     </text>
-                    <text id="Advice" font-family="AvenirNext-Medium, Avenir Next" font-size="17.335296" font-weight="400" letter-spacing="0.361152004" fill="#323C5A">
+                    <text id="Advice" class="advice" font-family="AvenirNext-Medium, Avenir Next" font-size="17.335296" font-weight="400" letter-spacing="0.361152004" fill="#323C5A">
                         <tspan x="32.5294766" y="26.389952">Advice</tspan>
                     </text>
                 </g>
@@ -142,10 +155,10 @@
                 <rect id="shadow" fill="#323C5A" opacity="0.244696553" filter="url(#filter-6)" x="10.944" y="20.52" width="121.068" height="180.576" rx="19.0688256"></rect>
                 <rect id="bg" fill="#FFFFFF" x="0" y="0" width="142.272" height="180.576" rx="8.7398784"></rect>
                 <g id="Group-4" transform="translate(15.996000, 64.176000)" fill="#323C5A">
-                    <text id="30%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                    <text class="return-value" id="30%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                         <tspan x="0" y="32.732">30%</tspan>
                     </text>
-                    <text id="Return" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                    <text class="return" id="Return" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
                         <tspan x="0" y="11">Return</tspan>
                     </text>
                 </g>
@@ -153,16 +166,16 @@
                     <text id="High" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                         <tspan x="0" y="32.732">High</tspan>
                     </text>
-                    <text id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                    <text class="return" id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
                         <tspan x="0" y="11">Risk</tspan>
                     </text>
                 </g>
                 <g id="logo" transform="translate(15.996000, 19.152000)">
                     <rect id="Rectangle-3" fill="url(#linearGradient-2)" x="0" y="4.32137048" width="26.1401808" height="26.1401808" rx="8.12592"></rect>
-                    <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="24.37776" font-weight="normal" fill="#FFFFFF">
+                    <text class="return" id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="24.37776" font-weight="normal" fill="#FFFFFF">
                         <tspan x="5.97423563" y="24.1743492">a</tspan>
                     </text>
-                    <text id="Advice" font-family="AvenirNext-Medium, Avenir Next" font-size="17.335296" font-weight="400" letter-spacing="0.361152004" fill="#323C5A">
+                    <text id="Advice" class="advice" font-family="AvenirNext-Medium, Avenir Next" font-size="17.335296" font-weight="400" letter-spacing="0.361152004" fill="#323C5A">
                         <tspan x="32.5294766" y="26.389952">Advice</tspan>
                     </text>
                 </g>
@@ -188,7 +201,7 @@
                     <g id="logo" mask="url(#mask-9)">
                         <g transform="translate(13.813258, 21.713580)">
                             <rect id="Rectangle-3" fill="url(#linearGradient-10)" fill-rule="evenodd" x="0" y="5.17664172" width="31.3137582" height="31.3137582" rx="9.734175"></rect>
-                            <text id="p" fill="none" font-family="AvenirNext-Medium, Avenir Next" font-size="29.202525" font-weight="400">
+                            <text class="return" id="p" fill="none" font-family="AvenirNext-Medium, Avenir Next" font-size="29.202525" font-weight="400">
                                 <tspan x="7.8718003" y="29.2088559" fill="#FFFFFF">p</tspan>
                             </text>
                             <text id="Portfolio" fill="none" font-family="AvenirNext-Medium, Avenir Next" font-size="20.76624" font-weight="400" letter-spacing="0.432629991">
@@ -201,17 +214,17 @@
                             <text id="Low" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                                 <tspan x="0" y="32.732" fill="#323C5A">Low</tspan>
                             </text>
-                            <text id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                            <text class="return" id="Risk" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
                                 <tspan x="0" y="11" fill="#323C5A">Risk</tspan>
                             </text>
                         </g>
                     </g>
                     <g id="Group-4-Copy-3" mask="url(#mask-9)">
                         <g transform="translate(14.364000, 77.172000)">
-                            <text id="26.5%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
+                            <text class="return-value" id="26.5%" font-family="AvenirNext-DemiBold, Avenir Next" font-size="17.1" font-weight="500">
                                 <tspan x="0" y="32.732" fill="#323C5A">26.5%</tspan>
                             </text>
-                            <text id="Return" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
+                            <text class="return" id="Return" font-family="AvenirNext-Medium, Avenir Next" font-size="10.944" font-weight="400">
                                 <tspan x="0" y="11" fill="#323C5A">Return</tspan>
                             </text>
                         </g>
