@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
-import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip, Tag} from 'antd';
+import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip, Tag, message} from 'antd';
 import {ForbiddenAccess, StockResearchModal, WatchList, Footer} from '../components';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
@@ -249,7 +249,7 @@ class PortfolioDetailImpl extends React.Component {
                     return {
                         name: _.get(item, 'security.ticker', 'Invalid'), 
                         y: Math.round(item.weightInPortfolio * 10000) / 100, 
-                        color: colorData[item.ticker],
+                        color: colorData[item.security.ticker],
                     };
                 });
             series.push({name: 'Composition', data: portfolioComposition});
@@ -322,7 +322,6 @@ class PortfolioDetailImpl extends React.Component {
                     color: benchmarkColor
                 });
                 const portfolioMetrics = Object.assign(_.get(response.data, 'summary.current', {}), pnlStats);
-
                 const constituentDollarPerformance = _.get(
                             response.data, 'current.metrics.constituentPerformance', []).map((item, index) => {
                     return {name: item.ticker, data: [Number(item.pnl.toFixed(2))], color: colorData[item.ticker]}
@@ -546,7 +545,9 @@ class PortfolioDetailImpl extends React.Component {
         .then(response => {
             this.getPortfolioDetail();
         })
-        .catch(error => error)
+        .catch(error => {
+            message.error('Error Occured');
+        })
         .finally(() => {
             this.setState({makeDefaultLoading: false});
         })

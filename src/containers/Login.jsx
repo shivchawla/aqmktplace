@@ -39,9 +39,9 @@ class Login extends Component {
           .then((response) => {
               this.cancelLoginCall = undefined;
               if (response.data.token){
-                if (values.remember){
-                  Utils.localStorageSaveObject(Utils.userInfoString, response.data);
-                }
+                // if (values.remember){
+                Utils.localStorageSaveObject(Utils.userInfoString, response.data);
+                // }
                 Utils.setLoggedInUserInfo(response.data);
                 Utils.localStorageSave('selectedPage', 1);
                 const redirectUrl = Utils.getRedirectAfterLoginUrl();
@@ -113,12 +113,6 @@ class Login extends Component {
       }else{
         return (
           <FormItem>
-            {getFieldDecorator('remember', {
-              valuePropName: 'checked',
-              initialValue: true,
-            })(
-              <Checkbox>Remember me</Checkbox>
-            )}
             <Link className="login-form-forgot" to="/forgotPassword">Forgot password</Link>
             <Button type="primary" htmlType="submit" className="login-form-button">
               Log in

@@ -3,7 +3,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Col, AutoComplete, Input, Icon, List, Modal, message} from 'antd';
+import {Row, Col, AutoComplete, Input, Icon, List, Modal, message} from 'antd';
 import {Utils} from '../utils';
 
 const dateFormat = 'YYYY-MM-DD';
@@ -176,10 +176,13 @@ class CreateWatchListImpl extends React.Component {
                     title="Create Watchlist"
                     onOk={this.createWatchList}
                     onCancel={this.props.toggleModal}
+                    width={400}
             >
-                <Col span={24}>
-                    <Input placeholder="Watchlist Name" onChange={this.handleInputChange} value={this.state.name}/>
-                </Col>
+                <Row>
+                    <Col span={24}>
+                        <Input placeholder="Watchlist Name" onChange={this.handleInputChange} value={this.state.name}/>
+                    </Col>
+                </Row>
                 {/* <Col span={24} style={{backgroundColor: '#fff', padding: '10px'}}>
                     <AutoComplete
                             dataSource={dataSource.map(this.renderOption)}

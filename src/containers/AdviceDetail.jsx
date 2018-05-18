@@ -761,7 +761,7 @@ class AdviceDetailImpl extends React.Component {
         const className = small ? 'action-button action-button-small' : 'action-button';
         if (userId !== advisorId) {
             return (
-                <React.Fragment>
+                <div style={{width: '95%'}}>
                     {this.renderApprovalButtons(small)}
                     <Button
                             onClick={() => 
@@ -792,11 +792,11 @@ class AdviceDetailImpl extends React.Component {
                     >
                         {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
                     </Button>
-                </React.Fragment>
+                </div>
             );
         } else {
             return (
-                <React.Fragment>
+                <div style={{width: '95%'}}>
                     {this.renderApprovalButtons(small)}
                     {
                         !this.state.adviceDetail.isPublic && 
@@ -816,7 +816,7 @@ class AdviceDetailImpl extends React.Component {
                     >
                         UPDATE ADVICE
                     </Button>
-                </React.Fragment>
+                </div>
             );
         }
     };

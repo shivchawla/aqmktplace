@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import _ from 'lodash';
 import {Utils} from '../utils';
 import { Spin, Form, Icon, Input, Button, Checkbox } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
@@ -39,6 +40,7 @@ class ResetPassword extends Component {
             })
           })
           .then((response) => {
+              console.log('Reset Password Completed');
               this.cancelLoginCall = undefined;
               this.props.history.push('/authMessage?mode=resetPassword');
             //   if (response.data.token){
@@ -62,11 +64,19 @@ class ResetPassword extends Component {
           })
           .catch((error) => {
             this.cancelLoginCall = undefined;
+            console.log(error.response);
+            if (error.response) {
+              this.updateState({
+                'loading': false,
+                'error': _.get(error, 'response.data.statusMessage', 'Error Occured')
+              });
+            }
+          })
+          .finally(() => {
             this.updateState({
-              'loading': false,
-              'error': error.response.data
+              'loading': false
             });
-          });
+          }); 
         }
       });
     }
@@ -96,6 +106,22 @@ class ResetPassword extends Component {
     }
   }
 
+  compareToFirstPassword = (rule, value, callback) => {
+    const form = this.props.form;
+    if (value && value !== form.getFieldValue('password')) {
+      callback('Two passwords that you enter is inconsistent!');
+    } else {
+      callback();
+    }
+  }
+  validateToNextPassword = (rule, value, callback) => {
+    const form = this.props.form;
+    if (value && this.state.confirmDirty) {
+      form.validateFields(['confirmPassword'], { force: true });
+    }
+    callback();
+  } 
+
 
   render() {
 
@@ -117,7 +143,7 @@ class ResetPassword extends Component {
         return (
           <FormItem>
             <Button type="primary" htmlType="submit" className="login-form-button" style={{marginTop: '20px'}}>
-              Send Request
+              SEND REQUEST
             </Button>
             <Link to="/login">Login here</Link>
             <p style={{'color':'#cc6666',
@@ -146,10 +172,15 @@ class ResetPassword extends Component {
           <Form onSubmit={this.handleSubmit} className="login-form">
             <FormItem>
               {getFieldDecorator('password', {
-                rules: [{ required: true, message: 'Please input your new password!' }],
+                rules: [
+                  { required: true, message: 'Please input your new password!' },
+                  {
+                    validator: this.validateToNextPassword,
+                  }
+                ],
               })(
                 <Input 
-                    prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                    prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
                     placeholder="Password" 
                     type="password" 
                 />
@@ -157,7 +188,12 @@ class ResetPassword extends Component {
             </FormItem>
             <FormItem>
               {getFieldDecorator('confirmPassword', {
-                rules: [{ required: true, message: 'Please confirm your new Password!' }],
+                rules: [
+                  { required: true, message: 'Please confirm your new Password!' },
+                  {
+                    validator: this.compareToFirstPassword,
+                  }
+                ],
               })(
                 <Input 
                         prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 

@@ -965,7 +965,7 @@ export class AdviceFormImpl extends React.Component {
 
         return (
             <Row>
-                <Col span={24}>
+                <Col span={24} style={{width: '95%'}}>
                     {
                         !this.state.preview 
                         ?   <React.Fragment>

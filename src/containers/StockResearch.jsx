@@ -697,18 +697,49 @@ class StockResearchImpl extends React.Component {
                                 {this.watchlistTabBarExtraContent()}
                             </Col>
                             <Col span={24}>
-                                <Tabs 
-                                        onChange={this.handleWatchlistTabChange} 
-                                        // tabBarExtraContent={this.watchlistTabBarExtraContent()}
-                                        tabBarStyle={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            alignContent: 'center',
-                                        }}
-                                >
-                                    {this.renderWatchlistTabs()}
-                                </Tabs>
+                                {
+                                    this.state.watchlists.length > 0
+                                    ?   <Tabs 
+                                            onChange={this.handleWatchlistTabChange} 
+                                            // tabBarExtraContent={this.watchlistTabBarExtraContent()}
+                                            tabBarStyle={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                alignContent: 'center',
+                                            }}
+                                    >
+                                            {this.renderWatchlistTabs()}
+                                        </Tabs>
+                                    :   <Row>
+                                            <Col 
+                                                    span={24}
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column', 
+                                                        justifyContent: 'center', 
+                                                        alignItems: 'center'
+                                                    }}
+                                            >
+                                                <h3 
+                                                        style={{
+                                                            marginTop: '100px', 
+                                                            fontSize: '17px', 
+                                                            fontWeight: '400'
+                                                        }}
+                                                >
+                                                    You haven't created any watchlist yet
+                                                </h3>
+                                                <Button 
+                                                        type="primary"
+                                                        style={{marginTop: '20px'}}
+                                                        onClick={this.toggleWatchListModal}
+                                                >
+                                                    CREATE WATCHLIST
+                                                </Button>
+                                            </Col>
+                                        </Row>
+                                }
                             </Col>
                         </Row>
                         <Row style={{...sideCardStyle, marginTop: '30px'}}>

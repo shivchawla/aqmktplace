@@ -112,7 +112,7 @@ export default class FAQ extends React.Component {
 
         return (
             <React.Fragment>
-                <Row>
+                <Row className='aq-page-container'>
                     <Col span={18} style={{...shadowBoxStyle, marginTop: '20px'}}>
                         <Row style={{padding: '20px'}}>
                             <Col span={24}>

@@ -247,6 +247,7 @@ class AdviceListItemImpl extends React.PureComponent {
             rebalancingFrequency,
             netValue,
         } = this.props.advice;
+        const isPublic = this.props.advice.public;
         let sectors = _.get(performanceSummary, 'current.sectors', []);
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
         const statusTagColor = isOwner ? '#3cb44b' : isSubscribed ? '#1890ff' : isFollowing ? '#03a7ad' : '#fff';
@@ -315,6 +316,25 @@ class AdviceListItemImpl extends React.PureComponent {
                                 {statusTagLabel!="" &&
                                     <Tag style={{...statusTagStyle, color:'black', cursor: 'auto'}}>
                                         <span style={{color: statusTagColor}}>{statusTagLabel}</span>
+                                    </Tag>
+                                }
+                                {
+                                    isOwner &&
+                                    <Tag style={{border: '1px solid #673AB7', cursor: 'auto'}}>
+                                        <Icon 
+                                                type={isPublic ? 'team' : 'lock'} 
+                                                style={{
+                                                    fontWeight: '400', 
+                                                    color:'#673AB7', 
+                                                    fontSize: '15px',
+                                                    // marginTop: '4px'
+                                                }}
+                                        />
+                                        <span style={{color: '#673AB7', marginLeft: '5px'}}>
+                                            {
+                                                isPublic ? 'Public' : 'Private'
+                                            }
+                                        </span>
                                     </Tag>
                                 }
                             </Row>

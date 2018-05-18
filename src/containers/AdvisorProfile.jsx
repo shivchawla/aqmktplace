@@ -3,12 +3,12 @@ import moment from 'moment';
 import _ from 'lodash';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
-import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select, message, Tooltip} from 'antd';
+import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select, message, Tooltip, Pagination} from 'antd';
 import {Twitter} from 'twitter-node-client';
 import {MetricItem, AdviceListItem, AdviceSortingMenu, AdviceListItemMod, AqPageHeader, ForbiddenAccess} from '../components';
 import {UpdateAdvisorProfile} from '../containers';
 import {layoutStyle, shadowBoxStyle, loadingColor} from '../constants';
-import {Utils, getBreadCrumbArray} from '../utils';
+import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {AdvisorProfileCrumb} from '../constants/breadcrumbs';
 import { Footer } from '../components/Footer';
 
@@ -39,8 +39,12 @@ export default class AdvisorProfile extends React.Component {
             filterModalVisible: false,
             sortBy: 'rating',
             loading: false,
+            adviceLoading: false,
             notAuthorized: false,
-            followLoading: false
+            followLoading: false,
+            pageLimit: 5,
+            advicesCount: 0,
+            selectedPage: 1
         };
     }
 
@@ -71,7 +75,7 @@ export default class AdvisorProfile extends React.Component {
                 <Row style={{textAlign: 'center'}}>
                     <h3 
                             style={{fontSize: '12px', color: '#909090'}}>
-                        Member Since {moment(this.state.memberSince).format(dateFormat)} 
+                        {/* Member Since {moment(this.state.memberSince).format(dateFormat)}  */}
                     </h3>
                 </Row>
                 <Row>
@@ -169,7 +173,10 @@ export default class AdvisorProfile extends React.Component {
         this.setState({loading: true});
         this.getAdvisorSummary()
         .then(response => {
-            this.setState({advices: this.processAdvices(response.data.advices)});
+            this.setState({
+                advices: this.processAdvices(_.get(response.data, 'advices', [])),
+                advicesCount: _.get(response.data, 'count', 0)
+            });
         })
         .catch(error => {
             // console.log(error.response);
@@ -189,7 +196,7 @@ export default class AdvisorProfile extends React.Component {
     getAdvisorSummary = (getAdvices = true) => new Promise((resolve, reject) => {
         const advisorIdCurrent = this.props.match.params.id;
         const url = `${requestUrl}/advisor/${advisorIdCurrent}?dashboard=0`;
-        const advicesUrl = `${requestUrl}/advice?advisor=${this.props.match.params.id}`;
+        const advicesUrl = `${requestUrl}/advice?advisor=${this.props.match.params.id}&skip=0&limit=${this.state.pageLimit}`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             const {latestAnalytics = {}, user} = response.data;
@@ -240,6 +247,7 @@ export default class AdvisorProfile extends React.Component {
                 isApproved: _.get(advice, 'approvalStatus', 'N/A'),
                 isOwner: _.get(advice, 'isOwner', false),
                 isSubscribed: _.get(advice, 'isSubscribed', false),
+                public: _.get(advice, 'public', false),
                 isTrending: false
             })
         });
@@ -373,6 +381,20 @@ export default class AdvisorProfile extends React.Component {
         }
     }
 
+    onPaginationChange = (page, pageSize) => {
+        const skip = this.state.pageLimit * (page - 1);
+        const adviceListUrl = `${requestUrl}/advice?advisor=${this.props.match.params.id}&skip=${skip}&limit=${this.state.pageLimit}`;
+        this.setState({adviceLoading: true, selectedPage: page});
+        fetchAjax(adviceListUrl, this.props.history, this.props.match.url)
+        .then(response => {
+            this.setState({advices: this.processAdvices(response.data.advices)});
+        })
+        .catch(error => error)
+        .finally(() => {
+            this.setState({adviceLoading: false});
+        });
+    }
+
     renderPageContent = () => {
         const breadCrumbs = getBreadCrumbArray(AdvisorProfileCrumb, [
             {name: 'Advisor Profile', url: '#'}
@@ -387,7 +409,12 @@ export default class AdvisorProfile extends React.Component {
                         title="Advisor Profile"
                         breadCrumbs={breadCrumbs}
                     />
-                    <Col xl={17} md={24} className="row-container" style={{...shadowBoxStyle, marginBottom: '20px'}}>
+                    <Col 
+                            xl={17} 
+                            md={24} 
+                            className="row-container" 
+                            style={{...shadowBoxStyle, marginBottom: '20px', minHeight: '600px'}}
+                    >
                         <Row style={{paddingLeft: '40px', paddingTop: '20px'}}>
                             {this.renderProfileDetails()}
                         </Row>
@@ -410,8 +437,16 @@ export default class AdvisorProfile extends React.Component {
                                                 sortBy={this.state.sortBy}
                                         /> */}
                                     </Col>
-                                    <Col span={24}>
+                                    <Col span={24} className='pagination-container'>
                                         {this.renderAdvices()}
+                                        <Row style={{textAlign: 'center'}}>
+                                            <Pagination
+                                                // current={Number(this.state.selectedPage)}
+                                                current={this.state.selectedPage} 
+                                                total={this.state.advicesCount} 
+                                                pageSize={this.state.pageLimit}
+                                                onChange={this.onPaginationChange}/>
+                                        </Row>   
                                     </Col>
                                 </Row>
                             </Col>
@@ -425,7 +460,7 @@ export default class AdvisorProfile extends React.Component {
         return (
             <React.Fragment>
                 <Loading
-                        show={this.state.loading}
+                        show={this.state.loading || this.state.adviceLoading}
                         color={loadingColor}
                         className="main-loader"
                         showSpinner={false}

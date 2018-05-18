@@ -1022,7 +1022,7 @@ class AddTransactionsImpl extends React.Component {
                     this.state.notAuthorized 
                     ?   <ForbiddenAccess />
                     :   <React.Fragment>
-                            <Col span={24} className='aq-page-container'>
+                            <Row span={24} className='aq-page-container'>
                                 <StockResearchModal 
                                         ticker={this.state.stockResearchModalTicker} 
                                         visible={this.state.stockResearchModalVisible}
@@ -1104,7 +1104,7 @@ class AddTransactionsImpl extends React.Component {
                                         </Row>
                                     </Col>
                                     <Col xl={6} lg={6} md={0} sm={0} xs={0} >
-                                        <Row type="flex">
+                                        <Row type="flex" style={{width: '95%'}}>
                                             <Col span={24}>
                                                 <Button 
                                                         type="primary" 
@@ -1134,7 +1134,7 @@ class AddTransactionsImpl extends React.Component {
                                         </Row>
                                     </Col>
                                 </Form>
-                            </Col>
+                            </Row>
                         </React.Fragment>
                 }
             </Row>
