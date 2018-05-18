@@ -103,7 +103,6 @@ class Policy extends Component {
               'padding': '40px 5% 40px 5%'}}>
               {getPolicyDiv()}
             </div>
-            <Footer />
           </div>
         );
       }
@@ -119,6 +118,10 @@ class Policy extends Component {
           />
         </div>
         {getTotalDiv()}
+        {
+          !this.state.loading &&
+          <Footer />
+        }
       </React.Fragment>
     );
   }

@@ -138,3 +138,8 @@ export const cashStyle = {
 }
 
 export const primaryColor = '#03A7AD';
+
+export const pageContainer = {
+    marginLeft: '20px',
+    marginRight: '60px'
+}

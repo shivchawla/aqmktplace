@@ -381,7 +381,7 @@ export default class AdvisorProfile extends React.Component {
         return (
             this.state.notAuthorized 
             ?   <ForbiddenAccess />
-            :   <Row>
+            :   <Row className='aq-page-container'>
                     {this.renderUpdateModal()}
                     <AqPageHeader 
                         title="Advisor Profile"

@@ -12,6 +12,10 @@ body {
   background-color: #e91;
 }
 
+.aq-page-container {
+  margin: 0 30px !important;
+}
+
 h1, h2, h3, h4, h5 {
 	padding: 0;
 	margin :0;
@@ -34,6 +38,10 @@ h1, h2, h3, h4, h5 {
     width: 150px;
 }
  */
+
+ .ant-layout-content {
+   width: 100% !important;
+ }
 
 .animated-page-wrapper {
 	position: absolute;
@@ -83,6 +91,13 @@ h1, h2, h3, h4, h5 {
 .card{
 	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
   }
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px
+}
   
 
 .card-1 {
@@ -106,7 +121,7 @@ h1, h2, h3, h4, h5 {
   }
   
   .ant-form.login-form {
-	max-width: 300px;
+	/* max-width: 300px; */
 	text-align: left;
 	margin-top: 20px;
   }

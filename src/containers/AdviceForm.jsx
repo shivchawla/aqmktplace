@@ -1106,7 +1106,7 @@ export class AdviceFormImpl extends React.Component {
                 ]);
         return (
             this.state.isOwner || !this.props.isUpdate
-            ?   <Row type="flex" justify="end">
+            ?   <Row type="flex" justify="end" className='aq-page-container'>
                     <StockResearchModal 
                             ticker={this.state.stockResearchModalTicker} 
                             visible={this.state.stockResearchModalVisible}
@@ -1139,7 +1139,6 @@ export class AdviceFormImpl extends React.Component {
                     <Col xl={6} lg={6} md={0} sm={0} xs={0}>
                         {this.renderActionButtons()}
                     </Col>
-                    <Footer />
                 </Row>
             :   <ForbiddenAccess />
         );
@@ -1159,7 +1158,10 @@ export class AdviceFormImpl extends React.Component {
                 />
                 {
                     !this.state.show && 
-                    this.renderPageContent()
+                    <React.Fragment>
+                        {this.renderPageContent()}
+                        <Footer />
+                    </React.Fragment>
                 }
             </Row>
         );

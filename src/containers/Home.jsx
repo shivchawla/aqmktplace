@@ -161,23 +161,22 @@ export default class Home extends React.Component {
                                     Best investment ideas.<br></br>Let the experts help you build the portfolio your desire.
                                 </h5>
                             </Col>
-                            {
-                                <Row>
-                                    <Button 
-                                            className="signup-button"
-                                            onClick={() => this.props.history.push('/advice')}
-                                    >
-                                        Find Investment Ideas
-                                    </Button>
-                                    <Button 
-                                            style={{marginLeft: '20px'}}
-                                            className="action-buttons"
-                                            onClick={() => this.props.history.push('/advisordashboard/createadvice')}
-                                    >
-                                        Create Financial Advice
-                                    </Button>
-                                </Row>
-                            }
+                            
+                            <Col span={24}>
+                                <Button 
+                                        className="signup-button"
+                                        onClick={() => this.props.history.push('/advice')}
+                                >
+                                    Find Investment Ideas
+                                </Button>
+                                <Button 
+                                        style={{marginLeft: '20px'}}
+                                        className="action-buttons"
+                                        onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                                >
+                                    Create Financial Advice
+                                </Button>
+                            </Col>
                         </Row>
                     </Col>
                     <Col span={12} className='hero-image'>
@@ -308,7 +307,7 @@ const FeatureCard = props => {
                     style={{transform: 'scale(1, 1)', marginTop: '10px', width: '70px', height: '70px', ...iconStyle}} 
                     src={icon} 
             />
-            <h3 style={{color: '#3961FF', fontSize: '20px', marginTop: '5px'}}>{header}</h3>
+            <h3 style={{color: '#00A2A2', fontSize: '20px', marginTop: '5px'}}>{header}</h3>
             <h3 style={{fontSize: '16px', color: '#333333', marginTop: '15px'}}>{content}</h3>
         </div>
     );

@@ -40,7 +40,7 @@ class ResetPassword extends Component {
           })
           .then((response) => {
               this.cancelLoginCall = undefined;
-              this.props.history.push('/login');
+              this.props.history.push('/authMessage?mode=resetPassword');
             //   if (response.data.token){
             //     if (values.remember){
             //       Utils.localStorageSaveObject(Utils.userInfoString, response.data);
@@ -148,7 +148,11 @@ class ResetPassword extends Component {
               {getFieldDecorator('password', {
                 rules: [{ required: true, message: 'Please input your new password!' }],
               })(
-                <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Password" />
+                <Input 
+                    prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                    placeholder="Password" 
+                    type="password" 
+                />
               )}
             </FormItem>
             <FormItem>

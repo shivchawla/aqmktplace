@@ -25,7 +25,7 @@ export const Footer = props => {
                 <h5 className="footer-group-header">Policies</h5>
                 <div className="footer-list">
                     <Link className="footer-link" to="/policies/tnc">Terms of use</Link>
-                    <Link clLinkssName="footer-link" to="/policies/privacy">Privacy Policy</Link>
+                    <Link className="footer-link" to="/policies/privacy">Privacy Policy</Link>
                 </div>
             </Col>
             <Col span={4} className="footer-container">
@@ -39,6 +39,7 @@ export const Footer = props => {
                 <h5 className="footer-group-header">Help</h5>
                 <div className="footer-list">
                     <Link className="footer-link" to="/faq">FAQ</Link>
+                    <a className="footer-link" href="mailto:contact@aimsquant.com">Contact Us</a>
                 </div>
             </Col>
         </Row>

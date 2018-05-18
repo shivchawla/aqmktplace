@@ -563,7 +563,7 @@ class PortfolioDetailImpl extends React.Component {
             this.state.notAuthorized
             ?   <ForbiddenAccess />
             :   <React.Fragment>
-                    <Row style={{marginBottom: '20px'}}>
+                    <Row className='aq-page-container' style={{marginBottom: '20px'}}>
                         <StockResearchModal
                                 ticker={this.state.stockResearchModalTicker}
                                 visible={this.state.stockResearchModalVisible}

@@ -3,6 +3,9 @@
     <!-- Generator: Sketch 50 (54983) - http://www.bohemiancoding.com/sketch -->
     <title>Group 29</title>
     <desc>Created with Sketch.</desc>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Lato:400,700');
+    </style>
     <defs>
         <filter x="-52.1%" y="-34.9%" width="204.1%" height="169.8%" filterUnits="objectBoundingBox" id="filter-1">
             <feGaussianBlur stdDeviation="21.0072767" in="SourceGraphic"></feGaussianBlur>

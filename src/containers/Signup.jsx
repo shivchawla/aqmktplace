@@ -151,7 +151,7 @@ class Signup extends Component {
               )}
             </FormItem>
             <FormItem className="signup-form-item">
-              <Button type="primary" htmlType="submit">Register</Button>
+              <Button type="primary" htmlType="submit" style={{width: '100%'}}>Register</Button>
             </FormItem>
             <p style={{'color':'#cc6666',
               'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
@@ -164,7 +164,7 @@ class Signup extends Component {
       <div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
         'minHeight': '500px', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'}}>
         <div className="card" style={{'padding': '20px', 'background': 'white',
-          'borderRadius': '2px', 'textAlign': 'center', 'minWidth': '340px', width: '500px'}}>
+          'borderRadius': '2px', 'textAlign': 'center', 'minWidth': '340px', width: '390px'}}>
           <img alt="" style={{'height': '60px', 'width': 'auto'}} src={logo}/>
           <p style={{'fontSize': '30px', 'fontWeight': '400', 'margin': '0px'}}>
             <span style={{'color': 'teal'}}>A</span>

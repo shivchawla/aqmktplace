@@ -102,7 +102,6 @@ class TnC extends Component {
               'padding': '40px 5% 40px 5%'}}>
               {getTnCDiv()}
             </div>
-            <Footer />
           </div>
         );
       }
@@ -118,6 +117,10 @@ class TnC extends Component {
           />
         </div>
         {getTotalDiv()}
+        {
+          !this.state.loading &&
+          <Footer />
+        }
       </React.Fragment>
     );
   }

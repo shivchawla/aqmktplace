@@ -66,6 +66,18 @@ class AuthMessageImpl extends Component {
           </React.Fragment>
         );
       }
+      else if (this.params.get('mode') === 'resetPassword'){
+        return (
+          <React.Fragment>
+            <h2 style={{'fontSize': '24px', 'color': 'teal'}}>
+              You have successfully updated your password !!
+            </h2>
+            <Link to='/login'>
+              <Button type="primary" style={{'marginTop': '20px'}}>GO BACK</Button>
+            </Link>
+          </React.Fragment>
+        );
+      }
     }
 
 

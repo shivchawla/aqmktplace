@@ -134,8 +134,8 @@ class Login extends Component {
     return (
 	    <div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
         'minHeight': '500px', 'display': 'flex', flexDirection: 'column', 'alignItems': 'center', 'justifyContent': 'center'}}>
-        <div className="card" style={{'padding': '20px', 'background': 'white',
-          'borderRadius': '2px', 'textAlign': 'center', 'minWidth': '340px'}}>
+        <div className="card login-card" style={{'padding': '20px', 'background': 'white',
+          'borderRadius': '2px', 'textAlign': 'center', 'width': '390px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px'}}>
           <img style={{'height': '60px', 'width': 'auto'}} src={logo}/>
           <p style={{'fontSize': '30px', 'fontWeight': '400', 'margin': '0px'}}>
             <span style={{'color': 'teal'}}>A</span>
@@ -147,7 +147,7 @@ class Login extends Component {
             'fontSize': '15px', 'margin': '0px'}}>
             Expert-Sourced Investment Portfolio
           </p>
-          <Form onSubmit={this.handleSubmit} className="login-form">
+          <Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
             <FormItem>
               {getFieldDecorator('userName', {
                 rules: [{ required: true, message: 'Please input your username!' }],

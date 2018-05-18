@@ -951,7 +951,7 @@ export default class InvestorDashboard extends React.Component {
             return <ForbiddenAccess />
         } else {
             return (
-                <Row>
+                <Row className='aq-page-container'>
                     <AqPageHeader title="Investor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
                     {this.state.showEmptyScreen.status ?
                     <Col span={24} style={emptyPortfolioStyle}>

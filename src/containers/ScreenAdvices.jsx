@@ -484,101 +484,103 @@ export default class ScreenAdvices extends React.PureComponent {
         const button = {route: '/advisordashboard/createadvice', title: 'Create Advice'};
 
         return (
-            <Row>
-                {this.renderQuestionnaireDialog()}
-                <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs} />
-                <Row className="row-container" style={{...shadowBoxStyle, marginBottom:'20px'}}>
-                    {this.renderFilter()}
-                    
-                    <Col xl={17} md={24} style={{paddingLeft:'20px'}}>
-                        <Row style={{marginTop: '40px'}}>
-                            
-                            <Row style={{...shadowBoxStyle, border:'0', borderWidth:'0px'}}> 
-                                <Input 
-                                    suffix={(
-                                        <Icon 
-                                            type="search" 
-                                            style={{fontSize: '16px', marginRight: '10px', fontWeight: '600'}}
-                                        />
-                                    )}
-                                    placeholder="Search Advice"
-                                    value={this.state.searchValue}
-                                    onChange={this.handleInputChange}
-                                    onPressEnter={() => this.getAdvices()}/>
-                            </Row>
+            <React.Fragment>
+                <Row className='aq-page-container'>
+                    {this.renderQuestionnaireDialog()}
+                    <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs} />
+                    <Row className="row-container" style={{...shadowBoxStyle, marginBottom:'20px'}}>
+                        {this.renderFilter()}
+                        
+                        <Col xl={17} md={24} style={{paddingLeft:'20px'}}>
+                            <Row style={{marginTop: '40px'}}>
+                                
+                                <Row style={{...shadowBoxStyle, border:'0', borderWidth:'0px'}}> 
+                                    <Input 
+                                        suffix={(
+                                            <Icon 
+                                                type="search" 
+                                                style={{fontSize: '16px', marginRight: '10px', fontWeight: '600'}}
+                                            />
+                                        )}
+                                        placeholder="Search Advice"
+                                        value={this.state.searchValue}
+                                        onChange={this.handleInputChange}
+                                        onPressEnter={() => this.getAdvices()}/>
+                                </Row>
 
-                            <Row type="flex" align="middle" justify="end" >
-                                <Col span={10} style={{...filterSortContainerStyle, marginBottom: '-40px', zIndex:'4'}}>
-                                    <Row type="flex" align="middle" justify="end">
-                                        <Col xs={3} md={3} xl={0} style={{marginTop: '5px'}}>
-                                            <Icon   
-                                                onClick={this.toggleFilterModal} 
-                                                style={{cursor: 'pointer'}}
-                                                type="bars" 
-                                                style={{ fontSize: 20, cursor: 'pointer'}}/>
-                                        </Col>
-                                        <Col span={4}>
-                                            <h5 style={{fontSize: '14px', color: '#6C6C6C'}}>Sort By</h5>
-                                        </Col>
-                                        <Col span={9}>
-                                            {this.renderSortingMenu()}
-                                        </Col>
-                                    </Row>
+                                <Row type="flex" align="middle" justify="end" >
+                                    <Col span={10} style={{...filterSortContainerStyle, marginBottom: '-40px', zIndex:'4'}}>
+                                        <Row type="flex" align="middle" justify="end">
+                                            <Col xs={3} md={3} xl={0} style={{marginTop: '5px'}}>
+                                                <Icon   
+                                                    onClick={this.toggleFilterModal} 
+                                                    style={{cursor: 'pointer'}}
+                                                    type="bars" 
+                                                    style={{ fontSize: 20, cursor: 'pointer'}}/>
+                                            </Col>
+                                            <Col span={4}>
+                                                <h5 style={{fontSize: '14px', color: '#6C6C6C'}}>Sort By</h5>
+                                            </Col>
+                                            <Col span={9}>
+                                                {this.renderSortingMenu()}
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            </Row>
+                            
+                            <Row>
+                                <Col span={24} style={{minHeight: '600px'}}>
+                                    <Tabs 
+                                        animated={false} 
+                                        defaultActiveKey={this.state.selectedTab} 
+                                        onChange={this.handleTabChange}>
+                                        
+                                        <TabPane tab="All" key="all">
+                                            {this.renderAdvices('all')}
+                                        </TabPane>
+                                        
+                                        <TabPane tab="Trending" key="trending">
+                                            {this.renderAdvices('trending')}
+                                        </TabPane>
+                                        
+                                        <TabPane tab="Subscribed" key="subscribed">
+                                            {this.renderAdvices('subscribed')}
+                                        </TabPane>
+                                        
+                                        <TabPane tab="Wishlist" key="following">
+                                            {this.renderAdvices('following')}
+                                        </TabPane>
+                                    </Tabs>
                                 </Col>
                             </Row>
-                        </Row>
-                        
-                        <Row>
-                            <Col span={24} style={{minHeight: '600px'}}>
-                                <Tabs 
-                                    animated={false} 
-                                    defaultActiveKey={this.state.selectedTab} 
-                                    onChange={this.handleTabChange}>
-                                    
-                                    <TabPane tab="All" key="all">
-                                        {this.renderAdvices('all')}
-                                    </TabPane>
-                                    
-                                    <TabPane tab="Trending" key="trending">
-                                        {this.renderAdvices('trending')}
-                                    </TabPane>
-                                    
-                                    <TabPane tab="Subscribed" key="subscribed">
-                                        {this.renderAdvices('subscribed')}
-                                    </TabPane>
-                                    
-                                    <TabPane tab="Wishlist" key="following">
-                                        {this.renderAdvices('following')}
-                                    </TabPane>
-                                </Tabs>
-                            </Col>
-                        </Row>
-                        <Row style={{textAlign: 'center'}}>
-                            <Pagination
-                                current={Number(this.state.selectedPage)} 
-                                total={this.state.totalCount} 
-                                pageSize={this.state.limit}
-                                onChange={this.onPaginationChange}/>
-                        </Row>                  
-                    </Col>
-                    <Col xl={6} md={0} offset={1} style={{...newLayoutStyle, padding: '0'}}>
-                        <Row>
-                            <Col span={8}>
-                                <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>
-                            </Col>
-                            <Col span={6} offset={9}>
-                                <Button style={filterBtnStyle} onClick={this.handleFilterChange}>Update</Button>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={24}>
-                                {this.getFilterComponent()}
-                            </Col>
-                        </Row>
-                    </Col>
+                            <Row style={{textAlign: 'center'}}>
+                                <Pagination
+                                    current={Number(this.state.selectedPage)} 
+                                    total={this.state.totalCount} 
+                                    pageSize={this.state.limit}
+                                    onChange={this.onPaginationChange}/>
+                            </Row>                  
+                        </Col>
+                        <Col xl={6} md={0} offset={1} style={{...newLayoutStyle, padding: '0'}}>
+                            <Row>
+                                <Col span={8}>
+                                    <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>
+                                </Col>
+                                <Col span={6} offset={9}>
+                                    <Button style={filterBtnStyle} onClick={this.handleFilterChange}>Update</Button>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col span={24}>
+                                    {this.getFilterComponent()}
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
                 </Row>
                 <Footer />
-            </Row>
+            </React.Fragment>
         );
     }
 

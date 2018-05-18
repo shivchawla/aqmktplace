@@ -674,7 +674,7 @@ export default class AdvisorDashboard extends React.Component {
             return <ForbiddenAccess />
         } else {
             return (
-                <Row>
+                <Row className='aq-page-container'>
                     <AqPageHeader title="Advisor Dashboard" breadCrumbs = {breadCrumbArray} />
                     {
                         this.state.showEmptyScreen

@@ -17,7 +17,18 @@ class AqPageHeaderImpl extends React.Component {
         } = this.props;
         
         return (
-            <Row type="flex" justify="space-between" align="middle" style={{backgroundColor: '#f9f9f9', paddingTop:'10px', marginBottom:'5px'}}>
+            <Row 
+                    type="flex" 
+                    justify="space-between" 
+                    align="middle" 
+                    style={{
+                        backgroundColor: '#f9f9f9', 
+                        paddingTop:'10px', 
+                        margin: '0 5px', 
+                        marginBottom:'10px', 
+                        ...this.props.style
+                    }}
+            >
                 <Col span={12}>
                     {
                         this.props.showTitle &&
