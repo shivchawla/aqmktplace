@@ -3,6 +3,21 @@
     <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
     <title>Group 21</title>
     <desc>Created with Sketch.</desc>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Lato:400,700|Montserrat:400,500,600');
+        .advice {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+        }
+        .return {
+            font-family: 'Lato', sans-serif;
+            font-weight: 400;
+        }
+        .return-value {
+            font-family: 'Lato', sans-serif;
+            font-weight: 700;
+        }
+    </style>
     <defs>
         <linearGradient x1="3.11503508%" y1="2.23521114%" x2="100%" y2="71.7555688%" id="linearGradient-1">
             <stop stop-color="#8468F5" offset="0%"></stop>
@@ -34,10 +49,10 @@
                 </g>
                 <g id="logo" transform="translate(65.964286, 33.000000)">
                     <rect id="Rectangle-3" fill="url(#linearGradient-4)" x="0" y="5.98275862" width="36.1899986" height="36.1899986" rx="11.25"></rect>
-                    <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="33.75" font-weight="normal" fill="#FFFFFF">
+                    <text class="return" id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="33.75" font-weight="normal" fill="#FFFFFF">
                         <tspan x="8.27108202" y="33.2413793">a</tspan>
                     </text>
-                    <text id="Advice" font-family="AvenirNext-Regular, Avenir Next" font-size="24" font-weight="normal" letter-spacing="0.5" fill="#323C5A">
+                    <text class="advice" id="Advice" font-family="AvenirNext-Regular, Avenir Next" font-size="24" font-weight="normal" letter-spacing="0.5" fill="#323C5A">
                         <tspan x="45.0357143" y="37">Advice</tspan>
                     </text>
                 </g>
