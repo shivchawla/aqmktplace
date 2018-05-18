@@ -358,12 +358,12 @@ class PortfolioDetailImpl extends React.Component {
                 const netValue = _.get(portfolioMetrics, 'netValue', null);
 
                 const metrics = [
-                    {value: annualReturn, label: annualReturnLabel, fixed: 2, percentage: true},
-                    {value: volatility, label: volatilityLabel, fixed: 2, percentage: true},
-                    {value: totalReturn, label: 'Total Return', fixed: 2, percentage: true, color: true},
+                    {value: annualReturn, label: annualReturnLabel, fixed: 2, percentage: true, tooltipText: 'Compounded annual growth rate over last year'},
+                    {value: volatility, label: volatilityLabel, fixed: 2, percentage: true, tooltipText: 'Annualized standard deviation of daily returns since inception'},
+                    {value: totalReturn, label: 'Total Return', fixed: 2, percentage: true, color: true, tooltipText: 'Total return since inception'},
                     //{value: dailyNAVChangePct, label: dailyNAVChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
-                    {value: totalPnl, label: unrealizedPnlLabel, fixed: 2, money:true, color: true, direction:true},
-                    {value: netValue, label: netValueLabel, isNetValue: true, money:true, dailyChangePct: dailyNAVChangePct, fixed: Math.round(netValue) == netValue ? 0 : 2}
+                    {value: totalPnl, label: unrealizedPnlLabel, fixed: 2, money:true, color: true, direction:true, tooltipText: 'Unrealized PNL'},
+                    {value: netValue, label: netValueLabel, isNetValue: true, money:true, dailyChangePct: dailyNAVChangePct, fixed: Math.round(netValue) == netValue ? 0 : 2, tooltip: 'Net Value of Portfolio'}
                 ];
                 this.setState({
                     portfolioMetrics: metrics,
@@ -659,7 +659,7 @@ class PortfolioDetailImpl extends React.Component {
                             <Row>
                                 <Col span={24} style={dividerStyle}></Col>
                             </Row>
-                            <Collapse bordered={false} defaultActiveKey={["1"]}>
+                            <Collapse bordered={false} defaultActiveKey={["1", "2"]}>
                                 <Panel
                                         key='1'
                                         style={customPanelStyle}
