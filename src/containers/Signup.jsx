@@ -52,7 +52,7 @@ class Signup extends Component {
           })
           .catch((error) => {
             this.cancelSignupCall = undefined;
-            if (error.response.status === 401){
+            if (error.response && error.response.status === 401){
               this.updateState({
                 'loading': false,
                 'error': "Email address already registered!! Sign up with a different email."
