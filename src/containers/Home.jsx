@@ -48,17 +48,17 @@ export default class Home extends React.Component {
                     <img src={adviceLogo} style={{transform: 'scale(0.8, 0.8)', marginLeft: '-40px'}}/>
                 </Col>
                 <Col span={12} className="tab-content-button-container">
-                    {
-                        Utils.isLoggedIn()
-                        ?   <ButtonComponent 
-                                    onClick={() => this.props.history.push('/advisordashboard/createadvice')} 
-                                    text="Create an Advice" 
-                            />
-                        :   <ButtonComponent 
-                                    onClick={() => this.props.history.push('/signup')} 
-                                    text="Become an advisor" 
-                            />
-                    }
+                    {/* <ButtonComponent 
+                                onClick={() => this.props.history.push('/advisordashboard/createadvice')} 
+                                text="Create an Advice" 
+                    /> */}
+                    <Button 
+                            style={{marginLeft: '20px', border: 'none', width: '200px', boxShadow: '0 4px 18px rgba(0, 0, 0, 0.1)'}}
+                            // className="action-buttons"
+                            onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                    >
+                        Create Financial Advice
+                    </Button>
                 </Col>
             </div>
         );
@@ -108,10 +108,17 @@ export default class Home extends React.Component {
                     <img src={portfolioLogo} style={{transform: 'scale(0.8, 0.8)', marginLeft: '-40px'}}/>
                 </Col>
                 <Col span={12} className="tab-content-button-container">
-                    <ButtonComponent 
+                    {/* <ButtonComponent 
                             onClick={() => this.props.history.push('/advice')} 
                             text="Screen Advices" 
-                    />
+                    /> */}
+                    <Button 
+                            style={{marginLeft: '20px', border: 'none', width: '200px', boxShadow: '0 4px 18px rgba(0, 0, 0, 0.1)'}}
+                            // className="action-buttons"
+                            onClick={() => this.props.history.push('/advice')} 
+                    >
+                        Screen Advices
+                    </Button>
                 </Col>
             </div>
         );

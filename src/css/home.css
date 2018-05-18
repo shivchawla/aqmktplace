@@ -69,10 +69,10 @@ body {
 }
 
 .middle-section {
-    margin: 0 30px;
+    /* padding: 0 40px; */
     box-shadow: 0 13px 31px rgba(189, 189, 189, 0.5);
     display: inline-block;
-    width: 95%;
+    width: 94.5%;
     border-radius: 4px;
 }
 
@@ -118,7 +118,7 @@ body {
 
 .tab-content-button-container {
     position: absolute;
-    bottom: 50px;
+    bottom: 110px;
     right: 30px;
     display: flex;
     flex-direction: row;
@@ -153,7 +153,7 @@ body {
     text-align: center;
     margin-top: 150px;
     margin-bottom: 100px; 
-    padding: '0 80px';
+    padding: 0 20px;
 }
 
 .lower-section-header {
