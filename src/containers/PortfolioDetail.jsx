@@ -344,16 +344,16 @@ class PortfolioDetailImpl extends React.Component {
                 var annualReturn = _.get(portfolioMetrics, 'annualReturn', null);
                 var totalReturn = _.get(portfolioMetrics, 'totalReturn', null);
 
-                const realtimeNAV = _.get(portfolioMetrics, 'netValue', 0.0);
-                const eodNAV = _.get(portfolioMetrics, 'netValueEOD', 0.0);
-                const rtNAVChangePct = eodNAV > 0.0 ? (realtimeNAV - eodNAV)/eodNAV : 0.0;
+                //const realtimeNAV = _.get(portfolioMetrics, 'netValue', 0.0);
+                //const eodNAV = _.get(portfolioMetrics, 'netValueEOD', 0.0);
+                //const rtNAVChangePct = eodNAV > 0.0 ? (realtimeNAV - eodNAV)/eodNAV : 0.0;
 
                 //Update return for recent NAV change
                 //annualReturn = Math.pow((1 + (annualReturn ? annualReturn : 0.0)), (251/252))*(1+rtNAVChangePct) - 1.0;
-                totalReturn = (1 + (totalReturn ? totalReturn : 0.0))*(1+rtNAVChangePct) - 1.0;
+                //totalReturn = (1 + (totalReturn ? totalReturn : 0.0))*(1+rtNAVChangePct) - 1.0;
                 
                 const volatility = _.get(portfolioMetrics, 'volatility', null);
-                const dailyNAVChangePct = Number(((rtNAVChangePct || _.get(portfolioMetrics, 'dailyNAVChangeEODPct', 0.0))*100).toFixed(2));
+                const dailyNAVChangePct = 0.0;//Number(((rtNAVChangePct || _.get(portfolioMetrics, 'dailyNAVChangeEODPct', 0.0))*100).toFixed(2));
                 const totalPnl = _.get(portfolioMetrics, 'totalPnl', null);
                 const netValue = _.get(portfolioMetrics, 'netValue', null);
 
