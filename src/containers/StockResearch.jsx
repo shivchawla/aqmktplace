@@ -553,7 +553,7 @@ class StockResearchImpl extends React.Component {
     renderAimsquantRedirectModal = () => {
         return (
             <Modal
-                    title="Redirection Warning"
+                    title="Redirection"
                     onOk={() => {
                         window.location.href = 'https://www.aimsquant.com/'
                     }}
@@ -563,7 +563,7 @@ class StockResearchImpl extends React.Component {
                 <Row>
                     <Col span={24}>
                         <h1 style={{fontSize: '16px'}}>
-                            You will be redirected to AimsQuant
+                            You will be redirected to www.aimsquant.com
                         </h1> 
                     </Col>
                 </Row>
@@ -757,13 +757,12 @@ class StockResearchImpl extends React.Component {
                                     <span style={{color: primaryColor}}>Aims</span>
                                     <span style={{color: 'rgb(224, 102, 102)'}}>Quant</span>
                                 </h1> 
-                                <h3 style={{textAlign: 'center'}}>To Systematically Research investment ideas check out AimsQuant</h3>
+                                <h3 style={{textAlign: 'center', fontSize:'14px'}}>Backtest your Investment Ideas in seconds</h3>
                                 <Button 
-                                        type="primary" 
-                                        style={{marginTop: '20px', width: '150px'}}
-                                        onClick={this.toggleAimsquantRedirectModal}
-                                >
-                                    TAKE ME THERE
+                                    type="primary" 
+                                    style={{marginTop: '20px', width: '150px'}}
+                                    onClick={this.toggleAimsquantRedirectModal}>
+                                    Backtest Now
                                 </Button>
                             </Col>
                         </Row>

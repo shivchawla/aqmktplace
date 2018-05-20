@@ -388,10 +388,11 @@ class AdviceDetailImpl extends React.Component {
         this.setState({isUpdateDialogVisible: !this.state.isUpdateDialogVisible});
     };
 
+    //Pick a better name
     renderModal = () => {
         return (
             <Modal
-                    title="Subscribe"
+                    title={this.state.adviceDetail.isSubscribed ? "Cancel Subscription" : "Buy Advice"}
                     visible={this.state.isDialogVisible}
                     onOk={this.subscribeAdvice}
                     onCancel={this.toggleDialog}
@@ -399,8 +400,8 @@ class AdviceDetailImpl extends React.Component {
                 <h3>
                     {
                         this.state.adviceDetail.isSubscribed
-                        ? "Are you sure you want to Unsubscribe"
-                        : "Are you sure you want to Subscribe"
+                        ? "Are you sure to cancel your subscription for this advice?"
+                        : "At AdviceQube, first 3 advices are FREE for initial 2 months. We will inform you when your free subscription ends."
                     }
                 </h3>
             </Modal>
@@ -776,7 +777,7 @@ class AdviceDetailImpl extends React.Component {
                     >
                         {
                             !this.state.adviceDetail.isSubscribed 
-                            ? "PURCHASE ADVICE" 
+                            ? "BUY ADVICE" 
                             : unsubscriptionPending ? "Unsubscription Pending" : "CANCEL SUBSCRIPTION"
                         }
                     </Button>

@@ -109,7 +109,7 @@ class ResetPassword extends Component {
   compareToFirstPassword = (rule, value, callback) => {
     const form = this.props.form;
     if (value && value !== form.getFieldValue('password')) {
-      callback('Two passwords that you enter is inconsistent!');
+      callback("Passwords don't match");
     } else {
       callback();
     }
