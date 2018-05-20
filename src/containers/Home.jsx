@@ -53,11 +53,10 @@ export default class Home extends React.Component {
                                 text="Create an Advice" 
                     /> */}
                     <Button 
-                            style={{marginLeft: '20px', border: 'none', width: '200px', boxShadow: '0 4px 18px rgba(0, 0, 0, 0.1)'}}
-                            // className="action-buttons"
-                            onClick={() => this.props.history.push('/advisordashboard/createadvice')}
-                    >
-                        Create Financial Advice
+                        style={{border: 'none', width: '200px'}}
+                        // className="action-buttons"
+                        onClick={() => this.props.history.push('/advisordashboard/createadvice')}>
+                        Create Investment Advice
                     </Button>
                 </Col>
             </div>
@@ -68,28 +67,23 @@ export default class Home extends React.Component {
         return (
             <React.Fragment>
                 <DetailListComponent
-                        key="1" 
-                        icon={people}
-                        header="Expand your advisory business"
-                        content="You don’t have to reinvent the wheel. Focus on your great investment 
-                        ideas. While you showcase your ideas, let us do the investor reachout."
-                />
+                    key="1" 
+                    icon={people}
+                    header="Expand your Business"
+                    content="While you focus primarily on improving your investment advices, we help you find the investors"/>
+                
                 <DetailListComponent 
-                        key="2" 
-                        icon={wheel}
-                        header="Barrier less investment advisory"
-                        content="You don’t have reinvent the wheel. Focus on your great investment 
-                        ideas. While you showcase your ideas, let us do the investor reachout."
-                        style={{marginTop: '110px'}}
-                />
+                    key="2" 
+                    icon={stack}
+                    header="Barrier Less Investment Advisory"
+                    content="The power of online to everyone. Now, you can sell your ideas to anyone, anywhere in the world"
+                    style={{marginTop: '110px'}}/>
                 <DetailListComponent
-                        key="3"  
-                        icon={stack}
-                        header="Expand your clientele and no."
-                        content="You don’t have reinvent the wheel. Focus on your great investment 
-                        ideas. While you showcase your ideas, let us do the investor reachout."
-                        style={{marginTop: '110px'}}
-                />
+                    key="3"  
+                    icon={wheel}
+                    header="Superior Research Tools"
+                    content="We provide you the tools to test your investment ideas, historical performance and ranking. You can also automate your investment advice."
+                    style={{marginTop: '110px'}}/>
             </React.Fragment>
         );
     }
@@ -99,7 +93,7 @@ export default class Home extends React.Component {
             <div>
                 <Col span={24}>
                     <h3 className='tab-content-text'>
-                    Only careful and systematic approach towards stock market can generate alpha. 
+                    Only careful and systematic approach towards stock market can generate returns. 
                     Meet advisors who meticulously research stock market to generate 
                     the best investment ideas, not just from India but from around the globe. 
                     </h3>
@@ -113,11 +107,10 @@ export default class Home extends React.Component {
                             text="Screen Advices" 
                     /> */}
                     <Button 
-                            style={{marginLeft: '20px', border: 'none', width: '200px', boxShadow: '0 4px 18px rgba(0, 0, 0, 0.1)'}}
-                            // className="action-buttons"
-                            onClick={() => this.props.history.push('/advice')} 
-                    >
-                        Screen Advices
+                        style={{border: 'none', width: '200px'}}
+                        // className="action-buttons"
+                        onClick={() => this.props.history.push('/advice')} >
+                        Find Investment Advices
                     </Button>
                 </Col>
             </div>
@@ -128,25 +121,24 @@ export default class Home extends React.Component {
         return (
             <React.Fragment>
                 <DetailListComponent
-                        key="1" 
-                        icon={performance}
-                        header="Clear investment ideas"
-                        content="Select Track the performance of an advice/advisor."
-                />
+                    key="1" 
+                    icon={performance}
+                    header="Best Investment Ideas"
+                    content="With many advisors/advices on the platform, select the best advice that fits your needs."/>
+
                 <DetailListComponent 
-                        key="2" 
-                        icon={test}
-                        header="Test it before you believe it"
-                        content="Integrate multiple advice in your portfolio from your subscribed advices."
-                        style={{marginTop: '110px'}}
-                />
+                    key="2" 
+                    icon={test}
+                    header="Power of Diversification"
+                    content="Combine multiple advices in your portfolio and achieve greater diversification and better returns"
+                    style={{marginTop: '110px'}}/>
+
                 <DetailListComponent
-                        key="3"  
-                        icon={track}
-                        header="Track investment portfolios"
-                        content="Create multiple investment portfolios and track metrics like never before."
-                        style={{marginTop: '110px'}}
-                />
+                    key="3"  
+                    icon={track}
+                    header="Track Investment Portfolios"
+                    content="Create multiple investment portfolios and track performance metrics like never before."
+                    style={{marginTop: '110px'}}/>
             </React.Fragment>
         );
     }
@@ -174,14 +166,14 @@ export default class Home extends React.Component {
                                         className="signup-button"
                                         onClick={() => this.props.history.push('/advice')}
                                 >
-                                    Find Investment Ideas
+                                    Find Investment Advice
                                 </Button>
                                 <Button 
                                         style={{marginLeft: '20px'}}
                                         className="action-buttons"
                                         onClick={() => this.props.history.push('/advisordashboard/createadvice')}
                                 >
-                                    Create Financial Advice
+                                    Create Investment Advice
                                 </Button>
                             </Col>
                         </Row>
@@ -297,23 +289,21 @@ const FeatureCard = props => {
 
     return (
         <div 
-                style={{
-                    backgroundColor: '#fff',
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    width: '250px',
-                    padding: '10px',
-                    paddingBottom: '20px',
-                    boxShadow: '0 4px 32px rgba(193, 193, 193, 0.5)',
-                    borderRadius: '4px'
-                }}
-        >
+            style={{
+                backgroundColor: '#fff',
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                width: '250px',
+                padding: '10px',
+                paddingBottom: '20px',
+                boxShadow: '0 4px 32px rgba(193, 193, 193, 0.5)',
+                borderRadius: '4px'
+            }}>
             <img 
-                    style={{transform: 'scale(1, 1)', marginTop: '10px', width: '70px', height: '70px', ...iconStyle}} 
-                    src={icon} 
-            />
+                style={{transform: 'scale(1, 1)', marginTop: '10px', width: '70px', height: '70px', ...iconStyle}} 
+                src={icon}/>
             <h3 style={{color: '#00A2A2', fontSize: '20px', marginTop: '5px'}}>{header}</h3>
             <h3 style={{fontSize: '16px', color: '#333333', marginTop: '15px'}}>{content}</h3>
         </div>
