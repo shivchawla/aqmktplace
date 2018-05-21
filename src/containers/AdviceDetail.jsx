@@ -252,6 +252,7 @@ class AdviceDetailImpl extends React.Component {
                 positions: [],
                 series: []
             });
+            return error;
         })
         .finally(() => {
             this.setState({show: false});

@@ -177,9 +177,7 @@ export default class AdvisorDashboard extends React.Component {
                 this.setUpSocketConnection();
             });
         })
-        .catch(error => {
-            console.log(error);
-        })
+        .catch(error => error)
         .finally(() => {
             this.setState({dashboardDataLoading: false, myAdvicesLoading: false, show: false});
         })
