@@ -38,7 +38,7 @@ export const Footer = props => {
                 <h5 className="footer-group-header">Help</h5>
                 <div className="footer-list">
                     <a className="footer-link" href="/faq">FAQ</a>
-                    <a className="footer-link" href="mailto:contact@aimsquant.com">Contact Us</a>
+                    <a className="footer-link" href="mailto:connect@aimsquant.com">Contact Us</a>
                 </div>
             </Col>
             <Col span={24} style={aimsquantContainerStyle}>
