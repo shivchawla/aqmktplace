@@ -8,7 +8,7 @@ import heroImage from '../assets/HeroImageSmall.svg';
 import chevronRight from '../assets/chevron-right.svg';
 import people from '../assets/people.svg';
 import wheel from '../assets/wheel.svg';
-import stack from '../assets/stack.svg';
+import globe from '../assets/globe.svg';
 import research from '../assets/research.svg';
 import share from '../assets/share.svg';
 import automate from '../assets/automate.svg';
@@ -53,8 +53,7 @@ export default class Home extends React.Component {
                                 text="Create an Advice" 
                     /> */}
                     <Button 
-                        style={{border: 'none', width: '200px'}}
-                        // className="action-buttons"
+                        className="home-action-buttons"
                         onClick={() => this.props.history.push('/advisordashboard/createadvice')}>
                         Create Investment Advice
                     </Button>
@@ -74,7 +73,7 @@ export default class Home extends React.Component {
                 
                 <DetailListComponent 
                     key="2" 
-                    icon={stack}
+                    icon={globe}
                     header="Barrier Less Investment Advisory"
                     content="The power of online to everyone. Now, you can sell your ideas to anyone, anywhere in the world"
                     style={{marginTop: '110px'}}/>
@@ -107,8 +106,7 @@ export default class Home extends React.Component {
                             text="Screen Advices" 
                     /> */}
                     <Button 
-                        style={{border: 'none', width: '200px'}}
-                        // className="action-buttons"
+                        className="home-action-buttons"
                         onClick={() => this.props.history.push('/advice')} >
                         Find Investment Advices
                     </Button>

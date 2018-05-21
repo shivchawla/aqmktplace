@@ -190,6 +190,25 @@ class AdviceDetailContentImpl extends React.Component {
                                 </span>
                             </Tag>
                         }
+                        {
+                            this.props.adviceDetail.isOwner &&
+                            <Tag style={{border: '1px solid #673AB7', cursor: 'auto'}}>
+                                <Icon 
+                                        type={this.props.adviceDetail.isPublic ? 'team' : 'lock'} 
+                                        style={{
+                                            fontWeight: '400', 
+                                            color:'#673AB7', 
+                                            fontSize: '15px',
+                                            // marginTop: '4px'
+                                        }}
+                                />
+                                <span style={{color: '#673AB7', marginLeft: '5px'}}>
+                                    {
+                                        this.props.adviceDetail.isPublic ? 'Public' : 'Private'
+                                    }
+                                </span>
+                            </Tag>
+                        }
                         {this.renderTrendingApprovedIcon()}
                     </Col>
                 </Row>

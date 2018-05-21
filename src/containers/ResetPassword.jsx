@@ -40,7 +40,7 @@ class ResetPassword extends Component {
             })
           })
           .then((response) => {
-              console.log('Reset Password Completed');
+              // console.log('Reset Password Completed');
               this.cancelLoginCall = undefined;
               this.props.history.push('/authMessage?mode=resetPassword');
             //   if (response.data.token){
@@ -64,12 +64,16 @@ class ResetPassword extends Component {
           })
           .catch((error) => {
             this.cancelLoginCall = undefined;
-            console.log(error.response);
+            console.log('Error Occured');
             if (error.response) {
               this.updateState({
                 'loading': false,
                 'error': _.get(error, 'response.data.statusMessage', 'Error Occured')
               });
+            } else {
+              this.updateState({
+                error: 'Error occured while updating password'
+              })
             }
           })
           .finally(() => {

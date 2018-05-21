@@ -282,7 +282,7 @@ export default class ScreenAdvices extends React.PureComponent {
         const {netValue, sharpe, volatility, rating} = selectedFilters;
         approved = _.join(approved, ',');
         personal = _.join(personal, ',');
-        const adviceRequestType = Utils.isLoggedIn() ?  'advice' : 'advice_default'
+        const adviceRequestType = Utils.isLoggedIn() ?  'advice' : 'advice_default';
         const url = `${requestUrl}/${adviceRequestType}?&${type}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip}&orderParam=${orderParam}&order=-1`;
         return url;
     }
@@ -465,10 +465,10 @@ export default class ScreenAdvices extends React.PureComponent {
 
     onPaginationChange = (page, pageSize) => {
         this.setState({selectedPage: page}, () => {
+            window.scrollTo(0, 0);
             this.getAdvices();
             Utils.localStorageSave('selectedPage', page);
         })
-        // console.log('Page', page);
     }   
 
     handleFilterChange = () => {

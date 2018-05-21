@@ -214,3 +214,14 @@ body {
 .new-advice {
     fill: red;
 }
+
+.home-action-buttons {
+    border: none;
+    width: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease-in-out;
+}
+
+.home-action-buttons:hover {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}

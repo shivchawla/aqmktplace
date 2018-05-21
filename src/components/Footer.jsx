@@ -5,7 +5,6 @@ import {Row, Col} from 'antd';
 export const Footer = props => {
     return (
         <Row className="footer">
-            <h3 className="footer-header">AdviceQube</h3>
             <Col span={4} className="footer-container">
                 <h5 className="footer-group-header">Products</h5>
                 <div className="footer-list">
@@ -42,6 +41,19 @@ export const Footer = props => {
                     <a className="footer-link" href="mailto:contact@aimsquant.com">Contact Us</a>
                 </div>
             </Col>
+            <Col span={24} style={aimsquantContainerStyle}>
+                <h3 style={{color: '#fff', fontSize: '12px'}}>
+                    AimsQuant Private Limited
+                </h3>
+            </Col>
         </Row>
     );
+}
+
+const aimsquantContainerStyle = {
+    position: 'absolute',
+    bottom: 0,
+    textAlign: 'right',
+    left: '-20px',
+    paddingBottom: '20px'
 }

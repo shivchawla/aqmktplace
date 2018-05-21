@@ -755,6 +755,11 @@ class AdviceDetailImpl extends React.Component {
         this.setState({unsubscriptionModalVisible: !this.state.unsubscriptionModalVisible});
     }
 
+    redirectToLogin = () => {
+        Utils.localStorageSave('redirectToUrlFromLogin', this.props.match.url);
+        this.props.history.push('/login');
+    }
+
     renderActionButtons = (small=false) => {
         const {userId} = this.state;
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
@@ -768,7 +773,8 @@ class AdviceDetailImpl extends React.Component {
                             onClick={() => 
                                 Utils.isLoggedIn() 
                                 ? unsubscriptionPending ? this.toggleUnsubscriptionModal() : this.toggleDialog() 
-                                : this.props.history.push('/login')
+                                : this.redirectToLogin()
+                                
                             }
                             className={className}
                             style={buttonStyle}
@@ -778,20 +784,20 @@ class AdviceDetailImpl extends React.Component {
                         {
                             !this.state.adviceDetail.isSubscribed 
                             ? "BUY ADVICE" 
-                            : unsubscriptionPending ? "Unsubscription Pending" : "CANCEL SUBSCRIPTION"
+                            : unsubscriptionPending ? "UNSUBSCRIPTION PENDING" : "CANCEL SUBSCRIPTION"
                         }
                     </Button>
                     <Button
                             onClick={() => 
                                 Utils.isLoggedIn()
                                 ? this.followAdvice()
-                                : this.props.history.push('/login') 
+                                : this.redirectToLogin()
                             }
                             className={className}
                             style={buttonStyle}
                             disabled={this.state.disableFollowButton}
                     >
-                        {!this.state.adviceDetail.isFollowing ? "Add To Wishlist" : "Remove From Wishlist"}
+                        {!this.state.adviceDetail.isFollowing ? "ADD TO WISHLIST" : "REMOVE FROM WISHLIST"}
                     </Button>
                 </div>
             );
