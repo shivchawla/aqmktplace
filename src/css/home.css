@@ -4,7 +4,7 @@ body {
 
 .page-container {
     position: relative;
-    padding-bottom: 20px;
+    /* padding-bottom: 20px; */
     display: flex;
     flex-direction: column;
     align-items: center;
