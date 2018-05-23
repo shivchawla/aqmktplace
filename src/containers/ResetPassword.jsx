@@ -64,7 +64,7 @@ class ResetPassword extends Component {
           })
           .catch((error) => {
             this.cancelLoginCall = undefined;
-            console.log('Error Occured');
+            // console.log('Error Occured');
             if (error.response) {
               this.updateState({
                 'loading': false,

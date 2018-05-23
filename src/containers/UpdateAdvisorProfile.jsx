@@ -145,7 +145,7 @@ class UpdateAdvisorProfileImpl extends React.Component {
                     }
                 });
             } else {
-                console.log('Error ', err);
+                // console.log('Error ', err);
             }
         });
     }
@@ -160,8 +160,8 @@ class UpdateAdvisorProfileImpl extends React.Component {
     checkCompanyValidation = () => {
         const companyRegistrationNum = this.props.form.getFieldValue('companyRegistrationNum') || '';
         const companyName = this.props.form.getFieldValue('companyName') || '';
-        console.log(companyRegistrationNum);
-        console.log(companyName);
+        // console.log(companyRegistrationNum);
+        // console.log(companyName);
         if (this.state.isCompany) {
             return companyRegistrationNum.length > 0 && companyName.length > 0;
         }

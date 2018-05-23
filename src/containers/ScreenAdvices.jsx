@@ -298,7 +298,6 @@ export default class ScreenAdvices extends React.PureComponent {
     processAdvices = (responseAdvices) => {
         const advices = [];
         responseAdvices.map((advice, index) => {
-            console.log('Advice Item', advice);
             advices.push({
                 isFollowing: advice.isFollowing || false,
                 id: advice._id || 0,
