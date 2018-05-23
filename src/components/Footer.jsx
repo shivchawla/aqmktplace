@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {Link} from 'react-router-dom';
 import {Row, Col} from 'antd';
 import {Utils} from '../utils';
-const {aimsquantUrl} = require('../localConfig');
+const aimsquantUrl = 'https://www.aimsquant.com';
 
 export const Footer = props => {
     const token = _.get(Utils.getUserInfo(), 'token', '') || '';
