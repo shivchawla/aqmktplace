@@ -1,5 +1,6 @@
 import moment from 'moment';
 import _ from 'lodash';
+import axios from 'axios';
 import {reactLocalStorage} from 'reactjs-localstorage';
 import {graphColors, metricColor} from '../constants';
 import {getStockData} from './requests';
@@ -442,6 +443,32 @@ export class Utils{
 		if (error.message === 'Network Error') {
 			history.push('/errorPage');
 		}
+	}
+
+	static autoLogin(token, history, redirectUrl, callback) {
+		const headers = {
+			'aimsquant-token': token
+		};
+		axios.get(`${requestUrl}/me`, {headers})
+        .then(response => {
+            Utils.localStorageSaveObject(Utils.userInfoString, {...response.data, token});
+			Utils.setLoggedInUserInfo({...response.data, token});
+			callback();
+        })
+        .catch(error => {
+          this.checkForInternet(error, history);
+          if (error.response) {
+              if (error.response.status === 400 || error.response.status === 403) {
+                  history.push('/forbiddenAccess');
+              }
+              this.checkErrorForTokenExpiry(error, history, redirectUrl);
+          }
+          return error;
+        });
+	}
+
+	static checkToken(token) {
+		return token && token !== undefined && token!== null && token.length > 0;
 	}
 }
 

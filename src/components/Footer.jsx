@@ -1,15 +1,20 @@
 import * as React from 'react';
+import _ from 'lodash';
 import {Link} from 'react-router-dom';
 import {Row, Col} from 'antd';
+import {Utils} from '../utils';
+const {aimsquantUrl} = require('../localConfig');
 
 export const Footer = props => {
+    const token = _.get(Utils.getUserInfo(), 'token', '') || '';
+
     return (
         <Row className="footer">
             <Col span={4} className="footer-container">
                 <h5 className="footer-group-header">Products</h5>
                 <div className="footer-list">
                     <Link className="footer-link" to="/home">MarketPlace</Link>
-                    <a className="footer-link" href="https://www.aimsquant.com/">Research Platform</a>
+                    <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home?token=${token}`}>Research Platform</a>
                 </div>
             </Col>
             {/* <Col span={4} className="footer-container">
@@ -30,8 +35,8 @@ export const Footer = props => {
             <Col span={4} className="footer-container">
                 <h5 className="footer-group-header">AimsQuant</h5>
                 <div className="footer-list">
-                    <a className="footer-link" href="https://www.aimsquant.com/research/community">Community</a>
-                    <a className="footer-link" href="https://www.aimsquant.com/research/strategy">Research</a>
+                    <a className="footer-link" target="_blank" href={`${aimsquantUrl}/community?token=${token}`}>Community</a>
+                    <a className="footer-link" target="_blank" href={`${aimsquantUrl}/research?token=${token}`}>Research</a>
                 </div>
             </Col>
             <Col span={4} className="footer-container">

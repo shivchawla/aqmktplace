@@ -20,7 +20,7 @@ import {PageNotFound, NoIternetAccess, ForbiddenAccess} from './components';
 import AppliedRoute from './components/AppliedRoute';
 import {AuthComponent} from './containers/AuthComponent';
 import {HocExample} from './containers/HocExample';
-import {Utils} from './utils';
+import {Utils, fetchAjax} from './utils';
 import {primaryColor} from './constants';
 // import AdvisorDashboard from './containers/AdvisorDashboard';
 // import InvestorDashboard from './containers/InvestorDashboard';
@@ -45,16 +45,25 @@ const AdvisorProfile = asyncComponent(() => import("./containers/AdvisorProfile"
 const Home = asyncComponent(() => import("./containers/Home"));
 const FAQ = asyncComponent(() => import("./containers/FAQ"));
 const ResetPassword = asyncComponent(() => import("./containers/ResetPassword"));
-const {gaTrackingId} = require('./localConfig');
+const {gaTrackingId, requestUrl} = require('./localConfig');
 
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {parentPath: '/', sideMenuOpen: true};
+        this.state = {parentPath: '/', sideMenuOpen: true, isLoggedIn: false};
         ReactGA.initialize(gaTrackingId); //Unique Google Analytics tracking number
     }
 
     componentWillMount() {
+        const params = new URLSearchParams(this.props.location.search);
+        const token = params.get('token') || '';
+        if (Utils.checkToken(token)) {
+            Utils.autoLogin(token,this.props.history, this.props.match.url, () => {
+                this.setState({isLoggedIn: true})
+            });
+        } else {
+            this.setState({isLoggedIn: Utils.isLoggedIn()});
+        }
         this.onRouteChanged(this.props.location.pathname);
     }
 
@@ -193,6 +202,10 @@ class App extends React.Component {
         );
     }
 
+    checkLoggedIn = () => {
+        return Utils.isLoggedIn() && this.state.isLoggedIn;
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -227,32 +240,32 @@ class App extends React.Component {
                                     onClick={this.handleNavMenuClick}
                                     selectedKeys={[this.state.parentPath]}>
                                     {
-                                        Utils.isLoggedIn() &&
+                                        this.checkLoggedIn() &&
                                             <SubMenu title="Dashboard">
                                                 <Menu.Item key="investordashboard">Investor Dashboard</Menu.Item>
                                                 <Menu.Item key="advisordashboard">Advisor Dashboard</Menu.Item>
                                             </SubMenu>
                                     }
                                     {
-                                        !Utils.isLoggedIn() &&
+                                        !this.checkLoggedIn() &&
                                         <Menu.Item key={'home'}>Home</Menu.Item>
                                     }
                                     <Menu.Item key="advice">Screen Advices</Menu.Item>
                                     {
-                                        Utils.isLoggedIn() &&
+                                        this.checkLoggedIn() &&
                                         <Menu.Item key="stockresearch">Stock Research</Menu.Item>
                                     }
                                     {
-                                        !Utils.isLoggedIn() &&
+                                        !this.checkLoggedIn() &&
                                         <Menu.Item key="login">Login</Menu.Item>
                                     }
                                     {
-                                        !Utils.isLoggedIn() &&
+                                        !this.checkLoggedIn() &&
                                         <Menu.Item key="signup">Signup</Menu.Item>
                                     }
                                 </Menu>
                                 {
-                                    Utils.isLoggedIn() &&
+                                    this.checkLoggedIn() &&
                                     <React.Fragment>
                                         {/* <Button 
                                                 type="primary"

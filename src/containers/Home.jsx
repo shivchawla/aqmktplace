@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Row, Col, Button} from 'antd';
 import {Motion, spring} from 'react-motion';
-import {Utils} from '../utils';
+import {Utils, fetchAjax} from '../utils';
 import adviceLogo from '../assets/AdviceLogo.svg';
 import portfolioLogo from '../assets/PortfolioLogo.svg';
 import heroImage from '../assets/HeroImageSmall.svg';
@@ -17,14 +17,17 @@ import test from '../assets/test.svg';
 import track from '../assets/track.svg';
 import performance from '../assets/performance.svg';
 import {Footer} from '../components/Footer';
-
 import '../css/home.css';
+
+
+const {requestUrl} = require('../localConfig');
 
 export default class Home extends React.Component { 
     constructor(props) {
         super(props);
         this.state = {
-            selectedTabBar: 'advisor'
+            selectedTabBar: 'advisor',
+            loading: false
         }
     }
 
