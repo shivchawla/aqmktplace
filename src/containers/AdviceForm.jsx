@@ -1052,7 +1052,8 @@ export class AdviceFormImpl extends React.Component {
                     lastName: _.get(Utils.getUserInfo(), 'lastName', null)
                 },
                 _id: _.get(Utils.getUserInfo(), 'advisor', null)
-            }
+            },
+            isPublic: this.state.isPublic
         };
         const metrics = {
             annualReturn: _.get(portfolioMetrics, 'returns.annualreturn', 0),
@@ -1071,7 +1072,7 @@ export class AdviceFormImpl extends React.Component {
                 price: item.lastPrice,
                 sector: item.sector,
                 weight: item.weight,
-                key: index
+                key: index,
             }
         });
         if(this.state.preview) {
