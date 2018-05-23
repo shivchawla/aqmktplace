@@ -29,7 +29,7 @@ class AuthMessageImpl extends Component {
         return (
           <React.Fragment>
             <h2 style={{'fontSize': '24px', 'color': 'teal'}}>
-              You are just one step away to test your great ideas!!
+              You are just one step away from finding great investment ideas!!
             </h2>
             <p style={{'fontSize': '18px', 'marginTop': '20px'}}>We've sent an email to
               <span style={{'fontWeight': '700'}}> {this.params.get('email')}</span>.
