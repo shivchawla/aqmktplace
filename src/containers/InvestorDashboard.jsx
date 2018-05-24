@@ -72,11 +72,11 @@ export default class InvestorDashboard extends React.Component {
                 dataIndex: 'name',
                 key: 'name',
                 fixed: true,
-                width: 200,
+                width: 220,
                 render: (text, record) => {
                     return  <h3 
                                 onClick={() => this.props.history.push(`advice/${record.id}`)} 
-                                style={{...nameEllipsisStyle}}
+                                style={{...nameEllipsisStyle, width: '200px'}}
                             >
                                 {text}
                             </h3>
@@ -86,11 +86,13 @@ export default class InvestorDashboard extends React.Component {
                 title: this.renderColumnHeader('NET VALUE'),
                 dataIndex: 'netValue',
                 key: 'netValue',
+                fixed: true,
+                width: 180,
                 render: (text, record) => {
                     let color = record.return < 0 ? '#ED4D4D' : '#3DC66B';
 
                     return (
-                        <h3 style={{fontSize: '16px'}}>
+                        <h3 style={{fontSize: '16px', style: '160px'}}>
                             {Utils.formatMoneyValueMaxTwoDecimals(Number(text))}
                             <span style={{fontSize: '12px', color, fontWeight: 700, marginLeft: '5px'}}>
                                 {`${record.return} %`}
@@ -114,7 +116,7 @@ export default class InvestorDashboard extends React.Component {
                             isSubscribed 
                             ? {text: 'Subscribed', color: '#108ee9'} 
                             : record.isFollowing ? {text: 'WishListed', color: '#1DE9B6'} : {text: 'Not Wishlisted', color: 'transparent'};;
-                    return <Tag color={tagContent.color} style={{textAlign: 'center', fontSize: '10px'}}>{tagContent.text}</Tag>
+                    return <Tag color={tagContent.color} style={{textAlign: 'center', fontSize: '10px', cursor: 'auto'}}>{tagContent.text}</Tag>
                 }
             }
         ]
@@ -261,7 +263,7 @@ export default class InvestorDashboard extends React.Component {
                         key: Math.random().toString(36),
                         name: advice.name,
                         return: Number(_.get(performanceSummary, 'current.totalReturn', 0) * 100).toFixed(2),
-                        netValue: _.get(performanceSummary, 'current.netValue', 0).toFixed(2),
+                        netValue: _.get(advice, 'netValue', 0).toFixed(2),
                         rating: advice.rating.current,
                         isFollowing: advice.isFollowing,
                         isSubscribed: advice.isSubscribed
@@ -436,7 +438,7 @@ export default class InvestorDashboard extends React.Component {
                     name: advice.name,
                     //This is EOD change in NAV na not return...KEY needs a NAME change
                     return: Number(_.get(performanceSummary, 'current.dailyNAVChangeEODPct', 0) * 100).toFixed(2),
-                    netValue: _.get(performanceSummary, 'current.netValueEOD', 0),
+                    netValue: _.get(advice, 'netValue', 0),
                     rating: _.get(advice, 'rating.current', 0),
                     isSubscribed,
                     isFollowing
@@ -454,7 +456,7 @@ export default class InvestorDashboard extends React.Component {
                 dataSource={this.state.subscribedAdvices} 
                 pagination={false}
                 size="small"
-                scroll={{ y: 320 }}
+                scroll={{ y: 350 }}
                 style={{margin: '10px 20px'}}/>
         );
     }

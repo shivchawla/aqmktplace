@@ -931,7 +931,7 @@ export class AdviceFormImpl extends React.Component {
             >
                 <Row>
                     <Col span={24}>
-                        <h3>You can only create 5 advices for free. To create more please complete our payment procedure</h3>
+                        <h3>You can only create {adviceLimit} advices for free.</h3>
                     </Col>
                 </Row>
             </Modal>
