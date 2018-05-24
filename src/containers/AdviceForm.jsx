@@ -206,13 +206,15 @@ export class AdviceFormImpl extends React.Component {
                     message.success('Succesfully Created Advice');
                 })
                 .catch(error => {
+                    console.log(error);
                     Utils.checkForInternet(error, this.props.history);
                     if (error.response) {
                         const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating advice');
                         notification.open({
-                            message: <span style={{color: '#f81d22'}}>Error</span>,
-                            description: errorMessage,
-                            duration: 0
+                            message: <span style={{color: '#f81d22', fontSize: '18px'}}>Error</span>,
+                            description: <span style={{fontWeight: '400', fontSize: '16px'}}>{errorMessage}</span>,
+                            duration: 0,
+                            type: 'error'
                         }); 
                         this.setState({postWarningModalVisible: false});                       
                         Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
@@ -981,13 +983,7 @@ export class AdviceFormImpl extends React.Component {
                                 <Button 
                                         style={{...buttonStyle}}
                                         disabled={!this.checkFormValidationSuccess()}
-                                        onClick={
-                                            (e) => {
-                                                this.state.adviceCount >= adviceLimit && !this.props.isUpdate
-                                                ? this.toggleAdviceLimitExceededModal()
-                                                : this.togglePostWarningModal()
-                                            }
-                                        }
+                                        onClick={this.togglePostWarningModal}
                                         className={`action-button ${className}`}
                                 >
                                     POST TO MARKET PLACE
@@ -997,13 +993,7 @@ export class AdviceFormImpl extends React.Component {
                                 <Button 
                                         style={{...buttonStyle}}
                                         type="primary" 
-                                        onClick={
-                                            (e) => {
-                                                this.state.adviceCount >= adviceLimit && !this.props.isUpdate
-                                                ? this.toggleAdviceLimitExceededModal()
-                                                : this.togglePostWarningModal()
-                                            }
-                                        }
+                                        onClick={this.togglePostWarningModal}
                                         className={`action-button ${className}`}
                                 >
                                     POST NOW
@@ -1012,13 +1002,7 @@ export class AdviceFormImpl extends React.Component {
                                     !this.props.isUpdate &&
                                     <Button 
                                             style={{...buttonStyle}}
-                                            onClick={
-                                                (e) => {
-                                                    this.state.adviceCount >= adviceLimit && !this.props.isUpdate
-                                                    ? this.toggleAdviceLimitExceededModal()
-                                                    : this.handleSubmit(e)
-                                                }
-                                            }
+                                            onClick={this.handleSubmit}
                                             className={`action-button ${className}`}
                                     >
                                         SAVE FOR LATER
