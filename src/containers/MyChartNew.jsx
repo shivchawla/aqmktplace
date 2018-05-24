@@ -185,7 +185,6 @@ class MyChartNewImpl extends React.Component {
                 selected: true,
                 color
             });
-            console.log(this.chart);
         }
         if (legendIndex === -1) {
             this.setState(prevState => {
