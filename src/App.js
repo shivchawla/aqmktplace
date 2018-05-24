@@ -239,32 +239,32 @@ class App extends React.Component {
                                     onClick={this.handleNavMenuClick}
                                     selectedKeys={[this.state.parentPath]}>
                                     {
-                                        this.checkLoggedIn() &&
+                                        Utils.isLoggedIn() &&
                                             <SubMenu title="Dashboard">
                                                 <Menu.Item key="investordashboard">Investor Dashboard</Menu.Item>
                                                 <Menu.Item key="advisordashboard">Advisor Dashboard</Menu.Item>
                                             </SubMenu>
                                     }
                                     {
-                                        !this.checkLoggedIn() &&
+                                        !Utils.isLoggedIn() &&
                                         <Menu.Item key={'home'}>Home</Menu.Item>
                                     }
                                     <Menu.Item key="advice">Screen Advices</Menu.Item>
                                     {
-                                        this.checkLoggedIn() &&
+                                        Utils.isLoggedIn() &&
                                         <Menu.Item key="stockresearch">Stock Research</Menu.Item>
                                     }
                                     {
-                                        !this.checkLoggedIn() &&
+                                        !Utils.isLoggedIn() &&
                                         <Menu.Item key="login">Login</Menu.Item>
                                     }
                                     {
-                                        !this.checkLoggedIn() &&
+                                        !Utils.isLoggedIn() &&
                                         <Menu.Item key="signup">Signup</Menu.Item>
                                     }
                                 </Menu>
                                 {
-                                    this.checkLoggedIn() &&
+                                    Utils.isLoggedIn() &&
                                     <React.Fragment>
                                         {/* <Button 
                                                 type="primary"
