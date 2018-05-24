@@ -638,38 +638,40 @@ class AdviceDetailImpl extends React.Component {
                         >Done</Button>
                     ]}
             >
-                <Col span={24}>
-                    <TextArea 
-                            placeholder="Enter message here" 
-                            autosize={{ minRows: 2, maxRows: 6 }} 
-                            onChange={this.handleApprovalInputChange} 
-                            value={this.state.approveObj.message}
-                    />
-                </Col>
-                <Col span={24} style={{marginTop: '20px'}}>
-                    <h5>Set Approval Action</h5>
-                    <RadioGroup 
-                            style={{marginTop: '10px', fontSize: '14px'}}
-                            onChange={this.handleApprovalRadioChange} 
-                            value={this.state.approveObj.approved}
-                    >
-                        {
-                            approval.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
-                        }
-                    </RadioGroup>
-                </Col>
-                <Col span={24} style={{marginTop: '20px'}}>
-                    <h5>Set Prohibit Action</h5>
-                    <RadioGroup 
-                            style={{marginTop: '10px', fontSize: '14px'}}
-                            onChange={this.handleProhibitRadioChange} 
-                            value={this.state.approveObj.prohibit}
-                    >
-                        {
-                            prohibit.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
-                        }
-                    </RadioGroup>
-                </Col>
+                <Row>
+                    <Col span={24}>
+                        <TextArea 
+                                placeholder="Enter message here" 
+                                autosize={{ minRows: 2, maxRows: 6 }} 
+                                onChange={this.handleApprovalInputChange} 
+                                value={this.state.approveObj.message}
+                        />
+                    </Col>
+                    <Col span={24} style={{marginTop: '20px'}}>
+                        <h5>Set Approval Action</h5>
+                        <RadioGroup 
+                                style={{marginTop: '10px', fontSize: '14px'}}
+                                onChange={this.handleApprovalRadioChange} 
+                                value={this.state.approveObj.approved}
+                        >
+                            {
+                                approval.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
+                            }
+                        </RadioGroup>
+                    </Col>
+                    <Col span={24} style={{marginTop: '20px'}}>
+                        <h5>Set Prohibit Action</h5>
+                        <RadioGroup 
+                                style={{marginTop: '10px', fontSize: '14px'}}
+                                onChange={this.handleProhibitRadioChange} 
+                                value={this.state.approveObj.prohibit}
+                        >
+                            {
+                                prohibit.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
+                            }
+                        </RadioGroup>
+                    </Col>
+                </Row>
             </Modal>
         );
     }
