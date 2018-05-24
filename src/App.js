@@ -55,15 +55,14 @@ class App extends React.Component {
     }
 
     componentWillMount() {
-        const params = new URLSearchParams(this.props.location.search);
-        const token = params.get('token') || '';
-        if (Utils.checkToken(token)) {
-            Utils.autoLogin(token,this.props.history, this.props.match.url, () => {
-                this.setState({isLoggedIn: true})
-            });
-        } else {
-            this.setState({isLoggedIn: Utils.isLoggedIn()});
-        }
+        // const params = new URLSearchParams(this.props.location.search);
+        // const token = params.get('token') || '';
+        // console.log('Check Token', Utils.checkToken(token));
+        // if (Utils.checkToken(token)) {
+        //     Utils.autoLogin(token,this.props.history, this.props.match.url, () => {
+        //         this.setState({isLoggedIn: true})
+        //     });
+        // }
         this.onRouteChanged(this.props.location.pathname);
     }
 
