@@ -142,8 +142,8 @@ class AdviceDetailImpl extends React.Component {
         } = response.data;
         
         this.performanceSummary = performanceSummary;
-        const currentPerformance = _.get(performanceSummary, 'current', {});
-        const simulatedPerformance = _.get(performanceSummary, 'simulated', {});
+        const currentPerformance = _.get(performanceSummary, 'current', {}) || {};
+        const simulatedPerformance = _.get(performanceSummary, 'simulated', {}) || {};
         const {annualReturn = 0, dailyNAVChangeEODPct = 0, netValueEOD = 0, totalReturn = 0, volatility = 0, maxLoss = 0, period = 0} = simulatedPerformance;
         const {nstocks = 0} = currentPerformance;
         var dailyNAVChangePct = 0.0
@@ -301,6 +301,7 @@ class AdviceDetailImpl extends React.Component {
             }
         })
         .catch(error => {
+            console.log(error);
             this.setState({
                 positions: [],
                 series: []
@@ -442,7 +443,7 @@ class AdviceDetailImpl extends React.Component {
             this.getDefaultAdviceData();
         } else {
             this.setUpSocketConnection();
-            this.getUserData();
+            // this.getUserData();
             this.getAdviceData();
         }
     }
@@ -769,10 +770,11 @@ class AdviceDetailImpl extends React.Component {
 
     renderActionButtons = (small=false) => {
         const {userId} = this.state;
+        const isOwner = _.get(this.state, 'adviceDetail.isOwner', false);
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
         const unsubscriptionPending = _.get(this.state, 'adviceResponse.subscriptionDetail.unsubscriptionPending', false);
         const className = small ? 'action-button action-button-small' : 'action-button';
-        if (userId !== advisorId) {
+        if (!isOwner) {
             return (
                 <div style={{width: '95%'}}>
                     {this.renderApprovalButtons(small)}

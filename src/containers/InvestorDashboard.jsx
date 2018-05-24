@@ -66,56 +66,20 @@ export default class InvestorDashboard extends React.Component {
             notAuthorized: false,
             topLoader: false
         };
-        this.stockPositionColumns = [
-            {
-                title: this.renderColumnHeader('NAME'),
-                dataIndex: 'name',
-                key: 'name',
-                render: text => 
-                        <h3 
-                                style={
-                                    {
-                                        width: '180px', 
-                                        overflow: 'hidden', 
-                                        textOverflow: 'ellipsis', 
-                                        whiteSpace: 'nowrap', 
-                                        fontSize: '14px', 
-                                        fontWeight: 400
-                                    }
-                                } 
-                                href="#"
-                            >
-                                {text}
-                            </h3>,
-            },
-            {
-                title: this.renderColumnHeader('SYMBOL'),
-                dataIndex: 'symbol',
-                key: 'symbol'
-            },
-            {
-                title: this.renderColumnHeader('SHARES'),
-                dataIndex: 'shares',
-                key: 'shares'
-            },
-            {
-                title: this.renderColumnHeader('PRICE'),
-                dataIndex: 'price',
-                key: 'price'
-            },
-            {
-                title: this.renderColumnHeader('AVG PRICE'),
-                dataIndex: 'avgPrice',
-                key: 'avgPrice'
-            }
-        ];
         this.adviceColumns = [
             {
                 title: this.renderColumnHeader('NAME'),
                 dataIndex: 'name',
                 key: 'name',
+                fixed: true,
+                width: 200,
                 render: (text, record) => {
-                    return <Link to={`advice/${record.id}`} style={{...nameEllipsisStyle, width: '80px'}}>{text}</Link>
+                    return  <h3 
+                                onClick={() => this.props.history.push(`advice/${record.id}`)} 
+                                style={{...nameEllipsisStyle}}
+                            >
+                                {text}
+                            </h3>
                 }
             },
             {
@@ -294,7 +258,7 @@ export default class InvestorDashboard extends React.Component {
                 if(_.findIndex(advices, presentAdvice => presentAdvice.id === advice._id) === -1) {
                     advices.push({
                         id: advice._id,
-                        key: index,
+                        key: Math.random().toString(36),
                         name: advice.name,
                         return: Number(_.get(performanceSummary, 'current.totalReturn', 0) * 100).toFixed(2),
                         netValue: _.get(performanceSummary, 'current.netValue', 0).toFixed(2),
@@ -468,7 +432,7 @@ export default class InvestorDashboard extends React.Component {
             if (performanceSummary) {
                 return {
                     id: advice._id,
-                    key: index,
+                    key: Math.random().toString(36),
                     name: advice.name,
                     //This is EOD change in NAV na not return...KEY needs a NAME change
                     return: Number(_.get(performanceSummary, 'current.dailyNAVChangeEODPct', 0) * 100).toFixed(2),
@@ -490,6 +454,7 @@ export default class InvestorDashboard extends React.Component {
                 dataSource={this.state.subscribedAdvices} 
                 pagination={false}
                 size="small"
+                scroll={{ y: 320 }}
                 style={{margin: '10px 20px'}}/>
         );
     }
@@ -585,19 +550,6 @@ export default class InvestorDashboard extends React.Component {
         } catch(err) {
             // console.log(err);
         }
-    }
-
-    renderStockTransactions = () => {
-        return (
-            <Table 
-                    bordered={false}
-                    pagination={false} 
-                    style={{margin: '0 10px'}} 
-                    size="small"
-                    columns={this.stockPositionColumns} 
-                    dataSource={this.state.stockPositions} 
-            />
-        );
     }
 
     toggleCompositionView = (e) => {
