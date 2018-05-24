@@ -541,7 +541,7 @@ export default class AdvisorDashboard extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            this.getUserDashboardData();
+            Promise.all([this.getUserDashboardData()])
         }
     }
 
@@ -647,7 +647,7 @@ export default class AdvisorDashboard extends React.Component {
                     </Col>
                     <Col span={6}>
                         <ListMetricItem 
-                                value={(_.get(advice, 'performanceSummary.current.netValueEOD', 0) || 0).toFixed(2)} 
+                                value={(_.get(advice, 'netValue', 0) || 0).toFixed(2)} 
                                 label="Net Value" 
                         />
                     </Col>

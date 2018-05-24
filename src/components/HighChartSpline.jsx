@@ -9,9 +9,20 @@ export class HighChartSpline extends React.Component {
         this.state = {
             config: {
                 chart: {
-                    type: 'spline',
+                    // type: 'spline',
                     height: 300,
                     width: 400
+                },
+                plotOptions: {
+                    series: {
+                        marker: {
+                            enabled: false
+                        },
+                        states: { hover: { enabled: false}} 
+                    }
+                },
+                tooltip: {
+                    enabled: false
                 },
                 title: {
                     style: {display: 'none'}
@@ -27,6 +38,7 @@ export class HighChartSpline extends React.Component {
                 legend: {
                     enabled: true
                 },
+                
                 series: []
             }
         };

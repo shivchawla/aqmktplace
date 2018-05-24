@@ -384,6 +384,7 @@ export default class AdvisorProfile extends React.Component {
 
     onPaginationChange = (page, pageSize) => {
         const skip = this.state.pageLimit * (page - 1);
+        window.scrollTo(0, 0);
         const adviceListUrl = `${requestUrl}/advice?advisor=${this.props.match.params.id}&skip=${skip}&limit=${this.state.pageLimit}`;
         this.setState({adviceLoading: true, selectedPage: page});
         fetchAjax(adviceListUrl, this.props.history, this.props.match.url)
@@ -414,7 +415,7 @@ export default class AdvisorProfile extends React.Component {
                             xl={17} 
                             md={24} 
                             className="row-container" 
-                            style={{...shadowBoxStyle, marginBottom: '20px', minHeight: '600px'}}
+                            style={{...shadowBoxStyle, marginBottom: '20px', minHeight: '600px', position: 'relative', paddingBottom: '60px'}}
                     >
                         <Row style={{paddingLeft: '40px', paddingTop: '20px'}}>
                             {this.renderProfileDetails()}
@@ -440,18 +441,22 @@ export default class AdvisorProfile extends React.Component {
                                     </Col>
                                     <Col span={24} className='pagination-container'>
                                         {this.renderAdvices()}
-                                        <Row style={{textAlign: 'center'}}>
-                                            <Pagination
-                                                // current={Number(this.state.selectedPage)}
-                                                current={this.state.selectedPage} 
-                                                total={this.state.advicesCount} 
-                                                pageSize={this.state.pageLimit}
-                                                onChange={this.onPaginationChange}/>
-                                        </Row>   
                                     </Col>
                                 </Row>
                             </Col>
                         </Row>
+                        <Row style={{textAlign: 'center', width: '100%', position: 'absolute', bottom: '10px'}}>
+                            {
+                                this.state.advices.length > 0 &&
+                                <Pagination
+                                        // current={Number(this.state.selectedPage)}
+                                        current={this.state.selectedPage} 
+                                        total={this.state.advicesCount} 
+                                        pageSize={this.state.pageLimit}
+                                        onChange={this.onPaginationChange}
+                                />
+                            }
+                        </Row>   
                     </Col>
                 </Row>
         );

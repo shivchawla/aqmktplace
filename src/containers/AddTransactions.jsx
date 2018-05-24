@@ -1129,7 +1129,7 @@ class AddTransactionsImpl extends React.Component {
                                                         disabled={!this.checkPreviewButtonDisabled()}
                                                         className='action-button'
                                                 >
-                                                    Preview
+                                                    PREVIEW
                                                 </Button>
                                             </Col>
                                         </Row>
