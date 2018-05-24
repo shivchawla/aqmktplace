@@ -248,7 +248,8 @@ export default class AdvisorProfile extends React.Component {
                 isOwner: _.get(advice, 'isOwner', false),
                 isSubscribed: _.get(advice, 'isSubscribed', false),
                 public: _.get(advice, 'public', false),
-                isTrending: false
+                isTrending: false,
+                netValue: _.get(advice, 'netValue', 0),
             })
         });
 

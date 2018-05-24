@@ -56,7 +56,7 @@ export class ChartTickerItem extends React.Component {
                     </Col>
                 }
                 <Col span={nameSpan}>
-                    <h4 style={{fontSize: metricFontSize, color: primaryColor}}>{name}</h4>
+                    <h4 style={{fontSize: metricFontSize, color}}>{name}</h4>
                 </Col>
                 <Col span={10} style={{textAlign: 'left'}}>
                     <MetricItem 

@@ -169,10 +169,11 @@ class MyChartNewImpl extends React.Component {
         }
     }
 
-    addItemToSeries = (name, data, color = null, destroy = false) => {
+    addItemToSeries = ({name, data, color = null, destroy = false, disabled = false}) => {
         if (destroy) {
             this.clearSeries();
         }
+        const initialYValue = data.length > 0 ? data[data.length - 1][1] : 0;
         const legendItems = [...this.state.legendItems];
         const seriesIndex = _.findIndex(this.chart.series, seriesItem => seriesItem.name.toUpperCase() === name.toUpperCase());
         const legendIndex = _.findIndex(legendItems, legendItem => legendItem.name.toUpperCase() === name.toUpperCase());
@@ -184,6 +185,7 @@ class MyChartNewImpl extends React.Component {
                 selected: true,
                 color
             });
+            console.log(this.chart);
         }
         if (legendIndex === -1) {
             this.setState(prevState => {
@@ -193,9 +195,9 @@ class MyChartNewImpl extends React.Component {
                             {
                                 name: name, //.toUpperCase(),
                                 x: '1994-16-02',
-                                y: 0,
+                                y: initialYValue,
                                 change: 0,
-                                disabled: destroy,
+                                disabled,
                                 checked: legendItems.length < 5 ,
                                 color: color || this.chart.series[this.chart.series.length - 1].color
                             }
@@ -206,9 +208,9 @@ class MyChartNewImpl extends React.Component {
                         legendItems: [...prevState.legendItems, {
                             name: name , //toUpperCase(),
                             x: '1994-16-02',
-                            y: 0,
+                            y: initialYValue,
                             change: 0,
-                            disabled: destroy,
+                            disabled,
                             checked: legendItems.length < 5 ,
                             color: color || this.chart.series[this.chart.series.length - 1].color
                         }]
@@ -218,12 +220,16 @@ class MyChartNewImpl extends React.Component {
         }   
     }
 
-    updateItemInSeries = (index, name, data) => {
+    updateItemInSeries = (index, {name, data, disabled}) => {
         const legendItems = [...this.state.legendItems];
+        const initialYValue = data.length > 0 ? data[data.length - 1][1] : '0';
         try {
             if (this.chart.series[index] !== undefined) {
                 this.chart.series[index].update({name: name, /*.toUpperCase()*/ data}, false);
                 legendItems[index].name = name; //.toUpperCase();
+                legendItems[index].y = initialYValue; // This line can be removed
+                legendItems[index].change = 0; // This line can be removed
+                legendItems[index].disabled = disabled;
                 this.setState({legendItems});
                 this.chart.redraw();
             }
@@ -250,7 +256,13 @@ class MyChartNewImpl extends React.Component {
                 this.showLoader();
                 getStockPerformance(item.name.toUpperCase())
                 .then(performance => {
-                    this.addItemToSeries(item.name, performance, item.color, true);
+                    this.addItemToSeries({
+                        name: item.name, 
+                        data: performance, 
+                        color: item.color, 
+                        destroy: true,
+                        disabled: true
+                    });
                 })
                 .catch(err => {
                     // console.log(err);
@@ -272,7 +284,12 @@ class MyChartNewImpl extends React.Component {
                             this.showLoader();
                             getStockPerformance(item.name)
                             .then(performance => {
-                                this.addItemToSeries(item.name, performance, item.color);
+                                this.addItemToSeries({
+                                    name: item.name, 
+                                    data: performance, 
+                                    color: item.color,
+                                    disabled: item.disabled
+                                });
                             })
                             .catch(err => {
                                 // console.log(err);
@@ -281,7 +298,7 @@ class MyChartNewImpl extends React.Component {
                                 this.hideLoader();
                             });
                         } else {
-                            this.addItemToSeries(item.name, item.data, item.color);
+                            this.addItemToSeries(item);
                         }
                     }
                 });
@@ -303,7 +320,6 @@ class MyChartNewImpl extends React.Component {
                     }
                 });
             } else { // Items need to be updated
-                // console.log("Items will be updated");
                 series.map((item, index) => {
                     const seriesIndex = _.findIndex(this.chart.series, 
                                 seriesItem => seriesItem.name.toUpperCase() === item.name.toUpperCase());
@@ -313,7 +329,10 @@ class MyChartNewImpl extends React.Component {
                             getStockPerformance(item.name.toUpperCase())
                             .then(performance => {
                                 // // console.log('Updating index', index);
-                                this.updateItemInSeries(index, item.name, performance);
+                                this.updateItemInSeries(
+                                    index, 
+                                    {name: item.name, data: performance, disabled: item.disabled}
+                                );
                             })
                             .catch(err => {
                                 // console.log(err);
@@ -322,7 +341,7 @@ class MyChartNewImpl extends React.Component {
                                 this.hideLoader();
                             });
                         } else {
-                            this.updateItemInSeries(index, item.name, item.data);
+                            this.updateItemInSeries(index, item);
                         }
                     // }
                 });
@@ -465,7 +484,7 @@ class MyChartNewImpl extends React.Component {
                         return (
                                 <Row key={index} type="flex" align="middle"> 
                                     <Col span={2}>
-                                        <Checkbox checked={legend.checked} onChange={e => this.onCheckboxChange(e, legend)} />
+                                        <Checkbox disabled={legend.disabled} checked={legend.checked} onChange={e => this.onCheckboxChange(e, legend)} />
                                     </Col>
                                     <Col span={22}>
                                         <h3 style={{fontSize: '12px'}}>

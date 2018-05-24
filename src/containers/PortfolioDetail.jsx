@@ -309,16 +309,19 @@ class PortfolioDetailImpl extends React.Component {
                 tickers.push({ // Pushing advice performance to performance graph
                     name: 'PORTFOLIO (True)',
                     data: truePerformanceSeries,
+                    noLoadData: true,
                     color: '#0082c8', //'#e6194b','#3cb44b''
                 });
                 tickers.push({ // Pushing advice performance to performance graph
                     name: 'PORTFOLIO (Simulated)',
                     data: simulatedPerformanceSeries,
+                    noLoadData: true,
                     color: '#3cb44b',
                 });
                 tickers.push({ // // Pushing benchmark performance to performance graph
                     name: benchmark,
                     data: benchmarkResponse,
+                    noLoadData: true,
                     color: benchmarkColor
                 });
                 const portfolioMetrics = Object.assign(_.get(response.data, 'summary.current', {}), pnlStats);

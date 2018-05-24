@@ -7,7 +7,7 @@ import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} f
 import {MyChartNew} from './MyChartNew';
 import {graphColors} from '../constants';
 import {AqHighChartMod, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader, HighChartNew, ForbiddenAccess, AqRate, Footer} from '../components';
-import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor, simulatedPerformanceColor} from '../constants';
+import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor, simulatedPerformanceColor, currentPerformanceColor} from '../constants';
 import {dateFormat, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/advisorDashboard.css';
 
@@ -436,16 +436,27 @@ export default class AdvisorDashboard extends React.Component {
         ])
         .then(([adviceResponse, benchmarkResponse]) => {
             // console.log(benchmarkResponse);
-            const data = _.get(adviceResponse.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
+            const simulatedPerformance = _.get(adviceResponse.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
+            const currentPerformance = _.get(adviceResponse.data, 'current.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
-                name: advice.name,
-                data,
-                color: simulatedPerformanceColor
+                name: `${advice.name} (Simulated)`,
+                data: simulatedPerformance,
+                color: simulatedPerformanceColor,
+                noLoadData: true,
             });
+
+            newTickers.push({
+                name: `${advice.name} (Current)`,
+                data: currentPerformance,
+                color: currentPerformanceColor,
+                noLoadData: true,
+                disabled: currentPerformance.length < 1
+            });
+
             newTickers.push({
                 name: "NIFTY_50",
                 data: benchmarkResponse,
-                color: benchmarkColor
+                color: benchmarkColor,
             });
             this.setState({tickers: newTickers});
         })

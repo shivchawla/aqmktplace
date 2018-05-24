@@ -423,7 +423,8 @@ class AddTransactionsImpl extends React.Component {
                 tickers.push({
                     name: 'Portfolio',
                     data: performanceSeries,
-                    color: performanceColor
+                    color: performanceColor,
+                    noLoadData: true
                 });
             } else{
                 tickers[1].data = performanceSeries;

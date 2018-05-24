@@ -205,21 +205,25 @@ class AdviceDetailImpl extends React.Component {
     getAdvicePerformance = (performance, benchmark = 'NIFTY_50') => {
         const tickers = [...this.state.tickers];
         const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
+        const simulatedPerformance = this.processPerformanceData(_.get(performance, 'simulated.portfolioValues', []));
+        const truePerformance = this.processPerformanceData(_.get(performance, 'current.portfolioValues', []));
         getStockPerformance(benchmark, benchmarkRequestType)
         .then(benchmarkResponse => {
-            if (performance.simulated) {
+            if (performance.simulated && simulatedPerformance.length > 0) {
                 tickers.push({
                     name: 'Simulated Performance',
-                    data: this.processPerformanceData(_.get(performance, 'simulated.portfolioValues', [])),
-                    color: simulatedPerformanceColor
+                    data: simulatedPerformance,
+                    color: simulatedPerformanceColor,
+                    noLoadData: true
                 });
             }
     
-            if (performance.current && Utils.isLoggedIn()) {
+            if (performance.current && Utils.isLoggedIn() && truePerformance.length > 0) {
                 tickers.push({
                     name: 'True Performance',
-                    data: this.processPerformanceData(_.get(performance, 'current.portfolioValues', [])),
-                    color: currentPerformanceColor
+                    data: truePerformance,
+                    color: currentPerformanceColor,
+                    noLoadData: true
                 });
             }
             tickers.push({
