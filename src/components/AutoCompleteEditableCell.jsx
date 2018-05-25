@@ -22,7 +22,9 @@ export class AutoCompleteEditableCellImpl extends React.Component {
 
     handleSearch = query => {
         this.setState({spinning: true});
-        const url = `${requestUrl}/stock?search=${query}`;
+        //Convert the & (or other special characters) in query string to URI component before passing to backend
+        const trueQuery = encodeURIComponent(query);
+        const url = `${requestUrl}/stock?search=${trueQuery}`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({dataSource: this.processSearchResponseData(response.data)});
