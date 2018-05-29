@@ -299,6 +299,12 @@ class AdviceDetailContentImpl extends React.Component {
                                     <h3 style={{fontSize: '13px', color: '#515151'}}>Sectors</h3>
                                 </div>
                             </Col>
+                            <Col span={6} style={{marginTop: '10px'}}>
+                                <InvestmentObjItem label="Investor Type" value="Sample Investor Type"/>
+                            </Col>
+                            <Col span={6} style={{marginTop: '10px'}}>
+                                <InvestmentObjItem label="Suitability" value="Sample Suitability"/>
+                            </Col>
                             {
                                 _.get(userText, 'detail', '').length > 0 &&
                                 <Col span={24} style={{marginTop: '10px'}}>

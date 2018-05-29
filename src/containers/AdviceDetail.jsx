@@ -933,6 +933,21 @@ class AdviceDetailImpl extends React.Component {
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}
+                            <Row 
+                                    style={{...shadowBoxStyle, height: '400px', width: '95%', marginLeft: '20px'}}>
+                                <Col span={24}>
+                                    <h3 style={{marginTop: '10px', marginLeft: '10px', color: '#595959', fontSize: '18px'}}>
+                                        Approve
+                                    </h3>
+                                </Col>
+                                <Col span={24}>
+                                    <Tabs defaultActiveKey="1" size="small">
+                                        <TabPane tab="General" key="1">General</TabPane>
+                                        <TabPane tab="Portfolio" key="2">Portfolio</TabPane>
+                                        <TabPane tab="Objective" key="3">Investment Objective</TabPane>
+                                    </Tabs>
+                                </Col>
+                            </Row>
                         </Col>
                     </Row>
                     <Footer />

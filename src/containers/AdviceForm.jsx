@@ -793,6 +793,20 @@ export class AdviceFormImpl extends React.Component {
         );
     }
 
+    getGoalDetail = type => {
+        const goal = this.props.form.getFieldValue('investmentObjGoal');
+        const goalItem = goals.filter(item => item.field === goal)[0];
+        if (goalItem) {
+            switch(type) {
+                case "investorType":
+                    return goalItem.investorType;
+                case "suitability":
+                    return goalItem.suitability;
+            }
+        }
+        return null;
+    }
+
     renderForm = () => {
         const {getFieldDecorator} = this.props.form;
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
@@ -955,12 +969,48 @@ export class AdviceFormImpl extends React.Component {
                                                     />
                                                 </Col>
                                             </Row>
+                                            <Row gutter={16}>
+                                                <Col span={12}>
+                                                    <InvestMentObjComponent 
+                                                        header="Investor Type"
+                                                        content={
+                                                            <h3 style={{fontSize: '16px'}}>
+                                                                {
+                                                                    this.getGoalDetail('investorType')
+                                                                }
+                                                            </h3>
+                                                        }
+                                                    />
+                                                </Col>
+                                                <Col span={12}>
+                                                    <InvestMentObjComponent 
+                                                        header="Field"
+                                                        content={
+                                                            <h3 style={{fontSize: '16px'}}>
+                                                                {
+                                                                    this.getGoalDetail('suitability')
+                                                                }
+                                                            </h3>
+                                                        }
+                                                    />
+                                                </Col>
+                                            </Row>
                                         </Col>
                                     </Row>
                                 </Col>
 
-                                <Col span={24}>
-                                    <Row style={{marginTop: '10px'}}>
+                                <Col span={24} style={{marginTop: '20px'}}>
+                                    <h3 style={inputHeaderStyle}>
+                                        Other Settings
+                                    </h3>
+                                    <Row 
+                                            style={{
+                                                marginTop: '5px', 
+                                                border: '1px solid #d9d9d9',
+                                                borderRadius: '4px',
+                                                padding: '10px 20px'
+                                            }}
+                                    >
                                         <Col span={8} >
                                             <h4 style={labelStyle}>Rebalancing Freq.</h4>
                                             {

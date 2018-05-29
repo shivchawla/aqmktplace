@@ -21,11 +21,11 @@ export const sectors = [
     "Diversified"
 ];
 export const goals = [
-    {investorType: '', suitability: '', field: 'Maximize return on Investment'},
-    {investorType: '', suitability: '', field: 'Wealth Preservation'},
-    {investorType: '', suitability: '', field: 'Balanced Equity Advice'},
-    {investorType: '', suitability: '', field: 'Reduce Volatility'},
-    {investorType: '', suitability: '', field: 'Sector Tracker'},
+    {investorType: 'Hello1', suitability: 'World1', field: 'Maximize return on Investment'},
+    {investorType: 'Hello2', suitability: 'World2', field: 'Wealth Preservation'},
+    {investorType: 'Hello3', suitability: 'World3', field: 'Balanced Equity Advice'},
+    {investorType: 'Hello4', suitability: 'World4', field: 'Reduce Volatility'},
+    {investorType: 'Hello5', suitability: 'World5', field: 'Sector Tracker'},
 ];
 export const portfolioValuation = [
     "Growth",
