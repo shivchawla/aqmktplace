@@ -302,10 +302,13 @@ class AdviceDetailContentImpl extends React.Component {
                             {
                                 _.get(userText, 'detail', '').length > 0 &&
                                 <Col span={24} style={{marginTop: '10px'}}>
-                                    <h3 style={{fontSize: '14px'}}>Description</h3>
+                                    <h3 style={{fontSize: '14px', fontWeight: '700'}}>Description</h3>
                                     <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
                                 </Col>
                             }
+                            <Col span={24} style={{marginTop: '10px'}}>
+                                <h5 style={{fontSize: '12px', color: '#F44336'}}>* Investment is subjected to Market Risk</h5>
+                            </Col>
                         </Row>
                     </Panel>
 
