@@ -843,50 +843,65 @@ export class AdviceFormImpl extends React.Component {
                                             Investment Objective
                                         </h3>
                                         <Col 
-                                                span={24}
-                                                style={{
-                                                    marginTop: '5px',
-                                                    padding: '8px 20px', 
-                                                    border: '1px solid #d9d9d9',
-                                                    borderRadius: '4px',
-                                                }}
-                                        >
+                                            span={24}
+                                            style={{
+                                                marginTop: '5px',
+                                                padding: '8px 20px', 
+                                                border: '1px solid #d9d9d9',
+                                                borderRadius: '4px',
+                                            }}>
+
                                             <Row gutter={16}>
-                                                <Col span={12}>
+                                                <Col span={16}>
                                                     <InvestMentObjComponent 
-                                                            header="Goal"
-                                                            content={
-                                                                <FormItem>
-                                                                    {
-                                                                        getFieldDecorator('investmentObjGoal', {
-                                                                            initialValue: goals[0].field,
-                                                                            rules: [{
-                                                                                required: true,
-                                                                                message: "Please enter the goal of your Advice"
-                                                                            }]
-                                                                        })(
-                                                                            <Select
-                                                                                    placeholder="Select Goal of your advice"
-                                                                                    disabled={this.state.isPublic}
-                                                                            >
-                                                                                {
-                                                                                    goals.map((item, index) => 
-                                                                                        <Option
-                                                                                                key={index}
-                                                                                                value={item.field}
-                                                                                        >
-                                                                                            {item.field}
-                                                                                        </Option>
-                                                                                    )
-                                                                                }
-                                                                            </Select>
-                                                                        )
-                                                                    }
-                                                                </FormItem>
-                                                            }
+                                                        header="Goal"
+                                                        content={
+                                                            <FormItem>
+                                                                {
+                                                                    getFieldDecorator('investmentObjGoal', {
+                                                                        initialValue: goals[0].field,
+                                                                        rules: [{
+                                                                            required: true,
+                                                                            message: "Please enter the goal of your Advice"
+                                                                        }]
+                                                                    })(
+                                                                        <Select
+                                                                                placeholder="Select Goal of your Advice"
+                                                                                disabled={this.state.isPublic}
+                                                                        >
+                                                                            {
+                                                                                goals.map((item, index) => 
+                                                                                    <Option
+                                                                                            key={index}
+                                                                                            value={item.field}
+                                                                                    >
+                                                                                        {item.field}
+                                                                                    </Option>
+                                                                                )
+                                                                            }
+                                                                        </Select>
+                                                                    )
+                                                                }
+                                                            </FormItem>
+                                                        }
                                                     />
                                                 </Col>
-                                                <Col span={12}>
+
+                                                <Col span={8}>
+                                                    {
+                                                        this.renderInvestmentObjectRadioGroup(
+                                                            'Valuation',
+                                                            'investmentObjPortfolioValuation',
+                                                            portfolioValuation,
+                                                            'Please enter the Portfolio Valuation of your advice'
+                                                        )
+                                                    }
+                                                </Col>
+                                            </Row>
+
+                                            <Row gutter={16}>
+                                                <Col span={16}>
+
                                                     <InvestMentObjComponent 
                                                         header="Sectors"
                                                         content={
@@ -922,19 +937,10 @@ export class AdviceFormImpl extends React.Component {
                                                         }
                                                     />
                                                 </Col>
-                                            </Row>
-                                            <Row gutter={16}>
-                                                <Col span={12}>
-                                                    {
-                                                        this.renderInvestmentObjectRadioGroup(
-                                                            'Portfolio Valuation',
-                                                            'investmentObjPortfolioValuation',
-                                                            portfolioValuation,
-                                                            'Please enter the Portfolio Valuation of your advice'
-                                                        )
-                                                    }
-                                                </Col>
-                                                <Col span={12}>
+
+                                    
+                                                
+                                                <Col span={8}>
                                                     {
                                                         this.renderInvestmentObjectRadioGroup(
                                                             'Capitalization',
@@ -945,6 +951,78 @@ export class AdviceFormImpl extends React.Component {
                                                     }
                                                 </Col>
                                             </Row>
+                                            
+                                            <Row gutter={16}>
+                                                <Col span={10}>
+                                                    <InvestMentObjComponent 
+                                                        header="Suitability"
+                                                        content={
+                                                            <FormItem>
+                                                                {
+                                                                    getFieldDecorator('investmentObjGoal', {
+                                                                        initialValue: goals[0].field,
+                                                                        rules: [{
+                                                                            required: true,
+                                                                            message: "Please enter the goal of your Advice"
+                                                                        }]
+                                                                    })(
+                                                                        <Select
+                                                                                placeholder="Select Goal of your Advice"
+                                                                                disabled={this.state.isPublic}
+                                                                        >
+                                                                            {
+                                                                                goals.map((item, index) => 
+                                                                                    <Option
+                                                                                            key={index}
+                                                                                            value={item.field}
+                                                                                    >
+                                                                                        {item.field}
+                                                                                    </Option>
+                                                                                )
+                                                                            }
+                                                                        </Select>
+                                                                    )
+                                                                }
+                                                            </FormItem>
+                                                        }
+                                                    />
+                                                </Col>
+                                                <Col span={8}>
+                                                    <InvestMentObjComponent 
+                                                        header="Investor Type"
+                                                        content={
+                                                            <FormItem>
+                                                                {
+                                                                    getFieldDecorator('investmentObjGoal', {
+                                                                        initialValue: goals[0].field,
+                                                                        rules: [{
+                                                                            required: true,
+                                                                            message: "Please enter the goal of your Advice"
+                                                                        }]
+                                                                    })(
+                                                                        <Select
+                                                                                placeholder="Select Goal of your Advice"
+                                                                                disabled={this.state.isPublic}
+                                                                        >
+                                                                            {
+                                                                                goals.map((item, index) => 
+                                                                                    <Option
+                                                                                            key={index}
+                                                                                            value={item.field}
+                                                                                    >
+                                                                                        {item.field}
+                                                                                    </Option>
+                                                                                )
+                                                                            }
+                                                                        </Select>
+                                                                    )
+                                                                }
+                                                            </FormItem>
+                                                        }
+                                                    />
+                                                </Col>
+                                            </Row>
+
                                             <Row>
                                                 <Col span={24}>
                                                     <InvestMentObjComponent 

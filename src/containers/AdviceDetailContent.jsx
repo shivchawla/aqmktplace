@@ -264,7 +264,7 @@ class AdviceDetailContentImpl extends React.Component {
                             <Col span={6}>
                                 <InvestmentObjItem  
                                         showTag 
-                                        label="Portfolio Valuation" 
+                                        label="Valuation" 
                                         value={_.get(portfolioValuation, 'field', '-')}
                                 />
                             </Col>
