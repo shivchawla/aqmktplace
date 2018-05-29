@@ -89,7 +89,7 @@ class StockResearchImpl extends React.Component {
         return data.map((item, index) => {
             return {
                 id: index,
-                symbol: item.ticker,
+                symbol: item.detail !== undefined ? item.detail.NSE_ID : item.ticker,
                 name: item.detail !== undefined ? item.detail.Nse_Name : item.ticker
             }
         })

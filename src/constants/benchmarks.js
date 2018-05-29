@@ -19,5 +19,6 @@ export const benchmarks = [
     "NIFTY_ENERGY",
     "NIFTY_INFRA",
     "NIFTY_MNC",
-    "NIFTY_SERV_SECTOR"
+    "NIFTY_SERV_SECTOR",
+    "NIFTY_CONSUMPTION",
 ];

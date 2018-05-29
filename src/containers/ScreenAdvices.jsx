@@ -285,8 +285,9 @@ export default class ScreenAdvices extends React.PureComponent {
         const {netValue, sharpe, volatility, rating} = selectedFilters;
         approved = _.join(approved, ',');
         personal = _.join(personal, ',');
+        const search = this.state.searchValue || "";
         const adviceRequestType = Utils.isLoggedIn() ?  'advice' : 'advice_default';
-        const url = `${requestUrl}/${adviceRequestType}?${type}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip}&orderParam=${orderParam}&order=-1`;
+        const url = `${requestUrl}/${adviceRequestType}?search=${search}&${type}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&skip=${skip}&orderParam=${orderParam}&order=-1`;
         return url;
     }
 
@@ -310,7 +311,7 @@ export default class ScreenAdvices extends React.PureComponent {
                 heading: advice.heading || '',
                 subscribers: advice.numSubscribers || 0,
                 followers: advice.numFollowers || 0,
-                rating: Number((_.get(advice, 'rating.current', 0) || 0).toFixed(2)),
+                rating: Number(_.get(advice, 'rating.current', 0) || 0).toFixed(2),
                 performanceSummary: advice.performanceSummary,
                 rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
                 isApproved: _.get(advice, 'approvalStatus', 'N/A'),
