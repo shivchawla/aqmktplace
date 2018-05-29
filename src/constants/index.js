@@ -21,11 +21,11 @@ export const sectors = [
     "Diversified"
 ];
 export const goals = [
-    "Maximize return on Investment",
-    "Wealth Preservation",
-    "Balanced Equity Advice",
-    "Reduce Volatility",
-    "Sector Tracker"
+    {investorType: '', suitability: '', field: 'Maximize return on Investment'},
+    {investorType: '', suitability: '', field: 'Wealth Preservation'},
+    {investorType: '', suitability: '', field: 'Balanced Equity Advice'},
+    {investorType: '', suitability: '', field: 'Reduce Volatility'},
+    {investorType: '', suitability: '', field: 'Sector Tracker'},
 ];
 export const portfolioValuation = [
     "Growth",
@@ -38,3 +38,9 @@ export const capitalization = [
     "Mid",
     "Large"
 ];
+
+// {
+//     investorType,
+//     suitability,
+//     field
+// }

@@ -831,10 +831,10 @@ export class AdviceFormImpl extends React.Component {
                                         <Col 
                                                 span={24}
                                                 style={{
-                                                    padding: '20px', 
+                                                    marginTop: '5px',
+                                                    padding: '8px 20px', 
                                                     border: '1px solid #d9d9d9',
                                                     borderRadius: '4px',
-                                                    marginTop: '7px'
                                                 }}
                                         >
                                             <Row gutter={16}>
@@ -845,7 +845,7 @@ export class AdviceFormImpl extends React.Component {
                                                                 <FormItem>
                                                                     {
                                                                         getFieldDecorator('investmentObjGoal', {
-                                                                            initialValue: goals[0],
+                                                                            initialValue: goals[0].field,
                                                                             rules: [{
                                                                                 required: true,
                                                                                 message: "Please enter the goal of your Advice"
@@ -859,9 +859,9 @@ export class AdviceFormImpl extends React.Component {
                                                                                     goals.map((item, index) => 
                                                                                         <Option
                                                                                                 key={index}
-                                                                                                value={item}
+                                                                                                value={item.field}
                                                                                         >
-                                                                                            {item}
+                                                                                            {item.field}
                                                                                         </Option>
                                                                                     )
                                                                                 }
@@ -1331,7 +1331,7 @@ export class AdviceFormImpl extends React.Component {
 
 const InvestMentObjComponent = ({header, content}) => {
     return (
-        <Row style={{marginTop: '20px'}} type="flex" align="middle">
+        <Row type="flex" align="middle" style={{marginBottom: '10px'}}>
             <Col span={24}>
                 <h3 style={investmentObjLabelStyle}>{header}:</h3>
             </Col>

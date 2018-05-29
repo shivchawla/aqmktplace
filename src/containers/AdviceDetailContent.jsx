@@ -258,29 +258,51 @@ class AdviceDetailContentImpl extends React.Component {
                             header={<h3 style={metricsHeaderStyle}>Investment Objective</h3>}
                     >
                         <Row className="row-container" >
-                            <InvestmentObjItem label="Goal" value={_.get(goal, 'field', '-')}/>
-                            <InvestmentObjItem  showTag label="Portfolio Valuation" value={_.get(portfolioValuation, 'field', '-')}/>
-                            <InvestmentObjItem showTag label="Capitalization" value={_.get(capitalization, 'field', '-')}/>
-                            <div style={{display: 'inline-flex', flexDirection: 'column'}}>
-                                <div style={{display: 'flex', flexDirection: 'row'}}>
-                                    {
-                                        _.get(sectors, 'detail', []).map((item, index) => {
-                                            return (
-                                                <Tag style={{border: `1px solid ${primaryColor}`, cursor: 'auto'}}>
-                                                    <span style={{fontSize: '14px', color: primaryColor}}>
-                                                        {item}
-                                                    </span>
-                                                </Tag>
-                                            );
-                                        })
-                                    }
+                            <Col span={6}>
+                                <InvestmentObjItem label="Goal" value={_.get(goal, 'field', '-')}/>
+                            </Col>
+                            <Col span={6}>
+                                <InvestmentObjItem  
+                                        showTag 
+                                        label="Portfolio Valuation" 
+                                        value={_.get(portfolioValuation, 'field', '-')}
+                                />
+                            </Col>
+                            <Col span={6}>
+                                <InvestmentObjItem 
+                                        showTag 
+                                        label="Capitalization" 
+                                        value={_.get(capitalization, 'field', '-')}
+                                />
+                            </Col>
+                            <Col span={6}>
+                                <div style={{display: 'flex', flexDirection: 'column'}}>
+                                    <div style={{
+                                            display: 'flex', 
+                                            flexDirection: 'row',
+                                            overflow: 'hidden',
+                                            overflowX: 'scroll'
+                                        }}
+                                    >
+                                        {
+                                            _.get(sectors, 'detail', []).map((item, index) => {
+                                                return (
+                                                    <Tag style={{border: `1px solid ${primaryColor}`, cursor: 'auto'}}>
+                                                        <span style={{fontSize: '14px', color: primaryColor}}>
+                                                            {item}
+                                                        </span>
+                                                    </Tag>
+                                                );
+                                            })
+                                        }
+                                    </div>
+                                    <h3 style={{fontSize: '13px', color: '#515151'}}>Sectors</h3>
                                 </div>
-                                <h3 style={{fontSize: '13px', color: '#515151'}}>Sectors</h3>
-                            </div>
+                            </Col>
                             {
                                 _.get(userText, 'detail', '').length > 0 &&
                                 <Col span={24} style={{marginTop: '10px'}}>
-                                    <h3 style={{color: '#6F6F6F', fontSize: '14px'}}>Description</h3>
+                                    <h3 style={{fontSize: '14px'}}>Description</h3>
                                     <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
                                 </Col>
                             }
@@ -364,11 +386,11 @@ class AdviceDetailContentImpl extends React.Component {
 
 const InvestmentObjItem = ({label, value, showTag = false}) => {
     return (
-        <div style={{display: 'inline-flex', flexDirection: 'column', marginRight: '70px'}}>
+        <div>
             {
                 showTag 
-                ?   <Tag style={{border: `1px solid ${primaryColor}`, cursor: 'auto'}}>
-                        <span style={{fontSize: '16px', color: primaryColor, fontWeight: '400'}}>
+                ?   <Tag style={{border: `1px solid ${primaryColor}`, cursor: 'auto', padding: '0 5px'}}>
+                        <span style={{fontSize: '14px', color: primaryColor, fontWeight: '400'}}>
                             {value}
                         </span>
                     </Tag>
