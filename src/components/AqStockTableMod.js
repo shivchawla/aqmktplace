@@ -291,7 +291,6 @@ export class AqStockTableMod extends React.Component {
                         pagination={false} 
                         dataSource={this.state.data} 
                         columns={this.columns} 
-                        scroll={{y: 300, x: true}}
                         size="middle"
                         rowClassName="stock-table-col"
                 />

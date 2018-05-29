@@ -74,7 +74,8 @@ class AdviceDetailContentImpl extends React.Component {
             updatedDate = '', 
             isSubscribed = false, 
             isOwner = false, 
-            rating = 0
+            rating = 0,
+            investmentObjective = {}
         } = this.props.adviceDetail || {};
         const {
             annualReturn = 0, 
@@ -82,7 +83,8 @@ class AdviceDetailContentImpl extends React.Component {
             averageReturns = 0, 
             dailyReturns = 0
         } = this.props.metrics || {};
-        const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["2","3"] : ["3"] : ["3"];
+        const {goal = {}, capitalization = {}, portfolioValuation = {}, sectors = {}, userText = {}} = investmentObjective;
+        const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["1", "2","3"] : ["1", "3"] : ["1", "3"];
         const tickers = _.get(this.props, 'tickers', []);
         const {netValue = 0, dailyNAVChangePct = 0} = this.props.metrics || {};
         const netValueMetricItem = {
@@ -255,10 +257,33 @@ class AdviceDetailContentImpl extends React.Component {
                             style={customPanelStyle}
                             header={<h3 style={metricsHeaderStyle}>Investment Objective</h3>}
                     >
-                        <Row className="row-container">
-                            <Col span={24}>
-                                <h5 style={{...textStyle, marginTop: '-10px', marginLeft: '20px'}}>{description}</h5>
-                            </Col>
+                        <Row className="row-container" >
+                            <InvestmentObjItem label="Goal" value={_.get(goal, 'field', '-')}/>
+                            <InvestmentObjItem  showTag label="Portfolio Valuation" value={_.get(portfolioValuation, 'field', '-')}/>
+                            <InvestmentObjItem showTag label="Capitalization" value={_.get(capitalization, 'field', '-')}/>
+                            <div style={{display: 'inline-flex', flexDirection: 'column'}}>
+                                <div style={{display: 'flex', flexDirection: 'row'}}>
+                                    {
+                                        _.get(sectors, 'detail', []).map((item, index) => {
+                                            return (
+                                                <Tag style={{border: `1px solid ${primaryColor}`, cursor: 'auto'}}>
+                                                    <span style={{fontSize: '14px', color: primaryColor}}>
+                                                        {item}
+                                                    </span>
+                                                </Tag>
+                                            );
+                                        })
+                                    }
+                                </div>
+                                <h3 style={{fontSize: '13px', color: '#515151'}}>Sectors</h3>
+                            </div>
+                            {
+                                _.get(userText, 'detail', '').length > 0 &&
+                                <Col span={24} style={{marginTop: '10px'}}>
+                                    <h3 style={{color: '#6F6F6F', fontSize: '14px'}}>Description</h3>
+                                    <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
+                                </Col>
+                            }
                         </Row>
                     </Panel>
 
@@ -335,6 +360,25 @@ class AdviceDetailContentImpl extends React.Component {
             </React.Fragment>
         );
     }
+}
+
+const InvestmentObjItem = ({label, value, showTag = false}) => {
+    return (
+        <div style={{display: 'inline-flex', flexDirection: 'column', marginRight: '70px'}}>
+            {
+                showTag 
+                ?   <Tag style={{border: `1px solid ${primaryColor}`, cursor: 'auto'}}>
+                        <span style={{fontSize: '16px', color: primaryColor, fontWeight: '400'}}>
+                            {value}
+                        </span>
+                    </Tag>
+                :   <span style={{fontSize: '16px', color: primaryColor, fontWeight: '400'}}>
+                        {value}
+                    </span>
+            }
+            <h3 style={{fontSize: '13px', color: '#515151'}}>{label}</h3>
+        </div>
+    );
 }
 
 export const AdviceDetailContent = withRouter(AdviceDetailContentImpl);

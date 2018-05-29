@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import _ from 'lodash';
 import {Utils} from '../utils';
 import { Spin, Form, Icon, Input, Button, Checkbox } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
@@ -61,7 +62,7 @@ class Login extends Component {
             this.cancelLoginCall = undefined;
             this.updateState({
               'loading': false,
-              'error': error.response.data
+              'error': _.get(error, 'response.data', 'Error Occured')
             });
           });
         }

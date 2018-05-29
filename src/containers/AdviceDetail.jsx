@@ -166,7 +166,8 @@ class AdviceDetailImpl extends React.Component {
                 followers: numFollowers,
                 updatedDate: moment(updatedDate).format(dateFormat),
                 rating: Number((rating.current || 0).toFixed(2)),
-                isPublic: response.data.public,
+                isPublic: _.get(response.data, 'public', false),
+                investmentObjective: _.get(response.data, 'investmentObjective', {})
             },
             metrics: {
                 ...this.state.metrics,
@@ -202,7 +203,7 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
-    getAdvicePerformance = (performance, benchmark = 'NIFTY_50') => {
+    getAdvicePerformance = (performance, benchmark = 'NIFTY_50') => new Promise((resolve, reject) => {
         const tickers = [...this.state.tickers];
         const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
         const simulatedPerformance = this.processPerformanceData(_.get(performance, 'simulated.portfolioValues', []));
@@ -232,8 +233,12 @@ class AdviceDetailImpl extends React.Component {
                 data: benchmarkResponse
             });
             this.setState({tickers});
+            resolve(true);
         })
-    }
+        .catch(error => {
+            reject(error);
+        });
+    })
 
     processPerformanceData = performanceData => {
         return performanceData.map(item => {
@@ -277,13 +282,11 @@ class AdviceDetailImpl extends React.Component {
         this.setState({show: true});
         return Promise.all([
             fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
-            fetchAjax(advicePerformanceUrl, this.props.history, this.props.match.url)
+            fetchAjax(advicePerformanceUrl, this.props.history, this.props.match.url),
         ]) 
         .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
             const benchmark = _.get(adviceSummaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
             this.getAdviceSummary(adviceSummaryResponse);
-            this.getAdvicePerformance(advicePerformanceResponse.data, benchmark);
-            
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
             //ADVICE SUMMARY IN BACKEND first calculated full performance
             //With the right output from backend, this call (advice performance) can be
@@ -291,10 +294,12 @@ class AdviceDetailImpl extends React.Component {
             
             const adviceDetail = this.state.adviceDetail;
             const authorizedToViewPortfolio = adviceDetail.isSubscribed || adviceDetail.isOwner || adviceDetail.isAdmin;
-
-            return authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null;
+            return Promise.all([
+                authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null,
+                this.getAdvicePerformance(advicePerformanceResponse.data, benchmark)
+            ])
         })
-        .then(advicePortfolioResponse  => {
+        .then(([advicePortfolioResponse])  => {
             let positions = [];
             if (advicePortfolioResponse) {
                 this.getAdviceDetail(advicePortfolioResponse);

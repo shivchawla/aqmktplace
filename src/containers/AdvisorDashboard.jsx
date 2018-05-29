@@ -17,7 +17,6 @@ const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 const ReactHighcharts = require('react-highcharts');
 const {requestUrl, aimsquantToken} = require('../localConfig');
-
 export default class AdvisorDashboard extends React.Component {
     numberOfTimeSocketConnectionCalled = 1;
     mounted = false;
@@ -116,8 +115,8 @@ export default class AdvisorDashboard extends React.Component {
         this.setState({dashboardDataLoading: true, myAdvicesLoading: true, show: true});
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
-            const currentRating = _.get(response.data, 'advices[0].rating.current', 0).toFixed(2);
-            const simulatedRating = _.get(response.data, 'advices[0].rating.simulated', 0).toFixed(2);
+            const currentRating = (_.get(response.data, 'advices[0].rating.current', 0) || 0).toFixed(2);
+            const simulatedRating = (_.get(response.data, 'advices[0].rating.simulated', 0) || 0).toFixed(2);
             const analytics = _.get(response.data, 'analytics', []);
             const advisorRatingStat = (_.get(analytics[analytics.length - 1], 'rating.current', 0)).toFixed(2);
             const advisorSubscribers = _.get(response.data, 'analytics[response.data.analytics.length - 1].numFollowers', 0);
@@ -177,7 +176,10 @@ export default class AdvisorDashboard extends React.Component {
                 this.setUpSocketConnection();
             });
         })
-        .catch(error => error)
+        .catch(error => {
+            console.log(error);
+            return error;
+        })
         .finally(() => {
             this.setState({dashboardDataLoading: false, myAdvicesLoading: false, show: false});
         })
@@ -309,7 +311,7 @@ export default class AdvisorDashboard extends React.Component {
         };
         advice.analytics.map((item, index) => {
             const month = moment(item.date).format('M');
-            const rating = type === 'current' ? _.get(item, 'rating.current', 0) : _.get(item, 'rating.simulated', 0);
+            const rating = type === 'current' ? (_.get(item, 'rating.current', 0) || 0) : (_.get(item, 'rating.simulated', 0) || 0);
             monthData[month - 1] = rating !== undefined ? Number(rating.toFixed(2)) : 0;
         });
 
@@ -407,8 +409,8 @@ export default class AdvisorDashboard extends React.Component {
         const ratingSeries = [];
         const series = this.state.ratingsConfig.series;
         const advice = advices.filter(item => item._id === value)[0];
-        const currentRating = _.get(advice, 'rating.current', 0).toFixed(2);
-        const simulatedRating = _.get(advice, 'rating.simulated', 0).toFixed(2);    
+        const currentRating = (_.get(advice, 'rating.current', 0) || 0).toFixed(2);
+        const simulatedRating = (_.get(advice, 'rating.simulated', 0) || 0).toFixed(2);    
 
         ratingSeries.push({name: 'Current Rating', data: this.processRatingByAdvice(advice), color: '#607D8B'});
         ratingSeries.push({name: 'Simulated Rating', data: this.processRatingByAdvice(advice, 'simulated'), color: '#FF9800'});

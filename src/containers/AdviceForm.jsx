@@ -6,7 +6,7 @@ import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors, primaryColor} from '../constants';
+import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors, primaryColor, sectors, goals, portfolioValuation, capitalization} from '../constants';
 import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader, Footer} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate, fetchAjax} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
@@ -33,7 +33,8 @@ import {
     Modal,
     Tabs,
     Select,
-    notification
+    notification,
+    Radio
 } from 'antd';
 import {adviceLimit} from '../constants';
 
@@ -43,6 +44,8 @@ const {TextArea} = Input;
 const FormItem = Form.Item;
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
+const RadioGroup = Radio.Group;
+const RadioButton = Radio.Button;
 
 const dateFormat = 'YYYY-MM-DD';
 const dateOffset = 5;
@@ -152,13 +155,21 @@ export class AdviceFormImpl extends React.Component {
         const method = isUpdate ? 'PUT' : 'POST';
         this.props.form.validateFields((err, values) => {
             const defaultStartDate = moment().add(1, 'days').format(dateFormat);
-            let {name, description, headline, startDate = defaultStartDate} = values;
+            let {
+                name, 
+                headline, 
+                startDate = defaultStartDate,
+                investmentObjGoal,
+                investmentObjSectors,
+                investmentObjPortfolioValuation,
+                investmentObjUserText,
+                investmentObjCapitalization
+            } = values;
             startDate = moment(startDate).format('YYYY-MM-DD');
             const endDate = moment(startDate).add(5, 'days').format(dateFormat);
             if(!err && this.validateTransactions()) {
                 requestData = {
                     name,
-                    description,
                     // heading: isUpdate ? null : 'headline',
                     portfolio: {
                         name,
@@ -177,6 +188,23 @@ export class AdviceFormImpl extends React.Component {
                     },
                     rebalance: this.state.rebalancingFrequency,
                     maxNotional: this.state.maxNotional,
+                    investmentObjective: {
+                        goal: {
+                            field: investmentObjGoal
+                        },
+                        sectors: {
+                            detail: investmentObjSectors
+                        },
+                        portfolioValuation: {
+                            field: investmentObjPortfolioValuation
+                        },
+                        capitalization: {
+                            field: investmentObjCapitalization
+                        },
+                        userText: {
+                            detail: investmentObjUserText
+                        }
+                    },
                     // public: publish
                 };
                 axios({
@@ -540,52 +568,6 @@ export class AdviceFormImpl extends React.Component {
         return nStocks;
     }
 
-    //IS this in USE???
-    renderPortfolioTable = () => {
-        const verifiedTransactions = this.getVerifiedTransactions();
-        const netValue =this.getNetValue();
-
-        /*var netValueValid = netValue <= this.state.maxNotional * 1.05;
-        const netValueValidIconSrc = !netValueValid ? 'exclamation-circle' : 'check-circle';
-        const netValueValidIconColor = !netValueValid ? metricColor.negative : metricColor.positive;    
-        const tooltipText = netValueValid ? "Advice value within Max. National" : "Advice value exceeds Max. National by more than 5%"*/
-
-        const netValueValidIconColor = metricColor.neutral;
-
-        const data = verifiedTransactions.map(transaction => {
-            return {
-                ...transaction,
-                totalValue: Utils.formatMoneyValueMaxTwoDecimals(transaction.totalValue),
-                weight: `${transaction.weight} %`
-            }
-        });
-
-        return (
-            <Col>
-                <Row>
-                    <div style={{textAlign: 'left', marginBottom: '5px', fontSize: '16px'}}>
-                        Total Advice Value: 
-                        <span style={{color: netValueValidIconColor, marginLeft: '5px'}}>{Utils.formatMoneyValueMaxTwoDecimals(netValue)}</span> 
-                        {/*<Tooltip title={tooltipText}>
-                            <Icon 
-                                type={netValueValidIconSrc} 
-                                style={{fontSize: '20px', marginLeft: '10px', color: netValueValidIconColor}}
-                            />
-                        </Tooltip>*/}
-                    </div>
-                </Row>
-                <Row>
-                    <Table 
-                        size="small" 
-                        columns={this.columns} 
-                        dataSource={data}
-                        pagination={false}
-                        style={{marginBottom: '20px'}}/>
-                </Row>
-            </Col>
-        );
-    }
-
     getAdvice = (id) => {
         const {requestUrl, aimsquantToken, userId} = localConfig;
         const adviceUrl =`${requestUrl}/advice/${id}`;
@@ -594,7 +576,12 @@ export class AdviceFormImpl extends React.Component {
         this.setState({show: true});
         fetchAjax(adviceUrl, this.props.history, this.props.match.url)
         .then(response => {
-            const {name, description, heading} = response.data;
+            const {name, description, heading, investmentObjective = {}} = response.data;
+            const investmentObjGoal = _.get(investmentObjective, 'goal.field', '');
+            const investmentObjSectors = _.get(investmentObjective, 'sectors.detail', []);
+            const investmentObjPortfolioValuation = _.get(investmentObjective, 'portfolioValuation.field', '');
+            const investmentObjCapitalization = _.get(investmentObjective, 'capitalization.field', '');
+            const investmentObjUserText = _.get(investmentObjective, 'userText.detail', '');
             const isOwner = _.get(response.data, 'isOwner', false);
             this.setState({
                 adviceName: name || '', 
@@ -624,7 +611,16 @@ export class AdviceFormImpl extends React.Component {
             //Why do we set show false...if we are launching another AJAX call?
             if (isOwner) {
                 this.setState({show: false}, () => {
-                    this.props.form.setFieldsValue({name, description, headline: heading});
+                    this.props.form.setFieldsValue({
+                        name, 
+                        description, 
+                        headline: heading,
+                        investmentObjGoal,
+                        investmentObjSectors,
+                        investmentObjPortfolioValuation,
+                        investmentObjCapitalization,
+                        investmentObjUserText
+                    });
                 });
                 return fetchAjax(advicePortfolioUrl, this.props.history, this.props.match.url);
             } else {
@@ -765,6 +761,38 @@ export class AdviceFormImpl extends React.Component {
         this.setState({preview: !this.state.preview});
     }
 
+    renderInvestmentObjectRadioGroup = (fieldName, fieldId, items, message) => {
+        const {getFieldDecorator} = this.props.form;
+
+        return (
+            <InvestMentObjComponent 
+                header={fieldName}
+                content={
+                    <FormItem>
+                        {
+                            getFieldDecorator(fieldId, {
+                                initialValue: items[0],
+                                rules: [{
+                                    required: true, 
+                                    message
+                                }]
+                            })(
+                                <RadioGroup 
+                                        size="small" 
+                                        disabled={this.state.isPublic} 
+                                >
+                                    {
+                                        items.map(item => <RadioButton value={item}>{item}</RadioButton>)
+                                    }
+                                </RadioGroup>
+                            )
+                        }
+                    </FormItem>
+                }
+            />
+        );
+    }
+
     renderForm = () => {
         const {getFieldDecorator} = this.props.form;
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
@@ -772,7 +800,10 @@ export class AdviceFormImpl extends React.Component {
         return (
             <Col xl={18} lg={18} md={24} style={{display: this.state.preview ? 'none' : 'block'}}>
                 <Row>
-                    <Col span={24} style={{...shadowBoxStyle, padding: '20px', marginBottom:'20px', minHeight: '600px'}}>
+                    <Col 
+                            span={24} 
+                            style={{...shadowBoxStyle, padding: '20px', marginBottom:'20px', minHeight: '600px'}}
+                    >
                         <Row>
                             <Form onSubmit={this.handleSubmit} style={{marginTop: '0px'}}>
                                 <Col span={24}>
@@ -794,23 +825,136 @@ export class AdviceFormImpl extends React.Component {
                                         </Col>
                                     </Row>
                                     <Row style={{marginTop: '10px'}}>
-                                        <Col span={24}>
-                                            <h3 style={inputHeaderStyle}>
-                                                Investment Objective
-                                            </h3>
-                                        </Col>
-                                        <Col span={24}>
-                                            <FormItem>
-                                                {getFieldDecorator('description', {
-                                                    rules: [{required: true, message: 'Please enter Investment Objective'}]
-                                                })(
-                                                    <TextArea 
-                                                            style={inputStyle} 
-                                                            autosize={{minRows: 3, maxRows: 6}}
-                                                            disabled={this.state.isPublic}
+                                        <h3 style={inputHeaderStyle}>
+                                            Investment Objective
+                                        </h3>
+                                        <Col 
+                                                span={24}
+                                                style={{
+                                                    padding: '20px', 
+                                                    border: '1px solid #d9d9d9',
+                                                    borderRadius: '4px',
+                                                    marginTop: '7px'
+                                                }}
+                                        >
+                                            <Row gutter={16}>
+                                                <Col span={12}>
+                                                    <InvestMentObjComponent 
+                                                            header="Goal"
+                                                            content={
+                                                                <FormItem>
+                                                                    {
+                                                                        getFieldDecorator('investmentObjGoal', {
+                                                                            initialValue: goals[0],
+                                                                            rules: [{
+                                                                                required: true,
+                                                                                message: "Please enter the goal of your Advice"
+                                                                            }]
+                                                                        })(
+                                                                            <Select
+                                                                                    placeholder="Select Goal of your advice"
+                                                                                    disabled={this.state.isPublic}
+                                                                            >
+                                                                                {
+                                                                                    goals.map((item, index) => 
+                                                                                        <Option
+                                                                                                key={index}
+                                                                                                value={item}
+                                                                                        >
+                                                                                            {item}
+                                                                                        </Option>
+                                                                                    )
+                                                                                }
+                                                                            </Select>
+                                                                        )
+                                                                    }
+                                                                </FormItem>
+                                                            }
                                                     />
-                                                )}
-                                            </FormItem>
+                                                </Col>
+                                                <Col span={12}>
+                                                    <InvestMentObjComponent 
+                                                        header="Sectors"
+                                                        content={
+                                                            <FormItem>
+                                                                {
+                                                                    getFieldDecorator('investmentObjSectors', {
+                                                                        rules: [{
+                                                                            required: true,
+                                                                            message: 'Please enter the relevant sectors of your portfolio',
+                                                                            type: 'array'
+                                                                        }]
+                                                                    })(
+                                                                        <Select
+                                                                                mode="multiple"
+                                                                                placeholder="Add sectors"
+                                                                                type="array"
+                                                                                disabled={this.state.isPublic}
+                                                                        >
+                                                                            {
+                                                                                sectors.map((sector, index) => 
+                                                                                    <Option
+                                                                                            key={index} 
+                                                                                            value={sector}
+                                                                                    >
+                                                                                        {sector}
+                                                                                    </Option>
+                                                                                )
+                                                                            }
+                                                                        </Select>
+                                                                    )
+                                                                }
+                                                            </FormItem>
+                                                        }
+                                                    />
+                                                </Col>
+                                            </Row>
+                                            <Row gutter={16}>
+                                                <Col span={12}>
+                                                    {
+                                                        this.renderInvestmentObjectRadioGroup(
+                                                            'Portfolio Valuation',
+                                                            'investmentObjPortfolioValuation',
+                                                            portfolioValuation,
+                                                            'Please enter the Portfolio Valuation of your advice'
+                                                        )
+                                                    }
+                                                </Col>
+                                                <Col span={12}>
+                                                    {
+                                                        this.renderInvestmentObjectRadioGroup(
+                                                            'Capitalization',
+                                                            'investmentObjCapitalization',
+                                                            capitalization,
+                                                            'Please enter the Capitalization of your advice'
+                                                        )
+                                                    }
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col span={24}>
+                                                    <InvestMentObjComponent 
+                                                        header="Description"
+                                                        content={
+                                                            <FormItem>
+                                                                {
+                                                                    getFieldDecorator('investmentObjUserText', {
+                                                                        rules: [{
+                                                                            required: false
+                                                                        }]
+                                                                    })(
+                                                                        <Input 
+                                                                                style={inputStyle} 
+                                                                                placeholder="Optional"
+                                                                                disabled={this.state.isPublic}
+                                                                        />
+                                                                    )
+                                                                }
+                                                            </FormItem>
+                                                        }                                                    
+                                                    />
+                                                </Col>
+                                            </Row>
                                         </Col>
                                     </Row>
                                 </Col>
@@ -902,11 +1046,20 @@ export class AdviceFormImpl extends React.Component {
 
     checkFormValidationSuccess = () => {
         const name = this.props.form.getFieldValue('name') || '';
-        const description = this.props.form.getFieldValue('description') || '';
+        // const description = this.props.form.getFieldValue('description') || '';
         const startDate = this.props.form.getFieldValue('startDate') || undefined;
+        const {
+            investmentObjGoal = '',
+            investmentObjSectors = [],
+            investmentObjPortfolioValuation = '',
+            investmentObjCapitalization = ''
+        } = this.props.form.getFieldsValue()
         return  (
             name.length > 0 
-            && description.length > 0 
+            && investmentObjGoal.length > 0
+            && investmentObjSectors.length > 0
+            && investmentObjPortfolioValuation.length > 0
+            && investmentObjCapitalization.length > 0
             && startDate !== undefined 
             && this.getVerifiedTransactions().length > 0
             && this.state.portfolioChanged
@@ -1023,7 +1176,15 @@ export class AdviceFormImpl extends React.Component {
     }
 
     renderPreview = () => {
-        const {name, description} = this.props.form.getFieldsValue();
+        const {
+            name, 
+            description,
+            investmentObjGoal,
+            investmentObjSectors,
+            investmentObjPortfolioValuation,
+            investmentObjUserText,
+            investmentObjCapitalization
+        } = this.props.form.getFieldsValue();
         const {portfolioMetrics} = this.state;
         const adviceDetail = {
             isOwner: true,
@@ -1037,7 +1198,24 @@ export class AdviceFormImpl extends React.Component {
                 },
                 _id: _.get(Utils.getUserInfo(), 'advisor', null)
             },
-            isPublic: this.state.isPublic
+            isPublic: this.state.isPublic,
+            investmentObjective: {
+                goal: {
+                    field: investmentObjGoal
+                },
+                sectors: {
+                    detail: investmentObjSectors
+                },
+                portfolioValuation: {
+                    field: investmentObjPortfolioValuation
+                },
+                capitalization: {
+                    field: investmentObjCapitalization
+                },
+                userText: {
+                    detail: investmentObjUserText
+                }
+            }
         };
         const metrics = {
             annualReturn: _.get(portfolioMetrics, 'returns.annualreturn', 0),
@@ -1151,6 +1329,17 @@ export class AdviceFormImpl extends React.Component {
     }
 }
 
+const InvestMentObjComponent = ({header, content}) => {
+    return (
+        <Row style={{marginTop: '20px'}} type="flex" align="middle">
+            <Col span={24}>
+                <h3 style={investmentObjLabelStyle}>{header}:</h3>
+            </Col>
+            <Col span={24}>{content}</Col>
+        </Row>
+    );
+}
+
 export const AdviceForm = Form.create()(withRouter(AdviceFormImpl));
 
 const labelStyle = {
@@ -1161,3 +1350,17 @@ const labelStyle = {
 const inputStyle = {
     // marginTop: '20px'
 };
+
+const investmentObjContainerStyle = {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center'
+};
+
+const investmentObjInputStyle = {
+    marginLeft: '20px'
+};
+
+const investmentObjLabelStyle = {
+    fontSize: '14px'
+}
