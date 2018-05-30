@@ -952,7 +952,7 @@ export class AdviceFormImpl extends React.Component {
                                                 </Col>
                                             </Row>
                                             
-                                            <Row gutter={16}>
+                                            {/* <Row gutter={16}>
                                                 <Col span={10}>
                                                     <InvestMentObjComponent 
                                                         header="Suitability"
@@ -1021,7 +1021,7 @@ export class AdviceFormImpl extends React.Component {
                                                         }
                                                     />
                                                 </Col>
-                                            </Row>
+                                            </Row> */}
 
                                             <Row>
                                                 <Col span={24}>
@@ -1047,7 +1047,7 @@ export class AdviceFormImpl extends React.Component {
                                                     />
                                                 </Col>
                                             </Row>
-                                            <Row gutter={16}>
+                                            <Row gutter={16} style={{marginTop: '15px'}}>
                                                 <Col span={12}>
                                                     <InvestMentObjComponent 
                                                         header="Investor Type"
@@ -1470,8 +1470,10 @@ const InvestMentObjComponent = ({header, content}) => {
 
 export const AdviceForm = Form.create()(withRouter(AdviceFormImpl));
 
+const labelColor = '#898989';
+
 const labelStyle = {
-    color: '#898989',
+    color: labelColor,
     marginBottom: '5px'
 };
 
@@ -1490,5 +1492,6 @@ const investmentObjInputStyle = {
 };
 
 const investmentObjLabelStyle = {
-    fontSize: '14px'
+    fontSize: '14px',
+    color: labelColor
 }
