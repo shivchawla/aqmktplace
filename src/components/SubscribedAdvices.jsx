@@ -234,7 +234,7 @@ class SubscribedAdvicesImpl extends React.Component {
                 compositions.push({
                     key: index,
                     name: _.get(item, 'security.detail.Nse_Name', 'N/A'), 
-                    symbol: item.security.ticker,
+                    symbol: _.get(item, 'security.detail.NSE_ID', null) || _.get(item, 'security.ticker', ''),
                     quantity: item.quantity,
                     lastPrice: Utils.formatMoneyValueMaxTwoDecimals(item.lastPrice),
                     costBasic: 200,

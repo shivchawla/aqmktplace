@@ -212,7 +212,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
             return {
                 key: index,
                 adviceKey: key,
-                symbol: _.get(item, 'security.ticker', ''),
+                symbol: _.get(item, 'security.detail.NSE_ID', null) || _.get(item, 'security.ticker', ''),
                 name: _.get(item, 'security.detail.Nse_Name', ''),
                 sector: _.get(item, 'security.detail.Sector', ''),
                 shares: _.get(targetPosition, 'modifiedShares', 0),

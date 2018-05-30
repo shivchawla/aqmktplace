@@ -466,7 +466,7 @@ export default class InvestorDashboard extends React.Component {
         stockTransactions.map((item, index) => {
             stockPositions.push({
                 key: index,
-                symbol: _.get(item, 'security.ticker', ''),
+                symbol: _.get(item, 'security.detail.NSE_ID', null) || _.get(item, 'security.ticker', ''),
                 name: _.get(item, 'security.detail.Nse_Name', ''),
                 shares: item.quantity || 0,
                 price: item.lastPrice || 0,

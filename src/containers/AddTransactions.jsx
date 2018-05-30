@@ -550,7 +550,7 @@ class AddTransactionsImpl extends React.Component {
                 composition.push({
                     key: index,
                     adviceKey: key,
-                    symbol: _.get(item, 'security.ticker', ''),
+                    symbol: _.get(item, 'security.detail.NSE_ID', null) || _.get(item, 'security.ticker', ''),
                     name: _.get(item, 'security.detail.Nse_Name', ''),
                     sector: _.get(item, 'security.detail.Sector', ''),
                     shares: 0,
@@ -743,7 +743,7 @@ class AddTransactionsImpl extends React.Component {
                         {
                             key: 1,
                             adviceKey: index,
-                            symbol: item.security.ticker,
+                            symbol: _.get(item, 'security.detail.NSE_ID', null) || _.get(item, 'security.ticker', ''),
                             name: item.security.detail.Nse_Name,
                             sector: item.security.detail.Sector,
                             shares: item.quantity,
@@ -761,7 +761,7 @@ class AddTransactionsImpl extends React.Component {
                 advices[adviceIndex].composition.push({
                     key: index + 1,
                     adviceKey: advices[adviceIndex].key,
-                    symbol: item.security.ticker,
+                    symbol: _.get(item, 'security.detail.NSE_ID', null) || _.get(item, 'security.ticker', ''),
                     name: item.security.detail.Nse_Name,
                     sector: item.security.detail.Sector,
                     shares: item.quantity,
@@ -783,7 +783,7 @@ class AddTransactionsImpl extends React.Component {
         stockTransactions.map((item, index) => {
             stockPositions.push({
                 key: index,
-                symbol: item.security.ticker,
+                symbol: _.get(item, 'security.detail.NSE_ID', null) || _.get(item, 'security.ticker', ''),
                 shares: item.quantity,
                 price: item.lastPrice,
                 avgPrice: item.avgPrice,
@@ -950,7 +950,7 @@ class AddTransactionsImpl extends React.Component {
             return {
                 key: index,
                 adviceKey: adviceIndex,
-                symbol: position.security.ticker,
+                symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker', ''),
                 shares: position.quantity,
                 modifiedShares: position.quantity,
                 newShares: 0,

@@ -53,7 +53,7 @@ export const addPositionToAdvice = (advices, advicePerformance, position, positi
                 {
                     key: 1,
                     adviceKey: positionIndex,
-                    symbol: position.security.ticker,
+                    symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker',''),
                     shares: position.quantity,
                     modifiedShares: position.quantity,
                     newShares: 0,

@@ -644,8 +644,8 @@ export class AdviceFormImpl extends React.Component {
                     sector: _.get(item, 'security.detail.Sector'),
                     lastPrice: item.lastPrice,
                     shares: item.quantity,
-                    symbol: item.security.ticker,
-                    ticker: item.security.ticker,
+                    symbol: _.get(item, 'security.detail.NSE_ID','-') || _.get(item, 'security.ticker','-'),
+                    ticker: _.get(item, 'security.detail.NSE_ID','-') || _.get(item, 'security.ticker','-'),
                     totalValue: item.quantity * item.lastPrice,
                 });
             });
