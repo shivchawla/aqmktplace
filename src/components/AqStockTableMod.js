@@ -178,7 +178,8 @@ export class AqStockTableMod extends React.Component {
                 // console.log(response.data);
                 const name = _.get(response.data, 'security.detail.Nse_Name', '');
                 const sector = _.get(response.data, 'security.detail.Sector', '');
-                const lastPrice = response.data.latestDetail.values.Close;
+                const lastPrice = _.get(response.data, 'latestDetailRT.current', 0.0) || 
+                                    _.get(response.data, 'latestDetail.values.Close', 0.0);
                 target['name'] = name;
                 target['sector'] = sector;
                 target['lastPrice'] = lastPrice;

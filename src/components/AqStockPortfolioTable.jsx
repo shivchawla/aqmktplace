@@ -79,7 +79,7 @@ export class AqStockPortfolioTable extends React.Component {
                 sector: _.get(position, 'security.detail.Sector', '-'),
                 price: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'lastPrice', 0)),
                 shares: position.quantity || 0,
-                symbol: _.get(position, 'security.ticker', '-'),
+                symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker', '-'),
                 avgPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'avgPrice', 0)),
             });
         });

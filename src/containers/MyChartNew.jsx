@@ -571,8 +571,8 @@ class MyChartNewImpl extends React.Component {
         return data.map((item, index) => {
             return {
                 id: index,
-                symbol: item.ticker,
-                name: item.detail !== undefined ? item.detail.Nse_Name : item.ticker
+                symbol: _.get(item, 'detail.NSE_ID', null) || _.get(item, 'ticker', ''),
+                name: _.get(item, 'detail.Nse_Name', null) || _.get(item, 'ticker', ''),
             }
         })
     }

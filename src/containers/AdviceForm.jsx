@@ -644,8 +644,8 @@ export class AdviceFormImpl extends React.Component {
                     sector: _.get(item, 'security.detail.Sector'),
                     lastPrice: item.lastPrice,
                     shares: item.quantity,
-                    symbol: item.security.ticker,
-                    ticker: item.security.ticker,
+                    symbol: _.get(item, 'security.detail.NSE_ID','-') || _.get(item, 'security.ticker','-'),
+                    ticker: _.get(item, 'security.detail.NSE_ID','-') || _.get(item, 'security.ticker','-'),
                     totalValue: item.quantity * item.lastPrice,
                 });
             });
@@ -1052,7 +1052,7 @@ export class AdviceFormImpl extends React.Component {
                                                 </Col>
                                             </Row>
                                             <Row gutter={16} style={{marginTop: '15px'}}>
-                                                <Col span={12}>
+                                                {/*<Col span={12}>
                                                     <InvestMentObjComponent 
                                                         header="Investor Type"
                                                         content={
@@ -1063,16 +1063,23 @@ export class AdviceFormImpl extends React.Component {
                                                             </h3>
                                                         }
                                                     />
-                                                </Col>
-                                                <Col span={12}>
+                                                </Col>*/}
+                                                <Col span={24}>
                                                     <InvestMentObjComponent 
-                                                        header="Field"
+                                                        header="Suitability"
                                                         content={
+                                                            <div>
                                                             <h3 style={{fontSize: '16px'}}>
                                                                 {
+                                                                    this.getGoalDetail('investorType')
+                                                                }
+                                                            </h3>
+                                                            <h3 style={{fontSize: '16px'}}>
+                                                                {   
                                                                     this.getGoalDetail('suitability')
                                                                 }
                                                             </h3>
+                                                            </div>
                                                         }
                                                     />
                                                 </Col>

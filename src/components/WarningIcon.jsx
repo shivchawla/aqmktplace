@@ -11,7 +11,7 @@ export class WarningIcon extends React.Component {
             content = <p>{reason}</p>;
         }
         return (
-            <Popover content={content}>
+            <Popover content={content} placement="right">
                 <Icon type="exclamation-circle" style={exclamationIconStyle}/>
             </Popover>
         );
