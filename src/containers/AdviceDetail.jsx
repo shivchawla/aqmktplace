@@ -5,11 +5,11 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input} from 'antd';
+import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Popover} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, buttonStyle, pageContainer} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate, Footer} from '../components';
+import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate, Footer, ApprovalItem, ApprovalItemView} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax, getStockPerformance} from '../utils';
@@ -25,6 +25,59 @@ const {TextArea} = Input;
 const {aimsquantToken, requestUrl} = require('../localConfig.js');
 const DateHelper = require('../utils/date');
 const dateFormat = 'Do MMMM YYYY';
+
+const approvalObj = {
+    name: {
+        valid: false,
+        reason: '',
+        fieldName: 'Name',
+    },
+    rebalanceFreq: {
+        valid: false,
+        reason: '',
+        fieldName: 'Rebalancing Frequency',
+    },
+    stockExposure: {
+        valid: false,
+        reason: '',
+        fieldName: 'Stock Exposure',
+    },
+    industryExposure: {
+        valid: false,
+        reason: '',
+        fieldName: 'Industry Exposure',
+    },
+    sectorExposure: {
+        valid: false,
+        reason: '',
+        fieldName: 'Sector Exposure',
+    },
+    goal: {
+        valid: false,
+        reason: '',
+        fieldName: 'Goal',
+    },
+    valuation: {
+        valid: false,
+        reason: '',
+        fieldName: 'Portfolio Valuation',
+    },
+    capitalization: {
+        valid: false,
+        reason: '',
+        fieldName: 'Capitalization',
+    },
+    sectors: {
+        valid: false,
+        reason: '',
+        fieldName: 'Sectors',
+    },
+    userText: {
+        valid: false,
+        reason: '',
+        fieldName: 'User Text'
+    }
+};
 
 class AdviceDetailImpl extends React.Component {
     socketOpenConnectionTimeout = 1000;
@@ -93,7 +146,8 @@ class AdviceDetailImpl extends React.Component {
                 prohibit: false
             },
             notAuthorized: false,
-            approvalLoading: false
+            approvalLoading: false,
+            approvalObj
         };
 
         this.performanceSummary = {};
@@ -167,7 +221,8 @@ class AdviceDetailImpl extends React.Component {
                 updatedDate: moment(updatedDate).format(dateFormat),
                 rating: Number((rating.current || 0).toFixed(2)),
                 isPublic: _.get(response.data, 'public', false),
-                investmentObjective: _.get(response.data, 'investmentObjective', {})
+                investmentObjective: _.get(response.data, 'investmentObjective', {}),
+                approval: _.get(response.data, 'approval[0]', {})
             },
             metrics: {
                 ...this.state.metrics,
@@ -606,7 +661,6 @@ class AdviceDetailImpl extends React.Component {
         const isAdmin = _.get(this.state, 'adviceDetail.isAdmin', false);
         const approvalStatus = _.get(this.state, 'adviceDetail.approvalStatus', 'pending');
         const className = small ? 'action-button action-button-small' : 'action-button';
-        // console.log(isAdmin);
         if (isAdmin && approvalStatus !== 'approved') {
             return (
                 <React.Fragment>
@@ -625,14 +679,128 @@ class AdviceDetailImpl extends React.Component {
         return null;
     }
 
+    onApprovalItemRadioChange = (e, field) => {
+        this.setState({
+            approvalObj: {
+                ...this.state.approvalObj,
+                [field]: {
+                    ...this.state.approvalObj[field],
+                    valid: e.target.value
+                }
+            }
+        })
+
+    }
+
+    onApprovalInputChange = (e, field) => {
+        this.setState({
+            approvalObj: {
+                ...this.state.approvalObj,
+                [field]: {
+                    ...this.state.approvalObj[field],
+                    reason: e.target.value
+                }
+            }
+        })
+    }
+
+    renderApprovalTabs = () => {
+        const isAdmin = _.get(this.state, 'adviceDetail.isAdmin', false);
+        const approvalStatus = _.get(this.state, 'adviceDetail.approvalStatus', 'pending');
+        if (isAdmin && approvalStatus !== 'approved') {
+            return (
+                <Row 
+                        style={{...shadowBoxStyle, height: '680px', width: '95%', marginLeft: '20px'}}>
+                    <Col span={24}>
+                        <h3 style={{marginTop: '10px', marginLeft: '10px', color: '#595959', fontSize: '18px'}}>
+                            Approve
+                        </h3>
+                    </Col>
+                    <Col span={24}>
+                        <Tabs defaultActiveKey="1" size="small" animated={false}>
+                            <TabPane tab="General" key="1" style={approvalRowContainerStyle}>
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.name} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'name')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'name')}
+                                />
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.rebalanceFreq} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'rebalanceFreq')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'rebalanceFreq')}
+                                />
+                            </TabPane>
+                            <TabPane tab="Objective" key="3" style={approvalRowContainerStyle}>
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.goal} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'goal')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'goal')}
+                                />
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.valuation} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'valuation')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'valuation')}
+                                />
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.capitalization} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'capitalization')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'capitalization')}
+                                />
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.sectors} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'sectors')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'sectors')}
+                                />
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.userText} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'userText')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'userText')}
+                                />
+                            </TabPane>
+                            <TabPane tab="Portfolio" key="2" style={approvalRowContainerStyle}>
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.stockExposure} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'stockExposure')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'stockExposure')}
+                                />
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.industryExposure} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'industryExposure')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'industryExposure')}
+                                />
+                                <ApprovalItem 
+                                        approvalObj={this.state.approvalObj.sectorExposure} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'sectorExposure')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'sectorExposure')}
+                                />
+                            </TabPane>
+                        </Tabs>
+                    </Col>
+                    <Col span={24} style={{padding: '0 15px', position: 'absolute', bottom: '20px'}}>
+                        <Button 
+                                onClick={this.toggleApprovalModal} 
+                                style={{width: '100%'}} 
+                                type="primary"
+                        >
+                            SEND APPROVAL
+                        </Button>
+                    </Col>
+                </Row>
+            );
+        }
+    }
+
     renderApprovalModal = () => {
         const approval = [{label: 'Approve', value: true}, {label: 'Unapprove', value: false}];
-        const prohibit = [{label: 'Prohibit', value: true}, {label: 'Allow', value: false}]
+        const {approvalObj} = this.state;
+
         return (
             <Modal
                     title="Take Approval Action"
                     onCancel={this.toggleApprovalModal}
                     visible={this.state.approvalModalVisible}
+                    style={{top: 20}}
+                    bodyStyle={{height: '600px'}}
                     footer={[
                         <Button 
                                 key={1} 
@@ -647,38 +815,90 @@ class AdviceDetailImpl extends React.Component {
                         >Done</Button>
                     ]}
             >
-                <Row>
+                <Row style={{height: '100%'}}>
                     <Col span={24}>
-                        <TextArea 
-                                placeholder="Enter message here" 
-                                autosize={{ minRows: 2, maxRows: 6 }} 
-                                onChange={this.handleApprovalInputChange} 
-                                value={this.state.approveObj.message}
-                        />
+                        <Tabs defaultActiveKey="1" size="small" animated={false}>
+                            <TabPane tab="General" key="1">
+                                <ApprovalItemView 
+                                        label="Name" 
+                                        approved={approvalObj.name.valid} 
+                                        reason={approvalObj.name.reason}
+                                />
+                                <ApprovalItemView 
+                                        label="Rebalance Frequency" 
+                                        approved={approvalObj.rebalanceFreq.valid}
+                                        reason={approvalObj.rebalanceFreq.reason}
+                                />
+                            </TabPane>
+                            <TabPane tab="Objective" key="3">
+                                <ApprovalItemView 
+                                        label="Goal" 
+                                        approved={approvalObj.goal.valid}
+                                        reason={approvalObj.goal.reason}
+                                />
+                                <ApprovalItemView 
+                                        label="Portfolio Valuation" 
+                                        approved={approvalObj.valuation.valid}
+                                        reason={approvalObj.valuation.reason}
+                                />
+                                <ApprovalItemView 
+                                        label="Capitalization" 
+                                        approved={approvalObj.capitalization.valid}
+                                        reason={approvalObj.capitalization.reason}
+                                />
+                                <ApprovalItemView 
+                                        label="Sectors" 
+                                        approved={approvalObj.sectors.valid}
+                                        reason={approvalObj.sectors.reason}
+                                />
+                                <ApprovalItemView 
+                                        label="UserText" 
+                                        approved={approvalObj.userText.valid}
+                                        reason={approvalObj.userText.reason}
+                                />
+                            </TabPane>
+                            <TabPane tab="Portfolio" key="2">
+                                <ApprovalItemView 
+                                        label="Stock Exposure" 
+                                        approved={approvalObj.stockExposure.valid}
+                                        reason={approvalObj.stockExposure.reason}
+                                />
+                                <ApprovalItemView 
+                                        label="Industry Exposure" 
+                                        approved={approvalObj.industryExposure.valid}
+                                        reason={approvalObj.industryExposure.reason}
+                                />
+                                <ApprovalItemView 
+                                        label="Sector Exposure" 
+                                        approved={approvalObj.sectorExposure.valid}
+                                        reason={approvalObj.sectorExposure.reason}
+                                />
+                            </TabPane>
+                        </Tabs>
                     </Col>
-                    <Col span={24} style={{marginTop: '20px'}}>
-                        <h5>Set Approval Action</h5>
-                        <RadioGroup 
-                                style={{marginTop: '10px', fontSize: '14px'}}
-                                onChange={this.handleApprovalRadioChange} 
-                                value={this.state.approveObj.approved}
-                        >
-                            {
-                                approval.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
-                            }
-                        </RadioGroup>
-                    </Col>
-                    <Col span={24} style={{marginTop: '20px'}}>
-                        <h5>Set Prohibit Action</h5>
-                        <RadioGroup 
-                                style={{marginTop: '10px', fontSize: '14px'}}
-                                onChange={this.handleProhibitRadioChange} 
-                                value={this.state.approveObj.prohibit}
-                        >
-                            {
-                                prohibit.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
-                            }
-                        </RadioGroup>
+                    <Col span={24} style={{position: 'absolute', bottom: '0px'}}>
+                        <Row>
+                            <Col span={24}>
+                                <TextArea 
+                                        placeholder="General Message" 
+                                        autosize={{ minRows: 2, maxRows: 2 }} 
+                                        onChange={this.handleApprovalInputChange} 
+                                        value={this.state.approveObj.message}
+                                />
+                            </Col>
+                            <Col span={24} style={{marginTop: '20px'}}>
+                                <h5>Status</h5>
+                                <RadioGroup 
+                                        style={{marginTop: '10px', fontSize: '14px'}}
+                                        onChange={this.handleApprovalRadioChange} 
+                                        value={this.state.approveObj.approved}
+                                >
+                                    {
+                                        approval.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
+                                    }
+                                </RadioGroup>
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
             </Modal>
@@ -686,18 +906,13 @@ class AdviceDetailImpl extends React.Component {
     }
 
     handleApprovalSubmission = () => {
-        const url = `${requestUrl}/advice/${this.props.match.params.id}/approve`;
+        const url = `${requestUrl}/advice/${this.props.match.params.id}/approveNew`;
         this.setState({approvalLoading: false});
-        const data = this.state.approveObj;
-        // console.log(data);
         axios({
             url,
-            method: 'POST',
+            method: 'PATCH',
             headers: Utils.getAuthTokenHeader(),
-            data: {
-                ...this.state.approveObj,
-                prohibit: false
-            }
+            data: this.constructApprovalMessage()
         })
         .then(response => {
             const adviceUrl = `${requestUrl}/advice/${this.props.match.params.id}`;
@@ -711,7 +926,6 @@ class AdviceDetailImpl extends React.Component {
         .catch(error => {
             Utils.checkForInternet(error, this.props.history);
             message.error('Error Occured');
-            // console.log(error);
             if (error.response) {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
@@ -719,6 +933,84 @@ class AdviceDetailImpl extends React.Component {
         .finally(() => {
             this.setState({approvalLoading: false});
         })
+    }
+
+    constructApprovalMessage = () => {
+        const {approveObj, approvalObj, adviceDetail} = this.state;
+        const {investmentObjective = {}} = adviceDetail;
+        const requiredDetailFields = ['name', 'rebalanceFreq', 'stockExposure', 'industryExposure', 'sectorExposure'];
+        let detail = [];
+        Object.keys(approvalObj).map(key => {
+            const keyIndex = requiredDetailFields.indexOf(key);
+            if (keyIndex !== -1) {
+                detail.push({
+                    field: key,
+                    reason: approvalObj[key].reason,
+                    valid: approvalObj[key].valid,
+                    requirements: []
+                });
+            }
+        });
+        detail.push({
+            field: 'investmentObjective',
+            reason: 'See Investment Objective',
+            requirements: [],
+            valid: this.checkInvestmentObjectiveValidity()
+        })
+
+        return {
+            message: approveObj.message,
+            status: approveObj.approved,
+            detail,
+            investmentObjective: {
+                goal: {
+                    field: _.get(investmentObjective, 'goal.field', ''),
+                    investorType: _.get(investmentObjective, 'goal.investorType', ''),
+                    suitability: _.get(investmentObjective, 'goal.suitability', ''),
+                    valid: approvalObj.goal.valid,
+                    reason: approvalObj.goal.reason
+                },
+                sectors: {
+                    detail: _.get(investmentObjective, 'sectors.detail', []),
+                    valid: approvalObj.sectors.valid,
+                    reason: approvalObj.sectors.reason
+                },
+                portfolioValuation: {
+                    field: _.get(investmentObjective, 'portfolioValuation.field', ''),
+                    valid: approvalObj.valuation.valid,
+                    reason: approvalObj.valuation.reason
+                },
+                capitalization: {
+                    field: _.get(investmentObjective, 'capitalization.field', ''),
+                    valid: approvalObj.capitalization.valid,
+                    reason: approvalObj.capitalization.reason
+                },
+                capitalization: {
+                    field: _.get(investmentObjective, 'capitalization.field', ''),
+                    valid: approvalObj.capitalization.valid,
+                    reason: approvalObj.capitalization.reason
+                },
+                userText: {
+                    detail: _.get(investmentObjective, 'capitalization.userText', ''),
+                    valid: approvalObj.userText.valid,
+                    reason: approvalObj.userText.reason
+                }
+            }
+        };
+    }
+
+    checkInvestmentObjectiveValidity = () => {
+        const {adviceDetail, approvalObj} = this.state;
+        const {investmentObjective = {}} = adviceDetail;
+        const investmentObjArray = ['goal', 'sectors', 'capitalization', 'valuation', 'userText'];
+        let falseCount = 0;
+        investmentObjArray.map(item => {
+            if (approvalObj[item].valid === false){
+                falseCount++;
+            }
+        });
+
+        return falseCount === 0;
     }
 
     handleApprovalRadioChange = e => {
@@ -781,7 +1073,7 @@ class AdviceDetailImpl extends React.Component {
         if (!isOwner) {
             return (
                 <div style={{width: '95%'}}>
-                    {this.renderApprovalButtons(small)}
+                    {/* {this.renderApprovalButtons(small)} */}
                     <Button
                             onClick={() => 
                                 Utils.isLoggedIn() 
@@ -817,7 +1109,7 @@ class AdviceDetailImpl extends React.Component {
         } else {
             return (
                 <div style={{width: '95%'}}>
-                    {this.renderApprovalButtons(small)}
+                    {/* {this.renderApprovalButtons(small)} */}
                     {
                         !this.state.adviceDetail.isPublic && 
                         <Button 
@@ -932,6 +1224,7 @@ class AdviceDetailImpl extends React.Component {
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}
+                            {this.renderApprovalTabs()}
                             {/* <Row 
                                     style={{...shadowBoxStyle, height: '400px', width: '95%', marginLeft: '20px'}}>
                                 <Col span={24}>
@@ -1030,4 +1323,8 @@ const customPanelStyle = {
     border: 0,
     borderBottom: '1px solid #eaeaea',
     overflow: 'hidden',
+};
+
+const approvalRowContainerStyle = {
+    padding: '0 15px',
 };

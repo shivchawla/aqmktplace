@@ -244,6 +244,7 @@ class AdviceListItemImpl extends React.PureComponent {
             isSubscribed,
             isApproved,
             isOwner,
+            isAdmin,
             rebalancingFrequency,
             netValue,
         } = this.props.advice;
@@ -319,7 +320,7 @@ class AdviceListItemImpl extends React.PureComponent {
                                     </Tag>
                                 }
                                 {
-                                    isOwner &&
+                                    (isOwner || isAdmin) &&
                                     <Tag style={{border: '1px solid #673AB7', cursor: 'auto'}}>
                                         <Icon 
                                                 type={isPublic ? 'team' : 'lock'} 

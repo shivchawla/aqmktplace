@@ -316,6 +316,7 @@ export default class ScreenAdvices extends React.PureComponent {
                 rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
                 isApproved: _.get(advice, 'approvalStatus', 'N/A'),
                 isOwner: _.get(advice, 'isOwner', false),
+                isAdmin: _.get(advice, 'isAdmin', false),
                 isSubscribed: _.get(advice, 'isSubscribed', false),
                 isTrending: false,
                 public: _.get(advice, 'public', false),

@@ -6,9 +6,9 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch, Icon, Tag, Tooltip} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, metricsLabelStyle, metricsValueStyle} from '../constants';
+import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate, IconItem} from '../components';
+import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate, IconItem, WarningIcon} from '../components';
 import {MyChartNew} from './MyChartNew';
 import medalIcon from '../assets/award.svg';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax} from '../utils';
@@ -65,6 +65,37 @@ class AdviceDetailContentImpl extends React.Component {
         return null;
     }
 
+    getWarning = field => {
+        const {adviceDetail = {}} = this.props;
+        const {detail = []} = adviceDetail.approval;
+        const fieldItem = detail.filter(item => item.field === field)[0] || {field, reason: 'N/A', valid: false};
+        return fieldItem;
+    }
+
+    getInvestmentObjWarning = field => {
+        const {adviceDetail = {}} = this.props;
+        const {investmentObjective = {}} = adviceDetail;
+        const item = _.get(investmentObjective, field, {valid: true, reason: 'N/A'});
+        return item;
+    }
+
+    getPortfolioWarnings = () => {
+        const {adviceDetail = {}} = this.props;
+        const {detail = []} = adviceDetail.approval;
+        const lookupFields = ['sectorExposure', 'industryExposure', 'stockExposure'];
+        let invalidCount = 0;
+        const reasons = [];
+        detail.map(item => {
+            const lookUpItemIndex = lookupFields.indexOf(item.field);
+            if (lookUpItemIndex !== -1 && !item.valid) {
+                invalidCount++;
+                reasons.push(item.reason);
+            }
+        });
+
+        return {valid: invalidCount === 0, reasons};
+    }
+
     renderPageContent() {
         const {
             name = '', 
@@ -99,7 +130,13 @@ class AdviceDetailContentImpl extends React.Component {
             <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
                 <Row className="row-container" type="flex" justify="space-between" align="middle">
                     <Col span={18}>
-                        <h1 style={adviceNameStyle}>{name}</h1>
+                        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                            <h1 style={adviceNameStyle}>{name}</h1>
+                            {
+                                !this.getWarning('name').valid &&
+                                <WarningIcon reason={this.getWarning('name').reason}/>
+                            }
+                        </div>
                         {
                             advisor.user &&
                             <h5 
@@ -261,13 +298,20 @@ class AdviceDetailContentImpl extends React.Component {
                             <Col span={24}>
                                 <Row>
                                     <Col span={6}>
-                                        <InvestmentObjItem label="Goal" value={_.get(goal, 'field', '-')}/>
+                                        <InvestmentObjItem 
+                                                label="Goal" 
+                                                value={_.get(goal, 'field', '-')} 
+                                                warning={!this.getInvestmentObjWarning('goal').valid}
+                                                reason={this.getInvestmentObjWarning('goal').reason}
+                                        />
                                     </Col>
                                     <Col span={6}>
                                         <InvestmentObjItem  
                                                 showTag 
                                                 label="Valuation" 
                                                 value={_.get(portfolioValuation, 'field', '-')}
+                                                warning={!this.getInvestmentObjWarning('portfolioValuation').valid}
+                                                reason={this.getInvestmentObjWarning('portfolioValuation').reason}
                                         />
                                     </Col>
                                     <Col span={6}>
@@ -275,6 +319,8 @@ class AdviceDetailContentImpl extends React.Component {
                                                 showTag 
                                                 label="Capitalization" 
                                                 value={_.get(capitalization, 'field', '-')}
+                                                warning={!this.getInvestmentObjWarning('capitalization').valid}
+                                                reason={this.getInvestmentObjWarning('capitalization').reason}
                                         />
                                     </Col>
                                     <Col span={6}>
@@ -298,7 +344,15 @@ class AdviceDetailContentImpl extends React.Component {
                                                     })
                                                 }
                                             </div>
-                                            <h3 style={{fontSize: '13px', color: '#515151'}}>Sectors</h3>
+                                            <div style={{display: 'flex', flexDirection: 'row'}}>
+                                                <h3 style={{fontSize: '13px', color: '#515151'}}>Sectors</h3>
+                                                {
+                                                    !this.getInvestmentObjWarning('sectors').valid &&
+                                                    <WarningIcon 
+                                                            reason={this.getInvestmentObjWarning('sectors').reason}
+                                                    />
+                                                }
+                                            </div>
                                         </div>
                                     </Col>
                                 </Row>
@@ -334,8 +388,22 @@ class AdviceDetailContentImpl extends React.Component {
                             style={customPanelStyle}
                             header={
                                 <Row type="flex" justify="space-between">
-                                    <Col span={6}>
+                                    <Col span={6} style={{display: 'flex', flexDirection: 'row'}}>
                                         <h3 style={metricsHeaderStyle}>Portfolio</h3>
+                                        {
+                                            !this.getPortfolioWarnings().valid &&
+                                            <WarningIcon 
+                                                    content={
+                                                        <div>
+                                                            {
+                                                                this.getPortfolioWarnings().reasons.map((reason, index) => {
+                                                                    return <p key={index}>{reason}</p>
+                                                                })
+                                                            }
+                                                        </div>
+                                                    }
+                                            />
+                                        }
                                     </Col>
                                 </Row>
                             }>
@@ -401,7 +469,7 @@ class AdviceDetailContentImpl extends React.Component {
     }
 }
 
-const InvestmentObjItem = ({label, value, showTag = false}) => {
+const InvestmentObjItem = ({label, value, showTag = false, warning = false, reason= 'N/A'}) => {
     return (
         <div>
             {
@@ -415,7 +483,13 @@ const InvestmentObjItem = ({label, value, showTag = false}) => {
                         {value}
                     </span>
             }
-            <h3 style={{fontSize: '13px', color: '#515151'}}>{label}</h3>
+            <div style={{display: 'flex', flexDirection: 'row'}}>
+                <h3 style={{fontSize: '13px', color: '#515151'}}>{label}</h3>
+                {
+                    warning &&
+                    <WarningIcon reason={reason}/>
+                }
+            </div>
         </div>
     );
 }
@@ -475,3 +549,4 @@ const customPanelStyle = {
     borderBottom: '1px solid #eaeaea',
     overflow: 'hidden',
 };
+

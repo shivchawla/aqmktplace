@@ -41,3 +41,6 @@ export * from './AqRate';
 export * from './AsyncComponent';
 export * from './IconItem';
 export * from './Footer';
+export * from './ApprovalItem';
+export * from './ApprovalItemView';
+export * from './WarningIcon';
