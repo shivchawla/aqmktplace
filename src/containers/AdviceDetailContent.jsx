@@ -297,7 +297,7 @@ class AdviceDetailContentImpl extends React.Component {
                         <Row className="row-container" >
                             <Col span={24}>
                                 <Row>
-                                    <Col span={6}>
+                                    <Col span={24}>
                                         <InvestmentObjItem 
                                                 label="Goal" 
                                                 value={_.get(goal, 'field', '-')} 

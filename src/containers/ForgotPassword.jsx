@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {Utils} from '../utils';
+import _ from 'lodash';
 import {requestUrl} from '../localConfig';
 import { Spin, Form, Icon, Input, Button } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
@@ -47,7 +48,7 @@ class ForgotPasswordImpl extends Component {
             this.cancelForgotPasswordCall = undefined;
             this.updateState({
               'loading': false,
-              'error': error.response.data
+              'error': _.get(error, 'response.data', 'Unexpected Error')
             });
           });
         }
