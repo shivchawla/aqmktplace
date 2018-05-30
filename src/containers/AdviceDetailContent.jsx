@@ -260,9 +260,24 @@ class AdviceDetailContentImpl extends React.Component {
                         <Row className="row-container" >
                             <Col span={24}>
                                 <Row>
-                                    <Col span={6}>
+                                    <Col span={24}>
                                         <InvestmentObjItem label="Goal" value={_.get(goal, 'field', '-')}/>
                                     </Col>
+                                </Row>
+
+                                <Row style={{marginTop: '15px'}}>
+                                    <Col span={10} style={{marginTop: '10px'}}>
+                                        <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
+                                    </Col>
+                                </Row>
+
+                                <Row style={{marginTop: '15px'}}>
+                                    <Col span={24} style={{marginTop: '10px'}}>
+                                        <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
+                                    </Col>
+                                </Row>
+                            
+                                <Row style={{marginTop: '15px'}}>
                                     <Col span={6}>
                                         <InvestmentObjItem  
                                                 showTag 
@@ -303,16 +318,6 @@ class AdviceDetailContentImpl extends React.Component {
                                     </Col>
                                 </Row>
                             </Col>
-                            <Col span={24}>
-                                <Row>
-                                    <Col span={6} style={{marginTop: '10px'}}>
-                                        <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
-                                    </Col>
-                                    <Col span={6} style={{marginTop: '10px'}}>
-                                        <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
-                                    </Col>
-                                </Row>
-                            </Col>
                             {
                                 _.get(userText, 'detail', '').length > 0 &&
                                 <Col span={24} style={{marginTop: '10px'}}>
@@ -320,8 +325,8 @@ class AdviceDetailContentImpl extends React.Component {
                                     <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
                                 </Col>
                             }
-                            <Col span={24} style={{marginTop: '10px'}}>
-                                <h5 style={{fontSize: '12px', color: '#F44336'}}>* Investment is subjected to Market Risk</h5>
+                            <Col span={24} style={{marginTop: '20px'}}>
+                                <h5 style={{fontSize: '12px'}}>* All investors are advised to conduct their own independent research into individual stocks before making a purchase decision. In addition, investors are advised that past stock performance is not indicative of future price action.</h5>
                             </Col>
                         </Row>
                     </Panel>
@@ -411,11 +416,11 @@ const InvestmentObjItem = ({label, value, showTag = false}) => {
                             {value}
                         </span>
                     </Tag>
-                :   <span style={{fontSize: '16px', color: primaryColor, fontWeight: '400'}}>
+                :   <span style={{fontSize: '16px', fontWeight: '400'}}>
                         {value}
                     </span>
             }
-            <h3 style={{fontSize: '13px', color: '#515151'}}>{label}</h3>
+            <h3 style={{fontSize: '12px', color: '#515151'}}>{label}</h3>
         </div>
     );
 }
