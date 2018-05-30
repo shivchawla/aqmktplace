@@ -292,7 +292,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 value={_.get(capitalization, 'field', '-')}
                                         />
                                     </Col>
-                                    <Col span={6}>
+                                    <Col span={12}>
                                         <div style={{display: 'flex', flexDirection: 'column'}}>
                                             <div style={{
                                                     display: 'flex', 
