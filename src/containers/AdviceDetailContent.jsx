@@ -306,10 +306,10 @@ class AdviceDetailContentImpl extends React.Component {
                             <Col span={24}>
                                 <Row>
                                     <Col span={6} style={{marginTop: '10px'}}>
-                                        <InvestmentObjItem label="Investor Type" value="Sample Investor Type"/>
+                                        <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
                                     </Col>
                                     <Col span={6} style={{marginTop: '10px'}}>
-                                        <InvestmentObjItem label="Suitability" value="Sample Suitability"/>
+                                        <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
                                     </Col>
                                 </Row>
                             </Col>

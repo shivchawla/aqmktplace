@@ -167,6 +167,8 @@ export class AdviceFormImpl extends React.Component {
             } = values;
             startDate = moment(startDate).format('YYYY-MM-DD');
             const endDate = moment(startDate).add(5, 'days').format(dateFormat);
+            const investorType = this.getGoalDetail('investorType');
+            const suitability = this.getGoalDetail('suitability');
             if(!err && this.validateTransactions()) {
                 requestData = {
                     name,
@@ -190,7 +192,9 @@ export class AdviceFormImpl extends React.Component {
                     maxNotional: this.state.maxNotional,
                     investmentObjective: {
                         goal: {
-                            field: investmentObjGoal
+                            field: investmentObjGoal,
+                            investorType,
+                            suitability
                         },
                         sectors: {
                             detail: investmentObjSectors
@@ -1329,7 +1333,9 @@ export class AdviceFormImpl extends React.Component {
             isPublic: this.state.isPublic,
             investmentObjective: {
                 goal: {
-                    field: investmentObjGoal
+                    field: investmentObjGoal,
+                    investorType: this.getGoalDetail('investorType'),
+                    suitability: this.getGoalDetail('suitability')
                 },
                 sectors: {
                     detail: investmentObjSectors
