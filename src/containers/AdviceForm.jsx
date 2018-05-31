@@ -1342,20 +1342,33 @@ export class AdviceFormImpl extends React.Component {
                 goal: {
                     field: investmentObjGoal,
                     investorType: this.getGoalDetail('investorType'),
-                    suitability: this.getGoalDetail('suitability')
+                    suitability: this.getGoalDetail('suitability'),
+                    valid: true
                 },
                 sectors: {
-                    detail: investmentObjSectors
+                    detail: investmentObjSectors,
+                    valid: true
                 },
                 portfolioValuation: {
-                    field: investmentObjPortfolioValuation
+                    field: investmentObjPortfolioValuation,
+                    valid: true
                 },
                 capitalization: {
-                    field: investmentObjCapitalization
+                    field: investmentObjCapitalization,
+                    valid: true
                 },
                 userText: {
-                    detail: investmentObjUserText
+                    detail: investmentObjUserText,
+                    valid: true
                 }
+            },
+            approval: {
+                detail: [
+                    {
+                        field: 'name',
+                        valid: true
+                    }
+                ]
             }
         };
         const metrics = {

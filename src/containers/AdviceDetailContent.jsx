@@ -297,7 +297,7 @@ class AdviceDetailContentImpl extends React.Component {
                         <Row className="row-container" >
                             <Col span={24}>
                                 <Row>
-                                    <Col span={6}>
+                                    <Col span={24}>
                                         <InvestmentObjItem 
                                                 label="Goal" 
                                                 value={_.get(goal, 'field', '-')} 
@@ -308,7 +308,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 </Row>
 
                                 <Row style={{marginTop: '15px'}}>
-                                    <Col span={10} style={{marginTop: '10px'}}>
+                                    <Col span={24} style={{marginTop: '10px'}}>
                                         <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
                                     </Col>
                                 </Row>
@@ -359,7 +359,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                     })
                                                 }
                                             </div>
-                                            <div style={{display: 'flex', flexDirection: 'row'}}>
+                                            <div style={{display: 'flex', flexDirection: 'row', marginTop: '5px'}}>
                                                 <h3 style={{fontSize: '13px', color: '#515151'}}>Sectors</h3>
                                                 {
                                                     !this.getInvestmentObjWarning('sectors').valid &&
@@ -488,7 +488,7 @@ const InvestmentObjItem = ({label, value, showTag = false, warning = false, reas
                         {value}
                     </span>
             }
-            <div style={{display: 'flex', flexDirection: 'row'}}>
+            <div style={{display: 'flex', flexDirection: 'row', marginTop: '5px'}}>
                 <h3 style={{fontSize: '13px', color: '#515151'}}>{label}</h3>
                 {
                     warning &&
