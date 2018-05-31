@@ -7,7 +7,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 import {AdviceDetailContent} from './AdviceDetailContent';
 import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors, primaryColor, sectors, goals, portfolioValuation, capitalization} from '../constants';
-import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader, Footer} from '../components';
+import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader, Footer, WarningIcon} from '../components';
 import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate, fetchAjax} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {store} from '../store';
@@ -92,7 +92,10 @@ export class AdviceFormImpl extends React.Component {
             portfolioChanged: false,
             postWarningModalVisible: false,
             adviceLimitExceededModalVisible: false,
-            adviceCount: 0
+            adviceCount: 0,
+            approvalRequested: false,
+            latestApproval: {status: false},
+            investmentObjective: {}
         };
         this.columns = [
             {
@@ -152,7 +155,7 @@ export class AdviceFormImpl extends React.Component {
         const {requestUrl, aimsquantToken} = localConfig;
         const {isUpdate, adviceId} = this.props;
         const url = isUpdate ? `${requestUrl}/advice/${adviceId}` : `${requestUrl}/advice`;
-        const method = isUpdate ? 'PUT' : 'POST';
+        const method = isUpdate ? 'PATCH' : 'POST';
         this.props.form.validateFields((err, values) => {
             const defaultStartDate = moment().add(1, 'days').format(dateFormat);
             let {
@@ -209,7 +212,7 @@ export class AdviceFormImpl extends React.Component {
                             detail: investmentObjUserText
                         }
                     },
-                    // public: publish
+                    public: publish
                 };
                 axios({
                     method,
@@ -221,22 +224,23 @@ export class AdviceFormImpl extends React.Component {
                     const adviceId = _.get(response.data, '_id', null);
                     const successMessage = isUpdate ? 'Advice Updated successfully' : 'Advice Created successfully';
                     message.success(successMessage);
-                    if (method === 'POST' && publish) {
-                        return axios({
-                            url: `${requestUrl}/advice/${adviceId}/publish`,
-                            method: 'POST',
-                            headers: Utils.getAuthTokenHeader()
-                        })
-                    } else {
-                        this.props.history.push(`/advice/${adviceId}`);
-                        return null;
-                    }
-                })
-                .then(response => {
-                    const adviceId = _.get(response.data, 'adviceId', null);
+                    // if (method === 'POST' && publish) {
+                    //     return axios({
+                    //         url: `${requestUrl}/advice/${adviceId}/publish`,
+                    //         method: 'POST',
+                    //         headers: Utils.getAuthTokenHeader()
+                    //     })
+                    // } else {
+                    //     this.props.history.push(`/advice/${adviceId}`);
+                    //     return null;
+                    // }
                     this.props.history.push(`/advice/${adviceId}`);
-                    message.success('Succesfully Created Advice');
                 })
+                // .then(response => {
+                //     const adviceId = _.get(response.data, 'adviceId', null);
+                //     this.props.history.push(`/advice/${adviceId}`);
+                //     message.success('Succesfully Created Advice');
+                // })
                 .catch(error => {
                     Utils.checkForInternet(error, this.props.history);
                     if (error.response) {
@@ -455,7 +459,7 @@ export class AdviceFormImpl extends React.Component {
     )
 
     renderMenu = (options, handleClick, defaultValue = options[0]) => (
-        <Select value={defaultValue} style={{width: 150}} onChange={handleClick} disabled={this.state.isPublic}>
+        <Select value={defaultValue} style={{width: 150}} onChange={handleClick} disabled={!this.getDisableStatus()}>
             {
                 options.map((item, index) => <Option key={index} value={item}>{item}</Option>)
             }
@@ -594,7 +598,10 @@ export class AdviceFormImpl extends React.Component {
                 rebalancingFrequency: response.data.rebalance || 0,
                 isPublic: response.data['public'],
                 maxNotional: response.data.maxNotional || 0 ,
-                isOwner
+                isOwner,
+                approvalRequested: _.get(response.data, 'approvalRequested', false),
+                latestApproval: _.get(response.data, 'latestApproval', {status: false}),
+                investmentObjective: _.get(response.data, 'investmentObjective', {})
             }, () => {
                 if (this.state.isOwner) {
                     const benchmarkTicker = _.get(response.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
@@ -764,12 +771,14 @@ export class AdviceFormImpl extends React.Component {
         this.setState({preview: !this.state.preview});
     }
 
-    renderInvestmentObjectRadioGroup = (fieldName, fieldId, items, message) => {
+    renderInvestmentObjectRadioGroup = (fieldName, fieldId, items, message, warning = false, reason = '') => {
         const {getFieldDecorator} = this.props.form;
 
         return (
             <InvestMentObjComponent 
                 header={fieldName}
+                warning={this.state.isPublic && warning && this.props.isUpdate}
+                reason={reason}
                 content={
                     <FormItem>
                         {
@@ -782,7 +791,7 @@ export class AdviceFormImpl extends React.Component {
                             })(
                                 <RadioGroup 
                                         size="small" 
-                                        disabled={this.state.isPublic} 
+                                        disabled={!this.getDisableStatus()} 
                                 >
                                     {
                                         items.map(item => <RadioButton value={item}>{item}</RadioButton>)
@@ -810,6 +819,42 @@ export class AdviceFormImpl extends React.Component {
         return null;
     }
 
+    getDisableStatus = () => {
+        const isPublic = _.get(this.state, 'isPublic', false);
+        const approvalRequested = _.get(this.state, 'approvalRequested', false);
+        const validationStatus = _.get(this.state, 'latestApproval.status', false);
+        return !isPublic || (isPublic && !approvalRequested && !validationStatus);
+    }
+
+    getWarning = field => {
+        const {detail = []} = this.state.latestApproval;
+        const fieldItem = detail.filter(item => item.field === field)[0] || {field, reason: 'N/A', valid: false};
+        return fieldItem;
+    }
+
+    getInvestmentObjWarning = field => {
+        const {investmentObjective = {}} = this.state;
+        const item = _.get(investmentObjective, field, {valid: true, reason: 'N/A'});
+        return item;
+    }
+
+    getPortfolioWarnings = () => {
+        const {detail = []} = this.state.latestApproval;
+        const lookupFields = ['sectorExposure', 'industryExposure', 'stockExposure'];
+        let invalidCount = 0;
+        const reasons = [];
+        detail.map(item => {
+            const lookUpItemIndex = lookupFields.indexOf(item.field);
+            if (lookUpItemIndex !== -1 && !item.valid) {
+                invalidCount++;
+                reasons.push(item.reason);
+            }
+        });
+
+        return {valid: invalidCount === 0, reasons};
+    }
+
+
     renderForm = () => {
         const {getFieldDecorator} = this.props.form;
         const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
@@ -825,17 +870,21 @@ export class AdviceFormImpl extends React.Component {
                             <Form onSubmit={this.handleSubmit} style={{marginTop: '0px'}}>
                                 <Col span={24}>
                                     <Row>
-                                        <Col span={24}>
+                                        <Col span={24} style={horizontalBox}>
                                             <h3 style={inputHeaderStyle}>
                                                 Advice Name
                                             </h3>
+                                            {
+                                                this.state.isPublic && !this.getWarning('name').valid && this.props.isUpdate &&
+                                                <WarningIcon reason={this.getWarning('name').reason} />
+                                            }
                                         </Col>
                                         <Col span={24}>
                                             <FormItem>
                                                 {getFieldDecorator('name', {
                                                     rules: [{required: true, message: 'Please enter Advice Name'}]
                                                 })(
-                                                    <Input style={inputStyle} disabled={this.state.isPublic}/>
+                                                    <Input style={inputStyle} disabled={!this.getDisableStatus()}/>
                                                 )}
                                                 
                                             </FormItem>
@@ -858,6 +907,8 @@ export class AdviceFormImpl extends React.Component {
                                                 <Col span={16}>
                                                     <InvestMentObjComponent 
                                                         header="Goal"
+                                                        warning={this.state.isPublic && !this.getInvestmentObjWarning('goal').valid && this.props.isUpdate}
+                                                        reason={this.getInvestmentObjWarning('goal').reason}
                                                         content={
                                                             <FormItem>
                                                                 {
@@ -870,7 +921,7 @@ export class AdviceFormImpl extends React.Component {
                                                                     })(
                                                                         <Select
                                                                                 placeholder="Select Goal of your Advice"
-                                                                                disabled={this.state.isPublic}
+                                                                                disabled={!this.getDisableStatus()}
                                                                         >
                                                                             {
                                                                                 goals.map((item, index) => 
@@ -896,7 +947,9 @@ export class AdviceFormImpl extends React.Component {
                                                             'Valuation',
                                                             'investmentObjPortfolioValuation',
                                                             portfolioValuation,
-                                                            'Please enter the Portfolio Valuation of your advice'
+                                                            'Please enter the Portfolio Valuation of your advice',
+                                                            !this.getInvestmentObjWarning('portfolioValuation').valid,
+                                                            this.getInvestmentObjWarning('portfolioValuation').reason
                                                         )
                                                     }
                                                 </Col>
@@ -907,6 +960,8 @@ export class AdviceFormImpl extends React.Component {
 
                                                     <InvestMentObjComponent 
                                                         header="Sectors"
+                                                        warning={this.state.isPublic && !this.getInvestmentObjWarning('sectors').valid && this.props.isUpdate}
+                                                        reason={this.getInvestmentObjWarning('sectors').reason}
                                                         content={
                                                             <FormItem>
                                                                 {
@@ -921,7 +976,7 @@ export class AdviceFormImpl extends React.Component {
                                                                                 mode="multiple"
                                                                                 placeholder="Add sectors"
                                                                                 type="array"
-                                                                                disabled={this.state.isPublic}
+                                                                                disabled={!this.getDisableStatus()}
                                                                         >
                                                                             {
                                                                                 sectors.map((sector, index) => 
@@ -949,7 +1004,9 @@ export class AdviceFormImpl extends React.Component {
                                                             'Capitalization',
                                                             'investmentObjCapitalization',
                                                             capitalization,
-                                                            'Please enter the Capitalization of your advice'
+                                                            'Please enter the Capitalization of your advice',
+                                                            !this.getInvestmentObjWarning('capitalization').valid,
+                                                            this.getInvestmentObjWarning('capitalization').reason
                                                         )
                                                     }
                                                 </Col>
@@ -1030,6 +1087,8 @@ export class AdviceFormImpl extends React.Component {
                                                 <Col span={24}>
                                                     <InvestMentObjComponent 
                                                         header="Description"
+                                                        warning={this.state.isPublic && !this.getInvestmentObjWarning('userText').valid && this.props.isUpdate}
+                                                        reason={this.getInvestmentObjWarning('userText').reason}
                                                         content={
                                                             <FormItem>
                                                                 {
@@ -1041,7 +1100,7 @@ export class AdviceFormImpl extends React.Component {
                                                                         <Input 
                                                                                 style={inputStyle} 
                                                                                 placeholder="Optional"
-                                                                                disabled={this.state.isPublic}
+                                                                                disabled={!this.getDisableStatus()}
                                                                         />
                                                                     )
                                                                 }
@@ -1141,8 +1200,22 @@ export class AdviceFormImpl extends React.Component {
                             </Form>
                         </Row>
                         <Row style={{marginTop: '20px'}}>
-                            <Col span={24}>
+                            <Col span={24} style={horizontalBox}>
                                 <h3 style={inputHeaderStyle}>Portfolio</h3>
+                                {
+                                    this.state.isPublic && !this.getPortfolioWarnings().valid && this.props.isUpdate &&
+                                    <WarningIcon 
+                                            content={
+                                                <div>
+                                                    {
+                                                        this.getPortfolioWarnings().reasons.map((reason, index) => {
+                                                            return <p key={index}>{reason}</p>
+                                                        })
+                                                    }
+                                                </div>
+                                            }
+                                    />
+                                }
                             </Col>
                             <Col span={24} style={{border:' 1px solid #eaeaea', marginTop: '5px'}}>
                                 <Row type="flex" style={{margin: '10px 10px 0 10px', position: 'relative'}}>
@@ -1200,7 +1273,7 @@ export class AdviceFormImpl extends React.Component {
             && investmentObjCapitalization.length > 0
             && startDate !== undefined 
             && this.getVerifiedTransactions().length > 0
-            && this.state.portfolioChanged) || !this.state.isPublic
+            && this.state.portfolioChanged) || this.getDisableStatus()
         );
     }
 
@@ -1482,11 +1555,15 @@ export class AdviceFormImpl extends React.Component {
     }
 }
 
-const InvestMentObjComponent = ({header, content}) => {
+const InvestMentObjComponent = ({header, content, warning = false, reason = ''}) => {
     return (
         <Row type="flex" align="middle" style={{marginBottom: '10px'}}>
-            <Col span={24}>
+            <Col span={24} style={horizontalBox}>
                 <h3 style={investmentObjLabelStyle}>{header}:</h3>
+                {
+                    warning &&
+                    <WarningIcon reason={reason}/>
+                }
             </Col>
             <Col span={24}>{content}</Col>
         </Row>
@@ -1519,4 +1596,10 @@ const investmentObjInputStyle = {
 const investmentObjLabelStyle = {
     fontSize: '14px',
     color: labelColor
+};
+
+const horizontalBox = {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center'
 }

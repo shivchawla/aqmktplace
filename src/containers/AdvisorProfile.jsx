@@ -182,7 +182,6 @@ export default class AdvisorProfile extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 if (error.response.status === 400) {
@@ -254,7 +253,6 @@ export default class AdvisorProfile extends React.Component {
                 netValue: _.get(advice, 'netValue', 0),
             })
         });
-        console.log(advices);
 
         return advices;
     }

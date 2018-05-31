@@ -138,7 +138,7 @@ class AdviceDetailContentImpl extends React.Component {
                         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <h1 style={adviceNameStyle}>{name}</h1>
                             {
-                                !approvalStatus && !this.getWarning('name').valid && !approvalRequested &&
+                                isPublic && !approvalStatus && !this.getWarning('name').valid && !approvalRequested &&
                                 <WarningIcon reason={this.getWarning('name').reason}/>
                             }
                             {
@@ -330,7 +330,7 @@ class AdviceDetailContentImpl extends React.Component {
                                         <InvestmentObjItem 
                                                 label="Goal" 
                                                 value={_.get(goal, 'field', '-')} 
-                                                warning={!approvalStatus && !this.getInvestmentObjWarning('goal').valid && !approvalRequested}
+                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('goal').valid && !approvalRequested}
                                                 reason={this.getInvestmentObjWarning('goal').reason}
                                         />
                                     </Col>
@@ -354,7 +354,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 showTag 
                                                 label="Valuation" 
                                                 value={_.get(portfolioValuation, 'field', '-')}
-                                                warning={!approvalStatus && !this.getInvestmentObjWarning('portfolioValuation').valid && !approvalRequested}
+                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('portfolioValuation').valid && !approvalRequested}
                                                 reason={this.getInvestmentObjWarning('portfolioValuation').reason}
                                         />
                                     </Col>
@@ -363,7 +363,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 showTag 
                                                 label="Capitalization" 
                                                 value={_.get(capitalization, 'field', '-')}
-                                                warning={!approvalStatus && !this.getInvestmentObjWarning('capitalization').valid && !approvalRequested}
+                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('capitalization').valid && !approvalRequested}
                                                 reason={this.getInvestmentObjWarning('capitalization').reason}
                                         />
                                     </Col>
@@ -395,6 +395,8 @@ class AdviceDetailContentImpl extends React.Component {
                                                     Sectors
                                                 </h3>
                                                 {
+                                                    isPublic && 
+                                                    isPublic && 
                                                     !approvalStatus && 
                                                     !this.getInvestmentObjWarning('sectors').valid &&
                                                     !approvalRequested &&
@@ -413,6 +415,8 @@ class AdviceDetailContentImpl extends React.Component {
                                     <div style={{display: 'flex', flexDirection: 'row'}}>
                                         <h3 style={{fontSize: '14px', fontWeight: '700'}}>Description</h3>
                                         {
+                                            isPublic && 
+                                            isPublic && 
                                             !approvalStatus && 
                                             !this.getInvestmentObjWarning('userText').valid &&
                                             !approvalRequested &&
@@ -441,6 +445,7 @@ class AdviceDetailContentImpl extends React.Component {
                                     <Col span={6} style={{display: 'flex', flexDirection: 'row'}}>
                                         <h3 style={metricsHeaderStyle}>Portfolio</h3>
                                         {
+                                            isPublic && 
                                             !approvalStatus && 
                                             !this.getPortfolioWarnings().valid &&
                                             !approvalRequested &&

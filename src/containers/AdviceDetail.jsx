@@ -102,7 +102,8 @@ class AdviceDetailImpl extends React.Component {
                 benchmark: '',
                 approval: [],
                 approvalStatus: false,
-                investmentObjective: {}
+                investmentObjective: {},
+                approvalRequested: false
             },
             metrics: {
                 annualReturn: 0,
@@ -1103,6 +1104,9 @@ class AdviceDetailImpl extends React.Component {
         const unsubscriptionPending = _.get(this.state, 'adviceResponse.subscriptionDetail.unsubscriptionPending', false);
         const className = small ? 'action-button action-button-small' : 'action-button';
         const isValid = _.get(this.state, 'adviceDetail.approval.status', false);
+        const isAdmin = _.get(this.state, 'adviceDetail.isAdmin', false);
+        const isPublic = _.get(this.state, 'adviceDetail.isPublic', false);
+        const approvalRequested = _.get(this.state, 'adviceDetail.approvalRequested', false);
         if (!isOwner) {
             return (
                 <div style={{width: '95%'}}>
@@ -1167,13 +1171,17 @@ class AdviceDetailImpl extends React.Component {
                             POST  TO MARKETPLACE
                         </Button>
                     }
-                    <Button
-                            onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
-                            className={className}
-                            style={buttonStyle}
-                    >
-                        UPDATE ADVICE
-                    </Button>
+                    {
+                        ((!approvalRequested && isPublic) || !isPublic) &&
+                        <Button
+                                onClick={() => this.props.history.push(`/advisordashboard/updateadvice/${this.props.match.params.id}`)}
+                                className={className}
+                                style={buttonStyle}
+                        >
+                            UPDATE ADVICE
+                        </Button>
+                    }
+                    
                 </div>
             );
         }
