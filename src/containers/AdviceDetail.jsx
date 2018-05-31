@@ -912,18 +912,6 @@ class AdviceDetailImpl extends React.Component {
                                         value={this.state.approveObj.message}
                                 />
                             </Col>
-                            <Col span={24} style={{marginTop: '20px'}}>
-                                <h5>Status</h5>
-                                <RadioGroup 
-                                        style={{marginTop: '10px', fontSize: '14px'}}
-                                        onChange={this.handleApprovalRadioChange} 
-                                        value={this.state.approveObj.approved}
-                                >
-                                    {
-                                        approval.map((item, index) => <Radio key={index} value={item.value}>{item.label}</Radio>)
-                                    }
-                                </RadioGroup>
-                            </Col>
                         </Row>
                     </Col>
                 </Row>
@@ -1011,13 +999,8 @@ class AdviceDetailImpl extends React.Component {
                     valid: approvalObj.capitalization.valid,
                     reason: approvalObj.capitalization.reason
                 },
-                capitalization: {
-                    field: _.get(investmentObjective, 'capitalization.field', ''),
-                    valid: approvalObj.capitalization.valid,
-                    reason: approvalObj.capitalization.reason
-                },
                 userText: {
-                    detail: _.get(investmentObjective, 'capitalization.userText', ''),
+                    detail: _.get(investmentObjective, 'userText.detail', ''),
                     valid: approvalObj.userText.valid,
                     reason: approvalObj.userText.reason
                 }
@@ -1400,7 +1383,7 @@ const approvalRowContainerStyle = {
 };
 
 const approvalModalTabStyle = {
-    width: '500px',
+    height: '400px',
     overflow: 'hidden',
     overflowY: 'scroll'
 }

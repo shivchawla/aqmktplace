@@ -410,7 +410,17 @@ class AdviceDetailContentImpl extends React.Component {
                             {
                                 _.get(userText, 'detail', '').length > 0 &&
                                 <Col span={24} style={{marginTop: '10px'}}>
-                                    <h3 style={{fontSize: '14px', fontWeight: '700'}}>Description</h3>
+                                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                                        <h3 style={{fontSize: '14px', fontWeight: '700'}}>Description</h3>
+                                        {
+                                            !approvalStatus && 
+                                            !this.getInvestmentObjWarning('userText').valid &&
+                                            !approvalRequested &&
+                                            <WarningIcon 
+                                                    reason={this.getInvestmentObjWarning('userText').reason}
+                                            />
+                                        }
+                                    </div>
                                     <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
                                 </Col>
                             }

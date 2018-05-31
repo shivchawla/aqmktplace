@@ -1194,14 +1194,14 @@ export class AdviceFormImpl extends React.Component {
             investmentObjCapitalization = ''
         } = this.props.form.getFieldsValue()
         return  (
-            name.length > 0 
+            (name.length > 0 
             && investmentObjGoal.length > 0
             && investmentObjSectors.length > 0
             && investmentObjPortfolioValuation.length > 0
             && investmentObjCapitalization.length > 0
             && startDate !== undefined 
             && this.getVerifiedTransactions().length > 0
-            && this.state.portfolioChanged
+            && this.state.portfolioChanged) || !this.state.isPublic
         );
     }
 
