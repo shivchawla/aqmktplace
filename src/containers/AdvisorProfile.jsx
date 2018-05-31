@@ -150,21 +150,24 @@ export default class AdvisorProfile extends React.Component {
                 return <AdviceListItemMod key={index} advice={advice}/>
             });    
         } else {
-            return (
-                <Row style={{marginTop: '40px'}}>
-                    <Col span={24} style={{textAlign: 'center'}}>
-                        <h3>You haven't created any advices yet.</h3>
-                    </Col>
-                    <Col span={24} style={{textAlign: 'center', marginTop: '20px'}}>
-                        <Button 
-                                style={{width: '150px', height: '40px', fontSize: '16px'}}
-                                type="primary" 
-                                onClick={() => this.props.history.push('/advisordashboard/createadvice')}
-                        >
-                            Create One
-                        </Button>
-                    </Col>
-                </Row>
+            return 
+            (
+                this.state.isOwner
+                ?   <Row style={{marginTop: '40px'}}>
+                        <Col span={24} style={{textAlign: 'center'}}>
+                            <h3>You haven't created any advices yet.</h3>
+                        </Col>
+                        <Col span={24} style={{textAlign: 'center', marginTop: '20px'}}>
+                            <Button 
+                                    style={{width: '150px', height: '40px', fontSize: '16px'}}
+                                    type="primary" 
+                                    onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                            >
+                                Create One
+                            </Button>
+                        </Col>
+                    </Row>
+                :   null
             );
         }
     }
@@ -179,7 +182,7 @@ export default class AdvisorProfile extends React.Component {
             });
         })
         .catch(error => {
-            // console.log(error.response);
+            console.log(error);
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
                 if (error.response.status === 400) {
@@ -231,7 +234,6 @@ export default class AdvisorProfile extends React.Component {
     processAdvices = (responseAdvices) => {
         const advices = [];
         responseAdvices.map((advice, index) => {
-            // console.log('Advice Item', advice);
             advices.push({
                 isFollowing: advice.isFollowing || false,
                 id: advice._id || 0,
@@ -241,10 +243,10 @@ export default class AdvisorProfile extends React.Component {
                 heading: advice.heading || '',
                 subscribers: advice.numSubscribers || 0,
                 followers: advice.numFollowers || 0,
-                rating: _.get(advice, 'rating.current', 0).toFixed(2),
+                rating: (_.get(advice, 'rating.current', 0) || 0).toFixed(2),
                 performanceSummary: advice.performanceSummary,
                 rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
-                isApproved: _.get(advice, 'approvalStatus', 'N/A'),
+                isApproved: _.get(advice, 'latestApproval.status', false),
                 isOwner: _.get(advice, 'isOwner', false),
                 isSubscribed: _.get(advice, 'isSubscribed', false),
                 public: _.get(advice, 'public', false),
@@ -252,6 +254,7 @@ export default class AdvisorProfile extends React.Component {
                 netValue: _.get(advice, 'netValue', 0),
             })
         });
+        console.log(advices);
 
         return advices;
     }

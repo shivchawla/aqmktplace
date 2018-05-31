@@ -32,11 +32,6 @@ const approvalObj = {
         reason: '',
         fieldName: 'Name',
     },
-    rebalanceFreq: {
-        valid: false,
-        reason: '',
-        fieldName: 'Rebalancing Frequency',
-    },
     stockExposure: {
         valid: false,
         reason: '',
@@ -150,6 +145,7 @@ class AdviceDetailImpl extends React.Component {
             },
             notAuthorized: false,
             approvalLoading: false,
+            // Used to approve investment objective and other fields
             approvalObj
         };
 
@@ -351,7 +347,6 @@ class AdviceDetailImpl extends React.Component {
             this.setState({show: false});
         });
     }
-
 
     //THIS IS BUGGY - 02/05/2018
     //ADVICE PORTFOLIO IS FETCHED ONLY WHEN USER IS AUTHORIZED
@@ -850,11 +845,6 @@ class AdviceDetailImpl extends React.Component {
                                         approved={approvalObj.name.valid} 
                                         reason={approvalObj.name.reason}
                                 />
-                                <ApprovalItemView 
-                                        label="Rebalance Frequency" 
-                                        approved={approvalObj.rebalanceFreq.valid}
-                                        reason={approvalObj.rebalanceFreq.reason}
-                                />
                             </TabPane>
                             <TabPane tab="Objective" key="3" style={approvalModalTabStyle}>
                                 <ApprovalItemView 
@@ -952,7 +942,8 @@ class AdviceDetailImpl extends React.Component {
     constructApprovalMessage = () => {
         const {approveObj, approvalObj, adviceDetail} = this.state;
         const {investmentObjective = {}} = adviceDetail;
-        const requiredDetailFields = ['name', 'rebalanceFreq', 'stockExposure', 'industryExposure', 'sectorExposure'];
+        // Fields that are required to check for validation in approvalObj
+        const requiredDetailFields = ['name', 'stockExposure', 'industryExposure', 'sectorExposure'];
         let detail = [];
         Object.keys(approvalObj).map(key => {
             const keyIndex = requiredDetailFields.indexOf(key);
@@ -1008,13 +999,16 @@ class AdviceDetailImpl extends React.Component {
         };
     }
 
+    // Used to check if all the items in investmentObjArray is marked as valid
     checkInvestmentObjectiveValidity = () => {
         const {adviceDetail, approvalObj} = this.state;
         const {investmentObjective = {}} = adviceDetail;
+        // The fields that's checked for validation
         const investmentObjArray = ['goal', 'sectors', 'capitalization', 'portfolioValuation', 'userText'];
         let falseCount = 0;
         investmentObjArray.map(item => {
-            if (approvalObj[item].valid === false){
+            // Checking only the items in investmentObjective for validation in approvalObj
+            if (approvalObj[item].valid === false) {
                 falseCount++;
             }
         });
@@ -1091,7 +1085,6 @@ class AdviceDetailImpl extends React.Component {
             this.getAdviceSummary(adviceSummaryResponse);
         })
         .catch(error => {
-            console.log(error);
             message.error('Error Occured');
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {

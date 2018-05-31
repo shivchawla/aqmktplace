@@ -238,7 +238,6 @@ export class AdviceFormImpl extends React.Component {
                     message.success('Succesfully Created Advice');
                 })
                 .catch(error => {
-                    console.log(error);
                     Utils.checkForInternet(error, this.props.history);
                     if (error.response) {
                         const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating advice');

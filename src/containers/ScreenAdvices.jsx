@@ -275,7 +275,6 @@ export default class ScreenAdvices extends React.PureComponent {
             }
         })
         .catch(error => {
-            console.log(error);
             return error;
         })
         .finally(() => {
