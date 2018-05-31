@@ -57,7 +57,7 @@ const approvalObj = {
         reason: '',
         fieldName: 'Goal',
     },
-    valuation: {
+    portfolioValuation: {
         valid: false,
         reason: '',
         fieldName: 'Portfolio Valuation',
@@ -104,7 +104,10 @@ class AdviceDetailImpl extends React.Component {
                 isOwner: false,
                 isSubscribed: false,
                 isFollowing: false,
-                benchmark: ''
+                benchmark: '',
+                approval: [],
+                approvalStatus: false,
+                investmentObjective: {}
             },
             metrics: {
                 annualReturn: 0,
@@ -202,6 +205,11 @@ class AdviceDetailImpl extends React.Component {
         const {nstocks = 0} = currentPerformance;
         var dailyNAVChangePct = 0.0
         var annualReturnEOD = annualReturn;
+        const approval = _.get(response.data, 'latestApproval', {});
+        const investmentObjective = _.get(response.data, 'investmentObjective', {});
+        const approvalRequested = _.get(response.data, 'approvalRequested', false);
+        this.updateApprovalObj(approval, investmentObjective);
+
         this.setState({
             adviceResponse: response.data,
             adviceDetail: {
@@ -221,8 +229,9 @@ class AdviceDetailImpl extends React.Component {
                 updatedDate: moment(updatedDate).format(dateFormat),
                 rating: Number((rating.current || 0).toFixed(2)),
                 isPublic: _.get(response.data, 'public', false),
-                investmentObjective: _.get(response.data, 'investmentObjective', {}),
-                approval: _.get(response.data, 'approval[0]', {})
+                investmentObjective,
+                approval,
+                approvalRequested
             },
             metrics: {
                 ...this.state.metrics,
@@ -239,6 +248,27 @@ class AdviceDetailImpl extends React.Component {
                 simulated: simulatedPerformance
             }
         });
+    }
+
+    updateApprovalObj = (approval, investmentObjective) => {
+        const detail = _.get(approval, 'detail', []);
+        const {approvalObj} = this.state;
+        detail.map(item => {
+            const fieldValidIndex = Object.keys(approvalObj).indexOf(item.field);
+            if (fieldValidIndex !== -1) {
+                approvalObj[item.field].valid = item.valid;
+                approvalObj[item.field].reason = item.reason;
+            }
+        });
+        Object.keys(investmentObjective).map(item => {
+            const fieldValidIndex = Object.keys(approvalObj).indexOf(item);
+            if (fieldValidIndex !== -1) {
+                console.log(item + ' ' + fieldValidIndex);
+                approvalObj[item].valid = investmentObjective[item].valid;
+                approvalObj[item].reason = investmentObjective[item].reason;
+            }
+        });
+        this.setState({approvalObj});
     }
 
     getAdviceDetail = response => {
@@ -707,7 +737,9 @@ class AdviceDetailImpl extends React.Component {
     renderApprovalTabs = () => {
         const isAdmin = _.get(this.state, 'adviceDetail.isAdmin', false);
         const approvalStatus = _.get(this.state, 'adviceDetail.approvalStatus', 'pending');
-        if (isAdmin && approvalStatus !== 'approved') {
+        const approvalRequested = _.get(this.state, 'adviceDetail.approvalRequested', false);
+        const isPublic = _.get(this.state, 'adviceDetail.isPublic', false);
+        if (isAdmin && approvalRequested && isPublic) {
             return (
                 <Row 
                         style={{...shadowBoxStyle, height: '680px', width: '95%', marginLeft: '20px'}}>
@@ -737,9 +769,9 @@ class AdviceDetailImpl extends React.Component {
                                         onInputChange={e => this.onApprovalInputChange(e, 'goal')}
                                 />
                                 <ApprovalItem 
-                                        approvalObj={this.state.approvalObj.valuation} 
-                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'valuation')}
-                                        onInputChange={e => this.onApprovalInputChange(e, 'valuation')}
+                                        approvalObj={this.state.approvalObj.portfolioValuation} 
+                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'portfolioValuation')}
+                                        onInputChange={e => this.onApprovalInputChange(e, 'portfolioValuation')}
                                 />
                                 <ApprovalItem 
                                         approvalObj={this.state.approvalObj.capitalization} 
@@ -838,8 +870,8 @@ class AdviceDetailImpl extends React.Component {
                                 />
                                 <ApprovalItemView 
                                         label="Portfolio Valuation" 
-                                        approved={approvalObj.valuation.valid}
-                                        reason={approvalObj.valuation.reason}
+                                        approved={approvalObj.portfolioValuation.valid}
+                                        reason={approvalObj.portfolioValuation.reason}
                                 />
                                 <ApprovalItemView 
                                         label="Capitalization" 
@@ -977,8 +1009,8 @@ class AdviceDetailImpl extends React.Component {
                 },
                 portfolioValuation: {
                     field: _.get(investmentObjective, 'portfolioValuation.field', ''),
-                    valid: approvalObj.valuation.valid,
-                    reason: approvalObj.valuation.reason
+                    valid: approvalObj.portfolioValuation.valid,
+                    reason: approvalObj.portfolioValuation.reason
                 },
                 capitalization: {
                     field: _.get(investmentObjective, 'capitalization.field', ''),
@@ -1002,7 +1034,7 @@ class AdviceDetailImpl extends React.Component {
     checkInvestmentObjectiveValidity = () => {
         const {adviceDetail, approvalObj} = this.state;
         const {investmentObjective = {}} = adviceDetail;
-        const investmentObjArray = ['goal', 'sectors', 'capitalization', 'valuation', 'userText'];
+        const investmentObjArray = ['goal', 'sectors', 'capitalization', 'portfolioValuation', 'userText'];
         let falseCount = 0;
         investmentObjArray.map(item => {
             if (approvalObj[item].valid === false){
@@ -1064,12 +1096,43 @@ class AdviceDetailImpl extends React.Component {
         this.props.history.push('/login');
     }
 
+    requestApproval = () => {
+        const url = `${requestUrl}/advice/${this.props.match.params.id}/requestapproval`;
+        axios({
+            url,
+            method: 'POST',
+            headers: Utils.getAuthTokenHeader()
+        })
+        .then(response => {
+            message.success('Approval Requested');
+            const summaryUrl = `${requestUrl}/advice/${this.props.match.params.id}`;
+            return Promise.all([
+                fetchAjax(summaryUrl, this.props.history, this.props.match.url)
+            ]);
+        })
+        .then(([adviceSummaryResponse]) => {
+            this.getAdviceSummary(adviceSummaryResponse);
+        })
+        .catch(error => {
+            console.log(error);
+            message.error('Error Occured');
+            Utils.checkForInternet(error, this.props.history);
+            if (error.response) {
+                if (error.response.status === 400 || error.response.status === 403) {
+                    this.props.history.push('/forbiddenAccess');
+                }
+                Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            }
+        })
+    }
+
     renderActionButtons = (small=false) => {
         const {userId} = this.state;
         const isOwner = _.get(this.state, 'adviceDetail.isOwner', false);
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
         const unsubscriptionPending = _.get(this.state, 'adviceResponse.subscriptionDetail.unsubscriptionPending', false);
         const className = small ? 'action-button action-button-small' : 'action-button';
+        const isValid = _.get(this.sate, 'adviceDetail.approval.status', false);
         if (!isOwner) {
             return (
                 <div style={{width: '95%'}}>
@@ -1110,6 +1173,19 @@ class AdviceDetailImpl extends React.Component {
             return (
                 <div style={{width: '95%'}}>
                     {/* {this.renderApprovalButtons(small)} */}
+                    {
+                        this.state.adviceDetail.isPublic &&
+                        !isValid &&
+                        !this.state.adviceDetail.approvalRequested &&
+                        <Button 
+                                onClick={this.requestApproval} 
+                                className={className} 
+                                style={buttonStyle} 
+                                type="primary"
+                        >
+                            REQUEST APPROVAL
+                        </Button>
+                    }
                     {
                         !this.state.adviceDetail.isPublic && 
                         <Button 
