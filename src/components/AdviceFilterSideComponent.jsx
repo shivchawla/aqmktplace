@@ -192,20 +192,23 @@ export class AdviceFilterSideComponent extends React.Component {
                                 </Col>
                             </Row>
                         </Col>
-                        <Col span={this.props.modal ? 12 : 24} style={{marginBottom: '20px'}}>
-                            <IconHeader 
-                                    icon="check-circle" 
-                                    label="Status"
-                                    checked={this.state.selectApprovedllFilters}
-                                    filterType="approved"
-                                    onChange={this.handleFilterGroupCheckboxChange}
-                            />
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderStatusFilter()}
-                                </Col>
-                            </Row>
-                        </Col>
+                        {
+                            this.props.isAdmin &&
+                            <Col span={this.props.modal ? 12 : 24} style={{marginBottom: '20px'}}>
+                                <IconHeader 
+                                        icon="check-circle" 
+                                        label="Status"
+                                        checked={this.state.selectApprovedllFilters}
+                                        filterType="approved"
+                                        onChange={this.handleFilterGroupCheckboxChange}
+                                />
+                                <Row>
+                                    <Col span={24}>
+                                        {this.renderStatusFilter()}
+                                    </Col>
+                                </Row>
+                            </Col>
+                        }
                         <Col span={this.props.modal ? 12 : 24} style={{marginBottom: '20px'}}>
                             <IconHeader 
                                     icon="check-circle" 

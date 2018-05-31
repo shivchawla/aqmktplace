@@ -263,7 +263,6 @@ class AdviceDetailImpl extends React.Component {
         Object.keys(investmentObjective).map(item => {
             const fieldValidIndex = Object.keys(approvalObj).indexOf(item);
             if (fieldValidIndex !== -1) {
-                console.log(item + ' ' + fieldValidIndex);
                 approvalObj[item].valid = investmentObjective[item].valid;
                 approvalObj[item].reason = investmentObjective[item].reason;
             }
@@ -756,11 +755,6 @@ class AdviceDetailImpl extends React.Component {
                                         onRadioChange={e => this.onApprovalItemRadioChange(e, 'name')}
                                         onInputChange={e => this.onApprovalInputChange(e, 'name')}
                                 />
-                                <ApprovalItem 
-                                        approvalObj={this.state.approvalObj.rebalanceFreq} 
-                                        onRadioChange={e => this.onApprovalItemRadioChange(e, 'rebalanceFreq')}
-                                        onInputChange={e => this.onApprovalInputChange(e, 'rebalanceFreq')}
-                                />
                             </TabPane>
                             <TabPane tab="Objective" key="3" style={approvalRowContainerStyle}>
                                 <ApprovalItem 
@@ -850,7 +844,7 @@ class AdviceDetailImpl extends React.Component {
                 <Row style={{height: '100%'}}>
                     <Col span={24}>
                         <Tabs defaultActiveKey="1" size="small" animated={false}>
-                            <TabPane tab="General" key="1">
+                            <TabPane tab="General" key="1" style={approvalModalTabStyle}>
                                 <ApprovalItemView 
                                         label="Name" 
                                         approved={approvalObj.name.valid} 
@@ -862,7 +856,7 @@ class AdviceDetailImpl extends React.Component {
                                         reason={approvalObj.rebalanceFreq.reason}
                                 />
                             </TabPane>
-                            <TabPane tab="Objective" key="3">
+                            <TabPane tab="Objective" key="3" style={approvalModalTabStyle}>
                                 <ApprovalItemView 
                                         label="Goal" 
                                         approved={approvalObj.goal.valid}
@@ -889,7 +883,7 @@ class AdviceDetailImpl extends React.Component {
                                         reason={approvalObj.userText.reason}
                                 />
                             </TabPane>
-                            <TabPane tab="Portfolio" key="2">
+                            <TabPane tab="Portfolio" key="2" style={approvalModalTabStyle}>
                                 <ApprovalItemView 
                                         label="Stock Exposure" 
                                         approved={approvalObj.stockExposure.valid}
@@ -1132,7 +1126,7 @@ class AdviceDetailImpl extends React.Component {
         let advisorId = this.state.adviceDetail.advisor.user ? this.state.adviceDetail.advisor.user._id: '';
         const unsubscriptionPending = _.get(this.state, 'adviceResponse.subscriptionDetail.unsubscriptionPending', false);
         const className = small ? 'action-button action-button-small' : 'action-button';
-        const isValid = _.get(this.sate, 'adviceDetail.approval.status', false);
+        const isValid = _.get(this.state, 'adviceDetail.approval.status', false);
         if (!isOwner) {
             return (
                 <div style={{width: '95%'}}>
@@ -1404,3 +1398,9 @@ const customPanelStyle = {
 const approvalRowContainerStyle = {
     padding: '0 15px',
 };
+
+const approvalModalTabStyle = {
+    width: '500px',
+    overflow: 'hidden',
+    overflowY: 'scroll'
+}

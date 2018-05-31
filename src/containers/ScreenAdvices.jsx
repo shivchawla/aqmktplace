@@ -43,7 +43,8 @@ export default class ScreenAdvices extends React.PureComponent {
             initialCall: true,
             show: false,
             questionnaireModalVisible: false,
-            questionnaireFilters: {}
+            questionnaireFilters: {},
+            isAdmin: false
         }
     }
 
@@ -74,10 +75,26 @@ export default class ScreenAdvices extends React.PureComponent {
             this.getAdvices();
             // Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            this.getAdvices();
+            this.getUserDetail()
+            .then(response => {
+                this.getAdvices();
+            });
             this.toggleFilter();
         }
     }
+
+    getUserDetail = () => new Promise((resolve, reject) => {
+        const url = `${requestUrl}/me`;
+        fetchAjax(url, this.props.history, this.props.match.url)
+        .then(response => {
+            this.setState({isAdmin: _.get(response.data, 'isAdmin', false)});
+            resolve(true);
+        })
+        .catch(error => {
+            reject(false);
+            return error
+        });
+    });
 
     getQustionnaireModal = () => {
         const isFirstTime = Utils.getFromLocalStorage('isFirstTime') === 'false' ? false : true || true;
@@ -314,7 +331,7 @@ export default class ScreenAdvices extends React.PureComponent {
                 rating: Number(_.get(advice, 'rating.current', 0) || 0).toFixed(2),
                 performanceSummary: advice.performanceSummary,
                 rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
-                isApproved: _.get(advice, 'approvalStatus', 'N/A'),
+                isApproved: _.get(advice, 'latestApproval.status', false),
                 isOwner: _.get(advice, 'isOwner', false),
                 isAdmin: _.get(advice, 'isAdmin', false),
                 isSubscribed: _.get(advice, 'isSubscribed', false),
@@ -378,6 +395,7 @@ export default class ScreenAdvices extends React.PureComponent {
                     selectedTab={this.state.selectedTab}
                     updateSelectedFilters={this.updateSelectedFilters}
                     modal={modal}
+                    isAdmin={this.state.isAdmin}
             />
         );
     }

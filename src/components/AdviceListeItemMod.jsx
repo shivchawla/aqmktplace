@@ -125,10 +125,10 @@ class AdviceListItemImpl extends React.PureComponent {
     }
 
     renderTrendingApprovedIcon = () => {
-        const {isApproved} = this.props.advice;
+        const {isApproved, isOwner} = this.props.advice;
         return (
             <Row>
-                {isApproved === 'approved' &&
+                {isApproved && isOwner &&
                     <Col span={12}>
                         <IconItem 
                             src={medalIcon} 
