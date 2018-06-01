@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Row, Col, Radio, Input} from 'antd';
+import {metricColor, primaryColor} from '../constants';
 
 const RadioGroup = Radio.Group;
 
@@ -30,8 +31,8 @@ export class ApprovalItem extends React.Component {
                             onChange={this.props.onRadioChange} 
                             defaultValue={valid}
                     >
-                        <Radio value={true}>Valid</Radio>
-                        <Radio value={false}>Invalid</Radio>
+                        <Radio value={true} style={{color: primaryColor}}>Valid</Radio>
+                        <Radio value={false} style={{color: metricColor.negative}}>Invalid</Radio>
                     </RadioGroup>
                 </Col>
                 {

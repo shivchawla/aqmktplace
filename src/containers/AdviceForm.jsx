@@ -1316,7 +1316,8 @@ export class AdviceFormImpl extends React.Component {
                 <Row>
                     <Col span={24}>
                         <h3 style={{fontSize: '16px'}}>
-                            Modifications to the advice, except <span style={{color: primaryColor}}>Start Date</span> 
+                            Your advice will be submitted for Approval.<br></br>
+                            If approved, modifications to the advice, except <span style={{color: primaryColor}}>Start Date</span> 
                             &nbsp;and <span style={{color: primaryColor}}>Portfolio</span>&nbsp;
                             will not be possible after you post to MarketPlace.
                         </h3>
@@ -1350,7 +1351,11 @@ export class AdviceFormImpl extends React.Component {
                                         onClick={this.togglePostWarningModal}
                                         className={`action-button ${className}`}
                                 >
-                                    POST TO MARKET PLACE
+                                    {
+                                        this.props.isUpdate
+                                        ? "CONFIRM CHANGES"
+                                        : "POST TO MARKET PLACE"
+                                    }
                                 </Button>
                             </React.Fragment>
                         :   <React.Fragment>
@@ -1360,7 +1365,11 @@ export class AdviceFormImpl extends React.Component {
                                         onClick={this.togglePostWarningModal}
                                         className={`action-button ${className}`}
                                 >
-                                    POST NOW
+                                    {
+                                        this.props.isUpdate
+                                        ? "CONFIRM CHANGES"
+                                        : "POST NOW"
+                                    }
                                 </Button>
                                 {
                                     !this.props.isUpdate &&

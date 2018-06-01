@@ -75,26 +75,23 @@ export default class ScreenAdvices extends React.PureComponent {
             this.getAdvices();
             // Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            this.getUserDetail()
-            .then(response => {
-                this.getAdvices();
-            });
+            this.getUserDetailAndAdvices()
             this.toggleFilter();
         }
     }
 
-    getUserDetail = () => new Promise((resolve, reject) => {
+    getUserDetailAndAdvices = () => {
         const url = `${requestUrl}/me`;
+        this.setState({show: true});
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             this.setState({isAdmin: _.get(response.data, 'isAdmin', false)});
-            resolve(true);
+            this.getAdvices();
         })
         .catch(error => {
-            reject(false);
             return error
         });
-    });
+    }
 
     getQustionnaireModal = () => {
         const isFirstTime = Utils.getFromLocalStorage('isFirstTime') === 'false' ? false : true || true;
@@ -259,9 +256,9 @@ export default class ScreenAdvices extends React.PureComponent {
 
     getAdvices = adviceUrl => {
         this.setState({
-            loading: true,
+            loading: false,
             show: this.state.initialCall,
-            initialCall: false,
+            initialCall: false
         });
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         fetchAjax(url, this.props.history, this.props.match.url)
