@@ -6,7 +6,7 @@ import './index.css';
 import 'antd/dist/antd.css';
 import 'react-loading-bar/dist/index.css'
 import App from './App';
-import registerServiceWorker from './registerServiceWorker';
+import {unregister} from './registerServiceWorker';
 import {store} from './store';
 
 ReactDOM.render(
@@ -16,4 +16,4 @@ ReactDOM.render(
             </Router>
         </Provider>, 
         document.getElementById('root'));
-registerServiceWorker();
+unregister();

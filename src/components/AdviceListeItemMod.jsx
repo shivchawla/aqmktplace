@@ -128,7 +128,7 @@ class AdviceListItemImpl extends React.PureComponent {
         const {isApproved, isOwner} = this.props.advice;
         return (
             <Row>
-                {isApproved && isOwner &&
+                {isApproved &&
                     <Col span={12}>
                         <IconItem 
                             src={medalIcon} 
@@ -247,6 +247,7 @@ class AdviceListItemImpl extends React.PureComponent {
             isAdmin,
             rebalancingFrequency,
             netValue,
+            approvalStatus = false
         } = this.props.advice;
         const isPublic = this.props.advice.public;
         let sectors = _.get(performanceSummary, 'current.sectors', []);
@@ -295,7 +296,7 @@ class AdviceListItemImpl extends React.PureComponent {
                 
                     <Row style={{marginTop: '5px'}} type="flex" justify="space-between">
 
-                        <Col span={8} style={{marginTop: '-5px'}}>
+                        <Col span={12} style={{marginTop: '-5px'}}>
                             <Row>
                                 <AqRate value={Number(rating)}/>
                             </Row>
@@ -321,22 +322,52 @@ class AdviceListItemImpl extends React.PureComponent {
                                 }
                                 {
                                     (isOwner || isAdmin) &&
-                                    <Tag style={{border: '1px solid #673AB7', cursor: 'auto'}}>
-                                        <Icon 
-                                                type={isPublic ? 'team' : 'lock'} 
-                                                style={{
-                                                    fontWeight: '400', 
-                                                    color:'#673AB7', 
-                                                    fontSize: '15px',
-                                                    // marginTop: '4px'
-                                                }}
-                                        />
-                                        <span style={{color: '#673AB7', marginLeft: '5px'}}>
-                                            {
-                                                isPublic ? 'Public' : 'Private'
-                                            }
-                                        </span>
-                                    </Tag>
+                                    <React.Fragment>
+                                        <Tag style={{border: '1px solid #673AB7', cursor: 'auto'}}>
+                                            <Icon 
+                                                    type={isPublic ? 'team' : 'lock'} 
+                                                    style={{
+                                                        fontWeight: '400', 
+                                                        color:'#673AB7', 
+                                                        fontSize: '15px',
+                                                        // marginTop: '4px'
+                                                    }}
+                                            />
+                                            <span style={{color: '#673AB7', marginLeft: '5px'}}>
+                                                {
+                                                    isPublic ? 'Public' : 'Private'
+                                                }
+                                            </span>
+                                        </Tag>
+                                        {
+                                            approvalStatus &&
+                                            <Tag style={{border: '1px solid #FFAB00', cursor: 'auto'}}>
+                                                <span style={{color: '#FFAB00', marginLeft: '5px'}}>
+                                                    Approval Pending
+                                                </span>
+                                            </Tag>
+                                        }
+                                        {
+                                            !approvalStatus &&
+                                            <Tag 
+                                                    style={{
+                                                        border: isApproved ? `1px solid #00897B` : `1px solid #FF5722`, 
+                                                        cursor: 'auto'
+                                                    }}
+                                            >
+                                                <span 
+                                                        style={{
+                                                            color: isApproved ? '#00897B' : '#FF5722', 
+                                                            marginLeft: '5px'
+                                                        }}
+                                                >
+                                                    {
+                                                        isApproved ? "Approved" : "Rejected"
+                                                    }
+                                                </span>
+                                            </Tag>
+                                        }
+                                    </React.Fragment>
                                 }
                             </Row>
 
@@ -345,56 +376,6 @@ class AdviceListItemImpl extends React.PureComponent {
                         <Col span={7}>
                             {this.renderNetValueChange(Object.assign({netValue:netValue}, performanceSummary))}
                         </Col>
-                    </Row>
-
-                    <Row>
-                        <Col span={8}>
-
-                            <Row>
-                                {this.renderTrendingApprovedIcon()}
-                            </Row>
-
-                            {/*<Row>
-                                <Tag color='f58231' style={{color:'black', border:'1px solid #f58231', width:'85px', paddingTop:'1px'}}>
-                                    <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
-                                    <span style={{marginLeft: '5px', color:'#f58231'}}>{rebalancingFrequency}</span>
-                                </Tag>
-                            </Row>*/}
-
-                            {/*sectors.length > 0 && sectors &&
-                                <Row>
-                                    <Col span={8} style={{marginTop: '10px', textAlign:'right'}}>
-                                        {this.renderSectors(sectors)}
-                                    </Col>
-                                </Row>
-                            */}
-                        </Col>
-
-                        
-                        {/*<Col span={8} style={{textAlign: 'right'}}>
-                            <Row>
-                                <Col span={8}>
-                                    <MetricItem 
-                                        style={{border: 'none'}} 
-                                        value={subscribers} 
-                                        label="Subscribers"
-                                        valueStyle={{fontSize: '20px', fontWeight: '400', color: '#3B3737'}}
-                                        labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E'}}/>
-                                </Col>
-                                {
-                                    performanceSummary.current && 
-                                    <Col span={8}>
-                                        <MetricItem 
-                                            style={{border: 'none'}} 
-                                            value={followers} 
-                                            label="Wishlisters"
-                                            valueStyle={{fontSize: '20px', fontWeight: '400', color: '#3B3737', paddingLeft: '10px'}}
-                                            labelStyle={{fontSize: '14px', fontWeight: '400', color: '#716E6E', paddingLeft: '10px'}}/>
-                                    </Col>
-                                }
-                            </Row>
-                        </Col>*/}
-
                     </Row>
                 </Col>
             </Row>

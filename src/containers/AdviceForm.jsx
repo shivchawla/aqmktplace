@@ -95,7 +95,8 @@ export class AdviceFormImpl extends React.Component {
             adviceCount: 0,
             approvalRequested: false,
             latestApproval: {status: false},
-            investmentObjective: {}
+            investmentObjective: {},
+            showError: false
         };
         this.columns = [
             {
@@ -337,10 +338,10 @@ export class AdviceFormImpl extends React.Component {
         let isValid = false;
         const validArray = [];
         if(this.getVerifiedTransactions(data).length < 1) {
-            message.error('Atleast one valid transaction must be provided for a valid advice');
+            // message.error('Atleast one valid transaction must be provided for a valid advice');
             return false;
         } else if (this.state.remainingCash < 0) {
-            message.error('Remaining cash should be equal or greater than 0');
+            // message.error('Remaining cash should be equal or greater than 0');
             return false;
         }
         data.map((item, index) => {
@@ -358,9 +359,9 @@ export class AdviceFormImpl extends React.Component {
             }
         });
         const falseItems = validArray.filter(item => item === false);
-        if(falseItems.length) {
-            message.error('Please provide a valid ticker and valid number of shares for each transaction');
-        }
+        // if(falseItems.length) {
+        //     message.error('Please provide a valid ticker and valid number of shares for each transaction');
+        // }
 
         return !falseItems.length;
     }
@@ -765,10 +766,17 @@ export class AdviceFormImpl extends React.Component {
     }
 
     togglePreview = () => {
-        if (!this.state.preview) {
-            this.getPortfolioPerformance();
-        }
-        this.setState({preview: !this.state.preview});
+        this.props.form.validateFields((err, values) => {
+            if (!err && this.validateTransactions()) {
+                if (!this.state.preview) {
+                    this.getPortfolioPerformance();
+                }
+                this.setState({preview: !this.state.preview});
+            } else {
+                this.setState({showError: true});
+                message.error('Please fill in the required fields and add atleast one valid transaction');
+            }
+        })
     }
 
     renderInvestmentObjectRadioGroup = (fieldName, fieldId, items, message, warning = false, reason = '') => {
@@ -1011,78 +1019,6 @@ export class AdviceFormImpl extends React.Component {
                                                     }
                                                 </Col>
                                             </Row>
-                                            
-                                            {/* <Row gutter={16}>
-                                                <Col span={10}>
-                                                    <InvestMentObjComponent 
-                                                        header="Suitability"
-                                                        content={
-                                                            <FormItem>
-                                                                {
-                                                                    getFieldDecorator('investmentObjGoal', {
-                                                                        initialValue: goals[0].field,
-                                                                        rules: [{
-                                                                            required: true,
-                                                                            message: "Please enter the goal of your Advice"
-                                                                        }]
-                                                                    })(
-                                                                        <Select
-                                                                                placeholder="Select Goal of your Advice"
-                                                                                disabled={this.state.isPublic}
-                                                                        >
-                                                                            {
-                                                                                goals.map((item, index) => 
-                                                                                    <Option
-                                                                                            key={index}
-                                                                                            value={item.field}
-                                                                                    >
-                                                                                        {item.field}
-                                                                                    </Option>
-                                                                                )
-                                                                            }
-                                                                        </Select>
-                                                                    )
-                                                                }
-                                                            </FormItem>
-                                                        }
-                                                    />
-                                                </Col>
-                                                <Col span={8}>
-                                                    <InvestMentObjComponent 
-                                                        header="Investor Type"
-                                                        content={
-                                                            <FormItem>
-                                                                {
-                                                                    getFieldDecorator('investmentObjGoal', {
-                                                                        initialValue: goals[0].field,
-                                                                        rules: [{
-                                                                            required: true,
-                                                                            message: "Please enter the goal of your Advice"
-                                                                        }]
-                                                                    })(
-                                                                        <Select
-                                                                                placeholder="Select Goal of your Advice"
-                                                                                disabled={this.state.isPublic}
-                                                                        >
-                                                                            {
-                                                                                goals.map((item, index) => 
-                                                                                    <Option
-                                                                                            key={index}
-                                                                                            value={item.field}
-                                                                                    >
-                                                                                        {item.field}
-                                                                                    </Option>
-                                                                                )
-                                                                            }
-                                                                        </Select>
-                                                                    )
-                                                                }
-                                                            </FormItem>
-                                                        }
-                                                    />
-                                                </Col>
-                                            </Row> */}
-
                                             <Row>
                                                 <Col span={24}>
                                                     <InvestMentObjComponent 
@@ -1110,18 +1046,6 @@ export class AdviceFormImpl extends React.Component {
                                                 </Col>
                                             </Row>
                                             <Row gutter={16} style={{marginTop: '15px'}}>
-                                                {/*<Col span={12}>
-                                                    <InvestMentObjComponent 
-                                                        header="Investor Type"
-                                                        content={
-                                                            <h3 style={{fontSize: '16px'}}>
-                                                                {
-                                                                    this.getGoalDetail('investorType')
-                                                                }
-                                                            </h3>
-                                                        }
-                                                    />
-                                                </Col>*/}
                                                 <Col span={24}>
                                                     <InvestMentObjComponent 
                                                         header="Suitability"
@@ -1201,7 +1125,15 @@ export class AdviceFormImpl extends React.Component {
                         </Row>
                         <Row style={{marginTop: '20px'}}>
                             <Col span={24} style={horizontalBox}>
-                                <h3 style={inputHeaderStyle}>Portfolio</h3>
+                                <div style={{display: 'flex', flexDirection: 'column'}}>
+                                    <h3 style={inputHeaderStyle}>Portfolio</h3>
+                                    {
+                                        this.state.showError && !this.validateTransactions() &&
+                                        <h3 style={{color: metricColor.negative, fontSize: '14px'}}>
+                                            Atleast one valid transaction must be added
+                                        </h3>
+                                    }
+                                </div>
                                 {
                                     this.state.isPublic && !this.getPortfolioWarnings().valid && this.props.isUpdate &&
                                     <WarningIcon 
@@ -1278,7 +1210,14 @@ export class AdviceFormImpl extends React.Component {
     }
 
     togglePostWarningModal = () => {
-        this.setState({postWarningModalVisible: !this.state.postWarningModalVisible});
+        this.props.form.validateFields((err, values) => {
+            if (!err && this.validateTransactions()) {
+                this.setState({postWarningModalVisible: !this.state.postWarningModalVisible});
+            } else {
+                this.setState({showError: true});
+                message.error('Please fill in the required fields and add atleast one valid transaction');
+            }
+        })
     }
 
     toggleAdviceLimitExceededModal = () => {
@@ -1351,11 +1290,7 @@ export class AdviceFormImpl extends React.Component {
                                         onClick={this.togglePostWarningModal}
                                         className={`action-button ${className}`}
                                 >
-                                    {
-                                        this.props.isUpdate
-                                        ? "CONFIRM CHANGES"
-                                        : "POST TO MARKET PLACE"
-                                    }
+                                    POST TO MARKET PLACE
                                 </Button>
                             </React.Fragment>
                         :   <React.Fragment>
@@ -1365,14 +1300,11 @@ export class AdviceFormImpl extends React.Component {
                                         onClick={this.togglePostWarningModal}
                                         className={`action-button ${className}`}
                                 >
-                                    {
-                                        this.props.isUpdate
-                                        ? "CONFIRM CHANGES"
-                                        : "POST NOW"
-                                    }
+                                    POST TO MARKET PLACE
                                 </Button>
                                 {
-                                    !this.props.isUpdate &&
+                                    // will be rendered if it is create advice or if the the advice is private
+                                    (!this.props.isUpdate || !this.state.isPublic) &&
                                     <Button 
                                             style={{...buttonStyle}}
                                             onClick={this.handleSubmit}

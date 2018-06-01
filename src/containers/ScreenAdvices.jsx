@@ -328,6 +328,7 @@ export default class ScreenAdvices extends React.PureComponent {
                 performanceSummary: advice.performanceSummary,
                 rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
                 isApproved: _.get(advice, 'latestApproval.status', false),
+                approvalStatus: _.get(advice, 'approvalRequested', false),
                 isOwner: _.get(advice, 'isOwner', false),
                 isAdmin: _.get(advice, 'isAdmin', false),
                 isSubscribed: _.get(advice, 'isSubscribed', false),
