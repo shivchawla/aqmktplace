@@ -30,6 +30,7 @@
     "react-dom": "16.2.0",
     "react-ga": "2.5.2",
     "react-hamburger-menu": "1.1.0",
+    "react-helmet": "^5.2.0",
     "react-highcharts": "16.0.1",
     "react-linkedin-login": "1.0.3",
     "react-linkedin-sdk": "1.0.8",

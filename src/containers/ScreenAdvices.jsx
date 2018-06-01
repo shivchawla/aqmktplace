@@ -6,6 +6,7 @@ import _ from 'lodash';
 import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal, Pagination, Radio} from 'antd';
 import {AdviceListItemMod, AdviceFilterSideComponent, AqPageHeader} from '../components';
 import {newLayoutStyle, pageTitleStyle, shadowBoxStyle, loadingColor} from '../constants';
+import {ScreenAdviceMeta} from '../metas';
 import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {adviceFilters as filters} from '../constants/filters';
 import '../css/screenAdvices.css';
@@ -507,7 +508,7 @@ export default class ScreenAdvices extends React.PureComponent {
             <React.Fragment>
                 <Row className='aq-page-container'>
                     {this.renderQuestionnaireDialog()}
-                    <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs} />
+                    <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs}/>
                     <Row className="row-container" style={{...shadowBoxStyle, marginBottom:'20px'}}>
                         {this.renderFilter()}
                         

@@ -135,7 +135,6 @@ export default class InvestorDashboard extends React.Component {
             this.getInvestorSubscribedAdvices(),
         ])
         .then(([response]) => {
-            //return;
             const defaultPortfolio = _.get(response.data, 'defaultPortfolio', null);
             const defaultPerformance = _.get(response.data, 'defaultPerformance', null);
             if (defaultPortfolio === null) {
@@ -200,16 +199,17 @@ export default class InvestorDashboard extends React.Component {
                 defaultComposition: composition,
                 stockPositions: this.processPresentStockTransction(positions),
                 metrics: {
-                    beta: performance.ratios.beta,
-                    sharperatio: performance.ratios.sharperatio,
-                    annualreturn: performance.returns.annualreturn,
-                    averagedailyreturn: performance.returns.averagedailyreturn,
-                    dailyreturn: performance.returns.dailyreturn,
-                    totalreturn: performance.returns.totalreturn,
-                    volatility: summary.volatility,
-                    netValue: summary.netValue,
+                    beta: _.get(performance, 'ratios.beta', 0),
+                    sharperatio: _.get(performance, 'ratios.sharperatio', 0),
+                    annualreturn: _.get(performance, 'returns.annualreturn', 0),
+                    averagedailyreturn: _.get(performance, 'returns.averagedailyreturn', 0),
+                    dailyreturn: _.get(performance, 'returns.dailyreturn', 0),
+                    totalreturn: _.get(performance, 'returns.totalreturn', 0),
+                    volatility: summary.volatility || 0,
+                    netValue: summary.netValue || 0,
                     dailyNavChangePct: dailyNavChangePct,
-                    totalPnl: totalPnl
+                    totalPnl: totalPnl,
+                    concentration: _.get(performance, 'portfoliostats.concentration', 0)
                 },
                 dollarPerformance,
                 percentagePerformance,
@@ -275,7 +275,6 @@ export default class InvestorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            // console.log(error);
             reject(error);
         })
         .finally(() => {
