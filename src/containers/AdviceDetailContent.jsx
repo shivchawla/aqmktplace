@@ -435,8 +435,7 @@ class AdviceDetailContentImpl extends React.Component {
                     </Panel>
 
                     {
-                        (isSubscribed || isOwner) &&
-
+                        (isSubscribed || isOwner || isAdmin) &&
                         <Panel
                             key="2"
                             style={customPanelStyle}
