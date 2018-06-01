@@ -256,7 +256,7 @@ export default class ScreenAdvices extends React.PureComponent {
 
     getAdvices = adviceUrl => {
         this.setState({
-            loading: false,
+            loading: true,
             show: this.state.initialCall,
             initialCall: false
         });
