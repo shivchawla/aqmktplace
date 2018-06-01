@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import {Row, Col, Icon, Tag, Rate, Tooltip} from 'antd';
 import {AqRate} from '../components';
 import {MetricItem} from './MetricItem';
-import {primaryColor} from '../constants';
+import {primaryColor, metricColor} from '../constants';
 import medalIcon from '../assets/award.svg';
 import trendingUpIcon from '../assets/trending-up.svg';
 import sunrise from '../assets/sunrise.svg';
@@ -351,13 +351,13 @@ class AdviceListItemImpl extends React.PureComponent {
                                             !approvalStatus &&
                                             <Tag 
                                                     style={{
-                                                        border: isApproved ? `1px solid #00897B` : `1px solid #FF5722`, 
+                                                        border: isApproved ? `1px solid #00897B` : `1px solid ${metricColor.negative}`, 
                                                         cursor: 'auto'
                                                     }}
                                             >
                                                 <span 
                                                         style={{
-                                                            color: isApproved ? '#00897B' : '#FF5722', 
+                                                            color: isApproved ? '#00897B' : metricColor.negative, 
                                                             marginLeft: '5px'
                                                         }}
                                                 >

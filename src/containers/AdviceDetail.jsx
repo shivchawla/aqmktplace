@@ -147,7 +147,8 @@ class AdviceDetailImpl extends React.Component {
             notAuthorized: false,
             approvalLoading: false,
             // Used to approve investment objective and other fields
-            approvalObj
+            approvalObj,
+            postWarningModalVisible: false
         };
 
         this.performanceSummary = {};
@@ -161,6 +162,7 @@ class AdviceDetailImpl extends React.Component {
             headers: Utils.getAuthTokenHeader(),
         })
         .then(response => {
+            this.togglePostWarningModal();
             this.getAdviceData();
             message.success('Advice successfully made Public');
         })
@@ -1097,6 +1099,33 @@ class AdviceDetailImpl extends React.Component {
         })
     }
 
+    togglePostWarningModal = () => {
+        this.setState({postWarningModalVisible: !this.state.postWarningModalVisible});
+    }
+
+    renderPostWarningModal = () => {
+        return (
+            <Modal
+                    visible={this.state.postWarningModalVisible}
+                    title="Warning"
+                    onOk={this.makeAdvicePublic}
+                    onCancel={this.togglePostWarningModal}
+                    bodyStyle={{height: '200px', top: '20'}}
+            >   
+                <Row>
+                    <Col span={24}>
+                        <h3 style={{fontSize: '16px'}}>
+                            Your advice will be submitted for Approval.<br></br>
+                            If approved, modifications to the advice, except <span style={{color: primaryColor}}>Start Date</span> 
+                            &nbsp;and <span style={{color: primaryColor}}>Portfolio</span>&nbsp;
+                            will not be possible after you post to MarketPlace.
+                        </h3>
+                    </Col>
+                </Row>
+            </Modal>
+        );
+    }
+
     renderActionButtons = (small=false) => {
         const {userId} = this.state;
         const isOwner = _.get(this.state, 'adviceDetail.isOwner', false);
@@ -1163,7 +1192,7 @@ class AdviceDetailImpl extends React.Component {
                     {
                         !this.state.adviceDetail.isPublic && 
                         <Button 
-                                onClick={this.makeAdvicePublic} 
+                                onClick={this.togglePostWarningModal} 
                                 className={className} 
                                 style={buttonStyle} 
                                 type="primary"
@@ -1296,6 +1325,7 @@ class AdviceDetailImpl extends React.Component {
                     showSpinner={false}
                 />
                {this.renderModal()}
+               {this.renderPostWarningModal()}
                {this.renderUpdateModal()}
                {this.renderApprovalModal()}
                {this.renderUnsubscriptionModal()}

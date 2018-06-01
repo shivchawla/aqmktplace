@@ -246,6 +246,7 @@ export default class AdvisorProfile extends React.Component {
                 performanceSummary: advice.performanceSummary,
                 rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
                 isApproved: _.get(advice, 'latestApproval.status', false),
+                approvalStatus: _.get(advice, 'approvalRequested', false),
                 isOwner: _.get(advice, 'isOwner', false),
                 isSubscribed: _.get(advice, 'isSubscribed', false),
                 public: _.get(advice, 'public', false),

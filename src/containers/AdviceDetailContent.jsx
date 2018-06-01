@@ -143,8 +143,8 @@ class AdviceDetailContentImpl extends React.Component {
                             }
                             {
                                 (isOwner || isAdmin) && approvalRequested && isPublic &&
-                                <Tag style={{marginLeft: '5px', border: `1px solid ${primaryColor}`, cursor: 'auto'}}>
-                                    <span style={{color: primaryColor}}>Approval Pending</span>
+                                <Tag style={{marginLeft: '5px', border: `1px solid #FFAB00`, cursor: 'auto'}}>
+                                    <span style={{color: '#FFAB00'}}>Approval Pending</span>
                                 </Tag>
                             }
                             {
@@ -152,11 +152,11 @@ class AdviceDetailContentImpl extends React.Component {
                                 <Tag 
                                         style={{
                                             marginLeft: '5px', 
-                                            border: `1px solid ${approvalStatus ? metricColor.positive : metricColor.negative}`,
+                                            border: `1px solid ${approvalStatus ? primaryColor : metricColor.negative}`,
                                             cursor: 'auto'
                                         }}
                                 >
-                                    <span style={{color: approvalStatus ? metricColor.positive : metricColor.negative}}>
+                                    <span style={{color: approvalStatus ? primaryColor : metricColor.negative}}>
                                         {
                                             approvalStatus 
                                             ? "Approved"
