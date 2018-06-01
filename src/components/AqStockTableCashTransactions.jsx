@@ -124,9 +124,9 @@ export class AqStockTableCashTransaction extends React.Component {
             }
             this.setState({data: newData});
             this.props.onChange(newData);
-            if (this.isValid(target) && this.props.previewPortfolio) {
-                this.props.previewPortfolio();
-            }
+            // if (this.isValid(target) && this.props.previewPortfolio) {
+            //     this.props.previewPortfolio();
+            // }
         }
     }
 
