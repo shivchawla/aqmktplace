@@ -561,8 +561,8 @@ class PortfolioDetailImpl extends React.Component {
             name: this.state.name,
         }]);
         const tooltipText = this.state.hasChangedCount 
-                ? "Some advices in your portfolio are backdated. You need to update your portfolio."
-                : "Portfolio is updated. You can still add new transactions"
+                ? "Advice in your portfolio are not up to date. You need to update your portfolio."
+                : "Advice in portfolio are up to date. You can still add new transactions"
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />
@@ -590,11 +590,9 @@ class PortfolioDetailImpl extends React.Component {
                         <Col xl={18} lg={18} md={24} style={{...shadowBoxStyle, padding: '0'}}>
                             <Row style={{padding: '20px 30px'}}>
                                 <Col span={24}>
-                                    <Row type="flex" justify="space-between">
-                                        <Col 
-                                                span={10} 
-                                                style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}
-                                        >
+                                    <Row type="flex" justify="space-between" gutter={8}>
+                                        <Col span={18} 
+                                            style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                                             <h2 style={{...pageHeaderStyle, marginBottom: 0}}>{this.state.name}</h2>
                                             {
                                                 this.state.isDefault &&
