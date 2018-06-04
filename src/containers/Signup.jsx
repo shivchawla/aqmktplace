@@ -3,6 +3,7 @@ import {Utils} from '../utils';
 import { Spin,  Form, Input, Icon, Checkbox, Button } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
+import {SignupMeta} from '../metas';
 import logo from "../assets/logo-advq-new.png";
 
 const {requestUrl} = require('../localConfig');
@@ -140,6 +141,7 @@ class Signup extends Component {
       }else{
         return (
           <React.Fragment>
+            <SignupMeta />
             <FormItem className="signup-form-item">
               {getFieldDecorator('agreement', {
                 valuePropName: 'checked',

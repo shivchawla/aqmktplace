@@ -4,6 +4,7 @@ import {Utils} from '../utils';
 import { Spin, Form, Icon, Input, Button, Checkbox } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
+import {LoginMeta} from '../metas';
 import logo from "../assets/logo-advq-new.png";
 const {requestUrl} = require('../localConfig');
 
@@ -129,6 +130,7 @@ class Login extends Component {
     return (
 	    <div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
         'minHeight': '500px', 'display': 'flex', flexDirection: 'column', 'alignItems': 'center', 'justifyContent': 'center'}}>
+        <LoginMeta />
         <div className="card login-card" style={{'padding': '20px', 'background': 'white',
           'borderRadius': '2px', 'textAlign': 'center', 'width': '390px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px'}}>
           <img style={{'height': '60px', 'width': 'auto'}} src={logo}/>

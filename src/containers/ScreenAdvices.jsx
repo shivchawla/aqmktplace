@@ -608,6 +608,7 @@ export default class ScreenAdvices extends React.PureComponent {
     render() {
         return (
             <React.Fragment>
+                <ScreenAdviceMeta />
                 <Loading
                         show={this.state.show}
                         color={loadingColor}

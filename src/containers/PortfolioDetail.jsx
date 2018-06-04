@@ -7,6 +7,7 @@ import axios from 'axios';
 import {withRouter} from 'react-router';
 import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip, Tag, message} from 'antd';
 import {ForbiddenAccess, StockResearchModal, WatchList, Footer} from '../components';
+import {PortfolioDetailMeta} from '../metas';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
 import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor, buttonStyle, primaryColor} from '../constants';
@@ -112,6 +113,7 @@ class PortfolioDetailImpl extends React.Component {
     renderAdvicePortfolio = () => {
         return (
             <Row>
+                <PortfolioDetailMeta />
                 <Col span={24} style={{marginTop: '5px'}}>
                     {
                         this.state.presentAdvices.length > 0

@@ -8,6 +8,7 @@ import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} 
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate, Footer} from '../components';
 import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
+import {InvestorDashboardMeta} from '../metas';
 import {generateColorData, getMetricColor, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import 'react-loading-bar/dist/index.css'
@@ -1006,6 +1007,7 @@ export default class InvestorDashboard extends React.Component {
                     showSpinner={false}
                     className="main-loader"
                 />
+                <InvestorDashboardMeta />
                {
                    !this.state.defaultPortfolioLoading &&
                    <React.Fragment>

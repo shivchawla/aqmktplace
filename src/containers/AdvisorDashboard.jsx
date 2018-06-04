@@ -5,6 +5,7 @@ import _ from 'lodash';
 import Loading from 'react-loading-bar';
 import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} from 'antd';
 import {MyChartNew} from './MyChartNew';
+import {AdvisorDashboardMeta} from '../metas';
 import {graphColors} from '../constants';
 import {AqHighChartMod, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader, HighChartNew, ForbiddenAccess, AqRate, Footer} from '../components';
 import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor, simulatedPerformanceColor, currentPerformanceColor} from '../constants';
@@ -802,6 +803,7 @@ export default class AdvisorDashboard extends React.Component {
                     className="main-loader"
                     showSpinner={false}
                 />
+                <AdvisorDashboardMeta />
                 {
                     !this.state.show &&
                     <React.Fragment>

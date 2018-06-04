@@ -4,11 +4,15 @@ import moment from 'moment';
 import _ from 'lodash';
 import {withRouter} from 'react-router'
 import {AddTransactions} from './AddTransactions';
+import {CreatePortfolioMeta} from '../metas';
 
 export class CreatePortfolioImpl extends React.Component {
     render() {
         return (
-            <AddTransactions />
+            <React.Fragment>
+                <CreatePortfolioMeta />
+                <AddTransactions />
+            </React.Fragment>
         );
     }
 }

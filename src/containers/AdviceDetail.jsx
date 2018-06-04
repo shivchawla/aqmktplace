@@ -12,6 +12,7 @@ import {AdviceDetailContent} from './AdviceDetailContent';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate, Footer, ApprovalItem, ApprovalItemView} from '../components';
 import {MyChartNew} from './MyChartNew';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
+import {AdviceDetailMeta} from '../metas';
 import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax, getStockPerformance} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import '../css/adviceDetail.css';
@@ -1324,16 +1325,16 @@ class AdviceDetailImpl extends React.Component {
                     className="main-loader"
                     showSpinner={false}
                 />
-               {this.renderModal()}
-               {this.renderPostWarningModal()}
-               {this.renderUpdateModal()}
-               {this.renderApprovalModal()}
-               {this.renderUnsubscriptionModal()}
-               {
-                    !this.state.show &&
-                    this.renderPageContent()
-               }
-
+                <AdviceDetailMeta />
+                {this.renderModal()}
+                {this.renderPostWarningModal()}
+                {this.renderUpdateModal()}
+                {this.renderApprovalModal()}
+                {this.renderUnsubscriptionModal()}
+                {
+                        !this.state.show &&
+                        this.renderPageContent()
+                }
            </Row>
         );
     }

@@ -4,7 +4,7 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio, Modal, message} from 'antd';
-import {List} from 'immutable';
+import {SignupMeta} from '../metas';
 import {AqLink, DashboardCard, AqPageHeader, WatchList, CreateWatchList, Footer} from '../components';
 import {pageTitleStyle, newLayoutStyle, shadowBoxStyle, loadingColor, primaryColor} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
@@ -780,6 +780,7 @@ class StockResearchImpl extends React.Component {
     render() {
         return (
             <React.Fragment>
+                <SignupMeta />
                 {this.renderCreateWatchListModal()}
                 {this.renderAimsquantRedirectModal()}
                 <Loading

@@ -17,6 +17,7 @@ import test from '../assets/test.svg';
 import track from '../assets/track.svg';
 import performance from '../assets/performance.svg';
 import {Footer} from '../components/Footer';
+import {HomeMeta} from '../metas';
 import '../css/home.css';
 
 
@@ -147,6 +148,7 @@ export default class Home extends React.Component {
     render() {
         return (
             <Col span={24} className='page-container'>
+                <HomeMeta />
                 <Row className="top-section">
                     {/* <Col span={24}>
                         <h3 className="page-header">AimsQube</h3>
