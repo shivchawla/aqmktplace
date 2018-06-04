@@ -132,7 +132,7 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
                             <DatePicker
                                 onChange={date => this.handleDateChange(date, advice)}
                                 onOpenChange={this.datePickerOpened}
-                                value={moment(advice.date, dateFormat)}
+                                value={moment(advice.date || moment(), dateFormat)}
                                 format={dateFormat}
                                 disabledDate={(current) => this.props.disabledDate(current, advice)}
                                 allowClear={false}
@@ -166,7 +166,6 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
                 // item.modifiedShares = item.shares * Number(e.target.value);
                 // netAssetValue += (item.newShares * Number(e.target.value)) * item.price;
             } else {
-                // console.log('Empty Units');
                 item.transactionalQuantity = item.newShares - item.shares;
             }
             return item;
@@ -233,10 +232,6 @@ class AqPortfolioTransactionAdviceImpl extends React.Component {
         targetAdvice.checked = e.target.checked;
         this.setState({advices});
         this.props.updateAdvices(advices);
-    }
-
-    datePickerOpened = e => {
-        // console.log(e);
     }
 
     renderHeaderItem = (advice) => {

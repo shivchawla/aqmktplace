@@ -106,7 +106,7 @@ export const tabBackgroundColor = '#fbfbfc';
 
 export const metricColor = {
     positive: '#4CAF50',
-    negative: '#f44335',
+    negative: '#f5222d',
     neutral: '#3F51B5'
 };
 

@@ -55,7 +55,8 @@ class AddTransactionsImpl extends React.Component {
             loadingPreviewData: false,
             defaultChecked: false,
             portfolioLimitExceededVisible: false,
-            portfolioCount: 0
+            portfolioCount: 0,
+            showErrors: false
         };
         this.adviceKey = 0;
     }
@@ -74,7 +75,7 @@ class AddTransactionsImpl extends React.Component {
                         Delete Selected
                     </Button>
                 </Col>
-                <Col span={4} offset={16} style={{position: 'absolute', right: '20px'}}>
+                {/* <Col span={4} offset={16} style={{position: 'absolute', right: '20px'}}>
                     <Button 
                             onClick={this.toggleSubscribedAdviceModal} 
                             style={{right: 0, position: 'absolute'}}
@@ -82,7 +83,7 @@ class AddTransactionsImpl extends React.Component {
                     >
                         Browse Advice
                     </Button>
-                </Col>
+                </Col> */}
                 <Col span={24} style={{marginTop: 20, padding: '0 20px'}}>
                     {
                         advices.length > 0 
@@ -200,10 +201,13 @@ class AddTransactionsImpl extends React.Component {
     }
 
     togglePreviewModal = () => {
-        if (!this.state.isPreviewModalVisible) {
-            this.previewPortfolio();
+        this.setState({showErrors: true});
+        if (this.checkTransactionErrors()) {
+            if (!this.state.isPreviewModalVisible) {
+                this.previewPortfolio();
+            }
+            this.setState({isPreviewModalVisible: !this.state.isPreviewModalVisible});
         }
-        this.setState({isPreviewModalVisible: !this.state.isPreviewModalVisible});
     }
 
     updateSubscribedAdvices = (subscribedAdvices) => {
@@ -333,8 +337,6 @@ class AddTransactionsImpl extends React.Component {
                 .finally(() => {
                     this.setState({submitButtonLoading: false});
                 });
-            } else {
-                message.error('Please provide a valid name');
             }
         });
     }
@@ -571,7 +573,7 @@ class AddTransactionsImpl extends React.Component {
     processAdviceTransaction = (adviceTransactions) => {
         const transactions = [];
         adviceTransactions.map(transaction => {
-            if (transaction.composition.length > 0) {
+            if (transaction.composition.length > 0 && transaction.newUnits > 0) {
                 transaction.composition.map(item => {
                     transactions.push({
                         security: {
@@ -697,14 +699,6 @@ class AddTransactionsImpl extends React.Component {
         let advices = [...this.state.advices];
         let subscribedAdvices = [...this.state.subscribedAdvices];
         const advicesToBeDeleted = this.state.advices.filter(item => item.checked === true);
-        // subscribedAdvices = subscribedAdvices.map(subscribedAdvice => {
-        //     advicesToBeDeleted.map(advice => {
-        //         if (advice.adviceId === subscribedAdvice.id) {
-        //             subscribedAdvice.isSelected = false;
-        //         }
-        //     });
-        //     return subscribedAdvice;
-        // });
         advices = _.pullAll(advices, advicesToBeDeleted);
         this.setState({advices, subscribedAdvices});
     }
@@ -717,7 +711,6 @@ class AddTransactionsImpl extends React.Component {
             || [0, 6].indexOf(current.weekday()) !== -1
             || (current && current < createdDate
         ));
-        // return (current && current > moment().endOf('day'));
     }
 
     processPreviewAdviceTransaction = (adviceTransactions) => {
@@ -797,11 +790,15 @@ class AddTransactionsImpl extends React.Component {
         return stockPositions;
     }
 
-    getUserPortfolios = () => {
+    getInitialData = () => {
         this.setState({show: true});
         fetchAjax(`${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio`)
         .then(response => {
             this.setState({portfolioCount: response.data.length});
+            return this.getSubscribedAdvices();
+        })
+        .then(subscribedAdvices => {
+            this.setState({advices: subscribedAdvices});
         })
         .catch(error => error)
         .finally(() => {
@@ -828,6 +825,66 @@ class AddTransactionsImpl extends React.Component {
                 </Row>
             </Modal>
         );
+    }
+
+    getSubscribedAdvices = () => new Promise((resolve, reject) => {
+        const url = `${requestUrl}/advice?subscribed=true`;
+        fetchAjax(url, this.props.history, this.props.match.url)
+        .then(adviceResponse => {
+            let subscribedAdvices = _.get(adviceResponse, 'data.advices', []);
+            const advicePortfolioRequests = subscribedAdvices.map(advice => {
+                const url = `${requestUrl}/advice/${advice._id}/portfolio`;
+                return fetchAjax(url, this.props.history, this.props.match.url);
+            });
+            return Promise.all([
+                subscribedAdvices,
+                ...advicePortfolioRequests
+            ]);
+        })
+        .then(promiseData => {
+            let subscribedAdvices = promiseData[0];
+            const portfolios = promiseData.splice(1);
+            const portfolioData = portfolios.map(item => item.data);
+            subscribedAdvices = subscribedAdvices.map(advice => {
+                return {
+                    ...advice,
+                    portfolio: portfolioData.filter(item => item.adviceId === advice._id)[0] || {}
+                }
+            });
+            resolve(this.processSubscribedAdvice(subscribedAdvices));
+        })
+        .catch(error => {
+            reject(error);
+        });
+    })
+
+    processSubscribedAdvice = subscribedAdvices => {
+        const advices = [];
+        const modifiedAdvices = [];
+        subscribedAdvices.map(advice => {
+            const adviceId = advice._id;
+            const adviceKey = Math.random().toString(36).substring(2, 15);
+            modifiedAdvices.push({
+                createdDate: advice.createdDate, 
+                date: moment().format(dateFormat),
+                id: advice._id,
+                name: advice.name,
+                key: adviceKey,
+                weight: 0,
+                profitLoss: 0,
+                oldUnits: 0,
+                newUnits: 0,
+                netAssetValue: advice.netValue,
+                hasChanged: false,
+                composition: this.getAdviceComposition(
+                    advice.portfolio.detail.positions, 
+                    adviceKey,
+                    true // new advices
+                )
+            });
+        });
+
+        return modifiedAdvices;
     }
 
     componentWillMount() {
@@ -892,7 +949,12 @@ class AddTransactionsImpl extends React.Component {
                             composition
                         });
                     });
-                    this.setState({advices: unionAdvices});
+                    return this.getSubscribedAdvices()
+                })
+                .then(subscribedAdvices => {
+                    this.setState({
+                        advices: _.uniqBy([...unionAdvices, ...subscribedAdvices], 'id')
+                    });
                 })
                 .catch(error => error)
                 .finally(() => {
@@ -900,7 +962,7 @@ class AddTransactionsImpl extends React.Component {
                 });
             } else {
                 const tickers = [...this.state.tickers];
-                this.getUserPortfolios();
+                this.getInitialData();
                 tickers.push({
                     name: this.state.selectedBenchmark,
                     color: benchmarkColor,
@@ -945,15 +1007,15 @@ class AddTransactionsImpl extends React.Component {
         return Promise.all(adviceRequests)        
     }
 
-    getAdviceComposition = (composition, adviceIndex) => {
+    getAdviceComposition = (composition, adviceIndex, newAdvice = false) => {
         return composition.map((position, index) => {
             return {
                 key: index,
                 adviceKey: adviceIndex,
                 symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker', ''),
-                shares: position.quantity,
-                modifiedShares: position.quantity,
-                newShares: 0,
+                shares: newAdvice ? 0 : position.quantity,
+                modifiedShares: newAdvice ? 0 : position.quantity,
+                newShares: newAdvice ? position.quantity : 0,
                 price: position.lastPrice,
                 costBasic: position.avgPrice,
                 unrealizedPL: 1231,
@@ -986,22 +1048,27 @@ class AddTransactionsImpl extends React.Component {
         });
     }
 
-    checkPreviewButtonDisabled = () => {
+    // checks if at least one valid transaction is present in the portfolio
+    checkTransactionErrors = () => {
         const transactions = [
             ...this.processAdviceTransaction(this.state.advices),
             ...this.processCashTransaction(this.state.cashTransactions),
             ...this.processStockTransaction(this.state.stockTransactions)
         ];
-        return transactions.length;
+        return transactions.length > 0;
     }
 
     handleDefaultChange = (e) => {
         this.setState({defaultChecked: e.target.checked});
     }
 
-    componentWillUpdate(nextProps, nextState) {
-        // console.log('Advices', nextState.advices);
-        // console.log('Subscribed Advices', nextState.subscribedAdvices);
+    createOrUpdatePortfolio = e => {
+        this.setState({showErrors: true});
+        if (this.checkTransactionErrors()) {
+            this.state.portfolioCount >= portfolioLimit 
+            ? this.togglePortfolioLimitExceededModal() 
+            : this.handleSubmit(e);
+        }        
     }
 
     renderPageContent = () => {
@@ -1037,13 +1104,8 @@ class AddTransactionsImpl extends React.Component {
                                     <Col xl={0} lg={0} xs={24} md={24} style={{textAlign: 'right', marginBottom:'10px'}}>
                                         <Button 
                                                 type="primary" 
-                                                onClick={e => {
-                                                    this.state.portfolioCount >= portfolioLimit 
-                                                    ? this.togglePortfolioLimitExceededModal()
-                                                    : this.handleSubmit(e)
-                                                }} 
+                                                onClick={this.createOrUpdatePortfolio} 
                                                 style={{marginRight: '20px', width: '200px'}}
-                                                disabled={!this.checkPreviewButtonDisabled()}
                                         >
                                             SAVE
                                         </Button>
@@ -1051,7 +1113,6 @@ class AddTransactionsImpl extends React.Component {
                                         <Button 
                                                 onClick={this.togglePreviewModal} 
                                                 style={{width: '200px'}}
-                                                disabled={!this.checkPreviewButtonDisabled()}
                                         >
                                             Preview
                                         </Button>
@@ -1089,6 +1150,20 @@ class AddTransactionsImpl extends React.Component {
                                             </Row>
                                         }
                                         <Row style={{marginTop: '5px'}}>
+                                            {
+                                                this.state.showErrors && !this.checkTransactionErrors() &&
+                                                <Col span={24}>
+                                                    <h3 
+                                                            style={{
+                                                                fontSize: '14px', 
+                                                                color: metricColor.negative,
+                                                                marginLeft: '20px'
+                                                            }}
+                                                    >
+                                                        * Atleast one valid transaction should be present in your portfolio
+                                                    </h3>
+                                                </Col>
+                                            }
                                             <Col span={24}>
                                                 <Tabs defaultActiveKey="2" animated={false} style={{paddingBottom: '20px'}}>
                                                     <TabPane tab="Stock Transaction" key="1" style={{minHeight: '300px'}}>
@@ -1109,14 +1184,10 @@ class AddTransactionsImpl extends React.Component {
                                             <Col span={24}>
                                                 <Button 
                                                         type="primary" 
-                                                        onClick={e => {
-                                                            this.state.portfolioCount >= portfolioLimit 
-                                                            ? this.togglePortfolioLimitExceededModal()
-                                                            : this.handleSubmit(e)
-                                                        }} 
+                                                        onClick={this.createOrUpdatePortfolio} 
                                                         style={buttonStyle}
                                                         loading={this.state.submitButtonLoading}
-                                                        disabled={!this.checkPreviewButtonDisabled()}
+                                                        // disabled={!this.checkPreviewButtonDisabled()}
                                                         className='action-button'
                                                 >
                                                     SAVE
@@ -1126,7 +1197,6 @@ class AddTransactionsImpl extends React.Component {
                                                 <Button 
                                                         onClick={this.togglePreviewModal} 
                                                         style={buttonStyle}
-                                                        disabled={!this.checkPreviewButtonDisabled()}
                                                         className='action-button'
                                                 >
                                                     PREVIEW
