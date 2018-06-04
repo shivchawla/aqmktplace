@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {Row, Col, Button} from 'antd';
+import axios from 'axios';
+import {Row, Col, Button, Modal, Input, Form, message} from 'antd';
 import {Motion, spring} from 'react-motion';
 import {Utils, fetchAjax} from '../utils';
 import adviceLogo from '../assets/AdviceLogo.svg';
@@ -22,13 +23,16 @@ import '../css/home.css';
 
 
 const {requestUrl} = require('../localConfig');
+const FormItem = Form.Item;
+const {TextArea} = Input;
 
-export default class Home extends React.Component { 
+export class Home extends React.Component { 
     constructor(props) {
         super(props);
         this.state = {
             selectedTabBar: 'advisor',
-            loading: false
+            loading: false,
+            contactUsModalvisible: false
         }
     }
 
@@ -145,14 +149,84 @@ export default class Home extends React.Component {
         );
     }
 
+    toggleContactUsModal = () => {
+        this.setState({contactUsModalvisible: !this.state.contactUsModalvisible});
+    }
+
+    submitContactUsForm = e => {
+        e.preventDefault();
+        const feedbackUrl = `${requestUrl}/user/sendFeedback`;
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                const subject = values.emailSubject;
+                const feedback = values.emailDetail;
+                axios({
+                    url: feedbackUrl,
+                    method: 'POST',
+                    headers: Utils.getAuthTokenHeader(),
+                    data: {
+                        feedback,
+                        subject
+                    }
+                })
+                .then(response => {
+                    message.success('Thank you for your feedback')
+                })
+                .catch(error => {
+                    message.error('Sorry, Error occured while submitting Feedback')
+                });
+            }
+        })
+    }
+
+    renderContactUsModal = () => {
+        const {getFieldDecorator} = this.props.form;
+
+        return (
+            <Modal
+                    title="Contact Us"
+                    visible={this.state.contactUsModalvisible}
+                    onOk={this.submitContactUsForm}
+                    onCancel={this.toggleContactUsModal}
+            >
+                <Row>
+                    <Form onSubmit={this.submitContactUsForm}>
+                        <Col span={24}>
+                            <h3 style={contactUsInputStyle}>Subject</h3>
+                            <FormItem>
+                                {
+                                    getFieldDecorator('emailSubject', {
+                                        rules: [{required: true, message: 'Please provide a valid subject'}]
+                                    })(
+                                        <Input placeholder='Subject'/>
+                                    )
+                                }
+                            </FormItem>
+                        </Col>
+                        <Col span={24} style={{marginTop: '20px'}}>
+                            <h3 style={{...contactUsInputStyle}}>Detail</h3>
+                            <FormItem>
+                                {
+                                    getFieldDecorator('emailDetail', {
+                                        rules: [{required: true, message: 'Please provide the detail of your form'}]
+                                    })(
+                                        <TextArea style={{marginTop: '4px'}} placeholder="Detail" rows={4}/>
+                                    )
+                                }
+                            </FormItem>
+                        </Col>
+                    </Form>
+                </Row>
+            </Modal>
+        );
+    }
+
     render() {
         return (
             <Col span={24} className='page-container'>
+                {this.renderContactUsModal()}
                 <HomeMeta />
                 <Row className="top-section">
-                    {/* <Col span={24}>
-                        <h3 className="page-header">AimsQube</h3>
-                    </Col> */}
                     <Col span={12} style={{paddingLeft: '40px'}}>
                         <Row>
                             <Col span={24}>
@@ -243,11 +317,13 @@ export default class Home extends React.Component {
                         />
                     </Col>
                 </Row>
-                <Footer />
+                <Footer hello='sauravbiswas' header='Hello World' onContactUsClick={this.toggleContactUsModal} />
             </Col>
         );
     }
 }
+
+export default Form.create()(Home);
 
 const TabBarElement = props => {
     const {text, isSelected} = props;
@@ -313,4 +389,7 @@ const FeatureCard = props => {
     );
 };
 
-
+const contactUsInputStyle = {
+    fontSize: '14px',
+    color: '#4C4C4C'
+}
