@@ -10,7 +10,7 @@ import {ForbiddenAccess, StockResearchModal, WatchList, Footer} from '../compone
 import {PortfolioDetailMeta} from '../metas';
 import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
-import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor, buttonStyle, primaryColor} from '../constants';
+import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor, buttonStyle, primaryColor, defaultPortfolioTooltip} from '../constants';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
@@ -598,18 +598,23 @@ class PortfolioDetailImpl extends React.Component {
                                             <h2 style={{...pageHeaderStyle, marginBottom: 0}}>{this.state.name}</h2>
                                             {
                                                 this.state.isDefault &&
-                                                <Tag 
-                                                        style={{
-                                                            marginLeft: '10px', 
-                                                            marginTop: '2px',
-                                                            color: primaryColor,
-                                                            border: `1px solid ${primaryColor}`,
-                                                            fontSize: '10px',
-                                                            cursor: 'auto'
-                                                        }}
+                                                <Tooltip
+                                                        title="This is your Default Portfolio"
+                                                        placement="right"
                                                 >
-                                                    Default Portfolio
-                                                </Tag>
+                                                    <Tag 
+                                                            style={{
+                                                                marginLeft: '10px', 
+                                                                marginTop: '2px',
+                                                                color: primaryColor,
+                                                                border: `1px solid ${primaryColor}`,
+                                                                fontSize: '10px',
+                                                                cursor: 'auto'
+                                                            }}
+                                                    >
+                                                        Default Portfolio
+                                                    </Tag>
+                                                </Tooltip>
                                             }
                                         </Col>
                                         <Col span={6} style={{textAlign: 'right'}}>

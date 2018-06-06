@@ -6,7 +6,7 @@ import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
 import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch, Icon, Tag, Tooltip} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor} from '../constants';
+import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate, IconItem, WarningIcon} from '../components';
 import {MyChartNew} from './MyChartNew';
@@ -143,27 +143,36 @@ class AdviceDetailContentImpl extends React.Component {
                             }
                             {
                                 (isOwner || isAdmin) && approvalRequested && isPublic &&
-                                <Tag style={{marginLeft: '5px', border: `1px solid #FFAB00`, cursor: 'auto'}}>
-                                    <span style={{color: '#FFAB00'}}>Approval Pending</span>
-                                </Tag>
+                                <Tooltip
+                                        title={adviceApprovalPending}
+                                        placement="right"
+                                >
+                                    <Tag style={{marginLeft: '5px', border: `1px solid #FFAB00`, cursor: 'auto'}}>
+                                        <span style={{color: '#FFAB00'}}>Approval Pending</span>
+                                    </Tag>
+                                </Tooltip>
                             }
                             {
                                 (isOwner || isAdmin) && !approvalRequested && isPublic &&
-                                <Tag 
-                                        style={{
-                                            marginLeft: '5px', 
-                                            border: `1px solid ${approvalStatus ? primaryColor : metricColor.negative}`,
-                                            cursor: 'auto'
-                                        }}
+                                <Tooltip
+                                        title={approvalStatus ? adviceApproved : adviceRejected}
                                 >
-                                    <span style={{color: approvalStatus ? primaryColor : metricColor.negative}}>
-                                        {
-                                            approvalStatus 
-                                            ? "Approved"
-                                            : "Rejected"
-                                        }
-                                    </span>
-                                </Tag>
+                                    <Tag 
+                                            style={{
+                                                marginLeft: '5px', 
+                                                border: `1px solid ${approvalStatus ? primaryColor : metricColor.negative}`,
+                                                cursor: 'auto'
+                                            }}
+                                    >
+                                        <span style={{color: approvalStatus ? primaryColor : metricColor.negative}}>
+                                            {
+                                                approvalStatus 
+                                                ? "Approved"
+                                                : "Rejected"
+                                            }
+                                        </span>
+                                    </Tag>
+                                </Tooltip>
                             }
                         </div>
                         {

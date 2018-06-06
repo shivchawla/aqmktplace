@@ -135,6 +135,7 @@ export class AqStockPortfolioTable extends React.Component {
                     pagination={false} 
                     columns={this.getColumns()}
                     style={this.props.style}
+                    scroll={this.props.scroll}
                     // processedPosition true means that the positions provided as props are processed into
                     // a certain format required by this table as seen in the columns
                     dataSource={this.props.processedPositions ?

@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import {Utils} from '../utils';
 import {Spin, Icon} from 'antd';
+import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router-dom';
 import axios from 'axios';
+import {loadingColor} from '../constants';
 
 const {requestUrl} = require('../localConfig');
 
@@ -14,6 +16,7 @@ class TokenUpdateImpl extends Component {
   constructor(props){
   	super();
   	this.state = {
+      loading: true
   	};
     if(props.location.search){
       const queryParams = new URLSearchParams(props.location.search);
@@ -25,6 +28,7 @@ class TokenUpdateImpl extends Component {
       }
     } 
     this.updateToken = () => {
+      this.setState({loading: true});
       axios({
               method: 'PUT',
               url: requestUrl + '/user/updateToken',
@@ -35,7 +39,6 @@ class TokenUpdateImpl extends Component {
             })
           .then((response) => {
               Utils.setShouldUpdateToken(false);
-              // console.log(Utils.getShouldUpdateToken());
               if(response.data && response.data.token){
                 Utils.updateUserToken(response.data.token);
                 if (this.redirectUrl){
@@ -52,6 +55,9 @@ class TokenUpdateImpl extends Component {
              Utils.setShouldUpdateToken(false);
              Utils.logoutUser();
              this.props.history.push('/login');
+          })
+          .finally(() => {
+            this.setState({loading: false})
           });
     }
   }
@@ -78,7 +84,12 @@ class TokenUpdateImpl extends Component {
 	    <div style={{'display': 'flex',
         'alignItems': 'center', 'justifyContent': 'center',
         'minHeight': '142px', 'backgroundColor': 'white'}}>
-        <Spin indicator={antIconLoading} />
+        <Loading 
+            show={this.state.loading}
+            color={loadingColor}
+            showSpinner={false}
+            className="main-loader"
+        />
       </div>
     );
   }

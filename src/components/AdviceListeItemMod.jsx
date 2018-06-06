@@ -253,10 +253,18 @@ class AdviceListItemImpl extends React.PureComponent {
         let sectors = _.get(performanceSummary, 'current.sectors', []);
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
         const statusTagColor = isOwner ? '#3cb44b' : isSubscribed ? '#1890ff' : isFollowing ? '#03a7ad' : '#fff';
-        const statusTagLabel = isOwner ? 'Owner' : isSubscribed ? 'Subscribed' : isFollowing ? 'Wishlist' : "";
+        const statusTagLabel = isOwner ? 'Owner' : isSubscribed ? 'Subscribed' : isFollowing ? 'Wishlisted' : "";
         const advisorName = `${_.get(advisor, 'user.firstName')} ${_.get(advisor, 'user.lastName')}`;
         const advisorId = _.get(advisor, '_id', '');
         const statusTagStyle = {border:'1px solid', borderColor:statusTagColor};
+        const adviceApprovalPending = 'Approval is pending for this advice by the admin';
+        const adviceRejected = 'Advice is rejected by the admin.';
+        const adviceApproved = 'Advice is approved by the admin ';
+        const advicePublic = 'This advice is public';
+        const advicePrivate = 'This advice is private and not open to Marketplace';
+        const adviceWishlisted = 'You have wishlisted this advice';
+        const adviceSubscribed = 'You have subscribed this advice';
+
         return (
 
             <Row 
@@ -323,49 +331,64 @@ class AdviceListItemImpl extends React.PureComponent {
                                 {
                                     (isOwner || isAdmin) &&
                                     <React.Fragment>
-                                        <Tag style={{border: '1px solid #673AB7', cursor: 'auto'}}>
-                                            <Icon 
-                                                    type={isPublic ? 'team' : 'lock'} 
-                                                    style={{
-                                                        fontWeight: '400', 
-                                                        color:'#673AB7', 
-                                                        fontSize: '15px',
-                                                        // marginTop: '4px'
-                                                    }}
-                                            />
-                                            <span style={{color: '#673AB7', marginLeft: '5px'}}>
-                                                {
-                                                    isPublic ? 'Public' : 'Private'
-                                                }
-                                            </span>
-                                        </Tag>
-                                        {
-                                            approvalStatus &&
-                                            <Tag style={{border: '1px solid #FFAB00', cursor: 'auto'}}>
-                                                <span style={{color: '#FFAB00', marginLeft: '5px'}}>
-                                                    Approval Pending
-                                                </span>
-                                            </Tag>
-                                        }
-                                        {
-                                            !approvalStatus &&
-                                            <Tag 
-                                                    style={{
-                                                        border: isApproved ? `1px solid #00897B` : `1px solid ${metricColor.negative}`, 
-                                                        cursor: 'auto'
-                                                    }}
-                                            >
-                                                <span 
+                                        <Tooltip
+                                                title={isPublic ? advicePublic : advicePrivate}
+                                                placement="bottom"
+                                        >
+                                            <Tag style={{border: '1px solid #673AB7', cursor: 'auto'}}>
+                                                <Icon 
+                                                        type={isPublic ? 'team' : 'lock'} 
                                                         style={{
-                                                            color: isApproved ? '#00897B' : metricColor.negative, 
-                                                            marginLeft: '5px'
+                                                            fontWeight: '400', 
+                                                            color:'#673AB7', 
+                                                            fontSize: '15px',
+                                                            // marginTop: '4px'
                                                         }}
-                                                >
+                                                />
+                                                <span style={{color: '#673AB7', marginLeft: '5px'}}>
                                                     {
-                                                        isApproved ? "Approved" : "Rejected"
+                                                        isPublic ? 'Public' : 'Private'
                                                     }
                                                 </span>
                                             </Tag>
+                                        </Tooltip>
+                                        {
+                                            approvalStatus &&
+                                            <Tooltip
+                                                    title={adviceApprovalPending}
+                                                    placement="bottom"
+                                            >
+                                                <Tag style={{border: '1px solid #FFAB00', cursor: 'auto'}}>
+                                                    <span style={{color: '#FFAB00', marginLeft: '5px'}}>
+                                                        Approval Pending
+                                                    </span>
+                                                </Tag>
+                                            </Tooltip>
+                                        }
+                                        {
+                                            !approvalStatus &&
+                                            <Tooltip
+                                                    title={isApproved ? adviceApproved : adviceRejected}
+                                                    placement="bottom"
+                                            >
+                                                <Tag 
+                                                        style={{
+                                                            border: isApproved ? `1px solid #00897B` : `1px solid ${metricColor.negative}`, 
+                                                            cursor: 'auto'
+                                                        }}
+                                                >
+                                                    <span 
+                                                            style={{
+                                                                color: isApproved ? '#00897B' : metricColor.negative, 
+                                                                marginLeft: '5px'
+                                                            }}
+                                                    >
+                                                        {
+                                                            isApproved ? "Approved" : "Rejected"
+                                                        }
+                                                    </span>
+                                                </Tag>
+                                            </Tooltip>
                                         }
                                     </React.Fragment>
                                 }

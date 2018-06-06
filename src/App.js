@@ -1,7 +1,8 @@
 import * as React from 'react';
 import ReactGA from 'react-ga';
 import {Layout, Menu, Row, Col, Button, Popover, Icon} from 'antd';
-import {BrowserRouter as Router, Route, withRouter, Link, Switch} from 'react-router-dom';
+import {Redirect, Route} from 'react-router';
+import {BrowserRouter as Router, withRouter, Link, Switch} from 'react-router-dom';
 import {slide as SideMenu} from 'react-burger-menu'
 import AqBreadCrumb from './components/AqBreadCrumb';
 import Login from './containers/Login';
@@ -93,17 +94,17 @@ class App extends React.Component {
             {regExp: '^\/$', title: 'Home - AdviceQube'},
             {regExp: '^\/policies\/tnc$', title: 'Terms and Conditions - AdviceQube'},
             {regExp: '^\/policies\/privacy$', title: 'Privacy Policy - AdviceQube'},
-            {regExp: '^\/investordashboard$', title: 'Investor Dashboard - AdviceQube'},
-            {regExp: '^\/investordashboard\/createportfolio$', title: 'Create Portfolio - AdviceQube'},
-            {regExp: '^\/advisordashboard$', title: 'Advisor Dashboard - AdviceQube'},
+            {regExp: '^\/dashboard$', title: 'Investor Dashboard - AdviceQube'},
+            {regExp: '^\/dashboard\/createportfolio$', title: 'Create Portfolio - AdviceQube'},
+            {regExp: '^\/dashboard$', title: 'Advisor Dashboard - AdviceQube'},
             {regExp: '^\/stockresearch$', title: 'Stock Research - AdviceQube'},
             {regExp: '^\/login$', title: 'Login - AdviceQube'},
             {regExp: '^\/signup$', title: 'Register - AdviceQube'},
             {regExp: '^\/advice\/[A-Za-z0-9]+$', title: 'Advice Detail - AdviceQube'},
-            {regExp: '^\/advisordashboard\/updateadvice\/[A-Za-z0-9]+$', title: 'Update Advice - AdviceQube'},
-            {regExp: '^\/advisordashboard\/advisorprofile\/[A-Za-z0-9]+$', title: 'Advisor Profile - AdviceQube'},
-            {regExp: '^\/investordashboard\/portfolio\/[A-Za-z0-9]+$', title: 'Portfolio Detail - AdviceQube'},
-            {regExp: '^\/investordashboard\/portfolio\/transactions\/[A-Za-z0-9]+$', title: 'Update Portfolio - AdviceQube'},
+            {regExp: '^\/dashboard\/updateadvice\/[A-Za-z0-9]+$', title: 'Update Advice - AdviceQube'},
+            {regExp: '^\/dashboard\/advisorprofile\/[A-Za-z0-9]+$', title: 'Advisor Profile - AdviceQube'},
+            {regExp: '^\/dashboard\/portfolio\/[A-Za-z0-9]+$', title: 'Portfolio Detail - AdviceQube'},
+            {regExp: '^\/dashboard\/portfolio\/transactions\/[A-Za-z0-9]+$', title: 'Update Portfolio - AdviceQube'},
         ];
         regexArray.map((item, index) => {
             const expression = new RegExp(item.regExp);
@@ -241,10 +242,7 @@ class App extends React.Component {
                                     selectedKeys={[this.state.parentPath]}>
                                     {
                                         Utils.isLoggedIn() &&
-                                            <SubMenu title="Dashboard">
-                                                <Menu.Item key="investordashboard">Investor Dashboard</Menu.Item>
-                                                <Menu.Item key="advisordashboard">Advisor Dashboard</Menu.Item>
-                                            </SubMenu>
+                                        <Menu.Item key="dashboard">Dashboard</Menu.Item>
                                     }
                                     {
                                         !Utils.isLoggedIn() &&
@@ -320,15 +318,16 @@ class App extends React.Component {
                             <Route path="/stockresearch" exact component={StockResearch} /> {/* Page */}
                             <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
                             <Route exact={true} path='/advice/:id' component={AdviceDetail} /> {/* Page */}
-                            <Route exact={true} path='/advisordashboard/createadvice' component={CreateAdvice} /> {/* Page */}
-                            <Route exact={true} path='/investordashboard/createportfolio' component={CreatePortfolio} /> {/* Page */}
-                            <Route exact={true} path='/advisordashboard/updateadvice/:id' component={UpdateAdvice} /> {/* Page */}
-                            <Route exact={true} path='/investordashboard/portfolio/:id' component={PortfolioDetail} /> {/* Page */}
-                            <Route exact={true} path='/investordashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> {/* Page */}
-                            <Route exact={true} path='/investordashboard' component={InvestorDashboard} /> {/* Page */}
-                            <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} /> {/* Page */}
-                            <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} /> {/* Page */}
-                            <Route exact={true} path='/dashboard' component={Dashboard} /> {/* Page */}
+                            <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> {/* Page */}
+                            <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> {/* Page */}
+                            <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> {/* Page */}
+                            <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> {/* Page */}
+                            <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> {/* Page */}
+                            <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> {/* Page */}
+                            <Route 
+                                    path='/dashboard' 
+                                    component={Dashboard}
+                            /> {/* Page */}
                             <Route path='/policies/privacy' component={Policy} /> {/* Page */}
                             <Route path='/policies/tnc' component={TnC} /> {/* Page */}
                             <Route path='/forgotPassword' component={ForgotPassword} /> {/* Page */}

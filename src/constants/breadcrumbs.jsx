@@ -1,10 +1,10 @@
 export const investorDashboard = [];
 export const CreateAdviceCrumb = [
-    {name: 'Advisor Dashboard', url: '/advisordashboard'}
+    {name: 'Dashboard', url: '/dashboard/advisor/myAdvices'}
 ];
 
 export const CreatePortfolioCrumb = [
-    {name: 'Investor Dashboard', url: '/investordashboard'}
+    {name: 'Dashboard', url: '/dashboard/investor/createdPortfolios'}
 ];
 
 export const AdviceDetailCrumb = [
@@ -17,7 +17,7 @@ export const UpdateAdviceCrumb = [
 ];
 
 export const PortfolioDetailCrumb = [
-    {name: 'Investor Dashboard', url: '/investordashboard'},
+    {name: 'Dashboard', url: '/dashboard/investor/createdPortfolios'},
 ];
 
 export const UpdatePortfolioCrumb = [

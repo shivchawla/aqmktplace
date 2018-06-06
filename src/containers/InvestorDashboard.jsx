@@ -5,7 +5,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Link} from 'react-router-dom';
-import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
+import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin, message} from 'antd';
 import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate, Footer, AqStockPortfolioTable, StockResearchModal} from '../components';
 import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
@@ -69,7 +69,18 @@ class InvestorDashboard extends React.Component {
             topLoader: false,
             rawDefaultPortfolioPositions: [],
             stockResearchModalTicker: 'TCS',
-            stockResearchModalVisible: false
+            stockResearchModalVisible: false,
+            portfolioPerformanceLoading: false,
+            portfolioDetailLoading: false,
+            selectedCompositionRadio: 'stocks',
+            performanceSelectedPortfolio: { // Used to get the value of Select when performance summary is selected
+                name: '',
+                id: ''
+            },
+            portfolioSelectedPortfolio: { // Used to get the value of Select when portfolio summary is selected
+                name: '',
+                id: ''
+            }
         };
         this.adviceColumns = [
             {
@@ -80,7 +91,7 @@ class InvestorDashboard extends React.Component {
                 width: 320,
                 render: (text, record) => {
                     return  <h3 
-                                onClick={() => this.props.history.push(`advice/${record.id}`)} 
+                                onClick={() => this.props.history.push(`/advice/${record.id}`)} 
                                 style={{...nameEllipsisStyle, width: '280px'}}
                             >
                                 {text}
@@ -129,6 +140,92 @@ class InvestorDashboard extends React.Component {
 
     renderColumnHeader = name => <h3 style={{fontSize: '12px', color: '#353535', fontWeight: '700'}}>{name}</h3>
 
+    getPortfolioPerformance = portfolioId => new Promise((resolve, reject) => {
+        const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${portfolioId}`;
+        const portfolioUrl = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${portfolioId}`;
+        const tickers = [...this.state.tickers];
+        this.setState({portfolioPerformanceLoading: true});
+        Promise.all([
+            fetchAjax(performanceUrl, this.props.history, this.props.match.url),
+            fetchAjax(portfolioUrl, this.props.history, this.props.match.url),
+        ])
+        .then(([performanceResponse, portfolioResponse]) => {
+            const currentPortfolioValues = _.get(performanceResponse.data, 'current.portfolioValues', []);
+            const simulatedPortfolioValues = _.get(performanceResponse.data, 'simulated.portfolioValues', []);
+
+            const currentMetrics = _.get(performanceResponse.data, 'current.metrics.portfolioPerformance.true', {});
+            const simulatedMetrics = _.get(performanceResponse.data, 'simulated.metrics.portfolioPerformance.true', {});
+
+            const currentSummary = _.get(performanceResponse.data, 'summary.current', {});
+            const simulatedSummary = _.get(performanceResponse.data, 'summary.simulated', {});
+
+            const currentPerformance = currentPortfolioValues.map(item => 
+                    [moment(item.date, dateFormat).valueOf(), item.netValue]);
+            const simulatedPerformance = simulatedPortfolioValues.map(item => 
+                    [moment(item.date, dateFormat).valueOf(), item.netValue]);
+            
+            const portfolioSimulatedTicker = tickers.filter(ticker => ticker.name === 'Portfolio - Simulated')[0];
+            const portfolioCurrentTicker = tickers.filter(ticker => ticker.name === 'Portfolio - Current')[0];
+            if (portfolioSimulatedTicker && portfolioCurrentTicker) {
+                portfolioSimulatedTicker.data = simulatedPerformance;
+                portfolioCurrentTicker.data = currentPerformance;
+                this.setState({
+                    tickers,
+                    metrics: {
+                        beta: _.get(currentPerformance, 'ratios.beta', 0),
+                        sharperatio: _.get(currentPerformance, 'ratios.sharperatio', 0),
+                        annualreturn: _.get(currentPerformance, 'returns.annualreturn', 0),
+                        averagedailyreturn: _.get(currentPerformance, 'returns.averagedailyreturn', 0),
+                        dailyreturn: _.get(currentPerformance, 'returns.dailyreturn', 0),
+                        totalreturn: _.get(currentMetrics, 'returns.totalreturn', 0),
+                        volatility: _.get(currentSummary, 'volatility', 0),
+                        netValue: _.get(portfolioResponse.data, 'pnlStats.netValue', 0),
+                        dailyNavChangePct: _.get(currentSummary, 'dailyNAVChangeEODPct', 0),
+                        totalPnl: _.get(portfolioResponse.data, 'pnlStats.totalPnlPct'),
+                        concentration: _.get(currentPerformance, 'portfoliostats.concentration', 0)
+                    }
+                });
+            } else {
+                message.error('Error occured while loading performance');
+                reject('Error')
+            }
+        })
+        .catch(error => reject(error))
+        .finally(() => {
+            this.setState({portfolioPerformanceLoading: false});
+        });
+    })
+
+    getPortfolioDetail = portfolioId => new Promise((resolve, reject) => {
+        this.setState({portfolioDetailLoading: true});
+        const portfolioUrl = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${portfolioId}`;
+        const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${portfolioId}`;
+        Promise.all([
+            fetchAjax(portfolioUrl, this.props.history, this.props.match.url),
+            fetchAjax(performanceUrl, this.props.history, this.props.match.url)
+        ])
+        .then(([portfolioResponse, performanceResponse]) => {
+            const positions = _.get(portfolioResponse.data, 'detail.positions', []);
+            const portfolioMetrics = _.get(performanceResponse.data, 'current.metrics.portfolioMetrics', {});
+            const positionModdedForColors = positions.map(item => item.security.ticker); 
+            const colorData = generateColorData(positionModdedForColors);
+            const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
+            console.log(composition);
+            this.setState({
+                composition,
+                defaultComposition: composition,
+                rawDefaultPortfolioPositions: positions,
+                positions
+            }, () => {
+                resolve(true);
+            });
+        })
+        .catch(error => reject(error))
+        .finally(() => {
+            this.setState({portfolioDetailLoading: false});
+        });
+    })
+
     getDefaultPortfolioData = () => {
         const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}`;
         const tickers = [...this.state.tickers];
@@ -158,33 +255,41 @@ class InvestorDashboard extends React.Component {
             const performance = _.get(defaultPerformance, 'current.metrics.portfolioPerformance.true', {});
             const benchmark = _.get(defaultPortfolio, 'benchmark.ticker', 'NIFTY_50');
             const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
-            
-            const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${response.data.defaultPortfolio._id}`;
-            const performanceData = _.get(defaultPerformance, 'simulated.portfolioValues', []).map(item => {
-                        return [moment(item.date, dateFormat).valueOf(), item.netValue]
+            const simulatedPerformanceData = _.get(defaultPerformance, 'simulated.portfolioValues', []).map(item => {
+                return [moment(item.date, dateFormat).valueOf(), item.netValue];
             });
+            const currentPerformanceData = _.get(defaultPerformance, 'current.portfolioValues', []).map(item => {
+                return [moment(item.date, dateFormat).valueOf(), item.netValue];
+            })
             const pieChartTitle = composition[0].data.length > 1 && `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
             const summary = Object.assign(
                 _.get(defaultPerformance, 'summary.current', {}),
                 _.get(defaultPortfolio, 'pnlStats', {})
             );
 
-            var netValue = summary.netValue || summary.netValueEOD;
-            var netValueEOD = summary.netValueEOD;
-            var dailyNavChangePct = (((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : 0) || summary.dailyNAVChangeEODPct)*100).toFixed(2);
-            var totalPnl = summary.totalPnl;
+            const netValue = summary.netValue || summary.netValueEOD;
+            const netValueEOD = summary.netValueEOD;
+            const dailyNavChangePct = (((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : 0) || summary.dailyNAVChangeEODPct)*100).toFixed(2);
+            const totalPnl = summary.totalPnl;
             getStockPerformance(benchmark, benchmarkRequestType)
             .then(benchmarkResponse => {
+                tickers.push({
+                    name: 'Portfolio - Simulated',
+                    data: simulatedPerformanceData,
+                    show: true,
+                    color: metricColor.neutral
+                });
+                tickers.push({
+                    name: 'Portfolio - Current',
+                    data: currentPerformanceData,
+                    show: true,
+                    color: metricColor.positive
+                });
                 tickers.push({
                     name: benchmark,
                     show: true,
                     color: benchmarkColor,
                     data: benchmarkResponse
-                });
-                tickers.push({
-                    name: 'Portfolio',
-                    data: performanceData,
-                    show: true
                 });
                 this.setState({tickers, rawDefaultPortfolioPositions: positions});
             })
@@ -198,6 +303,14 @@ class InvestorDashboard extends React.Component {
             this.setState({
                 defaultPortfolioName: _.get(defaultPortfolio, 'name', ''),
                 defaultPortfolioId: _.get(defaultPortfolio, '_id', ''),
+                performanceSelectedPortfolio: {
+                    name: _.get(defaultPortfolio, 'name', ''),
+                    id: _.get(defaultPortfolio, '_id', '')
+                },
+                portfolioSelectedPortfolio: {
+                    name: _.get(defaultPortfolio, 'name', ''),
+                    id: _.get(defaultPortfolio, '_id', '')
+                },
                 positions,
                 showEmptyScreen: {...this.state.showEmptyScreen, status: positions.length > 0 ? false : true},
                 composition,
@@ -218,7 +331,6 @@ class InvestorDashboard extends React.Component {
                 },
                 dollarPerformance,
                 percentagePerformance,
-                // tickers,
             });
             return this.getInvestorPortfolios();
         })
@@ -239,7 +351,6 @@ class InvestorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            // console.log(error);
             reject(error);
         })
         .finally(() => {
@@ -382,7 +493,7 @@ class InvestorDashboard extends React.Component {
                 <Row 
                     key={index} 
                     style={{marginBottom: '10px', padding: '0 20px', cursor: 'pointer', marginTop: '10px'}} 
-                    onClick={(e) => this.props.history.push(`/investordashboard/portfolio/${portfolio.id}`)}>
+                    onClick={(e) => this.props.history.push(`/dashboard/portfolio/${portfolio.id}`)}>
                     <Col span={7}>
                         <ListMetricItem label="Name" value={portfolio.name} />
                     </Col>
@@ -564,6 +675,7 @@ class InvestorDashboard extends React.Component {
     handleOverviewSelectChange = e => {
         const {positions, defaultComposition} = this.state;
         const choice = e.target.value;
+        this.setState({selectedCompositionRadio: choice});
         let series = [];
         try {
             switch(choice) {
@@ -707,7 +819,11 @@ class InvestorDashboard extends React.Component {
                             series = {this.state.composition} 
                     />
                     <Row style={{textAlign: 'center', marginTop: '10px'}}>
-                        <RadioGroup onChange={this.handleOverviewSelectChange} defaultValue="stocks" size="small">
+                        <RadioGroup 
+                                onChange={this.handleOverviewSelectChange} 
+                                value={this.state.selectedCompositionRadio} 
+                                size="small"
+                        >
                             <RadioButton value="stocks">Stocks</RadioButton>
                             <RadioButton value="sectors">Sectors</RadioButton>
                             <RadioButton value="industries">Industries</RadioButton>
@@ -730,15 +846,47 @@ class InvestorDashboard extends React.Component {
         />;
     }
 
-    renderPortfolioMenu = () => {
+    handlePortfolioPerformanceMenuChange = portfolioId => {
+        this.setState({performanceSelectedPortfolio: {
+            name: (this.state.investorPortfolios.filter(portfolio => portfolio.id === portfolioId)[0] || {name: 'N/A'}).name,
+            id: portfolioId
+        }}, () => {
+            this.getPortfolioPerformance(portfolioId);
+        });
+    }
+
+    handlePortfolioDetailChange = portfolioId => {
+        this.setState({
+            selectedCompositionRadio: 'stocks', 
+            portfolioSelectedPortfolio: {
+                name: (this.state.investorPortfolios.filter(portfolio => portfolio.id === portfolioId)[0] || {name: 'N/A'}).name,
+                id: portfolioId
+            }
+        }, () => {
+            this.getPortfolioDetail(portfolioId);
+        });
+    }
+
+    renderPortfolioMenu = (onChange, selectedPortfolioId) => {
         return (
             <Select 
-                    value={this.state.defaultPortfolioName} 
-                    style={{width: 150, marginTop: '5px'}} 
-                    size="small"
-                    
+                    value={selectedPortfolioId}
+                    style={{width: 250, marginTop: '5px', position: 'absolute', top: '-35px'}} 
+                    onChange={onChange}
+                    autoFocus={true}
             >
-                <Option value={this.state.defaultPortfolioName}>{this.state.defaultPortfolioName}</Option>
+                {
+                    this.state.investorPortfolios.map((portfolio, index) => {
+                        return (
+                            <Option 
+                                    key={index}
+                                    value={portfolio.id}
+                            >
+                                {portfolio.name}
+                            </Option>
+                        );
+                    })
+                }
             </Select>
         );
     }
@@ -757,7 +905,6 @@ class InvestorDashboard extends React.Component {
         this.mounted = false;
         this.unSubscribeToAllPortfolios();
         this.unSubscribeToAllAdvices();
-        // Utils.closeWebSocket();
     }
 
     
@@ -936,14 +1083,22 @@ class InvestorDashboard extends React.Component {
                     <Col style={{paddingBottom: '20px'}}>
                         <Row>
                             {
-                                this.props.section === 'performanceSummary' &&
+                                (this.props.match.params.section === undefined || this.props.match.params.section === 'performanceSummary') &&
                                 <Col xl={24} lg={24}>
+                                    <Row type="flex" justify="end">
+                                        {
+                                            this.renderPortfolioMenu(
+                                                this.handlePortfolioPerformanceMenuChange,
+                                                this.state.performanceSelectedPortfolio.id
+                                            )
+                                        }
+                                    </Row>
                                     <DashboardCard 
-                                            title="PERFORMANCE SUMMARY" 
+                                            title={`Performance Summary - (${this.state.performanceSelectedPortfolio.name})`} 
                                             loading={this.state.defaultPortfolioLoading}
-                                            cardStyle={{height:'625px'}} 
+                                            cardStyle={{height:'625px', marginTop: '20px'}} 
                                             headerStyle={headerStyle}
-                                            menu={this.renderPortfolioMenu()}
+                                            loading={this.state.portfolioPerformanceLoading}
                                     >
 
                                         <Row style={{padding: '10px'}}>
@@ -959,14 +1114,22 @@ class InvestorDashboard extends React.Component {
                                 </Col>
                             }
                             {
-                                this.props.section === 'portfolioSummary' &&
+                                this.props.match.params.section === 'portfolioSummary' &&
                                 <Col xl={24} lg={24}>
+                                    <Row type="flex" justify="end">
+                                        {
+                                            this.renderPortfolioMenu(
+                                                this.handlePortfolioDetailChange,
+                                                this.state.portfolioSelectedPortfolio.id
+                                            )
+                                        }
+                                    </Row>
                                     <DashboardCard 
-                                            title="PORTFOLIO SUMMARY" 
+                                            title={`Portfolio Summary - (${this.state.portfolioSelectedPortfolio.name})`} 
                                             loading={this.state.defaultPortfolioLoading}
-                                            cardStyle={{height:'625px'}} 
+                                            cardStyle={{height:'625px', marginTop: '20px'}} 
                                             headerStyle={headerStyle}
-                                            menu={this.renderPortfolioMenu()}
+                                            loading={this.state.portfolioDetailLoading}
                                     >
                                             <Row type="flex" align="middle" style={{paddingLeft: '20px'}}>
                                                 <Col 
@@ -982,6 +1145,7 @@ class InvestorDashboard extends React.Component {
                                                             portfolio={{
                                                                 positions: this.state.rawDefaultPortfolioPositions
                                                             }}
+                                                            scroll={{y: 400}}
                                                             columns={['name', 'shares', 'price', 'avgPrice', 'sector']}
                                                     />
                                                 </Col>
@@ -991,7 +1155,7 @@ class InvestorDashboard extends React.Component {
                                 </Col>
                             }
                             {
-                                this.props.section === 'createdPortfolios' &&
+                                this.props.match.params.section === 'createdPortfolios' &&
                                 <Col xl={24} lg={24}>
                                     <DashboardCard 
                                             title="MY PORTFOLIOS" 
@@ -1005,7 +1169,7 @@ class InvestorDashboard extends React.Component {
                                 </Col>
                             }
                             {
-                                this.props.section === 'subscribedAdvices' &&
+                                this.props.match.params.section === 'subscribedAdvices' &&
                                 <Col xl={24} lg={24}>
                                     <DashboardCard 
                                             title="MY ADVICES" 

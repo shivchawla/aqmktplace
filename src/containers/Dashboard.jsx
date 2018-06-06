@@ -1,4 +1,6 @@
 import * as React from 'react';
+import _ from 'lodash';
+import {Route} from 'react-router-dom';
 import {Layout, Menu, Icon, Row, Col} from 'antd';
 import InvestorDashboard from './InvestorDashboard';
 import AdvisorDashboard from './AdvisorDashboard';
@@ -13,8 +15,8 @@ export default class Dashboard extends React.Component {
         super(props);
         this.state = {
             view: {
-                page: 'advisor',
-                section: 'metrics'
+                page: 'investor',
+                section: 'performanceSummary'
             }
         }
     }
@@ -22,16 +24,21 @@ export default class Dashboard extends React.Component {
     handleMenuClick = e => {
         const page = e.keyPath[1];
         const section = e.keyPath[0];
-        this.setState({view: {
-            page,
-            section
-        }});
+        this.props.history.push(`${this.props.match.url}/${page}/${section}`)
+    }
+
+    getSelectedSection = () => {
+        const crumbs = _.split(this.props.location.pathname, '/');
+        if (crumbs[crumbs.length - 1] === 'dashboard' || crumbs[crumbs.length - 1].length < 1) {
+            return 'performanceSummary';
+        }
+        return crumbs[crumbs.length - 1];
     }
 
     getMenuItem = value => <span style={menuItemStyle}>{value}</span>
 
     render() {
-        const breadCrumbArray = getBreadCrumbArray([{name: 'Advisor Dashboard'}]);
+        const breadCrumbArray = getBreadCrumbArray([{name: 'Dashboard'}]);
         const investorTitle = <span style={subMenuLabelStyle}><Icon type="shopping-cart" />Investor Dashboard</span>;
         const advisorTitle = <span style={subMenuLabelStyle}><Icon type="rocket" />Advisor Dashboard</span>;
 
@@ -44,7 +51,7 @@ export default class Dashboard extends React.Component {
                     >
                         <Menu
                                 mode="inline"
-                                defaultSelectedKeys={['performanceSummary']}
+                                defaultSelectedKeys={[this.getSelectedSection()]}
                                 defaultOpenKeys={['investor', 'advisor']}
                                 style={{ height: '100%' }}
                                 onClick={this.handleMenuClick}
@@ -61,7 +68,7 @@ export default class Dashboard extends React.Component {
                             </SubMenu>
                             <SubMenu key="advisor" title={advisorTitle}>
                                 <Menu.Item key="myAdvices">{this.getMenuItem('My Advices')}</Menu.Item>
-                                <Menu.Item key="myAdvicePerformance">{this.getMenuItem('Advice Performance')}</Menu.Item>
+                                <Menu.Item key="advicePerformance">{this.getMenuItem('Advice Performance')}</Menu.Item>
                                 <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item>
                             </SubMenu>
                         </Menu>
@@ -74,11 +81,27 @@ export default class Dashboard extends React.Component {
                                 title="Dashboard" 
                         />
                         <Content>
-                            {
-                                this.state.view.page === 'investor'
-                                ?   <InvestorDashboard section={this.state.view.section} />
-                                :   <AdvisorDashboard section={this.state.view.section} />
-                            }
+                            <Route 
+                                    exact={true}
+                                    path={`${this.props.match.url}/advisor/:section`} 
+                                    render={
+                                        props => <AdvisorDashboard {...props} />
+                                    }
+                            />
+                            <Route 
+                                    path={`${this.props.match.url}`} 
+                                    exact={true}
+                                    render={
+                                        props => <InvestorDashboard {...props} />
+                                    }
+                            />
+                            <Route 
+                                    path={`${this.props.match.url}/investor/:section`} 
+                                    exact={true}
+                                    render={
+                                        props => <InvestorDashboard {...props} />
+                                    }
+                            />
                         </Content>
                     </Layout>
                 </Layout>

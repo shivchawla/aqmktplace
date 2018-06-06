@@ -9,7 +9,7 @@ import {MyChartNew} from './MyChartNew';
 import {AdvisorDashboardMeta} from '../metas';
 import {graphColors} from '../constants';
 import {AqHighChartMod, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader, HighChartNew, ForbiddenAccess, AqRate, Footer} from '../components';
-import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor, simulatedPerformanceColor, currentPerformanceColor} from '../constants';
+import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor, simulatedPerformanceColor, currentPerformanceColor, nameEllipsisStyle} from '../constants';
 import {dateFormat, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/advisorDashboard.css';
 
@@ -329,10 +329,10 @@ class AdvisorDashboard extends React.Component {
                 <Col span={12}> {/* Total Subscribers */}
                     <DashboardCard
                             title="TOTAL SUBSCRIBERS"
-                            cardStyle={{height:'525px'}}
+                            cardStyle={{height:'365px'}}
                     >
                         <Row>
-                            <Col span={24} style={{paddingTop: '20px', paddingLeft: '20px'}}>
+                            <Col span={16} style={{paddingTop: '20px'}}>
                                 <HighChartSpline 
                                         id="subsriber-rating-chart" 
                                         xAxisTitle="Subscribers"
@@ -340,8 +340,8 @@ class AdvisorDashboard extends React.Component {
                                         width={450}
                                 />
                             </Col>
-                            <Col span={10} style={{marginRight: '20px', left: '8%', marginTop: '40px'}}>
-                                <Row type="flex" align="middle">
+                            <Col span={8} style={{marginTop: '40px'}}>
+                                <Row style={{paddingRight: '20px', textAlign: 'right'}}>
                                     <StatsMetricItem label="Subscribers" value={this.state.subscriberStats.totalSubscribers}/>
                                 </Row>
                             </Col>
@@ -351,28 +351,36 @@ class AdvisorDashboard extends React.Component {
                 <Col span={12}> {/* Subscribers / Advice */}
                     <DashboardCard
                             title="SUBSCRIBERS / ADVICE"
-                            cardStyle={{height:'525px'}}
+                            cardStyle={{height:'365px'}}
+                            headerSpan={24}
                     >
-                        <Row tab="Subscribers / Advice" key="2" style={{display: 'flex', flexDirection: 'column'}}>
-                            <Col span={24}>
+                        <Row tab="Subscribers / Advice" key="2">
+                            <Col span={14}>
                                 <HighChartNew 
                                         series = {
                                             [{name: 'Subs PerAdvice Composition', data: this.state.subsPerAdviceSeries}]
                                         } 
                                         handleChartClick={this.handleChartClick}
-                                        innerSize={200}
-                                        height={340}
+                                        innerSize={180}
+                                        height={320}
                                 />
                             </Col>
-                            <Col span={24}>
-                                <Row type="flex" justify="center">
-                                    <Col span={24} style={{left: '8%'}}>
-                                        <h3 style={{color: '#444444', fontSize: '22px', fontWeight: '700'}}>{name}</h3>
+                            <Col span={10}>
+                                <Row type="flex" justify="end" style={{textAlign: 'right', paddingRight: '40px', paddingTop: '30px'}}>
+                                    <Col span={24}>
+                                        <h3 
+                                                style={{
+                                                    color: '#444444', 
+                                                    fontSize: '16px',
+                                                }}
+                                        >
+                                            {name}
+                                        </h3>
                                     </Col>
-                                    <Col span={10}>
+                                    <Col span={24}>
                                         <StatsMetricItem label="Subscribers" value={selectedAdviceSubscribers}/>
                                     </Col>
-                                    <Col span={10}>
+                                    <Col span={24} style={{marginTop: '30px'}}>
                                         <StatsMetricItem label="Total Subscribers" value={totalSubscribers}/>
                                     </Col>
                                 </Row>
@@ -394,16 +402,17 @@ class AdvisorDashboard extends React.Component {
         });
     }
 
-    renderAdvicesMenu = (handleSelect, top = 0, right = 0) => {
+    renderAdvicesMenu = (handleSelect, top = 0, right = 0, size = 'default') => {
         const advices = this.state.staticAdvices;
 
         if(advices.length > 0) {
             return (
                 <Select 
                         defaultValue={advices[0].name} 
-                        style={{width: 160}}
+                        style={{width: 250}}
                         onChange={handleSelect}
-                        size="small"
+                        autoFocus={true}
+                        size={size}
                 >
                     {
                         advices.map((advice, index) => {
@@ -429,7 +438,7 @@ class AdvisorDashboard extends React.Component {
         const series = this.state.ratingsConfig.series;
         const advice = advices.filter(item => item._id === value)[0];
         const currentRating = (_.get(advice, 'rating.current', 0) || 0).toFixed(2);
-        const simulatedRating = (_.get(advice, 'rating.simulated', 0) || 0).toFixed(2);    
+        const simulatedRating = (_.get(advice, 'rating.simulated', 0) || 0).toFixed(2);
 
         ratingSeries.push({name: 'Current Rating', data: this.processRatingByAdvice(advice), color: '#607D8B'});
         ratingSeries.push({name: 'Simulated Rating', data: this.processRatingByAdvice(advice, 'simulated'), color: '#FF9800'});
@@ -444,7 +453,11 @@ class AdvisorDashboard extends React.Component {
 
     handleSelectAdvicePerformance = value => {
         const advice = this.state.rawAdvices.filter(item => item._id === value)[0];
-        this.getAdvicePerformance(advice);
+        this.setState({
+            selectedAdvice: advice.name
+        }, () => {
+            this.getAdvicePerformance(advice);
+        });
     }
 
     getAdvicePerformance = advice => {
@@ -681,58 +694,51 @@ class AdvisorDashboard extends React.Component {
     renderMetrics = () => {
         return (
             <Row gutter={16}>
-                <Col span={12}>
+                <Col span={12}> {/* Advice Rating */}
                     <DashboardCard
                             title="ADVICE RATING"
-                            cardStyle={{height:'525px'}} 
+                            cardStyle={{height:'365px'}} 
+                            menu={this.renderAdvicesMenu(this.handleSelectAdvice, -20, 0, 'small')}
                     >
                         <Row>
-                            <Col 
-                                    span={24} 
-                                    style={{
-                                        paddingTop: '20px', 
-                                        paddingLeft: '20px'
-                                    }}
-                            >  
-                                <Row>
-                                    <Col span={24} style={{marginBottom: '10px'}} style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingRight: '20px'}}>
-                                        {this.renderAdvicesMenu(this.handleSelectAdvice, -20)}
-                                    </Col>
-                                    <HighChartSpline 
-                                            id="advice-rating-chart" 
-                                            series={this.state.adviceRating}
-                                            width={450}
-                                    />
-                                </Row>
+                            <Col span={16} style={{paddingTop: '20px'}}>  
+                                <HighChartSpline 
+                                        id="advice-rating-chart" 
+                                        series={this.state.adviceRating}
+                                        width={450}
+                                />
                             </Col>
-                            <Col span={24} style={{marginRight: '20px', marginTop: '20px'}}>
-                                <Row type="flex" justify="center">
-                                    <Col span={10}>
-                                        <StatsMetricItem style={{marginTop: '30px'}} label="Current Rating" value={this.state.ratingStats.currentRating}/>
-                                    </Col>
-                                    <Col span={10}>
-                                        <StatsMetricItem label="Simulated Rating" value={this.state.ratingStats.simulatedRating}/>
-                                    </Col>
+                            <Col span={8} style={{marginTop: '20px'}}>
+                                <Row style={{paddingRight: '20px', textAlign: 'right'}}>
+                                    <StatsMetricItem 
+                                            label="Current Rating" 
+                                            value={this.state.ratingStats.currentRating}
+                                    />
+                                    <StatsMetricItem 
+                                            style={{marginTop: '30px'}} 
+                                            label="Simulated Rating" 
+                                            value={this.state.ratingStats.simulatedRating}
+                                    />
                                 </Row>
                             </Col>
                         </Row>
                     </DashboardCard>
                 </Col>
-                <Col span={12}>
+                <Col span={12}> {/* Advisor Rating */}
                     <DashboardCard
                             title="ADVISOR RATING"
-                            cardStyle={{height:'525px'}}
+                            cardStyle={{height:'365px'}}
                     >
-                        <Row style={{paddingTop: '12%'}}>
-                            <Col span={24}>
+                        <Row>
+                            <Col span={16} style={{paddingTop: '20px'}}>
                                 <HighChartSpline 
                                         id="advisor-rating-chart" 
                                         series={this.state.advisorRating}
                                         width={450}
                                 />
                             </Col>
-                            <Col span={24} style={{marginRight: '20px', left: '8%'}}>
-                                <Row type="flex" align="middle">
+                            <Col span={8} style={{marginTop: '20px'}}>
+                                <Row style={{paddingRight: '20px', textAlign: 'right'}}>
                                     <StatsMetricItem label="Rating" value={this.state.advisorRatingStat}/>
                                 </Row>
                             </Col>
@@ -767,7 +773,7 @@ class AdvisorDashboard extends React.Component {
                         :   <Col span={24}>
                                 <Row>
                                     {
-                                        this.props.section === 'myAdvices' &&
+                                        (this.props.match.params.section === undefined || this.props.match.params.section === 'myAdvices') &&
                                         <Col span={24}>
                                             <DashboardCard 
                                                     headerStyle={headerStyle}
@@ -782,13 +788,15 @@ class AdvisorDashboard extends React.Component {
                                         </Col>
                                     }
                                     {
-                                        this.props.section === 'myAdvicePerformance' &&
+                                        this.props.match.params.section === 'advicePerformance' &&
                                         <Col span={24}>
+                                            <Row type="flex" justify="end">
+                                                {this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
+                                            </Row>
                                             <DashboardCard 
                                                     headerStyle={headerStyle}
                                                     cardStyle={{marginTop:'10px', height:'625px'}} 
-                                                    title="PERFORMANCE CHART" 
-                                                    menu={this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
+                                                    title={`Performance Chart - (${this.state.selectedAdvice})`}
                                                     loading={this.state.advicePerformanceLoading}
                                             >
                                                 <Col
@@ -800,7 +808,7 @@ class AdvisorDashboard extends React.Component {
                                         </Col>
                                     }
                                     {
-                                        (this.props.section === 'metrics' || this.props.section === 'ratings') &&
+                                        (this.props.match.params.section === 'metrics' || this.props.match.params.section === 'ratings') &&
                                         <Row gutter={16}>
                                             <Col span={24}>
                                                 <Spin spinning={this.state.dashboardDataLoading}>
@@ -843,7 +851,7 @@ class AdvisorDashboard extends React.Component {
 
 const StatsMetricItem = ({label, value, style}) => {
     return (
-        <div>
+        <div style={style}>
             <h3 style={metricValueStyle}>{value}</h3>
             <h3 style={metricLabelStyle}>{label}</h3>
         </div>
@@ -859,13 +867,13 @@ const cardHeaderStyle = {
 
 const metricValueStyle = {
     color: '#26BABC',
-    fontSize: '35px',
+    fontSize: '30px',
     fontWeight: 700
 };
 
 const metricLabelStyle = {
     color: '#6C6C6C',
-    fontSize: '19px'
+    fontSize: '14px'
 };
 
 const emptyPortfolioStyle = {
