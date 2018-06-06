@@ -127,7 +127,7 @@ class MyChartNewImpl extends React.Component {
                     useHTML: true
                 },
                 chart: {
-                    height: 350 
+                    height: this.props.height || 350 
                 },
                 credits: {
                     enabled: false

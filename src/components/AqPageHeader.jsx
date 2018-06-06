@@ -22,7 +22,7 @@ class AqPageHeaderImpl extends React.Component {
                     justify="space-between" 
                     align="middle" 
                     style={{
-                        backgroundColor: '#f9f9f9', 
+                        backgroundColor: this.props.backgroundColor || '#f9f9f9', 
                         paddingTop:'10px', 
                         margin: '0 5px', 
                         marginBottom:'10px', 

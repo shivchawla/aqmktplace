@@ -114,13 +114,26 @@ export class AqStockPortfolioTable extends React.Component {
 
     renderHeaderText = title => <span style={{fontSize: '12px', fontWeight: '700'}}>{title}</span>
 
+    getColumns = () => {
+        if (this.props.columns && this.props.columns.length > 0) {
+            const columns = this.columns.map(item => {
+                const columnIndex = this.props.columns.indexOf(item.key);
+                if (columnIndex !== -1) {
+                    return item;
+                }
+            });
+            return _.compact(columns);
+        }
+
+        return this.columns;
+    }
+
     render() {
-        // console.log(this.props.portfolio);
         return (
             <Table 
-                    size="small"
+                    size={this.props.size || 'small'}
                     pagination={false} 
-                    columns={this.columns}
+                    columns={this.getColumns()}
                     style={this.props.style}
                     // processedPosition true means that the positions provided as props are processed into
                     // a certain format required by this table as seen in the columns

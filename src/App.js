@@ -44,6 +44,7 @@ const ScreenAdvices = asyncComponent(() => import("./containers/ScreenAdvices"))
 const AdvisorProfile = asyncComponent(() => import("./containers/AdvisorProfile"));
 const Home = asyncComponent(() => import("./containers/Home"));
 const FAQ = asyncComponent(() => import("./containers/FAQ"));
+const Dashboard = asyncComponent(() => import("./containers/Dashboard"));
 const ResetPassword = asyncComponent(() => import("./containers/ResetPassword"));
 const {gaTrackingId, requestUrl} = require('./localConfig');
 
@@ -327,6 +328,7 @@ class App extends React.Component {
                             <Route exact={true} path='/investordashboard' component={InvestorDashboard} /> {/* Page */}
                             <Route exact={true} path='/advisordashboard/advisorprofile/:id' component={AdvisorProfile} /> {/* Page */}
                             <Route exact={true} path='/advisordashboard' component={AdvisorDashboard} /> {/* Page */}
+                            <Route exact={true} path='/dashboard' component={Dashboard} /> {/* Page */}
                             <Route path='/policies/privacy' component={Policy} /> {/* Page */}
                             <Route path='/policies/tnc' component={TnC} /> {/* Page */}
                             <Route path='/forgotPassword' component={ForgotPassword} /> {/* Page */}

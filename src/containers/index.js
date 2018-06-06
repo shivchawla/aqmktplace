@@ -22,3 +22,4 @@ export * from './ForgotPassword';
 export * from './AuthMessage';
 export * from './FAQ';
 export * from './ResetPassword';
+export * from './Dashboard';

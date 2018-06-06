@@ -14,7 +14,7 @@ export class HighChartNew extends React.Component {
                 colors: ['#f58231','#911eb4','#3cb44b','#ffe119','#46f0f0','#f032e6','#d2f53c','#fabebe','#008080','#e6beff','#aa6e28','#fffac8','#800000','#aaffc3','#808000','#ffd8b1','#000080', '#808080'],
                 chart: {
                     type: 'variablepie',
-                    height: 280,
+                    height: props.height || 280,
                     animation:false,
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
@@ -33,17 +33,10 @@ export class HighChartNew extends React.Component {
                 tooltip: {
                     enabled: false
                 },
-                /*legend:{
-                    align:'right',
-                    layout:'vertical',
-                    verticalAlign:'center',
-                    y:100,
-                    x:20
-                },*/
                 plotOptions: {
                     variablepie: {
                         //center: [160, 100],
-                        innerSize: 150,
+                        innerSize: props.innerSize || 150,
                         cursor: 'pointer',
                         zMin:0,
                         zMax:1,
@@ -189,7 +182,7 @@ export class HighChartNew extends React.Component {
 
     render() {
         return(
-            <Row style={{height: '320px'}} id="chart-container"></Row>
+            <Row style={{height: '320px', ...this.props.chartContainerStyle}} id="chart-container"></Row>
         );
     }
 }

@@ -143,3 +143,8 @@ export const pageContainer = {
     marginLeft: '20px',
     marginRight: '60px'
 }
+
+export const horizontalBox = {
+    display: 'flex',
+    flexDirection: 'row'
+};

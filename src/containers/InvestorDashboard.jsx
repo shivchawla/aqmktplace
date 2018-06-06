@@ -3,9 +3,10 @@ import axios from 'axios';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import moment from 'moment';
+import {withRouter} from 'react-router';
 import {Link} from 'react-router-dom';
 import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin} from 'antd';
-import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate, Footer} from '../components';
+import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate, Footer, AqStockPortfolioTable, StockResearchModal} from '../components';
 import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {InvestorDashboardMeta} from '../metas';
@@ -20,7 +21,7 @@ const TabPane = Tabs.TabPane;
 const Option = Select.Option;
 const dateFormat = 'YYYY-MM-DD';
 
-export default class InvestorDashboard extends React.Component {
+class InvestorDashboard extends React.Component {
     numberOfTimeSocketConnectionCalled = 1;
     mounted = false;
     constructor(props) {
@@ -65,7 +66,10 @@ export default class InvestorDashboard extends React.Component {
             defaultPortfolioName: 'Default Portfolio',
             defaultPortfolioId: '',
             notAuthorized: false,
-            topLoader: false
+            topLoader: false,
+            rawDefaultPortfolioPositions: [],
+            stockResearchModalTicker: 'TCS',
+            stockResearchModalVisible: false
         };
         this.adviceColumns = [
             {
@@ -73,11 +77,11 @@ export default class InvestorDashboard extends React.Component {
                 dataIndex: 'name',
                 key: 'name',
                 fixed: true,
-                width: 220,
+                width: 320,
                 render: (text, record) => {
                     return  <h3 
                                 onClick={() => this.props.history.push(`advice/${record.id}`)} 
-                                style={{...nameEllipsisStyle, width: '200px'}}
+                                style={{...nameEllipsisStyle, width: '280px'}}
                             >
                                 {text}
                             </h3>
@@ -88,7 +92,7 @@ export default class InvestorDashboard extends React.Component {
                 dataIndex: 'netValue',
                 key: 'netValue',
                 fixed: true,
-                width: 180,
+                width: 280,
                 render: (text, record) => {
                     let color = record.return < 0 ? '#ED4D4D' : '#3DC66B';
 
@@ -182,7 +186,7 @@ export default class InvestorDashboard extends React.Component {
                     data: performanceData,
                     show: true
                 });
-                this.setState({tickers});
+                this.setState({tickers, rawDefaultPortfolioPositions: positions});
             })
             const constituentPerformance = _.get(defaultPerformance, 'current.metrics.constituentPerformance', []);
             const dollarPerformance = constituentPerformance.map(item => {
@@ -455,8 +459,7 @@ export default class InvestorDashboard extends React.Component {
                 columns={this.adviceColumns} 
                 dataSource={this.state.subscribedAdvices} 
                 pagination={false}
-                size="small"
-                scroll={{ y: 350 }}
+                scroll={{ y: 500 }}
                 style={{margin: '10px 20px'}}/>
         );
     }
@@ -595,7 +598,7 @@ export default class InvestorDashboard extends React.Component {
         const colStyle = {marginBottom: '0px'};
         
         return(
-            <Row type="flex" justify="space-around" style={{margin:'0 auto'}}> 
+            <Row type="flex" justify="space-around" style={{margin:'0 auto', marginTop: '20px'}}> 
                 <Col span={5} style={colStyle}>
                     <MetricItem 
                         valueStyle={{...valueStyle}} 
@@ -655,10 +658,10 @@ export default class InvestorDashboard extends React.Component {
             }
     
             return (
-                <Row style={{height: '345px'}}>
+                <Row type="flex" align="middle" style={{marginLeft: '30px'}}>
                     <Col span={24}>
                         <Row> 
-                            <Col span={24} style={colStyle}>
+                            <Col span={4} style={colStyle}>
                                 <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
@@ -667,7 +670,7 @@ export default class InvestorDashboard extends React.Component {
                                     value={nStocks}
                                 />
                             </Col>
-                            <Col span={24} style={colStyle}>
+                            <Col span={4} style={colStyle}>
                                 <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
@@ -675,7 +678,7 @@ export default class InvestorDashboard extends React.Component {
                                     value={concentration}
                                 />
                             </Col>
-                            <Col span={24} style={colStyle}>
+                            <Col span={4} style={colStyle}>
                                 <MetricItem 
                                     valueStyle={valueStyle} 
                                     labelStyle={labelStyle} 
@@ -695,17 +698,23 @@ export default class InvestorDashboard extends React.Component {
 
     renderOverviewPieChart = () => {
         return (
-            <Col style={{marginTop:'-10px'}}>
-                <HighChartNew series = {this.state.composition} />
-                
-                <Row style={{textAlign: 'center', marginTop: '-50px'}}>
-                    <RadioGroup onChange={this.handleOverviewSelectChange} defaultValue="stocks" size="small">
-                        <RadioButton value="stocks">Stocks</RadioButton>
-                        <RadioButton value="sectors">Sectors</RadioButton>
-                        <RadioButton value="industries">Industries</RadioButton>
-                    </RadioGroup>
-                </Row>
-            </Col>
+            <Row type="flex" align="middle">
+                <Col span={24}>
+                    <HighChartNew 
+                            chartContainerStyle={640} 
+                            height={340} 
+                            innerSize={200} 
+                            series = {this.state.composition} 
+                    />
+                    <Row style={{textAlign: 'center', marginTop: '10px'}}>
+                        <RadioGroup onChange={this.handleOverviewSelectChange} defaultValue="stocks" size="small">
+                            <RadioButton value="stocks">Stocks</RadioButton>
+                            <RadioButton value="sectors">Sectors</RadioButton>
+                            <RadioButton value="industries">Industries</RadioButton>
+                        </RadioGroup>
+                    </Row>
+                </Col>
+            </Row>
         );
     }
 
@@ -741,8 +750,6 @@ export default class InvestorDashboard extends React.Component {
         } else {
             this.setUpSocketConnection();
             this.getDefaultPortfolioData();
-            // this.getInvestorPortfolios();
-            // this.getInvestorSubscribedAdvices();
         }
     }
 
@@ -908,7 +915,6 @@ export default class InvestorDashboard extends React.Component {
         } else {
             return (
                 <Row className='aq-page-container'>
-                    <AqPageHeader title="Investor Dashboard" breadCrumbs = {breadCrumbArray} button={button}/>
                     {this.state.showEmptyScreen.status ?
                     <Col span={24} style={emptyPortfolioStyle}>
                         {
@@ -928,68 +934,89 @@ export default class InvestorDashboard extends React.Component {
                     </Col>
                 :   
                     <Col style={{paddingBottom: '20px'}}>
-                        <Row gutter={12}>
-                            <Col xl={12} lg={24} style={{marginTop: '20px'}}>
-                                <DashboardCard 
-                                        title="SUMMARY" 
-                                        loading={this.state.defaultPortfolioLoading}
-                                        cardStyle={{height:'425px'}} 
-                                        headerStyle={headerStyle}
-                                        menu={this.renderPortfolioMenu()}
-                                >
-                                        <Row type="flex" justify="space-around" style={{marginTop: '10px', marginBottom: '10px'}}>
-                                            <Col span={20}>{this.renderSummaryMetrics()}</Col>
+                        <Row>
+                            {
+                                this.props.section === 'performanceSummary' &&
+                                <Col xl={24} lg={24}>
+                                    <DashboardCard 
+                                            title="PERFORMANCE SUMMARY" 
+                                            loading={this.state.defaultPortfolioLoading}
+                                            cardStyle={{height:'625px'}} 
+                                            headerStyle={headerStyle}
+                                            menu={this.renderPortfolioMenu()}
+                                    >
+
+                                        <Row style={{padding: '10px'}}>
+                                            <Col span={24}>
+                                                {this.renderSummaryMetrics()}
+                                            </Col>
+                                            <Col style={{marginTop: '40px', padding: '0 10px'}} span={24}>
+                                                <MyChartNew series={this.state.tickers}/>
+                                            </Col>
                                         </Row>
-
-                                        <Row type="flex">
-                                            <Col span={12}>{this.renderOverviewPieChart()}</Col>
-                                            <Col style={{left: '20%', marginTop: '5%'}} span={12}>{this.renderOverviewMetrics()}</Col>
-                                        </Row>
-                                </DashboardCard>
-                            </Col>
-                            
-                            <Col xl={12} lg={24} style={{marginTop: '20px'}}>
-                                <DashboardCard 
-                                        title="PERFORMANCE CHART" 
-                                        loading={this.state.defaultPortfolioLoading}
-                                        cardStyle={{height: '425px'}} 
-                                        headerStyle={headerStyle}
-                                        menu={this.renderPortfolioMenu()}
-                                >
-
-                                    <Row style={{padding: '10px'}}>
-                                        <MyChartNew series={this.state.tickers}/>
-                                    </Row>
-                                
-                                </DashboardCard>
-                            </Col>
-
-                            
-                        </Row>
-
-                        <Row gutter={12}>
-                            <Col xl={12} lg={24}>
-                                <DashboardCard 
-                                        title="MY PORTFOLIOS" 
-                                        loading={this.state.portfolioLoading}
-                                        headerStyle={headerStyle}
-                                        cardStyle={{marginTop:'12px', height: '450px'}} 
-                                        contentStyle={{...contentStyle, height: '90%'}}
-                                >
-                                    {this.renderPortfolios()}
-                                </DashboardCard>
-                            </Col>
-
-                            <Col xl={12} lg={24}>
-                                <DashboardCard 
-                                        title="MY ADVICES" 
-                                        cardStyle={{marginTop:'12px', height: '450px'}}
-                                        loading={this.state.subscribedAdvicesLoading}
-                                        headerStyle={headerStyle}
-                                >
-                                    {this.renderSubscribedAdvices()}
-                                </DashboardCard>
-                            </Col>
+                                    
+                                    </DashboardCard>
+                                </Col>
+                            }
+                            {
+                                this.props.section === 'portfolioSummary' &&
+                                <Col xl={24} lg={24}>
+                                    <DashboardCard 
+                                            title="PORTFOLIO SUMMARY" 
+                                            loading={this.state.defaultPortfolioLoading}
+                                            cardStyle={{height:'625px'}} 
+                                            headerStyle={headerStyle}
+                                            menu={this.renderPortfolioMenu()}
+                                    >
+                                            <Row type="flex" align="middle" style={{paddingLeft: '20px'}}>
+                                                <Col 
+                                                        span={24} 
+                                                        style={{marginTop: '20px'}}
+                                                >
+                                                    {this.renderOverviewMetrics()}
+                                                </Col>
+                                                <Col span={17}>
+                                                    <AqStockPortfolioTable 
+                                                            updateTicker={this.updateTicker}
+                                                            size="default"
+                                                            portfolio={{
+                                                                positions: this.state.rawDefaultPortfolioPositions
+                                                            }}
+                                                            columns={['name', 'shares', 'price', 'avgPrice', 'sector']}
+                                                    />
+                                                </Col>
+                                                <Col span={7}>{this.renderOverviewPieChart()}</Col>
+                                            </Row>
+                                    </DashboardCard>
+                                </Col>
+                            }
+                            {
+                                this.props.section === 'createdPortfolios' &&
+                                <Col xl={24} lg={24}>
+                                    <DashboardCard 
+                                            title="MY PORTFOLIOS" 
+                                            loading={this.state.portfolioLoading}
+                                            headerStyle={headerStyle}
+                                            cardStyle={{height: '625px'}} 
+                                            contentStyle={{...contentStyle, height: '90%'}}
+                                    >
+                                        {this.renderPortfolios()}
+                                    </DashboardCard>
+                                </Col>
+                            }
+                            {
+                                this.props.section === 'subscribedAdvices' &&
+                                <Col xl={24} lg={24}>
+                                    <DashboardCard 
+                                            title="MY ADVICES" 
+                                            cardStyle={{height: '625px'}}
+                                            loading={this.state.subscribedAdvicesLoading}
+                                            headerStyle={headerStyle}
+                                    >
+                                        {this.renderSubscribedAdvices()}
+                                    </DashboardCard>
+                                </Col>
+                            }
                         </Row>
                     </Col>
                 }
@@ -998,9 +1025,24 @@ export default class InvestorDashboard extends React.Component {
         }
     }
 
+    toggleStockResearchModal = () => {
+        this.setState({stockResearchModalVisible: !this.state.stockResearchModalVisible});
+    }
+
+    updateTicker = ticker => {
+        this.setState({stockResearchModalTicker: ticker}, () => {
+            this.toggleStockResearchModal()
+        });
+    }
+
     render() {
         return(
             <Col span={24}>
+                <StockResearchModal
+                        ticker={this.state.stockResearchModalTicker}
+                        visible={this.state.stockResearchModalVisible}
+                        toggleModal={this.toggleStockResearchModal}
+                />
                 <Loading 
                     show={this.state.defaultPortfolioLoading}
                     color={loadingColor}
@@ -1009,26 +1051,25 @@ export default class InvestorDashboard extends React.Component {
                 />
                 <InvestorDashboardMeta />
                {
-                   !this.state.defaultPortfolioLoading &&
-                   <React.Fragment>
-                        {this.renderPageContent()}
-                        <Footer />
-                    </React.Fragment>
+                    !this.state.defaultPortfolioLoading &&
+                    this.renderPageContent()
                }
             </Col>
         );
     }
 }
 
+export default withRouter(InvestorDashboard);
+
 const valueStyle = {
     color: '#585858',
-    fontSize: '20px',
+    fontSize: '24px',
     fontWeight: '400'
 };
 
 const labelStyle = {
     color: '#707070',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: '400'
 };
 

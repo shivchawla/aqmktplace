@@ -2,7 +2,7 @@
 
 html, body, #root, .ant-layout {
   width: 100%;
-  height: 100%;
+  height: 100% !important;
 }
 
 body {
@@ -41,6 +41,7 @@ h1, h2, h3, h4, h5 {
 
  .ant-layout-content {
    width: 100% !important;
+   height: 100% !important;
  }
 
 .animated-page-wrapper {

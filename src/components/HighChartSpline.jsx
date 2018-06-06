@@ -10,8 +10,8 @@ export class HighChartSpline extends React.Component {
             config: {
                 chart: {
                     // type: 'spline',
-                    height: 300,
-                    width: 400
+                    height: this.props.height || 300,
+                    width: this.props.width || 400
                 },
                 plotOptions: {
                     series: {
@@ -33,7 +33,8 @@ export class HighChartSpline extends React.Component {
                 yAxis: {
                     title: {
                         text: props.xAxisTitle === undefined ? 'Rating' : props.xAxisTitle
-                    }
+                    },
+                    gridLineColor: 'transparent'
                 },
                 legend: {
                     enabled: true
