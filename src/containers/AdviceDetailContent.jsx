@@ -1,17 +1,12 @@
 import * as React from 'react';
-import axios from 'axios';
-import SkyLight from 'react-skylight';
-import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
-import moment from 'moment';
-import {Spin, Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Switch, Icon, Tag, Tooltip} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../constants';
-import UpdateAdvice from './UpdateAdvice';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, AdviceMetricsItems, AqRate, IconItem, WarningIcon} from '../components';
+import {Spin, Row, Col, Tabs, Collapse, DatePicker, Radio, Input, Icon} from 'antd';
+import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../constants';
+import {AqStockPortfolioTable, MetricItem, AdviceMetricsItems, AqRate, IconItem, WarningIcon, AqTag} from '../components';
 import {MyChartNew} from './MyChartNew';
 import medalIcon from '../assets/award.svg';
-import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax} from '../utils';
+import {Utils} from '../utils';
 import '../css/adviceDetail.css';
 
 const TabPane = Tabs.TabPane;
@@ -39,7 +34,6 @@ class AdviceDetailContentImpl extends React.Component {
             {value: volatility, label: 'Volatility', percentage: true, fixed: 2, tooltipText: `Annualized standard deviation of daily returns ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
             {value: totalReturn, label: 'Total Return', percentage: true, color:true, fixed: 2, tooltipText: `Total return ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
             {value: -1*maxLoss, color:true, label: 'Maximum Loss', percentage: true, fixed: 2, tooltipText: `Maximum drop from the peak return ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
-            // {value: netValue, label: 'Net Value', money:true, isNetValue:true, dailyChangePct:dailyNAVChangePct},
         ]
 
         return (
@@ -143,36 +137,20 @@ class AdviceDetailContentImpl extends React.Component {
                             }
                             {
                                 (isOwner || isAdmin) && approvalRequested && isPublic &&
-                                <Tooltip
-                                        title={adviceApprovalPending}
-                                        placement="right"
-                                >
-                                    <Tag style={{marginLeft: '5px', border: `1px solid #FFAB00`, cursor: 'auto'}}>
-                                        <span style={{color: '#FFAB00'}}>Approval Pending</span>
-                                    </Tag>
-                                </Tooltip>
+                                <AqTag 
+                                        color='#FFAB00' 
+                                        tooltipTitle={adviceApprovalPending}
+                                        text='Approval Pending'
+                                        tagStyle={{marginLeft: '10px'}}
+                                />
                             }
                             {
                                 (isOwner || isAdmin) && !approvalRequested && isPublic &&
-                                <Tooltip
-                                        title={approvalStatus ? adviceApproved : adviceRejected}
-                                >
-                                    <Tag 
-                                            style={{
-                                                marginLeft: '5px', 
-                                                border: `1px solid ${approvalStatus ? primaryColor : metricColor.negative}`,
-                                                cursor: 'auto'
-                                            }}
-                                    >
-                                        <span style={{color: approvalStatus ? primaryColor : metricColor.negative}}>
-                                            {
-                                                approvalStatus 
-                                                ? "Approved"
-                                                : "Rejected"
-                                            }
-                                        </span>
-                                    </Tag>
-                                </Tooltip>
+                                <AqTag 
+                                        color={approvalStatus ? primaryColor : metricColor.negative}
+                                        tooltipTitle={approvalStatus ? adviceApproved : adviceRejected}
+                                        text={approvalStatus ? 'Approved' : 'Rejected'}
+                                />
                             }
                         </div>
                         {
@@ -216,75 +194,40 @@ class AdviceDetailContentImpl extends React.Component {
                             span={24} 
                             style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}
                     >
-                        <Tooltip title="Rebalancing Frequency: The advice is rebalanced/updated at this frequency" placement="rightBottom">
-                            <Tag 
-                                style={{
-                                    color:'black', 
-                                    border:'1px solid #f58231', 
-                                    paddingTop:'1px',
-                                    cursor: 'auto'}}>
-                                <Icon type="clock-circle-o" style={{fontWeight: '400', color:'#f58231'}}/>
-                                <span 
-                                        style={{marginLeft: '5px', color:'#f58231'}}
-                                >
-                                    {this.props.adviceDetail.rebalanceFrequency}
-                                </span>
-                            </Tag>
-                        </Tooltip>
+                        <AqTag 
+                                tooltipTitle='Rebalancing Frequency: The advice is rebalanced/updated at this frequency'
+                                color='#f58231'
+                                text={this.props.adviceDetail.rebalanceFrequency}
+                                icon='clock-circle-o'
+                                iconStyle={{fontWeight: '400', marginRight: '5px'}}
+                        />
                         {
-                            this.props.adviceDetail.isOwner &&
-                            <Tag 
-                                style={{
-                                    // width:'65px', 
-                                    paddingTop:'1px',
-                                    cursor: 'auto',
-                                    border: '1px solid #3cb44b'
-                                }}>
-                                <Icon type="user" style={{fontWeight: '400', color:'#3cb44b'}}/>
-                                <span 
-                                        style={{marginLeft: '5px', color:'#3cb44b'}}
-                                >
-                                    Owner
-                                </span>
-                            </Tag>
+                            !this.props.adviceDetail.isOwner &&
+                            <AqTag 
+                                    tooltipTitle='You are the owner of this advice'
+                                    icon='user'
+                                    iconStyle={{marginRight: '5px'}}
+                                    color='#3cb44b'
+                                    text='Owner'
+                            />
                         }
                         {
                             (this.props.adviceDetail.isSubscribed || this.props.adviceDetail.isFollowing) &&
-                            <Tag 
-                                style={{
-                                    paddingTop:'1px',
-                                    cursor: 'auto',
-                                    border: '1px solid rgb(24, 144, 255)'
-                                }}>
-                                <span 
-                                        style={{marginLeft: '5px', color:'rgb(24, 144, 255)'}}
-                                >
-                                    {
-                                        this.props.adviceDetail.isSubscribed 
-                                        ? "Subscribed"
-                                        : "Wishlisted"
-                                    }
-                                </span>
-                            </Tag>
+                            <AqTag 
+                                    tooltipTitle={this.props.adviceDetail.isSubscribed ? 'You are subscribed to this advice' : 'You have wislisted this advice'}
+                                    text={this.props.adviceDetail.isSubscribed ? 'Subscribed' : 'Wishlisted'}
+                                    color='rgb(24, 144, 255)'
+                            />
                         }
                         {
                             this.props.adviceDetail.isOwner &&
-                            <Tag style={{border: '1px solid #673AB7', cursor: 'auto'}}>
-                                <Icon 
-                                        type={this.props.adviceDetail.isPublic ? 'team' : 'lock'} 
-                                        style={{
-                                            fontWeight: '400', 
-                                            color:'#673AB7', 
-                                            fontSize: '15px',
-                                            // marginTop: '4px'
-                                        }}
-                                />
-                                <span style={{color: '#673AB7', marginLeft: '5px'}}>
-                                    {
-                                        this.props.adviceDetail.isPublic ? 'Public' : 'Private'
-                                    }
-                                </span>
-                            </Tag>
+                            <AqTag 
+                                    color='#673AB7'
+                                    tooltipTitle={this.props.adviceDetail.isPublic ? 'This advice is Public' : 'This advice is private'}
+                                    text={this.props.adviceDetail.isPublic ? 'Public' : 'Private'}
+                                    icon={this.props.adviceDetail.isPublic ? 'team' : 'lock'}
+                                    iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
+                            />
                         }
                         {this.renderTrendingApprovedIcon()}
                     </Col>
@@ -388,11 +331,11 @@ class AdviceDetailContentImpl extends React.Component {
                                                 {
                                                     _.get(sectors, 'detail', []).map((item, index) => {
                                                         return (
-                                                            <Tag style={{border: `1px solid ${primaryColor}`, cursor: 'auto'}}>
-                                                                <span style={{fontSize: '14px', color: primaryColor}}>
-                                                                    {item}
-                                                                </span>
-                                                            </Tag>
+                                                            <AqTag 
+                                                                    color={primaryColor}
+                                                                    text={item}
+                                                                    textStyle={{fontSize: '14px'}}
+                                                            />
                                                         );
                                                     })
                                                 }
@@ -517,20 +460,7 @@ class AdviceDetailContentImpl extends React.Component {
     }
 
     render() {
-        return (
-            <React.Fragment>
-                {/* <Loading
-                    show={this.props.loading}
-                    color={loadingColor}
-                    className="main-loader"
-                    showSpinner={false}
-                /> */}
-                {
-                    // !this.props.loading && 
-                    this.renderPageContent()
-                }
-            </React.Fragment>
-        );
+        return (this.renderPageContent());
     }
 }
 
@@ -539,11 +469,11 @@ const InvestmentObjItem = ({label, value, showTag = false, warning = false, reas
         <div>
             {
                 showTag 
-                ?   <Tag style={{border: `1px solid ${primaryColor}`, cursor: 'auto', padding: '0 5px'}}>
-                        <span style={{fontSize: '14px', color: primaryColor, fontWeight: '400'}}>
-                            {value}
-                        </span>
-                    </Tag>
+                ?   <AqTag 
+                            color={primaryColor}
+                            text={value}
+                            textStyle={{fontSize: '14px', fontWeight: 400}}
+                    />
                 :   <span style={{fontSize: '16px', fontWeight: '400'}}>
                         {value}
                     </span>

@@ -44,3 +44,4 @@ export * from './Footer';
 export * from './ApprovalItem';
 export * from './ApprovalItemView';
 export * from './WarningIcon';
+export * from './AqTag';

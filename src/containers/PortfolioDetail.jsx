@@ -1,50 +1,40 @@
 import * as React from 'react';
-import * as Radium from 'radium';
 import _ from 'lodash';
 import Loading from 'react-loading-bar';
 import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
-import {Row, Col, Divider, Tabs, Radio, Card, Table, Button, Collapse, Icon, Tooltip, Tag, message} from 'antd';
+import {Row, Col, Radio, Button, Collapse, Icon, Tooltip, message} from 'antd';
 import {ForbiddenAccess, StockResearchModal, WatchList, Footer} from '../components';
 import {PortfolioDetailMeta} from '../metas';
-import {CreatePortfolioDialog} from '../containers';
 import {MyChartNew} from './MyChartNew';
-import {loadingColor, pageTitleStyle, metricColor, cashStyle, benchmarkColor, buttonStyle, primaryColor, defaultPortfolioTooltip} from '../constants';
+import {loadingColor, metricColor, cashStyle, benchmarkColor, buttonStyle, primaryColor} from '../constants';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
 import '../css/portfolioDetail.css';
-import {convertToPercentage, generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio, fetchAjax, getStockPerformance} from '../utils';
+import {generateColorData, Utils, getBreadCrumbArray, addToAdvice, addToMyPortfolio, fetchAjax, getStockPerformance} from '../utils';
 import {
     AqPortfolioCompositionAdvice,
-    AqHighChartMod,
-    MetricItem,
     AqCard,
     HighChartNew,
     HighChartBar,
     AqStockPortfolioTable,
-    AdviceMetricsItems
+    AdviceMetricsItems,
+    AqTag
 } from '../components';
 import {
-    newLayoutStyle,
     shadowBoxStyle,
     metricsHeaderStyle,
     pageHeaderStyle,
-    metricsLabelStyle,
-    metricsValueStyle,
     dividerStyle
 } from '../constants';
 import { AqPageHeader } from '../components/AqPageHeader';
 
 const dateFormat = 'YYYY-MM-DD';
 const Panel = Collapse.Panel;
-const TabPane = Tabs.TabPane;
 const {requestUrl} = require('../localConfig.js');
 const annualReturnLabel = 'Annual Return';
 const volatilityLabel = 'Volatility';
-const totalReturnLabel = 'Total Return';
-const dailyChangeLabel = 'Daily PnL';
-const dailyNAVChangePctLabel = 'Dly NAV Chg (%)';
 const netValueLabel = 'Net Value';
 const unrealizedPnlLabel = 'Unrealized PnL';
 
@@ -335,28 +325,8 @@ class PortfolioDetailImpl extends React.Component {
                         .map((item, index) => {
                     return {name: item.ticker, data: [Number(item.pnl_pct.toFixed(2))], color: colorData[item.ticker]}
                 });
-                // const portfolioComposition = _.get(response.data, 'current.metrics.portfolioMetrics.composition')
-                //         .map((item, index) => {
-                //     return {
-                //         name: item.ticker, 
-                //         y: Math.round(item.weight * 10000) / 100, 
-                //         color: colorData[item.ticker],
-                //     };
-                // });
-
-                // series.push({name: 'Composition', data: portfolioComposition});
-
                 var annualReturn = _.get(portfolioMetrics, 'annualReturn', null);
                 var totalReturn = _.get(portfolioMetrics, 'totalReturn', null);
-
-                //const realtimeNAV = _.get(portfolioMetrics, 'netValue', 0.0);
-                //const eodNAV = _.get(portfolioMetrics, 'netValueEOD', 0.0);
-                //const rtNAVChangePct = eodNAV > 0.0 ? (realtimeNAV - eodNAV)/eodNAV : 0.0;
-
-                //Update return for recent NAV change
-                //annualReturn = Math.pow((1 + (annualReturn ? annualReturn : 0.0)), (251/252))*(1+rtNAVChangePct) - 1.0;
-                //totalReturn = (1 + (totalReturn ? totalReturn : 0.0))*(1+rtNAVChangePct) - 1.0;
-                
                 const volatility = _.get(portfolioMetrics, 'volatility', null);
                 const dailyNAVChangePct = 0.0;//Number(((rtNAVChangePct || _.get(portfolioMetrics, 'dailyNAVChangeEODPct', 0.0))*100).toFixed(2));
                 const totalPnl = _.get(portfolioMetrics, 'totalPnl', null);
@@ -366,7 +336,6 @@ class PortfolioDetailImpl extends React.Component {
                     {value: annualReturn, label: annualReturnLabel, fixed: 2, percentage: true, tooltipText: 'Compounded annual growth rate since inception'},
                     {value: volatility, label: volatilityLabel, fixed: 2, percentage: true, tooltipText: 'Annualized standard deviation of daily returns since inception'},
                     {value: totalReturn, label: 'Total Return', fixed: 2, percentage: true, color: true, tooltipText: 'Total return since inception'},
-                    //{value: dailyNAVChangePct, label: dailyNAVChangePctLabel, fixed: 2, percentage: true, color: true, direction:true},
                     {value: totalPnl, label: unrealizedPnlLabel, fixed: 2, money:true, color: true, direction:true, tooltipText: 'Unrealized Profit/Loss'},
                     {value: netValue, label: netValueLabel, isNetValue: true, money:true, dailyChangePct: dailyNAVChangePct, fixed: Math.round(netValue) == netValue ? 0 : 2, tooltipText: 'Net Value of the Portfolio'}
                 ];
@@ -375,7 +344,6 @@ class PortfolioDetailImpl extends React.Component {
                     tickers,
                     performanceDollarSeries: constituentDollarPerformance,
                     performancepercentageSeries: constituentPercentagePerformance,
-                    // pieSeries: series,
                 });
             })
             .catch(error => {
@@ -457,7 +425,6 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     subscribeToStock = ticker => {
-        // console.log('Subscription Started for stock ' + ticker);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -468,7 +435,6 @@ class PortfolioDetailImpl extends React.Component {
     }
 
     unSubscribeToStock = ticker => {
-        // console.log('Unsubscription Started');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -598,23 +564,12 @@ class PortfolioDetailImpl extends React.Component {
                                             <h2 style={{...pageHeaderStyle, marginBottom: 0}}>{this.state.name}</h2>
                                             {
                                                 this.state.isDefault &&
-                                                <Tooltip
-                                                        title="This is your Default Portfolio"
-                                                        placement="right"
-                                                >
-                                                    <Tag 
-                                                            style={{
-                                                                marginLeft: '10px', 
-                                                                marginTop: '2px',
-                                                                color: primaryColor,
-                                                                border: `1px solid ${primaryColor}`,
-                                                                fontSize: '10px',
-                                                                cursor: 'auto'
-                                                            }}
-                                                    >
-                                                        Default Portfolio
-                                                    </Tag>
-                                                </Tooltip>
+                                                <AqTag 
+                                                        tooltipTitle='This is your Default Portfolio'
+                                                        color={primaryColor}
+                                                        text='Default Portfolio'
+                                                        tagStyle={{marginLeft: '10px'}}
+                                                />
                                             }
                                         </Col>
                                         <Col span={6} style={{textAlign: 'right'}}>
@@ -803,10 +758,6 @@ class PortfolioDetailImpl extends React.Component {
 }
 
 export default withRouter(PortfolioDetailImpl);
-
-const metricItemStyle = {
-    padding: '10px'
-}
 
 const customPanelStyle = {
     background: 'transparent',

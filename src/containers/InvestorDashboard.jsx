@@ -1,16 +1,14 @@
 import * as React from 'react';
-import axios from 'axios';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Link} from 'react-router-dom';
-import {Row, Col, Tabs, Select, Table, Button, Divider, Rate, Tag, Radio, Spin, message} from 'antd';
-import {AqHighChartMod, MetricItem, PortfolioListItem, AdviceListItem, ListMetricItem, HighChartNew, HighChartBar, AqCard, DashboardCard, AqPageHeader, AqPortfolioSummary, ForbiddenAccess, AqRate, Footer, AqStockPortfolioTable, StockResearchModal} from '../components';
-import {pageTitleStyle, layoutStyle, pageHeaderStyle, metricsHeaderStyle, newLayoutStyle, listMetricItemLabelStyle, listMetricItemValueStyle, nameEllipsisStyle, tabBackgroundColor, benchmarkColor, metricColor, loadingColor} from '../constants';
+import {Row, Col, Tabs, Select, Table, Button, Tag, Radio, message} from 'antd';
+import {MetricItem, ListMetricItem, HighChartNew, HighChartBar, DashboardCard, ForbiddenAccess, AqRate, AqStockPortfolioTable, StockResearchModal, AqTag} from '../components';
+import {nameEllipsisStyle, benchmarkColor, metricColor, loadingColor} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {InvestorDashboardMeta} from '../metas';
-import {generateColorData, getMetricColor, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
+import {generateColorData, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import 'react-loading-bar/dist/index.css'
 
@@ -121,7 +119,7 @@ class InvestorDashboard extends React.Component {
                 title: this.renderColumnHeader('RATING'),
                 dataIndex: 'rating',
                 key: 'rating',
-                render: text => <AqRate style={{fontSize: '13px'}} value={Number(text) / 2}/>
+                render: text => <AqRate style={{fontSize: '16px'}} value={Number(text) / 2}/>
             },
             {
                 title: '',
@@ -131,8 +129,14 @@ class InvestorDashboard extends React.Component {
                     const tagContent = 
                             isSubscribed 
                             ? {text: 'Subscribed', color: '#108ee9'} 
-                            : record.isFollowing ? {text: 'WishListed', color: '#1DE9B6'} : {text: 'Not Wishlisted', color: 'transparent'};;
-                    return <Tag color={tagContent.color} style={{textAlign: 'center', fontSize: '10px', cursor: 'auto'}}>{tagContent.text}</Tag>
+                            : record.isFollowing ? {text: 'WishListed', color: '#00BFA5'} : {text: 'Not Wishlisted', color: 'transparent'};;
+                    return (
+                        <AqTag 
+                                color={tagContent.color} 
+                                text={tagContent.text}
+                                textStyle={{fontSize: '12px'}}
+                        />
+                    );
                 }
             }
         ]
@@ -1007,8 +1011,7 @@ class InvestorDashboard extends React.Component {
                 // console.log(error);
             }
         }
-    }
-    // updatePortfolRealTime = 
+    } 
 
     subscribeToPortfolio = portfolioId => {
         const msg = {
@@ -1055,8 +1058,6 @@ class InvestorDashboard extends React.Component {
     }
 
     renderPageContent = () => {
-        const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);
-        const button = !this.state.showEmptyScreen.status ? {route: '/investordashboard/createportfolio', title: 'Create Portfolio'} : null;
         if (this.state.notAuthorized) {
             return <ForbiddenAccess />
         } else {
@@ -1250,7 +1251,6 @@ const headerStyle = {
 };
 
 const contentStyle = {
-    // paddingTop: '20px', 
     overflow: 'hidden', 
     overflowY: 'scroll'
 };
