@@ -7,7 +7,7 @@ export class DashboardCard extends React.Component {
         const {cardStyle, children, title, menu = null, loading = false, xl=12, lg=24, headerSpan=10, menuSpan=12} = this.props;
 
         return (
-            <Col span={24} style={{...shadowBoxStyle, ...cardStyle, ...noOverflowStyle}}>
+            <Col span={24} style={{position: 'relative', ...shadowBoxStyle, ...cardStyle, ...noOverflowStyle}}>
                 <Row style={{...headerStyle, ...this.props.headerStyle}} type="flex" justify="space-between">
                     <Col span={headerSpan}>
                         <h3 style={{marginLeft: '20px'}}>{title}</h3>
@@ -16,8 +16,8 @@ export class DashboardCard extends React.Component {
                         {menu}
                     </Col>
                 </Row>
-                <Row style={{...contentStyle, ...this.props.contentStyle}}>
-                    <Spin spinning={loading} style={{position: 'absolute'}}>
+                <Row style={{position: 'relative', ...contentStyle, ...this.props.contentStyle}}>
+                    <Spin spinning={loading}>
                         {children}
                     </Spin>
                 </Row>
@@ -35,4 +35,6 @@ const contentStyle = {
     //height: '350px', 
     overflow: 'hidden', 
     overflowY: 'scroll',
+    height: '94%',
+    position: 'relative'
 };

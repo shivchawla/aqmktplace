@@ -3,12 +3,12 @@ import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Tabs, Select, Table, Button, Tag, Radio, message} from 'antd';
+import {Row, Col, Tabs, Select, Table, Button, Radio, message, Icon} from 'antd';
 import {MetricItem, ListMetricItem, HighChartNew, HighChartBar, DashboardCard, ForbiddenAccess, AqRate, AqStockPortfolioTable, StockResearchModal, AqTag} from '../components';
-import {nameEllipsisStyle, benchmarkColor, metricColor, loadingColor} from '../constants';
+import {nameEllipsisStyle, benchmarkColor, metricColor, loadingColor, primaryColor, horizontalBox} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {InvestorDashboardMeta} from '../metas';
-import {generateColorData, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
+import {generateColorData, Utils, fetchAjax, getStockPerformance} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import 'react-loading-bar/dist/index.css'
 
@@ -170,6 +170,7 @@ class InvestorDashboard extends React.Component {
             
             const portfolioSimulatedTicker = tickers.filter(ticker => ticker.name === 'Portfolio - Simulated')[0];
             const portfolioCurrentTicker = tickers.filter(ticker => ticker.name === 'Portfolio - Current')[0];
+            
             if (portfolioSimulatedTicker && portfolioCurrentTicker) {
                 portfolioSimulatedTicker.data = simulatedPerformance;
                 portfolioCurrentTicker.data = currentPerformance;
@@ -184,8 +185,8 @@ class InvestorDashboard extends React.Component {
                         totalreturn: _.get(currentMetrics, 'returns.totalreturn', 0),
                         volatility: _.get(currentSummary, 'volatility', 0),
                         netValue: _.get(portfolioResponse.data, 'pnlStats.netValue', 0),
-                        dailyNavChangePct: _.get(currentSummary, 'dailyNAVChangeEODPct', 0),
-                        totalPnl: _.get(portfolioResponse.data, 'pnlStats.totalPnlPct'),
+                        dailyNavChangePct: (_.get(currentSummary, 'dailyNAVChangeEODPct', 0) * 100).toFixed(2),
+                        totalPnl: _.get(portfolioResponse.data, 'pnlStats.totalPnl'),
                         concentration: _.get(currentPerformance, 'portfoliostats.concentration', 0)
                     }
                 });
@@ -214,7 +215,6 @@ class InvestorDashboard extends React.Component {
             const positionModdedForColors = positions.map(item => item.security.ticker); 
             const colorData = generateColorData(positionModdedForColors);
             const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
-            console.log(composition);
             this.setState({
                 composition,
                 defaultComposition: composition,
@@ -265,7 +265,6 @@ class InvestorDashboard extends React.Component {
             const currentPerformanceData = _.get(defaultPerformance, 'current.portfolioValues', []).map(item => {
                 return [moment(item.date, dateFormat).valueOf(), item.netValue];
             })
-            const pieChartTitle = composition[0].data.length > 1 && `${composition[0].data[0].name}<br>${composition[0].data[0].y}`;
             const summary = Object.assign(
                 _.get(defaultPerformance, 'summary.current', {}),
                 _.get(defaultPortfolio, 'pnlStats', {})
@@ -273,7 +272,7 @@ class InvestorDashboard extends React.Component {
 
             const netValue = summary.netValue || summary.netValueEOD;
             const netValueEOD = summary.netValueEOD;
-            const dailyNavChangePct = (((netValueEOD > 0.0 ? (netValue - netValueEOD)/netValueEOD : 0) || summary.dailyNAVChangeEODPct)*100).toFixed(2);
+            const dailyNavChangePct = (_.get(summary, 'dailyNAVChangeEODPct', 0) * 100).toFixed(2)
             const totalPnl = summary.totalPnl;
             getStockPerformance(benchmark, benchmarkRequestType)
             .then(benchmarkResponse => {
@@ -1110,8 +1109,13 @@ class InvestorDashboard extends React.Component {
                                                 <MyChartNew series={this.state.tickers}/>
                                             </Col>
                                         </Row>
-                                    
                                     </DashboardCard>
+                                    <ArrowButton 
+                                            text='Go To Portfolio'
+                                            onClick={() => 
+                                                this.props.history.push(`/dashboard/portfolio/${this.state.performanceSelectedPortfolio.id}`)
+                                            }
+                                    />
                                 </Col>
                             }
                             {
@@ -1146,13 +1150,19 @@ class InvestorDashboard extends React.Component {
                                                             portfolio={{
                                                                 positions: this.state.rawDefaultPortfolioPositions
                                                             }}
-                                                            scroll={{y: 400}}
+                                                            scroll={{y: 380}}
                                                             columns={['name', 'shares', 'price', 'avgPrice', 'sector']}
                                                     />
                                                 </Col>
                                                 <Col span={7}>{this.renderOverviewPieChart()}</Col>
                                             </Row>
                                     </DashboardCard>
+                                    <ArrowButton 
+                                            text='Go To Portfolio'
+                                            onClick={() => 
+                                                this.props.history.push(`/dashboard/portfolio/${this.state.portfolioSelectedPortfolio.id}`)
+                                            }
+                                    />
                                 </Col>
                             }
                             {
@@ -1225,6 +1235,31 @@ class InvestorDashboard extends React.Component {
 }
 
 export default withRouter(InvestorDashboard);
+
+export const ArrowButton = props => {
+    return (
+        <Col 
+                span={24} 
+                style={{
+                    paddingLeft: '20px', 
+                    paddingTop: '10px', 
+                    ...horizontalBox, 
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    position: 'absolute', 
+                    bottom: '20px'
+                }}
+                onClick={props.onClick}
+        >
+            <h3 
+                    style={{color: primaryColor, fontSize: '14px'}}
+            >
+                {props.text}
+            </h3>
+            <Icon type="right" style={{color: primaryColor, fontSize: '16px'}}/>
+        </Col>
+    );
+}
 
 const valueStyle = {
     color: '#585858',

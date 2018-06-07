@@ -126,8 +126,8 @@ class App extends React.Component {
             <div>
             <div className="loggedinuser-menu-popup-header">
                 <div>
-                <h3>{Utils.getLoggedInUserName()}</h3>
-                <p>{Utils.getLoggedInUserEmail()}</p>
+                    <h3>{Utils.getLoggedInUserName()}</h3>
+                    <p>{Utils.getLoggedInUserEmail()}</p>
                 </div>
             </div>
             <div className="loggedinuser-menu-popup-content">
@@ -172,7 +172,7 @@ class App extends React.Component {
                             className="row" 
                             onClick={
                                 () => 
-                                    {this.props.history.push(`/advisordashboard/createadvice`)}
+                                    {this.props.history.push(`/dashboard/createadvice`)}
                             }
                     >
                         <Icon type="file-text" className="icon" />
@@ -265,33 +265,10 @@ class App extends React.Component {
                                 {
                                     Utils.isLoggedIn() &&
                                     <React.Fragment>
-                                        {/* <Button 
-                                                type="primary"
-                                                onClick={() => this.props.history.push('/investordashboard/createportfolio')}
-                                                style={{marginLeft: '20px', marginTop: '18px', marginRight: '20px'}}
-                                        >
-                                            Create Portfolio
-                                        </Button> */}
-                                        <Popover
-                                            placement="bottomRight" 
-                                            content={this.getPopOverContent()} 
-                                            trigger="click"
-                                        >
-                                            <Button 
-                                                    type="primary" 
-                                                    shape="circle"
-                                                    style={{marginTop: '18px'}}
-                                                    // onClick={this.openPopOverMenu}
-                                            >
-                                                {Utils.getLoggedInUserInitials()} 
-                                            </Button>
-                                        </Popover>
-
                                         <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/>
-
                                         <Button 
                                             type="primary" 
-                                            onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                                            onClick={() => this.props.history.push('/dashboard/createadvice')}
                                             style={{marginTop: '18px'}}>
                                             Create Advice
                                         </Button>

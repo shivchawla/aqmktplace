@@ -5,9 +5,10 @@ import {Layout, Menu, Icon, Row, Col, Button} from 'antd';
 import InvestorDashboard from './InvestorDashboard';
 import AdvisorDashboard from './AdvisorDashboard';
 import {AqPageHeader} from '../components';
-import {getBreadCrumbArray} from '../utils';
+import {primaryColor, metricColor} from '../constants';
+import {getBreadCrumbArray, Utils} from '../utils';
 
-const {Header, Content, Sider} = Layout;
+const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
 
 export default class Dashboard extends React.Component {
@@ -24,9 +25,17 @@ export default class Dashboard extends React.Component {
     handleMenuClick = e => {
         const page = e.keyPath[1];
         const section = e.keyPath[0];
-        if (section === 'createPortfolio') {
+        if (page === undefined && section === 'createPortfolio') {
             this.props.history.push('/dashboard/createportfolio');
-        } else {
+        } else if (page === 'account') {
+            if (section === 'signOut') {
+                Utils.logoutUser();
+                this.props.history.push('/login');
+            } else if (section === 'myProfile') {
+                this.props.history.push(this.props.history.push(`/dashboard/advisorprofile/${Utils.getUserInfo().advisor}`));
+            }
+        }
+        else {
             this.props.history.push(`${this.props.match.url}/${page}/${section}`);
         }
     }
@@ -41,19 +50,64 @@ export default class Dashboard extends React.Component {
 
     getMenuItem = value => <span style={menuItemStyle}>{value}</span>
 
+    getUserDetailDiv = () => (
+        <div 
+                style={{
+                    backgroundColor: '#fff', 
+                    padding: '10px 10px',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    borderBottom: `1px solid #e0e0e0`,
+                    alignItems: 'center',
+                    height: '60px'
+                }}
+        >
+            <Button 
+                    style={{background: primaryColor, border: 'none', color: '#fff'}}
+                    shape="circle"
+                    onClick={
+                        () => this.props.history.push(this.props.history.push(`/dashboard/advisorprofile/${Utils.getUserInfo().advisor}`))
+                    }
+            >
+                {Utils.getLoggedInUserInitials()} 
+            </Button>
+            <div style={{display: 'flex', flexDirection: 'column', marginLeft: '5px'}}>
+                <h3 
+                        style={{
+                            color: primaryColor, 
+                            fontSize: '16px', 
+                            marginTop: '5px',
+                        }}
+                >
+                    {Utils.getLoggedInUserName()}
+                </h3>
+                <h5 
+                        style={{
+                            color: primaryColor, 
+                            fontSize: '12px', 
+                        }}
+                >
+                    {Utils.getLoggedInUserEmail()}
+                </h5>
+            </div>
+        </div>
+    )
+
     render() {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Dashboard'}]);
         const investorTitle = <span style={subMenuLabelStyle}><Icon type="shopping-cart" />Investor Dashboard</span>;
         const advisorTitle = <span style={subMenuLabelStyle}><Icon type="rocket" />Advisor Dashboard</span>;
         const createPortfolioTitle = <span style={subMenuLabelStyle}><Icon type="plus-square-o" />Create Portfolio</span>;
+        const accountTitle = <span style={subMenuLabelStyle}><Icon type="user" />Account</span>;
 
         return(
             <Layout>
                 <Layout>
                     <Sider 
                             width={250} 
-                            style={{ background: '#fff', height: '100%'}}
-                    >
+                            style={{ background: '#fff', height: 'calc(100% - 60px)'}}
+                    >   
+                        {this.getUserDetailDiv()}
                         <Menu
                                 mode="inline"
                                 defaultSelectedKeys={[this.getSelectedSection()]}
@@ -61,7 +115,6 @@ export default class Dashboard extends React.Component {
                                 style={{ height: '100%' }}
                                 onClick={this.handleMenuClick}
                         >
-                            <Menu.Item key="account">Account</Menu.Item>
                             <SubMenu 
                                     key="investor" 
                                     title={investorTitle}
@@ -77,6 +130,10 @@ export default class Dashboard extends React.Component {
                                 <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item>
                             </SubMenu>
                             <Menu.Item key="createPortfolio">{createPortfolioTitle}</Menu.Item>
+                            <SubMenu key="account" title={accountTitle}>
+                                <Menu.Item key="signOut">{this.getMenuItem('Sign Out')}</Menu.Item>
+                                <Menu.Item key="myProfile">{this.getMenuItem('My Profile')}</Menu.Item>
+                            </SubMenu>
                         </Menu>
                     </Sider>
                     <Layout style={{paddingBottom: '40px', paddingTop: '10px', paddingLeft: '10px'}}>

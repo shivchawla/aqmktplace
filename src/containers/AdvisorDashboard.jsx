@@ -1,24 +1,21 @@
 import * as React from 'react';
 import moment from 'moment';
-import axios from 'axios';
 import _ from 'lodash';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
-import {Row, Col, Radio, Table, Icon, Button, Tabs, Select, Modal, Rate, Spin} from 'antd';
+import {Row, Col, Button, Select, Spin} from 'antd';
 import {MyChartNew} from './MyChartNew';
 import {AdvisorDashboardMeta} from '../metas';
 import {graphColors} from '../constants';
-import {AqHighChartMod, AdviceListItem, ListMetricItem, HighChartSpline, DashboardCard, AqPageHeader, HighChartNew, ForbiddenAccess, AqRate, Footer} from '../components';
-import {pageTitleStyle, newLayoutStyle, noOverflowStyle, shadowBoxStyle, listMetricItemLabelStyle, listMetricItemValueStyle, tabBackgroundColor, loadingColor, benchmarkColor, simulatedPerformanceColor, currentPerformanceColor, nameEllipsisStyle} from '../constants';
-import {dateFormat, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
+import {ArrowButton} from './InvestorDashboard';
+import {ListMetricItem, HighChartSpline, DashboardCard, HighChartNew, ForbiddenAccess, AqRate} from '../components';
+import {listMetricItemLabelStyle, loadingColor, benchmarkColor, simulatedPerformanceColor, currentPerformanceColor} from '../constants';
+import {Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/advisorDashboard.css';
 
-const RadioGroup = Radio.Group;
-const RadioButton = Radio.Button;
 const Option = Select.Option;
-const TabPane = Tabs.TabPane;
-const ReactHighcharts = require('react-highcharts');
-const {requestUrl, aimsquantToken} = require('../localConfig');
+const {requestUrl} = require('../localConfig');
+const dashboardMediaqueries = {xl: 12, lg: 24, md: 24, sm: 24, xs: 24};
 class AdvisorDashboard extends React.Component {
     numberOfTimeSocketConnectionCalled = 1;
     mounted = false;
@@ -33,6 +30,7 @@ class AdvisorDashboard extends React.Component {
             staticAdvices: [], // the advice is not changed, it is populated only the first time when getDashboardData is called
             subsPerAdviceSeries: [],
             selectedAdvice: '',
+            selectedAdviceId: '',
             subscribeScreen: 'total',
             tickers: [],
             filterModalVisible: false,
@@ -323,13 +321,13 @@ class AdvisorDashboard extends React.Component {
     renderSubscriberStatsView = () => {
         const {subscribeScreen, subscriberStats} = this.state;
         const {totalSubscribers, selectedAdviceSubscribers, name} = subscriberStats;
-
+        
         return (
             <Row gutter={16}>
-                <Col span={12}> {/* Total Subscribers */}
+                <Col {...dashboardMediaqueries}> {/* Total Subscribers */}
                     <DashboardCard
                             title="TOTAL SUBSCRIBERS"
-                            cardStyle={{height:'365px'}}
+                            cardStyle={{height:'365px', marginTop: '20px'}}
                     >
                         <Row>
                             <Col span={16} style={{paddingTop: '20px'}}>
@@ -348,10 +346,10 @@ class AdvisorDashboard extends React.Component {
                         </Row>
                     </DashboardCard>
                 </Col>
-                <Col span={12}> {/* Subscribers / Advice */}
+                <Col {...dashboardMediaqueries}> {/* Subscribers / Advice */}
                     <DashboardCard
                             title="SUBSCRIBERS / ADVICE"
-                            cardStyle={{height:'365px'}}
+                            cardStyle={{height:'365px', marginTop: '20px'}}
                             headerSpan={24}
                     >
                         <Row tab="Subscribers / Advice" key="2">
@@ -454,7 +452,8 @@ class AdvisorDashboard extends React.Component {
     handleSelectAdvicePerformance = value => {
         const advice = this.state.rawAdvices.filter(item => item._id === value)[0];
         this.setState({
-            selectedAdvice: advice.name
+            selectedAdvice: advice.name,
+            selectedAdviceId: value
         }, () => {
             this.getAdvicePerformance(advice);
         });
@@ -463,13 +462,12 @@ class AdvisorDashboard extends React.Component {
     getAdvicePerformance = advice => {
         const newTickers = [];
         const url = `${requestUrl}/performance/advice/${advice._id}`;
-        this.setState({advicePerformanceLoading: true});
+        this.setState({advicePerformanceLoading: true, selectedAdviceId: advice._id});
         Promise.all([
             fetchAjax(url, this.props.history, this.props.match.url),
             getStockPerformance('NIFTY_50', 'detail_benchmark')
         ])
         .then(([adviceResponse, benchmarkResponse]) => {
-            // console.log(benchmarkResponse);
             const simulatedPerformance = _.get(adviceResponse.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             const currentPerformance = _.get(adviceResponse.data, 'current.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
@@ -694,10 +692,10 @@ class AdvisorDashboard extends React.Component {
     renderMetrics = () => {
         return (
             <Row gutter={16}>
-                <Col span={12}> {/* Advice Rating */}
+                <Col {...dashboardMediaqueries}> {/* Advice Rating */}
                     <DashboardCard
                             title="ADVICE RATING"
-                            cardStyle={{height:'365px'}} 
+                            cardStyle={{height:'365px', marginTop: '20px'}} 
                             menu={this.renderAdvicesMenu(this.handleSelectAdvice, -20, 0, 'small')}
                     >
                         <Row>
@@ -724,10 +722,10 @@ class AdvisorDashboard extends React.Component {
                         </Row>
                     </DashboardCard>
                 </Col>
-                <Col span={12}> {/* Advisor Rating */}
+                <Col {...dashboardMediaqueries}> {/* Advisor Rating */}
                     <DashboardCard
                             title="ADVISOR RATING"
-                            cardStyle={{height:'365px'}}
+                            cardStyle={{height:'365px', marginTop: '20px'}}
                     >
                         <Row>
                             <Col span={16} style={{paddingTop: '20px'}}>
@@ -805,6 +803,12 @@ class AdvisorDashboard extends React.Component {
                                                     <MyChartNew height={450} series={this.state.tickers} />
                                                 </Col>
                                             </DashboardCard>
+                                            <ArrowButton 
+                                                    text="Go To Advice"
+                                                    onClick={
+                                                        () => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)
+                                                    }
+                                            />
                                         </Col>
                                     }
                                     {
@@ -815,7 +819,7 @@ class AdvisorDashboard extends React.Component {
                                                     {this.renderSubscriberStatsView()}
                                                 </Spin>
                                             </Col>
-                                            <Col span={24} style={{marginTop: '16px'}}>
+                                            <Col span={24}>
                                                 <Spin spinning={this.state.dashboardDataLoading}>
                                                     {this.renderMetrics()}
                                                 </Spin>
