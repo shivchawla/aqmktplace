@@ -1,7 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import {Route} from 'react-router-dom';
-import {Layout, Menu, Icon, Row, Col} from 'antd';
+import {Layout, Menu, Icon, Row, Col, Button} from 'antd';
 import InvestorDashboard from './InvestorDashboard';
 import AdvisorDashboard from './AdvisorDashboard';
 import {AqPageHeader} from '../components';
@@ -24,7 +24,11 @@ export default class Dashboard extends React.Component {
     handleMenuClick = e => {
         const page = e.keyPath[1];
         const section = e.keyPath[0];
-        this.props.history.push(`${this.props.match.url}/${page}/${section}`)
+        if (section === 'createPortfolio') {
+            this.props.history.push('/dashboard/createportfolio');
+        } else {
+            this.props.history.push(`${this.props.match.url}/${page}/${section}`);
+        }
     }
 
     getSelectedSection = () => {
@@ -41,6 +45,7 @@ export default class Dashboard extends React.Component {
         const breadCrumbArray = getBreadCrumbArray([{name: 'Dashboard'}]);
         const investorTitle = <span style={subMenuLabelStyle}><Icon type="shopping-cart" />Investor Dashboard</span>;
         const advisorTitle = <span style={subMenuLabelStyle}><Icon type="rocket" />Advisor Dashboard</span>;
+        const createPortfolioTitle = <span style={subMenuLabelStyle}><Icon type="plus-square-o" />Create Portfolio</span>;
 
         return(
             <Layout>
@@ -71,6 +76,7 @@ export default class Dashboard extends React.Component {
                                 <Menu.Item key="advicePerformance">{this.getMenuItem('Advice Performance')}</Menu.Item>
                                 <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item>
                             </SubMenu>
+                            <Menu.Item key="createPortfolio">{createPortfolioTitle}</Menu.Item>
                         </Menu>
                     </Sider>
                     <Layout style={{paddingBottom: '40px', paddingTop: '10px', paddingLeft: '10px'}}>

@@ -310,13 +310,13 @@ class AddTransactionsImpl extends React.Component {
                     const successMessage = portfolioId ? 'Portfolio Updated Successfully' : 'Portfolio Created Successfully';
                     message.success(successMessage);
                     if (portfolioId) {
-                        this.props.history.push(`/investordashboard/portfolio/${portfolioId}`);
+                        this.props.history.push(`/dashboard/portfolio/${portfolioId}`);
                     } else {
                         const portfolioId = _.get(response.data, '_id', null);
                         if (portfolioId) {
-                            this.props.history.push(`/investordashboard/portfolio/${portfolioId}`);
+                            this.props.history.push(`/dashboard/portfolio/${portfolioId}`);
                         } else {
-                            this.props.history.push(`/investordashboard`);
+                            this.props.history.push(`/dashboard`);
                         }
                     }
                 })
@@ -1076,7 +1076,7 @@ class AddTransactionsImpl extends React.Component {
         const {portfolioId} = this.props;
         const breadCrumbs = this.props.portfolioId 
                 ? getBreadCrumbArray(UpdatePortfolioCrumb, [
-                    {name: this.state.portfolioName, url: `/investordashboard/portfolio/${this.state.portfolioId}`},
+                    {name: this.state.portfolioName, url: `/dashboard/portfolio/${this.state.portfolioId}`},
                     {name: 'Update Portfolio'}
                 ])
                 : getBreadCrumbArray(UpdatePortfolioCrumb, [

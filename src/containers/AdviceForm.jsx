@@ -225,23 +225,8 @@ export class AdviceFormImpl extends React.Component {
                     const adviceId = _.get(response.data, '_id', null);
                     const successMessage = isUpdate ? 'Advice Updated successfully' : 'Advice Created successfully';
                     message.success(successMessage);
-                    // if (method === 'POST' && publish) {
-                    //     return axios({
-                    //         url: `${requestUrl}/advice/${adviceId}/publish`,
-                    //         method: 'POST',
-                    //         headers: Utils.getAuthTokenHeader()
-                    //     })
-                    // } else {
-                    //     this.props.history.push(`/advice/${adviceId}`);
-                    //     return null;
-                    // }
                     this.props.history.push(`/advice/${adviceId}`);
                 })
-                // .then(response => {
-                //     const adviceId = _.get(response.data, 'adviceId', null);
-                //     this.props.history.push(`/advice/${adviceId}`);
-                //     message.success('Succesfully Created Advice');
-                // })
                 .catch(error => {
                     Utils.checkForInternet(error, this.props.history);
                     if (error.response) {
