@@ -184,7 +184,7 @@ class AdviceListItemImpl extends React.PureComponent {
                                     <span id ="advisorName" style={{color: primaryColor, marginRight: '5px'}}
                                         onClick={e => {
                                         e.stopPropagation();
-                                        this.props.history.push(`/advisordashboard/advisorprofile/${advisorId}`)}}>{` ${advisorName}`}
+                                        this.props.history.push(`/dashboard/advisorprofile/${advisorId}`)}}>{` ${advisorName}`}
                                     </span>
                                 </Col>
                             </Row>
