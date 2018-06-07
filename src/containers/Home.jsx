@@ -62,7 +62,7 @@ export class Home extends React.Component {
                     /> */}
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => this.props.history.push('/advisordashboard/createadvice')}>
+                        onClick={() => this.props.history.push('/dashboard/createadvice')}>
                         Create Investment Advice
                     </Button>
                 </Col>
@@ -248,7 +248,7 @@ export class Home extends React.Component {
                                 <Button 
                                         style={{marginLeft: '20px'}}
                                         className="action-buttons"
-                                        onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                                        onClick={() => this.props.history.push('/dashboard/createadvice')}
                                 >
                                     Create Investment Advice
                                 </Button>

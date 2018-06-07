@@ -196,6 +196,7 @@ class AdviceDetailContentImpl extends React.Component {
                     >
                         <AqTag 
                                 tooltipTitle='Rebalancing Frequency: The advice is rebalanced/updated at this frequency'
+                                tooltipPlacement='bottom'
                                 color='#f58231'
                                 text={this.props.adviceDetail.rebalanceFrequency}
                                 icon='clock-circle-o'
@@ -205,6 +206,7 @@ class AdviceDetailContentImpl extends React.Component {
                             !this.props.adviceDetail.isOwner &&
                             <AqTag 
                                     tooltipTitle='You are the owner of this advice'
+                                    tooltipPlacement='bottom'
                                     icon='user'
                                     iconStyle={{marginRight: '5px'}}
                                     color='#3cb44b'
