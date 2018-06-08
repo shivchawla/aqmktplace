@@ -14,6 +14,7 @@ const Panel = Collapse.Panel;
 const dateFormat ='YYYY-MM-DD';
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
+const columns = ['name', 'shares', 'price', 'avgPrice', 'sector', 'weight'];
 
 class AqPortfolioCompositionAdviceImpl extends React.Component {
 
@@ -148,6 +149,7 @@ class AqPortfolioCompositionAdviceImpl extends React.Component {
                             processedPositions={true}
                             updateTicker={this.props.toggleStockResearchModal}
                             style={{margin: '5px 15px'}}
+                            columns={columns}
                     />
                 </Col>
             </Row>

@@ -9,11 +9,9 @@ import medalIcon from '../assets/award.svg';
 import {Utils} from '../utils';
 import '../css/adviceDetail.css';
 
-const TabPane = Tabs.TabPane;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 const Panel = Collapse.Panel;
-const {TextArea} = Input;
 
 class AdviceDetailContentImpl extends React.Component {
     
@@ -123,6 +121,9 @@ class AdviceDetailContentImpl extends React.Component {
             isNetValue:true, 
             dailyChangePct:dailyNAVChangePct
         };
+        const ownerColumns = ['name', 'symbol', 'shares', 'price', 'avgPrice', 'unrealizedPnL', 'sector', 'weight'];
+        const notOwnerColumns = ['name', 'symbol', 'shares', 'price', 'sector', 'weight'];
+        const portfolioTableColumns = isOwner ? ownerColumns : notOwnerColumns;
         const approvalStatus = _.get(approval, 'status', false);
 
         return (
@@ -437,6 +438,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 }
                                 <Col span={24}>
                                     <AqStockPortfolioTable
+                                        columns={portfolioTableColumns}
                                         composition
                                         portfolio={{positions: this.props.positions || []}}
                                         updateTicker={this.props.updateTicker}

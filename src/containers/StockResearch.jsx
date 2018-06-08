@@ -3,10 +3,10 @@ import _ from 'lodash';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
-import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Card, Tabs, Radio, Modal, message} from 'antd';
+import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Tabs, Radio, Modal, message} from 'antd';
 import {SignupMeta} from '../metas';
-import {AqLink, DashboardCard, AqPageHeader, WatchList, CreateWatchList, Footer} from '../components';
-import {pageTitleStyle, newLayoutStyle, shadowBoxStyle, loadingColor, primaryColor} from '../constants';
+import {DashboardCard, AqPageHeader, WatchList, CreateWatchList, Footer, AqPerformanceMetrics} from '../components';
+import {shadowBoxStyle, loadingColor, primaryColor} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
@@ -655,8 +655,13 @@ class StockResearchImpl extends React.Component {
                                 </Row>
                             </Col>
                             <Col span={10}>
-                                <Row style={cardStyle}>
-                                    <Col span={24}>
+                                {/* <Row style={cardStyle}> */}
+                                    <AqPerformanceMetrics 
+                                            rollingPerformance={this.state.rollingPerformance} 
+                                            style={{height: '100%'}}
+                                            selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
+                                    />
+                                    {/* <Col span={24}>
                                         <h3 style={cardHeaderStyle}>Performance Metrics</h3>
                                     </Col>
                                     <Col span={24} style={{textAlign: 'right'}}>
@@ -664,8 +669,8 @@ class StockResearchImpl extends React.Component {
                                     </Col>
                                     <Col span={24}>
                                         {this.renderPerformanceMetrics()}
-                                    </Col>
-                                </Row>
+                                    </Col> */}
+                                {/* </Row> */}
                             </Col>
                         </Row>
                         <Row style={{...metricStyle, marginBottom:'10px'}}>  

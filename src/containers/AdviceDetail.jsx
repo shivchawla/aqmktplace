@@ -1,19 +1,17 @@
 import * as React from 'react';
 import axios from 'axios';
-import SkyLight from 'react-skylight';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Divider, Tabs, Button, Modal, message, Card, Rate, Collapse, DatePicker, Radio, Input, Popover} from 'antd';
-import {currentPerformanceColor, simulatedPerformanceColor, newLayoutStyle, metricsHeaderStyle, pageHeaderStyle, dividerNoMargin, loadingColor, pageTitleStyle, shadowBoxStyle, benchmarkColor, statusColor, cashStyle, primaryColor, buttonStyle, pageContainer} from '../constants';
+import {Row, Col, Tabs, Button, Modal, message, Collapse, Radio, Input} from 'antd';
+import {currentPerformanceColor, simulatedPerformanceColor, loadingColor, shadowBoxStyle, benchmarkColor, primaryColor, buttonStyle} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {AqTableMod, AqStockPortfolioTable, AqHighChartMod, MetricItem, AqCard, HighChartNew, HighChartBar, StockResearchModal, AqPageHeader, StatusBar, WatchList, ForbiddenAccess, AqRate, Footer, ApprovalItem, ApprovalItemView} from '../components';
-import {MyChartNew} from './MyChartNew';
+import {MetricItem, StockResearchModal, AqPageHeader, ForbiddenAccess, Footer, ApprovalItem, ApprovalItemView} from '../components';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {AdviceDetailMeta} from '../metas';
-import {generateColorData, Utils, getBreadCrumbArray, convertToDecimal,fetchAjax, getStockPerformance} from '../utils';
+import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import '../css/adviceDetail.css';
 
@@ -385,7 +383,6 @@ class AdviceDetailImpl extends React.Component {
             ])
         })
         .then(([advicePortfolioResponse])  => {
-            let positions = [];
             if (advicePortfolioResponse) {
                 this.getAdviceDetail(advicePortfolioResponse);
             }
@@ -648,8 +645,8 @@ class AdviceDetailImpl extends React.Component {
                     positions = positions.map(item => {
                         const targetPosition = staticPositions.filter(
                                 positionItem => positionItem.security.ticker === item.security.ticker)[0];
-                        item.avgPrice === 0 ? (targetPosition ? targetPosition.avgPrice : 0) : item.avgPrice;
-                        item.lastPrice === 0 ? (targetPosition ? targetPosition.lastPrice : 0) : item.lastPrice;
+                        item.avgPrice = item.avgPrice === 0 ? (targetPosition ? targetPosition.avgPrice : 0) : item.avgPrice;
+                        item.lastPrice = item.lastPrice === 0 ? (targetPosition ? targetPosition.lastPrice : 0) : item.lastPrice;
                         return item;
                     });
 

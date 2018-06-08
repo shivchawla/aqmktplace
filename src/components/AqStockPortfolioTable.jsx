@@ -1,7 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import {Table, Tooltip} from 'antd';
-import {nameEllipsisStyle} from '../constants';
+import {nameEllipsisStyle, metricColor} from '../constants';
 import {Utils} from '../utils';
 
 export class AqStockPortfolioTable extends React.Component {
@@ -52,6 +52,18 @@ export class AqStockPortfolioTable extends React.Component {
                 key: 'avgPrice'
             },
             {
+                title: this.renderHeaderText('UNREAILIZED PNL(\u20B9)'),
+                dataIndex: 'unrealizedPnL',
+                key: 'unrealizedPnL',
+                render: text => {
+                    const color = Number(text) > 0 ? metricColor.positive : metricColor.negative;
+
+                    return (
+                        <h3 style={{fontSize: '14px', color}}>{text}</h3>
+                    );
+                }
+            },
+            {
                 title: this.renderHeaderText('SECTOR'),
                 dataIndex: 'sector',
                 key: 'sector'
@@ -62,11 +74,6 @@ export class AqStockPortfolioTable extends React.Component {
                 key: 'weight'
             }
         ];
-
-        //Remove the "Last Price" from the table
-        if (this.props.composition) {
-            this.columns.splice(4,1);
-        }
     }
 
     getUpdatedPositions = portfolio => {
@@ -81,6 +88,7 @@ export class AqStockPortfolioTable extends React.Component {
                 shares: position.quantity || 0,
                 symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker', '-'),
                 avgPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'avgPrice', 0)),
+                unrealizedPnL: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'unrealizedPnL', 0)),
             });
         });
 

@@ -573,7 +573,7 @@ class InvestorDashboard extends React.Component {
                 columns={this.adviceColumns} 
                 dataSource={this.state.subscribedAdvices} 
                 pagination={false}
-                scroll={{ y: 500 }}
+                scroll={{ y: 430 }}
                 style={{margin: '10px 20px'}}/>
         );
     }
@@ -1166,7 +1166,7 @@ class InvestorDashboard extends React.Component {
                                                             portfolio={{
                                                                 positions: this.state.rawDefaultPortfolioPositions
                                                             }}
-                                                            scroll={{y: 380}}
+                                                            scroll={{y: 320}}
                                                             columns={['name', 'shares', 'price', 'avgPrice', 'sector']}
                                                     />
                                                 </Col>

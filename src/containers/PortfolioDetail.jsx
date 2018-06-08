@@ -663,7 +663,7 @@ class PortfolioDetailImpl extends React.Component {
                                         style={customPanelStyle}
                                         header={<h3 style={metricsHeaderStyle}>Portfolio</h3>}
                                 >
-                                    <Row style={{padding: '0 30px'}}>
+                                    <Row style={{padding: '0 20px'}}>
                                         <Col span={24}>
                                             <Row type="flex" justify="space-between">
                                             <Col span={6}><span style={cashStyle}>Cash: {Utils.formatMoneyValueMaxTwoDecimals(this.state.cash)}</span></Col>

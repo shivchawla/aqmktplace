@@ -45,3 +45,4 @@ export * from './ApprovalItem';
 export * from './ApprovalItemView';
 export * from './WarningIcon';
 export * from './AqTag';
+export * from './AqPerformanceMetrics';

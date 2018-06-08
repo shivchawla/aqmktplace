@@ -17,7 +17,7 @@ export const UpdateAdviceCrumb = [
 ];
 
 export const PortfolioDetailCrumb = [
-    {name: 'Dashboard', url: '/dashboard/investor/createdPortfolios'},
+    {name: 'Dashboard', url: '/dashboard/investor/performanceSummary'},
 ];
 
 export const UpdatePortfolioCrumb = [
