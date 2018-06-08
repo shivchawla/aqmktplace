@@ -1,4 +1,5 @@
 import axios from 'axios';
+import _ from 'lodash';
 import {Utils} from './index';
 const localConfig = require('../localConfig.js');
 
@@ -15,11 +16,18 @@ export const fetchAjax = (url, history, redirectUrl = '/advice', header=undefine
     return axios.get(url, {headers: header ? header : Utils.getAuthTokenHeader()})
     .catch(error => {
         Utils.checkForInternet(error, history);
-        if (error.response) {
-            if (error.response.status === 400 || error.response.status === 403) {
-                history.push('/forbiddenAccess');
+        if (Utils.isLoggedIn()) {
+            if (error.response) {
+                Utils.checkForServerError(error, history, redirectUrl);
+                Utils.checkErrorForTokenExpiry(error, history, redirectUrl);
+                if (error.response.status === 400 || 
+                            (error.response.status === 403 && _.get(error, 'response.data.code', '') !== 'server_error')
+                    ) {
+                    history.push('/forbiddenAccess');
+                }
             }
-            Utils.checkErrorForTokenExpiry(error, history, redirectUrl);
+        } else {
+            history.push('/login');
         }
         return error;
     })

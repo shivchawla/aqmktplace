@@ -8,7 +8,7 @@ import {MyChartNew} from './MyChartNew';
 import {AdvisorDashboardMeta} from '../metas';
 import {graphColors} from '../constants';
 import {ArrowButton} from './InvestorDashboard';
-import {ListMetricItem, HighChartSpline, DashboardCard, HighChartNew, ForbiddenAccess, AqRate} from '../components';
+import {ListMetricItem, HighChartSpline, DashboardCard, HighChartNew, ForbiddenAccess, AqRate, AqPageHeader} from '../components';
 import {listMetricItemLabelStyle, loadingColor, benchmarkColor, simulatedPerformanceColor, currentPerformanceColor} from '../constants';
 import {Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/advisorDashboard.css';
@@ -471,14 +471,14 @@ class AdvisorDashboard extends React.Component {
             const simulatedPerformance = _.get(adviceResponse.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             const currentPerformance = _.get(adviceResponse.data, 'current.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
-                name: `${advice.name} (Simulated)`,
+                name: `Advice - Simulated`,
                 data: simulatedPerformance,
                 color: simulatedPerformanceColor,
                 noLoadData: true,
             });
 
             newTickers.push({
-                name: `${advice.name} (Current)`,
+                name: `Advice - Current`,
                 data: currentPerformance,
                 color: currentPerformanceColor,
                 noLoadData: true,
@@ -743,6 +743,8 @@ class AdvisorDashboard extends React.Component {
                         </Row>
                     </DashboardCard>
                 </Col>
+                {/* Spacer */}
+                <Col span={24} style={{height: '100px'}}></Col>
             </Row>
         );
     }
@@ -756,6 +758,17 @@ class AdvisorDashboard extends React.Component {
         } else {
             return (
                 <Row className='aq-page-container'>
+                    <AqPageHeader 
+                            backgroundColor='transparent'
+                            title="Advisor Dashboard" 
+                            breadCrumbs = {breadCrumbArray} 
+                    >
+                        {
+                            this.props.match.params.section === 'advicePerformance'
+                            ? this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)
+                            : null
+                        }
+                    </AqPageHeader>
                     {
                         this.state.showEmptyScreen
                         ?   <Col span={24} style={emptyPortfolioStyle}>
@@ -768,15 +781,15 @@ class AdvisorDashboard extends React.Component {
                                     Create Advice
                                 </Button>
                             </Col>
-                        :   <Col span={24}>
+                        :   <Col span={24} className='advisorDashboardContainer' style={{height: '100%'}}>
                                 <Row>
                                     {
                                         (this.props.match.params.section === undefined || this.props.match.params.section === 'myAdvices') &&
                                         <Col span={24}>
                                             <DashboardCard 
                                                     headerStyle={headerStyle}
-                                                    title=" MY ADVICES"
-                                                    cardStyle={{marginTop:'10px', height:'625px'}}  
+                                                    title="MY ADVICES"
+                                                    cardStyle={{marginTop:'10px', height:'550px'}}  
                                                     menu={this.renderSortingMenu()}
                                                     loading={this.state.myAdvicesLoading}
                                                     contentStyle={{height: '90%', overflow: 'hidden', overflowY: 'scroll'}}
@@ -788,27 +801,29 @@ class AdvisorDashboard extends React.Component {
                                     {
                                         this.props.match.params.section === 'advicePerformance' &&
                                         <Col span={24}>
-                                            <Row type="flex" justify="end">
+                                            {/* <Row type="flex" justify="end">
                                                 {this.renderAdvicesMenu(this.handleSelectAdvicePerformance, 0 ,5)}
-                                            </Row>
+                                            </Row> */}
                                             <DashboardCard 
                                                     headerStyle={headerStyle}
-                                                    cardStyle={{marginTop:'10px', height:'625px'}} 
+                                                    cardStyle={{marginTop:'10px', height:'550px'}} 
                                                     title={`Performance Chart - (${this.state.selectedAdvice})`}
                                                     loading={this.state.advicePerformanceLoading}
+                                                    menu={
+                                                        <ArrowButton 
+                                                                text="Go To Advice"
+                                                                onClick={
+                                                                    () => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)
+                                                                }
+                                                        />
+                                                    }
                                             >
                                                 <Col
                                                         style={{paddingLeft: '20px', paddingTop: '10px'}}
                                                 >
-                                                    <MyChartNew height={450} series={this.state.tickers} />
+                                                    <MyChartNew height={420} series={this.state.tickers} />
                                                 </Col>
                                             </DashboardCard>
-                                            <ArrowButton 
-                                                    text="Go To Advice"
-                                                    onClick={
-                                                        () => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)
-                                                    }
-                                            />
                                         </Col>
                                     }
                                     {

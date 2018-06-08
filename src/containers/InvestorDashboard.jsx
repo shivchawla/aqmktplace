@@ -4,11 +4,11 @@ import _ from 'lodash';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Row, Col, Tabs, Select, Table, Button, Radio, message, Icon} from 'antd';
-import {MetricItem, ListMetricItem, HighChartNew, HighChartBar, DashboardCard, ForbiddenAccess, AqRate, AqStockPortfolioTable, StockResearchModal, AqTag} from '../components';
+import {MetricItem, ListMetricItem, HighChartNew, HighChartBar, DashboardCard, ForbiddenAccess, AqRate, AqStockPortfolioTable, StockResearchModal, AqTag, AqPageHeader} from '../components';
 import {nameEllipsisStyle, benchmarkColor, metricColor, loadingColor, primaryColor, horizontalBox} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {InvestorDashboardMeta} from '../metas';
-import {generateColorData, Utils, fetchAjax, getStockPerformance} from '../utils';
+import {generateColorData, Utils, fetchAjax, getStockPerformance, getBreadCrumbArray} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import 'react-loading-bar/dist/index.css'
 
@@ -214,7 +214,7 @@ class InvestorDashboard extends React.Component {
             const portfolioMetrics = _.get(performanceResponse.data, 'current.metrics.portfolioMetrics', {});
             const positionModdedForColors = positions.map(item => item.security.ticker); 
             const colorData = generateColorData(positionModdedForColors);
-            const composition = this.processTransactionsForChart(portfolioMetrics.composition, colorData);
+            const composition = this.processTransactionsForChart(portfolioMetrics.composition || [], colorData);
             this.setState({
                 composition,
                 defaultComposition: composition,
@@ -594,11 +594,10 @@ class InvestorDashboard extends React.Component {
         return stockPositions;
     }
 
-    processTransactionsForChart = (composition, colorData) => {
+    processTransactionsForChart = (composition = [], colorData) => {
         const chartData = [];
         const seriesData = [];
-        const positions = composition.map(item => item.ticker);
-        composition.map((item, index) => {
+        composition.map(item => {
             const weight = Number((item.weight * 100).toFixed(2));
             if (weight > 0) {
                 chartData.push({
@@ -815,10 +814,10 @@ class InvestorDashboard extends React.Component {
         return (
             <Row type="flex" align="middle">
                 <Col span={24}>
-                    <HighChartNew 
-                            chartContainerStyle={640} 
-                            height={340} 
-                            innerSize={200} 
+                    <HighChartNew
+                            chartContainerStyle={{height: '250px'}} 
+                            height={260} 
+                            innerSize={140} 
                             series = {this.state.composition} 
                     />
                     <Row style={{textAlign: 'center', marginTop: '10px'}}>
@@ -874,7 +873,7 @@ class InvestorDashboard extends React.Component {
         return (
             <Select 
                     value={selectedPortfolioId}
-                    style={{width: 250, marginTop: '5px', position: 'absolute', top: '-35px'}} 
+                    style={{width: 250}} 
                     onChange={onChange}
                     autoFocus={true}
             >
@@ -1057,11 +1056,34 @@ class InvestorDashboard extends React.Component {
     }
 
     renderPageContent = () => {
+        const breadCrumbArray = getBreadCrumbArray([{name: 'Investor Dashboard'}]);
+
         if (this.state.notAuthorized) {
             return <ForbiddenAccess />
         } else {
             return (
                 <Row className='aq-page-container'>
+                    <AqPageHeader 
+                            title="Investor Dashboard" 
+                            breadCrumbs = {breadCrumbArray}
+                            backgroundColor='transparent'
+                    >
+                        {
+                            (this.props.match.params.section === undefined 
+                            || this.props.match.params.section === 'performanceSummary') &&
+                                this.renderPortfolioMenu(
+                                    this.handlePortfolioPerformanceMenuChange,
+                                    this.state.performanceSelectedPortfolio.id
+                                )
+                        }
+                        {
+                            this.props.match.params.section === 'portfolioSummary' &&   
+                            this.renderPortfolioMenu(
+                                this.handlePortfolioDetailChange,
+                                this.state.portfolioSelectedPortfolio.id
+                            )
+                        }
+                    </AqPageHeader>
                     {this.state.showEmptyScreen.status ?
                     <Col span={24} style={emptyPortfolioStyle}>
                         {
@@ -1085,20 +1107,20 @@ class InvestorDashboard extends React.Component {
                             {
                                 (this.props.match.params.section === undefined || this.props.match.params.section === 'performanceSummary') &&
                                 <Col xl={24} lg={24}>
-                                    <Row type="flex" justify="end">
-                                        {
-                                            this.renderPortfolioMenu(
-                                                this.handlePortfolioPerformanceMenuChange,
-                                                this.state.performanceSelectedPortfolio.id
-                                            )
-                                        }
-                                    </Row>
                                     <DashboardCard 
                                             title={`Performance Summary - (${this.state.performanceSelectedPortfolio.name})`} 
                                             loading={this.state.defaultPortfolioLoading}
-                                            cardStyle={{height:'625px', marginTop: '20px'}} 
+                                            cardStyle={{height:'550px'}} 
                                             headerStyle={headerStyle}
                                             loading={this.state.portfolioPerformanceLoading}
+                                            menu={
+                                                <ArrowButton 
+                                                        text='Go To Portfolio'
+                                                        onClick={() => 
+                                                            this.props.history.push(`/dashboard/portfolio/${this.state.performanceSelectedPortfolio.id}`)
+                                                        }
+                                                />
+                                            }
                                     >
 
                                         <Row style={{padding: '10px'}}>
@@ -1106,35 +1128,29 @@ class InvestorDashboard extends React.Component {
                                                 {this.renderSummaryMetrics()}
                                             </Col>
                                             <Col style={{marginTop: '40px', padding: '0 10px'}} span={24}>
-                                                <MyChartNew series={this.state.tickers}/>
+                                                <MyChartNew series={this.state.tickers} height={320}/>
                                             </Col>
                                         </Row>
                                     </DashboardCard>
-                                    <ArrowButton 
-                                            text='Go To Portfolio'
-                                            onClick={() => 
-                                                this.props.history.push(`/dashboard/portfolio/${this.state.performanceSelectedPortfolio.id}`)
-                                            }
-                                    />
                                 </Col>
                             }
                             {
                                 this.props.match.params.section === 'portfolioSummary' &&
                                 <Col xl={24} lg={24}>
-                                    <Row type="flex" justify="end">
-                                        {
-                                            this.renderPortfolioMenu(
-                                                this.handlePortfolioDetailChange,
-                                                this.state.portfolioSelectedPortfolio.id
-                                            )
-                                        }
-                                    </Row>
                                     <DashboardCard 
                                             title={`Portfolio Summary - (${this.state.portfolioSelectedPortfolio.name})`} 
                                             loading={this.state.defaultPortfolioLoading}
-                                            cardStyle={{height:'625px', marginTop: '20px'}} 
+                                            cardStyle={{height:'550px'}} 
                                             headerStyle={headerStyle}
                                             loading={this.state.portfolioDetailLoading}
+                                            menu={
+                                                <ArrowButton 
+                                                        text='Go To Portfolio'
+                                                        onClick={() => 
+                                                            this.props.history.push(`/dashboard/portfolio/${this.state.portfolioSelectedPortfolio.id}`)
+                                                        }
+                                                />
+                                            }
                                     >
                                             <Row type="flex" align="middle" style={{paddingLeft: '20px'}}>
                                                 <Col 
@@ -1157,12 +1173,6 @@ class InvestorDashboard extends React.Component {
                                                 <Col span={7}>{this.renderOverviewPieChart()}</Col>
                                             </Row>
                                     </DashboardCard>
-                                    <ArrowButton 
-                                            text='Go To Portfolio'
-                                            onClick={() => 
-                                                this.props.history.push(`/dashboard/portfolio/${this.state.portfolioSelectedPortfolio.id}`)
-                                            }
-                                    />
                                 </Col>
                             }
                             {
@@ -1172,7 +1182,7 @@ class InvestorDashboard extends React.Component {
                                             title="MY PORTFOLIOS" 
                                             loading={this.state.portfolioLoading}
                                             headerStyle={headerStyle}
-                                            cardStyle={{height: '625px'}} 
+                                            cardStyle={{height: '550px'}} 
                                             contentStyle={{...contentStyle, height: '90%'}}
                                     >
                                         {this.renderPortfolios()}
@@ -1184,7 +1194,7 @@ class InvestorDashboard extends React.Component {
                                 <Col xl={24} lg={24}>
                                     <DashboardCard 
                                             title="MY ADVICES" 
-                                            cardStyle={{height: '625px'}}
+                                            cardStyle={{height: '550px'}}
                                             loading={this.state.subscribedAdvicesLoading}
                                             headerStyle={headerStyle}
                                     >
@@ -1238,16 +1248,14 @@ export default withRouter(InvestorDashboard);
 
 export const ArrowButton = props => {
     return (
-        <Col 
-                span={24} 
+        <div 
                 style={{
-                    paddingLeft: '20px', 
-                    paddingTop: '10px', 
+                    display: 'inline-flex',
+                    justifyContent: 'flex-end',
                     ...horizontalBox, 
                     alignItems: 'center',
                     cursor: 'pointer',
-                    position: 'absolute', 
-                    bottom: '20px'
+                    alignItems: 'center'
                 }}
                 onClick={props.onClick}
         >
@@ -1257,7 +1265,7 @@ export const ArrowButton = props => {
                 {props.text}
             </h3>
             <Icon type="right" style={{color: primaryColor, fontSize: '16px'}}/>
-        </Col>
+        </div>
     );
 }
 

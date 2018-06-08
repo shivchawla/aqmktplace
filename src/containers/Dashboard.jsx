@@ -4,8 +4,7 @@ import {Route} from 'react-router-dom';
 import {Layout, Menu, Icon, Row, Col, Button} from 'antd';
 import InvestorDashboard from './InvestorDashboard';
 import AdvisorDashboard from './AdvisorDashboard';
-import {AqPageHeader} from '../components';
-import {primaryColor, metricColor} from '../constants';
+import {primaryColor} from '../constants';
 import {getBreadCrumbArray, Utils} from '../utils';
 
 const {Content, Sider} = Layout;
@@ -94,79 +93,69 @@ export default class Dashboard extends React.Component {
     )
 
     render() {
-        const breadCrumbArray = getBreadCrumbArray([{name: 'Dashboard'}]);
         const investorTitle = <span style={subMenuLabelStyle}><Icon type="shopping-cart" />Investor Dashboard</span>;
         const advisorTitle = <span style={subMenuLabelStyle}><Icon type="rocket" />Advisor Dashboard</span>;
         const createPortfolioTitle = <span style={subMenuLabelStyle}><Icon type="plus-square-o" />Create Portfolio</span>;
         const accountTitle = <span style={subMenuLabelStyle}><Icon type="user" />Account</span>;
 
         return(
-            <Layout>
-                <Layout>
-                    <Sider 
-                            width={250} 
-                            style={{ background: '#fff', height: 'calc(100% - 60px)'}}
-                    >   
-                        {this.getUserDetailDiv()}
-                        <Menu
-                                mode="inline"
-                                defaultSelectedKeys={[this.getSelectedSection()]}
-                                defaultOpenKeys={['investor', 'advisor']}
-                                style={{ height: '100%' }}
-                                onClick={this.handleMenuClick}
+            <Layout style={{height: '100%'}}>
+                <Sider 
+                        width={250} 
+                        style={{ background: '#fff'}}
+                >   
+                    {this.getUserDetailDiv()}
+                    <Menu
+                            mode="inline"
+                            defaultSelectedKeys={[this.getSelectedSection()]}
+                            defaultOpenKeys={['investor', 'advisor']}
+                            onClick={this.handleMenuClick}
+                    >
+                        <SubMenu 
+                                key="investor" 
+                                title={investorTitle}
                         >
-                            <SubMenu 
-                                    key="investor" 
-                                    title={investorTitle}
-                            >
-                                <Menu.Item key="performanceSummary">{this.getMenuItem('Performance Summary')}</Menu.Item>
-                                <Menu.Item key="portfolioSummary">{this.getMenuItem('Portfolio Summary')}</Menu.Item>
-                                <Menu.Item key="createdPortfolios">{this.getMenuItem('Created Portfolios')}</Menu.Item>
-                                <Menu.Item key="subscribedAdvices">{this.getMenuItem('Subscribed Advices')}</Menu.Item>
-                            </SubMenu>
-                            <SubMenu key="advisor" title={advisorTitle}>
-                                <Menu.Item key="myAdvices">{this.getMenuItem('My Advices')}</Menu.Item>
-                                <Menu.Item key="advicePerformance">{this.getMenuItem('Advice Performance')}</Menu.Item>
-                                <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item>
-                            </SubMenu>
-                            <Menu.Item key="createPortfolio">{createPortfolioTitle}</Menu.Item>
-                            <SubMenu key="account" title={accountTitle}>
-                                <Menu.Item key="signOut">{this.getMenuItem('Sign Out')}</Menu.Item>
-                                <Menu.Item key="myProfile">{this.getMenuItem('My Profile')}</Menu.Item>
-                            </SubMenu>
-                        </Menu>
-                    </Sider>
-                    <Layout style={{paddingBottom: '40px', paddingTop: '10px', paddingLeft: '10px'}}>
-                        <AqPageHeader
-                                style={{marginLeft: '30px'}} 
-                                backgroundColor='transparent' 
-                                breadCrumbs = {breadCrumbArray} 
-                                title="Dashboard" 
+                            <Menu.Item key="performanceSummary">{this.getMenuItem('Performance Summary')}</Menu.Item>
+                            <Menu.Item key="portfolioSummary">{this.getMenuItem('Portfolio Summary')}</Menu.Item>
+                            <Menu.Item key="createdPortfolios">{this.getMenuItem('Created Portfolios')}</Menu.Item>
+                            <Menu.Item key="subscribedAdvices">{this.getMenuItem('Subscribed Advices')}</Menu.Item>
+                        </SubMenu>
+                        <SubMenu key="advisor" title={advisorTitle}>
+                            <Menu.Item key="myAdvices">{this.getMenuItem('My Advices')}</Menu.Item>
+                            <Menu.Item key="advicePerformance">{this.getMenuItem('Advice Performance')}</Menu.Item>
+                            <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item>
+                        </SubMenu>
+                        <Menu.Item key="createPortfolio">{createPortfolioTitle}</Menu.Item>
+                        <SubMenu key="account" title={accountTitle}>
+                            <Menu.Item key="signOut">{this.getMenuItem('Sign Out')}</Menu.Item>
+                            <Menu.Item key="myProfile">{this.getMenuItem('My Profile')}</Menu.Item>
+                        </SubMenu>
+                    </Menu>
+                </Sider>
+                <Layout style={{paddingTop: '10px', paddingLeft: '10px'}}>
+                    <Content style={{overflow: 'hidden', overflowY: 'scroll'}}>
+                        <Route 
+                                exact={true}
+                                path={`${this.props.match.url}/advisor/:section`} 
+                                render={
+                                    props => <AdvisorDashboard {...props} />
+                                }
                         />
-                        <Content>
-                            <Route 
-                                    exact={true}
-                                    path={`${this.props.match.url}/advisor/:section`} 
-                                    render={
-                                        props => <AdvisorDashboard {...props} />
-                                    }
-                            />
-                            <Route 
-                                    path={`${this.props.match.url}`} 
-                                    exact={true}
-                                    render={
-                                        props => <InvestorDashboard {...props} />
-                                    }
-                            />
-                            <Route 
-                                    path={`${this.props.match.url}/investor/:section`} 
-                                    exact={true}
-                                    render={
-                                        props => <InvestorDashboard {...props} />
-                                    }
-                            />
-                        </Content>
-                    </Layout>
+                        <Route 
+                                path={`${this.props.match.url}`} 
+                                exact={true}
+                                render={
+                                    props => <InvestorDashboard {...props} />
+                                }
+                        />
+                        <Route 
+                                path={`${this.props.match.url}/investor/:section`} 
+                                exact={true}
+                                render={
+                                    props => <InvestorDashboard {...props} />
+                                }
+                        />
+                    </Content>
                 </Layout>
             </Layout>
         );

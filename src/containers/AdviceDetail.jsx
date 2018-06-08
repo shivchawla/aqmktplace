@@ -149,7 +149,9 @@ class AdviceDetailImpl extends React.Component {
             approvalLoading: false,
             // Used to approve investment objective and other fields
             approvalObj,
-            postWarningModalVisible: false
+            postWarningModalVisible: false,
+            postToMarketPlaceLoading: false,
+            requestApprovalLoading: false
         };
 
         this.performanceSummary = {};
@@ -1073,6 +1075,7 @@ class AdviceDetailImpl extends React.Component {
 
     requestApproval = () => {
         const url = `${requestUrl}/advice/${this.props.match.params.id}/requestapproval`;
+        this.setState({requestApprovalLoading: true});
         axios({
             url,
             method: 'POST',
@@ -1098,6 +1101,9 @@ class AdviceDetailImpl extends React.Component {
                 Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
             }
         })
+        .finally(() => {
+            this.setState({requestApprovalLoading: false});
+        })
     }
 
     togglePostWarningModal = () => {
@@ -1109,9 +1115,18 @@ class AdviceDetailImpl extends React.Component {
             <Modal
                     visible={this.state.postWarningModalVisible}
                     title="Warning"
-                    onOk={this.makeAdvicePublic}
-                    onCancel={this.togglePostWarningModal}
                     bodyStyle={{height: '200px', top: '20'}}
+                    footer={[
+                        <Button key="2" onClick={this.togglePostWarningModal}>CANCEL</Button>,
+                        <Button  
+                                loading={this.state.postToMarketPlaceLoading} 
+                                type="primary" 
+                                key="1" 
+                                onClick={this.makeAdvicePublic}
+                        >
+                            POST
+                        </Button>
+                    ]}
             >   
                 <Row>
                     <Col span={24}>
@@ -1186,6 +1201,7 @@ class AdviceDetailImpl extends React.Component {
                                 className={className} 
                                 style={buttonStyle} 
                                 type="primary"
+                                loading={this.state.requestApprovalLoading}
                         >
                             REQUEST APPROVAL
                         </Button>

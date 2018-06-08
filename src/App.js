@@ -47,6 +47,7 @@ const Home = asyncComponent(() => import("./containers/Home"));
 const FAQ = asyncComponent(() => import("./containers/FAQ"));
 const Dashboard = asyncComponent(() => import("./containers/Dashboard"));
 const ResetPassword = asyncComponent(() => import("./containers/ResetPassword"));
+const StepperAdviceForm = asyncComponent(() => import("./containers/StepperAdviceForm"));
 const {gaTrackingId, requestUrl} = require('./localConfig');
 
 class App extends React.Component {
@@ -211,7 +212,7 @@ class App extends React.Component {
         return (
             <React.Fragment>
                 {/* {this.renderBurgerMenu()} */}
-                <Layout style={{backgroundColor: '#f9f9f9', height:'auto'}}>
+                <Layout style={{backgroundColor: '#f9f9f9', height:'100%'}}>
                     <Header style={headerStyle}>
                         <Row type="flex">
                             <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
@@ -265,16 +266,13 @@ class App extends React.Component {
                                 {
                                     Utils.isLoggedIn() &&
                                     <React.Fragment>
-                                        <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/>
+                                        {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
                                         <Button 
                                             type="primary" 
                                             onClick={() => this.props.history.push('/dashboard/createadvice')}
                                             style={{marginTop: '18px'}}>
                                             Create Advice
-                                        </Button>
-
-                                        
-
+                                        </Button>                                        
                                     </React.Fragment>
                                 }
                             </Col> 
@@ -315,6 +313,7 @@ class App extends React.Component {
                             <Route exact={true} path='/signup' component={Signup} /> {/* Page */}
                             <Route exact={true} path='/faq' component={FAQ} /> {/* Page */}
                             <Route exact={true} path='/resetPassword' component={ResetPassword} /> {/* Page */}
+                            <Route exact={true} path='/stepperCreateAdvice' component={StepperAdviceForm} /> {/* Page */}
                             <Route component={PageNotFound} />
                         </Switch>
                     </Content>
@@ -329,10 +328,8 @@ export default withRouter(App);
 const headerStyle = {
     background: '#fff',
     borderBottom: '1px solid #e1e1e1', 
-    //boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
-    //position: 'fixed',
+    // boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
     width: '100%',
-    //zIndex: '1000'
     height:'64px',
     padding:'0 0 0 30px'
 

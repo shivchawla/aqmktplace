@@ -9,12 +9,12 @@ export class DashboardCard extends React.Component {
         return (
             <Col span={24} style={{position: 'relative', ...shadowBoxStyle, ...cardStyle, ...noOverflowStyle}}>
                 <Row style={{...headerStyle, ...this.props.headerStyle}} type="flex" justify="space-between">
-                    <Col span={headerSpan}>
+                    <div>
                         <h3 style={{marginLeft: '20px'}}>{title}</h3>
-                    </Col>
-                    <Col span={menuSpan} style={{textAlign: 'right'}}>
+                    </div>
+                    <div style={{textAlign: 'right'}}>
                         {menu}
-                    </Col>
+                    </div>
                 </Row>
                 <Row style={{position: 'relative', ...contentStyle, ...this.props.contentStyle}}>
                     <Spin spinning={loading}>

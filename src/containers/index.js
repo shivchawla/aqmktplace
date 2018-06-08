@@ -23,3 +23,4 @@ export * from './AuthMessage';
 export * from './FAQ';
 export * from './ResetPassword';
 export * from './Dashboard';
+export * from './StepperAdviceForm';

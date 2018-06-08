@@ -150,6 +150,7 @@ class AdviceDetailContentImpl extends React.Component {
                                         color={approvalStatus ? primaryColor : metricColor.negative}
                                         tooltipTitle={approvalStatus ? adviceApproved : adviceRejected}
                                         text={approvalStatus ? 'Approved' : 'Rejected'}
+                                        tagStyle={{marginLeft: '10px'}}
                                 />
                             }
                         </div>

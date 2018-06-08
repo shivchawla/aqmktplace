@@ -4,32 +4,24 @@ import moment from 'moment';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
-import {connect} from 'react-redux';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {inputHeaderStyle, newLayoutStyle, buttonStyle, loadingColor, pageTitleStyle, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors, primaryColor, sectors, goals, portfolioValuation, capitalization} from '../constants';
-import {EditableCell, AqDropDown, AqHighChartMod, HighChartNew, DashboardCard, ForbiddenAccess, StockResearchModal, AqPageHeader, Footer, WarningIcon} from '../components';
-import {getUnixStockData, getStockPerformance, Utils, getBreadCrumbArray, constructErrorMessage, getFirstMonday, compareDates, getDate, fetchAjax} from '../utils';
+import {inputHeaderStyle, buttonStyle, loadingColor, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors, primaryColor, sectors, goals, portfolioValuation, capitalization} from '../constants';
+import {HighChartNew, ForbiddenAccess, StockResearchModal, AqPageHeader, Footer, WarningIcon} from '../components';
+import {getStockPerformance, Utils, getBreadCrumbArray, getFirstMonday, compareDates, getDate, fetchAjax} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
-import {store} from '../store';
 import {benchmarks} from '../constants/benchmarks';
 import {AqStockTableMod} from '../components/AqStockTableMod';
 import {MyChartNew} from '../containers/MyChartNew';
 import {
-    Layout, 
     Input, 
     Row, 
     Col, 
     DatePicker, 
     Form, 
     Button, 
-    Table, 
     message, 
-    Dropdown, 
     Menu, 
-    Tooltip,
-    Icon, 
     Spin, 
-    Checkbox, 
     Modal,
     Tabs,
     Select,
@@ -40,15 +32,12 @@ import {adviceLimit} from '../constants';
 
 const localConfig = require('../localConfig.js');
 
-const {TextArea} = Input;
 const FormItem = Form.Item;
-const TabPane = Tabs.TabPane;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
 const RadioButton = Radio.Button;
 
 const dateFormat = 'YYYY-MM-DD';
-const dateOffset = 5;
 const maxNotional = [500000, 50000, 100000, 200000, 300000, 500000];
 const rebalancingFrequency = [ 'Monthly', 'Daily', 'Weekly', 'Bi-Weekly', 'Quartely'];
 
@@ -96,6 +85,8 @@ export class AdviceFormImpl extends React.Component {
             approvalRequested: false,
             latestApproval: {status: false},
             investmentObjective: {},
+            saveForLaterLoading: false,
+            postToMarketPlaceLoading: false,
             showError: false
         };
         this.columns = [
@@ -149,6 +140,10 @@ export class AdviceFormImpl extends React.Component {
     }
 
     handleSubmit = (e, publish = false) => {
+        this.setState({
+            saveForLaterLoading: publish ? this.state.saveForLaterLoading : true,
+            postToMarketPlaceLoading: publish ? true : this.state.postToMarketPlaceLoading
+        });
         if (e.preventDefault) {
             e.preventDefault();
         }
@@ -161,7 +156,6 @@ export class AdviceFormImpl extends React.Component {
             const defaultStartDate = moment().add(1, 'days').format(dateFormat);
             let {
                 name, 
-                headline, 
                 startDate = defaultStartDate,
                 investmentObjGoal,
                 investmentObjSectors,
@@ -176,7 +170,6 @@ export class AdviceFormImpl extends React.Component {
             if(!err && this.validateTransactions()) {
                 requestData = {
                     name,
-                    // heading: isUpdate ? null : 'headline',
                     portfolio: {
                         name,
                         detail: {
@@ -240,6 +233,12 @@ export class AdviceFormImpl extends React.Component {
                         this.setState({postWarningModalVisible: false});                       
                         Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
                     }
+                })
+                .finally(() => {
+                    this.setState({
+                        saveForLaterLoading: publish ? this.state.saveForLaterLoading : false,
+                        postToMarketPlaceLoading: publish ? false : this.state.postToMarketPlaceLoading
+                    });
                 });
             }
         });
@@ -850,7 +849,6 @@ export class AdviceFormImpl extends React.Component {
 
     renderForm = () => {
         const {getFieldDecorator} = this.props.form;
-        const buttonText = this.getVerifiedTransactions().length > 0 ? 'Edit Portfolio' : 'Add Positions';
 
         return (
             <Col xl={18} lg={18} md={24} style={{display: this.state.preview ? 'none' : 'block'}}>
@@ -1236,6 +1234,17 @@ export class AdviceFormImpl extends React.Component {
                     onOk={(e) => this.handleSubmit(e, true)}
                     onCancel={this.togglePostWarningModal}
                     bodyStyle={{height: '200px', top: '20'}}
+                    footer={[
+                        <Button key="2" onClick={this.togglePostWarningModal}>CANCEL</Button>,
+                        <Button  
+                                loading={this.state.postToMarketPlaceLoading} 
+                                type="primary" 
+                                key="1" 
+                                onClick={(e) => this.handleSubmit(e, true)}
+                        >
+                            POST
+                        </Button>
+                    ]}
             >   
                 <Row>
                     <Col span={24}>
@@ -1294,6 +1303,7 @@ export class AdviceFormImpl extends React.Component {
                                             style={{...buttonStyle}}
                                             onClick={this.handleSubmit}
                                             className={`action-button ${className}`}
+                                            loading={this.state.saveForLaterLoading}
                                     >
                                         SAVE FOR LATER
                                     </Button>
@@ -1507,16 +1517,6 @@ const labelStyle = {
 
 const inputStyle = {
     // marginTop: '20px'
-};
-
-const investmentObjContainerStyle = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center'
-};
-
-const investmentObjInputStyle = {
-    marginLeft: '20px'
 };
 
 const investmentObjLabelStyle = {

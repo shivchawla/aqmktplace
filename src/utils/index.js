@@ -121,25 +121,46 @@ export class Utils{
 	}
 
 	static checkErrorForTokenExpiry(error, history, fromUrl){
-		if (error && error.response && error.response.data){
-			if(error.response.data.name==='TokenExpiredError' ||
-				error.response.data.message==='jwt expired'){
-				if (this.loggedInUserinfo.recentTokenUpdateTime
-					&& (moment().valueOf() < ((60*1000) + this.loggedInUserinfo.recentTokenUpdateTime)) ){
-					return;
+		return new Promise((resolve, reject) => {
+			if (error && error.response && error.response.data){
+				if(error.response.data.name==='TokenExpiredError' ||
+					error.response.data.message==='jwt expired'){
+					if (this.loggedInUserinfo.recentTokenUpdateTime
+						&& (moment().valueOf() < ((60*1000) + this.loggedInUserinfo.recentTokenUpdateTime)) ){
+						return;
+					}else{
+						this.setShouldUpdateToken(true);
+						history.push('/tokenUpdate?redirectUrl='+encodeURIComponent(fromUrl));
+						reject(false);
+					}
 				}else{
-					this.setShouldUpdateToken(true);
-					history.push('/tokenUpdate?redirectUrl='+encodeURIComponent(fromUrl));
+					console.log('Token not expired');
+					resolve(true);
+					// if (fromUrl && history){
+					// 	history.push(fromUrl);
+					// }else if (history){
+					// 	history.push('/login');
+					// }
+					// Utils.logoutUser();
 				}
-			}else{
-				// if (fromUrl && history){
-				// 	history.push(fromUrl);
-				// }else if (history){
-				// 	history.push('/login');
-				// }
-				// Utils.logoutUser();
 			}
-		}
+		})
+	}
+	
+	static checkForServerError(error, history, fromUrl) {
+		return new Promise((resolve, reject) => {
+			const errorCode = _.get(error, 'response.data.code', '');
+			const statusCode = _.get(error, 'response.data.statusCode', 0);
+			// console.log('errorCode', errorCode);
+			// console.log('statusCode',  typeof statusCode);
+			if (errorCode === 'server_error' && statusCode === 403) {
+				Utils.goToLoginPage(history, fromUrl);
+				reject(false);
+			} else {
+				console.log('No status error');
+				resolve(true);
+			}
+		})
 	}
 
 	static getRedirectAfterLoginUrl(){
