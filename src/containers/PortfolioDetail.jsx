@@ -549,7 +549,7 @@ class PortfolioDetailImpl extends React.Component {
                             <Col xl={0} lg={0} md={24} style={{textAlign: 'right'}}>
                                 <Button
                                         type="primary"
-                                        onClick={() => {this.props.history.push('/investordashboard/createportfolio')}}
+                                        onClick={() => {this.props.history.push('/dashboard/createportfolio')}}
                                 >
                                     Create Portfolio
                                 </Button>
@@ -577,7 +577,7 @@ class PortfolioDetailImpl extends React.Component {
                                             <Tooltip title={tooltipText}>
                                                 <Button
                                                         onClick={() => this.props.history.push(
-                                                            `/investordashboard/portfolio/transactions/${this.props.match.params.id}`,
+                                                            `/dashboard/portfolio/transactions/${this.props.match.params.id}`,
                                                             {
                                                                 pageTitle: 'Add Transactions',
                                                                 advices: this.state.presentAdvices,
@@ -698,7 +698,7 @@ class PortfolioDetailImpl extends React.Component {
                                         className="action-button" 
                                         type="primary"
                                         style={{...buttonStyle, width: '95%', marginLeft: '16px'}}
-                                        onClick={() => {this.props.history.push('/investordashboard/createportfolio')}}
+                                        onClick={() => {this.props.history.push('/dashboard/createportfolio')}}
                                 >
                                     Create Portfolio
                                 </Button>

@@ -95,7 +95,7 @@ class ResetPassword extends Component {
   componentDidMount(){
     this._mounted = true;
   	if (Utils.isLoggedIn()){
-      this.props.history.push('/investordashboard');
+      this.props.history.push('/dashboard');
     }
     // }else{
     //     const queryParams = new URLSearchParams(this.props.location.search);
