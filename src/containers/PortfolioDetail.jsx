@@ -123,6 +123,7 @@ class PortfolioDetailImpl extends React.Component {
     renderStockPortfolio = () => {
         return (
             <AqStockPortfolioTable
+                columns={['name', 'symbol', 'shares', 'price', 'avgPrice', 'unrealizedPnL', 'weight']}
                 style={{marginTop: '5px'}}
                 portfolio={{positions: this.state.stockPositions, cash:this.state.cash}}
                 updateTicker={this.updateTicker}
