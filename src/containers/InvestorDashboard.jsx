@@ -1152,7 +1152,7 @@ class InvestorDashboard extends React.Component {
                                                 />
                                             }
                                     >
-                                            <Row type="flex" align="middle" style={{paddingLeft: '20px'}}>
+                                            <Row type="flex" align="top" style={{paddingLeft: '20px'}}>
                                                 <Col 
                                                         span={24} 
                                                         style={{marginTop: '20px'}}
@@ -1166,7 +1166,6 @@ class InvestorDashboard extends React.Component {
                                                             portfolio={{
                                                                 positions: this.state.rawDefaultPortfolioPositions
                                                             }}
-                                                            scroll={{y: 320}}
                                                             columns={['name', 'shares', 'price', 'avgPrice', 'sector']}
                                                     />
                                                 </Col>
