@@ -328,6 +328,7 @@ class AdvisorDashboard extends React.Component {
                     <DashboardCard
                             title="TOTAL SUBSCRIBERS"
                             cardStyle={{height:'365px', marginTop: '20px'}}
+                            headerStyle={headerStyle}
                     >
                         <Row>
                             <Col span={16} style={{paddingTop: '20px'}}>
@@ -349,6 +350,7 @@ class AdvisorDashboard extends React.Component {
                 <Col {...dashboardMediaqueries}> {/* Subscribers / Advice */}
                     <DashboardCard
                             title="SUBSCRIBERS / ADVICE"
+                            headerStyle={headerStyle}
                             cardStyle={{height:'365px', marginTop: '20px'}}
                             headerSpan={24}
                     >
@@ -695,6 +697,7 @@ class AdvisorDashboard extends React.Component {
                 <Col {...dashboardMediaqueries}> {/* Advice Rating */}
                     <DashboardCard
                             title="ADVICE RATING"
+                            headerStyle={headerStyle}
                             cardStyle={{height:'365px', marginTop: '20px'}} 
                             menu={this.renderAdvicesMenu(this.handleSelectAdvice, -20, 0, 'small')}
                     >
@@ -725,6 +728,7 @@ class AdvisorDashboard extends React.Component {
                 <Col {...dashboardMediaqueries}> {/* Advisor Rating */}
                     <DashboardCard
                             title="ADVISOR RATING"
+                            headerStyle={headerStyle}
                             cardStyle={{height:'365px', marginTop: '20px'}}
                     >
                         <Row>
