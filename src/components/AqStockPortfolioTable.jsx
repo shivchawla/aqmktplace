@@ -52,7 +52,7 @@ export class AqStockPortfolioTable extends React.Component {
                 key: 'avgPrice'
             },
             {
-                title: this.renderHeaderText('UNREAILIZED PNL(\u20B9)'),
+                title: this.renderHeaderText('UNREALIZED PNL(\u20B9)'),
                 dataIndex: 'unrealizedPnL',
                 key: 'unrealizedPnL',
                 render: text => {

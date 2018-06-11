@@ -121,7 +121,7 @@ class AdviceDetailContentImpl extends React.Component {
             isNetValue:true, 
             dailyChangePct:dailyNAVChangePct
         };
-        const ownerColumns = ['name', 'symbol', 'shares', 'price', 'avgPrice', 'unrealizedPnL', 'sector', 'weight'];
+        const ownerColumns = ['name', 'symbol', 'shares', 'price', 'avgPrice', 'unrealizedPnL', 'weight'];
         const notOwnerColumns = ['name', 'symbol', 'shares', 'price', 'sector', 'weight'];
         const portfolioTableColumns = isOwner ? ownerColumns : notOwnerColumns;
         const approvalStatus = _.get(approval, 'status', false);
