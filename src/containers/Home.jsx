@@ -234,7 +234,7 @@ export class Home extends React.Component {
                             </Col>
                             <Col span={24}>
                                 <h5 className="hero-description-text">
-                                    Best investment ideas.<br></br>Let the experts help you build the portfolio your desire.
+                                    Best investment ideas.<br></br>Let the experts help you build the portfolio you desire.
                                 </h5>
                             </Col>
                             
