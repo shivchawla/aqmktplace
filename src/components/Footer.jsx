@@ -28,25 +28,25 @@ class FooterImpl extends React.Component{
         const feedbackUrl = `${requestUrl}/user/sendFeedback`;
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                const subject = values.emailSubject;
-                const feedback = values.emailDetail;
-                const email = values.email;
                 this.setState({feedBackLoading: true});
+
                 axios({
                     url: feedbackUrl,
                     method: 'POST',
-                    headers: Utils.getAuthTokenHeader(),
                     data: {
-                        feedback,
-                        subject,
-                        email
+                        "feedback": values.emailDetail,
+                        "subject": values.emailSubject,
+                        "to": "connect@aimsquant.com",
+                        "from": values.email
                     }
                 })
                 .then(response => {
-                    message.success('Thank you for your feedback')
+                    message.success('Thanks for your message!');
+                    this.setState({contactUsModalvisible: !this.state.contactUsModalvisible});
+                    this.props.form.resetFields();
                 })
                 .catch(error => {
-                    message.error('Sorry, Error occured while submitting Feedback')
+                    message.error('Sorry, Error occured while sending message');
                 })
                 .finally(() => {
                     this.setState({feedBackLoading: false});
@@ -75,14 +75,29 @@ class FooterImpl extends React.Component{
             >
                 <Row>
                     <Form onSubmit={this.submitContactUsForm}>
+                        
                         <Col span={24}>
+                            <h3 style={contactUsInputStyle}>Subject</h3>
+                            <FormItem>
+                                {
+                                    getFieldDecorator('emailSubject', {
+                                        initialValue: 'Connect with AimsQuant',
+                                        rules: [{required: true, message: 'Please provide a valid subject'}]
+                                    })(
+                                        <Input placeholder='Subject' disabled/>
+                                    )
+                                }
+                            </FormItem>
+                        </Col>
+
+                        <Col span={24} style={{marginTop: '20px'}}>
                             <h3 style={contactUsInputStyle}>Email</h3>
                             <FormItem>
                                 {
                                     getFieldDecorator('email', {
                                         initialValue: Utils.isLoggedIn() ? Utils.getLoggedInUserEmail() : '',
                                         rules: [
-                                            {required: true, message: 'Please provide a valid subject'},
+                                            {required: true, message: 'Please provide a valid email'},
                                             {type: 'email', message: 'Please provide a valid email'}
                                         ]
                                     })(
@@ -91,26 +106,15 @@ class FooterImpl extends React.Component{
                                 }
                             </FormItem>
                         </Col>
+                        
                         <Col span={24} style={{marginTop: '20px'}}>
-                            <h3 style={contactUsInputStyle}>Subject</h3>
-                            <FormItem>
-                                {
-                                    getFieldDecorator('emailSubject', {
-                                        rules: [{required: true, message: 'Please provide a valid subject'}]
-                                    })(
-                                        <Input placeholder='Subject'/>
-                                    )
-                                }
-                            </FormItem>
-                        </Col>
-                        <Col span={24} style={{marginTop: '20px'}}>
-                            <h3 style={{...contactUsInputStyle}}>Detail</h3>
+                            <h3 style={{...contactUsInputStyle}}>Message</h3>
                             <FormItem>
                                 {
                                     getFieldDecorator('emailDetail', {
-                                        rules: [{required: true, message: 'Please provide the detail of your form'}]
+                                        rules: [{required: true, message: 'Please write a valid message'}]
                                     })(
-                                        <TextArea style={{marginTop: '4px'}} placeholder="Detail" rows={4}/>
+                                        <TextArea style={{marginTop: '4px'}} placeholder="Write a message" rows={4}/>
                                     )
                                 }
                             </FormItem>

@@ -196,7 +196,7 @@ class Signup extends Component {
             <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
               {getFieldDecorator('email', {
                 rules: [{
-                  type: 'email', message: 'The input is not valid E-mail!',
+                  type: 'email', message: 'Please input a valid E-mail!',
                 }, {
                   required: true, message: 'Please input your E-mail!',
                 }],
