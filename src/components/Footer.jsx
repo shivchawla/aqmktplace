@@ -2,7 +2,7 @@ import * as React from 'react';
 import axios from 'axios';
 import _ from 'lodash';
 import {Link} from 'react-router-dom';
-import {Row, Col, Modal, message, Form, Input} from 'antd';
+import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
 import {Utils} from '../utils';
 const aimsquantUrl = 'https://www.aimsquant.com';
 
@@ -14,7 +14,8 @@ class FooterImpl extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            contactUsModalvisible: false
+            contactUsModalvisible: false,
+            feedBackLoading: false
         };
     }
 
@@ -30,6 +31,7 @@ class FooterImpl extends React.Component{
                 const subject = values.emailSubject;
                 const feedback = values.emailDetail;
                 const email = values.email;
+                this.setState({feedBackLoading: true});
                 axios({
                     url: feedbackUrl,
                     method: 'POST',
@@ -45,6 +47,9 @@ class FooterImpl extends React.Component{
                 })
                 .catch(error => {
                     message.error('Sorry, Error occured while submitting Feedback')
+                })
+                .finally(() => {
+                    this.setState({feedBackLoading: false});
                 });
             }
         })
@@ -57,8 +62,16 @@ class FooterImpl extends React.Component{
             <Modal
                     title="Contact Us"
                     visible={this.state.contactUsModalvisible}
-                    onOk={this.submitContactUsForm}
-                    onCancel={this.toggleContactUsModal}
+                    footer={[
+                        <Button onClick={this.toggleContactUsModal}>CANCEL</Button>,
+                        <Button 
+                                type="primary" 
+                                loading={this.state.feedBackLoading} 
+                                onClick={this.submitContactUsForm}
+                        >
+                            SEND
+                        </Button>
+                    ]}
             >
                 <Row>
                     <Form onSubmit={this.submitContactUsForm}>
