@@ -299,6 +299,7 @@ class App extends React.Component {
                             <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> {/* Page */}
                             <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> {/* Page */}
                             <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> {/* Page */}
+                            <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> {/* Page */}
                             <Route 
                                     path='/dashboard' 
                                     component={Dashboard}
@@ -313,7 +314,6 @@ class App extends React.Component {
                             <Route exact={true} path='/signup' component={Signup} /> {/* Page */}
                             <Route exact={true} path='/faq' component={FAQ} /> {/* Page */}
                             <Route exact={true} path='/resetPassword' component={ResetPassword} /> {/* Page */}
-                            <Route exact={true} path='/stepperCreateAdvice' component={StepperAdviceForm} /> {/* Page */}
                             <Route component={PageNotFound} />
                         </Switch>
                     </Content>

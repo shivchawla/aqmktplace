@@ -151,8 +151,6 @@ export class Utils{
 		return new Promise((resolve, reject) => {
 			const errorCode = _.get(error, 'response.data.code', '');
 			const statusCode = _.get(error, 'response.data.statusCode', 0);
-			// console.log('errorCode', errorCode);
-			// console.log('statusCode',  typeof statusCode);
 			if (errorCode === 'server_error' && statusCode === 403) {
 				Utils.goToLoginPage(history, fromUrl);
 				reject(false);
@@ -178,6 +176,7 @@ export class Utils{
 		this.localStorageSaveObject('adviceFilter', {});
 		this.localStorageSave('selectedPage', 1);
 		this.localStorageSave('selectedTab', 'all');
+		this.localStorageSave('redirectToUrlFromLogin', '/advice');
 		this.setLoggedInUserInfo({});
 	}
 

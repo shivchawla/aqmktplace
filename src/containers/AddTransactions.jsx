@@ -783,7 +783,8 @@ class AddTransactionsImpl extends React.Component {
                 country: item.security.country,
                 name: item.security.detail.Nse_Name,
                 sector: item.security.detail.Sector,
-                weight: (item.weightInPortfolio * 100).toFixed(2)
+                weight: (item.weightInPortfolio * 100).toFixed(2),
+                unrealizedPnL: _.get(item, 'unrealizedPnL', 0)
             });
         });
 

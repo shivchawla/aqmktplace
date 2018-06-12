@@ -123,7 +123,7 @@ class AdviceDetailContentImpl extends React.Component {
         };
         const ownerColumns = ['name', 'symbol', 'shares', 'price', 'avgPrice', 'unrealizedPnL', 'weight'];
         const notOwnerColumns = ['name', 'symbol', 'shares', 'price', 'sector', 'weight'];
-        const portfolioTableColumns = isOwner ? ownerColumns : notOwnerColumns;
+        const portfolioTableColumns = ((isOwner || isAdmin) && !this.props.preview) ? ownerColumns : notOwnerColumns;
         const approvalStatus = _.get(approval, 'status', false);
 
         return (

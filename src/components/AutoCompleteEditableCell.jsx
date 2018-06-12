@@ -1,14 +1,13 @@
 import * as React from 'react';
 import axios from 'axios';
-import {Input, InputNumber, Form, AutoComplete, Icon, Spin, Row, Col} from 'antd';
+import {Input, Form, AutoComplete, Icon, Spin, message} from 'antd';
 import {withRouter} from 'react-router';
 import {Utils} from '../utils';
 
 const Option = AutoComplete.Option;
-const FormItem = Form.Item;
 const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
 
-const {requestUrl, aimsquantToken} = require('../localConfig');
+const {requestUrl} = require('../localConfig');
 
 export class AutoCompleteEditableCellImpl extends React.Component {
     constructor(props) {
@@ -31,6 +30,7 @@ export class AutoCompleteEditableCellImpl extends React.Component {
         })
         .catch(error => {
             Utils.checkErrorForTokenExpiry(error, this.props.history, this.props.match.url);
+            message.error('Error Occured while getting Stock Data');
         })
         .finally(() => {
             this.setState({spinning: false});
