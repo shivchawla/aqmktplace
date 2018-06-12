@@ -31,8 +31,7 @@ export class Home extends React.Component {
         super(props);
         this.state = {
             selectedTabBar: 'advisor',
-            loading: false,
-            contactUsModalvisible: false
+            loading: false
         }
     }
 
@@ -149,82 +148,9 @@ export class Home extends React.Component {
         );
     }
 
-    toggleContactUsModal = () => {
-        this.setState({contactUsModalvisible: !this.state.contactUsModalvisible});
-    }
-
-    submitContactUsForm = e => {
-        e.preventDefault();
-        const feedbackUrl = `${requestUrl}/user/sendFeedback`;
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                const subject = values.emailSubject;
-                const feedback = values.emailDetail;
-                axios({
-                    url: feedbackUrl,
-                    method: 'POST',
-                    headers: Utils.getAuthTokenHeader(),
-                    data: {
-                        feedback,
-                        subject
-                    }
-                })
-                .then(response => {
-                    message.success('Thank you for your feedback')
-                })
-                .catch(error => {
-                    message.error('Sorry, Error occured while submitting Feedback')
-                });
-            }
-        })
-    }
-
-    renderContactUsModal = () => {
-        const {getFieldDecorator} = this.props.form;
-
-        return (
-            <Modal
-                    title="Contact Us"
-                    visible={this.state.contactUsModalvisible}
-                    onOk={this.submitContactUsForm}
-                    onCancel={this.toggleContactUsModal}
-            >
-                <Row>
-                    <Form onSubmit={this.submitContactUsForm}>
-                        <Col span={24}>
-                            <h3 style={contactUsInputStyle}>Subject</h3>
-                            <FormItem>
-                                {
-                                    getFieldDecorator('emailSubject', {
-                                        rules: [{required: true, message: 'Please provide a valid subject'}]
-                                    })(
-                                        <Input placeholder='Subject'/>
-                                    )
-                                }
-                            </FormItem>
-                        </Col>
-                        <Col span={24} style={{marginTop: '20px'}}>
-                            <h3 style={{...contactUsInputStyle}}>Detail</h3>
-                            <FormItem>
-                                {
-                                    getFieldDecorator('emailDetail', {
-                                        rules: [{required: true, message: 'Please provide the detail of your form'}]
-                                    })(
-                                        <TextArea style={{marginTop: '4px'}} placeholder="Detail" rows={4}/>
-                                    )
-                                }
-                            </FormItem>
-                        </Col>
-                    </Form>
-                </Row>
-            </Modal>
-        );
-    }
-
     render() {
         return (
             <Col span={24} className='page-container'>
-                {this.renderContactUsModal()}
                 <HomeMeta />
                 <Row className="top-section">
                     <Col span={12} style={{paddingLeft: '40px'}}>
@@ -317,7 +243,7 @@ export class Home extends React.Component {
                         />
                     </Col>
                 </Row>
-                <Footer hello='sauravbiswas' header='Hello World' onContactUsClick={this.toggleContactUsModal} />
+                <Footer hello='sauravbiswas' header='Hello World' />
             </Col>
         );
     }
@@ -388,8 +314,3 @@ const FeatureCard = props => {
         </div>
     );
 };
-
-const contactUsInputStyle = {
-    fontSize: '14px',
-    color: '#4C4C4C'
-}
