@@ -133,7 +133,7 @@ class ForgotPasswordImpl extends Component {
             <FormItem className="signup-form-item">
               {getFieldDecorator('email', {
                 rules: [{
-                  type: 'email', message: 'The input is not valid E-mail!',
+                  type: 'email', message: 'Please input a valid E-mail!',
                 }, {
                   required: true, message: 'Please input your E-mail!',
                 }],
@@ -148,5 +148,7 @@ class ForgotPasswordImpl extends Component {
     );
   }
 }
+
+
 
 export const ForgotPassword =  Form.create()(withRouter(ForgotPasswordImpl));
