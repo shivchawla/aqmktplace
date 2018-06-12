@@ -698,11 +698,13 @@ export class AdviceFormImpl extends React.Component {
             case "Quartely": offset = '1q'; break;
         }
 
-        return this.props.isUpdate && this.state.isPublic ? 
-            this.state.rebalancingFrequency==="Daily" ? 
-            current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1) :
-            current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1 || compareDates(getDate(current.toDate()), getFirstMonday(offset)) != 0)  : 
-            current && (current < moment().startOf('day') || [0, 6].indexOf(current.weekday()) !== -1);
+        return (
+            this.props.isUpdate && this.state.isPublic 
+                ? this.state.rebalancingFrequency==="Daily" 
+                    ? current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1) 
+                    : current && (current < moment().endOf('day') || [0, 6].indexOf(current.weekday()) !== -1 || compareDates(getDate(current.toDate()), getFirstMonday(offset)) != 0)  
+                : current && (current < moment().startOf('day') || [0, 6].indexOf(current.weekday()) !== -1)
+        );
     }
 
     updateTicker = record => {
@@ -718,7 +720,7 @@ export class AdviceFormImpl extends React.Component {
     getUserAdvices = () => {
         const {requestUrl} = localConfig;
         this.setState({show: true});
-        fetchAjax(`${requestUrl}/advice?personal=1`)
+        fetchAjax(`${requestUrl}/advice?personal=1`, this.props.history, this.props.match.url)
         .then(response => {
             const adviceCount = _.get(response.data, 'count', 0);
             this.setState({adviceCount});
@@ -1034,16 +1036,16 @@ export class AdviceFormImpl extends React.Component {
                                                         header="Suitability"
                                                         content={
                                                             <div>
-                                                            <h3 style={{fontSize: '16px'}}>
-                                                                {
-                                                                    this.getGoalDetail('investorType')
-                                                                }
-                                                            </h3>
-                                                            <h3 style={{fontSize: '16px'}}>
-                                                                {   
-                                                                    this.getGoalDetail('suitability')
-                                                                }
-                                                            </h3>
+                                                                <h3 style={{fontSize: '16px'}}>
+                                                                    {
+                                                                        this.getGoalDetail('investorType')
+                                                                    }
+                                                                </h3>
+                                                                <h3 style={{fontSize: '16px'}}>
+                                                                    {   
+                                                                        this.getGoalDetail('suitability')
+                                                                    }
+                                                                </h3>
                                                             </div>
                                                         }
                                                     />
@@ -1418,7 +1420,6 @@ export class AdviceFormImpl extends React.Component {
     }
 
     renderPageContent = () => {
-        const {startDate, endDate} = this.state;
         const breadCrumbs = this.props.isUpdate
                 ? getBreadCrumbArray(UpdateAdviceCrumb, [
                     {name: this.state.adviceName, url: `/advice/${this.props.adviceId}`},

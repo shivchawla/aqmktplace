@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Row, Col} from 'antd';
+import {horizontalBox} from '../constants';
 import {WarningIcon} from './WarningIcon';
 
 export const InvestMentObjComponent = ({header, content, warning = false, reason = ''}) => {
@@ -21,3 +22,5 @@ const investmentObjLabelStyle = {
     fontSize: '14px',
     color: labelColor
 };
+
+const labelColor = '#898989';

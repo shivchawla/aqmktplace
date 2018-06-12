@@ -9,6 +9,7 @@ import Login from './containers/Login';
 import Signup from './containers/Signup';
 import Policy from './containers/Policy';
 import TnC from './containers/TnC';
+import {StepperAdviceForm} from './containers/StepperAdviceForm/AdviceForm';
 import {LoginModal} from './components/LoginModal'; 
 import {AuthRoute} from './components/AuthRoute';
 import {
@@ -47,7 +48,6 @@ const Home = asyncComponent(() => import("./containers/Home"));
 const FAQ = asyncComponent(() => import("./containers/FAQ"));
 const Dashboard = asyncComponent(() => import("./containers/Dashboard"));
 const ResetPassword = asyncComponent(() => import("./containers/ResetPassword"));
-const StepperAdviceForm = asyncComponent(() => import("./containers/StepperAdviceForm"));
 const {gaTrackingId, requestUrl} = require('./localConfig');
 
 class App extends React.Component {

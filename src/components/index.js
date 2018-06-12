@@ -46,3 +46,4 @@ export * from './ApprovalItemView';
 export * from './WarningIcon';
 export * from './AqTag';
 export * from './AqPerformanceMetrics';
+export * from './InvestmentObjComponent';

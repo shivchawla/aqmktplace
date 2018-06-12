@@ -18,7 +18,7 @@ export class AqPerformanceMetrics extends React.Component {
     }
 
     /*
-        Renders the RadioGroup which renders RadioButtons based on the timeline provided as a prop
+        Renders the RadioGroup which renders RadioButtons based on the timelines provided as a prop
     */
     renderRadioTimelineSelection = performanceMetricsTimeline => {
         return (
