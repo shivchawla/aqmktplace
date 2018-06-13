@@ -519,6 +519,14 @@ export const checkForInternet = (error, history) => {
 	}
 };
 
+export const getUnrealizedPnlPct = (unrealizedPnl, avgPrice, shares) => {
+	return (
+		avgPrice > 0 
+		? Number(((unrealizedPnl / (shares * avgPrice)) * 100).toFixed(2))
+		: 0
+	);
+};
+
 Utils.openSocketConnection();
 setInterval(function(){Utils.openSocketConnection();}, 10000);
 

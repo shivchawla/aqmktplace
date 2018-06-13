@@ -14,7 +14,7 @@ import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransac
 import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle, benchmarkColor, metricColor, performanceColor} from '../constants';
 import { MetricItem } from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
-import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax, getStockPerformance} from'../utils';
+import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax, getStockPerformance, getUnrealizedPnlPct} from'../utils';
 import {benchmarks} from '../constants/benchmarks';
 import {portfolioLimit} from '../constants';
 
@@ -785,16 +785,11 @@ class AddTransactionsImpl extends React.Component {
                 sector: item.security.detail.Sector,
                 weight: (item.weightInPortfolio * 100).toFixed(2),
                 unrealizedPnL: Number((_.get(item, 'unrealizedPnL', 0)).toFixed(2)),
-                unrealizedPnlPct: this.getUnrealizedPnlPct(_.get(item, 'unrealizedPnL', 0), _.get(item, 'avgPrice', 0), item.quantity || 0)
+                unrealizedPnlPct: getUnrealizedPnlPct(_.get(item, 'unrealizedPnL', 0), _.get(item, 'avgPrice', 0), item.quantity || 0)
             });
         });
 
         return stockPositions;
-    }
-
-    getUnrealizedPnlPct = (unrealizedPnl, avgPrice, shares) => {
-        let avgPriceMod = avgPrice > 0 ? avgPrice : 1;
-        return Number((unrealizedPnl / (shares * avgPriceMod) * 100).toFixed(2))
     }
 
     getInitialData = () => {

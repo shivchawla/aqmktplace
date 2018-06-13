@@ -2,7 +2,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import {Table, Tooltip} from 'antd';
 import {nameEllipsisStyle, metricColor} from '../constants';
-import {Utils} from '../utils';
+import {Utils, getUnrealizedPnlPct} from '../utils';
 
 export class AqStockPortfolioTable extends React.Component {
     constructor(props) {
@@ -56,7 +56,6 @@ export class AqStockPortfolioTable extends React.Component {
                 dataIndex: 'unrealizedPnL',
                 key: 'unrealizedPnL',
                 render: (text, record) => {
-                    console.log(Number(text), typeof Number(text));
                     const color = Number(text) >= 0 ? metricColor.positive : metricColor.negative;
 
                     return (
@@ -91,7 +90,7 @@ export class AqStockPortfolioTable extends React.Component {
                 avgPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'avgPrice', 0)),
                 unrealizedPnL: Number(_.get(position, 'unrealizedPnL', 0)),
                 // unrealizedPnL: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'unrealizedPnL', 0)),
-                unrealizedPnlPct: this.getUnrealizedPnlPct(_.get(position, 'unrealizedPnL', 0), _.get(position, 'avgPrice', 0), position.quantity || 0)
+                unrealizedPnlPct: getUnrealizedPnlPct(_.get(position, 'unrealizedPnL', 0), _.get(position, 'avgPrice', 0), position.quantity || 0)
             });
         });
 
@@ -111,11 +110,6 @@ export class AqStockPortfolioTable extends React.Component {
                 avgPrice: Utils.formatMoneyValueMaxTwoDecimals(avgPrice)
             }
         });
-    }
-
-    getUnrealizedPnlPct = (unrealizedPnl, avgPrice, shares) => {
-        let avgPriceMod = avgPrice > 0 ? avgPrice : 1;
-        return Number((unrealizedPnl / (shares * avgPriceMod) * 100).toFixed(2))
     }
 
     //NOT USED
