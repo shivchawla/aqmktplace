@@ -784,11 +784,17 @@ class AddTransactionsImpl extends React.Component {
                 name: item.security.detail.Nse_Name,
                 sector: item.security.detail.Sector,
                 weight: (item.weightInPortfolio * 100).toFixed(2),
-                unrealizedPnL: _.get(item, 'unrealizedPnL', 0)
+                unrealizedPnL: Number((_.get(item, 'unrealizedPnL', 0)).toFixed(2)),
+                unrealizedPnlPct: this.getUnrealizedPnlPct(_.get(item, 'unrealizedPnL', 0), _.get(item, 'avgPrice', 0), item.quantity || 0)
             });
         });
 
         return stockPositions;
+    }
+
+    getUnrealizedPnlPct = (unrealizedPnl, avgPrice, shares) => {
+        let avgPriceMod = avgPrice > 0 ? avgPrice : 1;
+        return Number((unrealizedPnl / (shares * avgPriceMod) * 100).toFixed(2))
     }
 
     getInitialData = () => {

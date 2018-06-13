@@ -56,11 +56,11 @@ export class AqStockPortfolioTable extends React.Component {
                 dataIndex: 'unrealizedPnL',
                 key: 'unrealizedPnL',
                 render: (text, record) => {
-
+                    console.log(Number(text), typeof Number(text));
                     const color = Number(text) >= 0 ? metricColor.positive : metricColor.negative;
 
                     return (
-                        <h3 style={{fontSize: '14px', color}}>{text} ({`${record.unrealizedPnlPct} %` || '-'})</h3>
+                        <h3 style={{fontSize: '14px', color}}>{Utils.formatMoneyValueMaxTwoDecimals(text)}&nbsp;&nbsp;({`${record.unrealizedPnlPct} %` || '-'})</h3>
                     );
                 }
             },
@@ -89,7 +89,8 @@ export class AqStockPortfolioTable extends React.Component {
                 shares: position.quantity || 0,
                 symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker', '-'),
                 avgPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'avgPrice', 0)),
-                unrealizedPnL: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'unrealizedPnL', 0)),
+                unrealizedPnL: Number(_.get(position, 'unrealizedPnL', 0)),
+                // unrealizedPnL: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'unrealizedPnL', 0)),
                 unrealizedPnlPct: this.getUnrealizedPnlPct(_.get(position, 'unrealizedPnL', 0), _.get(position, 'avgPrice', 0), position.quantity || 0)
             });
         });
@@ -114,7 +115,7 @@ export class AqStockPortfolioTable extends React.Component {
 
     getUnrealizedPnlPct = (unrealizedPnl, avgPrice, shares) => {
         let avgPriceMod = avgPrice > 0 ? avgPrice : 1;
-        return Number((unrealizedPnl / (shares * avgPriceMod)).toFixed(2))
+        return Number((unrealizedPnl / (shares * avgPriceMod) * 100).toFixed(2))
     }
 
     //NOT USED
