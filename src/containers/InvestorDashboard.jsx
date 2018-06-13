@@ -1092,7 +1092,7 @@ class InvestorDashboard extends React.Component {
                                     <h1>{this.state.showEmptyScreen.messageText}</h1>
                                     <Button 
                                             type="primary" 
-                                            onClick={() => this.props.history.push('/investordashboard/createportfolio')}
+                                            onClick={() => this.props.history.push('/dashboard/createportfolio')}
                                             style={{marginTop: '20px'}}
                                     >
                                         Create Portfolio

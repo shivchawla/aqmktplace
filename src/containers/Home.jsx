@@ -56,7 +56,7 @@ export class Home extends React.Component {
                 </Col>
                 <Col span={12} className="tab-content-button-container">
                     {/* <ButtonComponent 
-                                onClick={() => this.props.history.push('/advisordashboard/createadvice')} 
+                                onClick={() => this.props.history.push('/dashboard/createadvice')} 
                                 text="Create an Advice" 
                     /> */}
                     <Button 

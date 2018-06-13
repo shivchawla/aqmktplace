@@ -23,7 +23,7 @@ class AdvisorComponentImpl extends React.Component {
     }
 
     handleClick = advisorId => {
-        this.props.history.push(`/advisordashboard/advisorprofile/${advisorId}`);
+        this.props.history.push(`/dashboard/advisorprofile/${advisorId}`);
     }
 
     render() {

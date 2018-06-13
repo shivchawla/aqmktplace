@@ -62,6 +62,7 @@ class FooterImpl extends React.Component{
             <Modal
                     title="Contact Us"
                     visible={this.state.contactUsModalvisible}
+                    onCancel={this.toggleContactUsModal}
                     footer={[
                         <Button onClick={this.toggleContactUsModal}>CANCEL</Button>,
                         <Button 

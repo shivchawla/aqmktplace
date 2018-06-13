@@ -31,7 +31,7 @@ export default class Dashboard extends React.Component {
                 Utils.logoutUser();
                 this.props.history.push('/login');
             } else if (section === 'myProfile') {
-                this.props.history.push(this.props.history.push(`/dashboard/advisorprofile/${Utils.getUserInfo().advisor}`));
+                this.props.history.push(`/dashboard/advisorprofile/${Utils.getUserInfo().advisor}`);
             }
         }
         else {

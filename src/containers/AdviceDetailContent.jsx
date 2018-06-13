@@ -159,7 +159,7 @@ class AdviceDetailContentImpl extends React.Component {
                             advisor.user &&
                             <h5 
                                     style={{...userStyle, cursor: 'pointer'}} 
-                                    onClick={() => this.props.history.push(`/advisordashboard/advisorProfile/${advisor._id}`)}
+                                    onClick={() => this.props.history.push(`/dashboard/advisorProfile/${advisor._id}`)}
                             >
                                 By <span style={{color: primaryColor}}>{advisor.user.firstName} {advisor.user.lastName}</span>
                                 <span style={dateStyle}>{updatedDate}</span>

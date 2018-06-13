@@ -161,7 +161,7 @@ export default class AdvisorProfile extends React.Component {
                             <Button 
                                     style={{width: '150px', height: '40px', fontSize: '16px'}}
                                     type="primary" 
-                                    onClick={() => this.props.history.push('/advisordashboard/createadvice')}
+                                    onClick={() => this.props.history.push('/dashboard/createadvice')}
                             >
                                 Create One
                             </Button>
