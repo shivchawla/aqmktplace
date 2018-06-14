@@ -2,7 +2,6 @@ import * as React from 'react';
 import moment from 'moment';
 import {Row, Col, Form, DatePicker, Select} from 'antd';
 import {benchmarks} from '../../constants/benchmarks';
-import {getFirstMonday, compareDates, getDate} from '../../utils';
 import {getStepIndex} from './steps';
 
 const FormItem = Form.Item;

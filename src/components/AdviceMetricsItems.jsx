@@ -1,8 +1,7 @@
 import * as React from 'react';
-import {Row, Col, Tooltip} from 'antd';
+import {Row, Col} from 'antd';
 import {metricsLabelStyle, metricsValueStyle} from '../constants';
-import {MetricItem} from '../components';
-import {Utils} from '../utils';
+import {MetricItem} from '../components/MetricItem';
 
 export class AdviceMetricsItems extends React.Component {
     render() {

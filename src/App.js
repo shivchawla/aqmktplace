@@ -1,54 +1,137 @@
 import * as React from 'react';
 import ReactGA from 'react-ga';
-import {Layout, Menu, Row, Col, Button, Popover, Icon} from 'antd';
-import {Redirect, Route} from 'react-router';
-import {BrowserRouter as Router, withRouter, Link, Switch} from 'react-router-dom';
+import Loadable from 'react-loadable';
+import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
+import {Route} from 'react-router';
+import {withRouter, Switch} from 'react-router-dom';
 import {slide as SideMenu} from 'react-burger-menu'
-import AqBreadCrumb from './components/AqBreadCrumb';
-import Login from './containers/Login';
-import Signup from './containers/Signup';
-import Policy from './containers/Policy';
-import TnC from './containers/TnC';
-import {StepperAdviceForm} from './containers/StepperAdviceForm/AdviceForm';
-import {LoginModal} from './components/LoginModal'; 
-import {AuthRoute} from './components/AuthRoute';
-import {
-    TokenUpdate,
-    ForgotPassword, 
-    AuthMessage
-} from './containers';
-
-import {PageNotFound, NoIternetAccess, ForbiddenAccess} from './components';
-import AppliedRoute from './components/AppliedRoute';
-import {AuthComponent} from './containers/AuthComponent';
-import {HocExample} from './containers/HocExample';
-import {Utils, fetchAjax} from './utils';
+import {Utils} from './utils';
 import {primaryColor} from './constants';
-// import AdvisorDashboard from './containers/AdvisorDashboard';
-// import InvestorDashboard from './containers/InvestorDashboard';
-import asyncComponent from './components/AsyncComponent';
-
 import logo from "./assets/logo-advq-new.png";
 
 const SubMenu = Menu.SubMenu;
-const MenuItemGroup = Menu.ItemGroup;
-const {Header, Content, Footer, Sider} = Layout;
-const StockResearch = asyncComponent(() => import("./containers/StockResearch"));
-const InvestorDashboard = asyncComponent(() => import("./containers/InvestorDashboard"));
-const AdvisorDashboard = asyncComponent(() => import("./containers/AdvisorDashboard"));
-const PortfolioDetail = asyncComponent(() => import("./containers/PortfolioDetail"));
-const AdviceDetail = asyncComponent(() => import("./containers/AdviceDetail"));
-const CreatePortfolio = asyncComponent(() => import("./containers/CreatePortfolio"));
-const PortfolioAddTransactions = asyncComponent(() => import("./containers/PortfolioAddTransactions"));
-const CreateAdvice = asyncComponent(() => import("./containers/CreateAdvice"));
-const UpdateAdvice = asyncComponent(() => import("./containers/UpdateAdvice"));
-const ScreenAdvices = asyncComponent(() => import("./containers/ScreenAdvices"));
-const AdvisorProfile = asyncComponent(() => import("./containers/AdvisorProfile"));
-const Home = asyncComponent(() => import("./containers/Home"));
-const FAQ = asyncComponent(() => import("./containers/FAQ"));
-const Dashboard = asyncComponent(() => import("./containers/Dashboard"));
-const ResetPassword = asyncComponent(() => import("./containers/ResetPassword"));
-const {gaTrackingId, requestUrl} = require('./localConfig');
+const {Header, Content} = Layout;
+const {gaTrackingId} = require('./localConfig');
+
+const ScreenAdvices = Loadable({
+    loader: () => import('./containers/ScreenAdvices'),
+    loading: () => <div>Loading Page</div>
+});
+
+const Home = Loadable({
+    loader: () => import('./containers/Home'),
+    loading: () => <div>Loading Page</div>
+});
+
+const StockResearch = Loadable({
+    loader: () => import('./containers/StockResearch'),
+    loading: () => <div>Loading Page</div>
+});
+
+const TokenUpdate = Loadable({
+    loader: () => import('./containers/TokenUpdate'),
+    loading: () => <div>Loading Page</div>
+});
+
+const AdviceDetail = Loadable({
+    loader: () => import('./containers/AdviceDetail'),
+    loading: () => <div>Loading Page</div>
+});
+
+const CreateAdvice = Loadable({
+    loader: () => import('./containers/CreateAdvice'),
+    loading: () => <div>Loading Page</div>
+});
+
+const CreatePortfolio = Loadable({
+    loader: () => import('./containers/CreatePortfolio'),
+    loading: () => <div>Loading Page</div>
+});
+
+const UpdateAdvice = Loadable({
+    loader: () => import('./containers/UpdateAdvice'),
+    loading: () => <div>Loading Page</div>
+});
+
+const PortfolioDetail = Loadable({
+    loader: () => import('./containers/PortfolioDetail'),
+    loading: () => <div>Loading Page</div>
+});
+
+const PortfolioAddTransactions = Loadable({
+    loader: () => import('./containers/PortfolioAddTransactions'),
+    loading: () => <div>Loading Page</div>
+});
+
+const AdvisorProfile = Loadable({
+    loader: () => import('./containers/AdvisorProfile'),
+    loading: () => <div>Loading Page</div>
+});
+
+const StepperAdviceForm = Loadable({
+    loader: () => import('./containers/StepperAdviceForm/AdviceForm'),
+    loading: () => <div>Loading Page</div>
+});
+
+const Dashboard = Loadable({
+    loader: () => import('./containers/Dashboard'),
+    loading: () => <div>Loading Page</div>
+});
+
+const Policy = Loadable({
+    loader: () => import('./containers/Policy'),
+    loading: () => <div>Loading Page</div>
+});
+
+const TnC = Loadable({
+    loader: () => import('./containers/TnC'),
+    loading: () => <div>Loading Page</div>
+});
+
+const ForgotPassword = Loadable({
+    loader: () => import('./containers/ForgotPassword'),
+    loading: () => <div>Loading Page</div>
+});
+
+const NoIternetAccess = Loadable({
+    loader: () => import('./components/NoIternetAccess'),
+    loading: () => <div>Loading Page</div>
+});
+
+const ForbiddenAccess = Loadable({
+    loader: () => import('./components/ForbiddenAccess'),
+    loading: () => <div>Loading Page</div>
+});
+
+const AuthMessage = Loadable({
+    loader: () => import('./containers/AuthMessage'),
+    loading: () => <div>Loading Page</div>
+});
+
+const Login = Loadable({
+    loader: () => import('./containers/Login'),
+    loading: () => <div>Loading Page</div>
+});
+
+const Signup = Loadable({
+    loader: () => import('./containers/Signup'),
+    loading: () => <div>Loading Page</div>
+});
+
+const FAQ = Loadable({
+    loader: () => import('./containers/FAQ'),
+    loading: () => <div>Loading Page</div>
+});
+
+const ResetPassword = Loadable({
+    loader: () => import('./containers/ResetPassword'),
+    loading: () => <div>Loading Page</div>
+});
+
+const PageNotFound = Loadable({
+    loader: () => import('./components/PageNotFound'),
+    loading: () => <div>Loading Page</div>
+});
 
 class App extends React.Component {
     constructor(props) {
@@ -58,14 +141,6 @@ class App extends React.Component {
     }
 
     componentWillMount() {
-        // const params = new URLSearchParams(this.props.location.search);
-        // const token = params.get('token') || '';
-        // console.log('Check Token', Utils.checkToken(token));
-        // if (Utils.checkToken(token)) {
-        //     Utils.autoLogin(token,this.props.history, this.props.match.url, () => {
-        //         this.setState({isLoggedIn: true})
-        //     });
-        // }
         this.onRouteChanged(this.props.location.pathname);
     }
 
@@ -95,9 +170,9 @@ class App extends React.Component {
             {regExp: '^\/$', title: 'Home - AdviceQube'},
             {regExp: '^\/policies\/tnc$', title: 'Terms and Conditions - AdviceQube'},
             {regExp: '^\/policies\/privacy$', title: 'Privacy Policy - AdviceQube'},
-            {regExp: '^\/dashboard$', title: 'Investor Dashboard - AdviceQube'},
+            {regExp: '^\/dashboard\/investor\/[A-Za-z0-9]+$', title: 'Investor Dashboard - AdviceQube'},
+            {regExp: '^\/dashboard\/advisor\/[A-Za-z0-9]+$', title: 'Advisor Dashboard - AdviceQube'},
             {regExp: '^\/dashboard\/createportfolio$', title: 'Create Portfolio - AdviceQube'},
-            {regExp: '^\/dashboard$', title: 'Advisor Dashboard - AdviceQube'},
             {regExp: '^\/stockresearch$', title: 'Stock Research - AdviceQube'},
             {regExp: '^\/login$', title: 'Login - AdviceQube'},
             {regExp: '^\/signup$', title: 'Register - AdviceQube'},
@@ -287,33 +362,30 @@ class App extends React.Component {
                             i.e investordashboard, advisordashboard, advice, stockresearch, quantresearch
                         */}
                         <Switch>
-                            <Route exact={true} path='/home' component={Home} /> {/* Page */}
-                            <Route exact={true} path='/' component={Home} /> {/* Page */}
-                            <Route exact={true} path='/advice' component={ScreenAdvices} /> {/* Page */}
-                            <Route path="/stockresearch" exact component={StockResearch} /> {/* Page */}
+                            <Route exact={true} path='/home' component={Home} /> 
+                            <Route exact={true} path='/' component={Home} /> 
+                            <Route exact={true} path='/advice' component={ScreenAdvices} /> 
+                            <Route path="/stockresearch" exact component={StockResearch} /> 
                             <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                            <Route exact={true} path='/advice/:id' component={AdviceDetail} /> {/* Page */}
-                            <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> {/* Page */}
-                            <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> {/* Page */}
-                            <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> {/* Page */}
-                            <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> {/* Page */}
-                            <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> {/* Page */}
-                            <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> {/* Page */}
-                            <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> {/* Page */}
-                            <Route 
-                                    path='/dashboard' 
-                                    component={Dashboard}
-                            /> {/* Page */}
-                            <Route path='/policies/privacy' component={Policy} /> {/* Page */}
-                            <Route path='/policies/tnc' component={TnC} /> {/* Page */}
-                            <Route path='/forgotPassword' component={ForgotPassword} /> {/* Page */}
-                            <Route path='/errorPage' component={NoIternetAccess} /> {/* Page */}
-                            <Route path='/forbiddenAccess' component={ForbiddenAccess} /> {/* Page */}
+                            <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 
+                            <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
+                            <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> 
+                            <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
+                            <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
+                            <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> 
+                            <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> 
+                            <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
+                            <Route path='/dashboard' component={Dashboard} /> 
+                            <Route path='/policies/privacy' component={Policy} /> 
+                            <Route path='/policies/tnc' component={TnC} /> 
+                            <Route path='/forgotPassword' component={ForgotPassword} /> 
+                            <Route path='/errorPage' component={NoIternetAccess} /> 
+                            <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
                             <Route path='/authMessage' component={AuthMessage} /> 
-                            <Route exact={true} path='/login' component={Login} /> {/* Page */}
-                            <Route exact={true} path='/signup' component={Signup} /> {/* Page */}
-                            <Route exact={true} path='/faq' component={FAQ} /> {/* Page */}
-                            <Route exact={true} path='/resetPassword' component={ResetPassword} /> {/* Page */}
+                            <Route exact={true} path='/login' component={Login} /> 
+                            <Route exact={true} path='/signup' component={Signup} /> 
+                            <Route exact={true} path='/faq' component={FAQ} /> 
+                            <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
                             <Route component={PageNotFound} />
                         </Switch>
                     </Content>

@@ -1,12 +1,12 @@
 import * as React from 'react';
-import axios from 'axios';
-import {Row, Col, Button, Modal, Input, Form, message} from 'antd';
-import {Motion, spring} from 'react-motion';
-import {Utils, fetchAjax} from '../utils';
+import YouTube from 'react-youtube';
+import {pulse} from 'react-animations';
+import Radium, {StyleRoot} from 'radium';
+import Modal from 'react-responsive-modal';
+import {Row, Col, Button, Form, Icon} from 'antd';
 import adviceLogo from '../assets/AdviceLogo.svg';
 import portfolioLogo from '../assets/PortfolioLogo.svg';
 import heroImage from '../assets/HeroImageSmall.svg';
-import chevronRight from '../assets/chevron-right.svg';
 import people from '../assets/people.svg';
 import wheel from '../assets/wheel.svg';
 import globe from '../assets/globe.svg';
@@ -21,17 +21,13 @@ import {Footer} from '../components/Footer';
 import {HomeMeta} from '../metas';
 import '../css/home.css';
 
-
-const {requestUrl} = require('../localConfig');
-const FormItem = Form.Item;
-const {TextArea} = Input;
-
 export class Home extends React.Component { 
     constructor(props) {
         super(props);
         this.state = {
             selectedTabBar: 'advisor',
-            loading: false
+            loading: false,
+            youtubeModalVisible: false
         }
     }
 
@@ -148,103 +144,171 @@ export class Home extends React.Component {
         );
     }
 
+    onYoutubePlayerReady = event => {
+        event.target.pauseVideo();
+    }
+
+    toggleVideoPlayer = () => {
+        this.setState({youtubeModalVisible: !this.state.youtubeModalVisible});
+    }
+
+    renderVidePlayerModal = () => {
+        const youtubeOptions = {
+            height: '500',
+            width: '900',
+            playerVars: { // https://developers.google.com/youtube/player_parameters
+                autoplay: 0
+            }
+        };
+
+        return (
+            <Modal
+                open={this.state.youtubeModalVisible}
+                onClose={this.toggleVideoPlayer}
+                center
+                showCloseIcon={false}
+                animationDuration={500}
+                closeOnOverlayClick
+                closeOnEsc
+                classNames={{ overlay: 'custom-overlay', modal: 'custom-modal' }}
+            >
+                <Row>
+                    <Col span={24}>
+                        <YouTube
+                            className="youtube-player"
+                            videoId="Ppc_c77aNDI"
+                            opts={youtubeOptions}
+                            onReady={this._onReady}
+                        />
+                    </Col>
+                </Row>
+            </Modal>
+        );
+    }
+
     render() {
         return (
-            <Col span={24} className='page-container'>
-                <HomeMeta />
-                <Row className="top-section">
-                    <Col span={12} style={{paddingLeft: '40px'}}>
-                        <Row>
-                            <Col span={24}>
-                                <h1 className="hero-text">Expert-Sourced<br></br>Investment Portfolio</h1>
+            <StyleRoot>
+                {this.renderVidePlayerModal()}
+                <Col span={24} className='page-container'>
+                    <HomeMeta />
+                    <Row className="top-section">
+                        <Col span={12} style={{paddingLeft: '40px'}}>
+                            <Row>
+                                <Col span={24}>
+                                    <h1 className="hero-text">Expert-Sourced<br></br>Investment Portfolio</h1>
+                                </Col>
+                                <Col span={24}>
+                                    <h5 className="hero-description-text">
+                                        Best investment ideas.<br></br>Let the experts help you build the portfolio you desire.
+                                    </h5>
+                                </Col>
+                                
+                                <Col span={24}>
+                                    <Button 
+                                            className="signup-button"
+                                            onClick={() => this.props.history.push('/advice')}
+                                    >
+                                        Find Investment Advice
+                                    </Button>
+                                    <Button 
+                                            style={{marginLeft: '20px'}}
+                                            className="action-buttons"
+                                            onClick={() => this.props.history.push('/dashboard/createadvice')}
+                                    >
+                                        Create Investment Advice
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Col span={12} className='hero-image'>
+                            <object type="image/svg+xml" style={{marginLeft: '-20px'}} data={heroImage}></object>
+                        </Col>
+                        <Col 
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    bottom: '20%',
+                                    position: 'absolute'
+                                }} 
+                                span={24}
+                        >
+                            <div style={styles.bounce}>
+                                <Icon 
+                                        className='play-icon animated infinite bounce' 
+                                        type="play-circle" 
+                                        onClick={this.toggleVideoPlayer}
+                                />
+                            </div>
+                            <span 
+                                    style={{marginTop: '5px', fontWeight: 400, color: '#444', fontSize: '14px'}}
+                            >
+                                Play Video
+                            </span>
+                        </Col>
+                    </Row>
+                    <Row className="middle-section">
+                        <Col span={10} className="middle-left-section">
+                            <Col className='tab-bar'>
+                                <TabBarElement 
+                                        onClick={() => this.handleTabBarClick('advisor')} 
+                                        text='Advisor' 
+                                        isSelected={this.state.selectedTabBar === 'advisor' ? true : false} 
+                                />
+                                <TabBarElement 
+                                        onClick={() => this.handleTabBarClick('investor')} 
+                                        text='Investor' 
+                                        isSelected={this.state.selectedTabBar === 'investor' ? true : false} 
+                                />
                             </Col>
-                            <Col span={24}>
-                                <h5 className="hero-description-text">
-                                    Best investment ideas.<br></br>Let the experts help you build the portfolio you desire.
-                                </h5>
-                            </Col>
-                            
-                            <Col span={24}>
-                                <Button 
-                                        className="signup-button"
-                                        onClick={() => this.props.history.push('/advice')}
-                                >
-                                    Find Investment Advice
-                                </Button>
-                                <Button 
-                                        style={{marginLeft: '20px'}}
-                                        className="action-buttons"
-                                        onClick={() => this.props.history.push('/dashboard/createadvice')}
-                                >
-                                    Create Investment Advice
-                                </Button>
-                            </Col>
-                        </Row>
-                    </Col>
-                    <Col span={12} className='hero-image'>
-                        <object type="image/svg+xml" style={{marginLeft: '-20px'}} data={heroImage}></object>
-                    </Col>
-                </Row>
-                <Row className="middle-section">
-                    <Col span={10} className="middle-left-section">
-                        <Col className='tab-bar'>
-                            <TabBarElement 
-                                    onClick={() => this.handleTabBarClick('advisor')} 
-                                    text='Advisor' 
-                                    isSelected={this.state.selectedTabBar === 'advisor' ? true : false} 
+                            {
+                                this.state.selectedTabBar === 'advisor' 
+                                ? this.renderAdvisorMiddleLeftSection()
+                                : this.renderInvestorMiddleLeftSection()
+                            }
+                        </Col>
+                        <Col span={14} className="middle-right-section">
+                            {
+                                this.state.selectedTabBar === 'advisor'
+                                ? this.reenderAdvisorMiddleRightSection()
+                                : this.renderInvestorMiddleRightSection()
+                            }
+                        </Col>
+                    </Row>
+                    <Row className="lower-section">
+                        <h3 className="lower-section-header">Other Features</h3>
+                        <Col span={24} className="lower-section-card-container">
+                            <FeatureCard 
+                                    key="1"
+                                    icon={research}
+                                    header="Quant Research"
+                                    content="Systematically research investment ideas"
                             />
-                            <TabBarElement 
-                                    onClick={() => this.handleTabBarClick('investor')} 
-                                    text='Investor' 
-                                    isSelected={this.state.selectedTabBar === 'investor' ? true : false} 
+                            <FeatureCard 
+                                    key="2"
+                                    icon={share}
+                                    header="Share"
+                                    content="Share your ideas with community"
+                            />
+                            <FeatureCard
+                                    key="3" 
+                                    icon={automate}
+                                    header="Automate"
+                                    content="Automate your investment process"
+                            />
+                            <FeatureCard
+                                    key="4" 
+                                    iconStyle={{transform: 'scale(0.9, 0.9)'}}
+                                    icon={realtime}
+                                    header="Realtime"
+                                    content="Get real-time data for latest updates"
                             />
                         </Col>
-                        {
-                            this.state.selectedTabBar === 'advisor' 
-                            ? this.renderAdvisorMiddleLeftSection()
-                            : this.renderInvestorMiddleLeftSection()
-                        }
-                    </Col>
-                    <Col span={14} className="middle-right-section">
-                        {
-                            this.state.selectedTabBar === 'advisor'
-                            ? this.reenderAdvisorMiddleRightSection()
-                            : this.renderInvestorMiddleRightSection()
-                        }
-                    </Col>
-                </Row>
-                <Row className="lower-section">
-                    <h3 className="lower-section-header">Other Features</h3>
-                    <Col span={24} className="lower-section-card-container">
-                        <FeatureCard 
-                                key="1"
-                                icon={research}
-                                header="Quant Research"
-                                content="Systematically research investment ideas"
-                        />
-                        <FeatureCard 
-                                key="2"
-                                icon={share}
-                                header="Share"
-                                content="Share your ideas with community"
-                        />
-                        <FeatureCard
-                                key="3" 
-                                icon={automate}
-                                header="Automate"
-                                content="Automate your investment process"
-                        />
-                        <FeatureCard
-                                key="4" 
-                                iconStyle={{transform: 'scale(0.9, 0.9)'}}
-                                icon={realtime}
-                                header="Realtime"
-                                content="Get real-time data for latest updates"
-                        />
-                    </Col>
-                </Row>
-                <Footer hello='sauravbiswas' header='Hello World' />
-            </Col>
+                    </Row>
+                    <Footer hello='sauravbiswas' header='Hello World' />
+                </Col>
+            </StyleRoot>
         );
     }
 }
@@ -258,17 +322,6 @@ const TabBarElement = props => {
         <div className="tab-bar-component" onClick={props.onClick}>
             <h3 className="tab-bar-text">{text}</h3>
             <div className="bar" style={{backgroundColor: barColor}}></div>
-        </div>
-    );
-};
-
-const ButtonComponent = props => {
-    const {text} = props;
-
-    return (
-        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '-140px'}} onClick={props.onClick}>
-            <span style={{color: '#fff', fontSize: '16px'}}>{text}</span>
-            <img style={{marginLeft: '5px', marginTop: '2px'}} src={chevronRight} />
         </div>
     );
 };
@@ -313,4 +366,11 @@ const FeatureCard = props => {
             <h3 style={{fontSize: '16px', color: '#333333', marginTop: '15px'}}>{content}</h3>
         </div>
     );
+};
+
+const styles = {
+    bounce: {
+      animation: 'flash 2s infinite',
+      animationName: Radium.keyframes(pulse, 'flash')
+    }
 };

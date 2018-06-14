@@ -4,8 +4,9 @@ import _ from 'lodash';
 import {Link} from 'react-router-dom';
 import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
 import {Utils} from '../utils';
-const aimsquantUrl = 'https://www.aimsquant.com';
+import '../css/home.css';
 
+const aimsquantUrl = 'https://www.aimsquant.com';
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 const {requestUrl} = require('../localConfig');

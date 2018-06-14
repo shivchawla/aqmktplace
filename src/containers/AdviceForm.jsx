@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Loadable from 'react-loadable';
 import {withRouter} from 'react-router';
 import moment from 'moment';
 import axios from 'axios';
@@ -6,7 +7,11 @@ import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import {AdviceDetailContent} from './AdviceDetailContent';
 import {inputHeaderStyle, buttonStyle, loadingColor, benchmarkColor, performanceColor, shadowBoxStyle, metricColor, graphColors, primaryColor, sectors, goals, portfolioValuation, capitalization} from '../constants';
-import {HighChartNew, ForbiddenAccess, StockResearchModal, AqPageHeader, Footer, WarningIcon} from '../components';
+import {WarningIcon} from '../components/WarningIcon';
+import {HighChartNew} from '../components/HighChartNew';
+import ForbiddenAccess from '../components/ForbiddenAccess';
+import {AqPageHeader} from '../components/AqPageHeader';
+import {Footer} from '../components/Footer';
 import {getStockPerformance, Utils, getBreadCrumbArray, getFirstMonday, compareDates, getDate, fetchAjax} from '../utils';
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {benchmarks} from '../constants/benchmarks';
@@ -29,6 +34,10 @@ import {
     Radio
 } from 'antd';
 import {adviceLimit} from '../constants';
+const StockResearchModal = Loadable({
+    loader: () => import('../components/StockResearchModal'),
+    loading: () => <div>Loading</div>
+});
 
 const localConfig = require('../localConfig.js');
 

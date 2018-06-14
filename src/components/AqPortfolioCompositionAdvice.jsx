@@ -3,17 +3,18 @@ import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
 import {withRouter} from 'react-router';
-import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker, Icon, Tooltip} from 'antd';
-import {MetricItem, AqStockPortfolioTable} from '../components';
+import {Collapse, Row, Col, DatePicker, Icon, Tooltip} from 'antd';
+import {MetricItem} from '../components/MetricItem';
+import {Utils} from '../utils';
+import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
 import {metricsValueStyle, metricsLabelStyle, nameEllipsisStyle, metricColor} from '../constants';
 import {EditableCell} from './AqEditableCell';
-import {getStockData, Utils} from '../utils';
 import '../css/adviceTransactionTable.css';
 
 const Panel = Collapse.Panel;
 const dateFormat ='YYYY-MM-DD';
 
-const {requestUrl, aimsquantToken} = require('../localConfig');
+const {requestUrl} = require('../localConfig');
 const columns = ['name', 'shares', 'price', 'avgPrice', 'sector', 'weight'];
 
 class AqPortfolioCompositionAdviceImpl extends React.Component {

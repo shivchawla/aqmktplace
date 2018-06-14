@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Row, Col, Collapse} from 'antd';
-import {Footer} from '../components';
+import {Footer} from '../components/Footer';
 import {shadowBoxStyle} from '../constants';
 
 const Panel = Collapse.Panel;

@@ -1,10 +1,20 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
+import Loadable from 'react-loadable';
 import _ from 'lodash';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Row, Col, Tabs, Select, Table, Button, Radio, message, Icon} from 'antd';
-import {MetricItem, ListMetricItem, HighChartNew, HighChartBar, DashboardCard, ForbiddenAccess, AqRate, AqStockPortfolioTable, StockResearchModal, AqTag, AqPageHeader} from '../components';
+import {AqPageHeader} from '../components/AqPageHeader';
+import {AqTag} from '../components/AqTag';
+import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
+import {MetricItem} from '../components/MetricItem';
+import {ListMetricItem} from '../components/ListMetricItem';
+import {HighChartNew} from '../components/HighChartNew';
+import {HighChartBar} from '../components/HighChartBar';
+import {DashboardCard} from '../components/DashboardCard';
+import ForbiddenAccess from '../components/ForbiddenAccess';
+import {AqRate} from '../components/AqRate';
 import {nameEllipsisStyle, benchmarkColor, metricColor, loadingColor, primaryColor, horizontalBox} from '../constants';
 import {MyChartNew} from './MyChartNew';
 import {InvestorDashboardMeta} from '../metas';
@@ -12,6 +22,10 @@ import {generateColorData, Utils, fetchAjax, getStockPerformance, getBreadCrumbA
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import 'react-loading-bar/dist/index.css'
 
+const StockResearchModal = Loadable({
+    loader: () => import('../components/StockResearchModal'),
+    loading: () => <div>Loading</div>
+});
 const {requestUrl, aimsquantToken} = require('../localConfig');
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
@@ -1234,10 +1248,10 @@ class InvestorDashboard extends React.Component {
                     className="main-loader"
                 />
                 <InvestorDashboardMeta />
-               {
+            {
                     !this.state.defaultPortfolioLoading &&
                     this.renderPageContent()
-               }
+            }
             </Col>
         );
     }

@@ -1,9 +1,15 @@
 import * as React from 'react';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
-import {Spin, Row, Col, Tabs, Collapse, DatePicker, Radio, Input, Icon} from 'antd';
+import {Spin, Row, Col, Collapse, DatePicker, Radio, Icon} from 'antd';
 import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../constants';
-import {AqStockPortfolioTable, MetricItem, AdviceMetricsItems, AqRate, IconItem, WarningIcon, AqTag} from '../components';
+import {AqTag} from '../components/AqTag';
+import {WarningIcon} from '../components/WarningIcon'
+import {IconItem} from '../components/IconItem';
+import {AqRate} from '../components/AqRate';
+import {AdviceMetricsItems} from '../components/AdviceMetricsItems';
+import {MetricItem} from '../components/MetricItem';
+import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
 import {MyChartNew} from './MyChartNew';
 import medalIcon from '../assets/award.svg';
 import {Utils} from '../utils';
@@ -127,7 +133,7 @@ class AdviceDetailContentImpl extends React.Component {
         const approvalStatus = _.get(approval, 'status', false);
 
         return (
-            <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
+            <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom: '20px'}}>
                 <Row className="row-container" type="flex" justify="space-between" align="middle">
                     <Col span={18}>
                         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>

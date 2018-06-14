@@ -1,28 +1,37 @@
 import * as React from 'react';
+import Loadable from 'react-loadable';
 import _ from 'lodash';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
 import moment from 'moment';
 import {withRouter} from 'react-router'
-import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, Table, notification, Spin} from 'antd';
-import {adviceTransactions} from '../mockData/AdviceTransaction';
-import {AqPortfolioCompositionAdvice, AqPortfolioTransactionAdvice, AqStockPortfolioTable, AqStockTableTransaction, AqHighChartMod, ForbiddenAccess, AqPageHeader, StockResearchModal, Footer} from '../components';
+import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, notification, Spin} from 'antd';
+import {Footer} from '../components/Footer';
+import {AqPageHeader} from '../components/AqPageHeader';
+import ForbiddenAccess from '../components/ForbiddenAccess';
+import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
+import {AqPortfolioCompositionAdvice} from '../components/AqPortfolioCompositionAdvice';
+import {AqPortfolioTransactionAdvice} from '../components/AqPortfolioTransactionAdvice';
 import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
-import {pageTitleStyle, newLayoutStyle, buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle, benchmarkColor, metricColor, performanceColor} from '../constants';
-import { MetricItem } from '../components/MetricItem';
+import {buttonStyle, metricsLabelStyle, metricsValueStyle, loadingColor, shadowBoxStyle, benchmarkColor, metricColor, performanceColor} from '../constants';
+import {MetricItem} from '../components/MetricItem';
 import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
 import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax, getStockPerformance, getUnrealizedPnlPct} from'../utils';
 import {benchmarks} from '../constants/benchmarks';
 import {portfolioLimit} from '../constants';
 
+const StockResearchModal = Loadable({
+    loader: () => import('../components/StockResearchModal'),
+    loading: () => <div>Loading</div>
+});
+
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
 const FormItem = Form.Item;
-const {aimsquantToken, requestUrl} = require('../localConfig.js');
-
+const {requestUrl} = require('../localConfig.js');
 const dateFormat = 'YYYY-MM-DD';
 
 class AddTransactionsImpl extends React.Component {

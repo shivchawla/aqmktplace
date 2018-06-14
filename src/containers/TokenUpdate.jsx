@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Utils} from '../utils';
-import {Spin, Icon} from 'antd';
+import {Icon} from 'antd';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router-dom';
 import axios from 'axios';

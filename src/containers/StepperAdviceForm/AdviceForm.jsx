@@ -4,7 +4,7 @@ import axios from 'axios';
 import Promise from 'bluebird';
 import moment from 'moment';
 import {Row, Col, Form, Steps, Button, message} from 'antd';
-import {AqPageHeader} from '../../components';
+import {AqPageHeader} from '../../components/AqPageHeader';
 import {PostWarningModal} from './PostWarningModal';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
 import {handleCreateAjaxError, openNotification, getBreadCrumbArray, Utils, getStockPerformance} from '../../utils';

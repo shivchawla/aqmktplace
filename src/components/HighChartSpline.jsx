@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Col, Row, Radio} from 'antd';
+import {Col} from 'antd';
 import HighChart from 'highcharts';
 
 export class HighChartSpline extends React.Component { 

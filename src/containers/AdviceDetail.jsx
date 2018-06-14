@@ -1,27 +1,34 @@
 import * as React from 'react';
+import Loadable from 'react-loadable';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Tabs, Button, Modal, message, Collapse, Radio, Input} from 'antd';
+import {Row, Col, Tabs, Button, Modal, message, Input} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, loadingColor, shadowBoxStyle, benchmarkColor, primaryColor, buttonStyle} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {MetricItem, StockResearchModal, AqPageHeader, ForbiddenAccess, Footer, ApprovalItem, ApprovalItemView} from '../components';
+import {ApprovalItemView} from '../components/ApprovalItemView';
+import {ApprovalItem} from '../components/ApprovalItem';
+import {Footer} from '../components/Footer';
+import ForbiddenAccess from '../components/ForbiddenAccess';
+import {MetricItem} from '../components/MetricItem';
+import {AqPageHeader} from '../components/AqPageHeader';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {AdviceDetailMeta} from '../metas';
 import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import '../css/adviceDetail.css';
 
-
+const StockResearchModal = Loadable({
+    loader: () => import('../components/StockResearchModal'),
+    loading: () => <div>Loading</div>
+});
 const TabPane = Tabs.TabPane;
-const RadioGroup = Radio.Group;
-const Panel = Collapse.Panel;
 const {TextArea} = Input;
 
-const {aimsquantToken, requestUrl} = require('../localConfig.js');
+const {requestUrl} = require('../localConfig.js');
 const DateHelper = require('../utils/date');
 const dateFormat = 'Do MMMM YYYY';
 

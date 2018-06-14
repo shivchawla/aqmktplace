@@ -5,7 +5,7 @@ import { Spin, Icon } from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import Loading from 'react-loading-bar'
-import {Footer} from '../components';
+import {Footer} from '../components/Footer';
 import 'react-loading-bar/dist/index.css'
 import 'react-quill/dist/quill.snow.css';
 import '../css/quillContainer.css';

@@ -225,3 +225,23 @@ body {
 .home-action-buttons:hover {
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
+
+.youtube-player {
+    /* box-shadow: 0 16px 32px rgba(0,0,0,0.4); */
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.play-icon {
+    font-size: 50px;
+    color: #03A7AD;
+    cursor: pointer;
+    margin-top: -20px;
+}
+
+.custom-modal {
+    margin-left: -120px;
+    width: 950px;
+    background-color: transparent;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}

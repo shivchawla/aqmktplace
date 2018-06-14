@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Row, Col, Form, Input, Select, Radio} from 'antd';
-import {InvestMentObjComponent} from '../../components';
+import {InvestMentObjComponent} from '../../components/InvestmentObjComponent';
 import {goals, portfolioValuation, sectors, capitalization} from '../../constants';
 import {getStepIndex} from './steps';
 

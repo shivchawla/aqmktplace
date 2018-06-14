@@ -2,15 +2,14 @@ import * as React from 'react';
 import axios from 'axios';
 import _ from 'lodash';
 import {withRouter} from 'react-router';
-import {Input, Button, Form, Icon, Popover, Row, Col, Avatar, Radio, Checkbox, message} from 'antd';
+import {Input, Button, Form, Icon,Row, Col, Radio, message} from 'antd';
 import {Utils} from '../utils';
 import {primaryColor} from '../constants';
 
-const {TextArea} = Input;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
-const {aimsquantToken, requestUrl} = require('../localConfig');
+const {requestUrl} = require('../localConfig');
 
 class UpdateAdvisorProfileImpl extends React.Component {
     constructor(props) {
