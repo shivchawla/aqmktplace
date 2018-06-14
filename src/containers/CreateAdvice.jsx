@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {AdviceForm} from './AdviceForm';
+import {StepperAdviceForm} from './StepperAdviceForm/AdviceForm';
 import {CreateAdviceMeta} from '../metas';
 
 export default class CreateAdvice extends React.Component {
@@ -7,7 +7,7 @@ export default class CreateAdvice extends React.Component {
         return (
             <React.Fragment>
                 <CreateAdviceMeta />
-                <AdviceForm />
+                <StepperAdviceForm />
             </React.Fragment>
         );
     }

@@ -136,7 +136,7 @@ class App extends React.Component {
                         className="row" 
                         onClick={
                             () => 
-                                {this.props.history.push(`/advisordashboard/advisorprofile/${Utils.getUserInfo().advisor}`)}
+                                {this.props.history.push(`/dashboard/advisorprofile/${Utils.getUserInfo().advisor}`)}
                         }
                 >
                     <Icon type="user" className="icon" />
@@ -179,7 +179,7 @@ class App extends React.Component {
                         <Icon type="file-text" className="icon" />
                         Create Advice
                     </div>
-                    <div className="row" onClick={() => {Utils.logoutUser(); this.props.history.push('/investordashboard/createportfolio')}}>
+                    <div className="row" onClick={() => {Utils.logoutUser(); this.props.history.push('/dashboard/createportfolio')}}>
                         <Icon type="line-chart" className="icon" />
                         Create Portfolio
                     </div>
@@ -212,7 +212,7 @@ class App extends React.Component {
         return (
             <React.Fragment>
                 {/* {this.renderBurgerMenu()} */}
-                <Layout style={{backgroundColor: '#f9f9f9', height:'100%'}}>
+                <Layout style={{backgroundColor: '#f9f9f9'}}>
                     <Header style={headerStyle}>
                         <Row type="flex">
                             <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>

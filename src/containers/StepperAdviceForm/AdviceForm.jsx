@@ -1,19 +1,23 @@
 import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
+import Loading from 'react-loading-bar';
 import Promise from 'bluebird';
 import moment from 'moment';
+import {withRouter} from 'react-router';
 import {Row, Col, Form, Steps, Button, message} from 'antd';
-import {AqPageHeader} from '../../components';
+import {AqPageHeader, Footer} from '../../components';
 import {PostWarningModal} from './PostWarningModal';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
-import {handleCreateAjaxError, openNotification, getBreadCrumbArray, Utils, getStockPerformance} from '../../utils';
+import {handleCreateAjaxError, openNotification, getBreadCrumbArray, Utils, getStockPerformance, fetchAjax, getFirstMonday} from '../../utils';
 import {UpdateAdviceCrumb} from '../../constants/breadcrumbs';
 import {AdviceName} from './AdviceName';
 import {InvestmentObjective} from './InvestmentObjective';
 import {OtherSettings} from './OtherSettings';
 import {Portfolio} from './Portfolio';
-import {shadowBoxStyle, goals, metricColor, benchmarkColor, horizontalBox} from '../../constants';
+import {Protips} from './Protips';
+import {checkForInvestmentObjectiveError, getOthersWarning, getPortfolioWarnings} from './utils';
+import {shadowBoxStyle, goals, metricColor, benchmarkColor, horizontalBox, loadingColor} from '../../constants';
 import {steps, getStepIndex} from './steps';
 
 const {requestUrl} = require('../../localConfig');
@@ -21,7 +25,7 @@ const Step = Steps.Step;
 const dateFormat = 'YYYY-MM-DD';
 
 class StepperAdviceFormImpl extends React.Component {
-    createAdviceUrl = `${requestUrl}/advice`;
+    adviceUrl = `${requestUrl}/advice`;
     advicePerformanceUrl = `${requestUrl}/performance`;
     adviceNameStep = getStepIndex('adviceName');
     investmentObjectStep = getStepIndex('investmentObjective');
@@ -31,16 +35,21 @@ class StepperAdviceFormImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: [],
+            steps,
+            isUpdate: false, // this state is only for testing purposes and should be removed
+            adviceId: '5b14fb367b00b327d8447661',
+            isPublic: false,
+            positions: [],
             currentStep: 0,
-            portfolError: {
+            portfolioError: {
                 show: false,
                 detail: 'Please provide atleast one valid position'
             },
             loaders: {
                 postToMarketplace: false,
                 saveForLater: false,
-                preview: false
+                preview: false,
+                page: false
             },
             modal: {
                 marketPlaceWarning: false
@@ -48,6 +57,10 @@ class StepperAdviceFormImpl extends React.Component {
             highStockSeries: [],
             portfolioPerformanceMetrics: {},
             preview: false,
+            investmentObjectiveApprovalStatus: {}, // Used to get the approval status for investment objective
+            otherApprovalStatus: {}, // Used to get the approval status for name and portfolio
+            validationStatus: false,
+            approvalRequested: false
         };
     }
 
@@ -176,21 +189,25 @@ class StepperAdviceFormImpl extends React.Component {
     */
     validatePortfolio = () =>{
         if (this.getVerifiedPositions().length > 0) {
-            this.setState({portfolError: {...this.state.portfolError, show: false}});
+            this.setState({portfolioError: {...this.state.portfolioError, show: false}});
             return true;
         } else {
-            this.setState({portfolError: {...this.state.portfolError, show: true}});
+            this.setState({portfolioError: {...this.state.portfolioError, show: true}});
             return false
         }
+    }
+
+    validateAndGoToNextStep = () => {
+        this.validateForm()
+        .then(() => this.goToNextStep())
     }
 
     /*
         Gets the verified positions from the portfolio table.
         A position is validated if the symbol is valid and number of shares > 0
     */
-    getVerifiedPositions = () => {
-        const data = [...this.state.data];
-        const verifiedTransactions = data.filter(item => {
+    getVerifiedPositions = (positions = [...this.state.positions]) => {
+        const verifiedTransactions = positions.filter(item => {
             return item.symbol.length > 1 && Number(item.shares) > 0 && item.shares.toString().length > 0;
         });
 
@@ -201,26 +218,41 @@ class StepperAdviceFormImpl extends React.Component {
         Changes the content of the portfolio array.
         Passed as a prop to AqStockTableMod
     */
-    onChange = data => {
-        this.setState({data: _.cloneDeep(data)}, () => {
+    onChange = positions => {
+        this.setState({positions: _.cloneDeep(positions)}, () => {
             this.validatePortfolio();
         });
     }
 
+    updateStepStatus = (key, status) => {
+        const steps = [...this.state.steps];
+        const targetStep = steps.filter(step => step.key === key)[0];
+        if (targetStep) {
+            targetStep.description = status ? '' : '* Error';
+            targetStep.valid = status;
+        }
+        this.setState({steps});
+    }   
 
     renderSteps = () => {
         return (
             <Steps current={this.state.currentStep} size="small">
                 {
-                    steps.map((step, index) => {
+                    this.state.steps.map((step, index) => {
                         return (
                             <Step 
                                     key={index} 
-                                    step={this.state.currentStep} 
                                     title={step.title} 
-                                    description={step.description} 
+                                    description={
+                                        <span 
+                                                style={{color: step.valid ? metricColor.positive : metricColor.negative}}
+                                        >
+                                            {step.description}
+                                        </span>
+                                    } 
                                     onClick={() => this.goToStep(index)}
                                     style={{cursor: 'pointer'}}
+                                    // status={step.status}
                             />
                         );
                     })
@@ -230,16 +262,37 @@ class StepperAdviceFormImpl extends React.Component {
     }
 
     renderSelectedStep = () => {
-        const formProps = {form: this.props.form, step: this.state.currentStep};
+        const formProps = {
+            form: this.props.form, 
+            step: this.state.currentStep,
+            investmentObjectiveApprovalStatus: this.state.investmentObjectiveApprovalStatus,
+            updateStepStatus: this.updateStepStatus,
+            isUpdate: this.props.isUpdate,
+            isPublic: this.state.isPublic,
+            disabled: !this.getDisabledStatus(),
+            approvalRequested: this.state.approvalRequested
+        };
+
         return (
             <React.Fragment>
-                 <AdviceName {...formProps} />
-                <InvestmentObjective {...formProps} />
+                <AdviceName {...formProps} approvalStatusData={this.state.otherApprovalStatus} />
+                <InvestmentObjective 
+                    {...formProps}
+                    approvalStatusData={this.state.investmentObjectiveApprovalStatus}
+                />
                 <OtherSettings {...formProps} />
                 <Portfolio 
-                        step={this.state.currentStep} 
-                        onChange={this.onChange} 
-                        error={this.state.portfolError}
+                    isUpdate={this.props.isUpdate}
+                    isPublic={this.state.isPublic}
+                    data={this.state.positions}
+                    step={this.state.currentStep} 
+                    investmentObjectiveApprovalStatus={this.state.investmentObjectiveApprovalStatus}
+                    onChange={this.onChange} 
+                    error={this.state.portfolioError}
+                    approvalStatusData={this.state.otherApprovalStatus}
+                    updateStepStatus={this.updateStepStatus}
+                    disabled={!this.getDisabledStatus()}
+                    approvalRequested = {this.state.approvalRequested}
                 />
             </React.Fragment>
         );   
@@ -263,15 +316,30 @@ class StepperAdviceFormImpl extends React.Component {
         return null;
     }
 
-    createAdvice = (e, publish = false) => {
+    getFirstValidDate = () => {
+        var offset = '1d';
+        const rebalancingFrequency = this.props.form.getFieldValue('rebalancingFrequency') || "Daily";
+        switch(rebalancingFrequency) {
+            case "Daily": offset = '1d'; break;
+            case "Weekly": offset = '1w'; break;
+            case "Bi-Weekly": offset = '2w'; break;
+            case "Monthly": offset = '1m'; break;
+            case "Quartely": offset = '1q'; break;
+        }
+
+        return this.props.isUpdate && this.state.isPublic ? 
+            moment(getFirstMonday(offset)) : moment().startOf('day');
+     }
+
+    submitAdvice = (e, publish = false) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err && this.validatePortfolio()) { // Portfolio Validated
                 const requestObject = this.constructCreateAdviceRequestObject(values, publish);
                 this.updateLoader(publish ? 'postToMarketplace' : 'saveForLater', true);
                 axios({
-                    url: this.createAdviceUrl,
-                    method: 'POST',
+                    url: this.props.isUpdate ? `${this.adviceUrl}/${this.props.adviceId}` : this.adviceUrl,
+                    method: this.props.isUpdate ? 'PATCH' : 'POST',
                     data: requestObject,
                     headers: Utils.getAuthTokenHeader()
                 })
@@ -279,7 +347,9 @@ class StepperAdviceFormImpl extends React.Component {
                     const adviceId = _.get(response.data, '_id', '');
                     this.props.history.push(`/advice/${adviceId}`);
                     this.toggleMarketplaceWarningModal();
-                    openNotification('success', 'Success', 'Successfully Created Advice');
+                    this.props.isUpdate
+                    ? openNotification('success', 'Success', 'Successfully Created Advice')
+                    : openNotification('success', 'Success', 'Successfully Updated Advice')
                 })
                 .catch(error => handleCreateAjaxError(error, this.props.history, this.props.match.url))
                 .finally(() => {
@@ -343,8 +413,83 @@ class StepperAdviceFormImpl extends React.Component {
         });
     }
 
-    getPortfolioNetValue = () => {
-        const verifiedPositions = this.getVerifiedPositions();
+    getAdvice = (adviceId) => {
+        const adviceSummaryUrl = `${this.adviceUrl}/${adviceId}`;
+        const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio`;
+
+        this.updateLoader('page', true);
+        Promise.all([
+            fetchAjax(advicePortfolioUrl, this.props.history, this.props.match.url),
+            fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url)
+        ])
+        .then(([advicePortfolioResponse, adviceSummaryResponse]) => {
+            const {name = '', investmentObjective = {}} = adviceSummaryResponse.data;
+            const investmentObjGoal = _.get(investmentObjective, 'goal.field', '');
+            const investmentObjSectors = _.get(investmentObjective, 'sectors.detail', []);
+            const investmentObjPortfolioValuation = _.get(investmentObjective, 'portfolioValuation.field', '');
+            const investmentObjCapitalization = _.get(investmentObjective, 'capitalization.field', '');
+            const investmentObjUserText = _.get(investmentObjective, 'userText.detail', '');
+            const benchmark = _.get(adviceSummaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
+            const rebalancingFrequency = _.get(adviceSummaryResponse.data, 'rebalance', 0);
+            const positions = this.processPortfolioForTable(_.get(advicePortfolioResponse.data, 'detail.positions', []));
+            const investmentObjectiveApprovalStatus = _.get(adviceSummaryResponse.data, 'investmentObjective', {});
+            const otherApprovalStatus = _.get(adviceSummaryResponse.data, 'latestApproval', {status: false});
+            const isPublic = _.get(adviceSummaryResponse.data, 'public', false);
+            const validationStatus = _.get(adviceSummaryResponse.data, 'latestApproval.status', false);
+            const approvalRequested = _.get(adviceSummaryResponse.data, 'approvalRequested', false);
+
+            this.setState({
+                positions,
+                investmentObjectiveApprovalStatus,
+                otherApprovalStatus,
+                isPublic,
+                validationStatus,
+                approvalRequested
+            }, () => {
+                this.checkForApprovalErrors();
+                this.props.form.setFieldsValue({
+                    adviceName: name,
+                    investmentObjGoal,
+                    investmentObjSectors,
+                    investmentObjPortfolioValuation,
+                    investmentObjCapitalization,
+                    investmentObjUserText,
+                    benchmark,
+                    rebalancingFrequency,
+                    startDate: this.getFirstValidDate()
+                });
+            });
+        })
+        .catch(error => error)
+        .finally(() => {
+            this.updateLoader('page', false);
+        })
+    }
+
+    checkForApprovalErrors = () => {
+        this.updateStepStatus(
+            'investmentObjective', 
+            checkForInvestmentObjectiveError(this.state.investmentObjectiveApprovalStatus)
+        );
+        this.updateStepStatus(
+            'adviceName',
+            getOthersWarning(this.state.otherApprovalStatus, 'name').valid
+        );
+        this.updateStepStatus(
+            'portfolio',
+            getPortfolioWarnings(this.state.otherApprovalStatus).valid
+        );
+    }
+
+    getDisabledStatus = () => {
+        const isPublic = _.get(this.state, 'isPublic', false);
+        const approvalRequested = _.get(this.state, 'approvalRequested', false);
+        const validationStatus = _.get(this.state, 'validationStatus', false);
+        return !isPublic || (isPublic && !approvalRequested && !validationStatus);
+    }
+
+    getPortfolioNetValue = (positions = this.state.positions) => {
+        const verifiedPositions = this.getVerifiedPositions(positions);
         let netValue = 0.0;
         verifiedPositions.forEach(transaction => {
             netValue+=transaction.totalValue;
@@ -553,6 +698,37 @@ class StepperAdviceFormImpl extends React.Component {
     }
 
     /**
+     *  Processes positions from Advice Portfolio N/W call into the required format for AqStockTableMod
+     */
+    processPortfolioForTable = (positions = []) => {
+        let positionsMod = positions.map((position, index) => {
+           return {
+                key: index,
+                name: _.get(position, 'security.detail.Nse_Name', ''),
+                sector: _.get(position, 'security.detail.Sector'),
+                lastPrice: position.lastPrice,
+                shares: position.quantity,
+                symbol: _.get(position, 'security.detail.NSE_ID','-') || _.get(position, 'security.ticker','-'),
+                ticker: _.get(position, 'security.detail.NSE_ID','-') || _.get(position, 'security.ticker','-'),
+                totalValue: position.quantity * position.lastPrice,
+            };
+        });
+
+        return this.updatePositionsForWeight(positionsMod);
+    }    
+
+    /**
+     *  Calculating weights for individual positions in the portfolio
+     */
+    updatePositionsForWeight = (positions = []) => {
+        const netValue = Number(this.getPortfolioNetValue(positions).toFixed(2));
+        return positions.map((item, index) => {
+            item['weight'] = netValue > 0 ? Number((item['totalValue'] * 100 / netValue).toFixed(2)) : 0;
+            return item;
+        });
+    }
+
+    /**
      *  Processes the response from the /advice/performance network call into HighStock series data format
      */
     processPortfolioPerformanceResponse = performanceResponse => {
@@ -568,36 +744,34 @@ class StepperAdviceFormImpl extends React.Component {
      */
     renderActionButtons = () => {
         return (
-            this.state.currentStep === (steps.length - 1)
-            ?   <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <Button 
-                        onClick={this.togglePreview}
-                        className='action-button'
-                    >
-                        {!this.state.preview ? "PREVIEW" : "EDIT"}
-                    </Button>
-                    {
-                        this.state.preview &&
-                        <Button
-                            onClick={e => this.createAdvice(e)}
-                            loading={this.state.loaders.saveForLater}
-                            style={{marginTop: '20px'}}
-                            className='action-button'
-                        >
-                            SAVE FOR LATER
-                        </Button>
-                    }
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+                <Button 
+                    onClick={this.togglePreview}
+                    className='action-button'
+                >
+                    {!this.state.preview ? "PREVIEW" : "EDIT"}
+                </Button>
+                {
+                    this.state.preview && !this.state.isPublic &&
                     <Button
-                        type="primary" 
-                        onClick={this.toggleMarketplaceWarningModal}
-                        loading={this.state.loaders.postToMarketplace}
+                        onClick={e => this.submitAdvice(e)}
+                        loading={this.state.loaders.saveForLater}
                         style={{marginTop: '20px'}}
                         className='action-button'
                     >
-                        POST TO MARKETPLACE
+                        SAVE FOR LATER
                     </Button>
-                </div>
-            : null
+                }
+                <Button
+                    type="primary" 
+                    onClick={this.toggleMarketplaceWarningModal}
+                    loading={this.state.loaders.postToMarketplace}
+                    style={{marginTop: '20px'}}
+                    className='action-button'
+                >
+                    POST TO MARKETPLACE
+                </Button>
+            </div>
         );
     }
 
@@ -611,13 +785,13 @@ class StepperAdviceFormImpl extends React.Component {
                     style={{
                         ...horizontalBox, 
                         justifyContent: 'space-between',
-                        position: 'absolute', 
-                        bottom: '10px',
-                        width: 'calc(100% - 40px)',
+                        position: 'relative', 
+                        marginTop: '20px',
+                        marginBottom: '10px',
+                        alignItems: 'flex-end'
                     }}
             >
                 <Button 
-                        type="primary" 
                         onClick={this.goToPreviousStep}
                         disabled={this.state.currentStep == 0}
                 >
@@ -625,15 +799,25 @@ class StepperAdviceFormImpl extends React.Component {
                 </Button>
                 <Button 
                         type="primary" 
-                        onClick={() => {
-                            this.validateForm()
-                            .then(() => this.goToNextStep())
-                        }}
-                        disabled={this.state.currentStep == (steps.length - 1)}
+                        onClick={
+                            this.state.currentStep === steps.length - 1
+                            ? this.togglePreview
+                            : this.validateAndGoToNextStep
+                        }
                 >
-                    Next
+                    {
+                        this.state.currentStep === steps.length - 1
+                        ? "Preview"
+                        : "Next"
+                    }
                 </Button>
             </Col>
+        );
+    }
+
+    renderProtips = () => {
+        return (
+            <Protips />
         );
     }
 
@@ -646,8 +830,12 @@ class StepperAdviceFormImpl extends React.Component {
                         display: this.state.preview ? 'none' : 'block'
                     }}
             >
-                <Form onSubmit={this.createAdvice}>
-                    <Row style={{position: 'relative', height: '600px', padding: '20px'}}>
+                <Form onSubmit={this.submitAdvice}>
+                    <Row 
+                            type="flex"
+                            justify="space-between"
+                            style={{position: 'relative', minHeight: '550px', padding: '20px'}}
+                    >
                         <Col span={24}>{this.renderSteps()}</Col>
                         <Col span={24} style={{marginTop: '20px'}}>
                             {this.renderSelectedStep()}
@@ -690,14 +878,24 @@ class StepperAdviceFormImpl extends React.Component {
         }
     }
 
-    render() {
+    componentDidMount() {
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url);
+        } else {
+            if (this.props.isUpdate) {
+                this.getAdvice(this.props.adviceId);
+            }
+        }
+    }
+
+    renderPageContent() {
         const breadCrumbs = getBreadCrumbArray(UpdateAdviceCrumb, [{name: 'Create Advice'}]);
 
         return (
-            <Row className='aq-page-container' style={{height: '100%'}} gutter={24}>
+            <Row className='aq-page-container' style={{height: '100%', paddingBottom: '20px'}} gutter={24}>
                 <PostWarningModal 
                         visible={this.state.modal.marketPlaceWarning}
-                        onOk={e => this.createAdvice(e, true)}
+                        onOk={e => this.submitAdvice(e, true)}
                         onCancel={this.toggleMarketplaceWarningModal}
                         loading={this.state.loaders.postToMarketplace}
                 />
@@ -711,11 +909,35 @@ class StepperAdviceFormImpl extends React.Component {
                 {this.renderForm()}
                 {this.renderPreview()}
                 <Col span={6}>
-                    {this.renderActionButtons()}
+                    {
+                        this.state.preview
+                        ? this.renderActionButtons()
+                        : this.renderProtips()
+                    }
                 </Col>
+            </Row>
+        );
+    }
+
+    render() {
+        return (
+            <Row>
+                <Loading
+                    show={this.state.loaders.page}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+                {
+                    // !this.state.loaders.page && 
+                    <div style={{display: this.state.loaders.page ? 'none' : 'block'}}>
+                        {this.renderPageContent()}
+                        <Footer />
+                    </div>
+                }
             </Row>
         );
     }
 }
 
-export const StepperAdviceForm = Form.create()(StepperAdviceFormImpl);
+export const StepperAdviceForm = Form.create()(withRouter(StepperAdviceFormImpl));

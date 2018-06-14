@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {AdviceForm} from './AdviceForm';
+import {StepperAdviceForm} from './StepperAdviceForm/AdviceForm';
 import {UpdateAdviceMeta} from '../metas';
 
 export default class UpdateAdvice extends React.Component {
@@ -7,7 +7,7 @@ export default class UpdateAdvice extends React.Component {
         return (
             <React.Fragment>
                 <UpdateAdviceMeta />
-                <AdviceForm  isUpdate={true} adviceId={this.props.match.params.id} />
+                <StepperAdviceForm  isUpdate={true} adviceId={this.props.match.params.id} />
             </React.Fragment>
         );
     }
