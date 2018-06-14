@@ -2,7 +2,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import {Table, Tooltip} from 'antd';
 import {nameEllipsisStyle, metricColor} from '../constants';
-import {Utils, getUnrealizedPnlPct} from '../utils';
+import {Utils, getUnrealizedPnlPct,getUnrealizedPnl} from '../utils';
 
 export class AqStockPortfolioTable extends React.Component {
     constructor(props) {
@@ -88,7 +88,7 @@ export class AqStockPortfolioTable extends React.Component {
                 shares: position.quantity || 0,
                 symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker', '-'),
                 avgPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'avgPrice', 0)),
-                unrealizedPnL: Number(_.get(position, 'unrealizedPnL', 0)),
+                unrealizedPnL: getUnrealizedPnl(_.get(position, 'unrealizedPnL', 0), _.get(position, 'avgPrice', 0)),
                 // unrealizedPnL: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'unrealizedPnL', 0)),
                 unrealizedPnlPct: getUnrealizedPnlPct(_.get(position, 'unrealizedPnL', 0), _.get(position, 'avgPrice', 0), position.quantity || 0)
             });

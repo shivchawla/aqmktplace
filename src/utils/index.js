@@ -299,8 +299,8 @@ export class Utils{
 		return modules;
 	}
 
-	static formatMoneyValueMaxTwoDecimals(value){
-		if (value){
+	static formatMoneyValueMaxTwoDecimals(value) {
+		if (value && typeof(value) == "number"){
 			var x = (value/100000) > 1.0 ? value.toFixed(0) : value.toFixed(2);
 			var afterPoint = '';
 			if(x.indexOf('.') > 0)
@@ -312,7 +312,7 @@ export class Utils{
 			if(otherNumbers !== '' && otherNumbers !== '-')
 			    lastThree = ',' + lastThree;
 			return otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree + afterPoint;
-		}else{
+		} else{
 			return value;
 		}
 	}
@@ -521,9 +521,14 @@ export const checkForInternet = (error, history) => {
 
 export const getUnrealizedPnlPct = (unrealizedPnl, avgPrice, shares) => {
 	return (
-		avgPrice > 0 
-		? Number(((unrealizedPnl / (shares * avgPrice)) * 100).toFixed(2))
-		: 0
+		avgPrice > 0 ? 
+			Number(((unrealizedPnl / (shares * avgPrice)) * 100).toFixed(2)) : "-"
+	);
+};
+
+export const getUnrealizedPnl = (unrealizedPnl, avgPrice) => {
+	return (
+		avgPrice > 0 ? unrealizedPnl : "-"
 	);
 };
 
