@@ -338,32 +338,73 @@ class App extends React.Component {
         );
     }
 
+    renderHeader = () => {
+        return (
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 599px)"
+                    render={() => {
+                        return (
+                            <Header
+                                style={{
+                                    backgroundColor: '#f9f9f9'
+                                }}
+                            >
+                                <Col 
+                                        span={24} 
+                                        style={{
+                                            display: 'flex', 
+                                            flexDirection: 'row', 
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                >
+                                    <img src={logo} style={{height: '40px'}}/>
+                                    <div onClick={() => this.props.history.push('/home')} 
+                                        style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                                        <span style={{...biggerFont, color:primaryColor}}>A</span>
+                                        <span style={{color: primaryColor}}>DVICE</span>
+                                        <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                                        <span style={{color: '#e06666'}}>UBE</span>
+                                    </div>
+                                </Col>
+                            </Header>
+                        );
+                    }}
+                />
+                <Media 
+                    query="(min-width: 600px)"
+                    render={() => {
+                        return (
+                            <Header style={headerStyle}>
+                                <Row type="flex">
+                                    <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                        <img src={logo} style={{height: '40px'}}/>
+                                        <h1 onClick={() => this.props.history.push('/home')} 
+                                            style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                                            <span style={{...biggerFont, color:primaryColor}}>A</span>
+                                            <span style={{color: primaryColor}}>DVICE</span>
+                                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                                            <span style={{color: '#e06666'}}>UBE</span>
+
+                                        </h1>
+                                    </Col>
+                                    {this.renderHeaderActionItemsDesktop()}
+                                </Row>
+                            </Header>
+                        );
+                    }}
+                />
+            </React.Fragment>
+        );
+    }       
+
     render() {
         return (
             <React.Fragment>
                 {/* {this.renderBurgerMenu()} */}
                 <Layout style={{backgroundColor: '#f9f9f9', height:'100%'}}>
-                    <Header style={headerStyle}>
-                        <Row type="flex">
-                            <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                <img src={logo} style={{height: '40px'}}/>
-                                <h1 onClick={() => this.props.history.push('/home')} 
-                                    style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-
-                                    <span style={{...biggerFont, color:primaryColor}}>A</span>
-                                    <span style={{color: primaryColor}}>DVICE</span>
-                                    <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                                    <span style={{color: '#e06666'}}>UBE</span>
-
-                                </h1>
-                            </Col>
-                            <Media 
-                                query="(min-width: 600px)"
-                                render={() => this.renderHeaderActionItemsDesktop()}
-                            />
-                        </Row>
-                    </Header>
-
+                    {this.renderHeader()}
                     <Content style={contentLayoutStyle}>
                         {/*
                             Add Routes in the following format if it is to be synced with header navigation

@@ -244,7 +244,7 @@ export class Home extends React.Component {
         this.setState({youtubeModalVisible: !this.state.youtubeModalVisible});
     }
 
-    renderVidePlayerModal = () => {
+    renderVidePlayerModalDesktop = () => {
         const youtubeOptions = {
             height: '500',
             width: '900',
@@ -268,6 +268,40 @@ export class Home extends React.Component {
                     <Col span={24}>
                         <YouTube
                             className="youtube-player"
+                            videoId="Ppc_c77aNDI"
+                            opts={youtubeOptions}
+                            onReady={this._onReady}
+                        />
+                    </Col>
+                </Row>
+            </Modal>
+        );
+    }
+
+    renderVideoPlayerModalMobile = () => {
+        const youtubeOptions = {
+            height: '300',
+            width: '300',
+            playerVars: { // https://developers.google.com/youtube/player_parameters
+                autoplay: 0
+            }
+        };
+
+        return (
+            <Modal
+                open={this.state.youtubeModalVisible}
+                onClose={this.toggleVideoPlayer}
+                center
+                showCloseIcon={false}
+                animationDuration={500}
+                closeOnOverlayClick
+                closeOnEsc
+                classNames={{ overlay: 'custom-overlay', modal: 'custom-modal' }}
+            >
+                <Row>
+                    <Col span={24} style={{left: '28%'}}>
+                        <YouTube
+                            className="youtube-player-mobile"
                             videoId="Ppc_c77aNDI"
                             opts={youtubeOptions}
                             onReady={this._onReady}
@@ -303,14 +337,14 @@ export class Home extends React.Component {
                     <Col span={24}>
                         <h1 
                                 className="hero-text-mobile" 
-                                style={{lineHeight: '30px'}}
+                                style={{lineHeight: '30px', textAlign: 'center', fontWeight: 700, fontSize: '24px'}}
                         >
-                            Expert-Sourced<br></br>Investment Portfolio
+                            Expert-Sourced <br></br> Investment Portfolio
                         </h1>
                     </Col>
                     <Col span={24}>
-                        <h5 className="hero-description-text-mobile">
-                            Best investment ideas.<br></br>Let the experts help you build the portfolio you desire.
+                        <h5 className="hero-description-text-mobile" style={{textAlign: 'center'}}>
+                            Let the experts help you build the portfolio you desire.
                         </h5>
                     </Col>
                 </Row>
@@ -394,7 +428,6 @@ export class Home extends React.Component {
                     <Icon 
                             className='play-icon animated infinite bounce' 
                             type="play-circle" 
-                            style={{boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'}}
                             onClick={this.toggleVideoPlayer}
                     />
                 </div>
@@ -414,7 +447,7 @@ export class Home extends React.Component {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        marginTop: '30px'
+                        marginBottom: '20px'
                     }} 
                     span={24}
             >
@@ -425,11 +458,6 @@ export class Home extends React.Component {
                             onClick={this.toggleVideoPlayer}
                     />
                 </div>
-                <span 
-                        style={{marginTop: '5px', fontWeight: 400, color: '#444', fontSize: '14px'}}
-                >
-                    Play Video
-                </span>
             </Col>
         );
     }
@@ -593,36 +621,46 @@ export class Home extends React.Component {
     render() {
         return (
             <StyleRoot>
-                {this.renderVidePlayerModal()}
+                <Media 
+                    query="(max-width: 599px)"
+                    render={() => this.renderVideoPlayerModalMobile()}
+                />
+                <Media 
+                    query="(min-width: 600px)"
+                    render={() => this.renderVidePlayerModalDesktop()}
+                />
+                {/* {this.renderVidePlayerModalDesktop()} */}
                 <Col span={24} className='page-container'>
                     <HomeMeta />
-                    <Row className="top-section">
-                        <Media 
-                            query="(max-width: 599px)"
-                            render={() => {
-                                return (
+                    <Media 
+                        query="(max-width: 599px)"
+                        render={() => {
+                            return (
+                                <Row>
                                     <React.Fragment>
                                         {this.renderTopLeftSectionMobile()}
-                                        {/* {this.renderPlayVideoButtonMobile()} */}
                                         {this.renderTopHeroImageMobile()}
+                                        {this.renderPlayVideoButtonMobile()}
                                         {this.renderActionButtonsMobile()}
                                     </React.Fragment>
-                                );
-                            }}
-                        />
-                        <Media
-                            query="(min-width: 600px)"
-                            render={() => {
-                                return (
+                                </Row>
+                            );
+                        }}
+                    />
+                    <Media
+                        query="(min-width: 600px)"
+                        render={() => {
+                            return (
+                                <Row className="top-section">
                                     <React.Fragment>
                                         {this.renderTopLeftSectionDesktop()}
                                         {this.renderTopHeroImageDesktop()}
                                         {this.renderPlayVideoButtonDesktop()}
                                     </React.Fragment>
-                                );
-                            }}
-                        />
-                    </Row>
+                                </Row>
+                            );
+                        }}
+                    />
                     <Row className="middle-section" style={{marginTop: '100px'}}>
                         <Media 
                             query="(max-width: 599px)"
