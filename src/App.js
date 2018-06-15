@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Media from 'react-media';
 import ReactGA from 'react-ga';
 import Loadable from 'react-loadable';
 import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
@@ -283,6 +284,60 @@ class App extends React.Component {
         return Utils.isLoggedIn() && this.state.isLoggedIn;
     }
 
+    renderHeaderActionItemsDesktop = () => {
+        return (
+            <Col 
+                    span={20}
+                    style={{
+                        display: 'flex', 
+                        justifyContent: 'flex-end', 
+                        height: '64px', 
+                        paddingRight: '10px',
+                    }}
+            >   
+                <Menu
+                    style={{marginTop: '10px'}} 
+                    mode="horizontal"
+                    onClick={this.handleNavMenuClick}
+                    selectedKeys={[this.state.parentPath]}>
+                    {
+                        Utils.isLoggedIn() &&
+                        <Menu.Item key="dashboard">Dashboard</Menu.Item>
+                    }
+                    {
+                        !Utils.isLoggedIn() &&
+                        <Menu.Item key={'home'}>Home</Menu.Item>
+                    }
+                    <Menu.Item key="advice">Screen Advices</Menu.Item>
+                    {
+                        Utils.isLoggedIn() &&
+                        <Menu.Item key="stockresearch">Stock Research</Menu.Item>
+                    }
+                    {
+                        !Utils.isLoggedIn() &&
+                        <Menu.Item key="login">Login</Menu.Item>
+                    }
+                    {
+                        !Utils.isLoggedIn() &&
+                        <Menu.Item key="signup">Signup</Menu.Item>
+                    }
+                </Menu>
+                {
+                    Utils.isLoggedIn() &&
+                    <React.Fragment>
+                        {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
+                        <Button 
+                            type="primary" 
+                            onClick={() => this.props.history.push('/dashboard/createadvice')}
+                            style={{marginTop: '18px'}}>
+                            Create Advice
+                        </Button>                                        
+                    </React.Fragment>
+                }
+            </Col> 
+        );
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -302,55 +357,10 @@ class App extends React.Component {
 
                                 </h1>
                             </Col>
-                            <Col 
-                                    span={20}
-                                    style={{
-                                        display: 'flex', 
-                                        justifyContent: 'flex-end', 
-                                        height: '64px', 
-                                        paddingRight: '10px',
-                                    }}
-                            >   
-                                <Menu
-                                    style={{marginTop: '10px'}} 
-                                    mode="horizontal"
-                                    onClick={this.handleNavMenuClick}
-                                    selectedKeys={[this.state.parentPath]}>
-                                    {
-                                        Utils.isLoggedIn() &&
-                                        <Menu.Item key="dashboard">Dashboard</Menu.Item>
-                                    }
-                                    {
-                                        !Utils.isLoggedIn() &&
-                                        <Menu.Item key={'home'}>Home</Menu.Item>
-                                    }
-                                    <Menu.Item key="advice">Screen Advices</Menu.Item>
-                                    {
-                                        Utils.isLoggedIn() &&
-                                        <Menu.Item key="stockresearch">Stock Research</Menu.Item>
-                                    }
-                                    {
-                                        !Utils.isLoggedIn() &&
-                                        <Menu.Item key="login">Login</Menu.Item>
-                                    }
-                                    {
-                                        !Utils.isLoggedIn() &&
-                                        <Menu.Item key="signup">Signup</Menu.Item>
-                                    }
-                                </Menu>
-                                {
-                                    Utils.isLoggedIn() &&
-                                    <React.Fragment>
-                                        {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
-                                        <Button 
-                                            type="primary" 
-                                            onClick={() => this.props.history.push('/dashboard/createadvice')}
-                                            style={{marginTop: '18px'}}>
-                                            Create Advice
-                                        </Button>                                        
-                                    </React.Fragment>
-                                }
-                            </Col> 
+                            <Media 
+                                query="(min-width: 600px)"
+                                render={() => this.renderHeaderActionItemsDesktop()}
+                            />
                         </Row>
                     </Header>
 
