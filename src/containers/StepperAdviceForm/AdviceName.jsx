@@ -20,9 +20,9 @@ export class AdviceName extends React.Component {
                     }}
             >
                 <Col span={24} style={{...headerContainerStyle}}>
-                    <h3 style={stepHeaderStyle}>
+                    {/*<h3 style={stepHeaderStyle}>
                         Step {adviceNameStep + 1}: Advice Name
-                    </h3>
+                    </h3>*/}
                     {
                         this.props.isUpdate &&
                         this.props.isPublic &&

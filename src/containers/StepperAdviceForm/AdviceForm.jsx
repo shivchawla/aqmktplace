@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import Promise from 'bluebird';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Form, Steps, Button, message} from 'antd';
+import {Row, Col, Form, Steps, Button, message, Popover} from 'antd';
 import {AqPageHeader, Footer} from '../../components';
 import {PostWarningModal} from './PostWarningModal';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
@@ -232,16 +232,33 @@ class StepperAdviceFormImpl extends React.Component {
             targetStep.valid = status;
         }
         this.setState({steps});
-    }   
+    }  
 
+   
     renderSteps = () => {
+        const customIcon = (index, status) => (
+            status == "wait" &&
+                <div 
+                    style={{fontSize: '12px', color:'white', backgroundColor:'teal', brder:'1px solid teal', borderRadius:'10px'}}>
+                    {index}
+                </div>
+            
+            ); 
+
+        const customDot = (dot, { status, index }) => (
+          <Popover content={<span>step {index} status: {status}</span>}>
+            {customIcon(index, status)}
+          </Popover>
+        );
+
+
         return (
-            <Steps current={this.state.currentStep} size="small">
+            <Steps current={this.state.currentStep} size="medium" progressDot={customDot}>
                 {
                     this.state.steps.map((step, index) => {
                         return (
                             <Step 
-                                    key={index} 
+                                    key={index}
                                     title={step.title} 
                                     description={
                                         <span 

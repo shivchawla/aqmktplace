@@ -62,9 +62,9 @@ export class OtherSettings extends React.Component {
                     align="middle"
             >
                 <Col span={24} style={headerContainerStyle}>
-                    <h3 style={stepHeaderStyle}>
+                    {/*<h3 style={stepHeaderStyle}>
                         Step {otherSettingsStep + 1}: Other Settings
-                    </h3>
+                    </h3>(*/})
                 </Col>
                 <Col span={24} style={{marginTop: '40px'}}>
                     <Row type = "flex" justify="space-between">

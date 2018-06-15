@@ -13,9 +13,9 @@ export class Portfolio extends React.Component {
         return (
             <Row style={{display: this.props.step === portfolioStep ? 'block': 'none'}}>
                 <Col span={24} style={headerContainerStyle}>
-                    <h3 style={stepHeaderStyle}>
+                    {/*<h3 style={stepHeaderStyle}>
                         Step {portfolioStep + 1}: Portfolio
-                    </h3>
+                    </h3>*/}
                     {
                         this.props.isPublic &&
                         this.props.isUpdate &&

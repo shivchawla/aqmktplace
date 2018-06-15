@@ -6,14 +6,16 @@ import {WarningIcon} from './WarningIcon';
 export const InvestMentObjComponent = ({header, content, warning = false, reason = ''}) => {
     return (
         <Row type="flex" align="middle" style={{marginBottom: '10px'}}>
-            <Col span={24} style={horizontalBox}>
-                <h3 style={investmentObjLabelStyle}>{header}:</h3>
-                {
+            <Col span={2} style={horizontalBox}>
+                
+                <div style={investmentObjLabelStyle}>{header}:</div>
+                
+            </Col>
+            <Col span={20}>{content}</Col>
+            <Col span={2}>{
                     warning &&
                     <WarningIcon reason={reason}/>
-                }
-            </Col>
-            <Col span={24}>{content}</Col>
+                }</Col>
         </Row>
     );
 }

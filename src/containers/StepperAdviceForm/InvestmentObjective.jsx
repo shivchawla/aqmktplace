@@ -82,9 +82,9 @@ export class InvestmentObjective extends React.Component {
             >
                 <Row {...investmentObjRowProps}>
                     <Col span={24} style={{...headerContainerStyle, marginTop: '10px', marginBottom: '20px'}}>
-                        <h3 style={stepHeaderStyle}>
+                        {/*<h3 style={stepHeaderStyle}>
                             Step {investmentObjectiveStep + 1}: Investment Objective
-                        </h3>
+                        </h3>*/}
                         {
                             this.props.isPublic &&
                             this.props.isUpdate &&
@@ -145,7 +145,7 @@ export class InvestmentObjective extends React.Component {
                             )
                         }
                     </Col>
-                    <Col span={8}>
+                    <Col span={12}>
                         {
                             this.renderInvestmentObjectRadioGroup(
                                 'Capitalization',
