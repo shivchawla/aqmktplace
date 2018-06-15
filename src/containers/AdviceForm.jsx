@@ -16,7 +16,6 @@ import {getStockPerformance, Utils, getBreadCrumbArray, getFirstMonday, compareD
 import {UpdateAdviceCrumb} from '../constants/breadcrumbs';
 import {benchmarks} from '../constants/benchmarks';
 import {AqStockTableMod} from '../components/AqStockTableMod';
-import {MyChartNew} from '../containers/MyChartNew';
 import {
     Input, 
     Row, 
@@ -28,12 +27,15 @@ import {
     Menu, 
     Spin, 
     Modal,
-    Tabs,
     Select,
     notification,
     Radio
 } from 'antd';
 import {adviceLimit} from '../constants';
+const MyChartNew = Loadable({
+    loader: () => import('../containers/MyChartNew'),
+    loading: () => <div>Loading</div>
+});
 const StockResearchModal = Loadable({
     loader: () => import('../components/StockResearchModal'),
     loading: () => <div>Loading</div>

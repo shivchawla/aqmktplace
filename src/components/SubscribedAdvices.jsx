@@ -1,15 +1,11 @@
 import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
-import Loading from 'react-loading-bar';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Collapse, Checkbox, Row, Col, Tabs, Table, DatePicker, Spin, Button} from 'antd';
-import {AqPortfolioCompositionAdvice, MetricItem} from '../components';
-import {loadingColor} from '../constants';
-import {MyChartNew} from '../containers/MyChartNew';
+import {MetricItem} from '../components';
 import {Utils, fetchAjax} from '../utils';
-import {adviceTransactions} from '../mockData/AdviceTransaction';
 import {
     currentPerformanceColor, 
     simulatedPerformanceColor, 
@@ -22,7 +18,7 @@ import {
 const Panel = Collapse.Panel;
 const TabPane = Tabs.TabPane;
 
-const {requestUrl, aimsquantToken} = require('../localConfig.js');
+const {requestUrl} = require('../localConfig.js');
 
 const dateFormat = 'YYYY-MM-DD';
 

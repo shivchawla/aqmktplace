@@ -12,7 +12,6 @@ import ForbiddenAccess from '../components/ForbiddenAccess';
 import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
 import {AqPortfolioCompositionAdvice} from '../components/AqPortfolioCompositionAdvice';
 import {AqPortfolioTransactionAdvice} from '../components/AqPortfolioTransactionAdvice';
-import {MyChartNew} from './MyChartNew';
 import {SubscribedAdvices} from '../components/SubscribedAdvices';
 import {AqStockTableCreatePortfolio} from '../components/AqStockTableCreatePortfolio';
 import {AqStockTableCashTransaction} from '../components/AqStockTableCashTransactions';
@@ -23,6 +22,10 @@ import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax, get
 import {benchmarks} from '../constants/benchmarks';
 import {portfolioLimit} from '../constants';
 
+const MyChartNew = Loadable({
+    loader: () => import('./MyChartNew'),
+    loading: () => <div>Loading</div>
+});
 const StockResearchModal = Loadable({
     loader: () => import('../components/StockResearchModal'),
     loading: () => <div>Loading</div>

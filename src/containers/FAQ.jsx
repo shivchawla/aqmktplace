@@ -96,11 +96,11 @@ export default class FAQ extends React.Component {
 
             {
                 question: 'My advice shows "Rejected" flag. How can I fix it?',
-                answer: 'Your advice doesn’t match the requirements as stated in “How can I create an Advice". Please check the approval messages on your advisor dashboard to learn more about the precise reason. Once you fix the advice to match requirements, you can request an approval using "Request Appraval" button',
+                answer: 'Your advice doesn’t match the requirements as stated in “How can I create an Advice". Please check the approval messages on your advisor dashboard to learn more about the precise reason. Once you fix the advice to match requirements, you can request an approval using "Request Approval" button',
             },
             {
                 question: 'My advice shows "Prohibited" flag. How can I fix it?',
-                answer: 'Either the Advice Name or Investment Objective is in unappropriate language. Once you fix the advice to match requirements, you can request an approval using "Request Appraval" button',
+                answer: 'Either the Advice Name or Investment Objective is in unappropriate language. Once you fix the advice to match requirements, you can request an approval using "Request Approval" button',
             },
             {
                 question: 'Why is my advice not approved yet?',

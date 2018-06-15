@@ -10,7 +10,6 @@ import {Footer} from '../components/Footer';
 import {WatchList} from '../components/WatchList';
 import ForbiddenAccess from '../components/ForbiddenAccess';
 import {PortfolioDetailMeta} from '../metas';
-import {MyChartNew} from './MyChartNew';
 import {loadingColor, metricColor, cashStyle, benchmarkColor, buttonStyle, primaryColor} from '../constants';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
@@ -33,6 +32,10 @@ import {
 } from '../constants';
 import { AqPageHeader } from '../components/AqPageHeader';
 
+const MyChartNew = Loadable({
+    loader: () => import('./MyChartNew'),
+    loading: () => <div>Loading</div>
+});
 const StockResearchModal = Loadable({
     loader: () => import('../components/StockResearchModal'),
     loading: () => <div>Loading</div>

@@ -9,9 +9,8 @@ import {ChartTickerItem} from '../components';
 import {getStockPerformance, dateFormat, Utils} from '../utils';
 import '../css/myChart.css';
 
-const TabPane = Tabs.TabPane;
 const Option = AutoComplete.Option;
-const {aimsquantToken, requestUrl} = require('../localConfig');
+const {requestUrl} = require('../localConfig');
 
 class MyChartNewImpl extends React.Component {
     constructor(props) {
@@ -586,7 +585,7 @@ class MyChartNewImpl extends React.Component {
     }
 }
 
-export const MyChartNew = withRouter(MyChartNewImpl);
+export default withRouter(MyChartNewImpl);
 
 const searchIconStyle = {
     marginRight: '20px',

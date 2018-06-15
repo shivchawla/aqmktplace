@@ -1362,59 +1362,6 @@ class AdviceDetailImpl extends React.Component {
 
 export default withRouter(AdviceDetailImpl);
 
-const cardItemStyle = {
-    border: '1px solid #444'
-};
-
-const metricItemStyle = {
-    padding: '10px'
-};
-
-const userStyle = {
-    fontWeight: 700,
-    fontSize: '12px',
-    color: '#595959'
-};
-
-const textStyle = {
-    fontSize: '14px',
-    marginTop: '10px'
-};
-
-const dateStyle = {
-    color: '#757474',
-    fontWeight: 500,
-    marginLeft: '10px'
-};
-
-const dividerStyle = {
-    backgroundColor: '#E0E0E0',
-    height: '1px'
-};
-
-const labelStyle = {
-    fontSize: '13px'
-};
-
-const valueStyle = {
-    fontSize: '16px',
-    fontWeight: '400',
-    color: '#555454'
-};
-
-const adviceNameStyle = {
-    fontSize: '20px',
-    color: '#353535'
-};
-
-const customPanelStyle = {
-    background: 'transparent',
-    borderRadius: 4,
-    border: 0,
-    borderBottom: '1px solid #eaeaea',
-    overflow: 'hidden',
-};
-
 const approvalRowContainerStyle = {
     padding: '0 15px',
 };

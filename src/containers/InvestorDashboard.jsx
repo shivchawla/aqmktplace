@@ -16,7 +16,6 @@ import {DashboardCard} from '../components/DashboardCard';
 import ForbiddenAccess from '../components/ForbiddenAccess';
 import {AqRate} from '../components/AqRate';
 import {nameEllipsisStyle, benchmarkColor, metricColor, loadingColor, primaryColor, horizontalBox} from '../constants';
-import {MyChartNew} from './MyChartNew';
 import {InvestorDashboardMeta} from '../metas';
 import {generateColorData, Utils, fetchAjax, getStockPerformance, getBreadCrumbArray} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
@@ -26,7 +25,11 @@ const StockResearchModal = Loadable({
     loader: () => import('../components/StockResearchModal'),
     loading: () => <div>Loading</div>
 });
-const {requestUrl, aimsquantToken} = require('../localConfig');
+const MyChartNew = Loadable({
+    loader: () => import('./MyChartNew'),
+    loading: () => <div>Loading</div>
+})
+const {requestUrl} = require('../localConfig');
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 const TabPane = Tabs.TabPane;

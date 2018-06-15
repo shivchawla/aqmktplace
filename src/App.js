@@ -15,122 +15,122 @@ const {gaTrackingId} = require('./localConfig');
 
 const ScreenAdvices = Loadable({
     loader: () => import('./containers/ScreenAdvices'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const Home = Loadable({
     loader: () => import('./containers/Home'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const StockResearch = Loadable({
     loader: () => import('./containers/StockResearch'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const TokenUpdate = Loadable({
     loader: () => import('./containers/TokenUpdate'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const AdviceDetail = Loadable({
     loader: () => import('./containers/AdviceDetail'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const CreateAdvice = Loadable({
     loader: () => import('./containers/CreateAdvice'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const CreatePortfolio = Loadable({
     loader: () => import('./containers/CreatePortfolio'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const UpdateAdvice = Loadable({
     loader: () => import('./containers/UpdateAdvice'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const PortfolioDetail = Loadable({
     loader: () => import('./containers/PortfolioDetail'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const PortfolioAddTransactions = Loadable({
     loader: () => import('./containers/PortfolioAddTransactions'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const AdvisorProfile = Loadable({
     loader: () => import('./containers/AdvisorProfile'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const StepperAdviceForm = Loadable({
     loader: () => import('./containers/StepperAdviceForm/AdviceForm'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const Dashboard = Loadable({
     loader: () => import('./containers/Dashboard'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const Policy = Loadable({
     loader: () => import('./containers/Policy'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const TnC = Loadable({
     loader: () => import('./containers/TnC'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const ForgotPassword = Loadable({
     loader: () => import('./containers/ForgotPassword'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const NoIternetAccess = Loadable({
     loader: () => import('./components/NoIternetAccess'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const ForbiddenAccess = Loadable({
     loader: () => import('./components/ForbiddenAccess'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const AuthMessage = Loadable({
     loader: () => import('./containers/AuthMessage'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const Login = Loadable({
     loader: () => import('./containers/Login'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const Signup = Loadable({
     loader: () => import('./containers/Signup'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const FAQ = Loadable({
     loader: () => import('./containers/FAQ'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const ResetPassword = Loadable({
     loader: () => import('./containers/ResetPassword'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 const PageNotFound = Loadable({
     loader: () => import('./components/PageNotFound'),
-    loading: () => <div>Loading Page</div>
+    loading: () => <Icon type="loading" />
 });
 
 class App extends React.Component {
