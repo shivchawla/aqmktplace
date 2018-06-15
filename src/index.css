@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css?family=Lato:400,700,300|Montserrat:400,500|Nunito');
 
-html, body, #root, .ant-layout {
+html, body, #root {
   width: 100%;
   height: 100%;
 }
 
-.ant-layout {
+/* .ant-layout {
   width: 100%;
   height: 90%;
-}
+} */
 
 body {
 	margin: 0;
