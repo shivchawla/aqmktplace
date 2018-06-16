@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Media from 'react-media';
 import YouTube from 'react-youtube';
-import {pulse} from 'react-animations';
+import pulse from 'react-animations/lib/pulse';
 import Radium, {StyleRoot} from 'radium';
 import Modal from 'react-responsive-modal';
 import {Row, Col, Button, Form, Icon} from 'antd';
@@ -321,7 +321,7 @@ export class Home extends React.Component {
                     </Col>
                     <Col span={24}>
                         <h5 className="hero-description-text">
-                            Best investment ideas.<br></br>Let the experts help you build the portfolio you desire.
+                            Best investment ideas.<br></br>Let the experts help you build the portfolio you desire
                         </h5>
                     </Col>
                     {this.renderActionButtonsDesktop()}
@@ -344,7 +344,7 @@ export class Home extends React.Component {
                     </Col>
                     <Col span={24}>
                         <h5 className="hero-description-text-mobile" style={{textAlign: 'center'}}>
-                            Let the experts help you build the portfolio you desire.
+                            Let the experts help you build the portfolio you desire
                         </h5>
                     </Col>
                 </Row>
@@ -419,7 +419,7 @@ export class Home extends React.Component {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        bottom: '20%',
+                        bottom: '25%',
                         position: 'absolute'
                     }} 
                     span={24}
@@ -427,7 +427,7 @@ export class Home extends React.Component {
                 <div style={styles.bounce}>
                     <Icon 
                             className='play-icon animated infinite bounce' 
-                            type="play-circle" 
+                            type="play-circle-o" 
                             onClick={this.toggleVideoPlayer}
                     />
                 </div>
@@ -447,14 +447,14 @@ export class Home extends React.Component {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        marginBottom: '20px'
+                        marginTop: '30px'
                     }} 
                     span={24}
             >
                 <div style={styles.bounce}>
                     <Icon 
                             className='play-icon animated infinite bounce' 
-                            type="play-circle" 
+                            type="play-circle-o"
                             onClick={this.toggleVideoPlayer}
                     />
                 </div>
@@ -639,8 +639,8 @@ export class Home extends React.Component {
                                 <Row>
                                     <React.Fragment>
                                         {this.renderTopLeftSectionMobile()}
-                                        {this.renderTopHeroImageMobile()}
                                         {this.renderPlayVideoButtonMobile()}
+                                        {this.renderTopHeroImageMobile()}
                                         {this.renderActionButtonsMobile()}
                                     </React.Fragment>
                                 </Row>
@@ -811,7 +811,7 @@ const FeatureCard = props => {
 
 const styles = {
     bounce: {
-      animation: 'flash 2s infinite',
-      animationName: Radium.keyframes(pulse, 'flash')
+      animation: 'pulse 1s infinite',
+      animationName: Radium.keyframes(pulse, 'pulse')
     }
 };

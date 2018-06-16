@@ -5,7 +5,6 @@ import Loadable from 'react-loadable';
 import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
 import {Route} from 'react-router';
 import {withRouter, Switch} from 'react-router-dom';
-import {slide as SideMenu} from 'react-burger-menu'
 import {Utils} from './utils';
 import {primaryColor} from './constants';
 import logo from "./assets/logo-advq-new.png";
@@ -261,22 +260,6 @@ class App extends React.Component {
                     </div>
                 </div>
             </div>
-        );
-    }
-
-    renderBurgerMenu = () => {
-        return (
-            <SideMenu isOpen={this.state.sideMenuOpen}>
-                <Row style={{backgroundColor: '#fff', height: '100%'}}>
-                    <Menu mode="inline">
-                        <SubMenu key="sub-dashboard" title="Dashboard">
-                            <Menu.Item key="sub-investor-dashboard">Investor Dashboard</Menu.Item>
-                            <Menu.Item key="sub-advisor-dashboard">Advisor Dashboard</Menu.Item>
-                        </SubMenu>
-                        <Menu.Item key="sub-screen-advices">Screen Advices</Menu.Item>
-                    </Menu>
-                </Row>
-            </SideMenu>
         );
     }
 
