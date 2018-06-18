@@ -1,27 +1,34 @@
 import * as React from 'react';
+import Loadable from 'react-loadable';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Tabs, Button, Modal, message, Collapse, Radio, Input} from 'antd';
+import {Row, Col, Tabs, Button, Modal, message, Input} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, loadingColor, shadowBoxStyle, benchmarkColor, primaryColor, buttonStyle} from '../constants';
 import UpdateAdvice from './UpdateAdvice';
 import {AdviceDetailContent} from './AdviceDetailContent';
-import {MetricItem, StockResearchModal, AqPageHeader, ForbiddenAccess, Footer, ApprovalItem, ApprovalItemView} from '../components';
+import {ApprovalItemView} from '../components/ApprovalItemView';
+import {ApprovalItem} from '../components/ApprovalItem';
+import {Footer} from '../components/Footer';
+import ForbiddenAccess from '../components/ForbiddenAccess';
+import {MetricItem} from '../components/MetricItem';
+import {AqPageHeader} from '../components/AqPageHeader';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {AdviceDetailMeta} from '../metas';
 import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import '../css/adviceDetail.css';
 
-
+const StockResearchModal = Loadable({
+    loader: () => import('../components/StockResearchModal'),
+    loading: () => <div>Loading</div>
+});
 const TabPane = Tabs.TabPane;
-const RadioGroup = Radio.Group;
-const Panel = Collapse.Panel;
 const {TextArea} = Input;
 
-const {aimsquantToken, requestUrl} = require('../localConfig.js');
+const {requestUrl} = require('../localConfig.js');
 const DateHelper = require('../utils/date');
 const dateFormat = 'Do MMMM YYYY';
 
@@ -1354,59 +1361,6 @@ class AdviceDetailImpl extends React.Component {
 }
 
 export default withRouter(AdviceDetailImpl);
-
-const cardItemStyle = {
-    border: '1px solid #444'
-};
-
-const metricItemStyle = {
-    padding: '10px'
-};
-
-const userStyle = {
-    fontWeight: 700,
-    fontSize: '12px',
-    color: '#595959'
-};
-
-const textStyle = {
-    fontSize: '14px',
-    marginTop: '10px'
-};
-
-const dateStyle = {
-    color: '#757474',
-    fontWeight: 500,
-    marginLeft: '10px'
-};
-
-const dividerStyle = {
-    backgroundColor: '#E0E0E0',
-    height: '1px'
-};
-
-const labelStyle = {
-    fontSize: '13px'
-};
-
-const valueStyle = {
-    fontSize: '16px',
-    fontWeight: '400',
-    color: '#555454'
-};
-
-const adviceNameStyle = {
-    fontSize: '20px',
-    color: '#353535'
-};
-
-const customPanelStyle = {
-    background: 'transparent',
-    borderRadius: 4,
-    border: 0,
-    borderBottom: '1px solid #eaeaea',
-    overflow: 'hidden',
-};
 
 const approvalRowContainerStyle = {
     padding: '0 15px',

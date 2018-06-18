@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {Modal, Row, Col} from 'antd';
+import {Modal} from 'antd';
 import StockResearch from '../containers/StockResearch';
 
-export class StockResearchModal extends React.Component {
+export default class StockResearchModal extends React.Component {
     shouldComponentUpdate(nextProps) {
         if (nextProps.ticker !== this.props.ticker) {
             // console.log(nextProps.ticker);

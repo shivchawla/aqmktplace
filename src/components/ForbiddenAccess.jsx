@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Row} from 'antd';
 
-export class ForbiddenAccess extends React.Component {
+export default class ForbiddenAccess extends React.Component {
     render() {
         return (
             <Row type="flex" align="middle" justify="center" style={{height: '100%'}}>

@@ -37,6 +37,7 @@ export const PortfolioDetailMeta = props => {
 export const AdvisorDashboardMeta = props => {
     return (
         <Helmet>
+            {/* <title>Advisor Dashboard</title> */}
             <meta charSet="utf-8"/>
             <meta name="description" content="Advisor Dashboard: Track your advices, subscribers, subscription activity and more"/>
             <meta name="keywords" content="www.adviceqube.com, Investments, Equity, NSE stocks, Investment Advice, Advice"/>
@@ -48,6 +49,7 @@ export const AdvisorDashboardMeta = props => {
 export const InvestorDashboardMeta = props => {
     return (
         <Helmet>
+            {/* <title>Investor Dashboard</title> */}
             <meta charSet="utf-8" />
             <meta name="description" content="Investor Dashboard: Track your portfolio, stock positions, subscribed advices and more"/>
             <meta name="keywords" content="www.adviceqube.com, Portfolio, Investments, Equity, NSE stocks, Investment Advice, Advice"/>

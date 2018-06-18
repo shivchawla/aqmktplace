@@ -1,18 +1,28 @@
 import * as React from 'react';
+import Loadable from 'react-loadable';
 import moment from 'moment';
 import _ from 'lodash';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
-import {Row, Col, Button, Select, Spin} from 'antd';
-import {MyChartNew} from './MyChartNew';
+import {Row, Col, Button, Select, Spin, Icon} from 'antd';
 import {AdvisorDashboardMeta} from '../metas';
 import {graphColors} from '../constants';
 import {ArrowButton} from './InvestorDashboard';
-import {ListMetricItem, HighChartSpline, DashboardCard, HighChartNew, ForbiddenAccess, AqRate, AqPageHeader} from '../components';
+import {AqPageHeader} from '../components/AqPageHeader';
+import {AqRate} from '../components/AqRate';
+import ForbiddenAccess from '../components/ForbiddenAccess';
+import {ListMetricItem} from '../components/ListMetricItem';
+import {HighChartSpline} from '../components/HighChartSpline';
+import {DashboardCard} from '../components/DashboardCard';
+import {HighChartNew} from '../components/HighChartNew';
 import {listMetricItemLabelStyle, loadingColor, benchmarkColor, simulatedPerformanceColor, currentPerformanceColor} from '../constants';
 import {Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/advisorDashboard.css';
 
+const MyChartNew = Loadable({
+    loader: () => import('./MyChartNew'),
+    loading: () => <Icon type="loading" />
+});
 const Option = Select.Option;
 const {requestUrl} = require('../localConfig');
 const dashboardMediaqueries = {xl: 12, lg: 24, md: 24, sm: 24, xs: 24};
@@ -111,7 +121,6 @@ class AdvisorDashboard extends React.Component {
         const ratingSeries = [];
         const advisorRating = [];
         let subscriberRating = {};
-        let totalSubscribers = 0;
         this.setState({dashboardDataLoading: true, myAdvicesLoading: true, show: true});
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
@@ -463,6 +472,7 @@ class AdvisorDashboard extends React.Component {
 
     getAdvicePerformance = advice => {
         const newTickers = [];
+        console.log(advice);
         const url = `${requestUrl}/performance/advice/${advice._id}`;
         this.setState({advicePerformanceLoading: true, selectedAdviceId: advice._id});
         Promise.all([
@@ -882,11 +892,6 @@ const StatsMetricItem = ({label, value, style}) => {
 };
 
 export default withRouter(AdvisorDashboard);
-
-const cardHeaderStyle = {
-    marginTop: '10px',
-    marginLeft: '10px'
-};
 
 const metricValueStyle = {
     color: '#26BABC',

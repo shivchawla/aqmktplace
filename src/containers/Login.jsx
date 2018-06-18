@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {Utils} from '../utils';
-import { Spin, Form, Icon, Input, Button, Checkbox } from 'antd';
+import { Spin, Form, Icon, Input, Button } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
 import {LoginMeta} from '../metas';

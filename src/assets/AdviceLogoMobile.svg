@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="107px" height="131px" viewBox="0 0 107 131" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 21</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="3.11503508%" y1="2.23521114%" x2="100%" y2="71.7555688%" id="linearGradient-1">
+            <stop stop-color="#8468F5" offset="0%"></stop>
+            <stop stop-color="#EC74E7" offset="100%"></stop>
+        </linearGradient>
+        <filter x="-26.3%" y="-20.0%" width="152.6%" height="139.9%" filterUnits="objectBoundingBox" id="filter-2">
+            <feGaussianBlur stdDeviation="4.0824" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <filter x="-52.0%" y="-34.9%" width="204.0%" height="169.9%" filterUnits="objectBoundingBox" id="filter-3">
+            <feGaussianBlur stdDeviation="9.59445" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <linearGradient x1="3.175543%" y1="52.1069434%" x2="107.779472%" y2="52.1069407%" id="linearGradient-4">
+            <stop stop-color="#00A2A2" offset="0%"></stop>
+            <stop stop-color="#5EEDFD" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="iPhone-8" transform="translate(-29.000000, -531.000000)">
+            <g id="Group-21" transform="translate(34.000000, 545.000000)">
+                <rect id="Rectangle-9-Copy-3" fill="#FFFFFF" opacity="0.926743659" x="0" y="12.20184" width="64.95552" height="57.97008" rx="3.99168"></rect>
+                <rect id="Rectangle-9-Copy-4" fill="url(#linearGradient-1)" opacity="0.0813519022" filter="url(#filter-2)" x="5.38858286" y="12.33792" width="46.5264" height="61.32672" rx="8.70912"></rect>
+                <rect id="Rectangle-9-Copy-2" fill="#FFFFFF" x="9.072" y="5.17104" width="64.95552" height="72.03168" rx="3.99168"></rect>
+                <rect id="shadow" fill="#323C5A" opacity="0.129999995" filter="url(#filter-3)" x="21.6635657" y="9.43488" width="55.3447543" height="82.37376" rx="8.70912"></rect>
+                <rect id="bg" fill="#FFFFFF" x="16.69248" y="0" width="64.95552" height="82.37376" rx="3.99168"></rect>
+                <g id="Advice-Text-Copy-2" transform="translate(24.312960, 35.562240)" fill="#00A2A2" fill-opacity="0.255661232">
+                    <rect id="Rectangle-9" x="0" y="0" width="45.72288" height="6.16896" rx="1.08864"></rect>
+                    <rect id="Rectangle-9-Copy-5" x="0" y="11.97504" width="35.56224" height="6.16896" rx="1.08864"></rect>
+                    <rect id="Rectangle-9-Copy-6" x="0" y="23.95008" width="23.22432" height="6.16896" rx="1.08864"></rect>
+                </g>
+                <g id="logo" transform="translate(23.937120, 11.975040)">
+                    <rect id="Rectangle-3" fill="url(#linearGradient-4)" x="0" y="2.17102345" width="13.1326267" height="13.1326267" rx="4.0824"></rect>
+                    <text id="a" font-family=".SFNSDisplay, .SF NS Display" font-size="12.2472" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="3.00141024" y="12.0875917">a</tspan>
+                    </text>
+                    <text id="Advice" font-family="AvenirNext-Regular, Avenir Next" font-size="8.70912" font-weight="normal" letter-spacing="0.181439996" fill="#323C5A">
+                        <tspan x="16.34256" y="13.71744">Advice</tspan>
+                    </text>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,11 +1,13 @@
 import * as React from 'react';
 import axios from 'axios';
+import windowSize from 'react-window-size';
 import _ from 'lodash';
 import {Link} from 'react-router-dom';
 import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
 import {Utils} from '../utils';
-const aimsquantUrl = 'https://www.aimsquant.com';
+import '../css/home.css';
 
+const aimsquantUrl = 'https://www.aimsquant.com';
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 const {requestUrl} = require('../localConfig');
@@ -130,30 +132,30 @@ class FooterImpl extends React.Component{
         const token = _.get(Utils.getUserInfo(), 'token', '') || '';
     
         return (
-            <Row className="footer">
+            <Row className="footer" style={{marginTop: this.props.windowWidth ? '0px' : '100px', ...this.props.style}}>
                 {this.renderContactUsModal()}
-                <Col span={4} className="footer-container">
+                <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">Products</h5>
                     <div className="footer-list">
                         <Link className="footer-link" to="/home">MarketPlace</Link>
-                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home?token=${token}`}>Research Platform</a>
+                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home`}>Research Platform</a>
                     </div>
                 </Col>
-                <Col span={4} className="footer-container">
+                <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">Policies</h5>
                     <div className="footer-list">
                         <Link className="footer-link" to="/policies/tnc">Terms of use</Link>
                         <Link className="footer-link" to="/policies/privacy">Privacy Policy</Link>
                     </div>
                 </Col>
-                <Col span={4} className="footer-container">
+                <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">AimsQuant</h5>
                     <div className="footer-list">
-                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/community?token=${token}`}>Community</a>
-                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/research?token=${token}`}>Research</a>
+                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/community`}>Community</a>
+                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/research`}>Research</a>
                     </div>
                 </Col>
-                <Col span={4} className="footer-container">
+                <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">Help</h5>
                     <div className="footer-list">
                         <a className="footer-link" href="/faq">FAQ</a>
@@ -170,7 +172,7 @@ class FooterImpl extends React.Component{
     }
 }
 
-export const Footer = Form.create()(FooterImpl);
+export const Footer = Form.create()(windowSize(FooterImpl));
 
 const aimsquantContainerStyle = {
     position: 'absolute',

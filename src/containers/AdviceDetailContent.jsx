@@ -1,14 +1,24 @@
 import * as React from 'react';
+import Loadable from 'react-loadable';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
-import {Spin, Row, Col, Tabs, Collapse, DatePicker, Radio, Input, Icon} from 'antd';
+import {Spin, Row, Col, Collapse, DatePicker, Radio, Icon} from 'antd';
 import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../constants';
-import {AqStockPortfolioTable, MetricItem, AdviceMetricsItems, AqRate, IconItem, WarningIcon, AqTag} from '../components';
-import {MyChartNew} from './MyChartNew';
+import {AqTag} from '../components/AqTag';
+import {WarningIcon} from '../components/WarningIcon'
+import {IconItem} from '../components/IconItem';
+import {AqRate} from '../components/AqRate';
+import {AdviceMetricsItems} from '../components/AdviceMetricsItems';
+import {MetricItem} from '../components/MetricItem';
+import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
 import medalIcon from '../assets/award.svg';
 import {Utils} from '../utils';
 import '../css/adviceDetail.css';
 
+const MyChartNew = Loadable({
+    loader: () => import('./MyChartNew'),
+    loading: () => <div>Loading</div>
+});
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 const Panel = Collapse.Panel;
@@ -91,8 +101,6 @@ class AdviceDetailContentImpl extends React.Component {
     renderPageContent() {
         const {
             name = '', 
-            heading = '', 
-            description = '', 
             advisor = '', 
             updatedDate = '', 
             isSubscribed = false, 
@@ -127,7 +135,7 @@ class AdviceDetailContentImpl extends React.Component {
         const approvalStatus = _.get(approval, 'status', false);
 
         return (
-            <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style}}>
+            <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom: '20px'}}>
                 <Row className="row-container" type="flex" justify="space-between" align="middle">
                     <Col span={18}>
                         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
@@ -496,23 +504,10 @@ const InvestmentObjItem = ({label, value, showTag = false, warning = false, reas
 
 export const AdviceDetailContent = withRouter(AdviceDetailContentImpl);
 
-const cardItemStyle = {
-    border: '1px solid #444'
-};
-
-const metricItemStyle = {
-    padding: '10px'
-};
-
 const userStyle = {
     fontWeight: 700,
     fontSize: '12px',
     color: '#595959'
-};
-
-const textStyle = {
-    fontSize: '14px',
-    marginTop: '10px'
 };
 
 const dateStyle = {
@@ -526,20 +521,9 @@ const dividerStyle = {
     height: '1px'
 };
 
-const labelStyle = {
-    fontSize: '13px'
-};
-
-const valueStyle = {
-    fontSize: '16px',
-    fontWeight: '400',
-    color: '#555454'
-};
-
 const adviceNameStyle = {
     fontSize: '24px',
     color: '#353535',
-    // fontWeight: 700
 };
 
 const customPanelStyle = {

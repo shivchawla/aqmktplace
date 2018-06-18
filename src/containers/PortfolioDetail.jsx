@@ -1,13 +1,15 @@
 import * as React from 'react';
 import _ from 'lodash';
+import Loadable from 'react-loadable';
 import Loading from 'react-loading-bar';
 import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
 import {Row, Col, Radio, Button, Collapse, Icon, Tooltip, message} from 'antd';
-import {ForbiddenAccess, StockResearchModal, WatchList, Footer} from '../components';
+import {Footer} from '../components/Footer';
+import {WatchList} from '../components/WatchList';
+import ForbiddenAccess from '../components/ForbiddenAccess';
 import {PortfolioDetailMeta} from '../metas';
-import {MyChartNew} from './MyChartNew';
 import {loadingColor, metricColor, cashStyle, benchmarkColor, buttonStyle, primaryColor} from '../constants';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import {PortfolioDetailCrumb} from '../constants/breadcrumbs';
@@ -29,6 +31,15 @@ import {
     dividerStyle
 } from '../constants';
 import { AqPageHeader } from '../components/AqPageHeader';
+
+const MyChartNew = Loadable({
+    loader: () => import('./MyChartNew'),
+    loading: () => <div>Loading</div>
+});
+const StockResearchModal = Loadable({
+    loader: () => import('../components/StockResearchModal'),
+    loading: () => <div>Loading</div>
+});
 
 const dateFormat = 'YYYY-MM-DD';
 const Panel = Collapse.Panel;
@@ -536,7 +547,7 @@ class PortfolioDetailImpl extends React.Component {
             this.state.notAuthorized
             ?   <ForbiddenAccess />
             :   <React.Fragment>
-                    <Row className='aq-page-container' style={{marginBottom: '20px'}}>
+                    <Row className='aq-page-container'>
                         <StockResearchModal
                                 ticker={this.state.stockResearchModalTicker}
                                 visible={this.state.stockResearchModalVisible}
@@ -692,7 +703,10 @@ class PortfolioDetailImpl extends React.Component {
                                 </Panel>
                             </Collapse>
                         </Col>
-                        <Col xl={6} lg={6} md={0} sm={0} xs={0} style={{minHeight:'200px', maxHeight: '500px'}}>
+                        <Col 
+                                xl={6} lg={6} md={0} sm={0} xs={0} 
+                                style={{minHeight:'200px', maxHeight: '500px'}}
+                        >
                             <Row>
                                 <Button 
                                         className="action-button" 
@@ -735,7 +749,7 @@ class PortfolioDetailImpl extends React.Component {
                             </Row>
                         </Col>
                     </Row>
-                    <Footer />
+                    <Footer style={{marginTop: '20px'}}/>
                 </React.Fragment>
         );
     }

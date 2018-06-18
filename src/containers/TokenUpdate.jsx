@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Utils} from '../utils';
-import {Spin, Icon} from 'antd';
+import {Icon} from 'antd';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router-dom';
 import axios from 'axios';
@@ -95,4 +95,4 @@ class TokenUpdateImpl extends Component {
   }
 }
 
-export const TokenUpdate = withRouter(TokenUpdateImpl);
+export default withRouter(TokenUpdateImpl);

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {metricColor} from '../../constants';
-import {AqStockTableMod} from '../../components';
+import {AqStockTableMod} from '../../components/AqStockTableMod';
 import {getStepIndex} from './steps';
 
 export class Portfolio extends React.Component {

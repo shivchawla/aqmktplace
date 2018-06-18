@@ -1,27 +1,22 @@
 import * as React from 'react';
-import axios from 'axios';
 import Loading from 'react-loading-bar';
-import moment from 'moment';
 import _ from 'lodash';
-import {Row, Col, Input, Icon, Button, Spin, Select, Tabs, Collapse, Checkbox, Popover, Modal, Pagination, Radio} from 'antd';
-import {AdviceListItemMod, AdviceFilterSideComponent, AqPageHeader} from '../components';
-import {newLayoutStyle, pageTitleStyle, shadowBoxStyle, loadingColor} from '../constants';
+import {Row, Col, Input, Icon, Button, Select, Tabs, Checkbox, Modal, Pagination, Radio} from 'antd';
+import {AdviceListItemMod} from '../components/AdviceListeItemMod';
+import {AdviceFilterSideComponent} from '../components/AdviceFilterSideComponent';
+import {AqPageHeader} from '../components/AqPageHeader';
+import {Footer} from '../components/Footer';
+import {newLayoutStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {ScreenAdviceMeta} from '../metas';
 import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {adviceFilters as filters} from '../constants/filters';
 import '../css/screenAdvices.css';
-import { Footer } from '../components/Footer';
 
-const {aimsquantToken, requestUrl} = require('../localConfig');
+const {requestUrl} = require('../localConfig');
 const Option = Select.Option;
-const CheckboxGroup = Checkbox.Group;
 const TabPane = Tabs.TabPane;
-const Panel = Collapse.Panel;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
-const antIcon = <Icon type="loading" style={{ fontSize: 18 }} spin />;
-
-const sortValues = ['name', 'updatedAt desc', 'subscribers', 'followers', 'rating'];
 
 export default class ScreenAdvices extends React.PureComponent {
     mounted = false;
@@ -600,7 +595,7 @@ export default class ScreenAdvices extends React.PureComponent {
                         </Col>
                     </Row>
                 </Row>
-                <Footer />
+                <Footer hello='sauravbiswas' header='Hello World' />
             </React.Fragment>
         );
     }
