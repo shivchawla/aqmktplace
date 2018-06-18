@@ -804,7 +804,7 @@ export class Home extends React.Component {
                             render={() => this.renderMiddleSectionDesktop()}
                         />
                     </Row>
-                    <Row className="lower-section" style={{marginTop: '80px'}}>
+                    {/*<Row className="lower-section" style={{marginTop: '80px'}}>
                         <Media 
                             query="(max-width: 1199px)"
                             render={() => this.renderLowerSectionMobile()}
@@ -813,7 +813,7 @@ export class Home extends React.Component {
                             query="(min-width: 1200px)"
                             render={() => this.renderLowerSectionDesktop()}
                         />
-                    </Row>
+                    </Row>*/}
                     <Media 
                         query="(max-width: 1199px)"
                         render={() => this.renderFooterMobile()}
