@@ -1,8 +1,9 @@
 import * as React from 'react';
 import moment from 'moment';
-import {Row, Col, Form, DatePicker, Select} from 'antd';
+import {Row, Col, Form, DatePicker, Select, Icon, Tooltip} from 'antd';
+import {horizontalBox} from '../../constants';
 import {benchmarks} from '../../constants/benchmarks';
-import {stepHeaderStyle, headerContainerStyle} from './constants';
+import {tooltips} from './constants';
 import {getStepIndex} from './steps';
 import {getFirstMonday, compareDates, getDate} from '../../utils';
 
@@ -52,6 +53,17 @@ export class OtherSettings extends React.Component {
         );
     }
 
+    renderHeader = (header, tooltip) => {
+        return (
+            <Tooltip title={tooltip} placement='top'>
+                <div style={{...horizontalBox, alignItems: 'center', marginTop: '5px'}}>
+                    <h4 style={labelStyle}>{header}</h4>
+                    <Icon style={{marginLeft: '5px', fontSize: '16px'}} type="question-circle"/>
+                </div>
+            </Tooltip>
+        );
+    }
+
     render = () => {
         const {getFieldDecorator} = this.props.form;
         const otherSettingsStep = getStepIndex('otherSettings');
@@ -61,15 +73,10 @@ export class OtherSettings extends React.Component {
                     style={{display: this.props.step === otherSettingsStep ? 'block': 'none',}} 
                     align="middle"
             >
-                <Col span={24} style={headerContainerStyle}>
-                    {/*<h3 style={stepHeaderStyle}>
-                        Step {otherSettingsStep + 1}: Other Settings
-                    </h3>(*/})
-                </Col>
                 <Col span={24} style={{marginTop: '40px'}}>
                     <Row type = "flex" justify="space-between">
                         <div>
-                            <h4 style={labelStyle}>Rebalancing Freq.</h4>
+                            {this.renderHeader('Rebalancing Frequency', tooltips['rebalancingFrequency'])}
                             {
                                 this.renderMenu(
                                     'rebalancingFrequency', 
@@ -79,7 +86,7 @@ export class OtherSettings extends React.Component {
                             }
                         </div>
                         <div>
-                            <h4 style={labelStyle}>Start Date</h4>
+                            {this.renderHeader('Start Date', tooltips['startDate'])}
                             <FormItem>
                                 {getFieldDecorator('startDate', {
                                     initialValue: moment(),
@@ -96,7 +103,7 @@ export class OtherSettings extends React.Component {
                             </FormItem>
                         </div>
                         <div>
-                            <h4 style={labelStyle}>Benchmark</h4>
+                            {this.renderHeader('Benchmark', tooltips['benchmark'])}
                             {
                                 this.renderMenu(
                                     'benchmark', 
@@ -115,5 +122,4 @@ export class OtherSettings extends React.Component {
 const labelColor = '#898989';
 const labelStyle = {
     color: labelColor,
-    marginBottom: '5px'
 };

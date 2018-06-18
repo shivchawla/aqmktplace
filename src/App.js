@@ -1,17 +1,14 @@
 import * as React from 'react';
 import ReactGA from 'react-ga';
 import {Layout, Menu, Row, Col, Button, Popover, Icon} from 'antd';
-import {Redirect, Route} from 'react-router';
-import {BrowserRouter as Router, withRouter, Link, Switch} from 'react-router-dom';
+import {Route} from 'react-router';
+import {withRouter, Link, Switch} from 'react-router-dom';
 import {slide as SideMenu} from 'react-burger-menu'
-import AqBreadCrumb from './components/AqBreadCrumb';
 import Login from './containers/Login';
 import Signup from './containers/Signup';
 import Policy from './containers/Policy';
 import TnC from './containers/TnC';
 import {StepperAdviceForm} from './containers/StepperAdviceForm/AdviceForm';
-import {LoginModal} from './components/LoginModal'; 
-import {AuthRoute} from './components/AuthRoute';
 import {
     TokenUpdate,
     ForgotPassword, 
@@ -19,10 +16,7 @@ import {
 } from './containers';
 
 import {PageNotFound, NoIternetAccess, ForbiddenAccess} from './components';
-import AppliedRoute from './components/AppliedRoute';
-import {AuthComponent} from './containers/AuthComponent';
-import {HocExample} from './containers/HocExample';
-import {Utils, fetchAjax} from './utils';
+import {Utils} from './utils';
 import {primaryColor} from './constants';
 // import AdvisorDashboard from './containers/AdvisorDashboard';
 // import InvestorDashboard from './containers/InvestorDashboard';
@@ -31,11 +25,8 @@ import asyncComponent from './components/AsyncComponent';
 import logo from "./assets/logo-advq-new.png";
 
 const SubMenu = Menu.SubMenu;
-const MenuItemGroup = Menu.ItemGroup;
-const {Header, Content, Footer, Sider} = Layout;
+const {Header, Content} = Layout;
 const StockResearch = asyncComponent(() => import("./containers/StockResearch"));
-const InvestorDashboard = asyncComponent(() => import("./containers/InvestorDashboard"));
-const AdvisorDashboard = asyncComponent(() => import("./containers/AdvisorDashboard"));
 const PortfolioDetail = asyncComponent(() => import("./containers/PortfolioDetail"));
 const AdviceDetail = asyncComponent(() => import("./containers/AdviceDetail"));
 const CreatePortfolio = asyncComponent(() => import("./containers/CreatePortfolio"));
@@ -48,7 +39,7 @@ const Home = asyncComponent(() => import("./containers/Home"));
 const FAQ = asyncComponent(() => import("./containers/FAQ"));
 const Dashboard = asyncComponent(() => import("./containers/Dashboard"));
 const ResetPassword = asyncComponent(() => import("./containers/ResetPassword"));
-const {gaTrackingId, requestUrl} = require('./localConfig');
+const {gaTrackingId} = require('./localConfig');
 
 class App extends React.Component {
     constructor(props) {
@@ -58,14 +49,6 @@ class App extends React.Component {
     }
 
     componentWillMount() {
-        // const params = new URLSearchParams(this.props.location.search);
-        // const token = params.get('token') || '';
-        // console.log('Check Token', Utils.checkToken(token));
-        // if (Utils.checkToken(token)) {
-        //     Utils.autoLogin(token,this.props.history, this.props.match.url, () => {
-        //         this.setState({isLoggedIn: true})
-        //     });
-        // }
         this.onRouteChanged(this.props.location.pathname);
     }
 

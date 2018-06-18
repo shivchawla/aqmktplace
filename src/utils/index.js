@@ -134,7 +134,6 @@ export class Utils{
 						reject(false);
 					}
 				}else{
-					console.log('Token not expired');
 					resolve(true);
 					// if (fromUrl && history){
 					// 	history.push(fromUrl);

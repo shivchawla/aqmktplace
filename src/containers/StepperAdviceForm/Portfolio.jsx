@@ -1,36 +1,119 @@
 import * as React from 'react';
-import {Row, Col} from 'antd';
+import {Row, Col, Button, Modal, Spin, Select} from 'antd';
 import {metricColor} from '../../constants';
-import {stepHeaderStyle, headerContainerStyle} from './constants';
+import {headerContainerStyle} from './constants';
 import {AqStockTableMod, WarningIcon} from '../../components';
+import {benchmarks} from '../../constants/benchmarks';
 import {getStepIndex} from './steps';
 import {getPortfolioWarnings} from './utils';
+import {MyChartNew} from '../MyChartNew';
+
+const Option = Select.Option;
 
 export class Portfolio extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            modal: {
+                performance: false
+            },
+            loadingPortfolioPerformance: false,
+            benchmarks,
+            selectedBenchmark: benchmarks[0],
+            highStockSeries: []
+        };
+    }
+
+    loadPerformance = benchmark => {
+        this.setState({loadingPortfolioPerformance: true});
+        this.props.getAdvicePerformance(benchmark)
+        .then(performanceData => {
+            this.setState({highStockSeries: performanceData});
+        })
+        .catch(error => error)
+        .finally(() => {
+            this.setState({loadingPortfolioPerformance: false});
+        })
+    }
+
+    renderBenchmarkDropdown = () => (
+        <Select 
+                defaultValue={this.state.selectedBenchmark} 
+                style={{width: '150px'}}
+                onChange={value => this.loadPerformance(value)}
+        >
+            {
+                this.state.benchmarks.map((benchmark, index) => (
+                    <Option key={index} value={benchmark}>{benchmark}</Option>
+                ))
+            }
+        </Select>
+    )
+
+    togglePerformanceModal = () => {
+        if (!this.state.modal.performance) {
+            this.loadPerformance(this.state.selectedBenchmark);
+        }
+        this.setState({modal: {
+            ...this.state.modal,
+            performance: !this.state.modal.performance
+        }});
+    }
+
+    renderPerformanceModal = () => {
+        return (
+            <Modal
+                    title="Performance View"
+                    visible={this.state.modal.performance}
+                    onOk={this.togglePerformanceModal}
+                    onCancel={this.togglePerformanceModal}
+                    width={980}
+                    bodyStyle={{overflow: 'hidden', overflowY: 'scroll', height: '500px'}}
+                    style={{top: 20}}
+                    footer={null}
+            >
+                <Spin spinning={this.state.loadingPortfolioPerformance}>
+                    <Row>
+                        <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                            {this.renderBenchmarkDropdown()}
+                        </Col>
+                        <Col span={24}>
+                            <MyChartNew 
+                                    series={this.state.highStockSeries} 
+                                    chartId="advice-preview-performance-chart"
+                            />
+                        </Col>
+                    </Row>
+                </Spin>
+            </Modal>
+        );
+    }
+
     render() {
         const portfolioStep = getStepIndex('portfolio');
         
         return (
             <Row style={{display: this.props.step === portfolioStep ? 'block': 'none'}}>
+                {this.renderPerformanceModal()}
                 <Col span={24} style={headerContainerStyle}>
-                    {/*<h3 style={stepHeaderStyle}>
-                        Step {portfolioStep + 1}: Portfolio
-                    </h3>*/}
                     {
                         this.props.isPublic &&
                         this.props.isUpdate &&
                         !getPortfolioWarnings(this.props.approvalStatusData).valid &&
-                        <WarningIcon 
-                            content={
-                                <div>
-                                    {
-                                        getPortfolioWarnings(this.props.approvalStatusData).reasons.map((reason, index) => {
-                                            return <p key={index}>{reason}</p>
-                                        })
-                                    }
-                                </div>
-                            }
-                        />
+                        <React.Fragment>
+                            <h4 style={{color: metricColor.negative}}>Portfolio Rejected</h4>
+                            <WarningIcon 
+                                content={
+                                    <div>
+                                        {
+                                            getPortfolioWarnings(this.props.approvalStatusData).reasons.map((reason, index) => {
+                                                return <p key={index}>{reason}</p>
+                                            })
+                                        }
+                                    </div>
+                                }
+                            />
+                        </React.Fragment>
                     }
                 </Col>
                 <Col span={24} style={{marginTop: '20px'}}>
@@ -46,6 +129,20 @@ export class Portfolio extends React.Component {
                             * {this.props.error.detail}
                         </h3>
                     }
+                    <Button 
+                            onClick={this.togglePerformanceModal} 
+                            style={{
+                                width: '150px', 
+                                position: 'absolute', 
+                                right: '0px', 
+                                top: '5px',
+                                zIndex: 20
+                            }}
+                            type="primary"
+                            disabled={this.props.verifiedPositions.length < 1}
+                    >
+                        View Performance
+                    </Button>
                     <AqStockTableMod 
                         style={{display: this.props.step >= 3 ? 'block': 'none'}}
                         onChange = {this.props.onChange}

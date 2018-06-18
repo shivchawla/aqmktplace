@@ -2,12 +2,25 @@ import * as React from 'react';
 import {Row, Col, Form, Input} from 'antd';
 import {getStepIndex} from './steps';
 import {getOthersWarning} from './utils';
-import {stepHeaderStyle, headerContainerStyle} from './constants';
+import {headerContainerStyle} from './constants';
 import {WarningIcon} from '../../components';
+import { primaryColor } from '../../constants';
 
 const FormItem = Form.Item;
 
 export class AdviceName extends React.Component {
+    showWarning = () => {
+        return (
+            this.props.isUpdate &&
+            this.props.isPublic &&
+            !getOthersWarning(this.props.approvalStatusData, 'name').valid &&
+            <WarningIcon 
+                    reason={getOthersWarning(this.props.approvalStatusData, 'name').reason} 
+                    style={{marginRight: '10px'}}
+            />
+        );
+    }
+
     render() {
         const {getFieldDecorator} = this.props.form;
         const adviceNameStep = getStepIndex('adviceName');
@@ -19,17 +32,14 @@ export class AdviceName extends React.Component {
                         flexDirection: 'column',
                     }}
             >
-                <Col span={24} style={{...headerContainerStyle}}>
-                    {/*<h3 style={stepHeaderStyle}>
-                        Step {adviceNameStep + 1}: Advice Name
-                    </h3>*/}
+                {/* <Col span={24} style={{...headerContainerStyle}}>
                     {
                         this.props.isUpdate &&
                         this.props.isPublic &&
                         !getOthersWarning(this.props.approvalStatusData, 'name').valid &&
                         <WarningIcon reason={getOthersWarning(this.props.approvalStatusData, 'name').reason} />
                     }
-                </Col>
+                </Col> */}
                 <Col span={24}>
                     <FormItem>
                         {getFieldDecorator('adviceName', {
@@ -37,7 +47,13 @@ export class AdviceName extends React.Component {
                         })(
                             <Input 
                                     placeholder='Type Advice Name' 
-                                    style={{fontSize: '18px', height: '60px', marginTop: '20px'}}
+                                    style={{
+                                        fontSize: '18px', 
+                                        height: '60px', 
+                                        marginTop: '20px',
+                                        color: primaryColor
+                                    }}
+                                    suffix={this.showWarning()}
                                     disabled={this.props.disabled}
                             />
                         )}

@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import Promise from 'bluebird';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Form, Steps, Button, message, Popover} from 'antd';
+import {Row, Col, Form, Steps, Button, message, Popover, Icon} from 'antd';
 import {AqPageHeader, Footer} from '../../components';
 import {PostWarningModal} from './PostWarningModal';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
@@ -17,7 +17,7 @@ import {OtherSettings} from './OtherSettings';
 import {Portfolio} from './Portfolio';
 import {Protips} from './Protips';
 import {checkForInvestmentObjectiveError, getOthersWarning, getPortfolioWarnings} from './utils';
-import {shadowBoxStyle, goals, metricColor, benchmarkColor, horizontalBox, loadingColor} from '../../constants';
+import {shadowBoxStyle, goals, metricColor, benchmarkColor, horizontalBox, loadingColor, primaryColor} from '../../constants';
 import {steps, getStepIndex} from './steps';
 
 const {requestUrl} = require('../../localConfig');
@@ -35,12 +35,13 @@ class StepperAdviceFormImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            adviceName: '',
             steps,
             isUpdate: false, // this state is only for testing purposes and should be removed
             adviceId: '5b14fb367b00b327d8447661',
             isPublic: false,
             positions: [],
-            currentStep: 0,
+            currentStep: 2,
             portfolioError: {
                 show: false,
                 detail: 'Please provide atleast one valid position'
@@ -234,42 +235,77 @@ class StepperAdviceFormImpl extends React.Component {
         this.setState({steps});
     }  
 
+    getAppropriateStepIcon = (status, index) => {
+        switch(status) {
+            case "finish":
+                return <Icon type="check" style={{color: '#fff'}}/>;
+            case "process":
+                return (
+                    <span 
+                            style={{
+                                color: status === 'wait' ? '#e8e8e8' : '#fff',
+                                fontSize: '14px'
+                            }}
+                    >
+                        {index + 1}
+                    </span>
+                );
+            case "wait":
+                return <Icon type="ellipsis" style={{color: '#9B9B9B', fontWeight: 'bolder', fontSize: '30px'}}/>;
+        }
+    }
    
     renderSteps = () => {
-        const customIcon = (index, status) => (
-            status == "wait" &&
+        const customDot = (dot, { status, index }) => {
+            return (
                 <div 
-                    style={{fontSize: '12px', color:'white', backgroundColor:'teal', brder:'1px solid teal', borderRadius:'10px'}}>
-                    {index}
+                        style={{
+                            height: '30px', 
+                            width: '30px', 
+                            borderRadius: '50%', 
+                            backgroundColor: status === 'wait' ? '#fff' : primaryColor,
+                            border: status === 'wait' ? '1px solid #fff' : 'none',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginLeft: '-10px',
+                            marginTop: '-10px',
+                        }}
+                >
+                    {this.getAppropriateStepIcon(status, index)}
                 </div>
-            
-            ); 
-
-        const customDot = (dot, { status, index }) => (
-          <Popover content={<span>step {index} status: {status}</span>}>
-            {customIcon(index, status)}
-          </Popover>
-        );
-
+            );
+        }
 
         return (
-            <Steps current={this.state.currentStep} size="medium" progressDot={customDot}>
+            <Steps 
+                    style={{position: 'relative', marginTop: '5px'}} 
+                    current={this.state.currentStep} 
+                    size="medium" 
+                    progressDot={customDot}
+            >
                 {
                     this.state.steps.map((step, index) => {
                         return (
                             <Step 
                                     key={index}
-                                    title={step.title} 
-                                    description={
+                                    title={
                                         <span 
-                                                style={{color: step.valid ? metricColor.positive : metricColor.negative}}
+                                                style={{
+                                                    fontWeight: this.state.currentStep === index ? 700 : 400,
+                                                    color: step.valid 
+                                                            ? this.state.currentStep === index ? primaryColor : '#444'
+                                                            : metricColor.negative,
+                                                    marginTop: '10px',
+                                                    display: 'block'
+                                                }}
                                         >
-                                            {step.description}
+                                            {step.title}
                                         </span>
                                     } 
                                     onClick={() => this.goToStep(index)}
                                     style={{cursor: 'pointer'}}
-                                    // status={step.status}
                             />
                         );
                     })
@@ -304,12 +340,14 @@ class StepperAdviceFormImpl extends React.Component {
                     data={this.state.positions}
                     step={this.state.currentStep} 
                     investmentObjectiveApprovalStatus={this.state.investmentObjectiveApprovalStatus}
+                    getAdvicePerformance={this.getAdvicePortfolioPerformance}
                     onChange={this.onChange} 
                     error={this.state.portfolioError}
                     approvalStatusData={this.state.otherApprovalStatus}
                     updateStepStatus={this.updateStepStatus}
                     disabled={!this.getDisabledStatus()}
                     approvalRequested = {this.state.approvalRequested}
+                    verifiedPositions={this.getVerifiedPositions()}
                 />
             </React.Fragment>
         );   
@@ -393,9 +431,9 @@ class StepperAdviceFormImpl extends React.Component {
         }});
     }
 
-    getAdvicePortfolioPerformance = () => {
+    getAdvicePortfolioPerformance = selectedBenchmark => new Promise((resolve, reject) => {
         let highStockSeries = [...this.state.highStockSeries];
-        const benchmark = this.props.form.getFieldValue('benchmark') || 'NIFTY_50';
+        const benchmark = selectedBenchmark === undefined ? this.props.form.getFieldValue('benchmark') || 'NIFTY_50' : selectedBenchmark;
         const requestObject = this.constructAdvicePerformanceRequestObject(benchmark);
         this.updateLoader('preview', true);
         Promise.all([
@@ -423,12 +461,16 @@ class StepperAdviceFormImpl extends React.Component {
                 }
             ];
             this.setState({highStockSeries, portfolioPerformanceMetrics});
+            resolve(highStockSeries);
         })
-        .catch(error => handleCreateAjaxError(error, this.props.history, this.props.match.url))
+        .catch(error => {
+            handleCreateAjaxError(error, this.props.history, this.props.match.url);
+            reject(error);
+        })
         .finally(() => {
             this.updateLoader('preview', false);
         });
-    }
+    })
 
     getAdvice = (adviceId) => {
         const adviceSummaryUrl = `${this.adviceUrl}/${adviceId}`;
@@ -456,6 +498,7 @@ class StepperAdviceFormImpl extends React.Component {
             const approvalRequested = _.get(adviceSummaryResponse.data, 'approvalRequested', false);
 
             this.setState({
+                adviceName: name,
                 positions,
                 investmentObjectiveApprovalStatus,
                 otherApprovalStatus,
@@ -812,7 +855,7 @@ class StepperAdviceFormImpl extends React.Component {
                         onClick={this.goToPreviousStep}
                         disabled={this.state.currentStep == 0}
                 >
-                    Previous
+                    PREVIOUS
                 </Button>
                 <Button 
                         type="primary" 
@@ -824,8 +867,8 @@ class StepperAdviceFormImpl extends React.Component {
                 >
                     {
                         this.state.currentStep === steps.length - 1
-                        ? "Preview"
-                        : "Next"
+                        ? "PREVIEW"
+                        : "NEXT"
                     }
                 </Button>
             </Col>
@@ -906,7 +949,15 @@ class StepperAdviceFormImpl extends React.Component {
     }
 
     renderPageContent() {
-        const breadCrumbs = getBreadCrumbArray(UpdateAdviceCrumb, [{name: 'Create Advice'}]);
+        // const breadCrumbs = getBreadCrumbArray(UpdateAdviceCrumb, [{name: 'Create Advice'}]);
+        const breadCrumbs = this.props.isUpdate
+                ? getBreadCrumbArray(UpdateAdviceCrumb, [
+                    {name: this.state.adviceName, url: `/advice/${this.props.adviceId}`},
+                    {name: 'Update Advice'}
+                ])
+                : getBreadCrumbArray(UpdateAdviceCrumb, [
+                    {name: this.state.preview ? 'Preview Advice' : 'Create Advice'}
+                ]);
 
         return (
             <Row className='aq-page-container' style={{height: '100%', paddingBottom: '20px'}} gutter={24}>
@@ -918,7 +969,7 @@ class StepperAdviceFormImpl extends React.Component {
                 />
                 <Col span={24}>
                     <AqPageHeader 
-                        title="Create Advice"
+                        title={this.props.isUpdate ? "Update Advice" : "Create Advice"}
                         showTitle={true}
                         breadCrumbs={breadCrumbs}
                     />
