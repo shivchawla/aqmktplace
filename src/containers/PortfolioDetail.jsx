@@ -547,7 +547,7 @@ class PortfolioDetailImpl extends React.Component {
             this.state.notAuthorized
             ?   <ForbiddenAccess />
             :   <React.Fragment>
-                    <Row className='aq-page-container' style={{marginBottom: '20px'}}>
+                    <Row className='aq-page-container'>
                         <StockResearchModal
                                 ticker={this.state.stockResearchModalTicker}
                                 visible={this.state.stockResearchModalVisible}
@@ -703,7 +703,10 @@ class PortfolioDetailImpl extends React.Component {
                                 </Panel>
                             </Collapse>
                         </Col>
-                        <Col xl={6} lg={6} md={0} sm={0} xs={0} style={{minHeight:'200px', maxHeight: '500px'}}>
+                        <Col 
+                                xl={6} lg={6} md={0} sm={0} xs={0} 
+                                style={{minHeight:'200px', maxHeight: '500px'}}
+                        >
                             <Row>
                                 <Button 
                                         className="action-button" 
@@ -746,7 +749,7 @@ class PortfolioDetailImpl extends React.Component {
                             </Row>
                         </Col>
                     </Row>
-                    <Footer />
+                    <Footer style={{marginTop: '20px'}}/>
                 </React.Fragment>
         );
     }

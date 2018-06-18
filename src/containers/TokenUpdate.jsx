@@ -95,4 +95,4 @@ class TokenUpdateImpl extends Component {
   }
 }
 
-export const TokenUpdate = withRouter(TokenUpdateImpl);
+export default withRouter(TokenUpdateImpl);

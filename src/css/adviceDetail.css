@@ -1,3 +1,6 @@
+#root {
+    height: fit-content;
+}
 .ant-collapse-header {
     padding-left: 20px;
 }

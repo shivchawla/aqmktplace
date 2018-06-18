@@ -20,6 +20,7 @@ import {InvestorDashboardMeta} from '../metas';
 import {generateColorData, Utils, fetchAjax, getStockPerformance, getBreadCrumbArray} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import 'react-loading-bar/dist/index.css'
+import '../css/advisorDashboard.css';
 
 const StockResearchModal = Loadable({
     loader: () => import('../components/StockResearchModal'),

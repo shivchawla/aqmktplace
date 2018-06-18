@@ -132,13 +132,13 @@ class FooterImpl extends React.Component{
         const token = _.get(Utils.getUserInfo(), 'token', '') || '';
     
         return (
-            <Row className="footer" style={{marginTop: this.props.windowWidth ? '0px' : '100px'}}>
+            <Row className="footer" style={{marginTop: this.props.windowWidth ? '0px' : '100px', ...this.props.style}}>
                 {this.renderContactUsModal()}
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">Products</h5>
                     <div className="footer-list">
                         <Link className="footer-link" to="/home">MarketPlace</Link>
-                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home?token=${token}`}>Research Platform</a>
+                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home`}>Research Platform</a>
                     </div>
                 </Col>
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
@@ -151,8 +151,8 @@ class FooterImpl extends React.Component{
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">AimsQuant</h5>
                     <div className="footer-list">
-                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/community?token=${token}`}>Community</a>
-                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/research?token=${token}`}>Research</a>
+                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/community`}>Community</a>
+                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/research`}>Research</a>
                     </div>
                 </Col>
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
