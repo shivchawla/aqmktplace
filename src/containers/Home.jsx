@@ -25,11 +25,13 @@ import {Footer} from '../components/Footer';
 import {HomeMeta} from '../metas';
 import '../css/home.css';
 
+const {youtubeVideoId} = require('../localConfig');
+
 export class Home extends React.Component { 
     constructor(props) {
         super(props);
         this.state = {
-            selectedTabBar: 'advisor',
+            selectedTabBar: 'investor',
             loading: false,
             youtubeModalVisible: false
         }
@@ -111,7 +113,7 @@ export class Home extends React.Component {
         );
     }
 
-    reenderAdvisorMiddleRightSectionDesktop = (type='big') => {
+    renderAdvisorMiddleRightSectionDesktop = (type='big') => {
         return (
             <React.Fragment>
                 <DetailListComponent
@@ -184,7 +186,18 @@ export class Home extends React.Component {
                             marginRight: '5px'
                         }}
                 >
-                    <img src={portfolioLogoMobile} style={{transform: 'scale(1.2, 1.2)'}}/>
+                    <Media 
+                        query="(max-width: 600px)"
+                        render={() => (
+                            <img src={portfolioLogoMobile} style={{transform: 'scale(1.2, 1.2)'}} />
+                        )}
+                    />
+                    <Media 
+                        query="(min-width: 601px)"
+                        render={() => (
+                            <img src={portfolioLogoMobile} style={{height: '160px'}} />
+                        )}
+                    />
                 </Col>
                 <Col 
                         span={17} 
@@ -249,7 +262,7 @@ export class Home extends React.Component {
             height: '500',
             width: '900',
             playerVars: { // https://developers.google.com/youtube/player_parameters
-                autoplay: 0
+                autoplay: 1
             }
         };
 
@@ -268,7 +281,7 @@ export class Home extends React.Component {
                     <Col span={24}>
                         <YouTube
                             className="youtube-player"
-                            videoId="Ppc_c77aNDI"
+                            videoId={youtubeVideoId}
                             opts={youtubeOptions}
                             onReady={this._onReady}
                         />
@@ -278,12 +291,20 @@ export class Home extends React.Component {
         );
     }
 
-    renderVideoPlayerModalMobile = () => {
-        const youtubeOptions = {
+    renderVideoPlayerModalMobile = (type='mobile') => {
+        const youtubeOptionsMobile = {
             height: '300',
             width: '300',
             playerVars: { // https://developers.google.com/youtube/player_parameters
-                autoplay: 0
+                autoplay: 1
+            }
+        };
+
+        const youtubeOptionsTablet = {
+            height: '400',
+            width: '600',
+            playerVars: { // https://developers.google.com/youtube/player_parameters
+                autoplay: 1
             }
         };
 
@@ -291,7 +312,6 @@ export class Home extends React.Component {
             <Modal
                 open={this.state.youtubeModalVisible}
                 onClose={this.toggleVideoPlayer}
-                center
                 showCloseIcon={false}
                 animationDuration={500}
                 closeOnOverlayClick
@@ -299,11 +319,11 @@ export class Home extends React.Component {
                 classNames={{ overlay: 'custom-overlay', modal: 'custom-modal' }}
             >
                 <Row>
-                    <Col span={24} style={{left: '28%'}}>
+                    <Col span={24} style={{left: type === 'mobile' ? '28%' : '19%'}}>
                         <YouTube
                             className="youtube-player-mobile"
-                            videoId="Ppc_c77aNDI"
-                            opts={youtubeOptions}
+                            videoId={youtubeVideoId}
+                            opts={type === 'mobile' ? youtubeOptionsMobile : youtubeOptionsTablet}
                             onReady={this._onReady}
                         />
                     </Col>
@@ -332,23 +352,64 @@ export class Home extends React.Component {
 
     renderTopLeftSectionMobile = () => {
         return (
-            <Col span={24}>
-                <Row style={{padding: '10px 20px', paddingBottom: '0px'}}>
-                    <Col span={24}>
-                        <h1 
-                                className="hero-text-mobile" 
-                                style={{lineHeight: '30px', textAlign: 'center', fontWeight: 700, fontSize: '24px'}}
-                        >
-                            Expert-Sourced <br></br> Investment Portfolio
-                        </h1>
-                    </Col>
-                    <Col span={24}>
-                        <h5 className="hero-description-text-mobile" style={{textAlign: 'center'}}>
-                            Let the experts help you build the portfolio you desire
-                        </h5>
-                    </Col>
-                </Row>
-            </Col>
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => (
+                        <Col span={24}>
+                            <Row style={{padding: '10px 20px', paddingBottom: '0px'}}>
+                                <Col span={24}>
+                                    <h1 
+                                            className="hero-text-mobile" 
+                                            style={{lineHeight: '30px', textAlign: 'center', fontWeight: 700, fontSize: '24px'}}
+                                    >
+                                        Expert-Sourced <br></br> Investment Portfolio
+                                    </h1>
+                                </Col>
+                                <Col span={24}>
+                                    <h5 className="hero-description-text-mobile" style={{textAlign: 'center'}}>
+                                        Let the experts help you build the portfolio you desire
+                                    </h5>
+                                </Col>
+                            </Row>
+                        </Col>
+                    )}
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => (
+                        <Col span={24}>
+                            <Row style={{padding: '10px 20px', paddingBottom: '0px'}}>
+                                <Col span={24}>
+                                    <h1 
+                                            className="hero-text-mobile" 
+                                            style={{
+                                                lineHeight: '30px', 
+                                                textAlign: 'center', 
+                                                fontWeight: 700, 
+                                                fontSize: '32px',
+                                                marginTop: '40px'
+                                            }}
+                                    >
+                                        Expert-Sourced <br></br> Investment Portfolio
+                                    </h1>
+                                </Col>
+                                <Col span={24}>
+                                    <h5 
+                                            className="hero-description-text-mobile" 
+                                            style={{
+                                                textAlign: 'center', 
+                                                fontSize: '16px'
+                                            }}
+                                    >
+                                        Let the experts help you build the portfolio you desire
+                                    </h5>
+                                </Col>
+                            </Row>
+                        </Col>
+                    )}
+                />
+            </React.Fragment>
         );
     }
 
@@ -374,41 +435,102 @@ export class Home extends React.Component {
 
     renderActionButtonsMobile = () => {
         return (
-            <Col span={24} style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                <Button 
-                        className="signup-button-mobile"
-                        style={{marginTop: 0}}
-                        onClick={() => this.props.history.push('/advice')}
-                >
-                    Find Investment Advice
-                </Button>
-                <Button 
-                        className="create-advice-button-mobile"
-                        onClick={() => this.props.history.push('/dashboard/createadvice')}
-                >
-                    Create Investment Advice
-                </Button>
-            </Col>
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => (
+                        <Col span={24} style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                            <Button 
+                                    className="signup-button-mobile"
+                                    style={{marginTop: 0}}
+                                    onClick={() => this.props.history.push('/advice')}
+                            >
+                                Find Investment Advice
+                            </Button>
+                            <Button 
+                                    className="create-advice-button-mobile"
+                                    onClick={() => this.props.history.push('/dashboard/createadvice')}
+                            >
+                                Create Investment Advice
+                            </Button>
+                        </Col>
+                    )}
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => (
+                        <Col 
+                                span={24} 
+                                style={{
+                                        display: 'flex', 
+                                        flexDirection: 'row', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'space-between',
+                                        padding: '0 20px'
+                                    }}
+                                >
+                            <Button 
+                                    className="signup-button-mobile"
+                                    style={{marginTop: 0}}
+                                    onClick={() => this.props.history.push('/advice')}
+                            >
+                                Find Investment Advice
+                            </Button>
+                            <div style={{width: '40px'}}></div>
+                            <Button 
+                                    className="create-advice-button-mobile"
+                                    style={{marginTop: 0}}
+                                    onClick={() => this.props.history.push('/dashboard/createadvice')}
+                            >
+                                Create Investment Advice
+                            </Button>
+                        </Col>
+                    )}
+                />
+            </React.Fragment>
         );
     }
 
     renderTopHeroImageDesktop = () => {
         return (
             <Col span={12} className='hero-image'>
-                <object type="image/svg+xml" data={heroImage}></object>
+                <object style={{width: '85%'}} type="image/svg+xml" data={heroImage}></object>
             </Col>
         );
     }
 
     renderTopHeroImageMobile = () => {
         return (
-            <Col 
-                    span={24} 
-                    style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} 
-                    className='hero-image-mobile'
-            >
-                <object style={{width: '100%', height: '310px'}} type="image/svg+xml" data={heroImageMobile}></object>
-            </Col>
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => (
+                        <Col 
+                                span={24} 
+                                style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} 
+                                className='hero-image-mobile'
+                        >
+                            <object style={{width: '100%'}} type="image/svg+xml" data={heroImageMobile}></object>
+                        </Col>
+                    )}
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => (
+                        <Col 
+                                span={24} 
+                                style={{display: 'flex', flexDirection: 'column', alignItems: 'center', height: '400px'}} 
+                                className='hero-image-mobile'
+                        >
+                            <object 
+                                    style={{width: '100%', height: '400px'}} 
+                                    type="image/svg+xml" 
+                                    data={heroImageMobile}
+                            ></object>
+                        </Col>
+                    )}
+                />
+            </React.Fragment>
         );
     }
 
@@ -487,7 +609,7 @@ export class Home extends React.Component {
                 <Col span={14} className="middle-right-section">
                     {
                         this.state.selectedTabBar === 'advisor'
-                        ? this.reenderAdvisorMiddleRightSectionDesktop()
+                        ? this.renderAdvisorMiddleRightSectionDesktop()
                         : this.renderInvestorMiddleRightSectionDesktop()
                     }
                 </Col>
@@ -524,7 +646,7 @@ export class Home extends React.Component {
                 >
                     {
                         this.state.selectedTabBar === 'advisor'
-                        ? this.reenderAdvisorMiddleRightSectionDesktop('small')
+                        ? this.renderAdvisorMiddleRightSectionDesktop('small')
                         : this.renderInvestorMiddleRightSectionDesktop('small')
                     }
                 </Col>
@@ -622,18 +744,29 @@ export class Home extends React.Component {
         return (
             <StyleRoot>
                 <Media 
-                    query="(max-width: 599px)"
-                    render={() => this.renderVideoPlayerModalMobile()}
+                    query="(max-width: 1199px)"
+                    render={() => (
+                        <React.Fragment>
+                            <Media 
+                                query="(max-width: 600px)"
+                                render={() => this.renderVideoPlayerModalMobile()}
+                            />
+                            <Media 
+                                query="(min-width: 601px)"
+                                render={() => this.renderVideoPlayerModalMobile('tablet')}
+                            />
+                        </React.Fragment>
+                    )}
                 />
                 <Media 
-                    query="(min-width: 600px)"
+                    query="(min-width: 1200px)"
                     render={() => this.renderVidePlayerModalDesktop()}
                 />
                 {/* {this.renderVidePlayerModalDesktop()} */}
                 <Col span={24} className='page-container'>
                     <HomeMeta />
                     <Media 
-                        query="(max-width: 599px)"
+                        query="(max-width: 1199px)"
                         render={() => {
                             return (
                                 <Row>
@@ -648,7 +781,7 @@ export class Home extends React.Component {
                         }}
                     />
                     <Media
-                        query="(min-width: 600px)"
+                        query="(min-width: 1200px)"
                         render={() => {
                             return (
                                 <Row className="top-section">
@@ -663,30 +796,30 @@ export class Home extends React.Component {
                     />
                     <Row className="middle-section" style={{marginTop: '100px'}}>
                         <Media 
-                            query="(max-width: 599px)"
+                            query="(max-width: 1199px)"
                             render={() => this.renderMiddleSectionMobile()}
                         />
                         <Media 
-                            query="(min-width: 600px)"
+                            query="(min-width: 1200px)"
                             render={() => this.renderMiddleSectionDesktop()}
                         />
                     </Row>
                     <Row className="lower-section" style={{marginTop: '80px'}}>
                         <Media 
-                            query="(max-width: 599px)"
+                            query="(max-width: 1199px)"
                             render={() => this.renderLowerSectionMobile()}
                         />
                         <Media 
-                            query="(min-width: 600px)"
+                            query="(min-width: 1200px)"
                             render={() => this.renderLowerSectionDesktop()}
                         />
                     </Row>
                     <Media 
-                        query="(max-width: 599px)"
+                        query="(max-width: 1199px)"
                         render={() => this.renderFooterMobile()}
                     />
                     <Media 
-                        query="(min-width: 600px)"
+                        query="(min-width: 1200px)"
                         render={() => this.renderFooterDesktop()}
                     />
                 </Col>

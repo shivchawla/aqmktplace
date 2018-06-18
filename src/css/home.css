@@ -2,6 +2,11 @@ body {
     background-color: #fff;
 }
 
+/* #root {
+    height: fit-content;
+    background-color: #fff;
+}
+ */
 .page-container {
     position: relative;
     display: flex;
