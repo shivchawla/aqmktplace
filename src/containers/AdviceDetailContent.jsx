@@ -336,6 +336,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                     _.get(sectors, 'detail', []).map((item, index) => {
                                                         return (
                                                             <AqTag 
+                                                                    key={index}
                                                                     color={primaryColor}
                                                                     text={item}
                                                                     textStyle={{fontSize: '14px'}}

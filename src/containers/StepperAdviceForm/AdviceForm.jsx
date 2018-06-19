@@ -906,7 +906,7 @@ class StepperAdviceFormImpl extends React.Component {
     renderForm = () => {
         return (
             <Col 
-                    span={18} 
+                    xl={18} md={24}
                     style={{
                         ...shadowBoxStyle, 
                         display: this.state.preview ? 'none' : 'block'
@@ -998,7 +998,7 @@ class StepperAdviceFormImpl extends React.Component {
                 </Col>
                 {this.renderForm()}
                 {this.renderPreview()}
-                <Col span={6}>
+                <Col xl={6} md={0} sm={0} xs={0}>
                     {
                         this.state.preview
                         ? this.renderActionButtons()
