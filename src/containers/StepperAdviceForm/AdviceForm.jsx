@@ -425,8 +425,8 @@ class StepperAdviceFormImpl extends React.Component {
                     this.props.history.push(`/advice/${adviceId}`);
                     this.toggleMarketplaceWarningModal();
                     this.props.isUpdate
-                    ? openNotification('success', 'Success', 'Successfully Created Advice')
-                    : openNotification('success', 'Success', 'Successfully Updated Advice')
+                    ? openNotification('success', 'Success', 'Successfully Updated Advice')
+                    : openNotification('success', 'Success', 'Successfully Created Advice')
                 })
                 .catch(error => handleCreateAjaxError(error, this.props.history, this.props.match.url))
                 .finally(() => {

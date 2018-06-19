@@ -39,13 +39,7 @@ export class AdviceName extends React.Component {
                         })(
                             <Input 
                                     placeholder='Type Advice Name' 
-                                    style={{
-                                        fontSize: '18px', 
-                                        height: '60px', 
-                                        marginTop: '20px',
-                                        color: primaryColor
-                                    }}
-                                    suffix={this.showWarning()}
+                                    style={inputStyle}
                                     disabled={this.props.disabled}
                             />
                         )}
@@ -55,3 +49,10 @@ export class AdviceName extends React.Component {
         );
     }
 }
+
+const inputStyle = {
+    height: '60px', 
+    fontSize: '18px',
+    marginTop: '20px',
+    color: primaryColor
+};
