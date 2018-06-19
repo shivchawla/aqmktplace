@@ -92,4 +92,4 @@ class AuthMessageImpl extends Component {
   }
 }
 
-export const AuthMessage = withRouter(AuthMessageImpl);
+export default withRouter(AuthMessageImpl);

@@ -11,6 +11,7 @@ import {ScreenAdviceMeta} from '../metas';
 import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {adviceFilters as filters} from '../constants/filters';
 import '../css/screenAdvices.css';
+import '../css/adviceDetail.css';
 
 const {requestUrl} = require('../localConfig');
 const Option = Select.Option;

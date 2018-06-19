@@ -263,6 +263,7 @@ export class Home extends React.Component {
             width: '900',
             playerVars: { // https://developers.google.com/youtube/player_parameters
                 autoplay: 1
+                rel: 0
             }
         };
 
@@ -296,7 +297,8 @@ export class Home extends React.Component {
             height: '300',
             width: '300',
             playerVars: { // https://developers.google.com/youtube/player_parameters
-                autoplay: 1
+                autoplay: 1,
+                rel: 0
             }
         };
 
@@ -388,10 +390,10 @@ export class Home extends React.Component {
                                                 textAlign: 'center', 
                                                 fontWeight: 700, 
                                                 fontSize: '32px',
-                                                marginTop: '40px'
+                                                marginTop: '70px'
                                             }}
                                     >
-                                        Expert-Sourced <br></br> Investment Portfolio
+                                        Expert-Sourced Investment Portfolio
                                     </h1>
                                 </Col>
                                 <Col span={24}>
@@ -399,7 +401,7 @@ export class Home extends React.Component {
                                             className="hero-description-text-mobile" 
                                             style={{
                                                 textAlign: 'center', 
-                                                fontSize: '16px'
+                                                fontSize: '18px'
                                             }}
                                     >
                                         Let the experts help you build the portfolio you desire

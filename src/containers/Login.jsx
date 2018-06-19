@@ -80,7 +80,7 @@ class Login extends Component {
   componentDidMount(){
     this._mounted = true;
   	if (Utils.isLoggedIn()){
-      this.props.history.push('/investordashboard');
+      this.props.history.push('/advice');
     }else{
       // if (this.props.pageChange){
       //   this.props.pageChange('login');
