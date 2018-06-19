@@ -324,37 +324,40 @@ class App extends React.Component {
     renderHeader = () => {
         return (
             <React.Fragment>
-                <Media 
-                    query="(max-width: 599px)"
-                    render={() => {
-                        return (
-                            <Header
-                                style={{
-                                    backgroundColor: '#f9f9f9'
-                                }}
-                            >
-                                <Col 
-                                        span={24} 
-                                        style={{
-                                            display: 'flex', 
-                                            flexDirection: 'row', 
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}
+                {
+                    !(this.state.parentPath === 'login' || this.state.parentPath === 'signup') &&
+                    <Media 
+                        query="(max-width: 599px)"
+                        render={() => {
+                            return (
+                                <Header
+                                    style={{
+                                        backgroundColor: '#f9f9f9'
+                                    }}
                                 >
-                                    <img src={logo} style={{height: '40px'}}/>
-                                    <div onClick={() => this.props.history.push('/home')} 
-                                        style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-                                        <span style={{...biggerFont, color:primaryColor}}>A</span>
-                                        <span style={{color: primaryColor}}>DVICE</span>
-                                        <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                                        <span style={{color: '#e06666'}}>UBE</span>
-                                    </div>
-                                </Col>
-                            </Header>
-                        );
-                    }}
-                />
+                                    <Col 
+                                            span={24} 
+                                            style={{
+                                                display: 'flex', 
+                                                flexDirection: 'row', 
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                    >
+                                        <img src={logo} style={{height: '40px'}}/>
+                                        <div onClick={() => this.props.history.push('/home')} 
+                                            style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                                            <span style={{...biggerFont, color:primaryColor}}>A</span>
+                                            <span style={{color: primaryColor}}>DVICE</span>
+                                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                                            <span style={{color: '#e06666'}}>UBE</span>
+                                        </div>
+                                    </Col>
+                                </Header>
+                            );
+                        }}
+                    />
+                }
                 <Media 
                     query="(min-width: 600px)"
                     render={() => {

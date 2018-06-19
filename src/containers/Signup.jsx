@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import {Utils} from '../utils';
-import { Spin,  Form, Input, Icon, Checkbox, Button } from 'antd';
-import {Link, withRouter} from 'react-router-dom';
+import Media from 'react-media';
 import axios from 'axios';
+import {Spin,  Form, Input, Icon, Checkbox, Button, Row, Col} from 'antd';
+import {Link, withRouter} from 'react-router-dom';
+import {primaryColor} from '../constants';
+import {Utils} from '../utils';
 import {SignupMeta} from '../metas';
 import logo from "../assets/logo-advq-new.png";
+import '../css/register.css';
 
 const {requestUrl} = require('../localConfig');
 
@@ -121,16 +124,11 @@ class Signup extends Component {
     }
   }
 
-
-  render() {
-
-    const FormItem = Form.Item;
+  getRegisterButtonDiv = () => {
+	const FormItem = Form.Item;
     const { getFieldDecorator } = this.props.form;
-
     const antIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
-
-    const getRegisterButtonDiv = () =>{
-      if (this.state.loading){
+	if (this.state.loading){
         return (
           <div style={{'display': 'flex',
             'alignItems': 'center', 'justifyContent': 'center',
@@ -138,7 +136,7 @@ class Signup extends Component {
             <Spin indicator={antIconLoading} />
           </div>
         );
-      }else{
+      } else {
         return (
           <React.Fragment>
             <SignupMeta />
@@ -149,7 +147,7 @@ class Signup extends Component {
                   validator: this.validateTnc
                 }]
               })(
-                <Checkbox>I agree to <Link to="/policies/tnc">Terms and Conditions</Link></Checkbox>
+                <Checkbox style={{fontSize: '16px'}}>I agree to <Link to="/policies/tnc">Terms and Conditions</Link></Checkbox>
               )}
             </FormItem>
             <FormItem className="signup-form-item">
@@ -160,7 +158,119 @@ class Signup extends Component {
           </React.Fragment>
         );
       }
-    }
+  }
+
+  renderMobile = () => {
+	const FormItem = Form.Item;
+    const { getFieldDecorator } = this.props.form;
+
+    return (
+	  	<div 
+	  		style={{
+				height: 'calc(100vh - 64px)', 
+				width: '100%', 
+				background: '#fafafaf',
+				minHeight: '500px', 
+				display: 'flex'
+			}}
+		>
+			<Row 
+					className="card" 
+					style={{
+						padding: '20px', 
+						background: 'white',
+						borderRadius: '2px', 
+						minWidth: '340px', 
+						width: '390px',
+						boxShadow: 'none'
+					}}
+			>
+				<Col 
+						span={24} 
+						style={{
+							display: 'flex', 
+							flexDirection: 'row', 
+						}}
+				>
+					<img src={logo} style={{height: '40px'}}/>
+					<div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+						<span style={{...biggerFont, color: primaryColor}}>A</span>
+						<span style={{color: primaryColor}}>DVICE</span>
+						<span style={{...biggerFont, color: '#e06666'}}>Q</span>
+						<span style={{color: '#e06666'}}>UBE</span>
+					</div>
+				</Col>
+				<Col span={24}>
+					<p style={{'color': '#37474F', 'fontStyle': 'italic',
+						'fontSize': '15px', 'margin': '0px', marginTop: '10px'}}>
+						Expert-Sourced Investment Portfolio
+					</p>
+				</Col>
+				<Col span={24} style={{marginTop: '15%'}}>
+					<h3 style={{fontSize: '32px', color: primaryColor}}>Register</h3>
+				</Col>
+				<Col span={24}>
+					<Form onSubmit={this.handleSubmit} style={{width: '100%'}}>
+						<FormItem className="signup-form-item" style={{marginBottom: '10px', marginTop: '20px'}}>
+							{getFieldDecorator('firstName', {
+							rules: [{ required: true, message: 'Please input your firstName!', whitespace: true }],
+							})(
+							<Input placeholder="First Name"/>
+							)}
+						</FormItem>
+						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+							{getFieldDecorator('lastName', {
+							rules: [{ required: true, message: 'Please input your lastName!', whitespace: true }],
+							})(
+							<Input placeholder="Last Name"/>
+							)}
+						</FormItem>
+						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+							{getFieldDecorator('email', {
+							rules: [{
+								type: 'email', message: 'Please input a valid E-mail!',
+							}, {
+								required: true, message: 'Please input your E-mail!',
+							}],
+							})(
+							<Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-Mail"/>
+							)}
+						</FormItem>
+						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+							{getFieldDecorator('password', {
+							rules: [{
+								required: true, message: 'Please input your password!',
+							},{
+								min: 8, message: 'Password must be minimum 8 character long.',
+							}, {
+								validator: this.validateToNextPassword,
+							}],
+							})(
+							<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password"/>
+							)}
+						</FormItem>
+						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+							{getFieldDecorator('confirm', {
+							rules: [{
+								required: true, message: 'Please confirm your password!',
+							}, {
+								validator: this.compareToFirstPassword,
+							}],
+							})(
+							<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" onBlur={this.handleConfirmBlur} placeholder="Confirm Password"/>
+							)}
+						</FormItem>
+						{this.getRegisterButtonDiv()}
+					</Form>
+				</Col>
+			</Row>
+      </div>
+    );
+  }
+
+  renderDesktop = () => {
+	const FormItem = Form.Item;
+    const { getFieldDecorator } = this.props.form;
 
     return (
       <div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
@@ -228,12 +338,43 @@ class Signup extends Component {
                 <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" onBlur={this.handleConfirmBlur} placeholder="Confirm Password"/>
               )}
             </FormItem>
-            {getRegisterButtonDiv()}
+            {this.getRegisterButtonDiv()}
           </Form>
         </div>
       </div>
     );
   }
+
+  render() {
+
+    const FormItem = Form.Item;
+    const { getFieldDecorator } = this.props.form;
+
+    return (
+		<React.Fragment>
+			<Media 
+				query="(max-width: 600px)"
+				render={() => this.renderMobile()}
+			/>
+			<Media 
+				query="(min-width: 601px)"
+				render={() => this.renderDesktop()}
+			/>
+		</React.Fragment>
+	);
+  }
 }
 
 export default Form.create()(withRouter(Signup));
+
+
+const biggerFont = {
+    fontSize: '24px',
+    fontWeight: '400',
+};
+
+
+const headerColor = {
+    color: '#595959',
+    fontSize: '16px'
+};

@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
+import Media from 'react-media';
+import {Row, Col} from 'antd';
 import _ from 'lodash';
+import windowSize from 'react-window-size';
 import {Utils} from '../utils';
+import {primaryColor} from '../constants';
 import { Spin, Form, Icon, Input, Button } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
 import {LoginMeta} from '../metas';
 import logo from "../assets/logo-advq-new.png";
+import '../css/login.css';
 const {requestUrl} = require('../localConfig');
 
 class Login extends Component {
@@ -95,10 +100,112 @@ class Login extends Component {
     }
   }
 
+  renderMobile = () => {
+	const FormItem = Form.Item;
+    const { getFieldDecorator } = this.props.form;
 
-  render() {
+    const antIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
-    const FormItem = Form.Item;
+    const getLoginButtonDiv = () =>{
+      if (this.state.loading){
+        return (
+          <div style={{'display': 'flex',
+            'alignItems': 'center', 'justifyContent': 'center',
+            'minHeight': '142px'}}>
+            <Spin indicator={antIconLoading} />
+          </div>
+        );
+      } else{
+        return (
+          <FormItem>
+            <Link className="login-form-forgot" to="/forgotPassword" style={{fontSize: '16px'}}>Forgot password</Link>
+            <Button type="primary" htmlType="submit" className="login-form-button">
+              LOG IN
+            </Button>
+			<h3 style={{fontSize: '16px'}}>
+            	Or <Link to="/signup">register now!</Link>
+			</h3>
+            <p style={{'color':'#cc6666',
+              'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
+          </FormItem>
+        );
+      }
+	}
+	
+	return (
+		<div 
+			style={{
+				height: 'calc(100vh - 64px)', 
+				width: '100%', 
+				minHeight: '500px', 
+				display: 'flex', 
+				flexDirection: 'column', 
+			}}
+		>
+			<LoginMeta />
+			<Row 
+				className="card login-card" 
+				style={{
+					padding: '20px', 
+					background: '#fff',
+					borderRadius: '2px', 
+					width: this.props.windowWidth > 450 ? '390px' : '100%', 
+					display: 'flex', 
+					flexDirection: 'column', 
+					paddingTop: '20px',
+					boxShadow: 'none',
+				}}
+			>
+				<Col 
+						span={24} 
+						style={{
+							display: 'flex', 
+							flexDirection: 'row', 
+						}}
+				>
+					<img src={logo} style={{height: '40px'}}/>
+					<div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+						<span style={{...biggerFont, color:primaryColor}}>A</span>
+						<span style={{color: primaryColor}}>DVICE</span>
+						<span style={{...biggerFont, color: '#e06666'}}>Q</span>
+						<span style={{color: '#e06666'}}>UBE</span>
+					</div>
+				</Col>
+				<Col span={24}>
+					<p style={{'color': '#37474F', 'fontStyle': 'italic',
+						'fontSize': '15px', 'margin': '0px', marginTop: '10px'}}>
+						Expert-Sourced Investment Portfolio
+					</p>
+				</Col>
+				<Col span={24} style={{marginTop: '15%'}}>
+					<h3 style={{fontSize: '32px', color: primaryColor}}>Login</h3>
+				</Col>
+				<Col span={24}>
+					<Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
+						<FormItem>
+						{getFieldDecorator('userName', {
+							rules: [{ required: true, message: 'Please input your email!'},{type:'email', message:'Please input a valid email'}],
+						})(
+							<Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-mail"/>
+						)}
+						</FormItem>
+						<FormItem>
+						{getFieldDecorator('password', {
+							rules: [{ required: true, message: 'Please input your Password!'}],
+						})(
+							<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
+						)}
+						</FormItem>
+						{getLoginButtonDiv()}
+					</Form>
+				</Col>
+			</Row>
+	    </div>
+	);
+  }
+
+  renderDesktop = () => {
+	const FormItem = Form.Item;
     const { getFieldDecorator } = this.props.form;
 
     const antIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -117,7 +224,7 @@ class Login extends Component {
           <FormItem>
             <Link className="login-form-forgot" to="/forgotPassword">Forgot password</Link>
             <Button type="primary" htmlType="submit" className="login-form-button">
-              Log in
+              LOG IN
             </Button>
             Or <Link to="/signup">register now!</Link>
             <p style={{'color':'#cc6666',
@@ -125,46 +232,72 @@ class Login extends Component {
           </FormItem>
         );
       }
-    }
-
-    return (
-	    <div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
+	}
+	
+	return (
+		<div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
         'minHeight': '500px', 'display': 'flex', flexDirection: 'column', 'alignItems': 'center', 'justifyContent': 'center'}}>
         <LoginMeta />
-        <div className="card login-card" style={{'padding': '20px', 'background': 'white',
-          'borderRadius': '2px', 'textAlign': 'center', 'width': '390px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px'}}>
-          <img style={{'height': '60px', 'width': 'auto'}} src={logo}/>
-          <p style={{'fontSize': '30px', 'fontWeight': '400', 'margin': '0px'}}>
-            <span style={{'color': 'teal'}}>A</span>
-            <span style={{'color': 'teal', fontSize: '18px'}}>DVICE</span>
-            <span style={{'color': '#e06666'}}>Q</span>
-            <span style={{'color': '#e06666',fontSize: '18px'}}>UBE</span>
-          </p>
-          <p style={{'color': '#37474F', 'fontStyle': 'italic',
-            'fontSize': '15px', 'margin': '0px'}}>
-            Expert-Sourced Investment Portfolio
-          </p>
-          <Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
-            <FormItem>
-              {getFieldDecorator('userName', {
-                rules: [{ required: true, message: 'Please input your email!'},{type:'email', message:'Please input a valid email'}],
-              })(
-                <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-mail"/>
-              )}
-            </FormItem>
-            <FormItem>
-              {getFieldDecorator('password', {
-                rules: [{ required: true, message: 'Please input your Password!'}],
-              })(
-                <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
-              )}
-            </FormItem>
-            {getLoginButtonDiv()}
-          </Form>
-        </div>
+			<div className="card login-card" style={{'padding': '20px', 'background': 'white',
+			'borderRadius': '2px', 'textAlign': 'center', 'width': '390px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px'}}>
+				<img style={{'height': '60px', 'width': 'auto'}} src={logo}/>
+				<p style={{'fontSize': '30px', 'fontWeight': '400', 'margin': '0px'}}>
+					<span style={{'color': 'teal'}}>A</span>
+					<span style={{'color': 'teal', fontSize: '18px'}}>DVICE</span>
+					<span style={{'color': '#e06666'}}>Q</span>
+					<span style={{'color': '#e06666',fontSize: '18px'}}>UBE</span>
+				</p>
+				<p style={{'color': '#37474F', 'fontStyle': 'italic',
+					'fontSize': '15px', 'margin': '0px'}}>
+					Expert-Sourced Investment Portfolio
+				</p>
+				<Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
+					<FormItem>
+					{getFieldDecorator('userName', {
+						rules: [{ required: true, message: 'Please input your email!'},{type:'email', message:'Please input a valid email'}],
+					})(
+						<Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-mail"/>
+					)}
+					</FormItem>
+					<FormItem>
+					{getFieldDecorator('password', {
+						rules: [{ required: true, message: 'Please input your Password!'}],
+					})(
+						<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
+					)}
+					</FormItem>
+					{getLoginButtonDiv()}
+				</Form>
+			</div>
 	    </div>
-    );
+	);
+  }
+
+  render() {
+    return (
+		<React.Fragment>
+			<Media 
+				query="(max-width: 600px)"
+				render={() => this.renderMobile()}
+			/>
+			<Media 
+				query="(min-width: 601px)"
+				render={() => this.renderDesktop()}
+			/>
+		</React.Fragment>
+	);
   }
 }
 
-export default Form.create()(withRouter(Login));
+export default Form.create()(withRouter(windowSize(Login)));
+
+const biggerFont = {
+    fontSize: '24px',
+    fontWeight: '400',
+};
+
+
+const headerColor = {
+    color: '#595959',
+    fontSize: '16px'
+};
