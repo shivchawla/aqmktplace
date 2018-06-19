@@ -56,10 +56,7 @@ export class OtherSettings extends React.Component {
     renderHeader = (header, tooltip) => {
         return (
             <Tooltip title={tooltip} placement='top'>
-                <div style={{...horizontalBox, alignItems: 'center', marginTop: '5px'}}>
-                    <h4 style={labelStyle}>{header}</h4>
-                    <Icon style={{marginLeft: '5px', fontSize: '16px'}} type="question-circle"/>
-                </div>
+                <h4 style={labelStyle}>{header}</h4>
             </Tooltip>
         );
     }

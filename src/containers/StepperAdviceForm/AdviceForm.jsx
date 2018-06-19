@@ -5,8 +5,8 @@ import Loading from 'react-loading-bar';
 import Promise from 'bluebird';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Form, Steps, Button, message, Popover, Icon} from 'antd';
-import {AqPageHeader, Footer} from '../../components';
+import {Row, Col, Form, Steps, Button, message, Icon} from 'antd';
+import {AqPageHeader, Footer, WarningIcon} from '../../components';
 import {PostWarningModal} from './PostWarningModal';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
 import {handleCreateAjaxError, openNotification, getBreadCrumbArray, Utils, getStockPerformance, fetchAjax, getFirstMonday} from '../../utils';
@@ -41,7 +41,7 @@ class StepperAdviceFormImpl extends React.Component {
             adviceId: '5b14fb367b00b327d8447661',
             isPublic: false,
             positions: [],
-            currentStep: 2,
+            currentStep: 0,
             portfolioError: {
                 show: false,
                 detail: 'Please provide atleast one valid position'
@@ -254,6 +254,41 @@ class StepperAdviceFormImpl extends React.Component {
                 return <Icon type="ellipsis" style={{color: '#9B9B9B', fontWeight: 'bolder', fontSize: '30px'}}/>;
         }
     }
+
+    getAppropriateStepWarning = step => {
+        switch(step.key) {
+            case "adviceName":
+                return getOthersWarning(this.state.otherApprovalStatus, 'name').reason;
+            case "investmentObjective":
+                return "Error In Investment Objective"
+            case "portfolio":
+                return  getPortfolioWarnings(this.state.otherApprovalStatus).reasons.map((reason, index) => {
+                    return <p key={index}>{reason}</p>
+                });
+        }
+    }
+
+    getAppropriateStepTitle = (step, index) => {
+        const titleStyle = {
+            fontWeight: this.state.currentStep === index ? 700 : 400,
+            color: this.state.currentStep === index ? primaryColor : '#444',
+            marginTop: '10px',
+            display: 'block'
+        };
+
+        return (
+            <div style={{...horizontalBox, alignItems: 'center'}}>
+                <span style={titleStyle}>{step.title}</span>
+                {
+                    this.state.isPublic && this.props.isUpdate && !step.valid &&
+                    <WarningIcon 
+                            style={{marginTop: '10px'}}
+                            content={this.getAppropriateStepWarning(step)}
+                    />
+                }
+            </div>
+        );
+    }
    
     renderSteps = () => {
         const customDot = (dot, { status, index }) => {
@@ -290,20 +325,7 @@ class StepperAdviceFormImpl extends React.Component {
                         return (
                             <Step 
                                     key={index}
-                                    title={
-                                        <span 
-                                                style={{
-                                                    fontWeight: this.state.currentStep === index ? 700 : 400,
-                                                    color: step.valid 
-                                                            ? this.state.currentStep === index ? primaryColor : '#444'
-                                                            : metricColor.negative,
-                                                    marginTop: '10px',
-                                                    display: 'block'
-                                                }}
-                                        >
-                                            {step.title}
-                                        </span>
-                                    } 
+                                    title={this.getAppropriateStepTitle(step, index)} 
                                     onClick={() => this.goToStep(index)}
                                     style={{cursor: 'pointer'}}
                             />
@@ -877,7 +899,7 @@ class StepperAdviceFormImpl extends React.Component {
 
     renderProtips = () => {
         return (
-            <Protips />
+            <Protips selectedStep={this.state.currentStep} />
         );
     }
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Row, Col, Button, Modal, Spin, Select} from 'antd';
+import {Row, Col, Button, Modal, Spin, Select, Tooltip} from 'antd';
 import {metricColor} from '../../constants';
 import {headerContainerStyle} from './constants';
 import {AqStockTableMod, WarningIcon} from '../../components';
@@ -95,27 +95,6 @@ export class Portfolio extends React.Component {
         return (
             <Row style={{display: this.props.step === portfolioStep ? 'block': 'none'}}>
                 {this.renderPerformanceModal()}
-                <Col span={24} style={headerContainerStyle}>
-                    {
-                        this.props.isPublic &&
-                        this.props.isUpdate &&
-                        !getPortfolioWarnings(this.props.approvalStatusData).valid &&
-                        <React.Fragment>
-                            <h4 style={{color: metricColor.negative}}>Portfolio Rejected</h4>
-                            <WarningIcon 
-                                content={
-                                    <div>
-                                        {
-                                            getPortfolioWarnings(this.props.approvalStatusData).reasons.map((reason, index) => {
-                                                return <p key={index}>{reason}</p>
-                                            })
-                                        }
-                                    </div>
-                                }
-                            />
-                        </React.Fragment>
-                    }
-                </Col>
                 <Col span={24} style={{marginTop: '20px'}}>
                     {
                         this.props.error.show &&
@@ -129,20 +108,22 @@ export class Portfolio extends React.Component {
                             * {this.props.error.detail}
                         </h3>
                     }
-                    <Button 
-                            onClick={this.togglePerformanceModal} 
-                            style={{
-                                width: '150px', 
-                                position: 'absolute', 
-                                right: '0px', 
-                                top: '5px',
-                                zIndex: 20
-                            }}
-                            type="primary"
-                            disabled={this.props.verifiedPositions.length < 1}
-                    >
-                        View Performance
-                    </Button>
+                    <Tooltip title="View Portfolio Performance" placement="top">
+                        <Button 
+                                onClick={this.togglePerformanceModal} 
+                                style={{
+                                    width: '150px', 
+                                    position: 'absolute', 
+                                    right: '0px', 
+                                    top: '5px',
+                                    zIndex: 20
+                                }}
+                                type="primary"
+                                disabled={this.props.verifiedPositions.length < 1}
+                        >
+                            View Performance
+                        </Button>
+                    </Tooltip>
                     <AqStockTableMod 
                         style={{display: this.props.step >= 3 ? 'block': 'none'}}
                         onChange = {this.props.onChange}

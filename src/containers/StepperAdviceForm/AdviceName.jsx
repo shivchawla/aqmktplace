@@ -2,7 +2,6 @@ import * as React from 'react';
 import {Row, Col, Form, Input} from 'antd';
 import {getStepIndex} from './steps';
 import {getOthersWarning} from './utils';
-import {headerContainerStyle} from './constants';
 import {WarningIcon} from '../../components';
 import { primaryColor } from '../../constants';
 
@@ -14,6 +13,7 @@ export class AdviceName extends React.Component {
             this.props.isUpdate &&
             this.props.isPublic &&
             !getOthersWarning(this.props.approvalStatusData, 'name').valid &&
+            this.props.isPublic &&
             <WarningIcon 
                     reason={getOthersWarning(this.props.approvalStatusData, 'name').reason} 
                     style={{marginRight: '10px'}}
@@ -32,14 +32,6 @@ export class AdviceName extends React.Component {
                         flexDirection: 'column',
                     }}
             >
-                {/* <Col span={24} style={{...headerContainerStyle}}>
-                    {
-                        this.props.isUpdate &&
-                        this.props.isPublic &&
-                        !getOthersWarning(this.props.approvalStatusData, 'name').valid &&
-                        <WarningIcon reason={getOthersWarning(this.props.approvalStatusData, 'name').reason} />
-                    }
-                </Col> */}
                 <Col span={24}>
                     <FormItem>
                         {getFieldDecorator('adviceName', {

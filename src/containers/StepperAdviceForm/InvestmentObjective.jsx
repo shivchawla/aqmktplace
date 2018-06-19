@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {Row, Col, Form, Input, Select, Radio} from 'antd';
-import {InvestMentObjComponent, WarningIcon} from '../../components';
+import {InvestMentObjComponent} from '../../components';
 import {goals, portfolioValuation, sectors, capitalization} from '../../constants';
 import {getStepIndex} from './steps';
-import {getInvestmentObjectiveWarning, checkForInvestmentObjectiveError} from './utils';
-import {headerContainerStyle, tooltips} from './constants';
+import {getInvestmentObjectiveWarning} from './utils';
+import {tooltips} from './constants';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -157,7 +157,7 @@ export class InvestmentObjective extends React.Component {
                                 'Please enter the Capitalization of your advice',
                                 !getInvestmentObjectiveWarning(this.props.approvalStatusData, 'capitalization').valid,
                                 getInvestmentObjectiveWarning(this.props.approvalStatusData, 'capitalization').reason,
-                                {label: 7, content: 15, warning: 2}
+                                {label: 6, content: 15, warning: 2}
                             )
                         }
                     </Col>
@@ -215,7 +215,11 @@ export class InvestmentObjective extends React.Component {
                         <InvestMentObjComponent 
                             header="Description"
                             tooltip={{text: tooltips['userText']}}
-                            warning={!getInvestmentObjectiveWarning(this.props.approvalStatusData, 'userText').valid}
+                            warning={
+                                this.props.isPublic &&
+                                this.props.isUpdate &&
+                                !getInvestmentObjectiveWarning(this.props.approvalStatusData, 'userText').valid
+                            }
                             reason={getInvestmentObjectiveWarning(this.props.approvalStatusData, 'userText').reason}
                             content={
                                 <Col span={24}>
@@ -242,12 +246,12 @@ export class InvestmentObjective extends React.Component {
                             tooltip={{text: tooltips['suitability']}}
                             content={
                                 <Col span={24}>
-                                    <h3 style={{fontSize: '16px'}}>
+                                    <h3 style={{fontSize: '15px'}}>
                                         {
                                             this.getGoalDetail('investorType')
                                         }
                                     </h3>
-                                    <h3 style={{fontSize: '16px'}}>
+                                    <h3 style={{fontSize: '15px'}}>
                                         {   
                                             this.getGoalDetail('suitability')
                                         }
