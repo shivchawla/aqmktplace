@@ -263,6 +263,7 @@ export class Home extends React.Component {
             width: '900',
             playerVars: { // https://developers.google.com/youtube/player_parameters
                 autoplay: 1
+                rel: 0
             }
         };
 
@@ -296,7 +297,8 @@ export class Home extends React.Component {
             height: '300',
             width: '300',
             playerVars: { // https://developers.google.com/youtube/player_parameters
-                autoplay: 1
+                autoplay: 1,
+                rel: 0
             }
         };
 
