@@ -128,9 +128,17 @@ const ProTipComponent = ({protip}) => {
                             <h4 style={headerTextStyle}>Example</h4>
                         </Col>
                         <Col span={24} style={{marginTop: '5px'}}>
-                            <h4>
-                                {_.join(_.get(detail, 'suggestedData', []), ' , ')}
-                            </h4>
+                            <ul style={unorderedListStyle}>
+                                {
+                                    _.get(detail, 'suggestedData', []).map((example, index) => {
+                                        return (
+                                            <li style={listItemStyle} key={index}>
+                                                <h4>{example}</h4>
+                                            </li>
+                                        );
+                                    })
+                                }
+                            </ul>
                         </Col>
                     </Row>
                 }
