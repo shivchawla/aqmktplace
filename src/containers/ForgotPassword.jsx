@@ -151,4 +151,4 @@ class ForgotPasswordImpl extends Component {
 
 
 
-export const ForgotPassword =  Form.create()(withRouter(ForgotPasswordImpl));
+export default Form.create()(withRouter(ForgotPasswordImpl));

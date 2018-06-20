@@ -1,16 +1,25 @@
 import * as React from 'react';
+import Lodable from 'react-loadable';
 import _ from 'lodash';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Tabs, Radio, Modal, message} from 'antd';
 import {SignupMeta} from '../metas';
-import {DashboardCard, AqPageHeader, WatchList, CreateWatchList, Footer, AqPerformanceMetrics} from '../components';
+import {DashboardCard} from '../components/DashboardCard';
+import {AqPageHeader} from '../components/AqPageHeader';
+import {WatchList} from '../components/WatchList';
+import {CreateWatchList} from '../components/CreateWatchList';
+import {Footer} from '../components/Footer';
+import {AqPerformanceMetrics} from '../components/AqPerformanceMetrics';
 import {shadowBoxStyle, loadingColor, primaryColor} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
-import {MyChartNew} from '../containers/MyChartNew';
 import '../css/stockResearch.css';
 
+const MyChartNew = Lodable({
+    loader: () => import('../containers/MyChartNew'),
+    loading: () => <div>Loading</div>
+});
 const RadioButton = Radio.Button;
 const {requestUrl} = require('../localConfig');
 const RadioGroup = Radio.Group;

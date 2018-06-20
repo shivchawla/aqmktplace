@@ -1,12 +1,10 @@
 import * as React from 'react';
 import {Row, Col, Button, Modal, Spin, Select, Tooltip} from 'antd';
 import {metricColor} from '../../constants';
-import {headerContainerStyle} from './constants';
-import {AqStockTableMod, WarningIcon} from '../../components';
+import {AqStockTableMod} from '../../components/AqStockTableMod';
 import {benchmarks} from '../../constants/benchmarks';
 import {getStepIndex} from './steps';
-import {getPortfolioWarnings} from './utils';
-import {MyChartNew} from '../MyChartNew';
+import MyChartNew from '../MyChartNew';
 
 const Option = Select.Option;
 

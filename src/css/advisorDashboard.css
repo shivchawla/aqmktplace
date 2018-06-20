@@ -1,3 +1,7 @@
 .advice-row:hover {
     background-color: 'red'
 };
+
+#root {
+    height: 100%;
+}

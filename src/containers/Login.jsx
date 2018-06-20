@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {Utils} from '../utils';
-import { Spin, Form, Icon, Input, Button, Checkbox } from 'antd';
+import { Spin, Form, Icon, Input, Button } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
 import {LoginMeta} from '../metas';
@@ -80,7 +80,7 @@ class Login extends Component {
   componentDidMount(){
     this._mounted = true;
   	if (Utils.isLoggedIn()){
-      this.props.history.push('/dashboard');
+      this.props.history.push('/advice');
     }else{
       // if (this.props.pageChange){
       //   this.props.pageChange('login');

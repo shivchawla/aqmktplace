@@ -4,10 +4,10 @@ import axios from 'axios';
 import _ from 'lodash';
 import {withRouter} from 'react-router';
 import {Checkbox, Collapse, Row, Col, Table, Input, DatePicker, Icon, Tooltip} from 'antd';
-import {MetricItem, AqStockPortfolioTable} from '../components';
+import {MetricItem} from '../components/MetricItem';
 import {metricsValueStyle, metricsLabelStyle, nameEllipsisStyle, metricColor} from '../constants';
 import {EditableCell} from './AqEditableCell';
-import {getStockData, Utils} from '../utils';
+import {Utils} from '../utils';
 import '../css/adviceTransactionTable.css';
 
 const Panel = Collapse.Panel;

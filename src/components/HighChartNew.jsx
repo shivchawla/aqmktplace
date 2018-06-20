@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Row,Col} from 'antd';
+import {Row} from 'antd';
 import _ from 'lodash';
 import HighChart from 'highcharts';
 import VariablePie from 'highcharts/modules/variable-pie'

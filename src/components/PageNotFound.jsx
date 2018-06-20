@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Row} from 'antd';
 
-export class PageNotFound extends React.Component {
+export default class PageNotFound extends React.Component {
     render() {
         return (
             <Row type="flex" align="middle" justify="center" style={{height: '100%'}}>

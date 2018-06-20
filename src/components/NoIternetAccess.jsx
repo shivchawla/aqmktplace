@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {Row, Button} from 'antd';
-export class NoIternetAccess extends React.Component {
+import {Row} from 'antd';
+export default class NoIternetAccess extends React.Component {
     render() {
         return (
             <Row type="flex" align="middle" justify="center" style={{height: '100%'}}>

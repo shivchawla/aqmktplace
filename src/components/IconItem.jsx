@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {Row, Col, Icon, Tag} from 'antd';
 
 export const IconItem = ({src, label, imageStyle={}, labelStyle={}}) => {
     return (
@@ -9,13 +8,6 @@ export const IconItem = ({src, label, imageStyle={}, labelStyle={}}) => {
         </div>
     );
 }
-
-const iconItemImageStyle = {
-    color: '#5A5A5A',
-    fontSize: '12px',
-    fontWeight: 400
-    
-};
 
 const iconItemLabelStyle = {
     fontSize: '12px',

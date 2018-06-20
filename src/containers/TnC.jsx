@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactQuill from 'react-quill';
 import {Utils} from '../utils';
-import {Footer} from '../components';
+import {Footer} from '../components/Footer';
 import { Spin, Icon } from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';

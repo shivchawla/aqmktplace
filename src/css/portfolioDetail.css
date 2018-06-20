@@ -1,3 +1,7 @@
+#root {
+    height: fit-content;
+}
+
 .primary-btn { 
     background-color: #26899A;
     border-radius: 2px;

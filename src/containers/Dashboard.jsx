@@ -1,12 +1,19 @@
 import * as React from 'react';
 import _ from 'lodash';
+import Loadable from 'react-loadable';
 import {Route} from 'react-router-dom';
-import {Layout, Menu, Icon, Row, Col, Button} from 'antd';
-import InvestorDashboard from './InvestorDashboard';
-import AdvisorDashboard from './AdvisorDashboard';
+import {Layout, Menu, Icon, Button} from 'antd';
 import {primaryColor} from '../constants';
-import {getBreadCrumbArray, Utils} from '../utils';
+import {Utils} from '../utils';
 
+const InvestorDashboard = Loadable({
+    loader: () => import('./InvestorDashboard'),
+    loading: () => <div>Loading</div>
+});
+const AdvisorDashboard = Loadable({
+    loader: () => import('./AdvisorDashboard'),
+    loading: () => <div>Loading</div>
+});
 const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
 
