@@ -992,7 +992,7 @@ class StepperAdviceFormImpl extends React.Component {
                         onCancel={this.toggleMarketplaceWarningModal}
                         loading={this.state.loaders.postToMarketplace}
                 />
-                <Col span={24}>
+                <Col span={24} style={{padding: 0}}>
                     <AqPageHeader 
                         title={this.props.isUpdate ? "Update Advice" : "Create Advice"}
                         showTitle={true}
@@ -1025,6 +1025,7 @@ class StepperAdviceFormImpl extends React.Component {
                     // !this.state.loaders.page && 
                     <div style={{display: this.state.loaders.page ? 'none' : 'block'}}>
                         {this.renderPageContent()}
+                        <div style={{height: '100px'}}></div>
                         <Footer />
                     </div>
                 }
