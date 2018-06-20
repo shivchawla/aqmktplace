@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
-import {Utils} from '../utils';
-import { Spin, Form, Icon, Input, Button} from 'antd';
-import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
+import _ from 'lodash';
+import Media from 'react-media';
+import {Col} from 'antd';
+import {Spin, Form, Icon, Input, Button} from 'antd';
+import {Link, withRouter} from 'react-router-dom';
+import {Utils} from '../utils';
+import {primaryColor} from '../constants';
 import logo from "../assets/logo-advq-new.png";
+import '../css/resetPassword.css';
+
 const {requestUrl} = require('../localConfig');
 
 class ResetPassword extends Component {
@@ -40,27 +45,8 @@ class ResetPassword extends Component {
             })
           })
           .then((response) => {
-              // console.log('Reset Password Completed');
               this.cancelLoginCall = undefined;
               this.props.history.push('/authMessage?mode=resetPassword');
-            //   if (response.data.token){
-            //     if (values.remember){
-            //       Utils.localStorageSaveObject(Utils.userInfoString, response.data);
-            //     }
-            //     Utils.setLoggedInUserInfo(response.data);
-            //     Utils.localStorageSave('selectedPage', 1);
-            //     const redirectUrl = Utils.getRedirectAfterLoginUrl();
-            //     if (redirectUrl){
-            //       this.props.history.push(redirectUrl);
-            //     }else{
-            //       this.props.history.push('/advice');
-            //     }
-            //   } else{
-            //     this.updateState({
-            //       'loading': false,
-            //       'error': "Unexpected error occured! Pleas try again."
-            //     });
-            //   }
           })
           .catch((error) => {
             this.cancelLoginCall = undefined;
@@ -97,10 +83,6 @@ class ResetPassword extends Component {
   	if (Utils.isLoggedIn()){
       this.props.history.push('/dashboard');
     }
-    // }else{
-    //     const queryParams = new URLSearchParams(this.props.location.search);
-    //     console.log(queryParams.get('resetcode'));
-    // }
   }
 
   componentWillUnMount(){
@@ -118,6 +100,7 @@ class ResetPassword extends Component {
       callback();
     }
   }
+
   validateToNextPassword = (rule, value, callback) => {
     const form = this.props.form;
     if (value && this.state.confirmDirty) {
@@ -126,9 +109,7 @@ class ResetPassword extends Component {
     callback();
   } 
 
-
-  render() {
-
+  renderDesktop = () => {
     const FormItem = Form.Item;
     const { getFieldDecorator } = this.props.form;
 
@@ -149,7 +130,7 @@ class ResetPassword extends Component {
             <Button type="primary" htmlType="submit" className="login-form-button" style={{marginTop: '20px'}}>
               SEND REQUEST
             </Button>
-            <Link to="/login">Login here</Link>
+            <Link to="/login">Login Here</Link>
             <p style={{'color':'#cc6666',
               'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
           </FormItem>
@@ -212,6 +193,157 @@ class ResetPassword extends Component {
 	    </div>
     );
   }
+
+  renderMobile = () => {
+    const FormItem = Form.Item;
+    const { getFieldDecorator } = this.props.form;
+
+    const antIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
+
+    const getLoginButtonDiv = () =>{
+      if (this.state.loading){
+        return (
+          <div style={{'display': 'flex',
+            'alignItems': 'center', 'justifyContent': 'center',
+            'minHeight': '142px'}}>
+            <Spin indicator={antIconLoading} />
+          </div>
+        );
+      }else{
+        return (
+          <FormItem>
+			<Button 
+					type="primary" 
+					htmlType="submit" 
+					className="login-form-button" 
+					style={{
+						marginTop: '20px',
+						fontSize: '16px',
+						height: '40px'
+					}}
+			>
+              SEND REQUEST
+            </Button>
+            <Link to="/login" style={{fontSize: '16px'}}>Login Here</Link>
+            <p style={{'color':'#cc6666',
+              'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
+          </FormItem>
+        );
+      }
+    }
+
+    return (
+      	<div 
+        	style={{
+				height: 'calc(100vh - 64px)', 
+				width: '100%', 
+				background: '#fafafaf',
+				minHeight: '500px', 
+				display: 'flex', 
+				flexDirection: 'column', 
+			}}
+		>
+			<div 
+					className="card" 
+					style={{
+						padding: '20px', 
+						background: 'white',
+						borderRadius: '2px', 
+						boxShadow: 'none',
+					}}
+			>
+				<Col 
+						span={24} 
+						style={{
+							display: 'flex', 
+							flexDirection: 'row', 
+						}}
+				>
+					<img src={logo} style={{height: '40px'}}/>
+					<div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+						<span style={{...biggerFont, color:primaryColor}}>A</span>
+						<span style={{color: primaryColor}}>DVICE</span>
+						<span style={{...biggerFont, color: '#e06666'}}>Q</span>
+						<span style={{color: '#e06666'}}>UBE</span>
+					</div>
+				</Col>
+				<Col span={24}>
+					<p style={{'color': '#37474F', 'fontStyle': 'italic',
+						'fontSize': '15px', 'margin': '0px', marginTop: '10px'}}>
+						Expert-Sourced Investment Portfolio
+					</p>
+				</Col>
+				<Col span={24} style={{marginTop: '15%'}}>
+					<h3 style={{fontSize: '32px', color: primaryColor}}>Reset Password</h3>
+				</Col>
+				<Col span={24}>
+					<Form onSubmit={this.handleSubmit} className="login-form">
+						<FormItem>
+						{getFieldDecorator('password', {
+							rules: [
+							{ required: true, message: 'Please input your new password!' },
+							{
+								validator: this.validateToNextPassword,
+							}
+							],
+						})(
+							<Input 
+								prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+								placeholder="Password" 
+								type="password" 
+								style={{marginTop: '5px', height: '40px'}}
+							/>
+						)}
+						</FormItem>
+						<FormItem>
+						{getFieldDecorator('confirmPassword', {
+							rules: [
+							{ required: true, message: 'Please confirm your new Password!' },
+							{
+								validator: this.compareToFirstPassword,
+							}
+							],
+						})(
+							<Input 
+									prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+									type="password" 
+									placeholder="Confirm Password" 
+									style={{marginTop: '5px', height: '40px'}}
+							/>
+						)}
+						</FormItem>
+						{getLoginButtonDiv()}
+					</Form>
+				</Col>
+			</div>
+	    </div>
+    );
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <Media 
+          query="(max-width: 600px)"
+          render={() => this.renderMobile()}
+        />
+        <Media 
+          query="(min-width: 601px)"
+          render={() => this.renderDesktop()}
+        />
+      </React.Fragment>
+    );
+  }
 }
 
 export default Form.create()(withRouter(ResetPassword));
+
+const biggerFont = {
+  fontSize: '24px',
+  fontWeight: '400',
+};
+
+const headerColor = {
+  color: '#595959',
+  fontSize: '16px'
+};
