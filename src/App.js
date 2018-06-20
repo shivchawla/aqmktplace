@@ -321,11 +321,20 @@ class App extends React.Component {
         );
     }
 
+    showHeaderAdviceLogo = parentPath => {
+        const restrictedParentPaths = ['login', 'signup', 'forgotPassword', 'resetPassword'];
+        if (restrictedParentPaths.indexOf(parentPath) === -1) {
+            return true;
+        }
+
+        return false;
+    }
+
     renderHeader = () => {
         return (
             <React.Fragment>
                 {
-                    !(this.state.parentPath === 'login' || this.state.parentPath === 'signup') &&
+                    this.showHeaderAdviceLogo(this.state.parentPath) &&
                     <Media 
                         query="(max-width: 599px)"
                         render={() => {

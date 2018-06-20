@@ -124,7 +124,7 @@ class Signup extends Component {
     }
   }
 
-  getRegisterButtonDiv = () => {
+  getRegisterButtonDiv = (type='desktop') => {
 	const FormItem = Form.Item;
     const { getFieldDecorator } = this.props.form;
     const antIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -151,7 +151,20 @@ class Signup extends Component {
               )}
             </FormItem>
             <FormItem className="signup-form-item">
-              <Button type="primary" htmlType="submit" style={{width: '100%'}}>Register</Button>
+              <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  style={{
+                    width: '100%', 
+                    height: type === 'desktop' ? '32px' : '40px',
+                    fontSize: type === 'desktop' ? '14px' : '16px'
+                  }}
+              >
+                Register
+              </Button>
+              <h3 style={{fontSize: '16px'}}>
+            	  Or <Link to="/login">Login Now!</Link>
+              </h3>
             </FormItem>
             <p style={{'color':'#cc6666',
               'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
@@ -180,8 +193,6 @@ class Signup extends Component {
 						padding: '20px', 
 						background: 'white',
 						borderRadius: '2px', 
-						minWidth: '340px', 
-						width: '390px',
 						boxShadow: 'none'
 					}}
 			>
@@ -215,14 +226,14 @@ class Signup extends Component {
 							{getFieldDecorator('firstName', {
 							rules: [{ required: true, message: 'Please input your firstName!', whitespace: true }],
 							})(
-							<Input placeholder="First Name"/>
+							<Input placeholder="First Name" style={{height: '40px'}} />
 							)}
 						</FormItem>
 						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
 							{getFieldDecorator('lastName', {
 							rules: [{ required: true, message: 'Please input your lastName!', whitespace: true }],
 							})(
-							<Input placeholder="Last Name"/>
+							<Input placeholder="Last Name" style={{height: '40px', marginTop: '5px'}} />
 							)}
 						</FormItem>
 						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
@@ -233,7 +244,11 @@ class Signup extends Component {
 								required: true, message: 'Please input your E-mail!',
 							}],
 							})(
-							<Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-Mail"/>
+              <Input 
+                  prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                  placeholder="E-Mail"
+                  style={{height: '40px', marginTop: '5px'}}
+              />
 							)}
 						</FormItem>
 						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
@@ -246,7 +261,12 @@ class Signup extends Component {
 								validator: this.validateToNextPassword,
 							}],
 							})(
-							<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password"/>
+              <Input 
+                  prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                  type="password" 
+                  placeholder="Password"
+                  style={{height: '40px', marginTop: '5px'}}
+              />
 							)}
 						</FormItem>
 						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
@@ -257,10 +277,15 @@ class Signup extends Component {
 								validator: this.compareToFirstPassword,
 							}],
 							})(
-							<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" onBlur={this.handleConfirmBlur} placeholder="Confirm Password"/>
+              <Input 
+                  prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                  type="password" onBlur={this.handleConfirmBlur} 
+                  placeholder="Confirm Password"
+                  style={{height: '40px', marginTop: '5px'}}
+              />
 							)}
 						</FormItem>
-						{this.getRegisterButtonDiv()}
+						{this.getRegisterButtonDiv('mobile')}
 					</Form>
 				</Col>
 			</Row>

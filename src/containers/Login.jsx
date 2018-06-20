@@ -101,12 +101,12 @@ class Login extends Component {
   }
 
   renderMobile = () => {
-	const FormItem = Form.Item;
-    const { getFieldDecorator } = this.props.form;
+	  const FormItem = Form.Item;
+    const {getFieldDecorator} = this.props.form;
 
     const antIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
-    const getLoginButtonDiv = () =>{
+    const getLoginButtonDiv = (type = 'desktop') =>{
       if (this.state.loading){
         return (
           <div style={{'display': 'flex',
@@ -119,11 +119,19 @@ class Login extends Component {
         return (
           <FormItem>
             <Link className="login-form-forgot" to="/forgotPassword" style={{fontSize: '16px'}}>Forgot password</Link>
-            <Button type="primary" htmlType="submit" className="login-form-button">
+            <Button 
+                type="primary" 
+                htmlType="submit" 
+                className="login-form-button"
+                style={{
+                  height: '40px',
+                  fontSize: '16px'
+                }}
+            >
               LOG IN
             </Button>
 			<h3 style={{fontSize: '16px'}}>
-            	Or <Link to="/signup">register now!</Link>
+            	Or <Link to="/signup">Register Now!</Link>
 			</h3>
             <p style={{'color':'#cc6666',
               'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
@@ -186,14 +194,23 @@ class Login extends Component {
 						{getFieldDecorator('userName', {
 							rules: [{ required: true, message: 'Please input your email!'},{type:'email', message:'Please input a valid email'}],
 						})(
-							<Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-mail"/>
+              <Input 
+                  style={{height: '40px'}}
+                  prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                  placeholder="E-mail"
+              />
 						)}
 						</FormItem>
 						<FormItem>
 						{getFieldDecorator('password', {
 							rules: [{ required: true, message: 'Please input your Password!'}],
 						})(
-							<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
+              <Input
+                  style={{height: '40px'}} 
+                  prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                  type="password" 
+                  placeholder="Password" 
+              />
 						)}
 						</FormItem>
 						{getLoginButtonDiv()}
@@ -205,7 +222,7 @@ class Login extends Component {
   }
 
   renderDesktop = () => {
-	const FormItem = Form.Item;
+	  const FormItem = Form.Item;
     const { getFieldDecorator } = this.props.form;
 
     const antIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -226,7 +243,7 @@ class Login extends Component {
             <Button type="primary" htmlType="submit" className="login-form-button">
               LOG IN
             </Button>
-            Or <Link to="/signup">register now!</Link>
+            Or <Link to="/signup">Register Now!</Link>
             <p style={{'color':'#cc6666',
               'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
           </FormItem>
