@@ -6,8 +6,10 @@ export const portfolioConfig = [{
         suggestedData: []
     },
     requirements: [
-        "Portfolio should be diversified",
-        "Weight of an individual position can't increase more than 10%",
-        "Max notional should be less than 100000"
+        "Contains at-least 5 stocks",
+        "Exposure to an individual stock should be less than 20%",
+        "Portfolio Value should be less than 1 Lac",
+        "In case of diversified portfolio, exposure to single sector should be less than 35%",
+        "Performance over the last year should be within 10% of benchmark performance (downside)"
     ]
 }];
