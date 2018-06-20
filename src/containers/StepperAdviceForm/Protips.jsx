@@ -106,7 +106,7 @@ const ProTipComponent = ({protip}) => {
     
     return (
         <Row>
-            <Col span={24} style={{paddingRight: '80px', marginLeft: '40px'}}>
+            <Col span={24} style={{textAlign: 'justify', padding: '0 20px', marginTop: '-15px'}}>
                 <h4 style={{fontSize: '16px', color: '#4C4C4C'}}>{_.get(detail, 'definition', '')}</h4>
                 <Row style={{marginTop: '10px'}}>
                     <Col span={24} style={{...horizontalBox, alignItems: 'center'}}>
