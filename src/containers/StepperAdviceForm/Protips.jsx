@@ -106,8 +106,8 @@ const ProTipComponent = ({protip}) => {
     
     return (
         <Row>
-            <Col span={24} style={{textAlign: 'justify', padding: '0 20px', marginTop: '-15px'}}>
-                <h4 style={{fontSize: '16px', color: '#4C4C4C'}}>{_.get(detail, 'definition', '')}</h4>
+            <Col span={24} style={{padding: '0 0px', marginTop: '-15px'}}>
+                <h4 style={{textAlign: 'justify', fontSize: '16px', color: '#4C4C4C'}}>{_.get(detail, 'definition', '')}</h4>
                 <Row style={{marginTop: '10px'}}>
                     <Col span={24} style={{...horizontalBox, alignItems: 'center'}}>
                         <Icon type="info-circle-o" style={iconStyle} />
@@ -115,7 +115,7 @@ const ProTipComponent = ({protip}) => {
                     </Col>
                     {
                         _.get(detail, 'importance', null) !== null &&
-                        <Col span={24} style={{marginTop: '5px'}}>
+                        <Col span={24} style={{textAlign: 'justify', marginTop: '5px'}}>
                             <h4>{_.get(detail, 'importance', '')}</h4>
                         </Col>
                     }
@@ -125,7 +125,7 @@ const ProTipComponent = ({protip}) => {
                     <Row style={{marginTop: '10px'}}>
                         <Col span={24} style={{...horizontalBox, alignItems: 'center'}}>
                             <Icon type="profile" style={iconStyle} />
-                            <h4 style={headerTextStyle}>Example</h4>
+                            <h4 style={headerTextStyle}>Examples</h4>
                         </Col>
                         <Col span={24} style={{marginTop: '5px'}}>
                             <ul style={unorderedListStyle}>
