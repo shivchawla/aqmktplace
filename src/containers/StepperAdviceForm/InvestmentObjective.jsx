@@ -83,14 +83,6 @@ export class InvestmentObjective extends React.Component {
                     style={{display: this.props.step === investmentObjectiveStep ? 'block': 'none'}}
             >
                 <Row {...investmentObjRowProps}>
-                    {/* <Col span={24} style={{...headerContainerStyle, marginTop: '10px', marginBottom: '20px'}}>
-                        {
-                            this.props.isPublic &&
-                            this.props.isUpdate &&
-                            !checkForInvestmentObjectiveError(this.props.approvalStatusData) &&
-                            <WarningIcon reason="There are invalid Investment Objective items" />
-                        }
-                    </Col> */}
                     <Col span={24}>
                         <InvestMentObjComponent 
                             header="Goal"

@@ -465,6 +465,13 @@ class AdviceDetailContentImpl extends React.Component {
         )
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(this.props, nextProps)) {
+            return true;
+        } 
+        return false;
+    }
+
     render() {
         return (this.renderPageContent());
     }

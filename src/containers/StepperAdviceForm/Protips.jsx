@@ -7,6 +7,7 @@ import {adviceNameConfig} from './configs/adviceName';
 import {investmentObjectiveConfig} from './configs/investment';
 import {otherSettingsConfig} from './configs/otherSettings';
 import {portfolioConfig} from './configs/portfolio';
+import {unorderedListStyle, listItemStyle} from './style/protips';
 import '../../css/protips.css';
 
 const Panel = Collapse.Panel;
@@ -27,6 +28,14 @@ export class Protips extends React.Component {
             case "otherSettings":
                 return(otherSettingsConfig);
         }
+    }
+
+    shouldComponentUpdate(nextProps) {
+        if (this.props.selectedStep !== nextProps.selectedStep) {
+            return true;
+        } 
+
+        return false;
     }
 
     render() {
@@ -102,7 +111,7 @@ export class Protips extends React.Component {
 }
 
 const ProTipComponent = ({protip}) => {
-    const {header = '', detail = {}} = protip;
+    const {header = '', detail = {}, requirements = []} = protip;
     const headerTextStyle = {fontSize: '14px', marginLeft: '5px', color: '#4C4C4C', color: primaryColor};
     const iconStyle = {fontSize: '18px', color: primaryColor};
     
@@ -130,6 +139,28 @@ const ProTipComponent = ({protip}) => {
                             <h4>
                                 {_.join(_.get(detail, 'suggestedData', []), ' , ')}
                             </h4>
+                        </Col>
+                    </Row>
+                }
+                {
+                    requirements.length > 0 &&
+                    <Row style={{marginTop: '10px'}}>
+                        <Col span={24} style={{...horizontalBox, alignItems: 'center'}}>
+                            <Icon type="form" style={iconStyle} />
+                            <h4 style={headerTextStyle}>Requirements</h4>
+                        </Col>
+                        <Col span={24} offset={2}>
+                            <ul style={unorderedListStyle}>
+                                {
+                                    requirements.map((requirement, index) => {
+                                        return (
+                                            <li style={listItemStyle} key={index}>
+                                                <h4>{requirement}</h4>
+                                            </li>
+                                        );
+                                    })
+                                }
+                            </ul>
                         </Col>
                     </Row>
                 }

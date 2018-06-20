@@ -2,8 +2,8 @@ import * as React from 'react';
 import {Row, Col, Form, Input} from 'antd';
 import {getStepIndex} from './steps';
 import {getOthersWarning} from './utils';
+import {inputStyle} from './style/adviceName';
 import {WarningIcon} from '../../components';
-import { primaryColor } from '../../constants';
 
 const FormItem = Form.Item;
 
@@ -37,7 +37,7 @@ export class AdviceName extends React.Component {
                         {getFieldDecorator('adviceName', {
                             rules: [{required: true, message: 'Please enter Advice Name'}]
                         })(
-                            <Input 
+                            <Input
                                     placeholder='Type Advice Name' 
                                     style={inputStyle}
                                     disabled={this.props.disabled}
@@ -49,10 +49,3 @@ export class AdviceName extends React.Component {
         );
     }
 }
-
-const inputStyle = {
-    height: '60px', 
-    fontSize: '18px',
-    marginTop: '20px',
-    color: primaryColor
-};

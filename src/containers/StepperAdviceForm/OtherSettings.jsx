@@ -1,7 +1,6 @@
 import * as React from 'react';
 import moment from 'moment';
 import {Row, Col, Form, DatePicker, Select, Icon, Tooltip} from 'antd';
-import {horizontalBox} from '../../constants';
 import {benchmarks} from '../../constants/benchmarks';
 import {tooltips} from './constants';
 import {getStepIndex} from './steps';
@@ -67,7 +66,7 @@ export class OtherSettings extends React.Component {
 
         return (
             <Row
-                    style={{display: this.props.step === otherSettingsStep ? 'block': 'none',}} 
+                    style={{display: this.props.step === otherSettingsStep ? 'block': 'none'}} 
                     align="middle"
             >
                 <Col span={24} style={{marginTop: '40px'}}>
