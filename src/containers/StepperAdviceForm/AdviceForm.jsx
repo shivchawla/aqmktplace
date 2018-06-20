@@ -1,7 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
-import $ from 'jquery';
 import Loading from 'react-loading-bar';
 import Promise from 'bluebird';
 import moment from 'moment';
@@ -1000,7 +999,7 @@ class StepperAdviceFormImpl extends React.Component {
                 </Col>
                 {this.renderForm()}
                 {this.renderPreview()}
-                <Col xl={6} md={0} sm={0} xs={0} style={{height: `${$('#form-container').height()}px`}}>
+                <Col xl={6} md={0} sm={0} xs={0}>
                     {
                         this.state.preview
                         ? this.renderActionButtons()

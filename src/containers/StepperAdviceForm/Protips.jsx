@@ -51,7 +51,7 @@ export class Protips extends React.Component {
                         ...shadowBoxStyle, 
                         paddingTop: '10px', 
                         minHeight: '550px',
-                        height: '100%', 
+                        height: '550px', 
                         marginBottom: 0,
                     }}
             >
