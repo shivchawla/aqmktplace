@@ -50,8 +50,8 @@ export class Protips extends React.Component {
                     style={{
                         ...shadowBoxStyle, 
                         paddingTop: '10px', 
+                        minHeight: '550px',
                         height: '100%', 
-                        maxHeight: '600px', 
                         marginBottom: 0,
                     }}
             >
@@ -63,10 +63,10 @@ export class Protips extends React.Component {
                         style={{
                             overflow: 'hidden', 
                             overflowY: 'scroll',
-                            maxHeight: '500px'
+                            height: '100%'
                         }}
                 >
-                    <Collapse bordered={false} defaultActiveKey={['0']}>
+                    <Collapse accordion bordered={false} defaultActiveKey={['0']}>
                         {
                             this.getValidProTips(this.props.selectedStep).map((protip, index) => (
                                 <Panel
@@ -93,17 +93,6 @@ export class Protips extends React.Component {
                             ))
                         }
                     </Collapse>
-                    {/* <List
-                        style={{marginTop: '-10px'}}
-                        header={<div style={{fontSize: '20px'}}>PRO-TIPS</div>}
-                        dataSource={this.getValidProTips(this.props.selectedStep)}
-                        renderItem={
-                            protip => (
-                                <List.Item><ProTipComponent key="index" protip={protip} /></List.Item>
-                            )
-                        }
-                    /> */}
-
                 </Col>
             </Row>
         );
@@ -117,16 +106,19 @@ const ProTipComponent = ({protip}) => {
     
     return (
         <Row>
-            <Col span={24} style={{paddingRight: '60px', marginLeft: '40px'}}>
+            <Col span={24} style={{paddingRight: '80px', marginLeft: '40px'}}>
                 <h4 style={{fontSize: '16px', color: '#4C4C4C'}}>{_.get(detail, 'definition', '')}</h4>
                 <Row style={{marginTop: '10px'}}>
                     <Col span={24} style={{...horizontalBox, alignItems: 'center'}}>
                         <Icon type="info-circle-o" style={iconStyle} />
                         <h4 style={headerTextStyle}>Importance</h4>
                     </Col>
-                    <Col span={24} offset={2}>
-                        <h4>{_.get(detail, 'importance', '')}</h4>
-                    </Col>
+                    {
+                        _.get(detail, 'importance', null) !== null &&
+                        <Col span={24} style={{marginTop: '5px'}}>
+                            <h4>{_.get(detail, 'importance', '')}</h4>
+                        </Col>
+                    }
                 </Row>
                 {
                     _.get(detail, 'suggestedData', []).length > 0 &&
@@ -135,7 +127,7 @@ const ProTipComponent = ({protip}) => {
                             <Icon type="profile" style={iconStyle} />
                             <h4 style={headerTextStyle}>Example</h4>
                         </Col>
-                        <Col span={24} offset={2}>
+                        <Col span={24} style={{marginTop: '5px'}}>
                             <h4>
                                 {_.join(_.get(detail, 'suggestedData', []), ' , ')}
                             </h4>
@@ -149,7 +141,7 @@ const ProTipComponent = ({protip}) => {
                             <Icon type="form" style={iconStyle} />
                             <h4 style={headerTextStyle}>Requirements</h4>
                         </Col>
-                        <Col span={24} offset={2}>
+                        <Col span={24} >
                             <ul style={unorderedListStyle}>
                                 {
                                     requirements.map((requirement, index) => {

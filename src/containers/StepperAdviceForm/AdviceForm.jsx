@@ -1,6 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
+import $ from 'jquery';
 import Loading from 'react-loading-bar';
 import Promise from 'bluebird';
 import moment from 'moment';
@@ -911,6 +912,7 @@ class StepperAdviceFormImpl extends React.Component {
                         ...shadowBoxStyle, 
                         display: this.state.preview ? 'none' : 'block'
                     }}
+                    id="form-container"
             >
                 <Form onSubmit={this.submitAdvice}>
                     <Row 
@@ -998,7 +1000,7 @@ class StepperAdviceFormImpl extends React.Component {
                 </Col>
                 {this.renderForm()}
                 {this.renderPreview()}
-                <Col xl={6} md={0} sm={0} xs={0}>
+                <Col xl={6} md={0} sm={0} xs={0} style={{height: `${$('#form-container').height()}px`}}>
                     {
                         this.state.preview
                         ? this.renderActionButtons()
