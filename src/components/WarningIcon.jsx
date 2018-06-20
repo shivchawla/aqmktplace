@@ -12,7 +12,7 @@ export class WarningIcon extends React.Component {
         }
         return (
             <Popover content={content} placement="right">
-                <Icon type="exclamation-circle" style={exclamationIconStyle}/>
+                <Icon type="exclamation-circle" style={{...exclamationIconStyle, ...this.props.style}}/>
             </Popover>
         );
     }

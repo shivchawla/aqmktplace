@@ -1,19 +1,45 @@
 import * as React from 'react';
-import {Row, Col} from 'antd';
+import {Row, Col, Tooltip, Icon} from 'antd';
 import {horizontalBox} from '../constants';
 import {WarningIcon} from './WarningIcon';
 
-export const InvestMentObjComponent = ({header, content, warning = false, reason = ''}) => {
+export const InvestMentObjComponent = ({
+    header, 
+    content, 
+    warning = false, 
+    reason = '', 
+    span={label: 3, content: 20, warning: 2},
+    tooltip={text: null, placement: 'top'}
+}) => {
     return (
         <Row type="flex" align="middle" style={{marginBottom: '10px'}}>
-            <Col span={24} style={horizontalBox}>
-                <h3 style={investmentObjLabelStyle}>{header}:</h3>
+            <Col span={span.label}>
+                <Tooltip 
+                        title={tooltip.text}
+                        placement={tooltip.placement}
+                >
+                    <div style={{...investmentObjLabelStyle, ...horizontalBox, alignItems: 'center'}}>
+                        {header}:
+                        {
+                            // tooltip.text !== null &&
+                            // <Icon type="question-circle" style={{marginLeft: '5px'}}/>
+                        }
+                    </div>
+                </Tooltip>
+            </Col>
+            <Col span={span.content} style={{...horizontalBox, alignItems: 'center'}}>
+                {content}
                 {
                     warning &&
                     <WarningIcon reason={reason}/>
                 }
             </Col>
-            <Col span={24}>{content}</Col>
+            {/* <Col span={span.warning}>
+                {
+                    warning &&
+                    <WarningIcon reason={reason}/>
+                }
+            </Col> */}
         </Row>
     );
 }

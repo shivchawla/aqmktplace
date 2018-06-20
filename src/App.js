@@ -211,7 +211,7 @@ class App extends React.Component {
                         className="row" 
                         onClick={
                             () => 
-                                {this.props.history.push(`/advisordashboard/advisorprofile/${Utils.getUserInfo().advisor}`)}
+                                {this.props.history.push(`/dashboard/advisorprofile/${Utils.getUserInfo().advisor}`)}
                         }
                 >
                     <Icon type="user" className="icon" />
@@ -254,7 +254,7 @@ class App extends React.Component {
                         <Icon type="file-text" className="icon" />
                         Create Advice
                     </div>
-                    <div className="row" onClick={() => {Utils.logoutUser(); this.props.history.push('/investordashboard/createportfolio')}}>
+                    <div className="row" onClick={() => {Utils.logoutUser(); this.props.history.push('/dashboard/createportfolio')}}>
                         <Icon type="line-chart" className="icon" />
                         Create Portfolio
                     </div>

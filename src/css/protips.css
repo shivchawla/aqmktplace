@@ -1,0 +1,9 @@
+.ant-collapse-header {
+    padding-left: 20px;
+}
+.ant-collapse-content {
+    overflow: initial;
+}
+.ant-collapse-item {
+    margin-bottom: 0;
+}

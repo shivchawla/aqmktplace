@@ -2,7 +2,7 @@ import * as React from 'react';
 import moment from 'moment';
 import axios from 'axios';
 import _ from 'lodash';
-import {Table, Button, Row, Col} from 'antd';
+import {Table, Button, Row, Col, Tooltip} from 'antd';
 import {AutoCompleteEditableCell} from './AutoCompleteEditableCell';
 import {EditableCell} from './AqEditableCell';
 import {getStockData} from '../utils';
@@ -275,17 +275,28 @@ export class AqStockTableMod extends React.Component {
         return (
             <Col span={24}>
                 <Row style={{marginBottom: '20px'}}>
-                    <Button
-                            shape="circle" icon="delete" size="large" 
-                            disabled={this.state.selectedRows.length > 0 ? false : true} 
-                            onClick={this.deleteItems}
-                    />
-                    <Button  
-                            shape="circle" icon="plus" size="large" 
-                            type="primary" 
-                            onClick={this.addItem}
-                            style={{marginLeft: '20px'}}
-                    />
+                    <Tooltip
+                            title="Delete Positions"
+                            placement="top"
+                    >
+                        <Button
+                                style={{width: '40px'}}
+                                icon="delete" size="large" 
+                                disabled={this.state.selectedRows.length > 0 ? false : true} 
+                                onClick={this.deleteItems}
+                        />
+                    </Tooltip>
+                    <Tooltip
+                            title="Add Positions"
+                            placement="top"
+                    >
+                        <Button
+                                icon="plus" size="large" 
+                                type="primary" 
+                                onClick={this.addItem}
+                                style={{marginLeft: '20px', width: '40px'}}
+                        />
+                    </Tooltip>
                 </Row>
                 <Table 
                         rowSelection={this.getRowSelection()} 
