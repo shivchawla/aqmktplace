@@ -160,7 +160,7 @@ class Signup extends Component {
                     fontSize: type === 'desktop' ? '14px' : '16px'
                   }}
               >
-                Register
+                REGISTER
               </Button>
               <h3 style={{fontSize: '16px'}}>
             	  Or <Link to="/login">Login Now!</Link>
