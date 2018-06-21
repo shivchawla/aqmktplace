@@ -60,13 +60,22 @@ export class OtherSettings extends React.Component {
         );
     }
 
+    shouldComponentUpdate(nextProps) {
+        const otherSettingsStep = getStepIndex('otherSettings');
+        if (nextProps.step === otherSettingsStep) {
+            return true;
+        }
+
+        return false;
+    }
+
     render = () => {
         const {getFieldDecorator} = this.props.form;
-        const otherSettingsStep = getStepIndex('otherSettings');
+        console.log('Rendering Other Settings');
 
         return (
             <Row
-                    style={{display: this.props.step === otherSettingsStep ? 'block': 'none'}} 
+                    style={{display: 'block'}} 
                     align="middle"
             >
                 <Col span={24} style={{marginTop: '40px'}}>
