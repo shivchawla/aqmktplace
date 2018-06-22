@@ -1,23 +1,21 @@
 import * as React from 'react';
-import axios from 'axios';
 import _ from 'lodash';
-import $ from 'jquery';
-import {Button, Checkbox, Row, Col, Icon, Slider, Divider} from 'antd';
-import {IconHeader} from './IconHeader';
-import {adviceFilters as filters} from '../constants/filters';
-import {verticalLayout} from '../constants';
-import {Utils} from '../utils';
-import '../css/buttons.css';
+import {Checkbox, Row, Col, Collapse, Icon} from 'antd';
+import {FilterSliderComponent} from './FilterSliderComponent';
+import {adviceFilters as filters} from '../../constants/filters';
+import {primaryColor, horizontalBox} from '../../constants';
+import {Utils} from '../../utils';
+import '../../css/buttons.css';
 
-const {aimsquantToken, requestUrl, investorId} = require('../localConfig');
 const CheckboxGroup = Checkbox.Group;
+const Panel = Collapse.Panel;
 const kvp = {
     rebalancingFrequency: 'selectRebalanceAllFilters',
     approved: 'selectApprovedllFilters',
     owner: 'selectOwnerAllFilters'
 };
 
-export class AdviceFilterSideComponent extends React.Component {
+export class FilterMobileComponent extends React.Component {
     constructor(props) {
         super(props);
         const selectedFilters = {...filters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
@@ -30,6 +28,7 @@ export class AdviceFilterSideComponent extends React.Component {
             selectOwnerAllFilters: _.get(selectedFilters, 'owner', []).length === filters.owner.length,
             limit: 3
         };
+        this.sliderFilters = [];
     }
 
     componentWillReceiveProps(nextProps) {
@@ -77,19 +76,6 @@ export class AdviceFilterSideComponent extends React.Component {
         });
     }
 
-    processUrl = (type = 'all') => {
-        const {selectedFilters, defaultFilters} = this.state;
-        let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
-        let personal = selectedFilters.owner.map(item => item === 'Personal' ? 1 : 0);
-        const limit = this.state.limit;
-        const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
-        const {netValue, sharpe, volatility, rating} = selectedFilters;
-        approved = _.join(approved, ',');
-        personal = _.join(personal, ',');
-        const url = `${requestUrl}/advice?&${this.props.selectedTab}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
-        return url;
-    }
-
     convertRangeToDecimal = range => {
         const rangeArray = range.split(',');
         const min = Number(rangeArray[0]) / 100;
@@ -113,42 +99,59 @@ export class AdviceFilterSideComponent extends React.Component {
     }
 
     handleSliderChange = (value, type) => {
-        const selectedFilters = [...this.state.selectedFilters];
         const selectedRange = value.join(',');
         this.setState({
             selectedFilters: {
                 ...this.state.selectedFilters,
                 [type]: selectedRange
             }
-        }, () => {
-            this.props.updateSelectedFilters(this.state.selectedFilters);
-            Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
         });
 
     }
 
-    renderSliderFilters = (filterArray) => {
+    setSliderInputRef = el => {
+        const sliderType = _.get(el, 'props.type', null);
+        if (sliderType !== null) {
+            const indexOfSlider = this.sliderFilters.filter(item => item.props.type === sliderType)[0];
+            if (indexOfSlider === undefined) {
+                this.sliderFilters.push(el);
+            }
+        }
+    }
+
+    renderSliderFilters = filterArray => {
         return filterArray.map((filter, index) => {
             return (
-                <Col span={this.props.modal ? 12 : 24} key={index} style={{marginBottom: 20}}>
-                    <IconHeader 
-                            icon={filter.icon} 
-                            label={filter.label}
-                    />
+                <Panel header={filter.label} key={3 + index}>
                     <Row>
                         <Col span={24}>
-                            <Slider 
-                                    onChange={value => this.handleSliderChange(value, filter.type)} 
-                                    range 
-                                    value={filter.range.split(',').map(item => Number(item.trim()))} 
-                                    min={filter.min}
-                                    max={filter.max}
+                            <FilterSliderComponent 
+                                min={filter.min}
+                                max={filter.max}
+                                defaultValue={filter.range.split(',').map(item => Number(item.trim()))}
+                                type={filter.type}
+                                handleSliderChange={this.handleSliderChange}
+                                ref={this.setSliderInputRef}
                             />
                         </Col>
                     </Row>
-                </Col>
+                </Panel>
             );
         })
+    }
+
+    applyFilters = () => {
+        this.props.updateSelectedFilters(this.state.selectedFilters);
+        Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
+    }
+
+    clearAllFilters = () => {
+        this.sliderFilters.map(el => {
+            el.clearFilter();
+        });
+        this.setState({selectedFilters: this.state.defaultFilters}, () => {
+            this.applyFilters();
+        });
     }
 
     render() {
@@ -165,56 +168,64 @@ export class AdviceFilterSideComponent extends React.Component {
             <Row>
                 <Col span={24} style={filterLayoutStyle}>
                     <Row gutter={16}>
-                        <Col span={24} style={{marginBottom: '20px'}}>
-                            <IconHeader 
-                                    icon="clock-circle-o" 
-                                    label="Rebalancing Frequency"
-                                    checked={this.state.selectRebalanceAllFilters}
-                                    filterType="rebalancingFrequency"
-                                    onChange={this.handleFilterGroupCheckboxChange}
-                            />
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderRebalancingFreqFilter()}
-                                </Col>
-                            </Row>
+                        <Col span={24} style={horizontalBox} onClick={this.props.toggleFilterMenu}>
+                            <Icon type="left" />
+                            <h3>Go Back</h3>
                         </Col>
-                        {
-                            this.props.isAdmin &&
-                            <Col span={this.props.modal ? 12 : 24} style={{marginBottom: '20px'}}>
-                                <IconHeader 
-                                        icon="check-circle" 
-                                        label="Status"
-                                        checked={this.state.selectApprovedllFilters}
-                                        filterType="approved"
-                                        onChange={this.handleFilterGroupCheckboxChange}
-                                />
-                                <Row>
-                                    <Col span={24}>
-                                        {this.renderStatusFilter()}
-                                    </Col>
-                                </Row>
-                            </Col>
-                        }
-                        <Col span={this.props.modal ? 12 : 24} style={{marginBottom: '20px'}}>
-                            <IconHeader 
-                                    icon="check-circle" 
-                                    label="Ownership"
-                                    checked={this.state.selectOwnerAllFilters}
-                                    filterType="owner"
-                                    onChange={this.handleFilterGroupCheckboxChange}
-                            />
-                            <Row>
-                                <Col span={24}>
-                                    {this.renderAdviceFilter()}
-                                </Col>
-                            </Row>
+                        <Col span={24}>
+                            <h3 style={{fontSize: '14px', fontWeight: '700'}}>{'Sort & Filters'}</h3>
                         </Col>
-                        <Row gutter={16}>
-                        {
-                            this.renderSliderFilters(filterArray)
-                        }
-                        </Row>
+                        <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
+                            <h3 
+                                    onClick={this.applyFilters} 
+                                    style={{color: primaryColor, fontSize: '14px'}}
+                            >
+                                Apply Filters
+                            </h3>
+                            <h3 
+                                    onClick={this.clearAllFilters}
+                                    style={{color: primaryColor, fontSize: '14px'}}
+                            >
+                                Clear All
+                            </h3>
+                        </Col>
+                        <Col 
+                                span={24} 
+                                style={{
+                                    marginTop: '10px',
+                                    overflow: 'hidden',
+                                    overflowY: 'scroll',
+                                    maxHeight: '700px'
+                                }}
+                        >
+                            <Collapse 
+                                    bordered={false} 
+                                    defaultActiveKey={['0']}
+                            >
+                                <Panel header="Rebalancing Frequency">
+                                    <Row>
+                                        <Col span={24}>
+                                            {this.renderRebalancingFreqFilter()}
+                                        </Col>
+                                    </Row>
+                                </Panel>
+                                <Panel header="Status">
+                                    <Row>
+                                        <Col span={24}>
+                                            {this.renderStatusFilter()}
+                                        </Col>
+                                    </Row>
+                                </Panel>
+                                <Panel header="Ownership">
+                                    <Row>
+                                        <Col span={24}>
+                                            {this.renderAdviceFilter()}
+                                        </Col>
+                                    </Row>
+                                </Panel>
+                                {this.renderSliderFilters(filterArray)}
+                            </Collapse>
+                        </Col>
                     </Row>
                 </Col>
             </Row>

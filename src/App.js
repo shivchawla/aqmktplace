@@ -9,7 +9,6 @@ import {Utils} from './utils';
 import {primaryColor} from './constants';
 import logo from "./assets/logo-advq-new.png";
 
-const SubMenu = Menu.SubMenu;
 const {Header, Content} = Layout;
 const {gaTrackingId} = require('./localConfig');
 
@@ -17,6 +16,11 @@ const ScreenAdvices = Loadable({
     loader: () => import('./containers/ScreenAdvices'),
     loading: () => <Icon type="loading" />
 });
+
+const ScreenAdviceMobile = Loadable({
+    loader: () => import('./containers/ScreenAdviceMobile/ScreenAdviceMobile'),
+    loading: () => <Icon type="loading" />
+})
 
 const Home = Loadable({
     loader: () => import('./containers/Home'),
@@ -322,7 +326,7 @@ class App extends React.Component {
     }
 
     showHeaderAdviceLogo = parentPath => {
-        const restrictedParentPaths = ['login', 'signup', 'forgotPassword', 'resetPassword'];
+        const restrictedParentPaths = ['login', 'signup', 'forgotPassword', 'resetPassword', 'advice'];
         if (restrictedParentPaths.indexOf(parentPath) === -1) {
             return true;
         }
@@ -411,6 +415,7 @@ class App extends React.Component {
                             <Route exact={true} path='/home' component={Home} /> 
                             <Route exact={true} path='/' component={Home} /> 
                             <Route exact={true} path='/advice' component={ScreenAdvices} /> 
+                            <Route exact={true} path='/advice/mobile' component={ScreenAdviceMobile} /> 
                             <Route path="/stockresearch" exact component={StockResearch} /> 
                             <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
                             <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 

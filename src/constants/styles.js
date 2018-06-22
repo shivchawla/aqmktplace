@@ -146,5 +146,6 @@ export const pageContainer = {
 
 export const horizontalBox = {
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'center'
 };

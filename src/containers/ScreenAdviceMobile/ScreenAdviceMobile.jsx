@@ -1,25 +1,29 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
 import _ from 'lodash';
+import {slide as HamburgerMenu} from 'react-burger-menu';
 import {Row, Col, Input, Icon, Button, Select, Tabs, Checkbox, Modal, Pagination, Radio} from 'antd';
-import {AdviceListItemMod} from '../components/AdviceListeItemMod';
-import {AdviceFilterSideComponent} from '../components/AdviceFilterSideComponent';
-import {AqPageHeader} from '../components/AqPageHeader';
-import {Footer} from '../components/Footer';
-import {newLayoutStyle, shadowBoxStyle, loadingColor} from '../constants';
-import {ScreenAdviceMeta} from '../metas';
-import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
-import {adviceFilters as filters} from '../constants/filters';
-import '../css/screenAdvices.css';
-import '../css/adviceDetail.css';
+import {FilterMobileComponent} from './Filter';
+import {AdviceListItemMod} from '../../components/AdviceListeItemMod';
+import {AdviceListItemMobile} from './AdviceListItem';
+import {AdviceFilterSideComponent} from '../../components/AdviceFilterSideComponent';
+import {AqMobileLayout} from '../AqMobileLayout/Layout';
+import {AqPageHeader} from '../../components/AqPageHeader';
+import {Footer} from '../../components/Footer';
+import {newLayoutStyle, loadingColor, horizontalBox} from '../../constants';
+import {ScreenAdviceMeta} from '../../metas';
+import {Utils, getBreadCrumbArray, fetchAjax} from '../../utils';
+import {adviceFilters as filters} from '../../constants/filters';
+import '../../css/screenAdvices.css';
+import '../../css/adviceDetail.css';
 
-const {requestUrl} = require('../localConfig');
+const {requestUrl} = require('../../localConfig');
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 
-export default class ScreenAdvices extends React.PureComponent {
+export default class ScreenAdviceMobile extends React.PureComponent {
     mounted = false;
     constructor(props) {
         super(props);
@@ -41,7 +45,8 @@ export default class ScreenAdvices extends React.PureComponent {
             show: false,
             questionnaireModalVisible: false,
             questionnaireFilters: {},
-            isAdmin: false
+            isAdmin: false,
+            openFilterMenu: false
         }
     }
 
@@ -255,13 +260,6 @@ export default class ScreenAdvices extends React.PureComponent {
         });
     }
 
-    updateSelectedFilters = filters => {
-        this.setState({selectedFilters: {
-            ...this.state.selectedFilters,
-            ...filters
-        }});
-    }
-
     processUrl = (type, orderParam = this.state.sortBy) => {
         const {selectedFilters} = this.state;
         let approved = selectedFilters.approved.map(item => item === 'Approved' ? '1' : '0');
@@ -354,6 +352,45 @@ export default class ScreenAdvices extends React.PureComponent {
         );
     }
 
+    renderAdvicesMobile = (type = 'all') => {
+        const {advices} = this.state;
+        return (
+            <div 
+                    className="advice-list" 
+                    style={{
+                        position: 'relative', 
+                        width: '100%', 
+                        height: '100%', 
+                        zoom: 1, 
+                        padding: '0px 4px 1% 4px', 
+                        overflowY: 'auto', 
+                        minHeight: '300px'
+                    }}
+            >
+                <Loading
+                        show={this.state.loading}
+                        color={loadingColor}
+                        className="main-loader"
+                        showSpinner={false}
+                />
+                {
+                    !this.state.loading &&
+                    advices.map((advice, index) => {
+                        if (type === 'following') {
+                            if (advice.isFollowing && !advice.isSubscribed) {
+                                return <AdviceListItemMobile key={index} advice={advice}/>;
+                            } else {
+                                return null;
+                            }
+                        } else {
+                            return <AdviceListItemMobile key={index} advice={advice}/>;
+                        }
+                    })
+                }
+            </div>
+        );
+    }
+
     getFilterComponent = (modal = false) => {
         return (
             <AdviceFilterSideComponent 
@@ -371,13 +408,33 @@ export default class ScreenAdvices extends React.PureComponent {
         );
     }
 
+    getFilterMobileComponent = () => {
+        return (
+            <FilterMobileComponent 
+                    owner={false}
+                    updateAdvices={this.updateAdvices}
+                    updateAdviceUrl={this.updateAdviceUrl}
+                    toggleModal = {this.toggleFilterModal}
+                    orderParam={this.state.sortBy}
+                    toggleFilter={this.toggleFilter}
+                    selectedTab={this.state.selectedTab}
+                    updateSelectedFilters={this.updateSelectedFilters}
+                    isAdmin={this.state.isAdmin}
+                    toggleFilterMenu={this.toggleFilterMenu}
+            />
+        );
+    }
+
+    toggleFilterMenu = () => {
+        this.setState({openFilterMenu: !this.state.openFilterMenu});
+    }
+
     renderFilter = () => {
         return (
             <Modal
                     title="Apply Filters"
                     visible={this.state.filterModalVisible}
                     onCancel={this.toggleFilterModal}
-                    onOk={this.handleFilterChange}
                     width={700}
                     style={{top: 20}}
                     bodyStyle={{padding: '10px'}}
@@ -463,11 +520,16 @@ export default class ScreenAdvices extends React.PureComponent {
         })
     }   
 
-    handleFilterChange = () => {
-        this.setState({selectedPage: 1}, () => {
+    updateSelectedFilters = filters => {
+        this.setState({
+            selectedFilters: {
+                ...this.state.selectedFilters,
+                ...filters
+            },
+            selectedPage: 1
+        }, () => {
             this.getAdvices();
             Utils.localStorageSave('selectedPage', 1);
-            this.setState({filterModalVisible: false});
         });
     }
 
@@ -476,16 +538,16 @@ export default class ScreenAdvices extends React.PureComponent {
 
         return (
             <React.Fragment>
-                <Row className='aq-page-container'>
+                <Row>
                     {this.renderQuestionnaireDialog()}
                     <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs}/>
-                    <Row className="row-container" style={{...shadowBoxStyle, marginBottom:'20px'}}>
+                    <Row>
                         {this.renderFilter()}
                         
-                        <Col xl={17} md={24} style={{paddingLeft:'20px'}}>
+                        <Col xl={17} md={24}>
                             <Row style={{marginTop: '40px'}}>
                                 
-                                <Row style={{...shadowBoxStyle, border:'0', borderWidth:'0px'}}> 
+                                <Row style={{border:'0', borderWidth:'0px'}}> 
                                     <Input 
                                         suffix={(
                                             <Icon 
@@ -553,14 +615,12 @@ export default class ScreenAdvices extends React.PureComponent {
                                     onChange={this.onPaginationChange}/>
                             </Row>                  
                         </Col>
-                        <Col xl={6} md={0} offset={1} style={{...newLayoutStyle, padding: '0'}}>
+                        <Col span={24} style={{...newLayoutStyle, padding: '0'}}>
                             <Row>
                                 <Col span={8}>
                                     <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>
                                 </Col>
-                                <Col span={6} offset={9}>
-                                    <Button style={filterBtnStyle} onClick={this.handleFilterChange}>Update</Button>
-                                </Col>
+                                
                             </Row>
                             <Row>
                                 <Col span={24}>
@@ -572,6 +632,66 @@ export default class ScreenAdvices extends React.PureComponent {
                 </Row>
                 <Footer hello='sauravbiswas' header='Hello World' />
             </React.Fragment>
+        );
+    }
+
+    renderSidebar = () => {
+        return (
+            <HamburgerMenu
+                    customBurgerIcon={false}
+                    customCrossIcon={false}
+                    id={ "sidebar" }
+                    right
+                    width='375px'
+                    styles={{bmMenu: {backgroundColor: '#f9f9f9'}}}
+                    isOpen={this.state.openFilterMenu}
+            >
+                {this.getFilterMobileComponent()}
+            </HamburgerMenu>
+        );
+    }
+
+    renderPageContentNew = () => {
+        return (
+            <AqMobileLayout>
+                {this.renderSidebar()}
+                <Row style={{backgroundColor: '#fff', padding: '0 15px'}}>
+                    <Col span={24}>
+                        <Input 
+                            suffix={(
+                                <Icon 
+                                    type="search" 
+                                    style={{fontSize: '18px', marginRight: '10px', fontWeight: '600'}}
+                                    onClick={() => this.getAdvices()}
+                                />
+                            )}
+                            size="large"
+                            placeholder="Search Advice"
+                            value={this.state.searchValue}
+                            onChange={this.handleInputChange}
+                            onPressEnter={() => this.getAdvices()}
+                        />
+                    </Col>
+                    <Col 
+                            span={24} 
+                            style={{
+                                ...horizontalBox, 
+                                alignItems: 'center', 
+                                marginTop: '10px',
+                                justifyContent: 'space-between'
+                            }}
+                    >
+                        <span style={{fontSize: '14px'}}>{this.state.advices.length} Advices</span>
+                        <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
+                            <span style={{fontSize: '14px', marginRight: '5px'}}>Filter</span>
+                            <Icon type="down" style={{marginTop: '2px'}} />
+                        </div>
+                    </Col>
+                    <Col span={24} style={{marginTop: '10px'}}>
+                        {this.renderAdvicesMobile()}
+                    </Col>
+                </Row>
+            </AqMobileLayout>
         );
     }
 
@@ -587,7 +707,7 @@ export default class ScreenAdvices extends React.PureComponent {
                 />
                 {
                     !this.state.show &&
-                    this.renderPageContent()
+                    this.renderPageContentNew()
                 }
             </React.Fragment>
         );
@@ -611,3 +731,4 @@ const filterBtnStyle = {
     marginTop: '8px',
     color: '#fff'
 };
+
