@@ -21,14 +21,24 @@ export class AdviceName extends React.Component {
         );
     }
 
-    render() {
+    shouldComponentUpdate(nextProps) {
         const {getFieldDecorator} = this.props.form;
         const adviceNameStep = getStepIndex('adviceName');
+        if (nextProps.step === adviceNameStep) {
+            return true;
+        }
+
+        return false;
+    }
+
+    render() {
+        const {getFieldDecorator} = this.props.form;
+        console.log('Rendering Advice Name');
         
         return (
             <Row 
                     style={{
-                        display: this.props.step === adviceNameStep ? 'flex': 'none',
+                        display: 'flex',
                         flexDirection: 'column',
                     }}
             >

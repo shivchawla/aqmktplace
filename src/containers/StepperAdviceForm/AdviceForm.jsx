@@ -352,27 +352,35 @@ class StepperAdviceFormImpl extends React.Component {
 
         return (
             <React.Fragment>
-                <AdviceName {...formProps} approvalStatusData={this.state.otherApprovalStatus} />
-                <InvestmentObjective 
-                    {...formProps}
-                    approvalStatusData={this.state.investmentObjectiveApprovalStatus}
-                />
-                <OtherSettings {...formProps} />
-                <Portfolio 
-                    isUpdate={this.props.isUpdate}
-                    isPublic={this.state.isPublic}
-                    data={this.state.positions}
-                    step={this.state.currentStep} 
-                    investmentObjectiveApprovalStatus={this.state.investmentObjectiveApprovalStatus}
-                    getAdvicePerformance={this.getAdvicePortfolioPerformance}
-                    onChange={this.onChange} 
-                    error={this.state.portfolioError}
-                    approvalStatusData={this.state.otherApprovalStatus}
-                    updateStepStatus={this.updateStepStatus}
-                    disabled={!this.getDisabledStatus()}
-                    approvalRequested = {this.state.approvalRequested}
-                    verifiedPositions={this.getVerifiedPositions()}
-                />
+                <div style={{display: this.state.currentStep === 0 ? 'block' : 'none'}}>
+                    <AdviceName {...formProps} approvalStatusData={this.state.otherApprovalStatus} />
+                </div>
+                <div style={{display: this.state.currentStep === 1 ? 'block' : 'none'}}>
+                    <InvestmentObjective 
+                        {...formProps}
+                        approvalStatusData={this.state.investmentObjectiveApprovalStatus}
+                    />
+                </div>
+                <div style={{display: this.state.currentStep === 3 ? 'block' : 'none'}}>
+                    <OtherSettings {...formProps} />
+                </div>
+                <div style={{display: this.state.currentStep === 2 ? 'block' : 'none'}}>
+                    <Portfolio 
+                        isUpdate={this.props.isUpdate}
+                        isPublic={this.state.isPublic}
+                        data={this.state.positions}
+                        step={this.state.currentStep} 
+                        investmentObjectiveApprovalStatus={this.state.investmentObjectiveApprovalStatus}
+                        getAdvicePerformance={this.getAdvicePortfolioPerformance}
+                        onChange={this.onChange} 
+                        error={this.state.portfolioError}
+                        approvalStatusData={this.state.otherApprovalStatus}
+                        updateStepStatus={this.updateStepStatus}
+                        disabled={!this.getDisabledStatus()}
+                        approvalRequested = {this.state.approvalRequested}
+                        verifiedPositions={this.getVerifiedPositions()}
+                    />
+                </div>
             </React.Fragment>
         );   
         

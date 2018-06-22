@@ -73,14 +73,23 @@ export class InvestmentObjective extends React.Component {
         return null;
     }
 
+    shouldComponentUpdate(nextProps) {
+        const investmentObjectiveStep = getStepIndex('investmentObjective');
+        if (nextProps.step === investmentObjectiveStep) {
+            return true;
+        }
+
+        return false;
+    }
+
     render() {
         const {getFieldDecorator} = this.props.form;
-        const investmentObjectiveStep = getStepIndex('investmentObjective');
+        console.log('Rendering Investment Objective');
 
         return (
             <Col 
                     span={24}                        
-                    style={{display: this.props.step === investmentObjectiveStep ? 'block': 'none'}}
+                    style={{display: 'block'}}
             >
                 <Row {...investmentObjRowProps}>
                     <Col span={24}>
