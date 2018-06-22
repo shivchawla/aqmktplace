@@ -5,6 +5,7 @@ import {benchmarks} from '../../constants/benchmarks';
 import {tooltips} from './constants';
 import {getStepIndex} from './steps';
 import {getFirstMonday, compareDates, getDate} from '../../utils';
+import {AdviceName} from './AdviceName';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -19,12 +20,12 @@ export class OtherSettings extends React.Component {
             <FormItem>
                 {
                     getFieldDecorator(fieldName, {
-                        initialValue: options[0],
+                        //initialValue: options[0],
                         rules: [{required: true, message}]
                     })(
-                        <Select style={{width: 150}} disabled={this.props.disabled}>
+                        <Select style={{...labelStyle, width: 200}} disabled={this.props.disabled}>
                             {
-                                options.map((item, index) => <Option key={index} value={item}>{item}</Option>)
+                                options.map((item, index) => <Option style={labelStyle} key={index} value={item}>{item}</Option>)
                             }
                         </Select>
                     )
@@ -55,7 +56,7 @@ export class OtherSettings extends React.Component {
     renderHeader = (header, tooltip) => {
         return (
             <Tooltip title={tooltip} placement='top'>
-                <h4 style={labelStyle}>{header}</h4>
+                <h4 style={labelStyle}>{header}:</h4>
             </Tooltip>
         );
     }
@@ -74,57 +75,71 @@ export class OtherSettings extends React.Component {
         console.log('Rendering Other Settings');
 
         return (
-            <Row
-                    style={{display: 'block'}} 
-                    align="middle"
-            >
-                <Col span={24} style={{marginTop: '40px'}}>
-                    <Row type = "flex" justify="space-between">
-                        <div>
-                            {this.renderHeader('Rebalancing Frequency', tooltips['rebalancingFrequency'])}
-                            {
-                                this.renderMenu(
-                                    'rebalancingFrequency', 
-                                    rebalancingFrequency,
-                                    'Please select a valid Rebalancing Frequency'
-                                )
-                            }
-                        </div>
-                        <div>
-                            {this.renderHeader('Start Date', tooltips['startDate'])}
-                            <FormItem>
-                                {getFieldDecorator('startDate', {
-                                    initialValue: moment(),
-                                    rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
-                                })(
-                                    <DatePicker 
-                                        allowClear={false}
-                                        format={dateFormat}
-                                        style={{width: 150}}
-                                        disabledDate={this.getDisabledStartDate}
-                                        disabled={this.props.approvalRequested}
-                                    /> 
-                                )}
-                            </FormItem>
-                        </div>
-                        <div>
-                            {this.renderHeader('Benchmark', tooltips['benchmark'])}
-                            {
-                                this.renderMenu(
-                                    'benchmark', 
-                                    benchmarks,
-                                    'Please select a valid Benchmark'
-                                )
-                            }
-                        </div>
-                    </Row>
-                </Col>
-            </Row>
+            <Col>
+                <AdviceName {...this.props} approvalStatusData={this.props.otherApprovalStatus} />
+
+                <Row type = "flex" style={{marginTop: '30px'}} align="middle">
+                    <Col span={6}> {this.renderHeader('Rebalancing Frequency', tooltips['rebalancingFrequency'])}
+                    </Col>
+
+                    <Col span={16}>
+                        
+                        {
+                            this.renderMenu(
+                                'rebalancingFrequency', 
+                                rebalancingFrequency,
+                                'Please select a valid Rebalancing Frequency'
+                            )
+                        }
+                    </Col>
+                </Row>
+
+                <Row type = "flex" style={{marginTop: '30px'}} align="middle">
+                    <Col span={6} >
+                        {this.renderHeader('Start Date', tooltips['startDate'])}
+                    </Col>
+                    <Col span={16}>
+                        <FormItem>
+                            {getFieldDecorator('startDate', {
+                                initialValue: moment(),
+                                rules: [{ type: 'object', required: true, message: 'Please select Start Date' }]
+                            })(
+                                <DatePicker 
+                                    allowClear={false}
+                                    format={dateFormat}
+                                    style={{...labelStyle, width: 150}}
+                                    disabledDate={this.getDisabledStartDate}
+                                    disabled={this.props.approvalRequested}
+                                /> 
+                            )}
+                        </FormItem>
+                    </Col>
+                </Row>
+
+                <Row type = "flex" style={{marginTop: '30px'}} align="middle">
+                    <Col span={6}>
+                        {this.renderHeader('Benchmark', tooltips['benchmark'])}
+                    </Col>
+
+                    <Col span={16}>
+                        {
+                            this.renderMenu(
+                                'benchmark', 
+                                benchmarks,
+                                'Please select a valid Benchmark'
+                            )
+                        }
+                    </Col>
+                </Row>
+
+            </Col>
         );
     }
 }
 
-const labelColor = '#898989';
+const labelColor = '#000000';
 const labelStyle = {
-    color: labelColor,
+    fontWeight: 300, 
+    color: '#000000',
+    fontSize: '17px'
 };

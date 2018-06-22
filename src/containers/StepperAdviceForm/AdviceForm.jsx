@@ -13,7 +13,6 @@ import {Footer} from '../../components/Footer';
 import {WarningIcon} from '../../components/WarningIcon';
 import {handleCreateAjaxError, openNotification, getBreadCrumbArray, Utils, getStockPerformance, fetchAjax, getFirstMonday} from '../../utils';
 import {UpdateAdviceCrumb} from '../../constants/breadcrumbs';
-import {AdviceName} from './AdviceName';
 import {InvestmentObjective} from './InvestmentObjective';
 import {OtherSettings} from './OtherSettings';
 import {Portfolio} from './Portfolio';
@@ -74,6 +73,7 @@ class StepperAdviceFormImpl extends React.Component {
         } else {
             currentStep++;
         }
+
         this.setState({currentStep});
     }
 
@@ -205,6 +205,11 @@ class StepperAdviceFormImpl extends React.Component {
         .then(() => this.goToNextStep())
     }
 
+    validateAndPreview = () => {
+        this.validateForm()
+        .then(() => this.togglePreview())
+    }
+
     /*
         Gets the verified positions from the portfolio table.
         A position is validated if the symbol is valid and number of shares > 0
@@ -272,7 +277,7 @@ class StepperAdviceFormImpl extends React.Component {
 
     getAppropriateStepTitle = (step, index) => {
         const titleStyle = {
-            fontWeight: this.state.currentStep === index ? 700 : 400,
+            fontWeight: this.state.currentStep === index ? 700 : 300,
             color: this.state.currentStep === index ? primaryColor : '#444',
             marginTop: '10px',
             display: 'block'
@@ -353,18 +358,20 @@ class StepperAdviceFormImpl extends React.Component {
         return (
             <React.Fragment>
                 <div style={{display: this.state.currentStep === 0 ? 'block' : 'none'}}>
-                    <AdviceName {...formProps} approvalStatusData={this.state.otherApprovalStatus} />
-                </div>
-                <div style={{display: this.state.currentStep === 1 ? 'block' : 'none'}}>
                     <InvestmentObjective 
                         {...formProps}
                         approvalStatusData={this.state.investmentObjectiveApprovalStatus}
                     />
                 </div>
-                <div style={{display: this.state.currentStep === 3 ? 'block' : 'none'}}>
-                    <OtherSettings {...formProps} />
-                </div>
+
                 <div style={{display: this.state.currentStep === 2 ? 'block' : 'none'}}>
+                    <OtherSettings 
+                        {...formProps} 
+                        approvalStatusData={this.state.investmentObjectiveApprovalStatus}
+                    />
+                </div>
+
+                <div style={{display: this.state.currentStep === 1? 'block' : 'none'}}>
                     <Portfolio 
                         isUpdate={this.props.isUpdate}
                         isPublic={this.state.isPublic}
@@ -891,11 +898,9 @@ class StepperAdviceFormImpl extends React.Component {
                 </Button>
                 <Button 
                         type="primary" 
-                        onClick={
-                            this.state.currentStep === steps.length - 1
-                            ? this.togglePreview
-                            : this.validateAndGoToNextStep
-                        }
+                        onClick={this.state.currentStep === steps.length - 1 ?
+                            this.validateAndPreview :
+                            this.validateAndGoToNextStep}
                 >
                     {
                         this.state.currentStep === steps.length - 1

@@ -18,6 +18,12 @@ const investmentObjRowProps = {
 };
 
 
+const textStyle = {
+    fontWeight: 300, 
+    color: '#000000',
+    fontSize: '17px'
+};
+
 export class InvestmentObjective extends React.Component {
     
     renderInvestmentObjectRadioGroup = (fieldName, fieldId, items, message, warning = false, reason = '', span={label: 4, content: 20, warning: 2}) => {
@@ -35,16 +41,16 @@ export class InvestmentObjective extends React.Component {
                 reason={reason}
                 tooltip={{text: tooltips[fieldId]}}
                 content={
-                    <FormItem>
+                    <FormItem style={textStyle}>
                         {
                             getFieldDecorator(fieldId, {
-                                initialValue: items[0],
+                                initialValue: items[items.length - 1],
                                 rules: [{
                                     required: true, 
                                     message
                                 }]
                             })(
-                                <RadioGroup size="small" disabled={this.props.disabled}>
+                                <RadioGroup size="large" disabled={this.props.disabled} style={{...textStyle, fontWeight: 400}}>
                                     {
                                         items.map((item, index) => 
                                             <RadioButton key={index} value={item}>{item}</RadioButton>
@@ -60,12 +66,13 @@ export class InvestmentObjective extends React.Component {
     }
 
     getGoalDetail = type => {
-        const goal = this.props.form.getFieldValue('investmentObjGoal');
-        const goalItem = goals.filter(item => item.field === goal)[0];
+        const investorType = this.props.form.getFieldValue('investmentObjGoal');
+        const goalItem = goals.filter(item => item.investorType === investorType)[0];
+        console.log(goalItem);
         if (goalItem) {
             switch(type) {
-                case "investorType":
-                    return goalItem.investorType;
+                case "field":
+                    return goalItem.field;
                 case "suitability":
                     return goalItem.suitability;
             }
@@ -84,8 +91,6 @@ export class InvestmentObjective extends React.Component {
 
     render() {
         const {getFieldDecorator} = this.props.form;
-        console.log('Rendering Investment Objective');
-
         return (
             <Col 
                     span={24}                        
@@ -94,37 +99,39 @@ export class InvestmentObjective extends React.Component {
                 <Row {...investmentObjRowProps}>
                     <Col span={24}>
                         <InvestMentObjComponent 
-                            header="Goal"
+                            header="Investor Type"
                             warning={
                                 this.props.isPublic &&
                                 this.props.isUpdate &&
-                                !getInvestmentObjectiveWarning(this.props.approvalStatusData, 'goal').valid
+                                !getInvestmentObjectiveWarning(this.props.approvalStatusData, 'investorType').valid
                             }
-                            tooltip={{text: tooltips['goal']}}
-                            reason={getInvestmentObjectiveWarning(this.props.approvalStatusData, 'goal').reason}
+                            tooltip={{text: tooltips['investorType']}}
+                            reason={getInvestmentObjectiveWarning(this.props.approvalStatusData, 'investorType').reason}
                             content={
                                 <Col span={24}>
-                                    <FormItem>
+                                    <FormItem style={textStyle}>
                                         {
                                             getFieldDecorator('investmentObjGoal', {
-                                                initialValue: goals[0].field,
+                                                //initialValue: goals[0].investorType,
                                                 rules: [{
                                                     required: true,
-                                                    message: "Please enter the goal of your Advice"
+                                                    message: "Please choose a valid investor type"
                                                 }]
                                             })(
                                                 <Select
-                                                        placeholder="Select Goal of your Advice"
-                                                        style={{width: '100%'}}
+                                                        placeholder="Select Investor Type for your advice"
+                                                        style={{...textStyle, width: '100%'}}
                                                         disabled={this.props.disabled}
+
                                                 >
                                                     {
                                                         goals.map((item, index) => 
-                                                            <Option
-                                                                    key={index}
-                                                                    value={item.field}
+                                                            <Option 
+                                                                style={textStyle}
+                                                                key={index}
+                                                                value={item.investorType}
                                                             >
-                                                                {item.field}
+                                                                {item.investorType}
                                                             </Option>
                                                         )
                                                     }
@@ -136,7 +143,7 @@ export class InvestmentObjective extends React.Component {
                             }
                         />
                     </Col>
-                    <Col span={12}>
+                    <Col span={24} style={{marginTop: '20px'}}>
                         {
                             this.renderInvestmentObjectRadioGroup(
                                 'Valuation',
@@ -145,11 +152,11 @@ export class InvestmentObjective extends React.Component {
                                 'Please enter the Portfolio Valuation of your advice',
                                 !getInvestmentObjectiveWarning(this.props.approvalStatusData, 'portfolioValuation').valid,
                                 getInvestmentObjectiveWarning(this.props.approvalStatusData, 'portfolioValuation').reason,
-                                {label: 6, content: 15, warning: 2}
+                                {label: 4, content: 18, warning: 2}
                             )
                         }
                     </Col>
-                    <Col span={12}>
+                    <Col span={24} style={{marginTop: '20px'}}>
                         {
                             this.renderInvestmentObjectRadioGroup(
                                 'Capitalization',
@@ -158,12 +165,12 @@ export class InvestmentObjective extends React.Component {
                                 'Please enter the Capitalization of your advice',
                                 !getInvestmentObjectiveWarning(this.props.approvalStatusData, 'capitalization').valid,
                                 getInvestmentObjectiveWarning(this.props.approvalStatusData, 'capitalization').reason,
-                                {label: 6, content: 15, warning: 2}
+                                {label: 4, content: 18, warning: 2}
                             )
                         }
                     </Col>
                 </Row>
-                <Row {...investmentObjRowProps}>
+                {/*<Row {...investmentObjRowProps}>
                     <Col span={24}>
                         <InvestMentObjComponent 
                             header="Sectors"
@@ -239,7 +246,7 @@ export class InvestmentObjective extends React.Component {
                             }                                                    
                         />
                     </Col>
-                </Row>
+                </Row>*/}
                 <Row {...investmentObjRowProps}>
                     <Col span={24} style={{marginTop: '20px'}}>
                         <InvestMentObjComponent 
@@ -247,12 +254,12 @@ export class InvestmentObjective extends React.Component {
                             tooltip={{text: tooltips['suitability']}}
                             content={
                                 <Col span={24}>
-                                    <h3 style={{fontSize: '15px'}}>
+                                    {/*<h3 style={{fontSize: '15px'}}>
                                         {
-                                            this.getGoalDetail('investorType')
+                                            this.getGoalDetail('field')
                                         }
-                                    </h3>
-                                    <h3 style={{fontSize: '15px'}}>
+                                    </h3>*/}
+                                    <h3 style={textStyle}>
                                         {   
                                             this.getGoalDetail('suitability')
                                         }

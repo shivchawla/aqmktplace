@@ -17,6 +17,7 @@ export const tooltips = {
     investmentObjCapitalization: 'This is the capitalization of your advice',
     sectors: 'These are the sectors of your advice',
     userText: 'This is the description of your advice',
+    investorType: 'Investor type for this advice',
     suitability: 'This is the suitability of your advice',
     startDate: 'This is the start date of your advice',
     rebalancingFrequency: 'This is the rebalancing frequency of your advice',
