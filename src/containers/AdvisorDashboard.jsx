@@ -63,7 +63,6 @@ class AdvisorDashboard extends React.Component {
             advicePerformanceLoading: false,
             dashboardDataLoading: false,
             showEmptyScreen: false,
-            show: true,
             notAuthorized: false
         };
         this.adviceColumns = [
@@ -121,7 +120,7 @@ class AdvisorDashboard extends React.Component {
         const ratingSeries = [];
         const advisorRating = [];
         let subscriberRating = {};
-        this.setState({dashboardDataLoading: true, myAdvicesLoading: true, show: true});
+        this.setState({dashboardDataLoading: true, myAdvicesLoading: true, loading: true});
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             const currentRating = (_.get(response.data, 'advices[0].rating.current', 0) || 0).toFixed(2);
@@ -190,7 +189,7 @@ class AdvisorDashboard extends React.Component {
             return error;
         })
         .finally(() => {
-            this.setState({dashboardDataLoading: false, myAdvicesLoading: false, show: false});
+            this.setState({dashboardDataLoading: false, myAdvicesLoading: false, loading: false});
         })
     }
 
@@ -866,15 +865,15 @@ class AdvisorDashboard extends React.Component {
     render() {
         return(
             <Row>
-                <Loading 
-                    show={this.state.show}
+                {/*<Spinner 
+                    loading = {this.state.loading}
                     color={loadingColor}
                     className="main-loader"
                     showSpinner={false}
-                />
+                />*/}
                 <AdvisorDashboardMeta />
                 {
-                    !this.state.show &&
+                    !this.state.loading &&
                     this.renderPageContent()
                 }
             </Row>

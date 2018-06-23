@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Loading from 'react-loading-bar';
 import Loadable from 'react-loadable';
 import _ from 'lodash';
 import moment from 'moment';
@@ -1245,17 +1244,12 @@ class InvestorDashboard extends React.Component {
                         visible={this.state.stockResearchModalVisible}
                         toggleModal={this.toggleStockResearchModal}
                 />
-                <Loading 
-                    show={this.state.defaultPortfolioLoading}
-                    color={loadingColor}
-                    showSpinner={false}
-                    className="main-loader"
-                />
+                
                 <InvestorDashboardMeta />
-            {
-                    !this.state.defaultPortfolioLoading &&
+                
+                {!this.state.defaultPortfolioLoading &&
                     this.renderPageContent()
-            }
+                }
             </Col>
         );
     }

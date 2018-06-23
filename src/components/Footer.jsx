@@ -1,9 +1,17 @@
 import * as React from 'react';
 import axios from 'axios';
 import windowSize from 'react-window-size';
-import _ from 'lodash';
-import {Link} from 'react-router-dom';
-import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
+import get from 'lodash/get';
+import Link from 'react-router-dom/Link';
+//import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
+import Row from 'antd/lib/row';
+import Col from 'antd/lib/col';
+import Modal from 'antd/lib/modal';
+import Button from 'antd/lib/button';
+import Form from 'antd/lib/form';
+import Input from 'antd/lib/input';
+import message from 'antd/lib/message';
+
 import {Utils} from '../utils';
 import '../css/home.css';
 
@@ -129,7 +137,7 @@ class FooterImpl extends React.Component{
     }
 
     render() {
-        const token = _.get(Utils.getUserInfo(), 'token', '') || '';
+        const token = get(Utils.getUserInfo(), 'token', '') || '';
     
         return (
             <Row className="footer" style={{marginTop: this.props.windowWidth ? '0px' : '100px', ...this.props.style}}>

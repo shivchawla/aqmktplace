@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ReactQuill from 'react-quill';
 import {Utils} from '../utils';
-import {Footer} from '../components/Footer';
 import { Spin, Icon } from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
@@ -9,6 +8,7 @@ import Loading from 'react-loading-bar'
 import 'react-loading-bar/dist/index.css'
 import 'react-quill/dist/quill.snow.css';
 import '../css/quillContainer.css';
+import AppLayout from './AppLayout';
 
 class TnC extends Component {
 
@@ -21,32 +21,31 @@ class TnC extends Component {
       'tnc': undefined,
       'loading': true
   	};
+
     this.updateState = (data) => {
       if (this._mounted){
         this.setState(data);
       }
     }
+
     this.getTnc = () =>{
-      axios(Utils.getTncUrl(), {
-        cancelToken: new axios.CancelToken( (c) => {
-          // An executor function receives a cancel function as a parameter
-          this.cancelGetTnC = c;
-        })
-      })
-        .then((response) => {
-            this.updateState({
-              'tnc': response.data,
-              'loading': false
-            });
-            this.cancelGetTnC = undefined;
+        axios(Utils.getTncUrl(), {
+          cancelToken: new axios.CancelToken( (c) => {
+            // An executor function receives a cancel function as a parameter
+            this.cancelGetTnC = c;
           })
-          .catch((error) => {
-            this.updateState({
-              'tnc': error,
-              'loading': false
-            });
+        })
+        .then((response) => {
+            this.updateState({'tnc': response.data});
             this.cancelGetTnC = undefined;
-          });
+        })
+        .catch((error) => {
+            this.updateState({'tnc': error});
+            this.cancelGetTnC = undefined;
+        })
+        .finally(() => {
+            this.updateState({loading: false});
+        })
     }
   }
 
@@ -68,33 +67,20 @@ class TnC extends Component {
     const antIconLoading = <Icon type="loading" style={{ fontSize: 34 }} spin />;
 
     const getTnCDiv = () => {
-      const modules = {
-        toolbar: false
-      };
+        const modules = {
+          toolbar: false
+        };
 
-      if (this.state.loading){
-        return (
-          <div style={{'display': 'flex',
-            'alignItems': 'center', 'justifyContent': 'center',
-            'minHeight': '300px'}}>
-            <Spin indicator={antIconLoading} />
-          </div>
-        );
-      }else if (this.state.tnc){
-        return (
-          <ReactQuill value={this.state.tnc} toolbar={false} modules={modules} readOnly/>
-        );
-      }else{
-        return (
-          <div></div>
-        );
-      }
+        if (this.state.tnc) {
+            return (<ReactQuill value={this.state.tnc} toolbar={false} modules={modules} readOnly/>);
+        } else {
+          return (<div></div>);
+        }
     }
 
     const getTotalDiv = () => {
-      if (!this.state.loading){
         return (
-          <div className="policy-div" style={{'padding': '1% 3% 1% 3%', 'width': '100%', 'minHeight': 'calc(100vh - 70px)'}}>
+          <div className="policy-div" style={{'padding': '1% 3% 1% 3%', 'width': '100%'}}>
             <div style={{'display': 'flex', 'marginBottom': '10px'}}>
               <h2 style={{'color': '#3c3c3c', 'fontWeight': 'normal'}}>Terms of Use</h2>
             </div>
@@ -104,25 +90,15 @@ class TnC extends Component {
             </div>
           </div>
         );
-      }
     }
 
-    return (
-      <React.Fragment>
-        <div className="main-loader">
-          <Loading
-            show={this.state.loading}
-            color="teal"
-            showSpinner={false}
-          />
-        </div>
-        {getTotalDiv()}
-        {
-          !this.state.loading &&
-          <Footer />
-        }
-      </React.Fragment>
+    return ( 
+        <AppLayout 
+            loading = {this.state.loading}
+            content = {getTotalDiv()}>
+        </AppLayout>
     );
+
   }
 }
 

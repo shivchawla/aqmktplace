@@ -9,7 +9,6 @@ import {Row, Col, Form, Steps, Button, message, Icon} from 'antd';
 import {AqPageHeader} from '../../components/AqPageHeader';
 import {PostWarningModal} from './PostWarningModal';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
-import {Footer} from '../../components/Footer';
 import {WarningIcon} from '../../components/WarningIcon';
 import {handleCreateAjaxError, openNotification, getBreadCrumbArray, Utils, getStockPerformance, fetchAjax, getFirstMonday} from '../../utils';
 import {UpdateAdviceCrumb} from '../../constants/breadcrumbs';
@@ -1039,7 +1038,6 @@ class StepperAdviceFormImpl extends React.Component {
                     <div style={{display: this.state.loaders.page ? 'none' : 'block'}}>
                         {this.renderPageContent()}
                         <div style={{height: '100px'}}></div>
-                        <Footer />
                     </div>
                 }
             </Row>
