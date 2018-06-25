@@ -20,6 +20,11 @@ const ScreenAdvices = Loadable({
 const ScreenAdviceMobile = Loadable({
     loader: () => import('./containers/ScreenAdviceMobile/ScreenAdviceMobile'),
     loading: () => <Icon type="loading" />
+});
+
+const ScreenAdviceAntMobile = Loadable({
+    loader: () => import('./containers/ScreenAdviceMobile/ScreenAdviceAntMobile'),
+    loading: () => <Icon type="loading" />
 })
 
 const Home = Loadable({

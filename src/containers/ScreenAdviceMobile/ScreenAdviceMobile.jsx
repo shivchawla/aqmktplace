@@ -1,29 +1,25 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
+import windowSize from 'react-window-size';
 import _ from 'lodash';
 import {slide as HamburgerMenu} from 'react-burger-menu';
-import {Row, Col, Input, Icon, Button, Select, Tabs, Checkbox, Modal, Pagination, Radio} from 'antd';
+import {Row, Col, Icon, Button, Select, Tabs, Modal, Radio} from 'antd';
+import {SearchBar, List, Pagination} from 'antd-mobile';
 import {FilterMobileComponent} from './Filter';
-import {AdviceListItemMod} from '../../components/AdviceListeItemMod';
 import {AdviceListItemMobile} from './AdviceListItem';
-import {AdviceFilterSideComponent} from '../../components/AdviceFilterSideComponent';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
-import {AqPageHeader} from '../../components/AqPageHeader';
-import {Footer} from '../../components/Footer';
-import {newLayoutStyle, loadingColor, horizontalBox} from '../../constants';
+import {loadingColor, horizontalBox} from '../../constants';
 import {ScreenAdviceMeta} from '../../metas';
-import {Utils, getBreadCrumbArray, fetchAjax} from '../../utils';
+import {Utils, fetchAjax, generateRandomString} from '../../utils';
 import {adviceFilters as filters} from '../../constants/filters';
 import '../../css/screenAdvices.css';
 import '../../css/adviceDetail.css';
 
 const {requestUrl} = require('../../localConfig');
 const Option = Select.Option;
-const TabPane = Tabs.TabPane;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
-
-export default class ScreenAdviceMobile extends React.PureComponent {
+class ScreenAdviceMobileImpl extends React.PureComponent {
     mounted = false;
     constructor(props) {
         super(props);
@@ -227,11 +223,12 @@ export default class ScreenAdviceMobile extends React.PureComponent {
                 advices: this.processAdvices(response.data.advices),
                 totalCount: 1
             });
+            this.setState({show: false, loading: false});
         })
         .catch(error => error)
-        .finally(() => {
-            this.setState({show: false, loading: false});
-        });
+        // .finally(() => {
+        //     this.setState({show: false, loading: false});
+        // });
     }
 
     getAdvices = adviceUrl => {
@@ -249,15 +246,18 @@ export default class ScreenAdviceMobile extends React.PureComponent {
                     totalCount: _.get(response.data, 'count', 10)
                 });
             }
+            if (this.mounted) {
+                this.setState({loading: false, show: false});
+            }
         })
         .catch(error => {
             return error;
         })
-        .finally(() => {
-            if (this.mounted) {
-                this.setState({loading: false, show: false});
-            }
-        });
+        // .finally(() => {
+        //     if (this.mounted) {
+        //         this.setState({loading: false, show: false});
+        //     }
+        // });
     }
 
     processUrl = (type, orderParam = this.state.sortBy) => {
@@ -313,45 +313,6 @@ export default class ScreenAdviceMobile extends React.PureComponent {
         return advices;
     }
 
-    renderAdvices = (type = 'all') => {
-        const {advices} = this.state;
-        return (
-            <div 
-                    className="advice-list" 
-                    style={{
-                        position: 'relative', 
-                        width: '100%', 
-                        height: '100%', 
-                        zoom: 1, 
-                        padding: '0px 4px 1% 4px', 
-                        overflowY: 'auto', 
-                        minHeight: '300px'
-                    }}
-            >
-                <Loading
-                        show={this.state.loading}
-                        color={loadingColor}
-                        className="main-loader"
-                        showSpinner={false}
-                />
-                {
-                    !this.state.loading &&
-                    advices.map((advice, index) => {
-                        if (type === 'following') {
-                            if (advice.isFollowing && !advice.isSubscribed) {
-                                return <AdviceListItemMod key={index} advice={advice}/>;
-                            } else {
-                                return null;
-                            }
-                        } else {
-                            return <AdviceListItemMod key={index} advice={advice}/>;
-                        }
-                    })
-                }
-            </div>
-        );
-    }
-
     renderAdvicesMobile = (type = 'all') => {
         const {advices} = this.state;
         return (
@@ -373,38 +334,24 @@ export default class ScreenAdviceMobile extends React.PureComponent {
                         className="main-loader"
                         showSpinner={false}
                 />
+                <List>
+                    
+                </List>
                 {
                     !this.state.loading &&
                     advices.map((advice, index) => {
                         if (type === 'following') {
                             if (advice.isFollowing && !advice.isSubscribed) {
-                                return <AdviceListItemMobile key={index} advice={advice}/>;
+                                return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
                             } else {
                                 return null;
                             }
                         } else {
-                            return <AdviceListItemMobile key={index} advice={advice}/>;
+                            return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
                         }
                     })
                 }
             </div>
-        );
-    }
-
-    getFilterComponent = (modal = false) => {
-        return (
-            <AdviceFilterSideComponent 
-                    owner={false}
-                    updateAdvices={this.updateAdvices}
-                    updateAdviceUrl={this.updateAdviceUrl}
-                    toggleModal = {this.toggleFilterModal}
-                    orderParam={this.state.sortBy}
-                    toggleFilter={this.toggleFilter}
-                    selectedTab={this.state.selectedTab}
-                    updateSelectedFilters={this.updateSelectedFilters}
-                    modal={modal}
-                    isAdmin={this.state.isAdmin}
-            />
         );
     }
 
@@ -464,8 +411,7 @@ export default class ScreenAdviceMobile extends React.PureComponent {
         });
     }
 
-    handleInputChange = (e) => {
-        const value = e.target.value;
+    handleInputChange = value => {
         this.setState({searchValue: value}, () => {
             if (value.length === 0) {
                 this.getAdvices();
@@ -473,18 +419,15 @@ export default class ScreenAdviceMobile extends React.PureComponent {
         });
     }
 
-    handleSortingMenuChange = value => {
-        this.setState({sortBy: value}, () => {
-            Utils.localStorageSave('sortBy', value);
-            this.getAdvices();
-        });
+    handleSortChange = value => {
+        this.setState({sortBy: value});
     }
 
     renderSortingMenu = () => {
         return (
             <Select 
                     defaultValue={this.state.sortBy} 
-                    onChange={this.handleSortingMenuChange} 
+                    onChange={this.handleSortChange} 
                     style={{fontSize: '14px', width: '120px'}}
             >
                 <Option value="rating">Rating</Option>
@@ -520,129 +463,30 @@ export default class ScreenAdviceMobile extends React.PureComponent {
         })
     }   
 
-    updateSelectedFilters = filters => {
+    updateSelectedFilters = (filters, sortBy, type) => {
+        console.log(sortBy);
         this.setState({
             selectedFilters: {
                 ...this.state.selectedFilters,
                 ...filters
             },
-            selectedPage: 1
+            selectedPage: 1,
+            sortBy,
+            selectedTab: type
         }, () => {
             this.getAdvices();
             Utils.localStorageSave('selectedPage', 1);
         });
     }
 
-    renderPageContent = () => {
-        const breadCrumbs = getBreadCrumbArray([{name: 'Screen Advices'}]);
-
-        return (
-            <React.Fragment>
-                <Row>
-                    {this.renderQuestionnaireDialog()}
-                    <AqPageHeader title="Screen Advices" breadCrumbs={breadCrumbs}/>
-                    <Row>
-                        {this.renderFilter()}
-                        
-                        <Col xl={17} md={24}>
-                            <Row style={{marginTop: '40px'}}>
-                                
-                                <Row style={{border:'0', borderWidth:'0px'}}> 
-                                    <Input 
-                                        suffix={(
-                                            <Icon 
-                                                type="search" 
-                                                style={{fontSize: '16px', marginRight: '10px', fontWeight: '600'}}
-                                            />
-                                        )}
-                                        placeholder="Search Advice"
-                                        value={this.state.searchValue}
-                                        onChange={this.handleInputChange}
-                                        onPressEnter={() => this.getAdvices()}/>
-                                </Row>
-
-                                <Row type="flex" align="middle" justify="end" >
-                                    <Col span={10} style={{...filterSortContainerStyle, marginBottom: '-40px', zIndex:'4'}}>
-                                        <Row type="flex" align="middle" justify="end">
-                                            <Col xs={3} md={3} xl={0} style={{marginTop: '5px'}}>
-                                                <Icon   
-                                                    onClick={this.toggleFilterModal} 
-                                                    style={{cursor: 'pointer'}}
-                                                    type="bars" 
-                                                    style={{ fontSize: 20, cursor: 'pointer'}}/>
-                                            </Col>
-                                            <Col span={4}>
-                                                <h5 style={{fontSize: '14px', color: '#6C6C6C'}}>Sort By</h5>
-                                            </Col>
-                                            <Col span={9}>
-                                                {this.renderSortingMenu()}
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                </Row>
-                            </Row>
-                            
-                            <Row>
-                                <Col span={24} style={{minHeight: '600px'}}>
-                                    <Tabs 
-                                        animated={false} 
-                                        defaultActiveKey={this.state.selectedTab} 
-                                        onChange={this.handleTabChange}>
-                                        
-                                        <TabPane tab="All" key="all">
-                                            {this.renderAdvices('all')}
-                                        </TabPane>
-                                        
-                                        <TabPane tab="Trending" key="trending">
-                                            {this.renderAdvices('trending')}
-                                        </TabPane>
-                                        
-                                        <TabPane tab="Subscribed" key="subscribed">
-                                            {this.renderAdvices('subscribed')}
-                                        </TabPane>
-                                        
-                                        <TabPane tab="Wishlist" key="following">
-                                            {this.renderAdvices('following')}
-                                        </TabPane>
-                                    </Tabs>
-                                </Col>
-                            </Row>
-                            <Row style={{textAlign: 'center'}}>
-                                <Pagination
-                                    current={Number(this.state.selectedPage)} 
-                                    total={this.state.totalCount} 
-                                    pageSize={this.state.limit}
-                                    onChange={this.onPaginationChange}/>
-                            </Row>                  
-                        </Col>
-                        <Col span={24} style={{...newLayoutStyle, padding: '0'}}>
-                            <Row>
-                                <Col span={8}>
-                                    <h3 style={{...filterHeaderStyle, margin: '10px 0 0 10px'}}>Apply Filters</h3>
-                                </Col>
-                                
-                            </Row>
-                            <Row>
-                                <Col span={24}>
-                                    {this.getFilterComponent()}
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Row>
-                <Footer hello='sauravbiswas' header='Hello World' />
-            </React.Fragment>
-        );
-    }
-
-    renderSidebar = () => {
+    renderRightSidebar = () => {
         return (
             <HamburgerMenu
                     customBurgerIcon={false}
                     customCrossIcon={false}
                     id={ "sidebar" }
                     right
-                    width='375px'
+                    width={this.props.windowWidth}
                     styles={{bmMenu: {backgroundColor: '#f9f9f9'}}}
                     isOpen={this.state.openFilterMenu}
             >
@@ -651,25 +495,33 @@ export default class ScreenAdviceMobile extends React.PureComponent {
         );
     }
 
+    renderPagination = () => {
+        const locale = {
+            prevText: 'Prev',
+            nextText: 'Next',
+        };
+
+        return (
+            <Pagination 
+                current={Number(this.state.selectedPage)} 
+                total={this.state.totalCount}  
+                locale={locale} 
+                onChange={this.onPaginationChange}
+            />
+        );
+    }
+
     renderPageContentNew = () => {
         return (
             <AqMobileLayout>
-                {this.renderSidebar()}
-                <Row style={{backgroundColor: '#fff', padding: '0 15px'}}>
-                    <Col span={24}>
-                        <Input 
-                            suffix={(
-                                <Icon 
-                                    type="search" 
-                                    style={{fontSize: '18px', marginRight: '10px', fontWeight: '600'}}
-                                    onClick={() => this.getAdvices()}
-                                />
-                            )}
-                            size="large"
-                            placeholder="Search Advice"
-                            value={this.state.searchValue}
-                            onChange={this.handleInputChange}
-                            onPressEnter={() => this.getAdvices()}
+                <Row style={{backgroundColor: '#fff'}}>
+                    <Col span={24} style={{marginTop: '10px'}}>
+                        <SearchBar 
+                                placeholder="Search Advices" 
+                                cancelText="Cancel"
+                                value={this.state.searchValue}
+                                onChange={this.handleInputChange}
+                                onSubmit={() => this.getAdvices()}
                         />
                     </Col>
                     <Col 
@@ -677,18 +529,21 @@ export default class ScreenAdviceMobile extends React.PureComponent {
                             style={{
                                 ...horizontalBox, 
                                 alignItems: 'center', 
-                                marginTop: '10px',
-                                justifyContent: 'space-between'
+                                padding: '10px 15px',
+                                justifyContent: 'space-between',
                             }}
                     >
-                        <span style={{fontSize: '14px'}}>{this.state.advices.length} Advices</span>
+                        <span style={{fontSize: '18px'}}>{this.state.advices.length} Advices</span>
                         <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
-                            <span style={{fontSize: '14px', marginRight: '5px'}}>Filter</span>
-                            <Icon type="down" style={{marginTop: '2px'}} />
+                            <span style={{fontSize: '18px', marginRight: '5px'}}>Filter</span>
+                            <Icon type="down" style={{marginTop: '2px', fontSize: '20px'}} />
                         </div>
                     </Col>
-                    <Col span={24} style={{marginTop: '10px'}}>
+                    <Col span={24} style={{padding: '0 15px'}}>
                         {this.renderAdvicesMobile()}
+                    </Col>
+                    <Col span={24}>
+                        {this.renderPagination()}
                     </Col>
                 </Row>
             </AqMobileLayout>
@@ -699,6 +554,7 @@ export default class ScreenAdviceMobile extends React.PureComponent {
         return (
             <React.Fragment>
                 <ScreenAdviceMeta />
+                {this.renderRightSidebar()}
                 <Loading
                         show={this.state.show}
                         color={loadingColor}
@@ -713,6 +569,8 @@ export default class ScreenAdviceMobile extends React.PureComponent {
         );
     }
 }
+
+export default windowSize(ScreenAdviceMobileImpl);
 
 const filterSortContainerStyle = {
     marginTop: '20px',

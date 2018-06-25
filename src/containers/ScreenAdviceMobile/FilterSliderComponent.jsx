@@ -1,6 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import {Slider, Row, Col} from 'antd';
+import {Range} from 'antd-mobile';
 import { horizontalBox } from '../../constants';
 
 export class FilterSliderComponent extends React.Component {
@@ -36,23 +37,22 @@ export class FilterSliderComponent extends React.Component {
     }
 
     render() {
-        const {min = 0, max = 0, type} = this.props;
+        const {min = 0, max = 0} = this.props;
 
         return (
             <Row>
-                <Col span={24}>
-                    <Slider
-                        range
+                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', padding: '0 20px'}}>
+                    <h3 style={{fontSize: '18px'}}>{this.state.value[0]} %</h3>
+                    <h3 style={{fontSize: '18px'}}>{this.state.value[1]} %</h3>
+                </Col>
+                <Col span={24} style={{padding: '30px'}}>
+                    <Range
                         onChange={this.handleSliderChange}
                         onAfterChange={this.onAfterChange}
                         value={this.state.value}
                         min={min}
                         max={max}
                     />
-                </Col>
-                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
-                    <h3 style={{fontSize: '14px'}}>Min: {this.state.value[0]}</h3>
-                    <h3 style={{fontSize: '14px'}}>Max: {this.state.value[1]}</h3>
                 </Col>
             </Row>
         );

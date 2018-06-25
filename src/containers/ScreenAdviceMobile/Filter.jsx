@@ -1,14 +1,17 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Checkbox, Row, Col, Collapse, Icon} from 'antd';
+import {Row, Col, Icon, Collapse} from 'antd';
+import {Accordion, Radio, List} from 'antd-mobile';
+import {AqCheckboxGroup} from './AqCheckboxGroup';
 import {FilterSliderComponent} from './FilterSliderComponent';
 import {adviceFilters as filters} from '../../constants/filters';
 import {primaryColor, horizontalBox} from '../../constants';
 import {Utils} from '../../utils';
+import './filter.css';
 import '../../css/buttons.css';
 
-const CheckboxGroup = Checkbox.Group;
-const Panel = Collapse.Panel;
+const Panel = Accordion.Panel;
+const RadioItem = Radio.RadioItem;
 const kvp = {
     rebalancingFrequency: 'selectRebalanceAllFilters',
     approved: 'selectApprovedllFilters',
@@ -26,7 +29,9 @@ export class FilterMobileComponent extends React.Component {
             selectRebalanceAllFilters: _.get(selectedFilters, 'rebalancingFrequency', []).length === filters.rebalancingFrequency.length,
             selectApprovedllFilters: _.get(selectedFilters, 'approved', []).length === filters.approved.length,
             selectOwnerAllFilters: _.get(selectedFilters, 'owner', []).length === filters.owner.length,
-            limit: 3
+            type: Utils.getFromLocalStorage('selectedTab') || 'all',
+            limit: 3,
+            sortBy: Utils.getFromLocalStorage('sortBy') || 'rating',
         };
         this.sliderFilters = [];
     }
@@ -35,20 +40,67 @@ export class FilterMobileComponent extends React.Component {
         const selectedFilters = {...filters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
         this.setState({
             selectedFilters,
-            owner: nextProps.owner
+            owner: nextProps.owner,
         });
     }
 
-    renderRebalancingFreqFilter = () => (
-        <CheckboxGroup 
-                onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "rebalancingFrequency")} 
+    handleRadioChange = (key, value) => {
+        this.setState({[key]: value[0]});
+    }
+
+    renderAdviceTypeFilter = () => {
+        const data = [
+            {label: 'All', value: 'all'},
+            {label: 'Trending', value: 'trending'},
+            {label: 'Subscribed', value: 'subscribed'},
+            {label: 'Followimg', value: 'following'},
+        ];
+
+        return (
+            <AqCheckboxGroup 
+                singleSelect={true}
+                options={data}
+                value={[this.state.type]} 
+                onChange={checkedValues => this.handleRadioChange('type', checkedValues)}
+            />
+        );
+    }
+
+    renderSortingOptions = () => {
+        const data = [
+            {label: 'Rating', value: 'rating'},
+            {label: 'Return', value: 'return'},
+            {label: 'Name', value: 'name'},
+            {label: 'Volatility', value: 'volatility'},
+            {label: 'Sharpe', value: 'sharpe'},
+            {label: 'Max Loss', value: 'maxLoss'},
+            {label: 'Num. Followers', value: 'numFollowers'},
+            {label: 'Num. Subscribers', value: 'numSubscribers'},
+            {label: 'Created Date', value: 'createdDate'},
+        ];
+
+        return (
+            <AqCheckboxGroup 
+                singleSelect={true}
+                options={data}
+                value={[this.state.sortBy]} 
+                onChange={checkedValues => this.handleRadioChange('sortBy', checkedValues)}
+            />
+        );
+    }
+
+    renderRebalancingFreqFilter = () => {
+        return (
+            <AqCheckboxGroup 
                 options={this.state.defaultFilters.rebalancingFrequency} 
                 value={this.state.selectedFilters.rebalancingFrequency} 
-        />
-    )
+                onChange={checkedValues => this.handleFilterCheckboxChange(checkedValues, "rebalancingFrequency")}
+            />
+        );
+    }
 
     renderStatusFilter = () => (
-        <CheckboxGroup 
+        <AqCheckboxGroup 
                 onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "approved")} 
                 options={this.state.defaultFilters.approved} 
                 value={this.state.selectedFilters.approved} 
@@ -56,7 +108,7 @@ export class FilterMobileComponent extends React.Component {
     )
 
     renderAdviceFilter = () => (
-        <CheckboxGroup 
+        <AqCheckboxGroup 
                 onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "owner")} 
                 options={this.state.defaultFilters.owner}
                 value={this.state.selectedFilters.owner}
@@ -70,9 +122,6 @@ export class FilterMobileComponent extends React.Component {
                 [type]: checkedValues,
             },
             [kvp[type]]: checkedValues.length === this.state.defaultFilters[type].length
-        }, () => {
-            this.props.updateSelectedFilters(this.state.selectedFilters);
-            Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
         });
     }
 
@@ -122,7 +171,7 @@ export class FilterMobileComponent extends React.Component {
     renderSliderFilters = filterArray => {
         return filterArray.map((filter, index) => {
             return (
-                <Panel header={filter.label} key={3 + index}>
+                <Panel header={filter.label} key={5 + index}>
                     <Row>
                         <Col span={24}>
                             <FilterSliderComponent 
@@ -141,8 +190,11 @@ export class FilterMobileComponent extends React.Component {
     }
 
     applyFilters = () => {
-        this.props.updateSelectedFilters(this.state.selectedFilters);
+        this.props.toggleFilterMenu();
+        this.props.updateSelectedFilters(this.state.selectedFilters, this.state.sortBy, this.state.type);
         Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
+        Utils.localStorageSave('sortBy', this.state.sortBy || 'rating');
+        Utils.localStorageSave('selectedTab', this.state.type || 'all');
     }
 
     clearAllFilters = () => {
@@ -152,6 +204,21 @@ export class FilterMobileComponent extends React.Component {
         this.setState({selectedFilters: this.state.defaultFilters}, () => {
             this.applyFilters();
         });
+    }
+
+    renderHeaderForPanel = (header, key) => {
+        const filters = _.get(this.state, `selectedFilters[${key}]`, []);
+        console.log(_.join(filters, ','));
+        return (
+            <Row className='panel-header'>
+                <Col span={24}>
+                    <h3>{header}</h3>
+                </Col>
+                <Col span={24}>
+                    <h5>{_.join(filters, ',')}</h5>
+                </Col>
+            </Row>
+        );
     }
 
     render() {
@@ -166,66 +233,80 @@ export class FilterMobileComponent extends React.Component {
 
         return (
             <Row>
-                <Col span={24} style={filterLayoutStyle}>
-                    <Row gutter={16}>
-                        <Col span={24} style={horizontalBox} onClick={this.props.toggleFilterMenu}>
-                            <Icon type="left" />
-                            <h3>Go Back</h3>
-                        </Col>
-                        <Col span={24}>
-                            <h3 style={{fontSize: '14px', fontWeight: '700'}}>{'Sort & Filters'}</h3>
-                        </Col>
-                        <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
-                            <h3 
-                                    onClick={this.applyFilters} 
-                                    style={{color: primaryColor, fontSize: '14px'}}
-                            >
-                                Apply Filters
-                            </h3>
-                            <h3 
-                                    onClick={this.clearAllFilters}
-                                    style={{color: primaryColor, fontSize: '14px'}}
-                            >
-                                Clear All
-                            </h3>
-                        </Col>
-                        <Col 
-                                span={24} 
-                                style={{
-                                    marginTop: '10px',
-                                    overflow: 'hidden',
-                                    overflowY: 'scroll',
-                                    maxHeight: '700px'
-                                }}
-                        >
-                            <Collapse 
-                                    bordered={false} 
-                                    defaultActiveKey={['0']}
-                            >
-                                <Panel header="Rebalancing Frequency">
-                                    <Row>
-                                        <Col span={24}>
-                                            {this.renderRebalancingFreqFilter()}
-                                        </Col>
-                                    </Row>
-                                </Panel>
-                                <Panel header="Status">
-                                    <Row>
-                                        <Col span={24}>
-                                            {this.renderStatusFilter()}
-                                        </Col>
-                                    </Row>
-                                </Panel>
-                                <Panel header="Ownership">
-                                    <Row>
-                                        <Col span={24}>
-                                            {this.renderAdviceFilter()}
-                                        </Col>
-                                    </Row>
-                                </Panel>
-                                {this.renderSliderFilters(filterArray)}
-                            </Collapse>
-                        </Col>
+                <Col span={24}>
+                    <Row>
+                        <Row className='header-container' style={{padding: '10px 20px', width: '100%'}}>
+                            <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
+                                <h3 style={{fontSize: '26px', fontWeight: '700'}}>{'Sort & Filters'}</h3>
+                                <Icon 
+                                        type="close-circle-o" 
+                                        style={{fontSize: '26px', fontWeight: '700'}}
+                                        onClick={this.props.toggleFilterMenu}
+                                />
+                            </Col>
+                            <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginTop: '10px'}}>
+                                <h3 
+                                        onClick={this.applyFilters} 
+                                        style={{color: primaryColor, fontSize: '18px'}}
+                                >
+                                    Apply
+                                </h3>
+                                <h3 
+                                        onClick={this.clearAllFilters}
+                                        style={{color: primaryColor, fontSize: '18px'}}
+                                >
+                                    Clear All
+                                </h3>
+                            </Col>
+                        </Row>
+                        <Row style={{padding: '0 20px', marginTop: '94px'}}>
+                            <Col span={24} >
+                                <Accordion 
+                                        bordered={false} 
+                                        className="my-accordion"
+                                >
+                                    <Panel header="Sort By">
+                                        <Row>
+                                            <Col span={24}>
+                                                {this.renderSortingOptions()}
+                                            </Col>
+                                        </Row>
+                                    </Panel>
+                                    <Panel header="Advice Type">
+                                        <Row>
+                                            <Col span={24}>
+                                                {this.renderAdviceTypeFilter()}
+                                            </Col>
+                                        </Row>
+                                    </Panel>
+                                    <Panel 
+                                            header={this.renderHeaderForPanel('Rebalancing Frequency', 'rebalancingFrequency')}
+                                    >
+                                        <Row>
+                                            <Col span={24}>
+                                                {this.renderRebalancingFreqFilter()}
+                                            </Col>
+                                        </Row>
+                                    </Panel>
+                                    <Panel header="Status">
+                                        <Row>
+                                            <Col span={24}>
+                                                {this.renderStatusFilter()}
+                                            </Col>
+                                        </Row>
+                                    </Panel>
+                                    <Panel header="Ownership">
+                                        <Row>
+                                            <Col span={24}>
+                                                {this.renderAdviceFilter()}
+                                            </Col>
+                                        </Row>
+                                    </Panel>
+                                    {this.renderSliderFilters(filterArray)}
+                                </Accordion>
+                            </Col>
+                            <Col span={24} style={{height: '50px'}}></Col>
+                        </Row>
                     </Row>
                 </Col>
             </Row>
@@ -233,17 +314,3 @@ export class FilterMobileComponent extends React.Component {
     }
 }
 
-const filterHeader = {
-    fontSize: '14px',
-    color: '#444',
-    fontWeight: 700,
-    marginBottom: '10px'
-};
-
-const filterLayoutStyle = {
-    padding: '15px', 
-    overflow: 'hidden', 
-    //overflowY: 'scroll', 
-    //height: '600px',
-    layout_weight: '1'
-}

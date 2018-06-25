@@ -2,7 +2,8 @@ import * as React from 'react';
 import _ from 'lodash';
 import {withRouter} from 'react-router';
 import {slide as HamburgerMenu} from 'react-burger-menu';
-import {Row, Col, Layout, Icon, Menu} from 'antd';
+import {Row, Col, Layout, Menu, Icon} from 'antd';
+import {Flex, WhiteSpace, NavBar, SearchBar, WingBlank, Drawer, List} from 'antd-mobile';
 import {sidebarUrls} from './constants';
 import {primaryColor, horizontalBox} from '../../constants';
 import * as style from './layoutStyle';
@@ -22,21 +23,24 @@ class AqMobileLayoutImpl extends React.Component {
 
     renderHeader = () => {
         return (
-            <Col 
-                    span={24} 
-                    style={{
-                        display: 'flex', 
-                        flexDirection: 'row', 
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        position: 'relative'
-                    }}
-            >
-                <Icon 
+            <NavBar
+                mode="light"
+                icon={
+                    <Icon 
                         type="menu-unfold" 
                         style={{...style.sideBarMenuIconStyle, ...this.state.iconRotateStyle}}
                         onClick = {this.toggleSideMenu}
-                />
+                    />
+                }
+                onLeftClick={() => this.toggleSideMenu}
+                style={{
+                    display: 'flex', 
+                    flexDirection: 'row', 
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                }}
+            >
                 <div 
                         onClick={() => this.props.history.push('/home')} 
                         style={{...headerColor, cursor: 'pointer',display: 'inline-block'}}
@@ -46,14 +50,8 @@ class AqMobileLayoutImpl extends React.Component {
                     <span style={{...biggerFont, color: '#e06666'}}>Q</span>
                     <span style={{color: '#e06666'}}>UBE</span>
                 </div>
-                {
-                    _.get(this.props, 'headerExtraIcon', null) !== null &&
-                    <Icon 
-                            type="search" 
-                            style={{...style.sideBarExtraIconStyle, ...this.props.sideBarExtraIconStyle}}
-                    />
-                }
-            </Col>
+            </NavBar>
+
         );
     }
 
@@ -69,9 +67,10 @@ class AqMobileLayoutImpl extends React.Component {
         });
     }
 
-    renderSidebar = () => {
+    renderLeftSidebar = () => {
         return (
             <HamburgerMenu
+                    id="left-drawer"
                     onStateChange={this.handleBurgerMenuStateChange}
                     customBurgerIcon={false}
                     customCrossIcon={false}
@@ -88,6 +87,9 @@ class AqMobileLayoutImpl extends React.Component {
                             </Menu.Item>
                         ))
                     }
+                    <Menu.Item onClick={this.toggleSideMenu}>
+                        <SideMenuItem menuItem={{name: 'Toggle Drawer'}} />
+                    </Menu.Item>
                 </Menu>
             </HamburgerMenu>
         );
@@ -96,11 +98,11 @@ class AqMobileLayoutImpl extends React.Component {
     render() {
         return (
             <Layout id="aq-layout-container">
-                <Header style={style.headerStyle}>
+                {this.renderLeftSidebar()}
+                {/* <Header style={style.headerStyle}> */}
                     {this.renderHeader()}
-                </Header>
+                {/* </Header> */}
                 <Layout id="menu-wrapper">
-                    {this.renderSidebar()}
                     <Layout>
                         {this.props.children}
                     </Layout>

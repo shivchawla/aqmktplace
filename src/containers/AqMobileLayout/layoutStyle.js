@@ -5,7 +5,10 @@ const iconFontSize = '24px';
 export const headerStyle = {
     backgroundColor: '#fff',
     padding: 0,
-    borderBottom: '#eaeaea'
+    borderBottom: '#eaeaea',
+    position: 'fixed',
+    width: '100%',
+    zIndex: '1000'
 };
 
 export const sideBarMenuIconStyle = {
@@ -14,7 +17,8 @@ export const sideBarMenuIconStyle = {
     position: 'absolute',
     left: '15px',
     cursor: 'pointer',
-    transition: 'all 0.4s ease-in-out'
+    transition: 'all 0.4s ease-in-out',
+    marginTop: '-10px'
 };
 
 export const sideBarExtraIconStyle = {
