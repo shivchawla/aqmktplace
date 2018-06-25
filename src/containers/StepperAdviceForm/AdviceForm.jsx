@@ -393,12 +393,12 @@ class StepperAdviceFormImpl extends React.Component {
         Gets the suitability or investor type based on the goal selected by the user
     */
     getGoalDetail = type => {
-        const goal = this.props.form.getFieldValue('investmentObjGoal');
-        const goalItem = goals.filter(item => item.investorType === goal)[0];
+        const investorType = this.props.form.getFieldValue('investmentObjInvestorType');
+        const goalItem = goals.filter(item => item.investorType === investorType)[0];
         if (goalItem) {
             switch(type) {
-                case "investorType":
-                    return goalItem.investorType;
+                case "field":
+                    return goalItem.field;
                 case "suitability":
                     return goalItem.suitability;
             }
@@ -635,7 +635,7 @@ class StepperAdviceFormImpl extends React.Component {
     constructCreateAdviceRequestObject = (values, publish = false) => {
         let {
             adviceName,
-            investmentObjGoal,
+            investmentObjInvestorType,
             investmentObjPortfolioValuation,
             investmentObjSectors,
             investmentObjCapitalization,
@@ -644,11 +644,13 @@ class StepperAdviceFormImpl extends React.Component {
             startDate,
             benchmark
         } = values;
+
         startDate = moment(startDate).format(dateFormat);
         const endDate = moment(startDate).add(500, 'year').format(dateFormat); // Adding 500 years to the end date
-        const investorType = this.getGoalDetail('investorType');
+        
+        const goalField = this.getGoalDetail('field');
         const suitability = this.getGoalDetail('suitability');
-        console.log('suitability', suitability);
+        
         const requestObject = {
             name: adviceName,
             portfolio: {
@@ -670,8 +672,8 @@ class StepperAdviceFormImpl extends React.Component {
             maxNotional: 1000000,
             investmentObjective: {
                 goal: {
-                    field: investmentObjGoal,
-                    investorType,
+                    field: goalField,
+                    investorType: investmentObjInvestorType,
                     suitability
                 },
                 sectors: {
@@ -716,7 +718,7 @@ class StepperAdviceFormImpl extends React.Component {
     constructPreviewAdviceDetail = () => {
         const {
             adviceName, 
-            investmentObjGoal,
+            investmentObjInvestorType,
             investmentObjSectors,
             investmentObjPortfolioValuation,
             investmentObjUserText,
@@ -738,8 +740,8 @@ class StepperAdviceFormImpl extends React.Component {
             isPublic: false,
             investmentObjective: {
                 goal: {
-                    field: investmentObjGoal,
-                    investorType: this.getGoalDetail('investorType'),
+                    field: this.getGoalDetail('field'),
+                    investorType: investmentObjInvestorType,
                     suitability: this.getGoalDetail('suitability'),
                     valid: true
                 },

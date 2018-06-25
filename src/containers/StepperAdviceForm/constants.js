@@ -12,16 +12,16 @@ export const headerContainerStyle = {
 };
 
 export const tooltips = {
-    goal: 'This is the goal of the advice',
-    investmentObjPortfolioValuation: 'This is the Portfolio Valuation of the advice',
-    investmentObjCapitalization: 'This is the capitalization of your advice',
-    sectors: 'These are the sectors of your advice',
-    userText: 'This is the description of your advice',
-    investorType: 'Investor type for this advice',
-    suitability: 'This is the suitability of your advice',
-    startDate: 'This is the start date of your advice',
-    rebalancingFrequency: 'This is the rebalancing frequency of your advice',
-    benchmark: 'This is the benchmark of your advice',
-    portfolio: 'This is the portfolio of your advice',
-    adviceName: 'This will be the name of your advice'
+    goal: 'Goal of the advice',
+    investmentObjPortfolioValuation: 'Portfolio Valuation of the advice',
+    investmentObjCapitalization: 'Capitalization of the advice',
+    sectors: 'Relevant sectors in the advice investment portfolio',
+    userText: 'Description of your advice',
+    investorType: 'Investor type for the advice',
+    suitability: 'Suitability of the advice',
+    startDate: 'Start date of the advice',
+    rebalancingFrequency: 'Rebalancing frequency of the advice',
+    benchmark: 'Benchmark of the advice',
+    portfolio: 'Portfolio of the advice',
+    adviceName: 'Name of the advice'
 }

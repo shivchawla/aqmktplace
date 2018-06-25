@@ -66,7 +66,7 @@ export class InvestmentObjective extends React.Component {
     }
 
     getGoalDetail = type => {
-        const investorType = this.props.form.getFieldValue('investmentObjGoal');
+        const investorType = this.props.form.getFieldValue('investmentObjInvestorType');
         const goalItem = goals.filter(item => item.investorType === investorType)[0];
         if (goalItem) {
             switch(type) {
@@ -110,7 +110,7 @@ export class InvestmentObjective extends React.Component {
                                 <Col span={24}>
                                     <FormItem style={textStyle}>
                                         {
-                                            getFieldDecorator('investmentObjGoal', {
+                                            getFieldDecorator('investmentObjInvestorType', {
                                                 //initialValue: goals[0].investorType,
                                                 rules: [{
                                                     required: true,
