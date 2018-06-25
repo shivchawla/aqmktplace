@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
 import windowSize from 'react-window-size';
+import InfiniteScroll from 'react-infinite-scroller';
 import _ from 'lodash';
 import {slide as HamburgerMenu} from 'react-burger-menu';
 import {Row, Col, Icon, Button, Select, Tabs, Modal, Radio} from 'antd';
@@ -34,7 +35,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
             activeFilterPanel: [],
             filterModalVisible: false,
             loading: true,
-            selectedPage: Utils.getFromLocalStorage('selectedPage') || 1,
+            selectedPage: 1,
             limit: 10,
             totalCount: 3,
             initialCall: true,
@@ -235,15 +236,15 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
         this.setState({
             loading: true,
             show: this.state.initialCall,
-            initialCall: false
         });
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             if (this.mounted) {
                 this.setState({
-                    advices: this.processAdvices(response.data.advices),
-                    totalCount: _.get(response.data, 'count', 10)
+                    advices: [...this.state.advices, ...this.processAdvices(response.data.advices)],
+                    totalCount: this.state.initialCall && _.get(response.data, 'count', 10),
+                    initialCall: false
                 });
             }
             if (this.mounted) {
@@ -315,6 +316,9 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
 
     renderAdvicesMobile = (type = 'all') => {
         const {advices} = this.state;
+        const hasMore = this.state.selectedPage <= 2;
+        console.log(this.state.totalCount);
+        console.log(this.state.advices.length);
         return (
             <div 
                     className="advice-list" 
@@ -328,29 +332,27 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                         minHeight: '300px'
                     }}
             >
-                <Loading
-                        show={this.state.loading}
-                        color={loadingColor}
-                        className="main-loader"
-                        showSpinner={false}
-                />
-                <List>
-                    
-                </List>
-                {
-                    !this.state.loading &&
-                    advices.map((advice, index) => {
-                        if (type === 'following') {
-                            if (advice.isFollowing && !advice.isSubscribed) {
-                                return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
+                <InfiniteScroll
+                    pageStart={this.state.selectedPage}
+                    loadMore={this.onPaginationChange}
+                    hasMore={hasMore}
+                    loader={<div className="loader" key={0} style={{textAlign: 'center'}}>Loading ...</div>}
+                >
+                    {
+                        !this.state.loading &&
+                        advices.map((advice, index) => {
+                            if (type === 'following') {
+                                if (advice.isFollowing && !advice.isSubscribed) {
+                                    return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
+                                } else {
+                                    return null;
+                                }
                             } else {
-                                return null;
+                                return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
                             }
-                        } else {
-                            return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
-                        }
-                    })
-                }
+                        })
+                    }
+                </InfiniteScroll>
             </div>
         );
     }
@@ -455,11 +457,12 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
         });
     }
 
-    onPaginationChange = (page, pageSize) => {
+    onPaginationChange = () => {
+        let page = Number(this.state.selectedPage) + 1;
+        console.log('Called', page);
         this.setState({selectedPage: page}, () => {
             window.scrollTo(0, 0);
             this.getAdvices();
-            Utils.localStorageSave('selectedPage', page);
         })
     }   
 
@@ -495,22 +498,6 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
         );
     }
 
-    renderPagination = () => {
-        const locale = {
-            prevText: 'Prev',
-            nextText: 'Next',
-        };
-
-        return (
-            <Pagination 
-                current={Number(this.state.selectedPage)} 
-                total={this.state.totalCount}  
-                locale={locale} 
-                onChange={this.onPaginationChange}
-            />
-        );
-    }
-
     renderPageContentNew = () => {
         return (
             <AqMobileLayout>
@@ -541,9 +528,6 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                     </Col>
                     <Col span={24} style={{padding: '0 15px'}}>
                         {this.renderAdvicesMobile()}
-                    </Col>
-                    <Col span={24}>
-                        {this.renderPagination()}
                     </Col>
                 </Row>
             </AqMobileLayout>

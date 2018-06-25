@@ -208,7 +208,6 @@ export class FilterMobileComponent extends React.Component {
 
     renderHeaderForPanel = (header, key) => {
         const filters = _.get(this.state, `selectedFilters[${key}]`, []);
-        console.log(_.join(filters, ','));
         return (
             <Row className='panel-header'>
                 <Col span={24}>
