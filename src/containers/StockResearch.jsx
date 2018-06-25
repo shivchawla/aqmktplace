@@ -605,7 +605,11 @@ class StockResearchImpl extends React.Component {
                         <AqPageHeader style={{margin: '0 30px'}} title="Stock Research" breadCrumbs = {breadCrumbs}/>
                     </React.Fragment>
                 }
-                <Row className='aq-page-container' type="flex" justify="space-between">
+                <Row 
+                        className={this.props.openAsDialog ? '' : 'aq-page-container'} 
+                        type="flex" 
+                        justify="space-between"
+                >
                     <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom:'20px'}}>
                         {this.renderDeleteModal()}
                         <Row style={metricStyle}>
@@ -784,6 +788,8 @@ class StockResearchImpl extends React.Component {
         return (
             <AppLayout 
                 loading={this.state.loading}
+                noFooter={this.props.openAsDialog}
+                noHeader={this.props.openAsDialog}
                 content={
                     <React.Fragment>
                         <SignupMeta />

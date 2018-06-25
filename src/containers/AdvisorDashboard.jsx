@@ -63,7 +63,8 @@ class AdvisorDashboard extends React.Component {
             advicePerformanceLoading: false,
             dashboardDataLoading: false,
             showEmptyScreen: false,
-            notAuthorized: false
+            notAuthorized: false,
+            loading: false
         };
         this.adviceColumns = [
             {
@@ -135,7 +136,6 @@ class AdvisorDashboard extends React.Component {
             }
             const validAdviceIndex = this.getValidIndex(advices);
             const validAdvice = advices[validAdviceIndex] || null;
-            // console.log('Valid Advice', validAdvice);
             subscriberRating = {name: 'Total Subscribers', data: this.processTotalSubscribers(_.get(response.data, 'analytics', []))};
             subsTotalSeries.push({
                 name: 'Total Subscribers', 
@@ -864,19 +864,19 @@ class AdvisorDashboard extends React.Component {
 
     render() {
         return(
-            <Row>
-                {/*<Spinner 
-                    loading = {this.state.loading}
+            <Col span={24}>
+                <Loading 
+                    show = {this.state.loading}
                     color={loadingColor}
                     className="main-loader"
                     showSpinner={false}
-                />*/}
+                />
                 <AdvisorDashboardMeta />
                 {
                     !this.state.loading &&
                     this.renderPageContent()
                 }
-            </Row>
+            </Col>
         );
     }
 }

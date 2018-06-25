@@ -178,9 +178,11 @@ class App extends React.Component {
             {regExp: '^\/$', title: 'Home - AdviceQube'},
             {regExp: '^\/policies\/tnc$', title: 'Terms and Conditions - AdviceQube'},
             {regExp: '^\/policies\/privacy$', title: 'Privacy Policy - AdviceQube'},
+            {regExp: '^\/dashboard$', title: 'Investor Dashboard - AdviceQube'},
             {regExp: '^\/dashboard\/investor\/[A-Za-z0-9]+$', title: 'Investor Dashboard - AdviceQube'},
             {regExp: '^\/dashboard\/advisor\/[A-Za-z0-9]+$', title: 'Advisor Dashboard - AdviceQube'},
             {regExp: '^\/dashboard\/createportfolio$', title: 'Create Portfolio - AdviceQube'},
+            {regExp: '^\/dashboard\/createadvice$', title: 'Create Advice - AdviceQube'},
             {regExp: '^\/stockresearch$', title: 'Stock Research - AdviceQube'},
             {regExp: '^\/login$', title: 'Login - AdviceQube'},
             {regExp: '^\/signup$', title: 'Register - AdviceQube'},
@@ -197,8 +199,6 @@ class App extends React.Component {
                 return;
             }
         });
-        const parentPath = locationArray.length > 0 ? locationArray[1] : '/'; 
-        this.setState({parentPath});
     }
 
     render() {

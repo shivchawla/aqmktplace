@@ -1,24 +1,21 @@
 import * as React from 'react';
 import Media from 'react-media';
-import Loadable from 'react-loadable';
 //import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
 import Layout from 'antd/lib/layout';
 import Menu from 'antd/lib/menu';
 import Row from 'antd/lib/row';
 import Col from 'antd/lib/col';
 import Button from 'antd/lib/button';
-import Icon from 'antd/lib/icon';
-
 import withRouter from 'react-router-dom/withRouter';
 import {Utils} from '../utils';
 import {primaryColor} from '../constants';
 import logo from "../assets/logo-advq-new.png";
-import {Footer} from '../components/Footer';
+import {Footer as AqFooter} from '../components/Footer';
 import Loading from 'react-loading-bar';
 import {loadingColor} from '../constants';
 
 const SubMenu = Menu.SubMenu;
-const {Header, Content} = Layout;
+const {Header, Content, Footer} = Layout;
 
 
 class AppLayout extends React.Component {
@@ -27,10 +24,13 @@ class AppLayout extends React.Component {
         this.state = {parentPath: '/', sideMenuOpen: true, isLoggedIn: false};
     }
 
+    componentWillMount() {
+        this.onRouteChanged(this.props.location.pathname);
+    }
+
     componentDidUpdate(prevProps) {
         if (this.props.location !== prevProps.location) { // Route changed
-            //this.onRouteChanged(this.props.location.pathname);
-            //this.fireTracking();
+            this.onRouteChanged(this.props.location.pathname);
         }
     }
 
@@ -38,72 +38,11 @@ class AppLayout extends React.Component {
         this.props.history.push(`/${e.key}`);
     }
 
-    getPopOverContent = () => {
-        return (
-            <div>
-            <div className="loggedinuser-menu-popup-header">
-                <div>
-                    <h3>{Utils.getLoggedInUserName()}</h3>
-                    <p>{Utils.getLoggedInUserEmail()}</p>
-                </div>
-            </div>
-            <div className="loggedinuser-menu-popup-content">
-                <div 
-                        className="row" 
-                        onClick={
-                            () => 
-                                {this.props.history.push(`/dashboard/advisorprofile/${Utils.getUserInfo().advisor}`)}
-                        }
-                >
-                    <Icon type="user" className="icon" />
-                    ADVISOR PROFILE
-                </div>
-                <div 
-                        className="row" 
-                        onClick={
-                            () => {
-                                Utils.logoutUser(); 
-                                this.props.history.push('/login')
-                            }
-                        }
-                >
-                    <Icon type="logout" className="icon" />
-                    SIGN OUT
-                </div>
-            </div>
-            </div>
-        );
+    onRouteChanged = location => {
+        const locationArray = location.split('/');
+        const parentPath = locationArray.length > 0 ? locationArray[1] : '/'; 
+        this.setState({parentPath});
     }
-
-    getAddPopOverContent = () => {
-        return (
-            <div>
-                <div className="loggedinuser-menu-popup-header">
-                    {/* <div>
-                        <h3>{Utils.getLoggedInUserName()}</h3>
-                        <p>{Utils.getLoggedInUserEmail()}</p>
-                    </div> */}
-                </div>
-                <div className="loggedinuser-menu-popup-content">
-                    <div 
-                            className="row" 
-                            onClick={
-                                () => 
-                                    {this.props.history.push(`/dashboard/createadvice`)}
-                            }
-                    >
-                        <Icon type="file-text" className="icon" />
-                        Create Advice
-                    </div>
-                    <div className="row" onClick={() => {Utils.logoutUser(); this.props.history.push('/dashboard/createportfolio')}}>
-                        <Icon type="line-chart" className="icon" />
-                        Create Portfolio
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
 
     renderHeaderActionItemsDesktop = () => {
         return (
@@ -117,10 +56,11 @@ class AppLayout extends React.Component {
                     }}
             >   
                 <Menu
-                    style={{marginTop: '10px'}} 
-                    mode="horizontal"
-                    onClick={this.handleNavMenuClick}
-                    selectedKeys={[this.state.parentPath]}>
+                        style={{marginTop: '10px'}} 
+                        mode="horizontal"
+                        onClick={this.handleNavMenuClick}
+                        selectedKeys={[this.state.parentPath]}
+                >
                     {
                         Utils.isLoggedIn() &&
                         <Menu.Item key="dashboard">Dashboard</Menu.Item>
@@ -233,16 +173,16 @@ class AppLayout extends React.Component {
     } 
 
     renderFooterMobile = () => {
-        return <Footer mobile={true}/>;
+        return <AqFooter mobile={true}/>;
     }
 
     renderFooterDesktop = () => {
-        return <Footer/>;
+        return <AqFooter />;
     }
 
     renderFooter = () => {
         return  (
-            <div style={{marginTop: '20px'}}>
+            <div>
                 <Media 
                     query="(max-width: 1199px)"
                     render={() => this.renderFooterMobile()}
@@ -265,14 +205,22 @@ class AppLayout extends React.Component {
                         className="main-loader"
                         showSpinner={false}
                     />
-                    {!this.props.loading &&
-                        <React.Fragment> 
+                    {   !this.props.noHeader &&
+                        <Header style={{padding: 0}}>
                             {this.renderHeader()}
+                        </Header>
+                    }
+                    {
+                        !this.props.loading &&
+                        <Content style={contentLayoutStyle}> 
                             {this.props.content}
-                            {!this.props.noFooter &&
-                                this.renderFooter()
-                            }
-                        </React.Fragment>
+                        </Content>
+                    }
+                    {   
+                        !this.props.loading && !this.props.noFooter &&
+                        <div>
+                            {this.renderFooter()}
+                        </div>
                     }
                 </Layout>
             </React.Fragment>

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Loadable from 'react-loadable';
+import Loading from 'react-loading-bar';
 import _ from 'lodash';
 import moment from 'moment';
 import {withRouter} from 'react-router';
@@ -1244,10 +1245,15 @@ class InvestorDashboard extends React.Component {
                         visible={this.state.stockResearchModalVisible}
                         toggleModal={this.toggleStockResearchModal}
                 />
-                
+                <Loading 
+                    show={this.state.defaultPortfolioLoading}
+                    color={loadingColor}
+                    showSpinner={false}
+                    className="main-loader"
+                />
                 <InvestorDashboardMeta />
-                
-                {!this.state.defaultPortfolioLoading &&
+                {
+                    !this.state.defaultPortfolioLoading &&
                     this.renderPageContent()
                 }
             </Col>

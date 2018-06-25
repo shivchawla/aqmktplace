@@ -1037,7 +1037,6 @@ class StepperAdviceFormImpl extends React.Component {
                     // !this.state.loaders.page && 
                     <div style={{display: this.state.loaders.page ? 'none' : 'block'}}>
                         {this.renderPageContent()}
-                        <div style={{height: '100px'}}></div>
                     </div>
                 }
             </Row>
