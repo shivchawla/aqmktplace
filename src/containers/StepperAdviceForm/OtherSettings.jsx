@@ -72,11 +72,11 @@ export class OtherSettings extends React.Component {
 
     render = () => {
         const {getFieldDecorator} = this.props.form;
-        console.log('Rendering Other Settings');
-
+        // this.props.form.getFieldValue('fieldName');
+        
         return (
             <Col>
-                <AdviceName {...this.props} approvalStatusData={this.props.otherApprovalStatus} />
+                <AdviceName {...this.props} approvalStatusData={this.props.approvalStatusData} />
 
                 <Row type = "flex" style={{marginTop: '30px'}} align="middle">
                     <Col span={6}> {this.renderHeader('Rebalancing Frequency', tooltips['rebalancingFrequency'])}

@@ -97,8 +97,6 @@ export class Portfolio extends React.Component {
     }
 
     render() {
-        console.log('Rendering Portfolio');
-        
         return (
             <Row style={{display: 'block'}}>
                 {this.renderPerformanceModal()}

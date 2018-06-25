@@ -4,6 +4,7 @@ import {getStepIndex} from './steps';
 import {getOthersWarning} from './utils';
 import {inputStyle} from './style/adviceName';
 import {WarningIcon} from '../../components';
+import {horizontalBox} from '../../constants';
 
 const FormItem = Form.Item;
 
@@ -28,7 +29,6 @@ export class AdviceName extends React.Component {
     }
 
     shouldComponentUpdate(nextProps) {
-        const {getFieldDecorator} = this.props.form;
         const adviceNameStep = 2; //getStepIndex('adviceName');
         if (nextProps.step === adviceNameStep) {
             return true;
@@ -39,7 +39,6 @@ export class AdviceName extends React.Component {
 
     render() {
         const {getFieldDecorator} = this.props.form;
-        console.log('Rendering Advice Name');
         
         return (
             <Row type="flex" align="middle"> 
@@ -57,7 +56,10 @@ export class AdviceName extends React.Component {
                                     disabled={this.props.disabled}
                             />
                         )}
-                    </FormItem>
+                    </FormItem>                    
+                </Col>
+                <Col span={2}>
+                    {this.showWarning()}
                 </Col>
             </Row>
         );

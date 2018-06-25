@@ -68,7 +68,6 @@ export class InvestmentObjective extends React.Component {
     getGoalDetail = type => {
         const investorType = this.props.form.getFieldValue('investmentObjGoal');
         const goalItem = goals.filter(item => item.investorType === investorType)[0];
-        console.log(goalItem);
         if (goalItem) {
             switch(type) {
                 case "field":
