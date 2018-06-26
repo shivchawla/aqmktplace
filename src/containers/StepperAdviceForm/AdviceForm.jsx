@@ -385,6 +385,7 @@ class StepperAdviceFormImpl extends React.Component {
                         disabled={!this.getDisabledStatus()}
                         approvalRequested = {this.state.approvalRequested}
                         verifiedPositions={this.getVerifiedPositions()}
+                        onNext={this.validateAndGoToNextStep}
                     />
                 </div>
             </React.Fragment>

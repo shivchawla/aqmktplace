@@ -2,14 +2,7 @@ import * as React from 'react';
 import Media from 'react-media';
 import ReactGA from 'react-ga';
 import Loadable from 'react-loadable';
-//import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
-import Layout from 'antd/lib/layout';
-import Menu from 'antd/lib/menu';
-import Row from 'antd/lib/row';
-import Col from 'antd/lib/col';
-import Button from 'antd/lib/button';
-import Icon from 'antd/lib/icon';
-
+import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
 import Route from 'react-router/Route';
 import withRouter from 'react-router-dom/withRouter';
 import Switch from 'react-router-dom/Switch';

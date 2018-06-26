@@ -3,15 +3,7 @@ import axios from 'axios';
 import windowSize from 'react-window-size';
 import get from 'lodash/get';
 import Link from 'react-router-dom/Link';
-//import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
-import Row from 'antd/lib/row';
-import Col from 'antd/lib/col';
-import Modal from 'antd/lib/modal';
-import Button from 'antd/lib/button';
-import Form from 'antd/lib/form';
-import Input from 'antd/lib/input';
-import message from 'antd/lib/message';
-
+import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
 import {Utils} from '../utils';
 import '../css/home.css';
 

@@ -1,11 +1,6 @@
 import * as React from 'react';
 import Media from 'react-media';
-//import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
-import Layout from 'antd/lib/layout';
-import Menu from 'antd/lib/menu';
-import Row from 'antd/lib/row';
-import Col from 'antd/lib/col';
-import Button from 'antd/lib/button';
+import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
 import withRouter from 'react-router-dom/withRouter';
 import {Utils} from '../utils';
 import {primaryColor} from '../constants';
@@ -205,7 +200,7 @@ class AppLayout extends React.Component {
                         className="main-loader"
                         showSpinner={false}
                     />
-                    {   !this.props.noHeader &&
+                    {   !this.props.loading && !this.props.noHeader &&
                         <Header style={{padding: 0}}>
                             {this.renderHeader()}
                         </Header>

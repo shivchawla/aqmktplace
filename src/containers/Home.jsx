@@ -4,12 +4,7 @@ import YouTube from 'react-youtube';
 import pulse from 'react-animations/lib/pulse';
 import Radium, {StyleRoot} from 'radium';
 import Modal from 'react-responsive-modal';
-import Row from 'antd/lib/row';
-import Col from 'antd/lib/col';
-import Button from 'antd/lib/button';
-import Form from 'antd/lib/form';
-import Icon from 'antd/lib/icon';
-
+import {Row, Col, Button, Form, Icon} from 'antd';
 import adviceLogo from '../assets/AdviceLogo.svg';
 import adviceLogoMobile from '../assets/AdviceLogoMobile.svg';
 import portfolioLogoMobile from '../assets/PortfolioLogo.svg';
