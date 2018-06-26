@@ -8,6 +8,7 @@ import {withRouter, Switch} from 'react-router-dom';
 import {Utils} from './utils';
 import {primaryColor} from './constants';
 import logo from "./assets/logo-advq-new.png";
+global.Promise = require('bluebird');
 
 const SubMenu = Menu.SubMenu;
 const {Header, Content} = Layout;
