@@ -5,7 +5,7 @@ import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import {AqRate} from '../components/AqRate';
 import {AqTag} from '../components/AqTag';
-import {primaryColor, metricColor} from '../constants';
+import {primaryColor, metricColor, adviceApprovalPending, adviceApproved, adviceRejected, advicePublic, advicePrivate} from '../constants';
 import medalIcon from '../assets/award.svg';
 import {Utils} from '../utils';
 import '../css/adviceListItem.css';
@@ -157,11 +157,6 @@ class AdviceListItemImpl extends React.PureComponent {
         const advisorName = `${_.get(advisor, 'user.firstName')} ${_.get(advisor, 'user.lastName')}`;
         const advisorId = _.get(advisor, '_id', '');
         const statusTagStyle = {border:'1px solid', borderColor:statusTagColor};
-        const adviceApprovalPending = 'Approval is pending for this advice by the admin';
-        const adviceRejected = 'Advice is rejected by the admin.';
-        const adviceApproved = 'Advice is approved by the admin ';
-        const advicePublic = 'This advice is public';
-        const advicePrivate = 'This advice is private and not open to Marketplace';
 
         return (
 

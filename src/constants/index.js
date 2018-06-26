@@ -70,11 +70,11 @@ export const capitalization = [
     "Large Cap"
 ];
 
-export const adviceApprovalPending = 'Approval is pending for this advice by the admin';
-export const adviceRejected = 'Advice is rejected by the admin.';
-export const adviceApproved = 'Advice is approved by the admin ';
-export const advicePublic = 'This advice is public';
-export const advicePrivate = 'This advice is private and not open to Marketplace';
+export const adviceApprovalPending = 'Approval is pending for this advice';
+export const adviceRejected = 'Advice is rejected. Please fix the advice for suggestions and resubmit for approval';
+export const adviceApproved = 'Advice is approved and open for sale in the marketplace';
+export const advicePublic = 'Public Advice: Advice is visbile and open for sale in the marketplace';
+export const advicePrivate = 'Private Advice: Advice is private and not open for sale';
 export const adviceWishlisted = 'You have wishlisted this advice';
 export const adviceSubscribed = 'You have subscribed this advice';
 export const defaultPortfolioTooltip = 'This your Default Portfolio';

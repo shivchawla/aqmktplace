@@ -3,7 +3,7 @@ import Loadable from 'react-loadable';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import {Spin, Row, Col, Collapse, DatePicker, Radio, Icon} from 'antd';
-import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../constants';
+import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected, advicePublic, advicePrivate} from '../constants';
 import {AqTag} from '../components/AqTag';
 import {WarningIcon} from '../components/WarningIcon'
 import {IconItem} from '../components/IconItem';
@@ -243,7 +243,7 @@ class AdviceDetailContentImpl extends React.Component {
                             this.props.adviceDetail.isOwner &&
                             <AqTag 
                                     color='#673AB7'
-                                    tooltipTitle={this.props.adviceDetail.isPublic ? 'This advice is Public' : 'This advice is private'}
+                                    tooltipTitle={this.props.adviceDetail.isPublic ? advicePublic : advicePrivate}
                                     text={this.props.adviceDetail.isPublic ? 'Public' : 'Private'}
                                     icon={this.props.adviceDetail.isPublic ? 'team' : 'lock'}
                                     iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
