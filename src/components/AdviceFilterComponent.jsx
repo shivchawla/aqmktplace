@@ -12,7 +12,7 @@ const CheckboxGroup = Checkbox.Group;
 const filters = {
     maxNotional: ['100000', '200000', '300000', '500000', '750000', '1000000'],
     rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
-    approved: ['Approved', 'UnApproved'],
+    approved: ['Approved', 'Pending', 'Rejected'],
     netValue: '0,600000',
     sharpe: '-10,10',
     return: '-100,100',
@@ -90,7 +90,7 @@ export class AdviceFilterComponent extends React.Component {
 
     processUrl = (type = 'all') => {
         const {selectedFilters, defaultFilters} = this.state;
-        let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
+        let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : item === 'Pending' ? 0 : -1);
         const personal = this.props.personal;
         const limit = 10;
         const maxNotional = selectedFilters.maxNotional.length > 0 ? _.join(selectedFilters.maxNotional, ',') : _.join(defaultFilters.maxNotional, ',');
