@@ -1,0 +1,36 @@
+.my-accordion .pad .am-accordion-content-box {
+    padding: 10px;
+}
+
+.arrow {
+    position: relative;
+}
+
+.my-accordion {
+    margin-top: 20px;
+}
+
+.am-accordion .am-accordion-item .am-accordion-header {
+    padding-left: 30px;
+    display: flex;
+    flex-direction: row;
+    background-color: transparent;
+}
+
+.am-accordion-item {
+    margin-bottom: 20px;
+}
+
+.am-accordion-content-box {
+    padding: 10px
+}
+
+.header-container {
+    position: fixed;
+    background-color: #f9f9f9;
+    z-index: 200;
+}
+
+.position-panel > .ant-collapse-header {
+    padding: 0 !important;
+}

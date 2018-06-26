@@ -47,6 +47,11 @@ const AdviceDetail = Loadable({
     loading: () => <Icon type="loading" />
 });
 
+const AdviceDetailMobile = Loadable({
+    loader: () => import('./containers/AdviceDetailMobile/AdviceDetailMobile'),
+    loading: () => <Icon type="loading" />
+});
+
 const CreateAdvice = Loadable({
     loader: () => import('./containers/CreateAdvice'),
     loading: () => <Icon type="loading" />
@@ -186,6 +191,7 @@ class App extends React.Component {
             {regExp: '^\/login$', title: 'Login - AdviceQube'},
             {regExp: '^\/signup$', title: 'Register - AdviceQube'},
             {regExp: '^\/advice\/[A-Za-z0-9]+$', title: 'Advice Detail - AdviceQube'},
+            {regExp: '^\/advice\/[A-Za-z0-9]+/mobile$', title: 'Advice Detail Mobile - AdviceQube'},
             {regExp: '^\/dashboard\/updateadvice\/[A-Za-z0-9]+$', title: 'Update Advice - AdviceQube'},
             {regExp: '^\/dashboard\/advisorprofile\/[A-Za-z0-9]+$', title: 'Advisor Profile - AdviceQube'},
             {regExp: '^\/dashboard\/portfolio\/[A-Za-z0-9]+$', title: 'Portfolio Detail - AdviceQube'},
@@ -419,11 +425,14 @@ class App extends React.Component {
                         <Switch>
                             <Route exact={true} path='/home' component={Home} /> 
                             <Route exact={true} path='/' component={Home} /> 
-                            <Route exact={true} path='/advice' component={ScreenAdvices} /> 
+                            <Route exact={true} path='/advice' component={ScreenAdviceMobile} /> 
+                            <Route exact={true} path='/advice/desktop' component={ScreenAdvices} /> 
                             <Route exact={true} path='/advice/mobile' component={ScreenAdviceMobile} /> 
                             <Route path="/stockresearch" exact component={StockResearch} /> 
                             <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                            <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 
+                            <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} /> 
+                            <Route exact={true} path='/advice/:id/desktop' component={AdviceDetail} /> 
+                            <Route exact={true} path='/advice/:id/mobile' component={AdviceDetailMobile} /> 
                             <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
                             <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> 
                             <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
