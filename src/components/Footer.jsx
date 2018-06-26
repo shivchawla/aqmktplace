@@ -1,8 +1,8 @@
 import * as React from 'react';
 import axios from 'axios';
 import windowSize from 'react-window-size';
-import _ from 'lodash';
-import {Link} from 'react-router-dom';
+import get from 'lodash/get';
+import Link from 'react-router-dom/Link';
 import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
 import {Utils} from '../utils';
 import '../css/home.css';
@@ -129,10 +129,12 @@ class FooterImpl extends React.Component{
     }
 
     render() {
-        const token = _.get(Utils.getUserInfo(), 'token', '') || '';
+        const token = get(Utils.getUserInfo(), 'token', '') || '';
     
         return (
-            <Row className="footer" style={{marginTop: this.props.windowWidth ? '0px' : '100px', ...this.props.style}}>
+            <Col span={24} style={{marginTop: '-5px'}}>
+                <Row style={{height: '100px', backgroundColor: '#f9f9f9'}}></Row>
+                <Row className="footer" style={{marginTop: this.props.windowWidth ? '0px' : '100px', ...this.props.style}}>
                 {this.renderContactUsModal()}
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">Products</h5>
@@ -168,6 +170,7 @@ class FooterImpl extends React.Component{
                     </h3>
                 </Col>
             </Row>
+            </Col>
         );
     }
 }

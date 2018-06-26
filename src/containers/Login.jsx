@@ -11,6 +11,8 @@ import axios from 'axios';
 import {LoginMeta} from '../metas';
 import logo from "../assets/logo-advq-new.png";
 import '../css/login.css';
+import AppLayout from './AppLayout';
+
 const {requestUrl} = require('../localConfig');
 
 class Login extends Component {
@@ -292,16 +294,19 @@ class Login extends Component {
 
   render() {
     return (
-		<React.Fragment>
-			<Media 
-				query="(max-width: 600px)"
-				render={() => this.renderMobile()}
-			/>
-			<Media 
-				query="(min-width: 601px)"
-				render={() => this.renderDesktop()}
-			/>
-		</React.Fragment>
+        <AppLayout noFooter content = {
+        		<React.Fragment>
+        			<Media 
+        				query="(max-width: 600px)"
+        				render={() => this.renderMobile()}
+        			/>
+        			<Media 
+        				query="(min-width: 601px)"
+        				render={() => this.renderDesktop()}
+        			/>
+        		</React.Fragment>
+        }>
+        </AppLayout>
 	);
   }
 }

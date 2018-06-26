@@ -2,7 +2,6 @@ import * as React from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import axios from 'axios';
-import Loading from 'react-loading-bar';
 import {Row, Col, Avatar, Rate, Button, Modal, Icon, Select, message, Tooltip, Pagination} from 'antd';
 import ForbiddenAccess from '../components/ForbiddenAccess';
 import {AqPageHeader} from '../components/AqPageHeader';
@@ -12,7 +11,7 @@ import {UpdateAdvisorProfile} from '../containers/UpdateAdvisorProfile';
 import {shadowBoxStyle, loadingColor} from '../constants';
 import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {AdvisorProfileCrumb} from '../constants/breadcrumbs';
-import { Footer } from '../components/Footer';
+import AppLayout from './AppLayout';
 
 const {requestUrl, aimsquantToken} = require('../localConfig');
 const dateFormat = 'YYYY-MM-DD';
@@ -40,7 +39,7 @@ export default class AdvisorProfile extends React.Component {
             isCompany: false,
             filterModalVisible: false,
             sortBy: 'rating',
-            loading: false,
+            loading: true,
             adviceLoading: false,
             notAuthorized: false,
             followLoading: false,
@@ -468,21 +467,10 @@ export default class AdvisorProfile extends React.Component {
 
     render() {
         return (
-            <React.Fragment>
-                <Loading
-                        show={this.state.loading || this.state.adviceLoading}
-                        color={loadingColor}
-                        className="main-loader"
-                        showSpinner={false}
-                />
-                {
-                    !this.state.loading &&
-                    <React.Fragment>
-                        {this.renderPageContent()}
-                        <Footer />
-                    </React.Fragment>
-                }
-            </React.Fragment>
+             <AppLayout 
+                loading={this.state.loading || this.state.adviceLoading}
+                content={this.renderPageContent()}>
+            </AppLayout>
         );
     }
 }

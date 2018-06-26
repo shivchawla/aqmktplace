@@ -5,13 +5,13 @@ import {Row, Col, Input, Icon, Button, Select, Tabs, Checkbox, Modal, Pagination
 import {AdviceListItemMod} from '../components/AdviceListeItemMod';
 import {AdviceFilterSideComponent} from '../components/AdviceFilterSideComponent';
 import {AqPageHeader} from '../components/AqPageHeader';
-import {Footer} from '../components/Footer';
 import {newLayoutStyle, shadowBoxStyle, loadingColor} from '../constants';
 import {ScreenAdviceMeta} from '../metas';
 import {Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import {adviceFilters as filters} from '../constants/filters';
 import '../css/screenAdvices.css';
 import '../css/adviceDetail.css';
+import AppLayout from './AppLayout'
 
 const {requestUrl} = require('../localConfig');
 const Option = Select.Option;
@@ -38,7 +38,6 @@ export default class ScreenAdvices extends React.PureComponent {
             limit: 10,
             totalCount: 3,
             initialCall: true,
-            show: false,
             questionnaireModalVisible: false,
             questionnaireFilters: {},
             isAdmin: false
@@ -79,7 +78,6 @@ export default class ScreenAdvices extends React.PureComponent {
 
     getUserDetailAndAdvices = () => {
         const url = `${requestUrl}/me`;
-        this.setState({show: true});
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             this.setState({isAdmin: _.get(response.data, 'isAdmin', false)});
@@ -237,7 +235,6 @@ export default class ScreenAdvices extends React.PureComponent {
 
     getDefaultAdvices = () => {
         const url = `${requestUrl}/advice_default`;
-        this.setState({show: true});
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             this.setState({
@@ -247,14 +244,13 @@ export default class ScreenAdvices extends React.PureComponent {
         })
         .catch(error => error)
         .finally(() => {
-            this.setState({show: false, loading: false});
+            this.setState({loading: false});
         });
     }
 
     getAdvices = adviceUrl => {
         this.setState({
             loading: true,
-            show: this.state.initialCall,
             initialCall: false
         });
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
@@ -273,7 +269,7 @@ export default class ScreenAdvices extends React.PureComponent {
         })
         .finally(() => {
             if (this.mounted) {
-                this.setState({loading: false, show: false});
+                this.setState({loading: false});
             }
         });
     }
@@ -353,14 +349,8 @@ export default class ScreenAdvices extends React.PureComponent {
                         minHeight: '300px'
                     }}
             >
-                <Loading
-                        show={this.state.loading}
-                        color={loadingColor}
-                        className="main-loader"
-                        showSpinner={false}
-                />
+                
                 {
-                    !this.state.loading &&
                     advices.map((advice, index) => {
                         if (type === 'following') {
                             if (advice.isFollowing && !advice.isSubscribed) {
@@ -596,26 +586,21 @@ export default class ScreenAdvices extends React.PureComponent {
                         </Col>
                     </Row>
                 </Row>
-                <Footer hello='sauravbiswas' header='Hello World' />
             </React.Fragment>
         );
     }
 
     render() {
         return (
-            <React.Fragment>
-                <ScreenAdviceMeta />
-                <Loading
-                        show={this.state.show}
-                        color={loadingColor}
-                        className="main-loader"
-                        showSpinner={false}
-                />
-                {
-                    !this.state.show &&
-                    this.renderPageContent()
-                }
-            </React.Fragment>
+             <AppLayout
+                loading = {this.state.loading}
+                content={
+                    <React.Fragment>
+                        <ScreenAdviceMeta />
+                        {this.renderPageContent()}
+                    </React.Fragment>
+                }>
+            </AppLayout>
         );
     }
 }

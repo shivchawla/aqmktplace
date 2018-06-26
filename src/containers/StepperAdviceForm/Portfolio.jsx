@@ -98,8 +98,35 @@ export class Portfolio extends React.Component {
 
     render() {
         return (
-            <Row style={{display: 'block'}}>
+            <Row style={{display: 'block'}} type="flex">
                 {this.renderPerformanceModal()}
+                <div style={{
+                            position: 'absolute', 
+                            right: '0px', 
+                            top: '25px',
+                            zIndex: 20
+                        }}>
+                    <Tooltip title="View Portfolio Performance" placement="top">
+                        <Button style={{
+                                    width: '150px'}}
+                                onClick={this.togglePerformanceModal} 
+                                type="secondary"
+                                disabled={this.props.verifiedPositions.length < 1}
+                        >
+                            View Performance
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title="To Other Settings" placement="top">
+                        <Button style={{
+                                    marginLeft: '20px',
+                                    width: '75px'}} 
+                                onClick={this.props.onNext} 
+                                type="primary"
+                        >
+                            NEXT
+                        </Button>
+                    </Tooltip>
+                </div>
                 <Col span={24} style={{marginTop: '20px'}}>
                     {
                         this.props.error.show &&
@@ -113,22 +140,6 @@ export class Portfolio extends React.Component {
                             * {this.props.error.detail}
                         </h3>
                     }
-                    <Tooltip title="View Portfolio Performance" placement="top">
-                        <Button 
-                                onClick={this.togglePerformanceModal} 
-                                style={{
-                                    width: '150px', 
-                                    position: 'absolute', 
-                                    right: '0px', 
-                                    top: '5px',
-                                    zIndex: 20
-                                }}
-                                type="primary"
-                                disabled={this.props.verifiedPositions.length < 1}
-                        >
-                            View Performance
-                        </Button>
-                    </Tooltip>
                     <AqStockTableMod 
                         style={{display: this.props.step >= 3 ? 'block': 'none'}}
                         onChange = {this.props.onChange}

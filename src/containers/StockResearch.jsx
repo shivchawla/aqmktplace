@@ -2,7 +2,6 @@ import * as React from 'react';
 import Lodable from 'react-loadable';
 import _ from 'lodash';
 import axios from 'axios';
-import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Tabs, Radio, Modal, message} from 'antd';
 import {SignupMeta} from '../metas';
@@ -10,11 +9,11 @@ import {DashboardCard} from '../components/DashboardCard';
 import {AqPageHeader} from '../components/AqPageHeader';
 import {WatchList} from '../components/WatchList';
 import {CreateWatchList} from '../components/CreateWatchList';
-import {Footer} from '../components/Footer';
 import {AqPerformanceMetrics} from '../components/AqPerformanceMetrics';
 import {shadowBoxStyle, loadingColor, primaryColor} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
 import '../css/stockResearch.css';
+import AppLayout from './AppLayout';
 
 const MyChartNew = Lodable({
     loader: () => import('../containers/MyChartNew'),
@@ -34,13 +33,11 @@ class StockResearchImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            tickers: [
-                // {name: 'TCS', show: true},
-            ],
+            tickers: [],
             tickerName: '',
             dataSource: [],
             spinning: false,
-            loadingData: true,
+            loading: true,
             latestDetail: {
                 latestPrice: 0,
                 ticker: 'NIFTY_50',
@@ -57,7 +54,6 @@ class StockResearchImpl extends React.Component {
             },
             rollingPerformance: {},
             selectedPerformanceScreen: 'YTD',
-            show: false,
             watchlists: [],
             watchlistModalVisible: false,
             createWatchlistSecurities: [],
@@ -70,7 +66,7 @@ class StockResearchImpl extends React.Component {
 
     addItem = (tickerName = this.state.tickerName) => {
         const tickers = [...this.state.tickers];
-        tickers.push({name: tickerName, show: true, data: []});
+        tickers.push({name: tickerName, data: []});
         this.setState({tickers});
     }
 
@@ -108,11 +104,8 @@ class StockResearchImpl extends React.Component {
         const {latestDetail} = this.state;
         let tickers = [];
         tickers.push({name: value, destroy: true});
-        this.setState({tickers, show: true});
-        //// console.log('Initial Call' , initialCall);
-        if (initialCall === false) {
-            //this.unSubscribeToStock(this.state.latestDetail.ticker);
-        }
+        this.setState({tickers, loading: true});
+        
         Promise.all([
             getStockData(value, 'latestDetail'),
             getStockData(value, 'rollingPerformance')
@@ -149,7 +142,7 @@ class StockResearchImpl extends React.Component {
             }
         })
         .finally(() => {
-            this.setState({loadingData: false, show: false});
+            this.setState({loading: false});
         });
     }
 
@@ -612,7 +605,11 @@ class StockResearchImpl extends React.Component {
                         <AqPageHeader style={{margin: '0 30px'}} title="Stock Research" breadCrumbs = {breadCrumbs}/>
                     </React.Fragment>
                 }
-                <Row className='aq-page-container' type="flex" justify="space-between">
+                <Row 
+                        className={this.props.openAsDialog ? '' : 'aq-page-container'} 
+                        type="flex" 
+                        justify="space-between"
+                >
                     <Col xl={xl} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom:'20px'}}>
                         {this.renderDeleteModal()}
                         <Row style={metricStyle}>
@@ -689,11 +686,11 @@ class StockResearchImpl extends React.Component {
                                 headerStyle={{borderBottom: '1px solid #eaeaea'}}
                                 contentStyle={{height: '350px', marginTop: '10px'}}>
                                 <MyChartNew 
-                                        series = {this.state.tickers} 
-                                        deleteItem = {this.deleteItem}
-                                        addItem = {this.addItem}
-                                        verticalLegend = {true}
-                                        chartId={chartId}
+                                    series = {this.state.tickers} 
+                                    deleteItem = {this.deleteItem}
+                                    addItem = {this.addItem}
+                                    verticalLegend = {true}
+                                    chartId={chartId}
                                 /> 
                             </DashboardCard>
                         </Row>
@@ -742,7 +739,7 @@ class StockResearchImpl extends React.Component {
                                                             fontWeight: '400'
                                                         }}
                                                 >
-                                                    You haven't created any watchlist yet
+                                                    No watchlists to show
                                                 </h3>
                                                 <Button 
                                                         type="primary"
@@ -783,31 +780,25 @@ class StockResearchImpl extends React.Component {
                     </Col>
                 }
                 </Row>
-                {
-                    !this.props.openAsDialog &&
-                    <Footer />
-                }
             </React.Fragment>
         );
     }
 
     render() {
         return (
-            <React.Fragment>
-                <SignupMeta />
-                {this.renderCreateWatchListModal()}
-                {this.renderAimsquantRedirectModal()}
-                <Loading
-                    show={this.state.show}
-                    color={loadingColor}
-                    className="main-loader"
-                    showSpinner={false}
-                />
-                {
-                    !this.state.show &&
-                    this.renderPageContent()
-                }
-            </React.Fragment>
+            <AppLayout 
+                loading={this.state.loading}
+                noFooter={this.props.openAsDialog}
+                noHeader={this.props.openAsDialog}
+                content={
+                    <React.Fragment>
+                        <SignupMeta />
+                        {this.renderCreateWatchListModal()}
+                        {this.renderAimsquantRedirectModal()}
+                        {this.renderPageContent()}
+                    </React.Fragment>
+                }>
+            </AppLayout>
         );
     }
 }
