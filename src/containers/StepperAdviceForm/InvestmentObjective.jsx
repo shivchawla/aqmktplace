@@ -4,7 +4,7 @@ import {InvestMentObjComponent} from '../../components/InvestmentObjComponent';
 import {goals, portfolioValuation, sectors, capitalization, primaryColor} from '../../constants';
 import {getStepIndex} from './steps';
 import {getInvestmentObjectiveWarning} from './utils';
-import {tooltips} from './constants';
+import {tooltips, labelStyle, valueStyle, textStyle} from './constants';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -15,13 +15,6 @@ const investmentObjRowProps = {
     gutter: 16,
     type: 'flex',
     align: 'middle'
-};
-
-
-const textStyle = {
-    fontWeight: 300, 
-    color: '#000000',
-    fontSize: '17px'
 };
 
 export class InvestmentObjective extends React.Component {

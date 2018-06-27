@@ -24,9 +24,9 @@ export class OtherSettings extends React.Component {
                         //initialValue: options[0],
                         rules: [{required: true, message}]
                     })(
-                        <Select style={{...labelStyle, width: 200, color: primaryColor}} disabled={this.props.disabled}>
+                        <Select style={{...valueStyle, width: 200}} disabled={this.props.disabled}>
                             {
-                                options.map((item, index) => <Option style={labelStyle} key={index} value={item}>{item}</Option>)
+                                options.map((item, index) => <Option style={{...labelStyle, fontWeight:400}} key={index} value={item}>{item}</Option>)
                             }
                         </Select>
                     )
@@ -108,7 +108,7 @@ export class OtherSettings extends React.Component {
                                 <DatePicker 
                                     allowClear={false}
                                     format={dateFormat}
-                                    style={{...labelStyle, width: 150}}
+                                    style={{...valueStyle, width: 150}}
                                     disabledDate={this.getDisabledStartDate}
                                     disabled={this.props.approvalRequested}
                                 /> 
@@ -139,8 +139,15 @@ export class OtherSettings extends React.Component {
 }
 
 const labelColor = '#000000';
+
 const labelStyle = {
     fontWeight: 300, 
     color: '#000000',
-    fontSize: '17px'
+    fontSize: '16px'
+};
+
+const valueStyle = {
+    fontWeight: 400, 
+    color: primaryColor,
+    fontSize: '16px'
 };

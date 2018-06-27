@@ -5,15 +5,10 @@ import {getOthersWarning} from './utils';
 import {inputStyle} from './style/adviceName';
 import {WarningIcon} from '../../components';
 import {horizontalBox, goals, primaryColor} from '../../constants';
-
+import {labelStyle, valueStyle} from './constants';
 
 const FormItem = Form.Item;
 
-const labelStyle = {
-    fontWeight: 300, 
-    color: '#000000',
-    fontSize: '17px'
-};
 
 export class AdviceName extends React.Component {
     showWarning = () => {
@@ -86,7 +81,7 @@ export class AdviceName extends React.Component {
                             })(
                                 <Input autocomplete="off"
                                         placeholder='Type Advice Name' 
-                                        style={{...inputStyle, fontWeight:300}}
+                                        style={{...inputStyle}}
                                         disabled={this.props.disabled}
                                 />
                             )}
