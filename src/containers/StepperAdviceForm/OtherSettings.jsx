@@ -2,6 +2,7 @@ import * as React from 'react';
 import moment from 'moment';
 import {Row, Col, Form, DatePicker, Select, Icon, Tooltip} from 'antd';
 import {benchmarks} from '../../constants/benchmarks';
+import {primaryColor} from '../../constants';
 import {tooltips} from './constants';
 import {getStepIndex} from './steps';
 import {getFirstMonday, compareDates, getDate} from '../../utils';
@@ -23,7 +24,7 @@ export class OtherSettings extends React.Component {
                         //initialValue: options[0],
                         rules: [{required: true, message}]
                     })(
-                        <Select style={{...labelStyle, width: 200}} disabled={this.props.disabled}>
+                        <Select style={{...labelStyle, width: 200, color: primaryColor}} disabled={this.props.disabled}>
                             {
                                 options.map((item, index) => <Option style={labelStyle} key={index} value={item}>{item}</Option>)
                             }
