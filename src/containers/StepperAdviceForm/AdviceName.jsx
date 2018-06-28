@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Row, Col, Form, Input} from 'antd';
+import {InputItem} from 'antd-mobile';
 import {getStepIndex} from './steps';
 import {getOthersWarning} from './utils';
 import {inputStyle} from './style/adviceName';
@@ -42,10 +43,10 @@ export class AdviceName extends React.Component {
         
         return (
             <Row type="flex" align="middle"> 
-                <Col span={6} style={labelStyle}>
+                <Col span={24} style={labelStyle}>
                     Advice Name:
                 </Col>
-                <Col span={16}>
+                <Col span={24}>
                     <FormItem>
                         {getFieldDecorator('adviceName', {
                             rules: [{required: true, message: 'Please enter Advice Name'}]

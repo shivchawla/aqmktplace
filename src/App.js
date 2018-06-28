@@ -53,6 +53,11 @@ const CreateAdvice = Loadable({
     loading: () => <Icon type="loading" />
 });
 
+const CreateAdviceMobile = Loadable({
+    loader: () => import('./containers/CreateAdviceMobile'),
+    loading: () => <Icon type="loading" />
+});
+
 const CreatePortfolio = Loadable({
     loader: () => import('./containers/CreatePortfolio'),
     loading: () => <Icon type="loading" />
@@ -332,7 +337,7 @@ class App extends React.Component {
     }
 
     showHeaderAdviceLogo = parentPath => {
-        const restrictedParentPaths = ['login', 'signup', 'forgotPassword', 'resetPassword', 'advice'];
+        const restrictedParentPaths = ['login', 'signup', 'forgotPassword', 'resetPassword', 'advice', 'dashboard'];
         if (restrictedParentPaths.indexOf(parentPath) === -1) {
             return true;
         }
@@ -425,7 +430,8 @@ class App extends React.Component {
                             <Route path="/stockresearch" exact component={StockResearch} /> 
                             <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
                             <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 
-                            <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
+                            <Route exact={true} path='/dashboard/createadvice' component={CreateAdviceMobile} /> 
+                            <Route exact={true} path='/dashboard/createadvice/desktop' component={CreateAdvice} /> 
                             <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> 
                             <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
                             <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
