@@ -34,7 +34,7 @@ const dateFormat = 'Do MMMM YYYY';
 
 const approvalObj = {
     name: {
-        valid: false,
+        valid: true,
         reason: '',
         fieldName: 'Name',
     },
@@ -54,27 +54,27 @@ const approvalObj = {
         fieldName: 'Sector Exposure',
     },
     goal: {
-        valid: false,
+        valid: true,
         reason: '',
         fieldName: 'Goal',
     },
     portfolioValuation: {
-        valid: false,
+        valid: true,
         reason: '',
         fieldName: 'Portfolio Valuation',
     },
     capitalization: {
-        valid: false,
+        valid: true,
         reason: '',
         fieldName: 'Capitalization',
     },
     sectors: {
-        valid: false,
+        valid: true,
         reason: '',
         fieldName: 'Sectors',
     },
     userText: {
-        valid: false,
+        valid: true,
         reason: '',
         fieldName: 'User Text'
     }

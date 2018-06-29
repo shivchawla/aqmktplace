@@ -8,7 +8,7 @@ export const InvestMentObjComponent = ({
     content, 
     warning = false, 
     reason = '', 
-    span={label: 3, content: 20, warning: 2},
+    span={label: 4, content: 18, warning: 2},
     tooltip={text: null, placement: 'top'}
 }) => {
     return (
@@ -44,9 +44,13 @@ export const InvestMentObjComponent = ({
     );
 }
 
+const labelColor = '#000000';
+
 const investmentObjLabelStyle = {
-    fontSize: '14px',
+    fontSize: '17px',
+    fontWeight: 300,
     color: labelColor
 };
 
-const labelColor = '#898989';
+
+//const labelColor = '#898989';

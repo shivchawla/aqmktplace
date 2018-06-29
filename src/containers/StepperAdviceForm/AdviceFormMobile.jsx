@@ -1,31 +1,32 @@
 import * as React from 'react';
 import _ from 'lodash';
+import windowSize from 'react-window-size';
 import axios from 'axios';
 import Loading from 'react-loading-bar';
 import Promise from 'bluebird';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Form, Steps, Button, message, Icon} from 'antd';
-import {AqPageHeader} from '../../components/AqPageHeader';
+import {Row, Col, Form, Button, message, Icon} from 'antd';
+import {Steps, Button as MobileButton, LocaleProvider} from 'antd-mobile';
+import {AqMobileLayout} from '../AqMobileLayout/Layout';
 import {PostWarningModal} from './PostWarningModal';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
-import {Footer} from '../../components/Footer';
 import {WarningIcon} from '../../components/WarningIcon';
-import {handleCreateAjaxError, openNotification, getBreadCrumbArray, Utils, getStockPerformance, fetchAjax, getFirstMonday} from '../../utils';
-import {UpdateAdviceCrumb} from '../../constants/breadcrumbs';
-import {InvestmentObjective} from './InvestmentObjective';
-import {OtherSettings} from './OtherSettings';
-import {Portfolio} from './Portfolio';
+import {handleCreateAjaxError, openNotification, Utils, getStockPerformance, fetchAjax, getFirstMonday} from '../../utils';
+import {InvestmentObjective} from './InvestmentObjectiveMobile';
+import {OtherSettings} from './OtherSettingsMobile';
+import {PortfolioMobile} from './PortfolioMobile';
 import {Protips} from './Protips';
 import {checkForInvestmentObjectiveError, getOthersWarning, getPortfolioWarnings} from './utils';
-import {shadowBoxStyle, goals, metricColor, benchmarkColor, horizontalBox, loadingColor, primaryColor} from '../../constants';
+import {goals, metricColor, benchmarkColor, horizontalBox, loadingColor, primaryColor} from '../../constants';
 import {steps, getStepIndex} from './steps';
+import enUS from 'antd-mobile/lib/locale-provider/en_US';
 
 const {requestUrl} = require('../../localConfig');
 const Step = Steps.Step;
 const dateFormat = 'YYYY-MM-DD';
 
-class StepperAdviceFormImpl extends React.Component {
+class AdviceFormMobileImpl extends React.Component {
     adviceUrl = `${requestUrl}/advice`;
     advicePerformanceUrl = `${requestUrl}/performance`;
     adviceNameStep = getStepIndex('adviceName');
@@ -42,7 +43,7 @@ class StepperAdviceFormImpl extends React.Component {
             adviceId: '5b14fb367b00b327d8447661',
             isPublic: false,
             positions: [],
-            currentStep: this.investmentObjectStep,
+            currentStep: 0,
             portfolioError: {
                 show: false,
                 detail: 'Please provide atleast one valid position'
@@ -73,7 +74,6 @@ class StepperAdviceFormImpl extends React.Component {
         } else {
             currentStep++;
         }
-
         this.setState({currentStep});
     }
 
@@ -127,6 +127,7 @@ class StepperAdviceFormImpl extends React.Component {
     validateForm = (currentStep = this.state.currentStep) => new Promise((resolve, reject) => {
         const adviceName = ['adviceName'];
         const investmentObjective = [
+            'investorType',
             'investmentObjGoal',
             'investmentObjPortfolioValuation',
             'investmentObjSectors',
@@ -140,6 +141,11 @@ class StepperAdviceFormImpl extends React.Component {
             'benchmark'
         ];
         switch(currentStep) {
+            case this.adviceNameStep:
+                this.validateFields(adviceName)
+                .then(valid => resolve(valid))
+                .catch(inValid => reject({valid: false, index: currentStep}));
+                break;
             case this.investmentObjectStep:
                 this.validateFields(investmentObjective)
                 .then(valid => resolve(valid))
@@ -201,11 +207,6 @@ class StepperAdviceFormImpl extends React.Component {
         .then(() => this.goToNextStep())
     }
 
-    validateAndPreview = () => {
-        this.validateForm()
-        .then(() => this.togglePreview())
-    }
-
     /*
         Gets the verified positions from the portfolio table.
         A position is validated if the symbol is valid and number of shares > 0
@@ -222,10 +223,53 @@ class StepperAdviceFormImpl extends React.Component {
         Changes the content of the portfolio array.
         Passed as a prop to AqStockTableMod
     */
-    onChange = positions => {
-        this.setState({positions: _.cloneDeep(positions)}, () => {
+    addPosition = position => {
+        const positions = this.updateWeights([...this.state.positions, position]);
+        this.setState({positions}, () => {
             this.validatePortfolio();
+        })
+    }
+
+    deletePositions = toBeDeletedPositions => {
+        const positions = [...this.state.positions];
+        toBeDeletedPositions.map(toBeDeletedPosition => {
+            const positionIndex = _.findIndex(positions, position => position.key === toBeDeletedPosition.key);
+            if (positionIndex > -1) {
+                positions.splice(positionIndex, 1);
+            }
         });
+        this.setState({positions: this.updateWeights(positions)});
+    }
+
+    updatePosition = modifiedPosition => {
+        const positions = [...this.state.positions];
+        let targetPosition = positions.filter(position => position.key === modifiedPosition.key)[0];
+        if (targetPosition) {
+            targetPosition.shares = modifiedPosition.shares;
+            targetPosition.totalValue = modifiedPosition.totalValue;
+        }
+        this.setState({positions: this.updateWeights(positions)});
+    }
+
+    updateWeights = positions => {
+        const totalPortfolioValuation = this.getTotalPortfolioValuation(positions);
+
+        return positions.map(position => {
+            const weight = Number(position.totalValue) / totalPortfolioValuation;
+            return {
+                ...position,
+                weight
+            };
+        });
+    }
+
+    getTotalPortfolioValuation = positions => {
+        let totalPortfolioValuation = 0;
+        positions.map(position => {
+            totalPortfolioValuation += Number(position.totalValue);
+        });
+
+        return totalPortfolioValuation;
     }
 
     updateStepStatus = (key, status) => {
@@ -260,7 +304,7 @@ class StepperAdviceFormImpl extends React.Component {
 
     getAppropriateStepWarning = step => {
         switch(step.key) {
-            case "otherSettings":
+            case "adviceName":
                 return getOthersWarning(this.state.otherApprovalStatus, 'name').reason;
             case "investmentObjective":
                 return "Error In Investment Objective"
@@ -273,7 +317,7 @@ class StepperAdviceFormImpl extends React.Component {
 
     getAppropriateStepTitle = (step, index) => {
         const titleStyle = {
-            fontWeight: this.state.currentStep === index ? 700 : 300,
+            fontWeight: this.state.currentStep === index ? 700 : 400,
             color: this.state.currentStep === index ? primaryColor : '#444',
             marginTop: '10px',
             display: 'block'
@@ -307,8 +351,8 @@ class StepperAdviceFormImpl extends React.Component {
                             flexDirection: 'column',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            marginLeft: '-10px',
-                            marginTop: '-10px',
+                            marginLeft: '-5px',
+                            marginTop: '-3px',
                         }}
                 >
                     {this.getAppropriateStepIcon(status, index)}
@@ -322,20 +366,38 @@ class StepperAdviceFormImpl extends React.Component {
                     current={this.state.currentStep} 
                     size="medium" 
                     progressDot={customDot}
+                    direction="horizontal"
             >
                 {
                     this.state.steps.map((step, index) => {
                         return (
-                            <Step 
-                                    key={index}
-                                    title={this.getAppropriateStepTitle(step, index)} 
-                                    onClick={() => this.goToStep(index)}
-                                    style={{cursor: 'pointer'}}
+                            <Step
+                                icon={null} 
+                                key={index}
+                                title={this.getAppropriateStepTitle(step, index)} 
+                                onClick={() => this.goToStep(index)}
+                                style={{cursor: 'pointer'}}
                             />
                         );
                     })
                 }
             </Steps>
+        );
+    }
+
+    renderHeader = () => {
+        return (
+            <Row>
+                <Col span={24} style={{textAlign: 'center', fontSize: '16px'}}>
+                    <h3 style={{fontSize: '16px'}}>Step {this.state.currentStep + 1}</h3>
+                </Col>
+                <Col span={24} style={{textAlign: 'center'}}>
+                    <h2 style={{fontSize: '18px', fontWeight: '700'}}>Investment Objective</h2>
+                </Col>
+                {/* <Col span={24} style={{textAlign: 'center'}}>
+                    <h3>Step {this.state.currentStep + 1}</h3>
+                </Col> */}
+            </Row>
         );
     }
 
@@ -359,23 +421,20 @@ class StepperAdviceFormImpl extends React.Component {
                         approvalStatusData={this.state.investmentObjectiveApprovalStatus}
                     />
                 </div>
-
                 <div style={{display: this.state.currentStep === 2 ? 'block' : 'none'}}>
-                    <OtherSettings 
-                        {...formProps} 
-                        approvalStatusData={this.state.otherApprovalStatus}
-                    />
+                    <OtherSettings {...formProps} />
                 </div>
-
-                <div style={{display: this.state.currentStep === 1? 'block' : 'none'}}>
-                    <Portfolio 
+                <div style={{display: this.state.currentStep === 1 ? 'block' : 'none'}}>
+                    <PortfolioMobile 
                         isUpdate={this.props.isUpdate}
                         isPublic={this.state.isPublic}
-                        data={this.state.positions}
+                        positions={this.state.positions}
                         step={this.state.currentStep} 
                         investmentObjectiveApprovalStatus={this.state.investmentObjectiveApprovalStatus}
                         getAdvicePerformance={this.getAdvicePortfolioPerformance}
-                        onChange={this.onChange} 
+                        addPosition={this.addPosition} 
+                        deletePositions={this.deletePositions}
+                        updatePosition={this.updatePosition}
                         error={this.state.portfolioError}
                         approvalStatusData={this.state.otherApprovalStatus}
                         updateStepStatus={this.updateStepStatus}
@@ -393,12 +452,12 @@ class StepperAdviceFormImpl extends React.Component {
         Gets the suitability or investor type based on the goal selected by the user
     */
     getGoalDetail = type => {
-        const investorType = this.props.form.getFieldValue('investmentObjInvestorType');
-        const goalItem = goals.filter(item => item.investorType === investorType)[0];
+        const goal = this.props.form.getFieldValue('investmentObjGoal');
+        const goalItem = goals.filter(item => item.field === goal)[0];
         if (goalItem) {
             switch(type) {
-                case "field":
-                    return goalItem.field;
+                case "investorType":
+                    return goalItem.investorType;
                 case "suitability":
                     return goalItem.suitability;
             }
@@ -456,8 +515,6 @@ class StepperAdviceFormImpl extends React.Component {
             this.setState({preview: !this.state.preview}, () => {
                 this.state.preview && this.getAdvicePortfolioPerformance();
             });
-        } else {
-            openNotification('error', 'Error', 'You must fill up all the required fields')
         }
     }
 
@@ -470,7 +527,7 @@ class StepperAdviceFormImpl extends React.Component {
 
     getAdvicePortfolioPerformance = selectedBenchmark => new Promise((resolve, reject) => {
         let highStockSeries = [...this.state.highStockSeries];
-        const benchmark = selectedBenchmark === undefined ? this.props.form.getFieldValue('benchmark') || 'NIFTY_50' : selectedBenchmark;
+        const benchmark = selectedBenchmark === undefined ? this.props.form.getFieldValue('benchmark')[0] || 'NIFTY_50' : selectedBenchmark;
         const requestObject = this.constructAdvicePerformanceRequestObject(benchmark);
         this.updateLoader('preview', true);
         Promise.all([
@@ -569,7 +626,7 @@ class StepperAdviceFormImpl extends React.Component {
             checkForInvestmentObjectiveError(this.state.investmentObjectiveApprovalStatus)
         );
         this.updateStepStatus(
-            'otherSettings',
+            'adviceName',
             getOthersWarning(this.state.otherApprovalStatus, 'name').valid
         );
         this.updateStepStatus(
@@ -635,7 +692,7 @@ class StepperAdviceFormImpl extends React.Component {
     constructCreateAdviceRequestObject = (values, publish = false) => {
         let {
             adviceName,
-            investmentObjInvestorType,
+            investmentObjGoal,
             investmentObjPortfolioValuation,
             investmentObjSectors,
             investmentObjCapitalization,
@@ -644,13 +701,10 @@ class StepperAdviceFormImpl extends React.Component {
             startDate,
             benchmark
         } = values;
-
         startDate = moment(startDate).format(dateFormat);
         const endDate = moment(startDate).add(500, 'year').format(dateFormat); // Adding 500 years to the end date
-        
-        const goalField = this.getGoalDetail('field');
+        const investorType = this.getGoalDetail('investorType');
         const suitability = this.getGoalDetail('suitability');
-        
         const requestObject = {
             name: adviceName,
             portfolio: {
@@ -662,22 +716,22 @@ class StepperAdviceFormImpl extends React.Component {
                     cash: 0
                 },
                 benchmark: {
-                    ticker: benchmark,
+                    ticker: benchmark[0],
                     securityType: 'EQ',
                     country: 'IN',
                     exchange: 'NSE'
                 },
             },
-            rebalance: rebalancingFrequency,
+            rebalance: rebalancingFrequency[0],
             maxNotional: 1000000,
             investmentObjective: {
                 goal: {
-                    field: goalField,
-                    investorType: investmentObjInvestorType,
+                    field: investmentObjGoal,
+                    investorType,
                     suitability
                 },
                 sectors: {
-                    detail: ['Tech']
+                    detail: investmentObjSectors
                 },
                 portfolioValuation: {
                     field: investmentObjPortfolioValuation
@@ -718,7 +772,7 @@ class StepperAdviceFormImpl extends React.Component {
     constructPreviewAdviceDetail = () => {
         const {
             adviceName, 
-            investmentObjInvestorType,
+            investmentObjGoal,
             investmentObjSectors,
             investmentObjPortfolioValuation,
             investmentObjUserText,
@@ -740,8 +794,8 @@ class StepperAdviceFormImpl extends React.Component {
             isPublic: false,
             investmentObjective: {
                 goal: {
-                    field: this.getGoalDetail('field'),
-                    investorType: investmentObjInvestorType,
+                    field: investmentObjGoal,
+                    investorType: this.getGoalDetail('investorType'),
                     suitability: this.getGoalDetail('suitability'),
                     valid: true
                 },
@@ -842,20 +896,9 @@ class StepperAdviceFormImpl extends React.Component {
     /**
      *  Renders the actions buttons on the side of the screen
      */
-    renderActionButtons = (type='big') => {
-        const actionButtonStyle = {
-            marginTop: type=== 'big' ? '20px' : 0,
-            marginLeft: type=== 'big' ? 0 : '15px'
-        };
-
+    renderActionButtons = () => {
         return (
-            <div 
-                    className='action-buttons-container' 
-                    style={{
-                        display: 'flex', 
-                        flexDirection: type === 'big' ? 'column' : 'row', 
-                    }}
-            >
+            <div style={{display: 'flex', flexDirection: 'column'}}>
                 <Button 
                     onClick={this.togglePreview}
                     className='action-button'
@@ -867,7 +910,7 @@ class StepperAdviceFormImpl extends React.Component {
                     <Button
                         onClick={e => this.submitAdvice(e)}
                         loading={this.state.loaders.saveForLater}
-                        style={actionButtonStyle}
+                        style={{marginTop: '20px'}}
                         className='action-button'
                     >
                         SAVE FOR LATER
@@ -877,7 +920,7 @@ class StepperAdviceFormImpl extends React.Component {
                     type="primary" 
                     onClick={this.toggleMarketplaceWarningModal}
                     loading={this.state.loaders.postToMarketplace}
-                    style={actionButtonStyle}
+                    style={{marginTop: '20px'}}
                     className='action-button'
                 >
                     POST TO MARKETPLACE
@@ -894,32 +937,42 @@ class StepperAdviceFormImpl extends React.Component {
             <Col 
                     span={24} 
                     style={{
-                        ...horizontalBox, 
-                        justifyContent: 'space-between',
+                        // ...horizontalBox, 
+                        // justifyContent: 'space-between',
                         position: 'relative', 
                         marginTop: '20px',
                         marginBottom: '10px',
-                        alignItems: 'flex-end'
+                        // alignItems: 'flex-end'
                     }}
             >
-                <Button 
-                        onClick={this.goToPreviousStep}
-                        disabled={this.state.currentStep == 0}
-                >
-                    PREVIOUS
-                </Button>
-                <Button 
-                        type="primary" 
-                        onClick={this.state.currentStep === steps.length - 1 ?
-                            this.validateAndPreview :
-                            this.validateAndGoToNextStep}
-                >
-                    {
-                        this.state.currentStep === steps.length - 1
-                        ? "PREVIEW"
-                        : "NEXT"
-                    }
-                </Button>
+                <Row gutter={24}>
+                    <Col span={12}>
+                        <MobileButton 
+                                onClick={this.goToPreviousStep}
+                                disabled={this.state.currentStep == 0}
+                                size="small"
+                        >
+                            PREVIOUS
+                        </MobileButton>
+                    </Col>
+                    <Col span={12}>
+                        <MobileButton 
+                                type="primary" 
+                                onClick={
+                                    this.state.currentStep === steps.length - 1
+                                    ? this.togglePreview
+                                    : this.validateAndGoToNextStep
+                                }
+                                size="small"
+                        >
+                            {
+                                this.state.currentStep === steps.length - 1
+                                ? "PREVIEW"
+                                : "NEXT"
+                            }
+                        </MobileButton>
+                    </Col>
+                </Row>
             </Col>
         );
     }
@@ -932,29 +985,71 @@ class StepperAdviceFormImpl extends React.Component {
 
     renderForm = () => {
         return (
-            <Col 
-                    xl={18} md={24}
-                    style={{
-                        ...shadowBoxStyle, 
-                        display: this.state.preview ? 'none' : 'block'
-                    }}
-                    id="form-container"
-            >
-                <Form onSubmit={this.submitAdvice}>
-                    <Row 
-                            type="flex"
-                            justify="space-between"
-                            style={{position: 'relative', minHeight: '550px', padding: '20px'}}
+            <Form onSubmit={this.submitAdvice}>
+                <Row>
+                    <Col 
+                            span={24}
+                            style={{
+                                display: this.state.preview ? 'none' : 'block', 
+                                background: '#fff', 
+                                height: '-webkit-fill-available',
+                                paddingTop: '20px'
+                            }}
+                            id="form-container"
                     >
-                        <Col span={24}>{this.renderSteps()}</Col>
-                        <Col span={24} style={{marginTop: '20px'}}>
-                            {this.renderSelectedStep()}
-                        </Col>
+                        
+                            <Row
+                                    type="flex"
+                                    justify="start"
+                                    style={{position: 'relative', padding: '20px', paddingTop: '0px'}}
+                            >
+                                <Col span={24} style={{height: 'fit-content'}}>
+                                    {this.renderHeader()}
+                                </Col>
+                                <Col 
+                                        span={24} 
+                                        style={{
+                                            height: this.props.windowHeight - 160,
+                                            overflow: 'hidden',
+                                            overflowY: 'scroll'
+                                        }}
+                                >
+                                    {this.renderSelectedStep()}
+                                </Col>
+                            </Row>
+                    </Col>
+                    <Col span={24} style={{marginTop: '-80px', height: '80px', padding: '0 10px', background: '#fff'}}>
                         {this.renderNavigationButtons()}
-                    </Row>
-                </Form>
-            </Col>
+                    </Col>
+                </Row>
+            </Form>
         )
+    }
+
+    renderMobileActionButtons = () => {
+        return (
+            <Col span={24} style={{backgroundColor: '#fff'}}>
+                <Row gutter={24} style={{padding: '0 10px', margin: '20px 0'}}>
+                    <Col span={12}>
+                        <MobileButton 
+                                size="small"
+                                onClick={this.togglePreview}
+                        >
+                            EDIT
+                        </MobileButton>
+                    </Col>
+                    <Col span={12}>
+                        <MobileButton 
+                                size="small" 
+                                type="primary"
+                                onClick={this.toggleMarketplaceWarningModal}
+                        >
+                            POST
+                        </MobileButton>
+                    </Col>
+                </Row>
+            </Col>
+        );
     }
 
     renderPreview = () => {
@@ -972,16 +1067,22 @@ class StepperAdviceFormImpl extends React.Component {
 
         if(this.state.preview) {
             return (
-                <AdviceDetailContent 
-                    tickers={this.state.highStockSeries}
-                    adviceDetail={adviceDetail}
-                    metrics={metrics}
-                    positions={positions}
-                    preview={true}
-                    loading={this.state.loaders.preview}
-                    style={{display: this.state.preview ? 'block' : 'none'}}
-                    performanceType={"Simulated"}
-                />
+                <Row>
+                    {this.renderMobileActionButtons()}
+                    <Col span={24}>
+                        <AdviceDetailContent 
+                            tickers={this.state.highStockSeries}
+                            adviceDetail={adviceDetail}
+                            metrics={metrics}
+                            positions={positions}
+                            preview={true}
+                            loading={this.state.loaders.preview}
+                            style={{display: this.state.preview ? 'block' : 'none'}}
+                            performanceType={"Simulated"}
+                        />
+                    </Col>
+                    {this.renderMobileActionButtons()}
+                </Row>
             );
         } else {
             return null;
@@ -999,38 +1100,14 @@ class StepperAdviceFormImpl extends React.Component {
     }
 
     renderPageContent() {
-        // const breadCrumbs = getBreadCrumbArray(UpdateAdviceCrumb, [{name: 'Create Advice'}]);
-        const breadCrumbs = this.props.isUpdate
-                ? getBreadCrumbArray(UpdateAdviceCrumb, [
-                    {name: this.state.adviceName, url: `/advice/${this.props.adviceId}`},
-                    {name: 'Update Advice'}
-                ])
-                : getBreadCrumbArray(UpdateAdviceCrumb, [
-                    {name: this.state.preview ? 'Preview Advice' : 'Create Advice'}
-                ]);
-
         return (
-            <Row className='aq-page-container' style={{height: '100%', paddingBottom: '20px'}} gutter={24}>
+            <AqMobileLayout noHeader={true}>
                 <PostWarningModal 
                         visible={this.state.modal.marketPlaceWarning}
                         onOk={e => this.submitAdvice(e, true)}
                         onCancel={this.toggleMarketplaceWarningModal}
                         loading={this.state.loaders.postToMarketplace}
                 />
-                <Col span={24} style={{padding: 0}}>
-                    <AqPageHeader 
-                        title={this.props.isUpdate ? "Update Advice" : "Create Advice"}
-                        showTitle={true}
-                        breadCrumbs={breadCrumbs}
-                    >
-                        <Col xl={0} md={24} sm={24} xs={24}>
-                            {
-                                this.state.preview &&
-                                this.renderActionButtons('small')
-                            }
-                        </Col>
-                    </AqPageHeader>
-                </Col>
                 {this.renderForm()}
                 {this.renderPreview()}
                 <Col xl={6} md={0} sm={0} xs={0}>
@@ -1040,7 +1117,7 @@ class StepperAdviceFormImpl extends React.Component {
                         : this.renderProtips()
                     }
                 </Col>
-            </Row>
+            </AqMobileLayout>
         );
     }
 
@@ -1056,9 +1133,9 @@ class StepperAdviceFormImpl extends React.Component {
                 {
                     // !this.state.loaders.page && 
                     <div style={{display: this.state.loaders.page ? 'none' : 'block'}}>
-                        {this.renderPageContent()}
-                        <div style={{height: '100px'}}></div>
-                        <Footer />
+                        <LocaleProvider locale={enUS}>
+                            {this.renderPageContent()}
+                        </LocaleProvider>
                     </div>
                 }
             </Row>
@@ -1066,4 +1143,4 @@ class StepperAdviceFormImpl extends React.Component {
     }
 }
 
-export const StepperAdviceForm = Form.create()(withRouter(StepperAdviceFormImpl));
+export const AdviceFormMobile = Form.create()(withRouter(windowSize(AdviceFormMobileImpl)));

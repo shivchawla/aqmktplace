@@ -1,19 +1,19 @@
 export const investmentObjectiveConfig = [
     {
-        header: "Goal",
+        header: "Investor Type",
         detail: {
-            definition: "Investment Objective states the purpose of the undelying portfolio",
-            importance: "Choosing a valid goal of your advice is mandatory for every advice",
-            /*suggestedData: [
-                "January Advice", "February Advice", "March Advice"
-            ]*/
+            definition: "Choice of Investor Type governs the underlying investment goal and suitability of an investment portfolio",
+            importance: "Choosing a valid Investor Type for your advice is mandatory for every advice",
+            suggestedData: [
+                "Growth Investors", "Value Investors", "Sector Investor"
+            ]
         }
     },
     {
         header: "Portfolio Valuation",
         detail: {
             definition: "Portfolio valuation states the value style of underlying portfolio",
-            importance: "Choosing a valid valuation of your advice is mandatory for every advice",
+            importance: "Choosing a valid Valuation of your advice is mandatory for every advice",
             suggestedData: [
                 "Value", "Growth", "Blend"
             ]
@@ -23,13 +23,13 @@ export const investmentObjectiveConfig = [
         header: "Capitalization",
         detail: {
             definition: "Portfolio capitalization states the size style of underlying portfolio. If you choose only large cap stock in your portfolio, the capitalization of your portfolio is Large Cap",
-            importance: "Choosing a valid capitalization of your advice is mandatory for every advice",
+            importance: "Choosing a valid Capitalization of your advice is mandatory for every advice",
             suggestedData: [
                 "Large Cap", "Small Cap", "Mid Cap"
             ]
         }
     },
-    {
+    /*{
         header: "Sectors",
         detail: {
             definition: "Underlying Sectors in your portfolio",
@@ -46,5 +46,5 @@ export const investmentObjectiveConfig = [
             importance: "This is optional",
             suggestedData: []
         }
-    }
+    }*/
 ]

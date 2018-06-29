@@ -30,32 +30,32 @@ export const goals = [
 	{	
 		investorType: 'Growth Investors',
 		field: "To achieve high rates of growth and capital appreciation",
-		suitability: "Suitable for investors willing to tolerate high risk. The portfolio can undergo sudden downward swings and significant loses"
+		suitability: "Suitable for investors willing to achieve high rates of growth and capital appreciation along with high tolerance to risk. The portfolio can undergo sudden downward swings and significant loses"
 	},
 	{
 		investorType: "Capital Appreciation Investors",
 		field: "To achieve capital appreciation over a long term",
-		suitability: "Suitable for long term investors who seek growth over an extended period of time"
+		suitability: "Suitable for long term investors who seek capital appreciation over an extended period of time"
 	},
 	{
 		investorType: "Value Investors",
 		field: "To invest in underpriced stocks with sound underlying business assets",
-		suitability: "Suitable for long term investors who seek underpriced stocks and growth potential over an extended period of time"	
+		suitability: "Suitable for long term investors who seek underpriced stocks (with sound underlying business assets) and growth potential over an extended period of time"	
 	},
 	{
 		investorType: "Growth at Reasonable Price(GARP) Investors",
 		field: "To seek high potential for growth with reasonable value characteristics",
-		suitability: "Suitable for investors who seek high growth rates but lower than typical growth stocks. The portfolio can still undego large downward swings"	
+		suitability: "Suitable for investors who seek high growth rates (with reasonable value characteristics) but lower than typical growth stocks. The portfolio can still undego large downward swings"	
 	},
 	{
 		investorType: "Capital Preservation and Income Investors",
 		field: "To invest in high dividend yield stocks and portfolio with high dividend yield",
-		suitability: "Suitable for investors who seek high growth rates but lower than typical growth stocks. The portfolio can still undego large downward swings"	
+		suitability: "Suitable for investors looking for dividend yielding portfolios"	
 	},
 	{
-		investorType: "Sector Exposure/Tracker",
+		investorType: "Sector Investors",
 		field: "To invest in stocks with exposure to single sector",
-		suitability: "Suitable for investors looking to achieve exposure to a particular sector"	
+		suitability: "Suitable for investors looking to achieve exposure to a particular sector. Sectors trackers are not diversified portfolios and can undergo sudden losses"	
 	}
 ];
 export const portfolioValuation = [
@@ -70,11 +70,11 @@ export const capitalization = [
     "Large Cap"
 ];
 
-export const adviceApprovalPending = 'Approval is pending for this advice by the admin';
-export const adviceRejected = 'Advice is rejected by the admin.';
-export const adviceApproved = 'Advice is approved by the admin ';
-export const advicePublic = 'This advice is public';
-export const advicePrivate = 'This advice is private and not open to Marketplace';
+export const adviceApprovalPending = 'Approval is pending for this advice';
+export const adviceRejected = 'Advice is rejected. Please fix the advice for suggestions and resubmit for approval';
+export const adviceApproved = 'Advice is approved and open for sale in the marketplace';
+export const advicePublic = 'Public Advice: Advice is visbile and open for sale in the marketplace* (*subject to approval)';
+export const advicePrivate = 'Private Advice: Advice is private and not open for sale';
 export const adviceWishlisted = 'You have wishlisted this advice';
 export const adviceSubscribed = 'You have subscribed this advice';
 export const defaultPortfolioTooltip = 'This your Default Portfolio';

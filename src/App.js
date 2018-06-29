@@ -8,6 +8,7 @@ import {withRouter, Switch} from 'react-router-dom';
 import {Utils} from './utils';
 import {primaryColor, horizontalBox} from './constants';
 import logo from "./assets/logo-advq-new.png";
+global.Promise = require('bluebird');
 
 const {Header, Content} = Layout;
 const {gaTrackingId} = require('./localConfig');
@@ -54,6 +55,11 @@ const AdviceDetailMobile = Loadable({
 
 const CreateAdvice = Loadable({
     loader: () => import('./containers/CreateAdvice'),
+    loading: () => <Icon type="loading" />
+});
+
+const CreateAdviceMobile = Loadable({
+    loader: () => import('./containers/CreateAdviceMobile'),
     loading: () => <Icon type="loading" />
 });
 
@@ -271,7 +277,7 @@ class App extends React.Component {
     }
 
     showHeaderAdviceLogo = parentPath => {
-        const restrictedParentPaths = ['login', 'signup', 'forgotPassword', 'resetPassword', 'advice'];
+        const restrictedParentPaths = ['login', 'signup', 'forgotPassword', 'resetPassword', 'advice', 'dashboard'];
         if (restrictedParentPaths.indexOf(parentPath) === -1) {
             return true;
         }
@@ -384,7 +390,7 @@ class App extends React.Component {
                                         <Route path="/stockresearch" exact component={WorkInProgress} /> 
                                         <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
                                         <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} /> 
-                                        <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
+                                        <Route exact={true} path='/dashboard/createadvice' component={CreateAdviceMobile} /> 
                                         <Route exact={true} path='/dashboard/createportfolio' component={WorkInProgress} /> 
                                         <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
                                         <Route exact={true} path='/dashboard/portfolio/:id' component={WorkInProgress} /> 

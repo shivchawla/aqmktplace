@@ -3,7 +3,7 @@ import Loadable from 'react-loadable';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import {Spin, Row, Col, Collapse, DatePicker, Radio, Icon} from 'antd';
-import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../constants';
+import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected, advicePublic, advicePrivate} from '../constants';
 import {AqTag} from '../components/AqTag';
 import {WarningIcon} from '../components/WarningIcon'
 import {IconItem} from '../components/IconItem';
@@ -118,7 +118,7 @@ class AdviceDetailContentImpl extends React.Component {
             averageReturns = 0, 
             dailyReturns = 0
         } = this.props.metrics || {};
-        const {goal = {}, capitalization = {}, portfolioValuation = {}, sectors = {}, userText = {}} = investmentObjective;
+        const {goal = {}, capitalization = {}, portfolioValuation = {}, userText = {}} = investmentObjective;
         const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["1", "2","3"] : ["1", "3"] : ["1", "3"];
         const tickers = _.get(this.props, 'tickers', []);
         const {netValue = 0, dailyNAVChangePct = 0} = this.props.metrics || {};
@@ -133,6 +133,14 @@ class AdviceDetailContentImpl extends React.Component {
         const notOwnerColumns = ['name', 'symbol', 'shares', 'price', 'sector', 'weight'];
         const portfolioTableColumns = ((isOwner || isAdmin) && !this.props.preview) ? ownerColumns : notOwnerColumns;
         const approvalStatus = _.get(approval, 'status', false);
+
+        //Use from portfolio (instead of Investment Objective)
+        let sectors;
+        if (this.props.preview) {
+            sectors = this.props.positions ? _.uniq(this.props.positions.map(item => _.get(item, 'sector', '')).filter(item => item != '')) : [];
+        } else {
+            sectors = this.props.positions ? _.uniq(this.props.positions.map(item => _.get(item, 'security.detail.Sector', '')).filter(item => item != '')) : [];
+        }
 
         return (
             <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom: '20px'}}>
@@ -235,7 +243,7 @@ class AdviceDetailContentImpl extends React.Component {
                             this.props.adviceDetail.isOwner &&
                             <AqTag 
                                     color='#673AB7'
-                                    tooltipTitle={this.props.adviceDetail.isPublic ? 'This advice is Public' : 'This advice is private'}
+                                    tooltipTitle={this.props.adviceDetail.isPublic ? advicePublic : advicePrivate}
                                     text={this.props.adviceDetail.isPublic ? 'Public' : 'Private'}
                                     icon={this.props.adviceDetail.isPublic ? 'team' : 'lock'}
                                     iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
@@ -341,7 +349,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 }}
                                             >
                                                 {
-                                                    _.get(sectors, 'detail', []).map((item, index) => {
+                                                    sectors.map((item, index) => {
                                                         return (
                                                             <AqTag 
                                                                     key={index}
@@ -359,7 +367,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 >
                                                     Sectors
                                                 </h3>
-                                                {
+                                                {/*
                                                     isPublic && 
                                                     isPublic && 
                                                     !approvalStatus && 
@@ -368,7 +376,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                     <WarningIcon 
                                                             reason={this.getInvestmentObjWarning('sectors').reason}
                                                     />
-                                                }
+                                                */}
                                             </div>
                                         </div>
                                     </Col>

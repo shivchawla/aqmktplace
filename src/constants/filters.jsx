@@ -1,6 +1,6 @@
 export const adviceFilters = {
     rebalancingFrequency: ['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quartely'],
-    approved: ['Approved', 'UnApproved'],
+    approved: ['Approved', 'Pending', "Rejected"],
     owner: ['Personal', 'Others'],
     netValue: '0,200000',
     sharpe: '-10,10',

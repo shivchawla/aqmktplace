@@ -79,7 +79,7 @@ export class AdviceFilterSideComponent extends React.Component {
 
     processUrl = (type = 'all') => {
         const {selectedFilters, defaultFilters} = this.state;
-        let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : 0);
+        let approved = selectedFilters.approved.map(item => item === 'Approved' ? 1 : item === 'Unapproved' ? 0 : -1);
         let personal = selectedFilters.owner.map(item => item === 'Personal' ? 1 : 0);
         const limit = this.state.limit;
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');

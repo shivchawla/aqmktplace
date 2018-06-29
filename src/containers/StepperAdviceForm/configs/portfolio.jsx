@@ -1,8 +1,8 @@
 export const portfolioConfig = [{
     header: "Portfolio",
     detail: {
-        //definition: "This is the portfolio for your advice",
-        importance: "A portfolio is the crux of any advice. It should closely match the chosen investment objective",
+        definition: "Portfolio is a collection of stocks investments",
+        importance: "Portfolio must match it's stated investment objective and chosen valuation and capitalization style",
         suggestedData: []
     },
     requirements: [

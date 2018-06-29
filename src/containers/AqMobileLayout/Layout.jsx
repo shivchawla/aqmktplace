@@ -135,7 +135,10 @@ class AqMobileLayoutImpl extends React.Component {
             <Layout id="aq-layout-container">
                 {this.renderLeftSidebar()}
                 {/* <Header style={style.headerStyle}> */}
-                    {this.renderHeader()}
+                {
+                    !this.props.noHeader &&
+                    this.renderHeader()
+                }
                 {/* </Header> */}
                 <Layout id="menu-wrapper">
                     <Layout>

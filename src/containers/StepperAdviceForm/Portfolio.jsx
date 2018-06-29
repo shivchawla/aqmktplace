@@ -87,11 +87,18 @@ export class Portfolio extends React.Component {
         );
     }
 
-    render() {
+    shouldComponentUpdate(nextProps) {
         const portfolioStep = getStepIndex('portfolio');
-        
+        if (nextProps.step === portfolioStep) {
+            return true;
+        }
+
+        return false;
+    }
+
+    render() {
         return (
-            <Row style={{display: this.props.step === portfolioStep ? 'block': 'none'}}>
+            <Row style={{display: 'block'}}>
                 {this.renderPerformanceModal()}
                 <Col span={24} style={{marginTop: '20px'}}>
                     {
