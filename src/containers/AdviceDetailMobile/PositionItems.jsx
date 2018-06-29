@@ -38,37 +38,54 @@ export class PositionItems extends React.Component {
 
     render() {
         return (
-            <Collapse bordered={false} onChange={this.onCollapseChange}>
-                {
-                    this.processPositions().map((position, index) => {
-                        const {activePanelKeys} = this.state;
-                        const mode = activePanelKeys.indexOf(index.toString()) === -1 ? "horizontal" : "vertical";
-                        return (
-                            <Panel 
-                                    key={index} 
-                                    header={<PositionHeader position={position} mode={mode} />} 
-                                    style={customPanelStyle}
-                                    className='position-panel'
-                                    showArrow={false}
-                            >
-                                <PositionItem position={position} />
-                            </Panel>
-                        );
-                    })
-                }
-            </Collapse>
+            <Row>
+                <Col span={24}>
+                    <Row>
+                        <Col span={8} offset={2}>
+                            <h3 style={{fontSize: '16px', fontWeight: '700'}}>Symbol</h3>
+                        </Col>
+                        <Col span={7}>
+                            <h3 style={{fontSize: '16px', fontWeight: '700'}}>Last Price</h3>
+                        </Col>
+                        <Col span={7} style={{paddingLeft: '5px'}}>
+                            <h3 style={{fontSize: '16px', fontWeight: '700'}}>Weight</h3>
+                        </Col>
+                    </Row>
+                </Col>
+                <Col span={24} style={{marginTop: '10px'}}>
+                    <Collapse bordered={false} onChange={this.onCollapseChange}>
+                        {
+                            this.processPositions().map((position, index) => {
+                                const {activePanelKeys} = this.state;
+                                const mode = activePanelKeys.indexOf(index.toString()) === -1 ? "horizontal" : "vertical";
+                                return (
+                                    <Panel 
+                                            key={index} 
+                                            header={<PositionHeader position={position} mode={mode}/>} 
+                                            style={customPanelStyle}
+                                            className='position-panel'
+                                            showArrow={false}
+                                    >
+                                        <PositionItem position={position} />
+                                    </Panel>
+                                );
+                            })
+                        }
+                    </Collapse>
+                </Col>
+            </Row>
         );
     }
 }
 
-const PositionHeader = ({position, mode='horizontal'}) => {
+const PositionHeader = ({position, mode='horizontal', showLabel=false}) => {
     const {symbol = '', shares = 0, lastPrice = 0, sector = '', weight = 0, name = ''} = position;
     return (
         <Row type="flex">
             {
                 mode === 'horizontal'
                 ?   <React.Fragment>
-                        <NewPositionHeader position={position} />
+                        <NewPositionHeader position={position} showLabel={showLabel} />
                     </React.Fragment>
                 :   <React.Fragment>
                         <Col span={2}>
@@ -83,7 +100,7 @@ const PositionHeader = ({position, mode='horizontal'}) => {
     );
 }
 
-const NewPositionHeader = ({position}) => {
+const NewPositionHeader = ({position, showLabel = false}) => {
     const {symbol = '', lastPrice = 0, weight = 0} = position;
     return (
         <React.Fragment>
@@ -93,38 +110,38 @@ const NewPositionHeader = ({position}) => {
             <Col span={8} style={{display: 'flex', flexDirection: 'row'}}>
                 <MetricItem
                     valueStyle = {valueStyle} 
-                    labelStyle={labelStyle} 
+                    labelStyle={{...labelStyle, display: showLabel ? 'block' : 'none'}} 
                     valueContainerStyle={valueAndLabelContainerStyle}
                     labelContainerStyle={valueAndLabelContainerStyle}
                     value={symbol} 
                     label='Symbol' 
                     noNumeric={true}
-                    metricContainerStyle={metricContainerStyle}
+                    metricContainerStyle={{...metricContainerStyle, flexDirection: 'column-reverse'}}
                 />
             </Col>
             <Col span={7}>
                 <MetricItem
                     valueStyle = {valueStyle} 
-                    labelStyle={labelStyle} 
+                    labelStyle={{...labelStyle, display: showLabel ? 'block' : 'none'}} 
                     valueContainerStyle={valueAndLabelContainerStyle}
                     labelContainerStyle={valueAndLabelContainerStyle}
                     value={Utils.formatMoneyValueMaxTwoDecimals(Number(lastPrice))} 
                     money={true}
                     label="Last Price" 
-                    metricContainerStyle={metricContainerStyle}
+                    metricContainerStyle={{...metricContainerStyle, flexDirection: 'column-reverse'}}
                     style={containerStyle}
                 />
             </Col>
             <Col span={7}>
                 <MetricItem
-                    valueStyle = {valueStyle} 
-                    labelStyle={labelStyle} 
+                    valueStyle = {{...valueStyle, paddingLeft: '5px'}} 
+                    labelStyle={{...labelStyle, display: showLabel ? 'block' : 'none'}} 
                     valueContainerStyle={valueAndLabelContainerStyle}
                     labelContainerStyle={valueAndLabelContainerStyle}
                     value={Number(weight)} 
                     label="Weight"
                     percentage
-                    metricContainerStyle={metricContainerStyle}
+                    metricContainerStyle={{...metricContainerStyle, flexDirection: 'column-reverse'}}
                     style={containerStyle}
                 />
             </Col>
@@ -173,7 +190,7 @@ const customPanelStyleNew = {
 
 const valueStyle = {
     color: '#4A4A4A',
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: 400,
     width: 'fit-content'
 };
@@ -206,5 +223,5 @@ const metricContainerStyle = {
 const containerStyle = {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    // alignItems: 'center'
 }

@@ -304,7 +304,7 @@ class AdviceDetailImpl extends React.Component {
         .then(benchmarkResponse => {
             if (performance.simulated && simulatedPerformance.length > 0) {
                 tickers.push({
-                    name: 'Simulated Performance',
+                    name: 'Simulated',
                     data: simulatedPerformance,
                     color: simulatedPerformanceColor,
                     noLoadData: true
@@ -313,7 +313,7 @@ class AdviceDetailImpl extends React.Component {
     
             if (performance.current && Utils.isLoggedIn() && truePerformance.length > 0) {
                 tickers.push({
-                    name: 'True Performance',
+                    name: 'True',
                     data: truePerformance,
                     color: currentPerformanceColor,
                     noLoadData: true
@@ -1321,38 +1321,6 @@ class AdviceDetailImpl extends React.Component {
                             followAdvice={this.followAdvice}
                     />
                 </AqMobileLayout>
-            // :   <React.Fragment>
-            //         <Row style={{marginBottom:'20px'}} className='aq-page-container'>
-            //             <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
-            //                 <Col xl={0} xs={24} md={24} style={{textAlign: 'right'}}>
-            //                     {this.renderActionButtons(true)}
-            //                 </Col>
-            //             </AqPageHeader>
-            //             <StockResearchModal
-            //                     ticker={this.state.stockResearchModalTicker}
-            //                     visible={this.state.stockResearchModalVisible}
-            //                     toggleModal={this.toggleModal}
-            //             />
-                        // <AdviceDetailContentMobile 
-                        //         adviceDetail={this.state.adviceDetail}
-                        //         metrics={this.state.metrics}
-                        //         handlePortfolioStartDateChange={this.handlePortfolioStartDateChange}
-                        //         selectedPortfolioDate={this.state.selectedPortfolioDate}
-                        //         positions={this.state.positions}
-                        //         updateTicker={this.updateTicker}
-                        //         tickers={this.state.tickers}
-                        //         showPerformanceToggle={Utils.isLoggedIn()}
-                        //         handlePerformanceToggleChange={this.handlePerformanceToggleChange}
-                        //         performanceType={this.state.performanceType}
-                        //         loading={false}
-                        // />
-            //             <Col xl={6} md={0} sm={0} xs={0}>
-            //                 {this.renderActionButtons()}
-            //                 {this.renderApprovalTabs()}
-            //             </Col>
-            //         </Row>
-            //         <Footer />
-            //     </React.Fragment>
         );
     }
 

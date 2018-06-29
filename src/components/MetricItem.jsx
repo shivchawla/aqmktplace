@@ -39,8 +39,8 @@ const MetricItemImpl = (props) => {
                     <Col span={24}>
                         <h5 style={{...valueStyle, ...props.valueStyle, color: valueColor}}>
                             {value}
-                            {props.isNetValue && change !== null && <span style={{fontSize: '12.5px', marginLeft: '2px', color: changeColor}}>{change}</span>}
-                            {props.isNetValue && changePct !== null &&<span style={{fontSize: '12.5px', marginLeft: '2px', color: changeColor}}>({changePct}%)</span>}
+                            {props.isNetValue && change !== null && <span style={{fontSize: '18px', marginLeft: '2px', color: changeColor}}>{change}</span>}
+                            {props.isNetValue && changePct !== null &&<span style={{fontSize: '18px', marginLeft: '2px', color: changeColor}}>({changePct}%)</span>}
                         </h5>
                     </Col>
                     <Col>
