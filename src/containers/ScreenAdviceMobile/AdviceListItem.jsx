@@ -102,8 +102,8 @@ class AdviceListItemMobileImpl extends React.Component {
         return (
             <Row 
                 type="flex"
-                className="advice-card" 
-                style={{backgroundColor: cardBackgroundColor, margin: 0, marginBottom: '20px'}} 
+                // className="advice-card" 
+                style={{backgroundColor: cardBackgroundColor, margin: 0, marginBottom: '5px'}} 
                 align="top" 
                 onClick={e => this.handleClick(id)}>
 
@@ -138,6 +138,9 @@ class AdviceListItemMobileImpl extends React.Component {
                             <Row>
                                 {this.renderMetricIcons(performanceSummary)}
                             </Row>
+                        </Col>
+                        <Col span={24}>
+                            <div style={{height: '1px', backgroundColor: '#eaeaea', marginTop: '5px'}}></div>
                         </Col>
                     </Row>
                 </Col>

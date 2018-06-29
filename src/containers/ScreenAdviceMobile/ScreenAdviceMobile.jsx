@@ -1,7 +1,8 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
 import windowSize from 'react-window-size';
-import InfiniteScroll from 'react-infinite-scroller';
+// import InfiniteScroll from 'react-infinite-scroller';
+import InfiniteScroll from "react-infinite-scroll-component";
 import _ from 'lodash';
 import {slide as HamburgerMenu} from 'react-burger-menu';
 import {Row, Col, Icon, Button, Select, Tabs, Modal, Radio} from 'antd';
@@ -43,7 +44,8 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
             questionnaireModalVisible: false,
             questionnaireFilters: {},
             isAdmin: false,
-            openFilterMenu: false
+            openFilterMenu: false,
+            hasMoreAdvices: true,
         }
     }
 
@@ -65,6 +67,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
         .then(response => {
             this.setState({isAdmin: _.get(response.data, 'isAdmin', false)});
             this.getAdvices();
+            this.setState({show: false});
         })
         .catch(error => {
             return error
@@ -237,28 +240,29 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
             loading: true,
             show: this.state.initialCall,
         });
+        console.log('Getting Advices');
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             if (this.mounted) {
                 this.setState({
-                    advices: [...this.state.advices, ...this.processAdvices(response.data.advices)],
-                    totalCount: this.state.initialCall && _.get(response.data, 'count', 10),
-                    initialCall: false
+                    advices: this.state.advices.length < this.state.totalCount
+                            ? [...this.state.advices, ...this.processAdvices(response.data.advices)]
+                            : this.state.advices,
+                    totalCount: this.state.initialCall ? _.get(response.data, 'count', 10) : this.state.totalCount,
+                    initialCall: false,
+                    hasMoreAdvices: response.data.advices.length === 10
                 });
-            }
-            if (this.mounted) {
-                this.setState({loading: false, show: false});
             }
         })
         .catch(error => {
             return error;
         })
-        // .finally(() => {
-        //     if (this.mounted) {
-        //         this.setState({loading: false, show: false});
-        //     }
-        // });
+        .finally(() => {
+            if (this.mounted) {
+                this.setState({loading: false, show: false});
+            }
+        });
     }
 
     processUrl = (type, orderParam = this.state.sortBy) => {
@@ -316,43 +320,21 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
 
     renderAdvicesMobile = (type = 'all') => {
         const {advices} = this.state;
-        const hasMore = this.state.selectedPage <= 2;
-        console.log(this.state.totalCount);
-        console.log(this.state.advices.length);
         return (
             <div 
                     className="advice-list" 
                     style={{
                         position: 'relative', 
                         width: '100%', 
-                        height: '100%', 
-                        zoom: 1, 
                         padding: '0px 4px 1% 4px', 
-                        overflowY: 'auto', 
-                        minHeight: '300px'
                     }}
             >
-                <InfiniteScroll
-                    pageStart={this.state.selectedPage}
-                    loadMore={this.onPaginationChange}
-                    hasMore={hasMore}
-                    loader={<div className="loader" key={0} style={{textAlign: 'center'}}>Loading ...</div>}
-                >
-                    {
-                        !this.state.loading &&
-                        advices.map((advice, index) => {
-                            if (type === 'following') {
-                                if (advice.isFollowing && !advice.isSubscribed) {
-                                    return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
-                                } else {
-                                    return null;
-                                }
-                            } else {
-                                return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
-                            }
-                        })
-                    }
-                </InfiniteScroll>
+                <AdviceList 
+                    onPaginationChange={this.onPaginationChange}
+                    hasMoreAdvices={this.state.selectedPage <= Math.ceil(this.state.totalCount % 10)}
+                    advices={advices} 
+                    type={type}
+                />
             </div>
         );
     }
@@ -414,11 +396,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
     }
 
     handleInputChange = value => {
-        this.setState({searchValue: value}, () => {
-            if (value.length === 0) {
-                this.getAdvices();
-            }
-        });
+        this.setState({searchValue: value});
     }
 
     handleSortChange = value => {
@@ -459,9 +437,8 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
 
     onPaginationChange = () => {
         let page = Number(this.state.selectedPage) + 1;
-        console.log('Called', page);
         this.setState({selectedPage: page}, () => {
-            window.scrollTo(0, 0);
+            // window.scrollTo(0, 0);
             this.getAdvices();
         })
     }   
@@ -508,7 +485,11 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                 cancelText="Cancel"
                                 value={this.state.searchValue}
                                 onChange={this.handleInputChange}
-                                onSubmit={() => this.getAdvices()}
+                                onSubmit={() => {
+                                    this.setState({selectedPage: 1, advices: []}, () => {
+                                        this.getAdvices();
+                                    })
+                                }}
                         />
                     </Col>
                     <Col 
@@ -555,6 +536,48 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
 }
 
 export default windowSize(ScreenAdviceMobileImpl);
+
+class AdviceList extends React.Component {
+    shouldComponentUpdate(nextProps) {
+        if (!_.isEqual(nextProps, this.props)) {
+            return true;
+        }
+        return false;
+    }
+
+    render() {
+        const {advices = [], type = 'all', onPaginationChange, hasMoreAdvices} = this.props;
+        
+        return (
+            <InfiniteScroll
+                dataLength={advices.length}
+                next={onPaginationChange}
+                hasMore={hasMoreAdvices}
+                loader={<div className="loader" key={0} style={{textAlign: 'center'}}>Loading ...</div>}
+                endMessage={
+                    <p style={{ textAlign: "center" }}>
+                        <b>Yay! You have seen it all</b>
+                    </p>
+                }
+                scrollThreshold={0.6}
+            >
+                {
+                    advices.map((advice, index) => {
+                        if (type === 'following') {
+                            if (advice.isFollowing && !advice.isSubscribed) {
+                                return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
+                            } else {
+                                return null;
+                            }
+                        } else {
+                            return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
+                        }
+                    })
+                }
+            </InfiniteScroll>
+        );
+    }
+}
 
 const filterSortContainerStyle = {
     marginTop: '20px',

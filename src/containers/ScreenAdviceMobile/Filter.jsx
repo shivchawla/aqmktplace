@@ -10,7 +10,7 @@ import {Utils} from '../../utils';
 import './filter.css';
 import '../../css/buttons.css';
 
-const Panel = Accordion.Panel;
+const Panel = Collapse.Panel;
 const RadioItem = Radio.RadioItem;
 const kvp = {
     rebalancingFrequency: 'selectRebalanceAllFilters',
@@ -171,7 +171,11 @@ export class FilterMobileComponent extends React.Component {
     renderSliderFilters = filterArray => {
         return filterArray.map((filter, index) => {
             return (
-                <Panel header={filter.label} key={5 + index}>
+                <Panel 
+                        // header={filter.label}
+                        header={this.renderHeaderForSliderPanel(filter.label, filter.type)} 
+                        key={5 + index}
+                >
                     <Row>
                         <Col span={24}>
                             <FilterSliderComponent 
@@ -214,7 +218,34 @@ export class FilterMobileComponent extends React.Component {
                     <h3>{header}</h3>
                 </Col>
                 <Col span={24}>
-                    <h5>{_.join(filters, ',')}</h5>
+                    <h5 style={{fontSize: '12px'}}>{_.join(filters, ',')}</h5>
+                </Col>
+            </Row>
+        );
+    }
+
+    renderHeaderForRadioPanel = (header, key) => {
+        return (
+            <Row className='panel-header'>
+                <Col span={24}>
+                    <h3>{header}</h3>
+                </Col>
+                <Col span={24}>
+                    <h5 style={{fontSize: '12px'}}>{this.state[key]}</h5>
+                </Col>
+            </Row>
+        );
+    }
+
+    renderHeaderForSliderPanel = (header, key) => {
+        return (
+            <Row className='panel-header'>
+                <Col span={24}>
+                    <h3>{header}</h3>
+                </Col>
+                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
+                    <h5 style={{fontSize: '12px'}}>Min: {this.state.selectedFilters[key].split(',')[0]}</h5>
+                    <h5 style={{marginRight: '20px', fontSize: '12px'}}>Max: {this.state.selectedFilters[key].split(',')[1]}</h5>
                 </Col>
             </Row>
         );
@@ -260,18 +291,22 @@ export class FilterMobileComponent extends React.Component {
                         </Row>
                         <Row style={{padding: '0 20px', marginTop: '94px'}}>
                             <Col span={24} >
-                                <Accordion 
+                                <Collapse 
                                         bordered={false} 
                                         className="my-accordion"
                                 >
-                                    <Panel header="Sort By">
+                                    <Panel 
+                                            header={this.renderHeaderForRadioPanel('Sort By', 'sortBy')}
+                                    >
                                         <Row>
                                             <Col span={24}>
                                                 {this.renderSortingOptions()}
                                             </Col>
                                         </Row>
                                     </Panel>
-                                    <Panel header="Advice Type">
+                                    <Panel 
+                                            header={this.renderHeaderForRadioPanel('Advice Type', 'type')}
+                                    >
                                         <Row>
                                             <Col span={24}>
                                                 {this.renderAdviceTypeFilter()}
@@ -287,14 +322,18 @@ export class FilterMobileComponent extends React.Component {
                                             </Col>
                                         </Row>
                                     </Panel>
-                                    <Panel header="Status">
+                                    <Panel 
+                                            header={this.renderHeaderForPanel('Status', 'approved')}
+                                    >
                                         <Row>
                                             <Col span={24}>
                                                 {this.renderStatusFilter()}
                                             </Col>
                                         </Row>
                                     </Panel>
-                                    <Panel header="Ownership">
+                                    <Panel 
+                                            header={this.renderHeaderForPanel('Ownership', 'owner')}
+                                    >
                                         <Row>
                                             <Col span={24}>
                                                 {this.renderAdviceFilter()}
@@ -302,7 +341,7 @@ export class FilterMobileComponent extends React.Component {
                                         </Row>
                                     </Panel>
                                     {this.renderSliderFilters(filterArray)}
-                                </Accordion>
+                                </Collapse>
                             </Col>
                             <Col span={24} style={{height: '50px'}}></Col>
                         </Row>

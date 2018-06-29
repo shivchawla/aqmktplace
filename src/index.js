@@ -8,6 +8,7 @@ import 'react-loading-bar/dist/index.css'
 import App from './App';
 import {unregister} from './registerServiceWorker';
 
+global.Promise = require('bluebird');
 ReactDOM.render(
         <Router>
             <App />
