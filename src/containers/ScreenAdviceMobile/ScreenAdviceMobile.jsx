@@ -1,12 +1,11 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
 import windowSize from 'react-window-size';
-// import InfiniteScroll from 'react-infinite-scroller';
 import InfiniteScroll from "react-infinite-scroll-component";
 import _ from 'lodash';
 import {slide as HamburgerMenu} from 'react-burger-menu';
 import {Row, Col, Icon, Button, Select, Tabs, Modal, Radio} from 'antd';
-import {SearchBar} from 'antd-mobile';
+import {SearchBar, Button as MobileButton} from 'antd-mobile';
 import {FilterMobileComponent} from './Filter';
 import {AdviceListItemMobile} from './AdviceListItem';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
@@ -529,10 +528,22 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                     }}
                             >
                                 <span style={{fontSize: '14px'}}>{this.state.advices.length} Advices</span>
-                                <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
-                                    <span style={{fontSize: '14px', marginRight: '5px'}}>Filter</span>
-                                    <Icon type="down" style={{marginTop: '2px', fontSize: '14px'}} />
-                                </div>
+                                {
+                                    Utils.isLoggedIn()
+                                    ?   <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
+                                            <span style={{fontSize: '14px', marginRight: '5px'}}>Filter</span>
+                                            <Icon type="down" style={{marginTop: '2px', fontSize: '14px'}} />
+                                        </div>
+                                    :   <MobileButton 
+                                                style={{fontSize: '14px'}}
+                                                onClick={() => this.props.history.push('/login')}
+                                                size="small"
+                                                type="primary"
+                                        >
+                                            LOGIN
+                                        </MobileButton>
+                                }
+                                
                             </Col>
                             <Col span={24}>
                                 <div style={{height: '2px', backgroundColor: '#efeff4'}}></div>

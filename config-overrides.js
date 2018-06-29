@@ -1,17 +1,3 @@
-// const { injectBabelPlugin } = require('react-app-rewired');
-// const rewireLess = require('react-app-rewire-less');
-
-// module.exports = function override(config, env) {
-//   config = injectBabelPlugin(['import', { libraryName: 'antd', style: true }], config); 
-//   config = rewireLess.withLoaderOptions({
-//     modifyVars: 
-//       { "@primary-color": "#03A7AD",
-//   			"@font-family": "Lato" },
-//       }
-//   )(config, env);
-//   return config;
-// };
-
 const { injectBabelPlugin } = require('react-app-rewired');
 const rewireLess = require('react-app-rewire-less');
 const rewireBabelLoader = require("react-app-rewire-babel-loader");
@@ -24,16 +10,6 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 module.exports = function override(config, env) {
   config = injectBabelPlugin(['import', [{ libraryName: 'antd', style: true }, { libraryName: 'antd-mobile', style: true }]], config); 
-  // config = injectBabelPlugin(['import', { libraryName: 'antd-mobile', style: true }], config); 
-  // config = injectBabelPlugin(
-  //   [
-  //     'import', [
-  //       { libraryName: 'antd', style: true },
-  //       { libraryName: 'antd-mobile', style: true }
-  //     ]
-  //    ]
-  // );
-
   config = rewireLess.withLoaderOptions({
   	modifyVars: { 
       "@primary-color": "#03A7AD",

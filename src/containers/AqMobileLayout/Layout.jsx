@@ -1,14 +1,13 @@
 import * as React from 'react';
-import _ from 'lodash';
 import {withRouter} from 'react-router';
+import {Row, Col} from 'antd';
 import {slide as HamburgerMenu} from 'react-burger-menu';
-import {Row, Col, Layout, Menu, Icon} from 'antd';
-import {Flex, WhiteSpace, NavBar, SearchBar, WingBlank, Drawer, List} from 'antd-mobile';
+import {Layout, Menu, Icon} from 'antd';
+import {NavBar} from 'antd-mobile';
 import {sidebarUrls} from './constants';
+import {Utils} from '../../utils';
 import {primaryColor, horizontalBox} from '../../constants';
 import * as style from './layoutStyle';
-
-const {Header, Footer, Sider, Content} = Layout;
 
 class AqMobileLayoutImpl extends React.Component {
     constructor(props) {
@@ -27,9 +26,9 @@ class AqMobileLayoutImpl extends React.Component {
                 mode="light"
                 icon={
                     <Icon 
-                        type="menu-unfold" 
+                        type={this.props.innerPage ? "left" : "menu-unfold"} 
                         style={{...style.sideBarMenuIconStyle, ...this.state.iconRotateStyle}}
-                        onClick = {this.toggleSideMenu}
+                        onClick = {() => this.props.innerPage ? this.props.history.goBack() : this.toggleSideMenu()}
                     />
                 }
                 onLeftClick={() => this.toggleSideMenu}
@@ -67,6 +66,11 @@ class AqMobileLayoutImpl extends React.Component {
         });
     }
 
+    logoutUser = () => {
+        Utils.logoutUser();
+        this.props.history.push('/login');
+    }
+
     renderLeftSidebar = () => {
         return (
             <HamburgerMenu
@@ -79,18 +83,49 @@ class AqMobileLayoutImpl extends React.Component {
                     isOpen={this.state.sideBarOpenStatus} 
                     styles={style.sideBarMenuStyle}
             >
-                <Menu style={{backgroundColor: 'transparent'}}>
-                    {
-                        sidebarUrls.map((item, index) => (
-                            <Menu.Item key={index} onClick={() => this.props.history.push(item.url)}>
-                                <SideMenuItem menuItem={item} />
+                <Row>
+                    <Col 
+                            span={24} 
+                            style={{
+                                display: 'flex', 
+                                justifyContent: 'flex-end', 
+                                paddingTop: '10px', 
+                                paddingRight: '10px'
+                            }}
+                    >
+                        <Icon 
+                            type="close" 
+                            style={{fontSize: '24px', zIndex: '20'}}
+                            onClick={this.toggleSideMenu}
+                        />
+                    </Col>
+                    <Col span={24}>
+                        <Menu style={{backgroundColor: 'transparent'}}>
+                            {
+                                sidebarUrls.map((item, index) => (
+                                    <Menu.Item key={index} onClick={() => this.props.history.push(item.url)}>
+                                        <SideMenuItem menuItem={item} />
+                                    </Menu.Item>
+                                ))
+                            }
+                            <Menu.Item 
+                                    key={20} 
+                                    onClick={() => {
+                                        Utils.isLoggedIn()
+                                        ?   this.logoutUser()
+                                        :   this.props.history.push('/login')
+                                    }}
+                            >
+                                <SideMenuItem 
+                                    menuItem={{
+                                        name: Utils.isLoggedIn() ? 'Logout' : 'Login', 
+                                        icon: Utils.isLoggedIn() ? 'logout' : 'login'
+                                    }} 
+                                />
                             </Menu.Item>
-                        ))
-                    }
-                    <Menu.Item onClick={this.toggleSideMenu}>
-                        <SideMenuItem menuItem={{name: 'Toggle Drawer'}} />
-                    </Menu.Item>
-                </Menu>
+                        </Menu>
+                    </Col>
+                </Row>
             </HamburgerMenu>
         );
     }

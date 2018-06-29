@@ -473,6 +473,7 @@ class MyChartNewImpl extends React.Component {
 
     renderHorizontalLegendList = () => {
         const {legendItems} = this.state;
+        const fontSize = this.props.mobile ? '14px' : '12px'
         return (
             <Col style={{ zIndex:'20'}} span={24} >
                 {
@@ -485,14 +486,14 @@ class MyChartNewImpl extends React.Component {
                                         <Checkbox disabled={legend.disabled} checked={legend.checked} onChange={e => this.onCheckboxChange(e, legend)} />
                                     </Col>
                                     <Col span={22}>
-                                        <h3 style={{fontSize: '12px'}}>
+                                        <h3 style={{fontSize}}>
                                             <span style={{color: legend.color}}>{legend.name}</span>
                                             <span 
-                                                    style={{marginLeft: '10px', fontSize: '12px', fontWeight: '400'}}
+                                                    style={{marginLeft: '10px', fontSize, fontWeight: '400'}}
                                             >
                                                 {Number(legend.y).toFixed(2)}
                                             </span>
-                                            <span style={{fontSize: '12px', color: changeColor, marginLeft: '5px'}}>({legend.change} %)</span>
+                                            <span style={{fontSize, color: changeColor, marginLeft: '5px'}}>({legend.change} %)</span>
                                         </h3>
                                     </Col>
                                 </Row>
@@ -518,7 +519,16 @@ class MyChartNewImpl extends React.Component {
                         <Row type="flex" align="middle">
                             <Col span={12}>
                                 <h2 style={{fontSize: '12px', margin: '0'}}>
-                                    Date <span style={{fontWeight: '700', color: '#555454'}}>{this.state.selectedDate}</span>
+                                    Date 
+                                    <span 
+                                            style={{
+                                                fontWeight: '700', 
+                                                color: '#555454', 
+                                                fontSize: this.props.mobile ? '14px' : '13px'
+                                            }}
+                                    >
+                                        {this.state.selectedDate}
+                                    </span>
                                 </h2>
                             </Col>
                             <Col span={12} style={{display: 'flex', justifyContent: 'flex-end'}}>
@@ -551,17 +561,29 @@ class MyChartNewImpl extends React.Component {
                 {
                     !this.props.hideLegend &&
                     <Row>
-                        <h2 style={{fontSize: '12px', margin: '0'}}>
-                            Date <span style={{fontWeight: '700', color: '#555454'}}>{this.state.selectedDate}</span>
+                        <h2 style={{fontSize: this.props.mobile ? '14px' : '12px', margin: '0'}}>
+                            Date 
+                            <span 
+                                    style={{
+                                        fontWeight: '700', 
+                                        color: '#555454',
+                                        marginLeft: '5px' 
+                                    }}
+                            >
+                                {this.state.selectedDate}
+                            </span>
                         </h2>
                     </Row>
                 }
                 {
                     !this.props.hideLegend &&
-                    
-                    <Row style={{position:'absolute', width: '300px'}}>{this.renderHorizontalLegendList()}</Row>
+                    <Row 
+                            style={{position: !this.props.mobile ? 'absolute' : 'relative', width: '300px'}}
+                    >
+                        {this.renderHorizontalLegendList()}
+                    </Row>
                 }
-                <Row style={{marginTop:'30px'}} id={chartId}></Row>
+                <Row style={{marginTop: !this.props.mobile ? '30px' : '0px'}} id={chartId}></Row>
             </Col>
         );
     }
