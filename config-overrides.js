@@ -23,10 +23,23 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 
 module.exports = function override(config, env) {
-  config = injectBabelPlugin(['import', { libraryName: 'antd', style: true }], config); 
+  config = injectBabelPlugin(['import', [{ libraryName: 'antd', style: true }, { libraryName: 'antd-mobile', style: true }]], config); 
+  // config = injectBabelPlugin(['import', { libraryName: 'antd-mobile', style: true }], config); 
+  // config = injectBabelPlugin(
+  //   [
+  //     'import', [
+  //       { libraryName: 'antd', style: true },
+  //       { libraryName: 'antd-mobile', style: true }
+  //     ]
+  //    ]
+  // );
+
   config = rewireLess.withLoaderOptions({
-  	modifyVars: { "@primary-color": "#03A7AD",
-  					"@font-family": "Lato" },
+  	modifyVars: { 
+      "@primary-color": "#03A7AD",
+      "@font-family": "Lato",
+      "@brand-primary": "#03A7AD" 
+    },
   })(config, env);
   config = rewireBabelLoader.include(
     config,

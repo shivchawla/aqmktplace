@@ -107,7 +107,7 @@ class AdviceListItemMobileImpl extends React.Component {
                 align="top" 
                 onClick={e => this.handleClick(id)}>
 
-                <Col span={24} style={{paddingLeft:'10px', paddingRight:'10px'}}>
+                <Col span={24} style={{padding: '0 15px'}}>
                     <Row type="flex" justify="space-between" align="middle">
                         <Col span={24}>
                             <h3 style={{fontSize: '18px'}}>{name}</h3>                            
@@ -120,17 +120,6 @@ class AdviceListItemMobileImpl extends React.Component {
                                 this.props.history.push(`/dashboard/advisorprofile/${advisorId}`)}}>{` ${advisorName}`}
                             </span>
                         </Col>
-                        <Col span={10} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                            <AqTag 
-                                    tooltipTitle="Rebalancing Frequency: The advice is rebalanced/updated at this frequency"
-                                    tooltipPlacement="bottom"
-                                    text={rebalancingFrequency}
-                                    textStyle={{marginLeft: '5px'}}
-                                    tagStyle={{marginRight: '0px'}}
-                                    color='#f58231'
-                                    icon='clock-circle-o'
-                            />
-                        </Col>
                         <Col span={24}>
                             <AqRate value={Number(rating)}/>
                         </Col>
@@ -139,11 +128,14 @@ class AdviceListItemMobileImpl extends React.Component {
                                 {this.renderMetricIcons(performanceSummary)}
                             </Row>
                         </Col>
-                        <Col span={24}>
-                            <div style={{height: '1px', backgroundColor: '#eaeaea', marginTop: '5px'}}></div>
-                        </Col>
                     </Row>
                 </Col>
+                {
+                    this.props.border &&
+                    <Col span={24}>
+                        <div style={{height: '7px', backgroundColor: '#efeff4', marginTop: '5px'}}></div>
+                    </Col>
+                }
             </Row>
         );
     }

@@ -31,9 +31,9 @@ export class AqCheckboxGroup extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (!this.props.singleSelect) {
+        // if (!this.props.singleSelect) {
             this.setState({items: this.processValues(nextProps)});
-        }
+        // }
     }
 
     onChange = (e, value) => {
@@ -76,7 +76,7 @@ export class AqCheckboxGroup extends React.Component {
                             onChange={(e) => this.onChange(e, item.value)} 
                             checked={item.checked}
                     >
-                        {item.label}
+                        <h3 style={{fontSize: '14px'}}>{item.label}</h3>
                     </CheckboxItem>
                 ))
             }

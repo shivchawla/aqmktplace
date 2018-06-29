@@ -1,10 +1,10 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Row, Col, Icon, Collapse} from 'antd';
+import {Row, Col, Icon, Collapse, Rate} from 'antd';
 import {Accordion, Radio, List} from 'antd-mobile';
 import {AqCheckboxGroup} from './AqCheckboxGroup';
 import {FilterSliderComponent} from './FilterSliderComponent';
-import {adviceFilters as filters} from '../../constants/filters';
+import {adviceFiltersMobile as defaultSelectedFilters, adviceFilters as filters} from '../../constants/filters';
 import {primaryColor, horizontalBox} from '../../constants';
 import {Utils} from '../../utils';
 import './filter.css';
@@ -17,11 +17,29 @@ const kvp = {
     approved: 'selectApprovedllFilters',
     owner: 'selectOwnerAllFilters'
 };
+const adviceTypeFilterData = [
+    {label: 'All', value: 'all'},
+    {label: 'Trending', value: 'trending'},
+    {label: 'Subscribed', value: 'subscribed'},
+    {label: 'Following', value: 'following'}
+];
+
+const sortByData = [
+    {label: 'Rating', value: 'rating'},
+    {label: 'Return', value: 'return'},
+    {label: 'Name', value: 'name'},
+    {label: 'Volatility', value: 'volatility'},
+    {label: 'Sharpe', value: 'sharpe'},
+    {label: 'Max Loss', value: 'maxLoss'},
+    {label: 'Num. Followers', value: 'numFollowers'},
+    {label: 'Num. Subscribers', value: 'numSubscribers'},
+    {label: 'Created Date', value: 'createdDate'}
+];
 
 export class FilterMobileComponent extends React.Component {
     constructor(props) {
         super(props);
-        const selectedFilters = {...filters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
+        const selectedFilters = {...defaultSelectedFilters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
         this.state = {
             defaultFilters: filters,
             selectedFilters,
@@ -36,8 +54,15 @@ export class FilterMobileComponent extends React.Component {
         this.sliderFilters = [];
     }
 
+    shouldComponentUpdate(nextProps) {
+        if (!_.isEqual(nextProps, this.props)) {
+            return true;
+        }
+        return false;
+    }
+
     componentWillReceiveProps(nextProps) {
-        const selectedFilters = {...filters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
+        const selectedFilters = {...defaultSelectedFilters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
         this.setState({
             selectedFilters,
             owner: nextProps.owner,
@@ -49,17 +74,10 @@ export class FilterMobileComponent extends React.Component {
     }
 
     renderAdviceTypeFilter = () => {
-        const data = [
-            {label: 'All', value: 'all'},
-            {label: 'Trending', value: 'trending'},
-            {label: 'Subscribed', value: 'subscribed'},
-            {label: 'Followimg', value: 'following'},
-        ];
-
         return (
             <AqCheckboxGroup 
                 singleSelect={true}
-                options={data}
+                options={adviceTypeFilterData}
                 value={[this.state.type]} 
                 onChange={checkedValues => this.handleRadioChange('type', checkedValues)}
             />
@@ -67,22 +85,10 @@ export class FilterMobileComponent extends React.Component {
     }
 
     renderSortingOptions = () => {
-        const data = [
-            {label: 'Rating', value: 'rating'},
-            {label: 'Return', value: 'return'},
-            {label: 'Name', value: 'name'},
-            {label: 'Volatility', value: 'volatility'},
-            {label: 'Sharpe', value: 'sharpe'},
-            {label: 'Max Loss', value: 'maxLoss'},
-            {label: 'Num. Followers', value: 'numFollowers'},
-            {label: 'Num. Subscribers', value: 'numSubscribers'},
-            {label: 'Created Date', value: 'createdDate'},
-        ];
-
         return (
             <AqCheckboxGroup 
                 singleSelect={true}
-                options={data}
+                options={sortByData}
                 value={[this.state.sortBy]} 
                 onChange={checkedValues => this.handleRadioChange('sortBy', checkedValues)}
             />
@@ -174,7 +180,7 @@ export class FilterMobileComponent extends React.Component {
                 <Panel 
                         // header={filter.label}
                         header={this.renderHeaderForSliderPanel(filter.label, filter.type)} 
-                        key={5 + index}
+                        key={6 + index}
                 >
                     <Row>
                         <Col span={24}>
@@ -193,6 +199,36 @@ export class FilterMobileComponent extends React.Component {
         })
     }
 
+    handleRatingFilterChange = value => {
+        if (value > 0) {
+            this.setState({
+                selectedFilters: {
+                    ...this.state.selectedFilters,
+                    rating: `${value},5`
+                }
+            });
+        }   
+    }
+
+    renderRatingFilter = () => {
+        return (
+            <Panel
+                header={this.renderHeaderForRating(this.state.selectedFilters.rating.split(',')[0])} 
+            >
+                <Row>
+                    <Col span={24} style={{marginLeft: '20px'}}>
+                        <Rate
+                            value={this.state.selectedFilters.rating.split(',')[0]}
+                            onChange={this.handleRatingFilterChange}
+                            style={{marginLeft: ''}} 
+                            character={<Icon type="star" style={{fontSize: '30px', marginRight: '10px'}}/>} 
+                        />
+                    </Col>
+                </Row>
+            </Panel>
+        );
+    }
+
     applyFilters = () => {
         this.props.toggleFilterMenu();
         this.props.updateSelectedFilters(this.state.selectedFilters, this.state.sortBy, this.state.type);
@@ -205,7 +241,7 @@ export class FilterMobileComponent extends React.Component {
         this.sliderFilters.map(el => {
             el.clearFilter();
         });
-        this.setState({selectedFilters: this.state.defaultFilters}, () => {
+        this.setState({selectedFilters: defaultSelectedFilters, type: 'all', sortBy: 'rating'}, () => {
             this.applyFilters();
         });
     }
@@ -225,28 +261,69 @@ export class FilterMobileComponent extends React.Component {
     }
 
     renderHeaderForRadioPanel = (header, key) => {
+        let selectedOption = '';
+        switch(key) {
+            case "sortBy":
+                selectedOption = sortByData.filter(data => data.value === this.state[key])[0];
+                break;
+            case "type":
+                selectedOption = adviceTypeFilterData.filter(data => data.value === this.state[key])[0];
+                break;
+        }
+
         return (
             <Row className='panel-header'>
                 <Col span={24}>
                     <h3>{header}</h3>
                 </Col>
                 <Col span={24}>
-                    <h5 style={{fontSize: '12px'}}>{this.state[key]}</h5>
+                    <h5 style={{fontSize: '12px'}}>{selectedOption.label}</h5>
                 </Col>
             </Row>
         );
     }
 
     renderHeaderForSliderPanel = (header, key) => {
+        const defaultMin = this.state.defaultFilters[key].split(',')[0];
+        const defaultMax = this.state.defaultFilters[key].split(',')[1];
+        const selectedMin = this.state.selectedFilters[key].split(',')[0];
+        const selectedMax = this.state.selectedFilters[key].split(',')[1];
+
         return (
             <Row className='panel-header'>
                 <Col span={24}>
                     <h3>{header}</h3>
                 </Col>
-                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
-                    <h5 style={{fontSize: '12px'}}>Min: {this.state.selectedFilters[key].split(',')[0]}</h5>
-                    <h5 style={{marginRight: '20px', fontSize: '12px'}}>Max: {this.state.selectedFilters[key].split(',')[1]}</h5>
+                {
+                    (selectedMax !== defaultMax || selectedMin !== defaultMin) &&
+                    <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
+                        <h5 style={{fontSize: '12px'}}>Min: {selectedMin}</h5>
+                        <h5 style={{marginRight: '20px', fontSize: '12px'}}>Max: {selectedMax}</h5>
+                    </Col>
+                }
+            </Row>
+        );
+    }
+
+    renderHeaderForRating = value => {
+        const selectedMin = this.state.selectedFilters.rating.split(',')[0];
+        const defaultMin = this.state.defaultFilters.rating.split(',')[0];
+
+        return (
+            <Row className='panel-header'>
+                <Col span={24}>
+                    <h3>Rating</h3>
                 </Col>
+                {
+                    (selectedMin !== defaultMin) &&
+                    <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
+                        <h5 style={{fontSize: '14px'}}>
+                            {
+                                value == '5 stars' ? value : `${value} stars and above`
+                            }
+                        </h5>
+                    </Col>
+                }
             </Row>
         );
     }
@@ -255,7 +332,6 @@ export class FilterMobileComponent extends React.Component {
         const {selectedFilters} = this.state;
         const filterArray = [
             {type: 'return', label: 'Annual Return', range: selectedFilters.return, min: -100, max: 100},
-            {type: 'rating', label: 'Rating', range: selectedFilters.rating, min: 0, max: 5, step:0.1},
             {type: 'netValue', label: 'Net Value', range: selectedFilters.netValue, min: 0, max: 200000, step: 10000},
             {type: 'volatility', label: 'Volatility', range: selectedFilters.volatility, min: 0, max: 50},
             {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, step: 0.5},
@@ -265,31 +341,41 @@ export class FilterMobileComponent extends React.Component {
             <Row>
                 <Col span={24}>
                     <Row>
-                        <Row className='header-container' style={{padding: '10px 20px', width: '100%'}}>
+                        <Row 
+                                className='header-container' 
+                                style={{padding: '10px 20px', width: '100%', backgroundColor: primaryColor}}
+                        >
                             <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
-                                <h3 style={{fontSize: '26px', fontWeight: '700'}}>{'Sort & Filters'}</h3>
+                                <h3 style={{fontSize: '26px', fontWeight: '700', color: '#fff'}}>{'Sort & Filters'}</h3>
                                 <Icon 
                                         type="close-circle-o" 
-                                        style={{fontSize: '26px', fontWeight: '700'}}
+                                        style={{fontSize: '26px', fontWeight: '700', color: '#fff'}}
                                         onClick={this.props.toggleFilterMenu}
                                 />
                             </Col>
-                            <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginTop: '10px'}}>
+                            <Col 
+                                    span={24} 
+                                    style={{
+                                        ...horizontalBox, 
+                                        justifyContent: 'space-between', 
+                                        marginTop: '10px', 
+                                    }}
+                            >
                                 <h3 
                                         onClick={this.applyFilters} 
-                                        style={{color: primaryColor, fontSize: '18px'}}
+                                        style={{color: '#fff', fontSize: '18px'}}
                                 >
                                     Apply
                                 </h3>
                                 <h3 
                                         onClick={this.clearAllFilters}
-                                        style={{color: primaryColor, fontSize: '18px'}}
+                                        style={{color: '#fff', fontSize: '18px'}}
                                 >
                                     Clear All
                                 </h3>
                             </Col>
                         </Row>
-                        <Row style={{padding: '0 20px', marginTop: '94px'}}>
+                        <Row style={{padding: '0 20px', marginTop: '94px', backgroundColor: '#fff'}}>
                             <Col span={24} >
                                 <Collapse 
                                         bordered={false} 
@@ -340,6 +426,7 @@ export class FilterMobileComponent extends React.Component {
                                             </Col>
                                         </Row>
                                     </Panel>
+                                    {this.renderRatingFilter()}
                                     {this.renderSliderFilters(filterArray)}
                                 </Collapse>
                             </Col>

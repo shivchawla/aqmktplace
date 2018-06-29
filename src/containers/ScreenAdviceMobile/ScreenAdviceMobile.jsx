@@ -6,14 +6,14 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import _ from 'lodash';
 import {slide as HamburgerMenu} from 'react-burger-menu';
 import {Row, Col, Icon, Button, Select, Tabs, Modal, Radio} from 'antd';
-import {SearchBar, List, Pagination} from 'antd-mobile';
+import {SearchBar} from 'antd-mobile';
 import {FilterMobileComponent} from './Filter';
 import {AdviceListItemMobile} from './AdviceListItem';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
 import {loadingColor, horizontalBox} from '../../constants';
 import {ScreenAdviceMeta} from '../../metas';
 import {Utils, fetchAjax, generateRandomString} from '../../utils';
-import {adviceFilters as filters} from '../../constants/filters';
+import {adviceFiltersMobile as filters} from '../../constants/filters';
 import '../../css/screenAdvices.css';
 import '../../css/adviceDetail.css';
 
@@ -227,28 +227,26 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                 advices: this.processAdvices(response.data.advices),
                 totalCount: 1
             });
-            this.setState({show: false, loading: false});
         })
         .catch(error => error)
-        // .finally(() => {
-        //     this.setState({show: false, loading: false});
-        // });
+        .finally(() => {
+            this.setState({show: false, loading: false});
+        });
     }
 
-    getAdvices = adviceUrl => {
+    getAdvices = (adviceUrl, pagination = false) => {
         this.setState({
-            loading: true,
+            loading: pagination ? this.state.loading : true,
             show: this.state.initialCall,
         });
-        console.log('Getting Advices');
         const url = adviceUrl === undefined ? this.processUrl(this.state.selectedTab) : adviceUrl;
         fetchAjax(url, this.props.history, this.props.match.url)
         .then(response => {
             if (this.mounted) {
                 this.setState({
-                    advices: this.state.advices.length < this.state.totalCount
-                            ? [...this.state.advices, ...this.processAdvices(response.data.advices)]
-                            : this.state.advices,
+                    advices: this.state.selectedPage === 1
+                            ? this.processAdvices(response.data.advices)
+                            : [...this.state.advices, ...this.processAdvices(response.data.advices)],
                     totalCount: this.state.initialCall ? _.get(response.data, 'count', 10) : this.state.totalCount,
                     initialCall: false,
                     hasMoreAdvices: response.data.advices.length === 10
@@ -260,7 +258,10 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
         })
         .finally(() => {
             if (this.mounted) {
-                this.setState({loading: false, show: false});
+                this.setState({
+                    show: false,
+                    loading: pagination ? this.state.loading : false, 
+                });
             }
         });
     }
@@ -301,7 +302,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                 heading: advice.heading || '',
                 subscribers: advice.numSubscribers || 0,
                 followers: advice.numFollowers || 0,
-                rating: Number(_.get(advice, 'rating.current', 0) || 0).toFixed(2),
+                rating: Number(_.get(advice, 'rating.simulated', 0) || 0).toFixed(2),
                 performanceSummary: advice.performanceSummary,
                 rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
                 isApproved: _.get(advice, 'latestApproval.status', false),
@@ -326,15 +327,35 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                     style={{
                         position: 'relative', 
                         width: '100%', 
-                        padding: '0px 4px 1% 4px', 
                     }}
             >
-                <AdviceList 
-                    onPaginationChange={this.onPaginationChange}
-                    hasMoreAdvices={this.state.selectedPage <= Math.ceil(this.state.totalCount % 10)}
-                    advices={advices} 
-                    type={type}
+                <Loading
+                        show={this.state.loading}
+                        color={loadingColor}
+                        className="main-loader"
+                        showSpinner={false}
                 />
+                {
+                    !this.state.loading &&
+                    <React.Fragment>
+                        {
+                            advices.length < 1 
+                            ?   <div style={{height: '-webkit-fill-available'}}>
+                                    <h3 
+                                        style={{textAlign: 'center', marginTop: '20px'}}
+                                    >
+                                        No Advices Found
+                                    </h3>
+                                </div>
+                            :   <AdviceList 
+                                    onPaginationChange={this.onPaginationChange}
+                                    hasMoreAdvices={this.state.selectedPage <= Math.ceil(this.state.totalCount % 10)}
+                                    advices={advices} 
+                                    type={type}
+                                />
+                        }
+                    </React.Fragment>
+                }
             </div>
         );
     }
@@ -438,13 +459,11 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
     onPaginationChange = () => {
         let page = Number(this.state.selectedPage) + 1;
         this.setState({selectedPage: page}, () => {
-            // window.scrollTo(0, 0);
-            this.getAdvices();
+            this.getAdvices(undefined, true);
         })
     }   
 
     updateSelectedFilters = (filters, sortBy, type) => {
-        console.log(sortBy);
         this.setState({
             selectedFilters: {
                 ...this.state.selectedFilters,
@@ -452,7 +471,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
             },
             selectedPage: 1,
             sortBy,
-            selectedTab: type
+            selectedTab: type,
         }, () => {
             this.getAdvices();
             Utils.localStorageSave('selectedPage', 1);
@@ -485,6 +504,11 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                 cancelText="Cancel"
                                 value={this.state.searchValue}
                                 onChange={this.handleInputChange}
+                                onCancel={() => {
+                                    this.setState({selectedPage: 1, advices: [], searchValue: ''}, () => {
+                                        this.getAdvices();
+                                    })
+                                }}
                                 onSubmit={() => {
                                     this.setState({selectedPage: 1, advices: []}, () => {
                                         this.getAdvices();
@@ -492,22 +516,30 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                 }}
                         />
                     </Col>
-                    <Col 
-                            span={24} 
-                            style={{
-                                ...horizontalBox, 
-                                alignItems: 'center', 
-                                padding: '10px 15px',
-                                justifyContent: 'space-between',
-                            }}
-                    >
-                        <span style={{fontSize: '18px'}}>{this.state.advices.length} Advices</span>
-                        <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
-                            <span style={{fontSize: '18px', marginRight: '5px'}}>Filter</span>
-                            <Icon type="down" style={{marginTop: '2px', fontSize: '20px'}} />
-                        </div>
-                    </Col>
-                    <Col span={24} style={{padding: '0 15px'}}>
+                    {
+                        this.state.advices.length > 0 &&
+                        <React.Fragment>
+                            <Col 
+                                    span={24} 
+                                    style={{
+                                        ...horizontalBox, 
+                                        alignItems: 'center', 
+                                        padding: '10px 15px',
+                                        justifyContent: 'space-between',
+                                    }}
+                            >
+                                <span style={{fontSize: '14px'}}>{this.state.advices.length} Advices</span>
+                                <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
+                                    <span style={{fontSize: '14px', marginRight: '5px'}}>Filter</span>
+                                    <Icon type="down" style={{marginTop: '2px', fontSize: '14px'}} />
+                                </div>
+                            </Col>
+                            <Col span={24}>
+                                <div style={{height: '2px', backgroundColor: '#efeff4'}}></div>
+                            </Col>
+                        </React.Fragment>
+                    }
+                    <Col span={24} style={{marginTop: '5px'}}>
                         {this.renderAdvicesMobile()}
                     </Col>
                 </Row>
@@ -521,13 +553,13 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                 <ScreenAdviceMeta />
                 {this.renderRightSidebar()}
                 <Loading
-                        show={this.state.show}
+                        show={this.state.loading}
                         color={loadingColor}
                         className="main-loader"
                         showSpinner={false}
                 />
                 {
-                    !this.state.show &&
+                    !this.state.loading &&
                     this.renderPageContentNew()
                 }
             </React.Fragment>
@@ -555,9 +587,10 @@ class AdviceList extends React.Component {
                 hasMore={hasMoreAdvices}
                 loader={<div className="loader" key={0} style={{textAlign: 'center'}}>Loading ...</div>}
                 endMessage={
-                    <p style={{ textAlign: "center" }}>
-                        <b>Yay! You have seen it all</b>
-                    </p>
+                    // <p style={{ textAlign: "center" }}>
+                    //     <b>Yay! You have seen it all</b>
+                    // </p>
+                    null
                 }
                 scrollThreshold={0.6}
             >
@@ -565,12 +598,12 @@ class AdviceList extends React.Component {
                     advices.map((advice, index) => {
                         if (type === 'following') {
                             if (advice.isFollowing && !advice.isSubscribed) {
-                                return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
+                                return <AdviceListItemMobile border={index !== advices.length - 1} key={generateRandomString()} advice={advice}/>;
                             } else {
                                 return null;
                             }
                         } else {
-                            return <AdviceListItemMobile key={generateRandomString()} advice={advice}/>;
+                            return <AdviceListItemMobile border={index !== advices.length - 1} key={generateRandomString()} advice={advice}/>;
                         }
                     })
                 }
