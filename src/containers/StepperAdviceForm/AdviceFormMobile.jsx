@@ -10,7 +10,7 @@ import {Row, Col, Form, Button, message, Icon} from 'antd';
 import {Steps, Button as MobileButton, LocaleProvider} from 'antd-mobile';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
 import {PostWarningModal} from './PostWarningModal';
-import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
+import {AdviceDetailContentMobile} from '../AdviceDetailMobile/AdviceDetailContentMobile';
 import {WarningIcon} from '../../components/WarningIcon';
 import {handleCreateAjaxError, openNotification, Utils, getStockPerformance, fetchAjax, getFirstMonday} from '../../utils';
 import {InvestmentObjective} from './InvestmentObjectiveMobile';
@@ -141,17 +141,13 @@ class AdviceFormMobileImpl extends React.Component {
             'benchmark'
         ];
         switch(currentStep) {
-            case this.adviceNameStep:
-                this.validateFields(adviceName)
-                .then(valid => resolve(valid))
-                .catch(inValid => reject({valid: false, index: currentStep}));
-                break;
             case this.investmentObjectStep:
                 this.validateFields(investmentObjective)
                 .then(valid => resolve(valid))
                 .catch(inValid => reject({valid: false, index: currentStep}));
                 break;
             case this.otherSettingsStep:
+                console.log('Validating Other Settings');
                 this.validateFields(otherSettings)
                 .then(valid => resolve(valid))
                 .catch(inValid => reject({valid: false, index: currentStep}));
@@ -385,18 +381,31 @@ class AdviceFormMobileImpl extends React.Component {
         );
     }
 
+    getPageTitle = (index = this.state.currentStep) => {
+        switch(index) {
+            case 0:
+                return 'Investment Obejctive';
+            case 1:
+                return 'Portfolio';
+            case 2:
+                return 'Other Settings';
+            default:
+                return 'Investment Objective';
+        }
+    }
+
     renderHeader = () => {
         return (
             <Row>
                 <Col span={24} style={{textAlign: 'center', fontSize: '16px'}}>
-                    <h3 style={{fontSize: '16px'}}>Step {this.state.currentStep + 1}</h3>
+                    <h3 style={{fontSize: '16px', color: primaryColor}}>Step {this.state.currentStep + 1}</h3>
                 </Col>
                 <Col span={24} style={{textAlign: 'center'}}>
-                    <h2 style={{fontSize: '18px', fontWeight: '700'}}>Investment Objective</h2>
+                    <h2 style={{fontSize: '18px', fontWeight: '700', color: primaryColor}}>
+                        {this.getPageTitle()}
+                    </h2>
                 </Col>
-                {/* <Col span={24} style={{textAlign: 'center'}}>
-                    <h3>Step {this.state.currentStep + 1}</h3>
-                </Col> */}
+                <Col className='divider' span={24} style={{height: '1px', background: '#DFDFDF'}}/>
             </Row>
         );
     }
@@ -422,7 +431,10 @@ class AdviceFormMobileImpl extends React.Component {
                     />
                 </div>
                 <div style={{display: this.state.currentStep === 2 ? 'block' : 'none'}}>
-                    <OtherSettings {...formProps} />
+                    <OtherSettings 
+                        {...formProps} 
+                        approvalStatusData={this.state.otherApprovalStatus}
+                    />
                 </div>
                 <div style={{display: this.state.currentStep === 1 ? 'block' : 'none'}}>
                     <PortfolioMobile 
@@ -452,12 +464,12 @@ class AdviceFormMobileImpl extends React.Component {
         Gets the suitability or investor type based on the goal selected by the user
     */
     getGoalDetail = type => {
-        const goal = this.props.form.getFieldValue('investmentObjGoal');
-        const goalItem = goals.filter(item => item.field === goal)[0];
+        const goal = this.props.form.getFieldValue('investmentObjInvestorType');
+        const goalItem = goals.filter(item => item.investorType === _.get(goal, '[0]', '') || null)[0];
         if (goalItem) {
             switch(type) {
-                case "investorType":
-                    return goalItem.investorType;
+                case "field":
+                    return goalItem.field;
                 case "suitability":
                     return goalItem.suitability;
             }
@@ -511,11 +523,12 @@ class AdviceFormMobileImpl extends React.Component {
     }
 
     togglePreview = () => {
-        if (this.validatePortfolio()) {
+        this.validateForm()
+        .then(() => {
             this.setState({preview: !this.state.preview}, () => {
                 this.state.preview && this.getAdvicePortfolioPerformance();
             });
-        }
+        })
     }
 
     toggleMarketplaceWarningModal = () => {
@@ -578,6 +591,7 @@ class AdviceFormMobileImpl extends React.Component {
         .then(([advicePortfolioResponse, adviceSummaryResponse]) => {
             const {name = '', investmentObjective = {}} = adviceSummaryResponse.data;
             const investmentObjGoal = _.get(investmentObjective, 'goal.field', '');
+            const investorType = _.get(investmentObjective, 'goal.investorType', '');
             const investmentObjSectors = _.get(investmentObjective, 'sectors.detail', []);
             const investmentObjPortfolioValuation = _.get(investmentObjective, 'portfolioValuation.field', '');
             const investmentObjCapitalization = _.get(investmentObjective, 'capitalization.field', '');
@@ -608,9 +622,10 @@ class AdviceFormMobileImpl extends React.Component {
                     investmentObjPortfolioValuation,
                     investmentObjCapitalization,
                     investmentObjUserText,
-                    benchmark,
-                    rebalancingFrequency,
-                    startDate: this.getFirstValidDate()
+                    benchmark: [benchmark],
+                    rebalancingFrequency: [rebalancingFrequency],
+                    startDate: this.getFirstValidDate(),
+                    investmentObjInvestorType: [investorType]
                 });
             });
         })
@@ -692,7 +707,7 @@ class AdviceFormMobileImpl extends React.Component {
     constructCreateAdviceRequestObject = (values, publish = false) => {
         let {
             adviceName,
-            investmentObjGoal,
+            investmentObjInvestorType,
             investmentObjPortfolioValuation,
             investmentObjSectors,
             investmentObjCapitalization,
@@ -703,7 +718,7 @@ class AdviceFormMobileImpl extends React.Component {
         } = values;
         startDate = moment(startDate).format(dateFormat);
         const endDate = moment(startDate).add(500, 'year').format(dateFormat); // Adding 500 years to the end date
-        const investorType = this.getGoalDetail('investorType');
+        const goal = this.getGoalDetail('field');
         const suitability = this.getGoalDetail('suitability');
         const requestObject = {
             name: adviceName,
@@ -726,12 +741,12 @@ class AdviceFormMobileImpl extends React.Component {
             maxNotional: 1000000,
             investmentObjective: {
                 goal: {
-                    field: investmentObjGoal,
-                    investorType,
+                    field: goal,
+                    investorType: investmentObjInvestorType[0],
                     suitability
                 },
                 sectors: {
-                    detail: investmentObjSectors
+                    detail: this.extractSectorsFromPositions(this.state.positions)
                 },
                 portfolioValuation: {
                     field: investmentObjPortfolioValuation
@@ -766,20 +781,35 @@ class AdviceFormMobileImpl extends React.Component {
         });
     }
 
+    extractSectorsFromPositions = positions => {
+        const sectors = [];
+        positions.map(position => {
+            // Check if sector is present in sectors array and sector is not null
+            const sector = _.get(position, 'sector', null);
+            if (sector) {
+                const sectorIndex = sectors.indexOf(sector);
+                if (sectorIndex === -1) {
+                    sectors.push(sector);
+                }
+            }
+        });
+
+        return sectors;
+    }
+
     /**
      *  Constructs the AdviceDetail prop that is required by AdviceDetailContent
      */
     constructPreviewAdviceDetail = () => {
         const {
             adviceName, 
-            investmentObjGoal,
+            investmentObjInvestorType,
             investmentObjSectors,
             investmentObjPortfolioValuation,
             investmentObjUserText,
             investmentObjCapitalization,
             rebalancingFrequency,
         } = this.props.form.getFieldsValue();
-
         const adviceDetail = {
             isOwner: true,
             name: adviceName,
@@ -794,13 +824,13 @@ class AdviceFormMobileImpl extends React.Component {
             isPublic: false,
             investmentObjective: {
                 goal: {
-                    field: investmentObjGoal,
-                    investorType: this.getGoalDetail('investorType'),
+                    field: this.getGoalDetail('field'),
+                    investorType: investmentObjInvestorType,
                     suitability: this.getGoalDetail('suitability'),
                     valid: true
                 },
                 sectors: {
-                    detail: investmentObjSectors,
+                    detail: this.extractSectorsFromPositions(this.state.positions),
                     valid: true
                 },
                 portfolioValuation: {
@@ -937,12 +967,10 @@ class AdviceFormMobileImpl extends React.Component {
             <Col 
                     span={24} 
                     style={{
-                        // ...horizontalBox, 
-                        // justifyContent: 'space-between',
                         position: 'relative', 
                         marginTop: '20px',
                         marginBottom: '10px',
-                        // alignItems: 'flex-end'
+                        padding: '0 20px'
                     }}
             >
                 <Row gutter={24}>
@@ -992,8 +1020,7 @@ class AdviceFormMobileImpl extends React.Component {
                             style={{
                                 display: this.state.preview ? 'none' : 'block', 
                                 background: '#fff', 
-                                height: '-webkit-fill-available',
-                                paddingTop: '20px'
+                                height: this.props.windowHeight - 45,
                             }}
                             id="form-container"
                     >
@@ -1001,7 +1028,7 @@ class AdviceFormMobileImpl extends React.Component {
                             <Row
                                     type="flex"
                                     justify="start"
-                                    style={{position: 'relative', padding: '20px', paddingTop: '0px'}}
+                                    style={{position: 'relative', padding: '0 px'}}
                             >
                                 <Col span={24} style={{height: 'fit-content'}}>
                                     {this.renderHeader()}
@@ -1011,16 +1038,20 @@ class AdviceFormMobileImpl extends React.Component {
                                         style={{
                                             height: this.props.windowHeight - 160,
                                             overflow: 'hidden',
-                                            overflowY: 'scroll'
+                                            overflowY: 'scroll',
+                                            paddingTop: '10px'
                                         }}
                                 >
                                     {this.renderSelectedStep()}
                                 </Col>
                             </Row>
                     </Col>
-                    <Col span={24} style={{marginTop: '-80px', height: '80px', padding: '0 10px', background: '#fff'}}>
-                        {this.renderNavigationButtons()}
-                    </Col>
+                    {
+                        !this.state.preview &&
+                        <Col span={24} style={{marginTop: '-80px', height: '80px', background: '#fff'}}>
+                            {this.renderNavigationButtons()}
+                        </Col>
+                    }
                 </Row>
             </Form>
         )
@@ -1063,18 +1094,16 @@ class AdviceFormMobileImpl extends React.Component {
             netValue: this.getPortfolioNetValue(),
             nstocks: this.getVerifiedPositions().length
         };
-        const positions = this.constructPreviewPositions();
-
         if(this.state.preview) {
             return (
                 <Row>
                     {this.renderMobileActionButtons()}
                     <Col span={24}>
-                        <AdviceDetailContent 
+                        <AdviceDetailContentMobile 
                             tickers={this.state.highStockSeries}
                             adviceDetail={adviceDetail}
                             metrics={metrics}
-                            positions={positions}
+                            positions={this.processPositionsForPreview(this.state.positions)}
                             preview={true}
                             loading={this.state.loaders.preview}
                             style={{display: this.state.preview ? 'block' : 'none'}}
@@ -1089,6 +1118,15 @@ class AdviceFormMobileImpl extends React.Component {
         }
     }
 
+    processPositionsForPreview = positions => {
+        return positions.map(position => {
+            return {
+                ...position,
+                weightPct: Number(position.weight.toFixed(2))
+            }
+        })
+    }
+
     componentDidMount() {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -1101,7 +1139,7 @@ class AdviceFormMobileImpl extends React.Component {
 
     renderPageContent() {
         return (
-            <AqMobileLayout noHeader={true}>
+            <AqMobileLayout innerPage={true}>
                 <PostWarningModal 
                         visible={this.state.modal.marketPlaceWarning}
                         onOk={e => this.submitAdvice(e, true)}
@@ -1110,13 +1148,6 @@ class AdviceFormMobileImpl extends React.Component {
                 />
                 {this.renderForm()}
                 {this.renderPreview()}
-                <Col xl={6} md={0} sm={0} xs={0}>
-                    {
-                        this.state.preview
-                        ? this.renderActionButtons()
-                        : this.renderProtips()
-                    }
-                </Col>
             </AqMobileLayout>
         );
     }

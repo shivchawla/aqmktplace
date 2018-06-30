@@ -62,13 +62,15 @@ class AddPositionMobileImpl extends React.Component {
             const lastPrice = _.get(data, 'latestDetail.values.Close', 0);
             const shares = this.state.stockData.shares;
             const totalValue = Number((lastPrice * shares).toFixed(2));
+            const sector = _.get(data, 'security.detail.Sector', '');
             this.setState({
                 stockData: {
                     ...this.state.stockData,
                     name,
                     symbol,
                     lastPrice,
-                    totalValue
+                    totalValue,
+                    sector
                 }
             })
         })
@@ -177,17 +179,30 @@ class AddPositionMobileImpl extends React.Component {
         const {symbol, name, shares, lastPrice, totalValue} = this.state.stockData;
 
         return (
-            <Row style={{padding: '0 20px', height: '100%', position: 'relative'}}>
+            <Row style={{height: '100%', position: 'relative'}}>
                 <Col 
                         span={24} 
-                        style={{...horizontalBox, justifyContent: 'center', marginTop: '10px', position: 'relative'}}
+                        style={{
+                            ...horizontalBox, 
+                            justifyContent: 'center', 
+                            position: 'relative',
+                            backgroundColor: primaryColor,
+                            height: '64px'
+                        }}
                 >
                     <Icon 
                         type="close" 
-                        style={{fontSize: '22px', position: 'absolute', left: 0, zIndex: '20'}}
+                        style={{
+                            fontSize: '22px', 
+                            position: 'absolute', 
+                            left: 0, 
+                            zIndex: '20', 
+                            color: '#fff',
+                            marginLeft: '10px'
+                        }}
                         onClick={this.cancelAction}
                     />
-                    <h3 style={{fontSize: '18px'}}>
+                    <h3 style={{fontSize: '18px', color: '#fff'}}>
                         {this.props.updatePosition ? "Update Position" : "Add Position"}
                     </h3>
                 </Col>
@@ -231,7 +246,7 @@ class AddPositionMobileImpl extends React.Component {
                                     <Col span={8}>
                                         <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Shares</h3>
                                     </Col>
-                                    <Col span={16}>
+                                    <Col span={16} style={{...horizontalBox, justifyContent: 'flex-end'}}>
                                         {
                                             this.state.toggleEdit 
                                             ?   <div style={horizontalBox}>
@@ -310,8 +325,8 @@ const StockDetailComponent = ({label, value, valueStyle, labelStyle}) => {
             <Col span={8}>
                 <h3 style={{fontSize: '16px', color: '#4A4A4A', ...labelStyle}}>{label}</h3>
             </Col>
-            <Col span={16}>
-                <h3 style={{fontSize: '16px', color: '#4A4A4A', ...valueStyle}}>{value}</h3>
+            <Col span={16} style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                <h3 style={{fontSize: '16px', color: '#4A4A4A', ...valueStyle, textAlign: 'right'}}>{value}</h3>
             </Col>
         </Row>
     );

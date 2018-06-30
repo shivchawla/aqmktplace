@@ -46,7 +46,7 @@ export class AdviceName extends React.Component {
                 <Col span={24} style={labelStyle}>
                     Advice Name:
                 </Col>
-                <Col span={24}>
+                <Col span={24} style={{marginTop: '7px'}}>
                     <FormItem>
                         {getFieldDecorator('adviceName', {
                             rules: [{required: true, message: 'Please enter Advice Name'}]

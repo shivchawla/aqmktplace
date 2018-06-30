@@ -20,8 +20,6 @@ const MyChartNew = Loadable({
     loader: () => import('../MyChartNew'),
     loading: () => <div>Loading</div>
 });
-const RadioButton = Radio.Button;
-const RadioGroup = Radio.Group;
 const Panel = Collapse.Panel;
 
 class AdviceDetailContentImpl extends React.Component {
@@ -251,72 +249,75 @@ class AdviceDetailContentImpl extends React.Component {
                             />
                         </Spin>
                     </Col>
-                    <Col 
-                            span={24} 
-                            style={{
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                justifyContent: 'center', 
-                                marginTop: '15px',
-                                alignItems: 'center'
-                            }}
-                    >
-                        {
-                            !isOwner
-                            ?   <Button 
-                                        onClick={() => 
-                                            Utils.isLoggedIn() 
-                                            ? unsubscriptionPending 
-                                                    ? this.props.toggleUnsubscriptionModal() 
-                                                    : this.props.toggleSubscriptionModal() 
-                                            : this.redirectToLogin()
-                                            
-                                        }
-                                        type="primary" 
-                                        style={{fontSize: '16px', width: '40%'}}
-                                >
-                                    {!isSubscribed ? "Purchase" : "Unsubscribe"}
-                                </Button>
-                            :   ((!approvalRequested && isPublic) || !isPublic) &&
-                                <Button 
+                    {
+                        !this.props.preview &&
+                        <Col 
+                                span={24} 
+                                style={{
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    justifyContent: 'center', 
+                                    marginTop: '15px',
+                                    alignItems: 'center'
+                                }}
+                        >
+                            {
+                                !isOwner
+                                ?   <Button 
+                                            onClick={() => 
+                                                Utils.isLoggedIn() 
+                                                ? unsubscriptionPending 
+                                                        ? this.props.toggleUnsubscriptionModal() 
+                                                        : this.props.toggleSubscriptionModal() 
+                                                : this.redirectToLogin()
+                                                
+                                            }
                                             type="primary" 
                                             style={{fontSize: '16px', width: '40%'}}
-                                            onClick={() => 
-                                                Utils.isLoggedIn()
-                                                ? this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`)
-                                                : this.redirectToLogin()
-                                            }
                                     >
-                                        Update
-                                </Button>
-                        }
-                        {
-                            approvalRequested &&
-                            <h3 style={{fontSize: '14px', color: primaryColor}}>Approval Requested</h3>
-                        }
-                        {
-                            !isOwner &&
-                            <div 
-                                    onClick={() => console.log('Hello World')}
-                                    style={{...horizontalBox, marginTop: '10px', color: '#4a4a4a'}}
-                                    onClick={() => 
-                                        Utils.isLoggedIn()
-                                        ? this.props.followAdvice()
-                                        : this.redirectToLogin()
-                                    }
-                            > 
-                                <h3 style={{fontSize: '14px', color: primaryColor}}>
-                                    {
-                                        isFollowing ? 'Remove From Wishlist' : 'Add To Wishlist'
-                                    }
-                                </h3>
-                                <Icon 
-                                    type={isFollowing ? "close-circle-o" : "plus-circle-o"} 
-                                    style={{marginLeft: '5px', fontSize: '18px', color: primaryColor}}
-                                />
-                            </div>
-                        }
-                    </Col>
+                                        {!isSubscribed ? "Purchase" : "Unsubscribe"}
+                                    </Button>
+                                :   ((!approvalRequested && isPublic) || !isPublic) &&
+                                    <Button 
+                                                type="primary" 
+                                                style={{fontSize: '16px', width: '40%'}}
+                                                onClick={() => 
+                                                    Utils.isLoggedIn()
+                                                    ? this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`)
+                                                    : this.redirectToLogin()
+                                                }
+                                        >
+                                            Update
+                                    </Button>
+                            }
+                            {
+                                approvalRequested &&
+                                <h3 style={{fontSize: '14px', color: primaryColor}}>Approval Requested</h3>
+                            }
+                            {
+                                !isOwner &&
+                                <div 
+                                        onClick={() => console.log('Hello World')}
+                                        style={{...horizontalBox, marginTop: '10px', color: '#4a4a4a'}}
+                                        onClick={() => 
+                                            Utils.isLoggedIn()
+                                            ? this.props.followAdvice()
+                                            : this.redirectToLogin()
+                                        }
+                                > 
+                                    <h3 style={{fontSize: '14px', color: primaryColor}}>
+                                        {
+                                            isFollowing ? 'Remove From Wishlist' : 'Add To Wishlist'
+                                        }
+                                    </h3>
+                                    <Icon 
+                                        type={isFollowing ? "close-circle-o" : "plus-circle-o"} 
+                                        style={{marginLeft: '5px', fontSize: '18px', color: primaryColor}}
+                                    />
+                                </div>
+                            }
+                        </Col>
+                    }
                 </Row>
                 <div style={{width: '100%', height: '1px', backgroundColor: '#e8e8e8'}}></div>
                 <Row className="row-container" style={{marginTop: '5px'}}>
@@ -515,7 +516,10 @@ class AdviceDetailContentImpl extends React.Component {
                                     style={{position: 'relative', paddingTop: '0px'}}
                             >
                                 <Col span={24}>
-                                    <PositionItems positions={this.props.positions || []} />
+                                    <PositionItems 
+                                        positions={this.props.positions || []} 
+                                        preview={this.props.preview}
+                                    />
                                 </Col>
                             </Row>
                         </Panel>

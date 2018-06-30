@@ -4,8 +4,8 @@ import windowSize from 'react-window-size';
 import InfiniteScroll from "react-infinite-scroll-component";
 import _ from 'lodash';
 import {slide as HamburgerMenu} from 'react-burger-menu';
-import {Row, Col, Icon, Button, Select, Tabs, Modal, Radio} from 'antd';
-import {SearchBar, Button as MobileButton} from 'antd-mobile';
+import {Row, Col, Icon, Button, Select, Modal, Radio} from 'antd';
+import {SearchBar, Button as MobileButton, Tabs} from 'antd-mobile';
 import {FilterMobileComponent} from './Filter';
 import {AdviceListItemMobile} from './AdviceListItem';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
@@ -20,6 +20,12 @@ const {requestUrl} = require('../../localConfig');
 const Option = Select.Option;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
+const adviceTabs = [
+    { title: 'All', key: 'all' },
+    { title: 'Trending', key: 'trending' },
+    { title: 'Subscribed', key: 'subscribed' },
+    { title: 'Following', key: 'following' }
+  ];
 class ScreenAdviceMobileImpl extends React.PureComponent {
     mounted = false;
     constructor(props) {
@@ -336,7 +342,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                 />
                 {
                     !this.state.loading &&
-                    <React.Fragment>
+                    <Col span={24} style={{marginTop: '20px'}}>
                         {
                             advices.length < 1 
                             ?   <div style={{height: '-webkit-fill-available'}}>
@@ -353,7 +359,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                     type={type}
                                 />
                         }
-                    </React.Fragment>
+                    </Col>
                 }
             </div>
         );
@@ -407,7 +413,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
         this.setState({adviceUrl: url});
     }
 
-    handleTabChange = (key) => {
+    handleTabChange = ({tab, key}) => {
         this.setState({selectedTab: key, selectedPage: 1}, () => {
             Utils.localStorageSave('selectedTab', key);
             Utils.localStorageSave('selectedPage', 1);
@@ -493,6 +499,18 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
         );
     }
 
+    getFilterAppliedCount = () => {
+        const {selectedFilters = {}} = this.state;
+        let appliedFilterCount = 0;
+        Object.keys(selectedFilters).map(filter => {
+            if (!_.isEqual(selectedFilters[filter], filters[filter])) {
+                appliedFilterCount++;
+            }
+        });
+
+        return appliedFilterCount;
+    }
+
     renderPageContentNew = () => {
         return (
             <AqMobileLayout>
@@ -531,7 +549,12 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                 {
                                     Utils.isLoggedIn()
                                     ?   <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
-                                            <span style={{fontSize: '14px', marginRight: '5px'}}>Filter</span>
+                                            <span style={{fontSize: '14px', marginRight: '5px'}}>
+                                                Filter
+                                                {
+                                                    this.getFilterAppliedCount() > 0 ? `(${this.getFilterAppliedCount()})` : null
+                                                }
+                                            </span>
                                             <Icon type="down" style={{marginTop: '2px', fontSize: '14px'}} />
                                         </div>
                                     :   <MobileButton 
@@ -550,8 +573,16 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                             </Col>
                         </React.Fragment>
                     }
+                    
                     <Col span={24} style={{marginTop: '5px'}}>
-                        {this.renderAdvicesMobile()}
+                        <Tabs 
+                                page={_.findIndex(adviceTabs, tab => tab.key === this.state.selectedTab)} 
+                                tabs={adviceTabs} 
+                                animated={false} 
+                                onChange={this.handleTabChange}
+                        >
+                            {this.renderAdvicesMobile()}
+                        </Tabs>
                     </Col>
                 </Row>
             </AqMobileLayout>

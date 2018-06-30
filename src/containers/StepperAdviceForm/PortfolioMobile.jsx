@@ -2,8 +2,8 @@ import * as React from 'react';
 import _ from 'lodash';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {withRouter} from 'react-router';
-import {Row, Col, Modal, Spin, Select, Icon} from 'antd';
-import {Button as MobileButton, Checkbox, Icon as MobileIcon} from 'antd-mobile';
+import {Row, Col, Modal, Spin, Select, Icon, Checkbox} from 'antd';
+import {Button as MobileButton, Icon as MobileIcon} from 'antd-mobile';
 import {AddPositionMobile} from './AddPositionMobile';
 import {metricColor, primaryColor, horizontalBox} from '../../constants';
 import {benchmarks} from '../../constants/benchmarks';
@@ -13,7 +13,7 @@ import {MetricItem} from '../../components/MetricItem';
 import { Utils } from '../../utils';
 
 const Option = Select.Option;
-const CheckboxItem = Checkbox.CheckboxItem;
+// const CheckboxItem = Checkbox.CheckboxItem;
 
 export class PortfolioMobileImpl extends React.Component {
     constructor(props) {
@@ -140,7 +140,6 @@ export class PortfolioMobileImpl extends React.Component {
                 <Spin spinning={this.state.loadingPortfolioPerformance}>
                     <Row 
                             style={{
-                                padding: '10px',
                                 height: '-webkit-fill-available'
                             }}
                     >
@@ -148,22 +147,30 @@ export class PortfolioMobileImpl extends React.Component {
                                 style={{
                                     ...horizontalBox, 
                                     justifyContent: 'center', 
-                                    marginTop: '10px', 
                                     position: 'relative',
-                                    marginBottom: '20px'
+                                    marginBottom: '20px',
+                                    backgroundColor: primaryColor,
+                                    height: '64px'
                                 }}
                         >
                             <Icon 
                                 type="close" 
-                                style={{fontSize: '22px', position: 'absolute', left: 0, zIndex: '20'}}
+                                style={{
+                                    fontSize: '22px', 
+                                    position: 'absolute', 
+                                    left: 0, 
+                                    zIndex: '20', 
+                                    color: '#fff',
+                                    marginLeft: '10px'
+                                }}
                                 onClick={this.togglePerformanceBottomSheet}
                             />
-                            <h3 style={{fontSize: '18px'}}>Advice Performance</h3>
+                            <h3 style={{fontSize: '18px', color: '#fff'}}>Advice Performance</h3>
                         </Col>
-                        <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', padding: '0 10px'}}>
                             {this.renderBenchmarkDropdown()}
                         </Col>
-                        <Col span={24}>
+                        <Col span={24} style={{padding: '0 10px'}}>
                             <MyChartNew 
                                     series={this.state.highStockSeries} 
                                     chartId="advice-preview-performance-chart"
@@ -223,6 +230,7 @@ export class PortfolioMobileImpl extends React.Component {
                             toBeDeletePosition.key === position.key)[0] !== undefined
                         }
                         bottomBorder={index !== positions.length - 1}
+                        topBorder={index == 0}
                     />
         })
     }
@@ -262,7 +270,7 @@ export class PortfolioMobileImpl extends React.Component {
                 {this.renderAddPositionBottomSheet()}
                 {this.renderAdvicePerformanceBottomSheet()}
                 {this.renderPerformanceModal()}
-                <Col span={24}>
+                <Col span={24} style={{padding: '0 20px'}}>
                     {
                         this.props.error.show &&
                         <h3 
@@ -276,14 +284,21 @@ export class PortfolioMobileImpl extends React.Component {
                         </h3>
                     }
                 </Col>
-                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
-                    <Icon type="delete" onClick={this.deletePositions} style={{fontSize: '20px'}} />
+                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', padding: '0 20px'}}>
+                    <Icon 
+                        type="delete" 
+                        onClick={() => this.state.toBeDeletedPositions.length > 0 && this.deletePositions()} 
+                        style={{
+                            fontSize: '20px', 
+                            color: this.state.toBeDeletedPositions.length > 0 ? metricColor.negative : '#CECECE'
+                        }} 
+                    />
                     <h3 style={{fontSize: '16px', marginLeft: '35px'}}>Add Positions</h3>
                     <div style={horizontalBox}>
                         <Icon 
                             onClick={this.addPositionHandleClick} 
-                            type="plus" 
-                            style={{fontSize: '22px', fontWeight: '700', marginRight: '20px'}} 
+                            type="plus-circle" 
+                            style={{fontSize: '22px', fontWeight: '700', marginRight: '20px', color: primaryColor}} 
                         />
                         {
                             <Icon 
@@ -297,7 +312,7 @@ export class PortfolioMobileImpl extends React.Component {
                         }
                     </div>
                 </Col>
-                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginTop: '20px'}}>
+                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginTop: '20px', padding: '0 20px'}}>
                     <h3 style={{fontSize: '14px'}}>
                         Num. of Stocks: 
                         &nbsp;<span style={{fontWeight: '700', fontSize: '16px'}}>{positions.length}</span>
@@ -310,7 +325,7 @@ export class PortfolioMobileImpl extends React.Component {
                         </span>
                     </h3>
                 </Col>
-                <Col span={24}>
+                <Col span={24} style={{marginTop: '10px'}}>
                     {this.renderPositions()}
                 </Col>
             </Col>
@@ -320,28 +335,34 @@ export class PortfolioMobileImpl extends React.Component {
 
 export const PortfolioMobile = withRouter(PortfolioMobileImpl);
 
-const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorder}) => {
-    const {name = '', shares = 0, lastPrice = 0, weight = 0, totalValue = 0, key = 0} = position;
+const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorder, topBorder}) => {
+    const {name = '', shares = 0, lastPrice = 0, weight = 0, totalValue = 0, key = 0, symbol} = position;
 
     return (
         <Row 
                 style={{
-                    marginBottom: '10px',
-                    marginTop: '20px',
+                    // marginBottom: '10px',
+                    // marginTop: '20px',
                     borderRadius: '2px'
                 }}
         >
             <Col span={24}>
-                <Row type="flex" align="middle">
+                {
+                    topBorder &&
+                    <div style={{height: '7px', backgroundColor: '#efeff4'}}></div>
+                }
+            </Col>
+            <Col span={24} style={{marginTop: '10px'}}>
+                <Row type="flex" align="middle" style={{padding: '0 20px'}}>
                     <Col span={2}>
-                        <CheckboxItem 
+                        <Checkbox 
                             style={{paddingLeft: '0px'}}
                             onChange={() => takeDeleteAction(position)}
                             checked={checked}
                         />
                     </Col>
                     <Col span={20}>
-                        <h3 style={{color: primaryColor, fontSize: '16px'}}>{name}</h3>
+                        <h3 style={{color: primaryColor, fontSize: '16px'}}>{symbol}</h3>
                     </Col>
                     <Col span={2}>
                         <Icon 
@@ -353,17 +374,17 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                 </Row>
             </Col>
             <Col span={24}>
-                <Row type="flex" align="middle">
+                <Row type="flex" align="middle" justify="space-between" style={{padding: '0 20px'}}>
                     <Col span={6}>
                         <MetricItem 
-                            label="Shares"
+                            label="Num. of Shares"
                             value={shares}
                             labelStyle={metricLabelStyle}
                             valueStyle={metricValueStyle}
                             noNumeric={true}
                         />
                     </Col>
-                    <Col span={6}>
+                    {/* <Col span={6}>
                         <MetricItem 
                             label="Last Price"
                             value={Number(lastPrice)}
@@ -371,7 +392,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                             valueStyle={metricValueStyle}
                             money
                         />
-                    </Col>
+                    </Col> */}
                     <Col span={6}>
                         <MetricItem 
                             label="Total"
@@ -392,10 +413,10 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     </Col>
                 </Row>
             </Col>
-            <Col span={24}>
+            <Col span={24} style={{marginTop: '12px'}}>
                 {
-                    bottomBorder &&
-                    <div style={{height: '1px', background: '#eaeaea', marginTop: '10px'}}></div>
+                    // bottomBorder &&
+                    <div style={{height: '7px', backgroundColor: '#efeff4', marginTop: '5px'}}></div>
                 }
             </Col>
         </Row>
@@ -403,7 +424,8 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
 }
 
 const metricValueStyle = {
-    fontSize: '14px',
+    fontSize: '18px',
+    fontWeight: '400'
 };
 
 const metricLabelStyle = {

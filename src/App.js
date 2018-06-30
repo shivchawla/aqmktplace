@@ -73,6 +73,11 @@ const UpdateAdvice = Loadable({
     loading: () => <Icon type="loading" />
 });
 
+const UpdateAdviceMobile = Loadable({
+    loader: () => import('./containers/UpdateAdviceMobile'),
+    loading: () => <Icon type="loading" />
+});
+
 const PortfolioDetail = Loadable({
     loader: () => import('./containers/PortfolioDetail'),
     loading: () => <Icon type="loading" />
@@ -392,7 +397,7 @@ class App extends React.Component {
                                         <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} /> 
                                         <Route exact={true} path='/dashboard/createadvice' component={CreateAdviceMobile} /> 
                                         <Route exact={true} path='/dashboard/createportfolio' component={WorkInProgress} /> 
-                                        <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
+                                        <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdviceMobile} /> 
                                         <Route exact={true} path='/dashboard/portfolio/:id' component={WorkInProgress} /> 
                                         <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={WorkInProgress} /> 
                                         <Route exact={true} path='/dashboard/advisorprofile/:id' component={WorkInProgress} /> 

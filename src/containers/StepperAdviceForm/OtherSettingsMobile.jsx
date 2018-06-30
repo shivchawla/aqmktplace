@@ -80,19 +80,18 @@ export class OtherSettings extends React.Component {
         return false;
     }
 
-    render = () => {
+    render() {
         const {getFieldDecorator, getFieldProps} = this.props.form;
-        // this.props.form.getFieldValue('fieldName');
         
         return (
-            <Col>
+            <Col style={{padding: '0 20px', paddingTop: '10px'}}>
                 <AdviceName {...this.props} approvalStatusData={this.props.approvalStatusData} />
 
                 <Row type = "flex" style={{marginTop: '30px'}} align="middle">
-                    <Col span={24} >
-                    <h4 style={labelStyle}>Rebalancing Frequency:</h4>
+                    <Col span={24} style={{zIndex: '100'}}>
+                        <h4 style={labelStyle}>Rebalancing Frequency:</h4>
                     </Col>
-                    <Col span={24}>
+                    <Col span={24} style={{marginTop: '-5px'}}>
                         
                         {
                             this.renderMenu(
@@ -109,7 +108,7 @@ export class OtherSettings extends React.Component {
                     <Col span={24} >
                         {this.renderHeader('Start Date', tooltips['startDate'])}
                     </Col>
-                    <Col span={24}>
+                    <Col span={24} style={{marginTop: '7px'}}>
                         <FormItem>
                             {getFieldDecorator('startDate', {
                                 initialValue: moment(),
@@ -128,10 +127,10 @@ export class OtherSettings extends React.Component {
                 </Row>
 
                 <Row type = "flex" style={{marginTop: '30px'}} align="middle">
-                    <Col span={24} >
+                    <Col span={24} style={{zIndex: '100'}}>
                         <h4 style={labelStyle}>Benchmark:</h4>
                     </Col>
-                    <Col span={24}>
+                    <Col span={24} style={{marginTop: '-5px'}}>
                         {
                             this.renderMenu(
                                 'benchmark', 

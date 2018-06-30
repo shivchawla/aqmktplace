@@ -37,6 +37,8 @@ export class PositionItems extends React.Component {
     }
 
     render() {
+        const positions = this.props.preview ? this.props.positions : this.processPositions();
+
         return (
             <Row>
                 <Col span={24}>
@@ -55,7 +57,7 @@ export class PositionItems extends React.Component {
                 <Col span={24} style={{marginTop: '10px'}}>
                     <Collapse bordered={false} onChange={this.onCollapseChange}>
                         {
-                            this.processPositions().map((position, index) => {
+                            positions.map((position, index) => {
                                 const {activePanelKeys} = this.state;
                                 const mode = activePanelKeys.indexOf(index.toString()) === -1 ? "horizontal" : "vertical";
                                 return (
@@ -150,8 +152,8 @@ const NewPositionHeader = ({position, showLabel = false}) => {
 }
 
 const PositionItem = ({position}) => {
-    const {symbol = '', shares = 0, lastPrice = 0, sector = '', weightPct = 0} = position;
-
+    const {symbol = '', shares = 0, lastPrice = 0, sector = '', weightPct = 0, weight = 0} = position;
+    
     return (
         <Row>
             <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
@@ -172,7 +174,7 @@ const PositionItem = ({position}) => {
             </Col>
             <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
                 <h3 style={positionTextlStyle}>Weight:</h3>
-                <h3 style={positionTextlStyle}>{weightPct} %</h3>
+                <h3 style={positionTextlStyle}>{(weight * 100).toFixed(2)} %</h3>
             </Col>
         </Row>
     );
@@ -182,10 +184,6 @@ const positionTextlStyle = {
     fontSize: '16px',
     color: '#4A4A4A',
     marginBottom: '5px'
-};
-
-const customPanelStyleNew = {
-    marginBottom: '10px'
 };
 
 const valueStyle = {

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Media from 'react-media';
 import {Row, Col, Collapse} from 'antd';
 import {Footer} from '../components/Footer';
 import {shadowBoxStyle} from '../constants';
@@ -110,20 +111,48 @@ export default class FAQ extends React.Component {
 
         return (
             <React.Fragment>
-                <Row className='aq-page-container'>
-                    <Col span={18} style={{...shadowBoxStyle, marginTop: '20px'}}>
-                        <Row style={{padding: '20px'}}>
-                            <Col span={24}>
-                                <h1>FAQ</h1>
-                            </Col>
-                            <Col span={24}>
-                                <FAQGroup name='General' qas={generalQAS}/>
-                                <FAQGroup name='Advice' qas={adviceQAS}/>
-                                <FAQGroup name='Advisor' qas={advisorQAS}/>
-                            </Col>
-                        </Row>
-                    </Col>
-                </Row>
+                    <Media 
+                        query="(max-width: 599px)"
+                        render={() => {
+                            return (
+                                <Row>
+                                    <Col span={24}>
+                                        <Row style={{padding: '20px 0', paddingTop: '0'}}>
+                                            <Col span={24} style={{padding: '0 10px'}}>
+                                                <h1>FAQ</h1>
+                                            </Col>
+                                            <Col span={24} style={{marginTop: '-20px'}}>
+                                                <FAQGroup name='General' qas={generalQAS}/>
+                                                <FAQGroup name='Advice' qas={adviceQAS}/>
+                                                <FAQGroup name='Advisor' qas={advisorQAS}/>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            );
+                        }}
+                    />          
+                    <Media 
+                        query="(min-width: 600px)"
+                        render={() => {
+                            return (
+                                <Row className='aq-page-container'>
+                                    <Col span={18} style={{...shadowBoxStyle, marginTop: '20px'}}>
+                                        <Row style={{padding: '20px'}}>
+                                            <Col span={24}>
+                                                <h1>FAQ</h1>
+                                            </Col>
+                                            <Col span={24}>
+                                                <FAQGroup name='General' qas={generalQAS}/>
+                                                <FAQGroup name='Advice' qas={adviceQAS}/>
+                                                <FAQGroup name='Advisor' qas={advisorQAS}/>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            );
+                        }}
+                    />                    
                 <Footer />
             </React.Fragment>
         );
@@ -133,7 +162,7 @@ export default class FAQ extends React.Component {
 const FAQGroup = ({name, qas}) => { // Group name and question answers
     return (
         <Row style={{marginTop: '20px'}}>
-            <Col span={24}>
+            <Col span={24} style={{padding: '0 10px'}}>
                 <h3 style={{fontWeight: '700', color: '#323C5A'}}>{name}</h3>
             </Col>
             <Col span={24} style={{marginTop: '20px'}}>
@@ -149,7 +178,7 @@ const FAQGroup = ({name, qas}) => { // Group name and question answers
                                     {
                                         item.answer &&
                                         <h5 
-                                                style={{fontSize: '16px', marginLeft: '40px', marginBottom: '5px', color: '#515151'}}
+                                                style={{fontSize: '16px', marginBottom: '5px', color: '#515151'}}
                                         >
                                             {item.answer}
                                         </h5>

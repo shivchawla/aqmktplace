@@ -88,11 +88,19 @@ class AqMobileLayoutImpl extends React.Component {
                             span={24} 
                             style={{
                                 display: 'flex', 
-                                justifyContent: 'flex-end', 
+                                justifyContent: 'space-between', 
                                 paddingTop: '10px', 
-                                paddingRight: '10px'
+                                paddingRight: '10px',
+                                alignItems: 'center',
                             }}
                     >
+                        <div onClick={() => this.props.history.push('/home')} 
+                            style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                            <span style={{...biggerFont, color:primaryColor}}>A</span>
+                            <span style={{color: primaryColor}}>DVICE</span>
+                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                            <span style={{color: '#e06666'}}>UBE</span>
+                        </div>
                         <Icon 
                             type="close" 
                             style={{fontSize: '24px', zIndex: '20'}}

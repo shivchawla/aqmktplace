@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Row, Col, Form, Select, Radio} from 'antd';
+import {Row, Col} from 'antd';
 import {SegmentedControl, Picker, List} from 'antd-mobile';
 import {InvestMentObjComponent} from './InvestmentobjComponentMobile';
 import {goals, portfolioValuation, capitalization} from '../../constants';
@@ -31,7 +31,7 @@ export class InvestmentObjective extends React.Component {
                 header={fieldName}
                 content={
                     <SegmentedControl
-                        style={{width: '100%', height: '30px'}} 
+                        style={{width: '100%', height: '30px', marginTop: '10px'}} 
                         values={items}
                         key={fieldId}
                         selectedIndex={this.getSelectedIndexForSegment(items, fieldId)}
@@ -91,13 +91,13 @@ export class InvestmentObjective extends React.Component {
         return (
             <Col 
                     span={24}                        
-                    style={{display: 'block'}}
+                    style={{display: 'block', padding: '0 20px'}}
             >
                 <Row {...investmentObjRowProps}>
-                    <Col span={24}>
+                    <Col span={24} style={{zIndex: '100'}}>
                         <h3 style={labelStyle}>Investor Type</h3>
                     </Col>
-                    <Col span={24}>
+                    <Col span={24} style={{marginTop: '-5px'}}>
                         <Picker
                                 data={goals.map(item => {return {label: item.investorType, value: item.investorType}})}
                                 title=""

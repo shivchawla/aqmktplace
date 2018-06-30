@@ -54,8 +54,8 @@ export class FilterMobileComponent extends React.Component {
         this.sliderFilters = [];
     }
 
-    shouldComponentUpdate(nextProps) {
-        if (!_.isEqual(nextProps, this.props)) {
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
             return true;
         }
         return false;
@@ -180,7 +180,7 @@ export class FilterMobileComponent extends React.Component {
                 <Panel 
                         // header={filter.label}
                         header={this.renderHeaderForSliderPanel(filter.label, filter.type)} 
-                        key={6 + index}
+                        key={5 + index}
                 >
                     <Row>
                         <Col span={24}>
@@ -218,7 +218,7 @@ export class FilterMobileComponent extends React.Component {
                 <Row>
                     <Col span={24} style={{marginLeft: '20px'}}>
                         <Rate
-                            value={this.state.selectedFilters.rating.split(',')[0]}
+                            value={Number(this.state.selectedFilters.rating.split(',')[0])}
                             onChange={this.handleRatingFilterChange}
                             style={{marginLeft: ''}} 
                             character={<Icon type="star" style={{fontSize: '30px', marginRight: '10px'}}/>} 
@@ -390,7 +390,7 @@ export class FilterMobileComponent extends React.Component {
                                             </Col>
                                         </Row>
                                     </Panel>
-                                    <Panel 
+                                    {/* <Panel 
                                             header={this.renderHeaderForRadioPanel('Advice Type', 'type')}
                                     >
                                         <Row>
@@ -398,7 +398,7 @@ export class FilterMobileComponent extends React.Component {
                                                 {this.renderAdviceTypeFilter()}
                                             </Col>
                                         </Row>
-                                    </Panel>
+                                    </Panel> */}
                                     <Panel 
                                             header={this.renderHeaderForPanel('Rebalancing Frequency', 'rebalancingFrequency')}
                                     >
