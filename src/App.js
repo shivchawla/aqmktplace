@@ -3,8 +3,9 @@ import Media from 'react-media';
 import ReactGA from 'react-ga';
 import Loadable from 'react-loadable';
 import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
-import {Route} from 'react-router';
-import {withRouter, Switch} from 'react-router-dom';
+import Route from 'react-router/Route';
+import withRouter from 'react-router-dom/withRouter';
+import Switch from 'react-router-dom/Switch';
 import {Utils} from './utils';
 import {primaryColor, horizontalBox} from './constants';
 import logo from "./assets/logo-advq-new.png";
@@ -195,9 +196,11 @@ class App extends React.Component {
             {regExp: '^\/$', title: 'Home - AdviceQube'},
             {regExp: '^\/policies\/tnc$', title: 'Terms and Conditions - AdviceQube'},
             {regExp: '^\/policies\/privacy$', title: 'Privacy Policy - AdviceQube'},
+            {regExp: '^\/dashboard$', title: 'Investor Dashboard - AdviceQube'},
             {regExp: '^\/dashboard\/investor\/[A-Za-z0-9]+$', title: 'Investor Dashboard - AdviceQube'},
             {regExp: '^\/dashboard\/advisor\/[A-Za-z0-9]+$', title: 'Advisor Dashboard - AdviceQube'},
             {regExp: '^\/dashboard\/createportfolio$', title: 'Create Portfolio - AdviceQube'},
+            {regExp: '^\/dashboard\/createadvice$', title: 'Create Advice - AdviceQube'},
             {regExp: '^\/stockresearch$', title: 'Stock Research - AdviceQube'},
             {regExp: '^\/login$', title: 'Login - AdviceQube'},
             {regExp: '^\/signup$', title: 'Register - AdviceQube'},
@@ -215,8 +218,6 @@ class App extends React.Component {
                 return;
             }
         });
-        const parentPath = locationArray.length > 0 ? locationArray[1] : '/'; 
-        this.setState({parentPath});
     }
 
     handleNavMenuClick = e => {
@@ -293,7 +294,7 @@ class App extends React.Component {
     renderHeader = () => {
         return (
             <React.Fragment>
-                {
+                {/* {
                     this.showHeaderAdviceLogo(this.state.parentPath) &&
                     <Media 
                         query="(max-width: 599px)"
@@ -334,7 +335,7 @@ class App extends React.Component {
                                                         right: '20px'
                                                     }}
                                                     onClick={() => this.props.history.push('/login')}
-                                            >
+                           a                 >
                                                 Login
                                             </h3>
                                         }
@@ -343,8 +344,8 @@ class App extends React.Component {
                             );
                         }}
                     />
-                }
-                <Media 
+                } */}
+                {/* <Media 
                     query="(min-width: 600px)"
                     render={() => {
                         return (
@@ -366,7 +367,7 @@ class App extends React.Component {
                             </Header>
                         );
                     }}
-                />
+                /> */}
             </React.Fragment>
         );
     }       
@@ -376,7 +377,7 @@ class App extends React.Component {
             <React.Fragment>
                 {/* {this.renderBurgerMenu()} */}
                 <Layout style={{backgroundColor: '#f9f9f9', height:'100%'}}>
-                    {this.renderHeader()}
+                    {/* {this.renderHeader()} */}
                     <Content style={contentLayoutStyle}>
                         {/*
                             Add Routes in the following format if it is to be synced with header navigation

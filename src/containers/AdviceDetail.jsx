@@ -11,7 +11,6 @@ import UpdateAdvice from './UpdateAdvice';
 import {AdviceDetailContent} from './AdviceDetailContent';
 import {ApprovalItemView} from '../components/ApprovalItemView';
 import {ApprovalItem} from '../components/ApprovalItem';
-import {Footer} from '../components/Footer';
 import ForbiddenAccess from '../components/ForbiddenAccess';
 import {MetricItem} from '../components/MetricItem';
 import {AqPageHeader} from '../components/AqPageHeader';
@@ -20,6 +19,7 @@ import {AdviceDetailMeta} from '../metas';
 import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import '../css/adviceDetail.css';
+import AppLayout from './AppLayout';
 
 const StockResearchModal = Loadable({
     loader: () => import('../components/StockResearchModal'),
@@ -137,7 +137,6 @@ class AdviceDetailImpl extends React.Component {
             barDollarSeries: [],
             barPercentageSeries: [],
             positions: [],
-            show: false,
             cash: -10,
             stockResearchModalVisible: false,
             unsubscriptionModalVisible: false,
@@ -156,7 +155,8 @@ class AdviceDetailImpl extends React.Component {
             approvalObj,
             postWarningModalVisible: false,
             postToMarketPlaceLoading: false,
-            requestApprovalLoading: false
+            requestApprovalLoading: false,
+            loading: true,
         };
 
         this.performanceSummary = {};
@@ -340,7 +340,7 @@ class AdviceDetailImpl extends React.Component {
     getDefaultAdviceData = () => {
         const adviceId = this.props.match.params.id;
         const adviceSummaryUrl = `${requestUrl}/advice_default/${adviceId}?fullperformance=true`;
-        this.setState({show: true});
+        this.setState({loading: true});
         fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url)
         .then(summaryResponse => {
             const benchmark = _.get(summaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
@@ -355,7 +355,7 @@ class AdviceDetailImpl extends React.Component {
             return error;
         })
         .finally(() => {
-            this.setState({show: false});
+            this.setState({loading: false});
         });
     }
 
@@ -369,7 +369,7 @@ class AdviceDetailImpl extends React.Component {
         const adviceId = this.props.match.params.id;
         const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
         const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
-        this.setState({show: true});
+        this.setState({loading: true});
         return Promise.all([
             fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
             fetchAjax(advicePerformanceUrl, this.props.history, this.props.match.url),
@@ -402,7 +402,7 @@ class AdviceDetailImpl extends React.Component {
             return error;
         })
         .finally(() => {
-            this.setState({show: false});
+            this.setState({loading: false});
         });
     };
 
@@ -1331,31 +1331,26 @@ class AdviceDetailImpl extends React.Component {
                             {this.renderApprovalTabs()}
                         </Col>
                     </Row>
-                    <Footer />
                 </React.Fragment>
         );
     }
 
     render() {
         return (
-           <Row>
-                <Loading
-                    show={this.state.show}
-                    color={loadingColor}
-                    className="main-loader"
-                    showSpinner={false}
-                />
-                <AdviceDetailMeta />
-                {this.renderModal()}
-                {this.renderPostWarningModal()}
-                {this.renderUpdateModal()}
-                {this.renderApprovalModal()}
-                {this.renderUnsubscriptionModal()}
-                {
-                        !this.state.show &&
-                        this.renderPageContent()
-                }
-           </Row>
+            <AppLayout 
+                loading = {this.state.loading}
+                content={
+                   <Row>
+                        <AdviceDetailMeta />
+                        {this.renderModal()}
+                        {this.renderPostWarningModal()}
+                        {this.renderUpdateModal()}
+                        {this.renderApprovalModal()}
+                        {this.renderUnsubscriptionModal()}
+                        {this.renderPageContent()}
+                   </Row>
+               }>
+           </AppLayout>
         );
     }
 }

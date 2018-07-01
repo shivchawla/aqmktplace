@@ -1,8 +1,8 @@
 import * as React from 'react';
 import Media from 'react-media';
 import {Row, Col, Collapse} from 'antd';
-import {Footer} from '../components/Footer';
 import {shadowBoxStyle} from '../constants';
+import AppLayout from './AppLayout';
 
 const Panel = Collapse.Panel;
 
@@ -110,6 +110,7 @@ export default class FAQ extends React.Component {
         ];
 
         return (
+<<<<<<< HEAD
             <React.Fragment>
                     <Media 
                         query="(max-width: 599px)"
@@ -155,6 +156,27 @@ export default class FAQ extends React.Component {
                     />                    
                 <Footer />
             </React.Fragment>
+=======
+            <AppLayout content = {
+                <React.Fragment>
+                    <Row className='aq-page-container'>
+                        <Col span={18} style={{...shadowBoxStyle, marginTop: '20px'}}>
+                            <Row style={{padding: '20px'}}>
+                                <Col span={24}>
+                                    <h1>FAQ</h1>
+                                </Col>
+                                <Col span={24}>
+                                    <FAQGroup name='General' qas={generalQAS}/>
+                                    <FAQGroup name='Advice' qas={adviceQAS}/>
+                                    <FAQGroup name='Advisor' qas={advisorQAS}/>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                </React.Fragment>
+            }>
+            </AppLayout>
+>>>>>>> 903f2ea582dcdd4b327b5990f098f5579abe880a
         );
     }
 }
