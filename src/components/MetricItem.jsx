@@ -33,18 +33,45 @@ const MetricItemImpl = (props) => {
                 props.value;
 
     return (
-        <Tooltip title={tooltipText} placement="bottomLeft">
-            <Row style={{...containerStyle,...style, height, border, padding}}>
-                <Col span={24}>
-                    <h5 style={{...valueStyle, ...props.valueStyle, color:valueColor}}>
-                        {value}
-                        {props.isNetValue && change !== null && <span style={{fontSize: '12.5px', marginLeft: '2px', color: changeColor}}>{change}</span>}
-                        {props.isNetValue && changePct !== null &&<span style={{fontSize: '12.5px', marginLeft: '2px', color: changeColor}}>({changePct}%)</span>}
-                    </h5>
-                </Col>
-                <Col><h5 style={{...labelStyle, ...props.labelStyle}} value={labelStyle}>{label}</h5></Col>
-            </Row>
-        </Tooltip>
+        props.type === 'mobile'
+        ?   <Tooltip title={tooltipText} placement="bottomLeft">
+                <Row style={{...containerStyle,...style, height, border, padding}}>
+                    <Col span={24}>
+                        <h5 style={{...valueStyle, ...props.valueStyle, color: valueColor}}>
+                            {value}
+                            {props.isNetValue && change !== null && <span style={{fontSize: '18px', marginLeft: '2px', color: changeColor}}>{change}</span>}
+                            {props.isNetValue && changePct !== null &&<span style={{fontSize: '18px', marginLeft: '2px', color: changeColor, fontWeight: 400}}>({changePct}%)</span>}
+                        </h5>
+                    </Col>
+                    <Col>
+                        <h5 
+                            style={{textAlign: 'center', ...labelStyle, ...props.labelStyle}} 
+                            value={labelStyle}
+                        >
+                            {label}
+                        </h5>
+                    </Col>
+                </Row>
+            </Tooltip>
+        :   <Tooltip title={tooltipText} placement="bottomLeft">
+                <Row style={{...containerStyle,...style, height, border, padding}}>
+                    <div style={props.metricContainerStyle}>
+                        <Col span={24} style={props.valueContainerStyle}>
+                            <h5 style={{...valueStyle, ...props.valueStyle, color: valueColor}}>
+                                {value}
+                                {props.isNetValue && change !== null && <span style={{fontSize: '12.5px', marginLeft: '2px', color: changeColor}}>{change}</span>}
+                                {props.isNetValue && changePct !== null &&<span style={{fontSize: '12.5px', marginLeft: '2px', color: changeColor}}>({changePct}%)</span>}
+                            </h5>
+                        </Col>
+                        <Col 
+                                span={24}
+                                style={props.labelContainerStyle}
+                        >
+                            <h5 style={{...labelStyle, ...props.labelStyle}} value={labelStyle}>{label}</h5>
+                        </Col>
+                    </div>
+                </Row>
+            </Tooltip>
     );
 };
 

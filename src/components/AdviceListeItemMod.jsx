@@ -22,37 +22,6 @@ class AdviceListItemImpl extends React.PureComponent {
         this.props.history.push(`/advice/${id}`);
     }
 
-    renderDiversityChart = (diversity) => {
-        return (
-            <Row style={{textAlign: 'center'}}>
-                <Col span={24}>
-                    <span style={{fontSize: '12px'}}>
-                        Diversity Index
-                    </span>
-                </Col>
-
-                <Col span={24}>
-                    <h5 style={{fontSize: "18px"}}>
-                        {(diversity * 100).toFixed(2)} %
-                    </h5>
-                </Col>
-            </Row>
-        );
-    }
-
-    renderBetaChart = (beta) => {
-        return (
-            <Row style={{textAlign: 'center'}}>
-                <Col span={24}>
-                    <span style={{fontSize: '12px'}}>Beta</span>
-                </Col>
-                <Col span={24}>
-                    <h5 style={{fontSize: "18px"}}>{beta.toFixed(2)}</h5>
-                </Col>
-            </Row>
-        );
-    }
-
     renderAnnualReturnIcon = annualReturn => {
         return (
             <Row style={{textAlign: 'center'}}>
@@ -76,24 +45,6 @@ class AdviceListItemImpl extends React.PureComponent {
                 <h5 style={{fontSize: "18px"}}>{Number((volatility * 100).toFixed(2))} %</h5>
                 </Col>
                 
-            </Row>
-        );
-    }
-
-    renderTrendingApprovedIcon = () => {
-        const {isApproved} = this.props.advice;
-        return (
-            <Row>
-                {isApproved &&
-                    <Col span={12}>
-                        <IconItem 
-                            src={medalIcon} 
-                            imageStyle={{transform: 'scale(0.7, 0.7)'}} 
-                            labelStyle={{marginLeft: '5px', color:'teal'}}
-                            label="Approved"
-                        />
-                    </Col>
-                }
             </Row>
         );
     }

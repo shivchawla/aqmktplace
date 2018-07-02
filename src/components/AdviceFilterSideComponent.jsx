@@ -34,12 +34,10 @@ export class AdviceFilterSideComponent extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         const selectedFilters = {...filters, ...Utils.getObjectFromLocalStorage('adviceFilter')};
-        // console.log(selectedFilters);
         this.setState({
             selectedFilters,
             owner: nextProps.owner
         });
-        // this.setState({owner: nextProps.owner});
     }
 
     renderRebalancingFreqFilter = () => (
@@ -52,7 +50,6 @@ export class AdviceFilterSideComponent extends React.Component {
 
     renderStatusFilter = () => (
         <CheckboxGroup 
-                // style={verticalLayout}
                 onChange={(checkedValues) => this.handleFilterCheckboxChange(checkedValues, "approved")} 
                 options={this.state.defaultFilters.approved} 
                 value={this.state.selectedFilters.approved} 
@@ -75,10 +72,8 @@ export class AdviceFilterSideComponent extends React.Component {
             },
             [kvp[type]]: checkedValues.length === this.state.defaultFilters[type].length
         }, () => {
-            // console.log(this.state.selectedFilters);
             this.props.updateSelectedFilters(this.state.selectedFilters);
             Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
-            // this.props.updateAdviceUrl(this.processUrl());
         });
     }
 
@@ -89,11 +84,9 @@ export class AdviceFilterSideComponent extends React.Component {
         const limit = this.state.limit;
         const rebalancingFrequency = selectedFilters.rebalancingFrequency.length > 0 ? _.join(selectedFilters.rebalancingFrequency, ',') : _.join(defaultFilters.rebalancingFrequency, ',');
         const {netValue, sharpe, volatility, rating} = selectedFilters;
-        // console.log('Net Value', netValue);
         approved = _.join(approved, ',');
         personal = _.join(personal, ',');
         const url = `${requestUrl}/advice?&${this.props.selectedTab}=true&rebalance=${rebalancingFrequency}&return=${this.convertRangeToDecimal(selectedFilters.return)}&rating=${rating}&volatility=${this.convertRangeToDecimal(volatility)}&sharpe=${sharpe}&netValue=${netValue}&approved=${approved}&personal=${personal}&limit=${limit}&orderParam=${this.props.orderParam}&order=-1`;
-        // this.props.updateAdviceUrl(url);
         return url;
     }
 
@@ -116,7 +109,6 @@ export class AdviceFilterSideComponent extends React.Component {
         }, () => {
             this.props.updateSelectedFilters(this.state.selectedFilters);
             Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
-            // this.props.updateAdviceUrl(this.processUrl());
         });
     }
 
@@ -131,7 +123,6 @@ export class AdviceFilterSideComponent extends React.Component {
         }, () => {
             this.props.updateSelectedFilters(this.state.selectedFilters);
             Utils.localStorageSaveObject('adviceFilter', this.state.selectedFilters);
-            // this.props.updateAdviceUrl(this.processUrl());
         });
 
     }
@@ -152,12 +143,9 @@ export class AdviceFilterSideComponent extends React.Component {
                                     value={filter.range.split(',').map(item => Number(item.trim()))} 
                                     min={filter.min}
                                     max={filter.max}
-                                    marks={filter.marks ? filter.marks : {}}
-                                    step={filter.step ? filter.step : 1}
                             />
                         </Col>
                     </Row>
-                    {/* <Divider /> */}
                 </Col>
             );
         })
@@ -165,7 +153,6 @@ export class AdviceFilterSideComponent extends React.Component {
 
     render() {
         const {selectedFilters} = this.state;
-        // console.log(selectedFilters);
         const filterArray = [
             {type: 'return', label: 'Annual Return', range: selectedFilters.return, min: -100, max: 100},
             {type: 'rating', label: 'Rating', range: selectedFilters.rating, min: 0, max: 5, step:0.1},

@@ -2,25 +2,24 @@ import * as React from 'react';
 import Loadable from 'react-loadable';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
-import {Spin, Row, Col, Collapse, DatePicker, Radio, Icon} from 'antd';
-import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected, advicePublic, advicePrivate} from '../constants';
-import {AqTag} from '../components/AqTag';
-import {WarningIcon} from '../components/WarningIcon'
-import {IconItem} from '../components/IconItem';
-import {AqRate} from '../components/AqRate';
-import {AdviceMetricsItems} from '../components/AdviceMetricsItems';
-import {MetricItem} from '../components/MetricItem';
-import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
-import medalIcon from '../assets/award.svg';
-import {Utils} from '../utils';
-import '../css/adviceDetail.css';
+import {Spin, Row, Col, Collapse, Radio, Icon, Button} from 'antd';
+import {SegmentedControl, Button as MobileButton} from 'antd-mobile';
+import {horizontalBox, metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../../constants';
+import {AqTag} from '../../components/AqTag';
+import {WarningIcon} from '../../components/WarningIcon'
+import {IconItem} from '../../components/IconItem';
+import {AqRate} from '../../components/AqRate';
+import {PositionItems} from './PositionItems';
+import {MetricItem} from '../../components/MetricItem';
+import medalIcon from '../../assets/award.svg';
+import {Utils} from '../../utils';
+import '../../css/adviceDetail.css';
+import './adviceDetailMobile.css';
 
 const MyChartNew = Loadable({
-    loader: () => import('./MyChartNew'),
+    loader: () => import('../MyChartNew'),
     loading: () => <div>Loading</div>
 });
-const RadioButton = Radio.Button;
-const RadioGroup = Radio.Group;
 const Panel = Collapse.Panel;
 
 class AdviceDetailContentImpl extends React.Component {
@@ -45,9 +44,30 @@ class AdviceDetailContentImpl extends React.Component {
         ]
 
         return (
-            <Spin spinning={this.props.loading}>
-                <AdviceMetricsItems metrics={metricsItems} />
-            </Spin>
+            // <Spin spinning={this.props.loading}>
+            
+                metricsItems.map((item, index) => (
+                    <Col span={8} style={{marginTop: index > 2 ? '20px' : 0}}>
+                        <MetricItem
+                            type="mobile" 
+                            key={index}
+                            valueStyle = {{...metricsValueStyle, fontSize: '22px', textAlign: 'center'}} 
+                            labelStyle={metricsLabelStyle} 
+                            value={item.value} 
+                            label={item.label} 
+                            money={item.money}
+                            percentage={item.percentage}
+                            color={item.color}
+                            style={{padding: '10px'}} 
+                            isNetValue={item.isNetValue}
+                            dailyChange={item.dailyChange || null}
+                            dailyChangePct={item.dailyChangePct || null}
+                            tooltipText={item.tooltipText || null}
+                        />
+                    </Col>
+                ))
+            
+            // </Spin>
         );
     };
 
@@ -98,6 +118,13 @@ class AdviceDetailContentImpl extends React.Component {
         return {valid: invalidCount === 0, reasons};
     }
 
+
+    redirectToLogin = () => {
+        Utils.localStorageSave('redirectToUrlFromLogin', this.props.match.url);
+        this.props.history.push('/login');
+    }
+
+
     renderPageContent() {
         const {
             name = '', 
@@ -105,12 +132,14 @@ class AdviceDetailContentImpl extends React.Component {
             updatedDate = '', 
             isSubscribed = false, 
             isOwner = false, 
+            isFollowing = false,
             rating = 0,
             investmentObjective = {},
             approvalRequested = true,
             isAdmin = false,
             isPublic = false,
-            approval = {}
+            approval = {},
+            unsubscriptionPending = false
         } = this.props.adviceDetail || {};
         const {
             annualReturn = 0, 
@@ -118,8 +147,8 @@ class AdviceDetailContentImpl extends React.Component {
             averageReturns = 0, 
             dailyReturns = 0
         } = this.props.metrics || {};
-        const {goal = {}, capitalization = {}, portfolioValuation = {}, userText = {}} = investmentObjective;
-        const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["1", "2","3"] : ["1", "3"] : ["1", "3"];
+        const {goal = {}, capitalization = {}, portfolioValuation = {}, sectors = {}, userText = {}} = investmentObjective;
+        const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["1", "2","3"] : ["1", "2", "3"] : ["1", "2", "3"];
         const tickers = _.get(this.props, 'tickers', []);
         const {netValue = 0, dailyNAVChangePct = 0} = this.props.metrics || {};
         const netValueMetricItem = {
@@ -134,43 +163,13 @@ class AdviceDetailContentImpl extends React.Component {
         const portfolioTableColumns = ((isOwner || isAdmin) && !this.props.preview) ? ownerColumns : notOwnerColumns;
         const approvalStatus = _.get(approval, 'status', false);
 
-        //Use from portfolio (instead of Investment Objective)
-        let sectors;
-        if (this.props.preview) {
-            sectors = this.props.positions ? _.uniq(this.props.positions.map(item => _.get(item, 'sector', '')).filter(item => item != '')) : [];
-        } else {
-            sectors = this.props.positions ? _.uniq(this.props.positions.map(item => _.get(item, 'security.detail.Sector', '')).filter(item => item != '')) : [];
-        }
-
         return (
-            <Col xl={18} md={24} style={{...shadowBoxStyle, ...this.props.style, marginBottom: '20px'}}>
-                <Row className="row-container" type="flex" justify="space-between" align="middle">
-                    <Col span={18}>
-                        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                            <h1 style={adviceNameStyle}>{name}</h1>
-                            {
-                                isPublic && !approvalStatus && !this.getWarning('name').valid && !approvalRequested &&
-                                <WarningIcon reason={this.getWarning('name').reason}/>
-                            }
-                            {
-                                (isOwner || isAdmin) && approvalRequested && isPublic &&
-                                <AqTag 
-                                        color='#FFAB00' 
-                                        tooltipTitle={adviceApprovalPending}
-                                        text='Approval Pending'
-                                        tagStyle={{marginLeft: '10px'}}
-                                />
-                            }
-                            {
-                                (isOwner || isAdmin) && !approvalRequested && isPublic &&
-                                <AqTag 
-                                        color={approvalStatus ? primaryColor : metricColor.negative}
-                                        tooltipTitle={approvalStatus ? adviceApproved : adviceRejected}
-                                        text={approvalStatus ? 'Approved' : 'Rejected'}
-                                        tagStyle={{marginLeft: '10px'}}
-                                />
-                            }
-                        </div>
+            <Col span={24} style={{backgroundColor: '#fff'}}>
+                <Row className="row-container" type="flex" justify="center" align="middle">
+                    <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
+                        <div style={{...adviceNameStyle, textAlign: 'center'}}>{name}</div>
+                    </Col>
+                    <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
                         {
                             advisor.user &&
                             <h5 
@@ -181,37 +180,14 @@ class AdviceDetailContentImpl extends React.Component {
                                 <span style={dateStyle}>{updatedDate}</span>
                             </h5>
                         }
+                    </Col>
+                    <Col span={24} style={{textAlign: 'center'}}>
                         {
                             !this.props.preview &&
                             <AqRate value={rating} />
                         }
                     </Col>
-                    <Col span={6} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                        <Spin spinning={this.props.loading}>
-                            <MetricItem 
-                                    valueStyle = {{
-                                        ...metricsValueStyle, 
-                                        fontSize: '24px', 
-                                        fontWeight: '700', 
-                                        color: '#323C5A'
-                                    }} 
-                                    labelStyle={metricsLabelStyle} 
-                                    value={netValueMetricItem.value} 
-                                    label={netValueMetricItem.label} 
-                                    money={netValueMetricItem.money}
-                                    percentage={netValueMetricItem.percentage}
-                                    color={netValueMetricItem.color}
-                                    style={{padding: '20px'}} 
-                                    isNetValue={netValueMetricItem.isNetValue}
-                                    dailyChange={netValueMetricItem.dailyChange || null}
-                                    dailyChangePct={netValueMetricItem.dailyChangePct || null}
-                                />
-                        </Spin>
-                    </Col>
-                    <Col 
-                            span={24} 
-                            style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}
-                    >
+                    <Col span={24} style={{...horizontalBox, justifyContent: 'center', marginTop: '10px'}}>
                         <AqTag 
                                 tooltipTitle='Rebalancing Frequency: The advice is rebalanced/updated at this frequency'
                                 tooltipPlacement='bottom'
@@ -232,25 +208,119 @@ class AdviceDetailContentImpl extends React.Component {
                             />
                         }
                         {
-                            (this.props.adviceDetail.isSubscribed || this.props.adviceDetail.isFollowing) &&
+                            (isSubscribed || isFollowing) &&
                             <AqTag 
-                                    tooltipTitle={this.props.adviceDetail.isSubscribed ? 'You are subscribed to this advice' : 'You have wislisted this advice'}
-                                    text={this.props.adviceDetail.isSubscribed ? 'Subscribed' : 'Wishlisted'}
+                                    tooltipTitle={isSubscribed ? 'You are subscribed to this advice' : 'You have wislisted this advice'}
+                                    text={isSubscribed ? 'Subscribed' : 'Wishlisted'}
                                     color='rgb(24, 144, 255)'
                             />
                         }
                         {
-                            this.props.adviceDetail.isOwner &&
+                            isOwner &&
                             <AqTag 
                                     color='#673AB7'
-                                    tooltipTitle={this.props.adviceDetail.isPublic ? advicePublic : advicePrivate}
-                                    text={this.props.adviceDetail.isPublic ? 'Public' : 'Private'}
-                                    icon={this.props.adviceDetail.isPublic ? 'team' : 'lock'}
+                                    tooltipTitle={isPublic ? 'This advice is Public' : 'This advice is private'}
+                                    text={isPublic ? 'Public' : 'Private'}
+                                    icon={isPublic ? 'team' : 'lock'}
                                     iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
                             />
                         }
-                        {this.renderTrendingApprovedIcon()}
+                        {
+                            (isOwner || isAdmin) && approvalRequested && isPublic &&
+                            <AqTag 
+                                    color='#FFAB00'
+                                    text="Approval Requested"
+                            />
+                        }
                     </Col>
+                    <Col span={24} style={{display: 'flex', justifyContent: 'center', marginTop: '10px'}}>
+                        <Spin spinning={this.props.loading}>
+                            <MetricItem 
+                                valueStyle = {{
+                                    ...metricsValueStyle, 
+                                    fontSize: '32px',
+                                    fontWeight: 300 
+                                }} 
+                                labelStyle={{...metricsLabelStyle, fontSize: '15px', marginTop: '5px'}} 
+                                value={netValueMetricItem.value} 
+                                label={netValueMetricItem.label} 
+                                money={netValueMetricItem.money}
+                                percentage={netValueMetricItem.percentage}
+                                color={netValueMetricItem.color}
+                                valueColor={metricColor.positive}
+                                style={{padding: '20px'}} 
+                                isNetValue={netValueMetricItem.isNetValue}
+                                dailyChange={netValueMetricItem.dailyChange || null}
+                                dailyChangePct={netValueMetricItem.dailyChangePct || null}
+                                type="mobile"
+                            />
+                        </Spin>
+                    </Col>
+                    {
+                        !this.props.preview &&
+                        <Col 
+                                span={24} 
+                                style={{
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    justifyContent: 'center', 
+                                    marginTop: '15px',
+                                    alignItems: 'center'
+                                }}
+                        >
+                            {
+                                !isOwner
+                                ?   <Button 
+                                            onClick={() => 
+                                                Utils.isLoggedIn() 
+                                                ? unsubscriptionPending 
+                                                        ? this.props.toggleUnsubscriptionModal() 
+                                                        : this.props.toggleSubscriptionModal() 
+                                                : this.redirectToLogin()
+                                                
+                                            }
+                                            type="primary" 
+                                            style={{fontSize: '16px', width: '55%'}}
+                                    >
+                                        {!isSubscribed ? "BUY ADVICE" : "UNSUBSCRIBE"}
+                                    </Button>
+                                :   ((!approvalRequested && isPublic) || !isPublic) &&
+                                    <Button 
+                                                type="primary" 
+                                                style={{fontSize: '16px', width: '40%'}}
+                                                onClick={() => 
+                                                    Utils.isLoggedIn()
+                                                    ? this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`)
+                                                    : this.redirectToLogin()
+                                                }
+                                        >
+                                            UPDATE
+                                    </Button>
+                            }
+                            {
+                                !isOwner &&
+                                <div 
+                                        onClick={() => console.log('Hello World')}
+                                        style={{...horizontalBox, marginTop: '10px', color: '#4a4a4a'}}
+                                        onClick={() => 
+                                            Utils.isLoggedIn()
+                                            ? this.props.followAdvice()
+                                            : this.redirectToLogin()
+                                        }
+                                > 
+                                    <h3 style={{fontSize: '14px', color: primaryColor}}>
+                                        {
+                                            isFollowing ? 'Remove From Wishlist' : 'Add To Wishlist'
+                                        }
+                                    </h3>
+                                    <Icon 
+                                        type={isFollowing ? "close-circle-o" : "plus-circle-o"} 
+                                        style={{marginLeft: '5px', fontSize: '18px', color: primaryColor}}
+                                    />
+                                </div>
+                            }
+                        </Col>
+                    }
                 </Row>
                 <div style={{width: '100%', height: '1px', backgroundColor: '#e8e8e8'}}></div>
                 <Row className="row-container" style={{marginTop: '5px'}}>
@@ -265,21 +335,23 @@ class AdviceDetailContentImpl extends React.Component {
                     >
                         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginLeft: '-5px'}}>
                             <Icon type="down"/>
-                            <h3 style={{fontSize: '14px', fontWeight: 700, marginLeft: '10px'}}>Metrics</h3>
+                            <h3 style={{fontSize: '16px', fontWeight: 700, marginLeft: '10px'}}>Performance Snapshot</h3>
                         </div>
-                        { this.props.showPerformanceToggle &&
-                            <div style={{marginLeft: '5px'}}>
-                                <RadioGroup 
-                                        defaultValue={false} 
-                                        size="small" onChange={this.props.handlePerformanceToggleChange}>
-                                    <RadioButton value={true}>Realized</RadioButton>
-                                    <RadioButton value={false}>Simulated</RadioButton>
-                                </RadioGroup>
-                            </div>
+                    </Col>
+                    <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
+                        { 
+                            this.props.showPerformanceToggle &&
+                            <SegmentedControl 
+                                onValueChange={this.props.handlePerformanceToggleChange}
+                                values={['Realized', 'Simulated']} 
+                                selectedIndex={1}
+                            />
                         }
                     </Col>
-                    <Col span={24}>
-                        {this.renderAdviceMetrics()}
+                    <Col span={24} gutter={16} style={{marginTop: '15px'}}>
+                        <Row type="flex" gutter={24}>
+                            {this.renderAdviceMetrics()}
+                        </Row>
                     </Col>
                 </Row>
                 <Row>
@@ -288,12 +360,11 @@ class AdviceDetailContentImpl extends React.Component {
                 <Collapse 
                         bordered={false} 
                         defaultActiveKey={defaultActiveKey} 
-                        onChange={this.onCollapseChange}
                 >
                     <Panel
                             key="1"
                             style={customPanelStyle}
-                            header={<h3 style={metricsHeaderStyle}>Investment Objective</h3>}
+                            header={<h3 style={{...metricsHeaderStyle, fontSize: '16px'}}>Investment Objective</h3>}
                     >
                         <Row className="row-container" >
                             <Col span={24}>
@@ -308,20 +379,20 @@ class AdviceDetailContentImpl extends React.Component {
                                     </Col>
                                 </Row>
 
-                                <Row style={{marginTop: '25px'}}>
-                                    <Col span={24}>
+                                <Row style={{marginTop: '15px'}}>
+                                    <Col span={24} style={{marginTop: '10px'}}>
                                         <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
                                     </Col>
                                 </Row>
 
-                                <Row style={{marginTop: '25px'}}>
-                                    <Col span={24}>
+                                <Row style={{marginTop: '15px'}}>
+                                    <Col span={24} style={{marginTop: '10px'}}>
                                         <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
                                     </Col>
                                 </Row>
                             
-                                <Row style={{marginTop: '25px'}}>
-                                    <Col span={6}>
+                                <Row style={{marginTop: '15px'}}>
+                                    <Col span={8}>
                                         <InvestmentObjItem  
                                                 showTag 
                                                 label="Valuation" 
@@ -330,7 +401,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 reason={this.getInvestmentObjWarning('portfolioValuation').reason}
                                         />
                                     </Col>
-                                    <Col span={6}>
+                                    <Col span={8}>
                                         <InvestmentObjItem 
                                                 showTag 
                                                 label="Capitalization" 
@@ -339,7 +410,12 @@ class AdviceDetailContentImpl extends React.Component {
                                                 reason={this.getInvestmentObjWarning('capitalization').reason}
                                         />
                                     </Col>
-                                    <Col span={12}>
+                                    <Col 
+                                            span={_.get(sectors, 'detail', []).length > 1 ? 24 : 8}
+                                            style={{
+                                                marginTop: _.get(sectors, 'detail', []).length > 1 ? '20px' : '0px'
+                                            }}
+                                    >
                                         <div style={{display: 'flex', flexDirection: 'column'}}>
                                             <div style={{
                                                     display: 'flex', 
@@ -349,25 +425,27 @@ class AdviceDetailContentImpl extends React.Component {
                                                 }}
                                             >
                                                 {
-                                                    sectors.map((item, index) => {
+                                                    _.get(sectors, 'detail', []).map((item, index) => {
                                                         return (
-                                                            <AqTag 
-                                                                    key={index}
-                                                                    color={primaryColor}
-                                                                    text={item}
-                                                                    textStyle={{fontSize: '14px'}}
-                                                            />
+                                                            <React.Fragment>
+                                                                <AqTag 
+                                                                        key={index}
+                                                                        color={primaryColor}
+                                                                        text={item}
+                                                                        textStyle={{fontSize: '14px'}}
+                                                                />
+                                                            </React.Fragment>
                                                         );
                                                     })
                                                 }
                                             </div>
-                                            <div style={{display: 'flex', flexDirection: 'row', marginTop: '5px'}}>
+                                            <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                                                 <h3 
-                                                        style={{fontSize: '13px', color: '#515151', fontWeight: '700'}}
+                                                        style={{fontSize: '16px', color: '#515151', fontWeight: '700'}}
                                                 >
                                                     Sectors
                                                 </h3>
-                                                {/*
+                                                {
                                                     isPublic && 
                                                     isPublic && 
                                                     !approvalStatus && 
@@ -376,7 +454,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                     <WarningIcon 
                                                             reason={this.getInvestmentObjWarning('sectors').reason}
                                                     />
-                                                */}
+                                                }
                                             </div>
                                         </div>
                                     </Col>
@@ -401,9 +479,6 @@ class AdviceDetailContentImpl extends React.Component {
                                     <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
                                 </Col>
                             }
-                            <Col span={24} style={{marginTop: '20px'}}>
-                                <h5 style={{fontSize: '12px'}}>* All investors are advised to conduct their own independent research into individual stocks before making a purchase decision. In addition, investors are advised that past stock performance is not indicative of future price action.</h5>
-                            </Col>
                         </Row>
                     </Panel>
 
@@ -415,7 +490,7 @@ class AdviceDetailContentImpl extends React.Component {
                             header={
                                 <Row type="flex" justify="space-between">
                                     <Col span={6} style={{display: 'flex', flexDirection: 'row'}}>
-                                        <h3 style={metricsHeaderStyle}>Portfolio</h3>
+                                        <h3 style={{...metricsHeaderStyle, fontSize: '16px'}}>Portfolio</h3>
                                         {
                                             isPublic && 
                                             !approvalStatus && 
@@ -436,30 +511,17 @@ class AdviceDetailContentImpl extends React.Component {
                                     </Col>
                                 </Row>
                             }>
-                            <Row className="row-container" type="flex" justify="end" align="middle" style={{position: 'relative'}}>
-                                {isOwner && this.props.handlePortfolioStartDateChange  &&
-                                    <Col 
-                                            span={6} 
-                                            style={{
-                                                display: 'flex', 
-                                                justifyContent: 'flex-end', 
-                                                top: '-40px', 
-                                                position:'absolute', 
-                                            }}
-                                    >
-                                        <DatePicker
-                                            value={this.props.selectedPortfolioDate}
-                                            onChange={this.props.handlePortfolioStartDateChange}
-                                            allowClear={false}/>
-                                    </Col>
-                                }
+                            <Row 
+                                    className="row-container" 
+                                    type="flex" 
+                                    justify="end" 
+                                    align="middle" 
+                                    style={{position: 'relative', paddingTop: '0px'}}
+                            >
                                 <Col span={24}>
-                                    <AqStockPortfolioTable
-                                        columns={portfolioTableColumns}
-                                        composition
-                                        portfolio={{positions: this.props.positions || []}}
-                                        updateTicker={this.props.updateTicker}
-                                        processedPositions={this.props.preview}
+                                    <PositionItems 
+                                        positions={this.props.positions || []} 
+                                        preview={this.props.preview}
                                     />
                                 </Col>
                             </Row>
@@ -468,15 +530,34 @@ class AdviceDetailContentImpl extends React.Component {
                     <Panel
                             key="3"
                             style={customPanelStyle}
-                            header={<h3 style={metricsHeaderStyle}>Performance</h3>}
+                            header={<h3 style={{...metricsHeaderStyle, fontSize: '16px'}}>Performance</h3>}
                         >
                         <Row className="row-container">
                             <Spin spinning={this.props.loading}>
-                                <MyChartNew series={tickers} chartId="advice-detail-chart"/>
+                                <MyChartNew mobile={true} series={tickers} chartId="advice-detail-chart"/>
                             </Spin>
                         </Row>
                     </Panel>
                 </Collapse>
+                <Row>
+                    <Col span={24} style={{textAlign: 'center'}}>
+                        {
+                            (!isOwner &&  !isSubscribed) &&
+                            <Button 
+                                    onClick={() => 
+                                        Utils.isLoggedIn() 
+                                        ? this.props.toggleSubscriptionModal() 
+                                        : this.redirectToLogin()
+                                        
+                                    }
+                                    type="primary" 
+                                    style={{fontSize: '16px', width: '90%', margin: '20px 0'}}
+                            >
+                                BUY ADVICE
+                            </Button>
+                        }
+                    </Col>
+                </Row>
             </Col>
         )
     }
@@ -488,6 +569,10 @@ class AdviceDetailContentImpl extends React.Component {
         return false;
     }
 
+    updateAdvice = () => {
+        this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`);
+    }
+
     render() {
         return (this.renderPageContent());
     }
@@ -495,7 +580,7 @@ class AdviceDetailContentImpl extends React.Component {
 
 const InvestmentObjItem = ({label, value, showTag = false, warning = false, reason= 'N/A'}) => {
     return (
-        <div>
+        <div style={{width: 'fit-content'}}>
             {
                 showTag 
                 ?   <AqTag 
@@ -503,12 +588,12 @@ const InvestmentObjItem = ({label, value, showTag = false, warning = false, reas
                             text={value}
                             textStyle={{fontSize: '14px', fontWeight: 400}}
                     />
-                :   <span style={{fontSize: '16px', fontWeight: '400'}}>
+                :   <span style={{fontSize: '15px', fontWeight: '400', lineHeight: '15px'}}>
                         {value}
                     </span>
             }
-            <div style={{display: 'flex', flexDirection: 'row', marginTop: '0px'}}>
-                <h3 style={{fontSize: '13px', color: '#515151', fontWeight: '700'}}>{label}</h3>
+            <div style={{display: 'flex', flexDirection: 'row', marginTop: '2px'}}>
+                <h3 style={{fontSize: '15px', color: '#4a4a4a', fontWeight: '700'}}>{label}</h3>
                 {
                     warning &&
                     <WarningIcon reason={reason}/>
@@ -518,11 +603,11 @@ const InvestmentObjItem = ({label, value, showTag = false, warning = false, reas
     );
 }
 
-export const AdviceDetailContent = withRouter(AdviceDetailContentImpl);
+export const AdviceDetailContentMobile = withRouter(AdviceDetailContentImpl);
 
 const userStyle = {
     fontWeight: 700,
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#595959'
 };
 
@@ -540,6 +625,7 @@ const dividerStyle = {
 const adviceNameStyle = {
     fontSize: '24px',
     color: '#353535',
+    fontWeight: '700'
 };
 
 const customPanelStyle = {

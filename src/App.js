@@ -7,11 +7,10 @@ import Route from 'react-router/Route';
 import withRouter from 'react-router-dom/withRouter';
 import Switch from 'react-router-dom/Switch';
 import {Utils} from './utils';
-import {primaryColor} from './constants';
+import {primaryColor, horizontalBox} from './constants';
 import logo from "./assets/logo-advq-new.png";
 global.Promise = require('bluebird');
 
-const SubMenu = Menu.SubMenu;
 const {Header, Content} = Layout;
 const {gaTrackingId} = require('./localConfig');
 
@@ -19,6 +18,16 @@ const ScreenAdvices = Loadable({
     loader: () => import('./containers/ScreenAdvices'),
     loading: () => <Icon type="loading" />
 });
+
+const ScreenAdviceMobile = Loadable({
+    loader: () => import('./containers/ScreenAdviceMobile/ScreenAdviceMobile'),
+    loading: () => <Icon type="loading" />
+});
+
+const WorkInProgress = Loadable({
+    loader: () => import('./containers/WorkInProgressPage'),
+    loading: () => <Icon type="loading" />
+})
 
 const Home = Loadable({
     loader: () => import('./containers/Home'),
@@ -40,8 +49,18 @@ const AdviceDetail = Loadable({
     loading: () => <Icon type="loading" />
 });
 
+const AdviceDetailMobile = Loadable({
+    loader: () => import('./containers/AdviceDetailMobile/AdviceDetailMobile'),
+    loading: () => <Icon type="loading" />
+});
+
 const CreateAdvice = Loadable({
     loader: () => import('./containers/CreateAdvice'),
+    loading: () => <Icon type="loading" />
+});
+
+const CreateAdviceMobile = Loadable({
+    loader: () => import('./containers/CreateAdviceMobile'),
     loading: () => <Icon type="loading" />
 });
 
@@ -52,6 +71,11 @@ const CreatePortfolio = Loadable({
 
 const UpdateAdvice = Loadable({
     loader: () => import('./containers/UpdateAdvice'),
+    loading: () => <Icon type="loading" />
+});
+
+const UpdateAdviceMobile = Loadable({
+    loader: () => import('./containers/UpdateAdviceMobile'),
     loading: () => <Icon type="loading" />
 });
 
@@ -181,6 +205,7 @@ class App extends React.Component {
             {regExp: '^\/login$', title: 'Login - AdviceQube'},
             {regExp: '^\/signup$', title: 'Register - AdviceQube'},
             {regExp: '^\/advice\/[A-Za-z0-9]+$', title: 'Advice Detail - AdviceQube'},
+            {regExp: '^\/advice\/[A-Za-z0-9]+/mobile$', title: 'Advice Detail Mobile - AdviceQube'},
             {regExp: '^\/dashboard\/updateadvice\/[A-Za-z0-9]+$', title: 'Update Advice - AdviceQube'},
             {regExp: '^\/dashboard\/advisorprofile\/[A-Za-z0-9]+$', title: 'Advisor Profile - AdviceQube'},
             {regExp: '^\/dashboard\/portfolio\/[A-Za-z0-9]+$', title: 'Portfolio Detail - AdviceQube'},
@@ -197,33 +222,76 @@ class App extends React.Component {
 
     render() {
         return (
-            <Switch>
-                <Route exact={true} path='/home' component={Home} /> 
-                <Route exact={true} path='/' component={Home} /> 
-                <Route exact={true} path='/advice' component={ScreenAdvices} /> 
-                <Route path="/stockresearch" exact component={StockResearch} /> 
-                <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 
-                <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
-                <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> 
-                <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
-                <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
-                <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> 
-                <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> 
-                <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
-                <Route path='/dashboard' component={Dashboard} /> 
-                <Route path='/policies/privacy' component={Policy} /> 
-                <Route path='/policies/tnc' component={TnC} /> 
-                <Route path='/forgotPassword' component={ForgotPassword} /> 
-                <Route path='/errorPage' component={NoIternetAccess} /> 
-                <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
-                <Route path='/authMessage' component={AuthMessage} /> 
-                <Route exact={true} path='/login' component={Login} /> 
-                <Route exact={true} path='/signup' component={Signup} /> 
-                <Route exact={true} path='/faq' component={FAQ} /> 
-                <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
-                <Route component={PageNotFound} />
-            </Switch>
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 599px)"
+                    render={() => {
+                        return (
+                            <Switch>
+                                <Route exact={true} path='/home' component={Home} /> 
+                                <Route exact={true} path='/' component={Home} /> 
+                                <Route exact={true} path='/advice' component={ScreenAdviceMobile} /> 
+                                <Route path="/stockresearch" exact component={WorkInProgress} /> 
+                                <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
+                                <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} /> 
+                                <Route exact={true} path='/dashboard/createadvice' component={CreateAdviceMobile} /> 
+                                <Route exact={true} path='/dashboard/createportfolio' component={WorkInProgress} /> 
+                                <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdviceMobile} /> 
+                                <Route exact={true} path='/dashboard/portfolio/:id' component={WorkInProgress} /> 
+                                <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={WorkInProgress} /> 
+                                <Route exact={true} path='/dashboard/advisorprofile/:id' component={WorkInProgress} /> 
+                                <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
+                                <Route path='/dashboard' component={WorkInProgress} /> 
+                                <Route path='/policies/privacy' component={Policy} /> 
+                                <Route path='/policies/tnc' component={TnC} /> 
+                                <Route path='/forgotPassword' component={ForgotPassword} /> 
+                                <Route path='/errorPage' component={NoIternetAccess} /> 
+                                <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
+                                <Route path='/authMessage' component={AuthMessage} /> 
+                                <Route exact={true} path='/login' component={Login} /> 
+                                <Route exact={true} path='/signup' component={Signup} /> 
+                                <Route exact={true} path='/faq' component={FAQ} /> 
+                                <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
+                                <Route component={PageNotFound} />
+                            </Switch>
+                        );
+                    }}
+                />
+                <Media 
+                    query="(min-width: 600px)"
+                    render={() => {
+                        return (
+                            <Switch>
+                                <Route exact={true} path='/home' component={Home} /> 
+                                <Route exact={true} path='/' component={Home} /> 
+                                <Route exact={true} path='/advice' component={ScreenAdvices} /> 
+                                <Route path="/stockresearch" exact component={StockResearch} /> 
+                                <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
+                                <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 
+                                <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
+                                <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> 
+                                <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
+                                <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
+                                <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> 
+                                <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> 
+                                <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
+                                <Route path='/dashboard' component={Dashboard} /> 
+                                <Route path='/policies/privacy' component={Policy} /> 
+                                <Route path='/policies/tnc' component={TnC} /> 
+                                <Route path='/forgotPassword' component={ForgotPassword} /> 
+                                <Route path='/errorPage' component={NoIternetAccess} /> 
+                                <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
+                                <Route path='/authMessage' component={AuthMessage} /> 
+                                <Route exact={true} path='/login' component={Login} /> 
+                                <Route exact={true} path='/signup' component={Signup} /> 
+                                <Route exact={true} path='/faq' component={FAQ} /> 
+                                <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
+                                <Route component={PageNotFound} />
+                            </Switch>
+                        );
+                    }}
+                />
+            </React.Fragment>
         );
     }
 }

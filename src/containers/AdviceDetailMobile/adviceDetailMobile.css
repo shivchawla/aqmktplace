@@ -1,0 +1,7 @@
+.am-segment-item {
+    padding: 0 10px;
+}
+
+.ant-collapse-content > .ant-collapse-content-box {
+    padding: 0;
+}
