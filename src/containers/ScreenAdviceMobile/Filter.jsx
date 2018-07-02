@@ -285,10 +285,10 @@ export class FilterMobileComponent extends React.Component {
     }
 
     renderHeaderForSliderPanel = (header, key) => {
-        const defaultMin = this.state.defaultFilters[key].split(',')[0];
-        const defaultMax = this.state.defaultFilters[key].split(',')[1];
-        const selectedMin = this.state.selectedFilters[key].split(',')[0];
-        const selectedMax = this.state.selectedFilters[key].split(',')[1];
+        const defaultMin = Number(this.state.defaultFilters[key].split(',')[0]);
+        const defaultMax = Number(this.state.defaultFilters[key].split(',')[1]);
+        const selectedMin = Number(this.state.selectedFilters[key].split(',')[0]);
+        const selectedMax = Number(this.state.selectedFilters[key].split(',')[1]);
 
         return (
             <Row className='panel-header'>
@@ -334,8 +334,8 @@ export class FilterMobileComponent extends React.Component {
         const filterArray = [
             {type: 'return', label: 'Annual Return', range: selectedFilters.return, min: -100, max: 100, percentage: true},
             {type: 'netValue', label: 'Net Value', range: selectedFilters.netValue, min: 0, max: 200000, step: 10000, percentage: false},
-            {type: 'volatility', label: 'Volatility', range: selectedFilters.volatility, min: 0, max: 50, percentage: false},
-            {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, step: 0.5, percentage: false},
+            {type: 'volatility', label: 'Volatility', range: selectedFilters.volatility, min: 0, max: 50, percentage: true},
+            {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, percentage: false},
         ];
 
         return (
