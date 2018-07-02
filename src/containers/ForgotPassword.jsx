@@ -155,7 +155,10 @@ class ForgotPasswordImpl extends Component {
 					}}
 			>
 				<img src={logo} style={{height: '40px'}}/>
-				<div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+				<div 
+						style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}
+						onClick={() => this.props.history.push('/')}
+				>
 					<span style={{...biggerFont, color:primaryColor}}>A</span>
 					<span style={{color: primaryColor}}>DVICE</span>
 					<span style={{...biggerFont, color: '#e06666'}}>Q</span>

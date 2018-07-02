@@ -1303,7 +1303,7 @@ class AdviceDetailImpl extends React.Component {
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />
-            :   <AqMobileLayout innerPage={true}>
+            :   <AqMobileLayout innerPage={true} previousPageUrl='/advice'>
                     <AdviceDetailContentMobile 
                             adviceDetail={{...this.state.adviceDetail, unsubscriptionPending}}
                             metrics={this.state.metrics}

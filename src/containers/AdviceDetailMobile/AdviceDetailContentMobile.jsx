@@ -225,6 +225,15 @@ class AdviceDetailContentImpl extends React.Component {
                                     iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
                             />
                         }
+                        {
+                            approvalRequested &&
+                            <AqTag 
+                                    color='#FFAB00'
+                                    text="Approval Requested"
+                                    icon={this.props.adviceDetail.isPublic ? 'team' : 'lock'}
+                                    iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
+                            />
+                        }
                     </Col>
                     <Col span={24} style={{display: 'flex', justifyContent: 'center', marginTop: '10px'}}>
                         <Spin spinning={this.props.loading}>
@@ -289,10 +298,6 @@ class AdviceDetailContentImpl extends React.Component {
                                         >
                                             Update
                                     </Button>
-                            }
-                            {
-                                approvalRequested &&
-                                <h3 style={{fontSize: '14px', color: primaryColor}}>Approval Requested</h3>
                             }
                             {
                                 !isOwner &&

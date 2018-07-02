@@ -47,10 +47,6 @@ class AddPositionMobileImpl extends React.Component {
         this.setState({searchInputValue: value});
     }
 
-    componentDidMount() {
-        this.sharesTextInput.focus();
-    }
-
     onSelect = value => {
         this.setState({searchInputValue: value});
         this.setState({loadingStockDetails: true});
@@ -233,60 +229,64 @@ class AddPositionMobileImpl extends React.Component {
                     </Col>
                 }
                 <Spin spinning={this.state.loadingStockDetails}>
-                    <Col span={24} style={{marginTop: '20px', padding: '0 10px'}}>
-                        <Row>
-                            <Col span={24}>
-                                <StockDetailComponent label="Symbol" value={symbol} />
-                            </Col>
-                            <Col span={24}>
-                                <StockDetailComponent label="Name" value={name} valueStyle={{color: primaryColor}}/>
-                            </Col>
-                            <Col span={24}>
-                                <Row type="flex" align="middle" style={{marginBottom: '20px'}}>
-                                    <Col span={8}>
-                                        <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Shares</h3>
+                    {
+                        _.get(this.state, 'stockData.name', '-') !== '-'
+                        ?    <Col span={24} style={{marginTop: '20px', padding: '0 10px'}}>
+                                <Row>
+                                    <Col span={24}>
+                                        <StockDetailComponent label="Symbol" value={symbol} />
                                     </Col>
-                                    <Col span={16} style={{...horizontalBox, justifyContent: 'flex-end'}}>
-                                        {
-                                            this.state.toggleEdit 
-                                            ?   <div style={horizontalBox}>
-                                                    <InputItem 
-                                                        type="number"
-                                                        value={this.state.stockData.shares} 
-                                                        onChange={this.handleShareChange} 
-                                                        style={{paddingLeft: '0px'}}
-                                                        ref={el => this.sharesTextInput = el}
-                                                    />
-                                                    <Icon 
-                                                        onClick={this.toggleSharesInput} 
-                                                        type="check-circle-o" 
-                                                        style={{fontSize: '20px', marginLeft: '20px'}}
-                                                    />
-                                                </div>
-                                            :   <h3
-                                                    onClick={this.toggleSharesInput}  
-                                                    style={{fontSize: '16px', color: '#4A4A4A'}}
-                                                >
-                                                    {shares} <span style={{color: primaryColor}}>(edit)</span>
-                                                </h3>
-                                        }
+                                    <Col span={24}>
+                                        <StockDetailComponent label="Name" value={name} valueStyle={{color: primaryColor}}/>
+                                    </Col>
+                                    <Col span={24}>
+                                        <Row type="flex" align="middle" style={{marginBottom: '20px'}}>
+                                            <Col span={8}>
+                                                <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Shares</h3>
+                                            </Col>
+                                            <Col span={16} style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                                                {
+                                                    this.state.toggleEdit 
+                                                    ?   <div style={horizontalBox}>
+                                                            <InputItem 
+                                                                type="number"
+                                                                value={this.state.stockData.shares} 
+                                                                onChange={this.handleShareChange} 
+                                                                style={{paddingLeft: '0px'}}
+                                                                ref={el => this.sharesTextInput = el}
+                                                            />
+                                                            <Icon 
+                                                                onClick={this.toggleSharesInput} 
+                                                                type="check-circle-o" 
+                                                                style={{fontSize: '20px', marginLeft: '20px'}}
+                                                            />
+                                                        </div>
+                                                    :   <h3
+                                                            onClick={this.toggleSharesInput}  
+                                                            style={{fontSize: '16px', color: '#4A4A4A'}}
+                                                        >
+                                                            {shares} <span style={{color: primaryColor}}>(edit)</span>
+                                                        </h3>
+                                                }
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                    <Col span={24}>
+                                        <StockDetailComponent 
+                                            label="Last Price" 
+                                            value={`₹ ${Utils.formatMoneyValueMaxTwoDecimals(lastPrice)}`} 
+                                        />
+                                    </Col>
+                                    <Col span={24}>
+                                        <StockDetailComponent 
+                                            label="Total Value" 
+                                            value={`₹ ${Utils.formatMoneyValueMaxTwoDecimals(totalValue)}`} 
+                                        />
                                     </Col>
                                 </Row>
                             </Col>
-                            <Col span={24}>
-                                <StockDetailComponent 
-                                    label="Last Price" 
-                                    value={`₹ ${Utils.formatMoneyValueMaxTwoDecimals(lastPrice)}`} 
-                                />
-                            </Col>
-                            <Col span={24}>
-                                <StockDetailComponent 
-                                    label="Total Value" 
-                                    value={`₹ ${Utils.formatMoneyValueMaxTwoDecimals(totalValue)}`} 
-                                />
-                            </Col>
-                        </Row>
-                    </Col>
+                        :   <h3 style={{textAlign: 'center', marginTop: '50%'}}>Please search for a valid stock</h3>
+                    }
                 </Spin>
                 <Col 
                         span={24} 

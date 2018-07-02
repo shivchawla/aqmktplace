@@ -169,7 +169,8 @@ class Login extends Component {
 						style={{
 							display: 'flex', 
 							flexDirection: 'row', 
-						}}
+            }}
+            onClick={() => this.props.history.push('/')}
 				>
 					<img src={logo} style={{height: '40px'}}/>
 					<div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>

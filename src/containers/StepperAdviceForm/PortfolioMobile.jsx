@@ -27,8 +27,8 @@ export class PortfolioMobileImpl extends React.Component {
             benchmarks,
             selectedBenchmark: benchmarks[0],
             highStockSeries: [],
-            addPositionBottomSheetOpen: false,
-            performanceBottomSheetOpen: false,
+            addPositionBottomSheetOpen: true,
+            performanceBottomSheetOpen: true,
             selectedPosition: {},
             updatePosition: false,
             toBeDeletedPositions: []
