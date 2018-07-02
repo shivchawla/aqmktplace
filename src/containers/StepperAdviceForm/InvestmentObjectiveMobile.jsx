@@ -15,9 +15,9 @@ const investmentObjRowProps = {
 
 
 const textStyle = {
-    fontWeight: 300, 
+    fontWeight: 400, 
     color: '#000000',
-    fontSize: '17px'
+    fontSize: '15px'
 };
 
 const investmentObjPortfolioValuationFieldId = 'investmentObjPortfolioValuation';
@@ -95,7 +95,7 @@ export class InvestmentObjective extends React.Component {
             >
                 <Row {...investmentObjRowProps}>
                     <Col span={24} style={{zIndex: '100'}}>
-                        <h3 style={labelStyle}>Investor Type</h3>
+                        <div style={labelStyle}>Investor Type</div>
                     </Col>
                     <Col span={24} style={{marginTop: '-5px'}}>
                         <Picker
@@ -164,5 +164,5 @@ export class InvestmentObjective extends React.Component {
 const labelStyle = {
     fontWeight: 300, 
     color: '#000000',
-    fontSize: '17px'
+    fontSize: '16px'
 };

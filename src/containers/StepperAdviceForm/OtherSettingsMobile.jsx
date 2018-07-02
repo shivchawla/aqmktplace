@@ -150,5 +150,5 @@ export class OtherSettings extends React.Component {
 const labelStyle = {
     fontWeight: 300, 
     color: '#000000',
-    fontSize: '17px'
+    fontSize: '16px'
 };

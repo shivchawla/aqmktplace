@@ -47,7 +47,7 @@ class AdviceDetailContentImpl extends React.Component {
             // <Spin spinning={this.props.loading}>
             
                 metricsItems.map((item, index) => (
-                    <Col span={8} style={{marginTop: index > 2 ? '10px' : 0}}>
+                    <Col span={8} style={{marginTop: index > 2 ? '20px' : 0}}>
                         <MetricItem
                             type="mobile" 
                             key={index}
@@ -167,7 +167,7 @@ class AdviceDetailContentImpl extends React.Component {
             <Col span={24} style={{backgroundColor: '#fff'}}>
                 <Row className="row-container" type="flex" justify="center" align="middle">
                     <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
-                        <h1 style={{...adviceNameStyle, textAlign: 'center'}}>{name}</h1>
+                        <div style={{...adviceNameStyle, textAlign: 'center'}}>{name}</div>
                     </Col>
                     <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
                         {
@@ -243,7 +243,7 @@ class AdviceDetailContentImpl extends React.Component {
                                     fontSize: '32px',
                                     fontWeight: 300 
                                 }} 
-                                labelStyle={{...metricsLabelStyle, fontSize: '15px'}} 
+                                labelStyle={{...metricsLabelStyle, fontSize: '15px', marginTop: '5px'}} 
                                 value={netValueMetricItem.value} 
                                 label={netValueMetricItem.label} 
                                 money={netValueMetricItem.money}
@@ -284,7 +284,7 @@ class AdviceDetailContentImpl extends React.Component {
                                             type="primary" 
                                             style={{fontSize: '16px', width: '40%'}}
                                     >
-                                        {!isSubscribed ? "Purchase" : "Unsubscribe"}
+                                        {!isSubscribed ? "BUY ADVICE" : "UNSUBSCRIBE"}
                                     </Button>
                                 :   ((!approvalRequested && isPublic) || !isPublic) &&
                                     <Button 
@@ -296,7 +296,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                     : this.redirectToLogin()
                                                 }
                                         >
-                                            Update
+                                            UPDATE
                                     </Button>
                             }
                             {
@@ -571,7 +571,7 @@ const InvestmentObjItem = ({label, value, showTag = false, warning = false, reas
                             text={value}
                             textStyle={{fontSize: '14px', fontWeight: 400}}
                     />
-                :   <span style={{fontSize: '16px', fontWeight: '400', lineHeight: '20px'}}>
+                :   <span style={{fontSize: '15px', fontWeight: '400', lineHeight: '15px'}}>
                         {value}
                     </span>
             }
@@ -606,7 +606,7 @@ const dividerStyle = {
 };
 
 const adviceNameStyle = {
-    fontSize: '22px',
+    fontSize: '24px',
     color: '#353535',
     fontWeight: '700'
 };

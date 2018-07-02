@@ -384,7 +384,7 @@ class AdviceFormMobileImpl extends React.Component {
     getPageTitle = (index = this.state.currentStep) => {
         switch(index) {
             case 0:
-                return 'Investment Obejctive';
+                return 'Investment Objective';
             case 1:
                 return 'Portfolio';
             case 2:
@@ -396,15 +396,17 @@ class AdviceFormMobileImpl extends React.Component {
 
     renderHeader = () => {
         return (
-            <Row>
-                <Col span={24} style={{textAlign: 'center', fontSize: '16px'}}>
-                    <h3 style={{fontSize: '16px', color: primaryColor}}>Step {this.state.currentStep + 1}</h3>
-                </Col>
+            <Row height='72px'>
                 <Col span={24} style={{textAlign: 'center'}}>
-                    <h2 style={{fontSize: '18px', fontWeight: '700', color: primaryColor}}>
-                        {this.getPageTitle()}
-                    </h2>
+                    <span style={{fontSize: '20px', color: primaryColor}}>
+                        Step {this.state.currentStep + 1}: {this.getPageTitle()}
+                    </span>
                 </Col>
+                
+                <Col span={24} style={{textAlign: 'center'}}>
+                    <span style={{fontSize: '14px'}}>Create Advice</span>
+                </Col>
+
                 <Col className='divider' span={24} style={{height: '1px', background: '#DFDFDF'}}/>
             </Row>
         );

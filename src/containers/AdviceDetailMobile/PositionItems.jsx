@@ -22,7 +22,7 @@ export class PositionItems extends React.Component {
         return positions.map(position => {
             return {
                 name: _.get(position, 'security.detail.Nse_Name', ''),
-                symbol: _.get(position, 'security.ticker', ''),
+                symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker', ''),
                 shares: _.get(position, 'quantity', 0),
                 lastPrice: _.get(position, 'lastPrice', 0),
                 sector: _.get(position, 'security.detail.Sector', ''),
@@ -103,7 +103,8 @@ const PositionHeader = ({position, mode='horizontal', showLabel=false}) => {
 }
 
 const NewPositionHeader = ({position, showLabel = false}) => {
-    const {symbol = '', lastPrice = 0, weight = 0} = position;
+    const {symbol, lastPrice = 0, weight = 0} = position;
+    
     return (
         <React.Fragment>
             <Col span={2}>
@@ -111,7 +112,7 @@ const NewPositionHeader = ({position, showLabel = false}) => {
             </Col>
             <Col span={8} style={{display: 'flex', flexDirection: 'row'}}>
                 <MetricItem
-                    valueStyle = {valueStyle} 
+                    valueStyle = {{...valueStyle, color: primaryColor}} 
                     labelStyle={{...labelStyle, display: showLabel ? 'block' : 'none'}} 
                     valueContainerStyle={valueAndLabelContainerStyle}
                     labelContainerStyle={valueAndLabelContainerStyle}

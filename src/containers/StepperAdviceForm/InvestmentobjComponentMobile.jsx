@@ -12,7 +12,7 @@ export const InvestMentObjComponent = ({
     tooltip={text: null, placement: 'top'}
 }) => {
     return (
-        <Row type="flex" align="middle" style={{marginBottom: '10px'}}>
+        <Row type="flex" align="middle" style={{...investmentObjLabelStyle, marginBottom: '10px'}}>
             <Col span={24}>
                 {header}:
             </Col>
@@ -24,12 +24,8 @@ export const InvestMentObjComponent = ({
 }
 
 const labelColor = '#000000';
-
 const investmentObjLabelStyle = {
-    fontSize: '17px',
+    fontSize: '16px',
     fontWeight: 300,
     color: labelColor
 };
-
-
-//const labelColor = '#898989';
