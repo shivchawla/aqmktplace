@@ -22,6 +22,7 @@ const defaultStockData = {
 class AddPositionMobileImpl extends React.Component {
     constructor(props) {
         super(props);
+        this.autoCompleteElemet = null
         this.sharesTextInput = null;
         this.state = {
             dataSource: [],
@@ -50,6 +51,7 @@ class AddPositionMobileImpl extends React.Component {
     onSelect = value => {
         this.setState({searchInputValue: value});
         this.setState({loadingStockDetails: true});
+        this.autoCompleteElemet.blur();
         getStockData(value, 'latestDetail')
         .then(latestDetailResponse => {
             const {data} = latestDetailResponse;
@@ -221,6 +223,7 @@ class AddPositionMobileImpl extends React.Component {
                             disabled={this.state.loadingStockDetails}
                         >
                             <Input 
+                                ref={el => this.autoCompleteElemet = el}
                                 suffix={(
                                     <div>
                                         <Spin indicator={spinIcon} spinning={this.state.spinning}/>

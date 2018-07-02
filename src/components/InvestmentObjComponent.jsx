@@ -47,7 +47,7 @@ export const InvestMentObjComponent = ({
 const labelColor = '#000000';
 
 const investmentObjLabelStyle = {
-    fontSize: '17px',
+    fontSize: '16px',
     fontWeight: 300,
     color: labelColor
 };

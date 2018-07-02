@@ -1,9 +1,29 @@
-import {horizontalBox} from '../../constants';
+import {horizontalBox, primaryColor} from '../../constants';
+
 export const stepHeaderStyle = {
     fontSize: '22px',
     color: 'teal',
     //color: '#4A4A4A'
 };
+
+export const labelStyle = {
+    fontWeight: 300, 
+    color: '#000000',
+    fontSize: '16px'
+};
+
+export const valueStyle = {
+    fontWeight: 400, 
+    color: primaryColor,
+    fontSize: '16px'
+};
+
+export const textStyle = {
+    fontWeight: 400, 
+    color: '#000000',
+    fontSize: '16px'
+};
+
 
 export const headerContainerStyle = {
     ...horizontalBox,

@@ -31,7 +31,13 @@ export class InvestmentObjective extends React.Component {
                 header={fieldName}
                 content={
                     <SegmentedControl
-                        style={{width: '100%', height: '30px', marginTop: '10px'}} 
+                        style={{
+                            width: '100%', 
+                            height: '30px', 
+                            marginTop: '10px', 
+                            textTransform: 'uppercase', 
+                            fontWeight: '400'
+                        }} 
                         values={items}
                         key={fieldId}
                         selectedIndex={this.getSelectedIndexForSegment(items, fieldId)}

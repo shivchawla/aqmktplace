@@ -22,7 +22,7 @@ const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 const adviceTabs = [
     { title: 'All', key: 'all' },
-    { title: 'Trending', key: 'trending' },
+    // { title: 'Trending', key: 'trending' },
     { title: 'Subscribed', key: 'subscribed' },
     { title: 'Following', key: 'following' }
   ];

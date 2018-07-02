@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {Row, Col, Form, Input, Select, Radio} from 'antd';
 import {InvestMentObjComponent} from '../../components/InvestmentObjComponent';
-import {goals, portfolioValuation, sectors, capitalization} from '../../constants';
+import {goals, portfolioValuation, sectors, capitalization, primaryColor} from '../../constants';
 import {getStepIndex} from './steps';
 import {getInvestmentObjectiveWarning} from './utils';
-import {tooltips} from './constants';
+import {tooltips, labelStyle, valueStyle, textStyle} from './constants';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -15,13 +15,6 @@ const investmentObjRowProps = {
     gutter: 16,
     type: 'flex',
     align: 'middle'
-};
-
-
-const textStyle = {
-    fontWeight: 300, 
-    color: '#000000',
-    fontSize: '17px'
 };
 
 export class InvestmentObjective extends React.Component {
@@ -119,7 +112,7 @@ export class InvestmentObjective extends React.Component {
                                             })(
                                                 <Select
                                                         placeholder="Select Investor Type for your advice"
-                                                        style={{...textStyle, width: '100%'}}
+                                                        style={{...textStyle, width: '100%', color: primaryColor}}
                                                         disabled={this.props.disabled}
 
                                                 >

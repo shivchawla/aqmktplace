@@ -308,19 +308,19 @@ class AdviceDetailContentImpl extends React.Component {
                                     </Col>
                                 </Row>
 
-                                <Row style={{marginTop: '15px'}}>
-                                    <Col span={24} style={{marginTop: '10px'}}>
+                                <Row style={{marginTop: '25px'}}>
+                                    <Col span={24}>
                                         <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
                                     </Col>
                                 </Row>
 
-                                <Row style={{marginTop: '15px'}}>
-                                    <Col span={24} style={{marginTop: '10px'}}>
+                                <Row style={{marginTop: '25px'}}>
+                                    <Col span={24}>
                                         <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
                                     </Col>
                                 </Row>
                             
-                                <Row style={{marginTop: '15px'}}>
+                                <Row style={{marginTop: '25px'}}>
                                     <Col span={6}>
                                         <InvestmentObjItem  
                                                 showTag 
@@ -507,7 +507,7 @@ const InvestmentObjItem = ({label, value, showTag = false, warning = false, reas
                         {value}
                     </span>
             }
-            <div style={{display: 'flex', flexDirection: 'row', marginTop: '5px'}}>
+            <div style={{display: 'flex', flexDirection: 'row', marginTop: '0px'}}>
                 <h3 style={{fontSize: '13px', color: '#515151', fontWeight: '700'}}>{label}</h3>
                 {
                     warning &&
