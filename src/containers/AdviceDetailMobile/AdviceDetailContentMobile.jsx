@@ -226,12 +226,10 @@ class AdviceDetailContentImpl extends React.Component {
                             />
                         }
                         {
-                            approvalRequested &&
+                            isPublic && approvalRequested &&
                             <AqTag 
                                     color='#FFAB00'
                                     text="Approval Requested"
-                                    icon={this.props.adviceDetail.isPublic ? 'team' : 'lock'}
-                                    iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
                             />
                         }
                     </Col>
@@ -541,6 +539,25 @@ class AdviceDetailContentImpl extends React.Component {
                         </Row>
                     </Panel>
                 </Collapse>
+                <Row>
+                    <Col span={24} style={{textAlign: 'center'}}>
+                        {
+                            (!isOwner &&  !isSubscribed) &&
+                            <Button 
+                                    onClick={() => 
+                                        Utils.isLoggedIn() 
+                                        ? this.props.toggleSubscriptionModal() 
+                                        : this.redirectToLogin()
+                                        
+                                    }
+                                    type="primary" 
+                                    style={{fontSize: '16px', width: '90%', margin: '20px 0'}}
+                            >
+                                BUY ADVICE
+                            </Button>
+                        }
+                    </Col>
+                </Row>
             </Col>
         )
     }

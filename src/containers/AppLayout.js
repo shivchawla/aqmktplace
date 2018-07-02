@@ -200,22 +200,15 @@ class AppLayout extends React.Component {
                         className="main-loader"
                         showSpinner={false}
                     />
-                    {   !this.props.loading && !this.props.noHeader &&
-                        <Header style={{padding: 0}}>
-                            {this.renderHeader()}
-                        </Header>
-                    }
                     {
                         !this.props.loading &&
-                        <Content style={contentLayoutStyle}> 
+                        <React.Fragment> 
+                            {this.renderHeader()}
                             {this.props.content}
-                        </Content>
-                    }
-                    {   
-                        !this.props.loading && !this.props.noFooter &&
-                        <div>
-                            {this.renderFooter()}
-                        </div>
+                            {!this.props.noFooter &&
+                                this.renderFooter()
+                            }
+                        </React.Fragment>
                     }
                 </Layout>
             </React.Fragment>

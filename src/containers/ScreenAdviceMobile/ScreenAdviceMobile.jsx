@@ -326,6 +326,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
 
     renderAdvicesMobile = (type = 'all') => {
         const {advices} = this.state;
+        
         return (
             <div 
                     className="advice-list" 
@@ -354,7 +355,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                 </div>
                             :   <AdviceList 
                                     onPaginationChange={this.onPaginationChange}
-                                    hasMoreAdvices={this.state.selectedPage <= Math.ceil(this.state.totalCount % 10)}
+                                    hasMoreAdvices={this.state.selectedPage <= Math.ceil(this.state.totalCount / 10)}
                                     advices={advices} 
                                     type={type}
                                 />
@@ -476,7 +477,6 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
             },
             selectedPage: 1,
             sortBy,
-            selectedTab: type,
         }, () => {
             this.getAdvices();
             Utils.localStorageSave('selectedPage', 1);
@@ -543,7 +543,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                     justifyContent: 'space-between',
                                 }}
                         >
-                            <span style={{fontSize: '14px'}}>{this.state.advices.length} Advices</span>
+                            <span style={{fontSize: '14px'}}>{this.state.totalCount} Advices</span>
                             {
                                 Utils.isLoggedIn()
                                 ?   <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
@@ -575,7 +575,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                 page={_.findIndex(adviceTabs, tab => tab.key === this.state.selectedTab)} 
                                 tabs={adviceTabs} 
                                 animated={false} 
-                                onChange={this.handleTabChange}
+                                onTabClick={this.handleTabChange}
                         >
                             {this.renderAdvicesMobile()}
                         </Tabs>

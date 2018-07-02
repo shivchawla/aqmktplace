@@ -36,6 +36,7 @@ class AdviceFormMobileImpl extends React.Component {
 
     constructor(props) {
         super(props);
+        this.mobileLayout = null;
         this.state = {
             adviceName: '',
             steps,
@@ -396,18 +397,16 @@ class AdviceFormMobileImpl extends React.Component {
 
     renderHeader = () => {
         return (
-            <Row height='72px'>
-                <Col span={24} style={{textAlign: 'center'}}>
+            <Row style={{marginTop: '5px'}}>
+                <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
                     <span style={{fontSize: '20px', color: primaryColor}}>
                         Step {this.state.currentStep + 1}: {this.getPageTitle()}
                     </span>
                 </Col>
                 
-                <Col span={24} style={{textAlign: 'center'}}>
+                <Col span={24} style={{textAlign: 'center', marginBottom: '10px'}}>
                     <span style={{fontSize: '14px'}}>Create Advice</span>
                 </Col>
-
-                <Col className='divider' span={24} style={{height: '1px', background: '#DFDFDF'}}/>
             </Row>
         );
     }
@@ -1022,8 +1021,7 @@ class AdviceFormMobileImpl extends React.Component {
                             style={{
                                 display: this.state.preview ? 'none' : 'block', 
                                 background: '#fff', 
-                                height: this.props.windowHeight - 45,
-                                paddingTop: '10px'
+                                height: this.props.windowHeight - 100,
                             }}
                             id="form-container"
                     >
@@ -1033,9 +1031,6 @@ class AdviceFormMobileImpl extends React.Component {
                                     justify="start"
                                     style={{position: 'relative', padding: '0 px'}}
                             >
-                                <Col span={24} style={{height: 'fit-content'}}>
-                                    {this.renderHeader()}
-                                </Col>
                                 <Col 
                                         span={24} 
                                         style={{
@@ -1051,7 +1046,7 @@ class AdviceFormMobileImpl extends React.Component {
                     </Col>
                     {
                         !this.state.preview &&
-                        <Col span={24} style={{marginTop: '-80px', height: '80px', background: '#fff'}}>
+                        <Col span={24} style={{marginTop: '-40px', height: '80px', background: '#fff'}}>
                             {this.renderNavigationButtons()}
                         </Col>
                     }
@@ -1101,7 +1096,14 @@ class AdviceFormMobileImpl extends React.Component {
             return (
                 <Row>
                     {this.renderMobileActionButtons()}
-                    <Col span={24}>
+                    <Col 
+                            span={24} 
+                            style={{
+                                height: this.props.windowHeight - 80,
+                                overflow: 'hidden',
+                                overflowY: 'scroll'
+                            }}
+                    >
                         <AdviceDetailContentMobile 
                             tickers={this.state.highStockSeries}
                             adviceDetail={adviceDetail}
@@ -1142,7 +1144,12 @@ class AdviceFormMobileImpl extends React.Component {
 
     renderPageContent() {
         return (
-            <AqMobileLayout innerPage={true} noHeader={true}>
+            <AqMobileLayout 
+                noHeader={this.state.preview}
+                customHeader={this.renderHeader()}
+                navbarStyle={{height: '72px'}}
+                menuIconStyle={{top: '20px', display: this.state.currentStep === 0 ? 'block' : 'none'}}
+            >
                 <PostWarningModal 
                         visible={this.state.modal.marketPlaceWarning}
                         onOk={e => this.submitAdvice(e, true)}

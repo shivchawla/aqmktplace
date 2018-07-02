@@ -111,7 +111,8 @@ export default class FAQ extends React.Component {
         ];
 
         return (
-            <React.Fragment>
+            <AppLayout content = {
+                <React.Fragment>
                     <Media 
                         query="(max-width: 599px)"
                         render={() => {
@@ -153,9 +154,10 @@ export default class FAQ extends React.Component {
                                 </Row>
                             );
                         }}
-                    />                    
-                <Footer />
-            </React.Fragment>
+                    />                   
+                </React.Fragment>
+            }>
+            </AppLayout>
         );
     }
 }

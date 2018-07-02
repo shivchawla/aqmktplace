@@ -270,21 +270,69 @@ export class PortfolioMobileImpl extends React.Component {
                 {this.renderAddPositionBottomSheet()}
                 {this.renderAdvicePerformanceBottomSheet()}
                 {this.renderPerformanceModal()}
-                <Col span={24} style={{padding: '0 20px'}}>
-                    {
-                        this.props.error.show &&
-                        <h3 
-                                style={{
-                                    color: metricColor.negative, 
-                                    fontSize: '14px',
-                                    marginBottom: '10px'
-                                }}
-                        >
-                            * {this.props.error.detail}
-                        </h3>
-                    }
+                <Col 
+                        span={24} 
+                        style={{
+                            ...horizontalBox,
+                            justifyContent: 'center',
+                            background: '#fff',
+                            borderBottom: '1px solid #DFDFDF',
+                            height: '50px',
+                            marginTop: '-11px',
+                        }}
+                >
+                    <div
+                            style={{
+                                ...horizontalBox, 
+                                justifyContent: 'space-between', 
+                                margin: '10px',
+                                background: '#f5f5f5',
+                                borderRadius: '4px',
+                                height: '35px',
+                                padding: '0 10px',
+                                width: '100%'
+                            }}
+                    >
+                        <Icon 
+                            type="delete" 
+                            onClick={() => this.state.toBeDeletedPositions.length > 0 && this.deletePositions()} 
+                            style={{
+                                fontSize: '20px', 
+                                color: this.state.toBeDeletedPositions.length > 0 ? metricColor.negative : '#CECECE'
+                            }} 
+                        />
+                        <h3 style={{fontSize: '16px', marginLeft: '35px'}}>Add Positions</h3>
+                        <div style={horizontalBox}>
+                            <Icon 
+                                onClick={this.addPositionHandleClick} 
+                                type="plus-circle" 
+                                style={{fontSize: '22px', fontWeight: '700', marginRight: '20px', color: primaryColor}} 
+                            />
+                            {
+                                <Icon 
+                                    onClick={() => this.props.verifiedPositions.length >= 1 && this.togglePerformanceBottomSheet()} 
+                                    type="line-chart" 
+                                    style={{
+                                        fontSize: '22px', 
+                                        color: this.props.verifiedPositions.length >= 1 ? '#4a4a4a' : '#CECECE'
+                                    }}
+                                />
+                            }
+                        </div>
+                    </div>
                 </Col>
-                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', padding: '0 20px'}}>
+                {/* <Col 
+                        span={24} 
+                        style={{
+                            ...horizontalBox, 
+                            justifyContent: 'space-between', 
+                            padding: '0 20px',
+                            height: '40px',
+                            background: '#efeff4',
+                            marginTop: '-11px',
+                            borderBottom: '1px solid #DFDFDF'
+                        }}
+                >
                     <Icon 
                         type="delete" 
                         onClick={() => this.state.toBeDeletedPositions.length > 0 && this.deletePositions()} 
@@ -311,7 +359,7 @@ export class PortfolioMobileImpl extends React.Component {
                             />
                         }
                     </div>
-                </Col>
+                </Col> */}
                 <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginTop: '20px', padding: '0 20px'}}>
                     <h3 style={{fontSize: '14px'}}>
                         Num. of Stocks: 
@@ -324,6 +372,22 @@ export class PortfolioMobileImpl extends React.Component {
                             {Utils.formatMoneyValueMaxTwoDecimals(this.getTotalPortfolioValuation())}
                         </span>
                     </h3>
+                </Col>
+                <Col span={24} style={{padding: '0 20px'}}>
+                    {
+                        this.props.error.show &&
+                        <h3 
+                                style={{
+                                    color: metricColor.negative, 
+                                    fontSize: '14px',
+                                    marginBottom: '10px',
+                                    textAlign: 'center',
+                                    marginTop: '20px'
+                                }}
+                        >
+                            * {this.props.error.detail}
+                        </h3>
+                    }
                 </Col>
                 <Col span={24} style={{marginTop: '10px'}}>
                     {this.renderPositions()}
@@ -384,15 +448,6 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                             noNumeric={true}
                         />
                     </Col>
-                    {/* <Col span={6}>
-                        <MetricItem 
-                            label="Last Price"
-                            value={Number(lastPrice)}
-                            labelStyle={metricLabelStyle}
-                            valueStyle={metricValueStyle}
-                            money
-                        />
-                    </Col> */}
                     <Col span={6}>
                         <MetricItem 
                             label="Total"

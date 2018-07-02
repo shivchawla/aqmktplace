@@ -220,241 +220,77 @@ class App extends React.Component {
         });
     }
 
-    handleNavMenuClick = e => {
-        this.props.history.push(`/${e.key}`);
-    }
-
-    checkLoggedIn = () => {
-        return Utils.isLoggedIn() && this.state.isLoggedIn;
-    }
-
-    renderHeaderActionItemsDesktop = () => {
-        return (
-            <Col 
-                    span={20}
-                    style={{
-                        display: 'flex', 
-                        justifyContent: 'flex-end', 
-                        height: '64px', 
-                        paddingRight: '10px',
-                    }}
-            >   
-                <Menu
-                    style={{marginTop: '10px'}} 
-                    mode="horizontal"
-                    onClick={this.handleNavMenuClick}
-                    selectedKeys={[this.state.parentPath]}>
-                    {
-                        Utils.isLoggedIn() &&
-                        <Menu.Item key="dashboard">Dashboard</Menu.Item>
-                    }
-                    {
-                        !Utils.isLoggedIn() &&
-                        <Menu.Item key={'home'}>Home</Menu.Item>
-                    }
-                    <Menu.Item key="advice">Screen Advices</Menu.Item>
-                    {
-                        Utils.isLoggedIn() &&
-                        <Menu.Item key="stockresearch">Stock Research</Menu.Item>
-                    }
-                    {
-                        !Utils.isLoggedIn() &&
-                        <Menu.Item key="login">Login</Menu.Item>
-                    }
-                    {
-                        !Utils.isLoggedIn() &&
-                        <Menu.Item key="signup">Signup</Menu.Item>
-                    }
-                </Menu>
-                {
-                    Utils.isLoggedIn() &&
-                    <React.Fragment>
-                        {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
-                        <Button 
-                            type="primary" 
-                            onClick={() => this.props.history.push('/dashboard/createadvice')}
-                            style={{marginTop: '18px'}}>
-                            Create Advice
-                        </Button>                                        
-                    </React.Fragment>
-                }
-            </Col> 
-        );
-    }
-
-    showHeaderAdviceLogo = parentPath => {
-        const restrictedParentPaths = ['login', 'signup', 'forgotPassword', 'resetPassword', 'advice', 'dashboard'];
-        if (restrictedParentPaths.indexOf(parentPath) === -1) {
-            return true;
-        }
-
-        return false;
-    }
-
-    renderHeader = () => {
-        return (
-            <React.Fragment>
-                {/* {
-                    this.showHeaderAdviceLogo(this.state.parentPath) &&
-                    <Media 
-                        query="(max-width: 599px)"
-                        render={() => {
-                            return (
-                                <Header
-                                    style={{
-                                        backgroundColor: '#f9f9f9',
-                                        padding: '0',
-                                    }}
-                                >
-                                    <Col 
-                                            span={24} 
-                                            style={{
-                                                ...horizontalBox, 
-                                                justifyContent: Utils.isLoggedIn() ? 'center' : 'space-between',
-                                                padding: '0 20px'
-                                            }}
-                                    >
-                                        <div style={{...horizontalBox, position: 'relative'}}>
-                                            <img src={logo} style={{height: '30px'}}/>
-                                            <div onClick={() => this.props.history.push('/home')} 
-                                                style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-                                                <span style={{...biggerFont, color:primaryColor}}>A</span>
-                                                <span style={{color: primaryColor}}>DVICE</span>
-                                                <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                                                <span style={{color: '#e06666'}}>UBE</span>
-                                            </div>
-                                        </div>
-                                        {
-                                            !Utils.isLoggedIn() &&
-                                            <h3 
-                                                    style={{
-                                                        fontSize: '16px', 
-                                                        fontWeight: '400',
-                                                        color: primaryColor,
-                                                        position: 'absolute',
-                                                        right: '20px'
-                                                    }}
-                                                    onClick={() => this.props.history.push('/login')}
-                           a                 >
-                                                Login
-                                            </h3>
-                                        }
-                                    </Col>
-                                </Header>
-                            );
-                        }}
-                    />
-                } */}
-                {/* <Media 
-                    query="(min-width: 600px)"
-                    render={() => {
-                        return (
-                            <Header style={headerStyle}>
-                                <Row type="flex">
-                                    <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                        <img src={logo} style={{height: '40px', marginTop: '-10px'}}/>
-                                        <h1 onClick={() => this.props.history.push('/home')} 
-                                            style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-                                            <span style={{...biggerFont, color:primaryColor}}>A</span>
-                                            <span style={{color: primaryColor}}>DVICE</span>
-                                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                                            <span style={{color: '#e06666'}}>UBE</span>
-
-                                        </h1>
-                                    </Col>
-                                    {this.renderHeaderActionItemsDesktop()}
-                                </Row>
-                            </Header>
-                        );
-                    }}
-                /> */}
-            </React.Fragment>
-        );
-    }       
-
     render() {
         return (
             <React.Fragment>
-                {/* {this.renderBurgerMenu()} */}
-                <Layout style={{backgroundColor: '#f9f9f9', height:'100%'}}>
-                    {/* {this.renderHeader()} */}
-                    <Content style={contentLayoutStyle}>
-                        {/*
-                            Add Routes in the following format if it is to be synced with header navigation
-                            path='/parent/child/grandChild/....'
-                            where parent is one of the keys from the <Menu.Item> above.
-                            i.e investordashboard, advisordashboard, advice, stockresearch, quantresearch
-                        */}
-                        <Media 
-                            query="(max-width: 599px)"
-                            render={() => {
-                                return (
-                                    <Switch>
-                                        <Route exact={true} path='/home' component={Home} /> 
-                                        <Route exact={true} path='/' component={Home} /> 
-                                        <Route exact={true} path='/advice' component={ScreenAdviceMobile} /> 
-                                        <Route path="/stockresearch" exact component={WorkInProgress} /> 
-                                        <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                                        <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} /> 
-                                        <Route exact={true} path='/dashboard/createadvice' component={CreateAdviceMobile} /> 
-                                        <Route exact={true} path='/dashboard/createportfolio' component={WorkInProgress} /> 
-                                        <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdviceMobile} /> 
-                                        <Route exact={true} path='/dashboard/portfolio/:id' component={WorkInProgress} /> 
-                                        <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={WorkInProgress} /> 
-                                        <Route exact={true} path='/dashboard/advisorprofile/:id' component={WorkInProgress} /> 
-                                        <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
-                                        <Route path='/dashboard' component={WorkInProgress} /> 
-                                        <Route path='/policies/privacy' component={Policy} /> 
-                                        <Route path='/policies/tnc' component={TnC} /> 
-                                        <Route path='/forgotPassword' component={ForgotPassword} /> 
-                                        <Route path='/errorPage' component={NoIternetAccess} /> 
-                                        <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
-                                        <Route path='/authMessage' component={AuthMessage} /> 
-                                        <Route exact={true} path='/login' component={Login} /> 
-                                        <Route exact={true} path='/signup' component={Signup} /> 
-                                        <Route exact={true} path='/faq' component={FAQ} /> 
-                                        <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
-                                        <Route component={PageNotFound} />
-                                    </Switch>
-                                );
-                            }}
-                        />
-                        <Media 
-                            query="(min-width: 600px)"
-                            render={() => {
-                                return (
-                                    <Switch>
-                                        <Route exact={true} path='/home' component={Home} /> 
-                                        <Route exact={true} path='/' component={Home} /> 
-                                        <Route exact={true} path='/advice' component={ScreenAdvices} /> 
-                                        <Route path="/stockresearch" exact component={StockResearch} /> 
-                                        <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                                        <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 
-                                        <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
-                                        <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> 
-                                        <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
-                                        <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
-                                        <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> 
-                                        <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> 
-                                        <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
-                                        <Route path='/dashboard' component={Dashboard} /> 
-                                        <Route path='/policies/privacy' component={Policy} /> 
-                                        <Route path='/policies/tnc' component={TnC} /> 
-                                        <Route path='/forgotPassword' component={ForgotPassword} /> 
-                                        <Route path='/errorPage' component={NoIternetAccess} /> 
-                                        <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
-                                        <Route path='/authMessage' component={AuthMessage} /> 
-                                        <Route exact={true} path='/login' component={Login} /> 
-                                        <Route exact={true} path='/signup' component={Signup} /> 
-                                        <Route exact={true} path='/faq' component={FAQ} /> 
-                                        <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
-                                        <Route component={PageNotFound} />
-                                    </Switch>
-                                );
-                            }}
-                        />
-                    </Content>
-                </Layout>
+                <Media 
+                    query="(max-width: 599px)"
+                    render={() => {
+                        return (
+                            <Switch>
+                                <Route exact={true} path='/home' component={Home} /> 
+                                <Route exact={true} path='/' component={Home} /> 
+                                <Route exact={true} path='/advice' component={ScreenAdviceMobile} /> 
+                                <Route path="/stockresearch" exact component={WorkInProgress} /> 
+                                <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
+                                <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} /> 
+                                <Route exact={true} path='/dashboard/createadvice' component={CreateAdviceMobile} /> 
+                                <Route exact={true} path='/dashboard/createportfolio' component={WorkInProgress} /> 
+                                <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdviceMobile} /> 
+                                <Route exact={true} path='/dashboard/portfolio/:id' component={WorkInProgress} /> 
+                                <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={WorkInProgress} /> 
+                                <Route exact={true} path='/dashboard/advisorprofile/:id' component={WorkInProgress} /> 
+                                <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
+                                <Route path='/dashboard' component={WorkInProgress} /> 
+                                <Route path='/policies/privacy' component={Policy} /> 
+                                <Route path='/policies/tnc' component={TnC} /> 
+                                <Route path='/forgotPassword' component={ForgotPassword} /> 
+                                <Route path='/errorPage' component={NoIternetAccess} /> 
+                                <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
+                                <Route path='/authMessage' component={AuthMessage} /> 
+                                <Route exact={true} path='/login' component={Login} /> 
+                                <Route exact={true} path='/signup' component={Signup} /> 
+                                <Route exact={true} path='/faq' component={FAQ} /> 
+                                <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
+                                <Route component={PageNotFound} />
+                            </Switch>
+                        );
+                    }}
+                />
+                <Media 
+                    query="(min-width: 600px)"
+                    render={() => {
+                        return (
+                            <Switch>
+                                <Route exact={true} path='/home' component={Home} /> 
+                                <Route exact={true} path='/' component={Home} /> 
+                                <Route exact={true} path='/advice' component={ScreenAdvices} /> 
+                                <Route path="/stockresearch" exact component={StockResearch} /> 
+                                <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
+                                <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 
+                                <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
+                                <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> 
+                                <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
+                                <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
+                                <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> 
+                                <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> 
+                                <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
+                                <Route path='/dashboard' component={Dashboard} /> 
+                                <Route path='/policies/privacy' component={Policy} /> 
+                                <Route path='/policies/tnc' component={TnC} /> 
+                                <Route path='/forgotPassword' component={ForgotPassword} /> 
+                                <Route path='/errorPage' component={NoIternetAccess} /> 
+                                <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
+                                <Route path='/authMessage' component={AuthMessage} /> 
+                                <Route exact={true} path='/login' component={Login} /> 
+                                <Route exact={true} path='/signup' component={Signup} /> 
+                                <Route exact={true} path='/faq' component={FAQ} /> 
+                                <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
+                                <Route component={PageNotFound} />
+                            </Switch>
+                        );
+                    }}
+                />
             </React.Fragment>
         );
     }

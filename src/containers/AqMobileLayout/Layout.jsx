@@ -28,7 +28,7 @@ class AqMobileLayoutImpl extends React.Component {
                 icon={
                     <Icon 
                         type={this.props.innerPage ? "left" : "menu-unfold"} 
-                        style={{...style.sideBarMenuIconStyle, ...this.state.iconRotateStyle}}
+                        style={{...style.sideBarMenuIconStyle, ...this.state.iconRotateStyle, ...this.props.menuIconStyle}}
                         onClick = {
                             () => 
                                 this.props.innerPage 
@@ -45,18 +45,20 @@ class AqMobileLayoutImpl extends React.Component {
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
-                    borderBottom: '1px solid #E0E0E0'
+                    borderBottom: '1px solid #E0E0E0',
+                    ...this.props.navbarStyle
                 }}
             >
-                <div 
-                        onClick={() => this.props.history.push('/home')} 
-                        style={{...headerColor, cursor: 'pointer',display: 'inline-block'}}
-                >
-                    <span style={{...biggerFont, color: primaryColor}}>A</span>
-                    <span style={{color: primaryColor}}>DVICE</span>
-                    <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                    <span style={{color: '#e06666'}}>UBE</span>
-                </div>
+                {
+                    this.props.customHeader === undefined
+                    ?   <div style={{...headerColor, cursor: 'pointer',display: 'inline-block'}}>
+                            <span style={{...biggerFont, color: primaryColor}}>A</span>
+                            <span style={{color: primaryColor}}>DVICE</span>
+                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                            <span style={{color: '#e06666'}}>UBE</span>
+                        </div>
+                    :   this.props.customHeader
+                }
             </NavBar>
 
         );
@@ -99,13 +101,14 @@ class AqMobileLayoutImpl extends React.Component {
                                 paddingTop: '10px', 
                                 paddingRight: '10px',
                                 alignItems: 'center',
+                                borderBottom: '1px solid #eaeaea'
                             }}
                     >
                         <div 
                                 onClick={() => this.props.history.push('/home')} 
-                                style={{...horizontalBox, marginLeft: '10px'}}
+                                style={{...horizontalBox, marginLeft: '15px'}}
                         >
-                            <img src={logo} style={{height: '30px'}}/>
+                            <img src={logo} style={{height: '25px'}}/>
                             <div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
                                 <span style={{...biggerFont, color:primaryColor}}>A</span>
                                 <span style={{color: primaryColor}}>DVICE</span>
@@ -113,13 +116,13 @@ class AqMobileLayoutImpl extends React.Component {
                                 <span style={{color: '#e06666'}}>UBE</span>
                             </div>
                         </div>
-                        <Icon 
+                        {/* <Icon 
                             type="close" 
                             style={{fontSize: '24px', zIndex: '20'}}
                             onClick={this.toggleSideMenu}
-                        />
+                        /> */}
                     </Col>
-                    <Col span={24}>
+                    <Col span={24} style={{marginTop: '20px'}}>
                         <Menu style={{backgroundColor: 'transparent'}}>
                             {
                                 sidebarUrls.map((item, index) => (
@@ -177,7 +180,7 @@ const SideMenuItem = ({menuItem}) => {
         <div style={{...horizontalBox, alignItems: 'center'}}>
             {
                 menuItem.icon &&
-                <Icon style={{fontSize: '18px'}} type={menuItem.icon}/>
+                <Icon style={{fontSize: '18px', color: primaryColor}} type={menuItem.icon}/>
             }
             <h3 style={{fontSize: '16px', color: '#686868'}}>{menuItem.name}</h3>
         </div>
