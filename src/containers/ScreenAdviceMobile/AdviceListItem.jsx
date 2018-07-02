@@ -58,10 +58,10 @@ class AdviceListItemMobileImpl extends React.Component {
     }
 
     renderNetValueChange = performanceSummary => {
-        let netValue = 0;
-        if (performanceSummary ) {
-            netValue = _.get(performanceSummary, 'netValue', 0) || _.get(performanceSummary, 'current.netValueEOD', 0);
-        }
+        let {netValue = 0} = this.props.advice;
+        // if (performanceSummary ) {
+        //     netValue = _.get(performanceSummary, 'netValue', 0) || _.get(performanceSummary, 'current.netValueEOD', 0);
+        // }
       
         return (
             <Row style={{textAlign: 'left'}}>

@@ -207,7 +207,7 @@ class AdviceListItemImpl extends React.PureComponent {
                         </Col>
 
                         <Col span={7}>
-                            {this.renderNetValueChange(Object.assign({netValue:netValue}, performanceSummary))}
+                            {this.renderNetValueChange(Object.assign({netValue: netValue}, performanceSummary))}
                         </Col>
                     </Row>
                 </Col>
