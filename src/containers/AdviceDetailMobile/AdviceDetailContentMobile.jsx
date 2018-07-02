@@ -280,7 +280,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 
                                             }
                                             type="primary" 
-                                            style={{fontSize: '16px', width: '40%'}}
+                                            style={{fontSize: '16px', width: '55%'}}
                                     >
                                         {!isSubscribed ? "BUY ADVICE" : "UNSUBSCRIBE"}
                                     </Button>

@@ -252,7 +252,8 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                     advices: this.state.selectedPage === 1
                             ? this.processAdvices(response.data.advices)
                             : [...this.state.advices, ...this.processAdvices(response.data.advices)],
-                    totalCount: this.state.initialCall ? _.get(response.data, 'count', 10) : this.state.totalCount,
+                    // totalCount: this.state.initialCall ? _.get(response.data, 'count', 10) : this.state.totalCount,
+                    totalCount: _.get(response.data, 'count', 10),
                     initialCall: false,
                     hasMoreAdvices: response.data.advices.length === 10
                 });
@@ -414,7 +415,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
         this.setState({adviceUrl: url});
     }
 
-    handleTabChange = ({tab, key}) => {
+    handleTabChange = ({title, key}) => {
         this.setState({selectedTab: key, selectedPage: 1}, () => {
             Utils.localStorageSave('selectedTab', key);
             Utils.localStorageSave('selectedPage', 1);
