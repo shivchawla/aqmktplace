@@ -191,6 +191,7 @@ export class FilterMobileComponent extends React.Component {
                                 type={filter.type}
                                 handleSliderChange={this.handleSliderChange}
                                 ref={this.setSliderInputRef}
+                                percentage={filter.percentage}
                             />
                         </Col>
                     </Row>
@@ -331,10 +332,10 @@ export class FilterMobileComponent extends React.Component {
     render() {
         const {selectedFilters} = this.state;
         const filterArray = [
-            {type: 'return', label: 'Annual Return', range: selectedFilters.return, min: -100, max: 100},
-            {type: 'netValue', label: 'Net Value', range: selectedFilters.netValue, min: 0, max: 200000, step: 10000},
-            {type: 'volatility', label: 'Volatility', range: selectedFilters.volatility, min: 0, max: 50},
-            {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, step: 0.5},
+            {type: 'return', label: 'Annual Return', range: selectedFilters.return, min: -100, max: 100, percentage: true},
+            {type: 'netValue', label: 'Net Value', range: selectedFilters.netValue, min: 0, max: 200000, step: 10000, percentage: false},
+            {type: 'volatility', label: 'Volatility', range: selectedFilters.volatility, min: 0, max: 50, percentage: false},
+            {type: 'sharpe', label: 'Sharpe Ratio', range: selectedFilters.sharpe, min: -5, max:5, step: 0.5, percentage: false},
         ];
 
         return (

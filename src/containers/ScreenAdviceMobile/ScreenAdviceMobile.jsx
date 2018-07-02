@@ -533,47 +533,43 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                 }}
                         />
                     </Col>
-                    {
-                        this.state.advices.length > 0 &&
-                        <React.Fragment>
-                            <Col 
-                                    span={24} 
-                                    style={{
-                                        ...horizontalBox, 
-                                        alignItems: 'center', 
-                                        padding: '10px 15px',
-                                        justifyContent: 'space-between',
-                                    }}
-                            >
-                                <span style={{fontSize: '14px'}}>{this.state.advices.length} Advices</span>
-                                {
-                                    Utils.isLoggedIn()
-                                    ?   <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
-                                            <span style={{fontSize: '14px', marginRight: '5px'}}>
-                                                Filter
-                                                {
-                                                    this.getFilterAppliedCount() > 0 ? `(${this.getFilterAppliedCount()})` : null
-                                                }
-                                            </span>
-                                            <Icon type="down" style={{marginTop: '2px', fontSize: '14px'}} />
-                                        </div>
-                                    :   <MobileButton 
-                                                style={{fontSize: '14px'}}
-                                                onClick={() => this.props.history.push('/login')}
-                                                size="small"
-                                                type="primary"
-                                        >
-                                            LOGIN
-                                        </MobileButton>
-                                }
-                                
-                            </Col>
-                            <Col span={24}>
-                                <div style={{height: '2px', backgroundColor: '#efeff4'}}></div>
-                            </Col>
-                        </React.Fragment>
-                    }
-                    
+                    <React.Fragment>
+                        <Col 
+                                span={24} 
+                                style={{
+                                    ...horizontalBox, 
+                                    alignItems: 'center', 
+                                    padding: '10px 15px',
+                                    justifyContent: 'space-between',
+                                }}
+                        >
+                            <span style={{fontSize: '14px'}}>{this.state.advices.length} Advices</span>
+                            {
+                                Utils.isLoggedIn()
+                                ?   <div style={{...horizontalBox}} onClick={this.toggleFilterMenu}>
+                                        <span style={{fontSize: '14px', marginRight: '5px'}}>
+                                            Filter
+                                            {
+                                                this.getFilterAppliedCount() > 0 ? `(${this.getFilterAppliedCount()})` : null
+                                            }
+                                        </span>
+                                        <Icon type="down" style={{marginTop: '2px', fontSize: '14px'}} />
+                                    </div>
+                                :   <MobileButton 
+                                            style={{fontSize: '14px'}}
+                                            onClick={() => this.props.history.push('/login')}
+                                            size="small"
+                                            type="primary"
+                                    >
+                                        LOGIN
+                                    </MobileButton>
+                            }
+                            
+                        </Col>
+                        <Col span={24}>
+                            <div style={{height: '2px', backgroundColor: '#efeff4'}}></div>
+                        </Col>
+                    </React.Fragment>
                     <Col span={24} style={{marginTop: '5px'}}>
                         <Tabs 
                                 page={_.findIndex(adviceTabs, tab => tab.key === this.state.selectedTab)} 

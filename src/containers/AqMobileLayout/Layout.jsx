@@ -7,6 +7,7 @@ import {NavBar} from 'antd-mobile';
 import {sidebarUrls} from './constants';
 import {Utils} from '../../utils';
 import {primaryColor, horizontalBox} from '../../constants';
+import logo from "../../assets/logo-advq-new.png";
 import * as style from './layoutStyle';
 
 class AqMobileLayoutImpl extends React.Component {
@@ -28,7 +29,13 @@ class AqMobileLayoutImpl extends React.Component {
                     <Icon 
                         type={this.props.innerPage ? "left" : "menu-unfold"} 
                         style={{...style.sideBarMenuIconStyle, ...this.state.iconRotateStyle}}
-                        onClick = {() => this.props.innerPage ? this.props.history.goBack() : this.toggleSideMenu()}
+                        onClick = {
+                            () => 
+                                this.props.innerPage 
+                                ? this.props.previousPageUrl !== undefined
+                                  ? this.props.history.push(this.props.previousPageUrl)
+                                  : this.props.history.goBack()
+                                : this.toggleSideMenu()}
                     />
                 }
                 onLeftClick={() => this.toggleSideMenu}
@@ -37,7 +44,8 @@ class AqMobileLayoutImpl extends React.Component {
                     flexDirection: 'row', 
                     alignItems: 'center',
                     justifyContent: 'center',
-                    position: 'relative'
+                    position: 'relative',
+                    borderBottom: '1px solid #E0E0E0'
                 }}
             >
                 <div 
@@ -78,10 +86,9 @@ class AqMobileLayoutImpl extends React.Component {
                     onStateChange={this.handleBurgerMenuStateChange}
                     customBurgerIcon={false}
                     customCrossIcon={false}
-                    pageWrapId="menu-wrapper" 
-                    outerContainerId="aq-layout-container"
                     isOpen={this.state.sideBarOpenStatus} 
                     styles={style.sideBarMenuStyle}
+                    disableOverlayClick={this.toggleSideMenu}
             >
                 <Row>
                     <Col 
@@ -94,12 +101,17 @@ class AqMobileLayoutImpl extends React.Component {
                                 alignItems: 'center',
                             }}
                     >
-                        <div onClick={() => this.props.history.push('/home')} 
-                            style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-                            <span style={{...biggerFont, color:primaryColor}}>A</span>
-                            <span style={{color: primaryColor}}>DVICE</span>
-                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                            <span style={{color: '#e06666'}}>UBE</span>
+                        <div 
+                                onClick={() => this.props.history.push('/home')} 
+                                style={{...horizontalBox, marginLeft: '10px'}}
+                        >
+                            <img src={logo} style={{height: '30px'}}/>
+                            <div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                                <span style={{...biggerFont, color:primaryColor}}>A</span>
+                                <span style={{color: primaryColor}}>DVICE</span>
+                                <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                                <span style={{color: '#e06666'}}>UBE</span>
+                            </div>
                         </div>
                         <Icon 
                             type="close" 

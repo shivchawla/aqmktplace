@@ -1021,6 +1021,7 @@ class AdviceFormMobileImpl extends React.Component {
                                 display: this.state.preview ? 'none' : 'block', 
                                 background: '#fff', 
                                 height: this.props.windowHeight - 45,
+                                paddingTop: '10px'
                             }}
                             id="form-container"
                     >
@@ -1139,7 +1140,7 @@ class AdviceFormMobileImpl extends React.Component {
 
     renderPageContent() {
         return (
-            <AqMobileLayout innerPage={true}>
+            <AqMobileLayout innerPage={true} noHeader={true}>
                 <PostWarningModal 
                         visible={this.state.modal.marketPlaceWarning}
                         onOk={e => this.submitAdvice(e, true)}

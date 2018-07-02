@@ -37,13 +37,13 @@ export class FilterSliderComponent extends React.Component {
     }
 
     render() {
-        const {min = 0, max = 0} = this.props;
+        const {min = 0, max = 0, percentage = false} = this.props;
 
         return (
             <Row>
                 <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', padding: '0 20px'}}>
-                    <h3 style={{fontSize: '18px'}}>{this.state.value[0]} %</h3>
-                    <h3 style={{fontSize: '18px'}}>{this.state.value[1]} %</h3>
+                    <h3 style={{fontSize: '18px'}}>{this.state.value[0]} {percentage && `%`}</h3>
+                    <h3 style={{fontSize: '18px'}}>{this.state.value[1]} {percentage && `%`}</h3>
                 </Col>
                 <Col span={24} style={{padding: '30px'}}>
                     <Range
