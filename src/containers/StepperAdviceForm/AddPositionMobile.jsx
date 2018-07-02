@@ -176,14 +176,17 @@ class AddPositionMobileImpl extends React.Component {
 
         return (
             <Row style={{height: '100%', position: 'relative'}}>
-                <Col 
+                <div 
                         span={24} 
                         style={{
                             ...horizontalBox, 
                             justifyContent: 'center', 
                             position: 'relative',
                             backgroundColor: primaryColor,
-                            height: '64px'
+                            height: '64px',
+                            alignItems: 'center',
+                           '-webkit-align-items': 'center',
+                           width: '100%'
                         }}
                 >
                     <Icon 
@@ -201,7 +204,7 @@ class AddPositionMobileImpl extends React.Component {
                     <h3 style={{fontSize: '18px', color: '#fff'}}>
                         {this.props.updatePosition ? "Update Position" : "Add Position"}
                     </h3>
-                </Col>
+                </div>
                 {
                     !this.props.updatePosition &&
                     <Col span={24} style={{textAlign: 'center', marginTop: '10px', padding: '0 10px'}}>
@@ -305,7 +308,6 @@ class AddPositionMobileImpl extends React.Component {
                             <MobileButton 
                                     onClick={this.updateOrAddPosition} 
                                     type="primary" 
-                                    size="small"
                             >
                                 {this.props.updatePosition ? "UPDATE" : "ADD"}
                             </MobileButton>

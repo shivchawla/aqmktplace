@@ -221,7 +221,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 iconStyle={{fontWeight: '400', marginRight: '5px'}}
                         />
                         {
-                            !this.props.adviceDetail.isOwner &&
+                            isOwner &&
                             <AqTag 
                                     tooltipTitle='You are the owner of this advice'
                                     tooltipPlacement='bottom'

@@ -1115,7 +1115,7 @@ class AdviceFormMobileImpl extends React.Component {
                             performanceType={"Simulated"}
                         />
                     </Col>
-                    {this.renderMobileActionButtons()}
+                    {/* {this.renderMobileActionButtons()} */}
                 </Row>
             );
         } else {

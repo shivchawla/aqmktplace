@@ -197,7 +197,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 iconStyle={{fontWeight: '400', marginRight: '5px'}}
                         />
                         {
-                            !this.props.adviceDetail.isOwner &&
+                            isOwner &&
                             <AqTag 
                                     tooltipTitle='You are the owner of this advice'
                                     tooltipPlacement='bottom'
@@ -208,25 +208,25 @@ class AdviceDetailContentImpl extends React.Component {
                             />
                         }
                         {
-                            (this.props.adviceDetail.isSubscribed || this.props.adviceDetail.isFollowing) &&
+                            (isSubscribed || isFollowing) &&
                             <AqTag 
-                                    tooltipTitle={this.props.adviceDetail.isSubscribed ? 'You are subscribed to this advice' : 'You have wislisted this advice'}
-                                    text={this.props.adviceDetail.isSubscribed ? 'Subscribed' : 'Wishlisted'}
+                                    tooltipTitle={isSubscribed ? 'You are subscribed to this advice' : 'You have wislisted this advice'}
+                                    text={isSubscribed ? 'Subscribed' : 'Wishlisted'}
                                     color='rgb(24, 144, 255)'
                             />
                         }
                         {
-                            this.props.adviceDetail.isOwner &&
+                            isOwner &&
                             <AqTag 
                                     color='#673AB7'
-                                    tooltipTitle={this.props.adviceDetail.isPublic ? 'This advice is Public' : 'This advice is private'}
-                                    text={this.props.adviceDetail.isPublic ? 'Public' : 'Private'}
-                                    icon={this.props.adviceDetail.isPublic ? 'team' : 'lock'}
+                                    tooltipTitle={isPublic ? 'This advice is Public' : 'This advice is private'}
+                                    text={isPublic ? 'Public' : 'Private'}
+                                    icon={isPublic ? 'team' : 'lock'}
                                     iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
                             />
                         }
                         {
-                            isPublic && approvalRequested &&
+                            (isOwner || isAdmin) && approvalRequested && isPublic &&
                             <AqTag 
                                     color='#FFAB00'
                                     text="Approval Requested"
