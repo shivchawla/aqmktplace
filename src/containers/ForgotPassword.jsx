@@ -10,6 +10,7 @@ import {primaryColor} from '../constants';
 import axios from 'axios';
 import logo from "../assets/logo-advq-new.png";
 import '../css/forgotPassword.css';
+import AppLayout from './AppLayout';
 
 class ForgotPasswordImpl extends Component {
 
@@ -282,18 +283,21 @@ class ForgotPasswordImpl extends Component {
   }
 
   render() {
-	return (
-		<React.Fragment>
-			<Media 
-				query="(max-width: 600px)"
-				render={() => this.renderMobile()}
-			/>
-			<Media 
-				query="(min-width: 601px)"
-				render={() => this.renderDesktop()}
-			/>
-		</React.Fragment>
-	);
+    	return (
+          <AppLayout noFooter content = {
+          		<React.Fragment>
+          			<Media 
+          				query="(max-width: 600px)"
+          				render={() => this.renderMobile()}
+          			/>
+          			<Media 
+          				query="(min-width: 601px)"
+          				render={() => this.renderDesktop()}
+          			/>
+          		</React.Fragment>
+          }>
+          </AppLayout>
+      	);
   }	
 }
 

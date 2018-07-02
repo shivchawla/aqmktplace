@@ -6,7 +6,6 @@ import moment from 'moment';
 import axios from 'axios';
 import {withRouter} from 'react-router';
 import {Row, Col, Radio, Button, Collapse, Icon, Tooltip, message} from 'antd';
-import {Footer} from '../components/Footer';
 import {WatchList} from '../components/WatchList';
 import ForbiddenAccess from '../components/ForbiddenAccess';
 import {PortfolioDetailMeta} from '../metas';
@@ -31,6 +30,7 @@ import {
     dividerStyle
 } from '../constants';
 import { AqPageHeader } from '../components/AqPageHeader';
+import AppLayout from './AppLayout';
 
 const MyChartNew = Loadable({
     loader: () => import('./MyChartNew'),
@@ -68,7 +68,7 @@ class PortfolioDetailImpl extends React.Component {
             performancepercentageSeries: [],
             pieSeries: [],
             activeKey:['.$2'],
-            show: false,
+            loading: true,
             notAuthorized: false,
             cash: -10,
             stockResearchModalVisible: false,
@@ -282,7 +282,7 @@ class PortfolioDetailImpl extends React.Component {
             let positions = [];
             const tickers = [...this.state.tickers];
             const performanceUrl = `${requestUrl}/performance/investor/${Utils.getUserInfo().investor}/${this.props.match.params.id}`;
-            this.setState({show: true});
+            this.setState({loading: true});
             let pnlStats;
             this.getPortfolioDetail()
             .then(portfolioData => {
@@ -362,7 +362,7 @@ class PortfolioDetailImpl extends React.Component {
                 return error;
             })
             .finally(() => {
-                this.setState({show: false});
+                this.setState({loading: false});
             });
         }
     }
@@ -749,25 +749,19 @@ class PortfolioDetailImpl extends React.Component {
                             </Row>
                         </Col>
                     </Row>
-                    <Footer style={{marginTop: '20px'}}/>
                 </React.Fragment>
         );
     }
 
     render () {
         return (
-            <React.Fragment>
-                <Loading
-                    show={this.state.show}
-                    color={loadingColor}
-                    className="main-loader"
-                    showSpinner={false}
-                />
-                {
-                    !this.state.show &&
-                    this.renderPageContent()
-                }
-            </React.Fragment>
+            <AppLayout 
+                content = {
+                    <React.Fragment>
+                        {this.renderPageContent()}
+                    </React.Fragment>
+                }>
+            </AppLayout>
         );
     }
 }

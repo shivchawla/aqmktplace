@@ -6,7 +6,6 @@ import Loading from 'react-loading-bar';
 import moment from 'moment';
 import {withRouter} from 'react-router'
 import {Row, Col, Checkbox, Tabs, Button, Modal, message, Select, Radio, Form, Input, notification, Spin} from 'antd';
-import {Footer} from '../components/Footer';
 import {AqPageHeader} from '../components/AqPageHeader';
 import ForbiddenAccess from '../components/ForbiddenAccess';
 import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
@@ -21,6 +20,7 @@ import {UpdatePortfolioCrumb} from '../constants/breadcrumbs';
 import {Utils, getBreadCrumbArray, addToMyPortfolio, addToAdvice, fetchAjax, getStockPerformance, getUnrealizedPnlPct, getUnrealizedPnl} from'../utils';
 import {benchmarks} from '../constants/benchmarks';
 import {portfolioLimit} from '../constants';
+import AppLayout from './AppLayout';
 
 const MyChartNew = Loadable({
     loader: () => import('./MyChartNew'),
@@ -57,7 +57,7 @@ class AddTransactionsImpl extends React.Component {
             toggleValue: 'stock',
             selectedBenchmark: benchmarks[0],
             notAuthorized: false,
-            show: false,
+            loading: true,
             portfolioName: '',
             portfolioId: '',
             stockResearchModalVisible: false,
@@ -805,7 +805,7 @@ class AddTransactionsImpl extends React.Component {
     }
 
     getInitialData = () => {
-        this.setState({show: true});
+        this.setState({true: true});
         fetchAjax(`${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio`)
         .then(response => {
             this.setState({portfolioCount: response.data.length});
@@ -816,7 +816,7 @@ class AddTransactionsImpl extends React.Component {
         })
         .catch(error => error)
         .finally(() => {
-            this.setState({show: false});
+            this.setState({loading: false});
         });
     }
 
@@ -907,7 +907,7 @@ class AddTransactionsImpl extends React.Component {
         } else {
             if (this.props.portfolioId) { // Portfolio will be updated
                 // Check if the user is authorized to access this page
-                this.setState({show: true});
+                this.setState({loading: true});
                 const url = `${requestUrl}/investor/${Utils.getUserInfo().investor}/portfolio/${this.props.match.params.id}`;
                 const unionAdvices = [];
                 fetchAjax(url, this.props.history, this.props.match.url)
@@ -972,7 +972,7 @@ class AddTransactionsImpl extends React.Component {
                 })
                 .catch(error => error)
                 .finally(() => {
-                    this.setState({show: false});
+                    this.setState({loading: false});
                 });
             } else {
                 const tickers = [...this.state.tickers];
@@ -1228,24 +1228,18 @@ class AddTransactionsImpl extends React.Component {
 
     render() {
         return (
-            <Row>
-                {this.renderSubscribedAdviceModal()}
-                {this.renderPreviewModal()}
-                {this.renderPortfolioLimitExceededModal()}
-                <Loading
-                    show={this.state.show}
-                    color={loadingColor}
-                    className="main-loader"
-                    showSpinner={false}
-                />
-                {
-                    !this.state.show &&
-                    <React.Fragment>
+            <AppLayout 
+                loading = {this.state.loading}
+                content = {
+                    <Row>
+                        {this.renderSubscribedAdviceModal()}
+                        {this.renderPreviewModal()}
+                        {this.renderPortfolioLimitExceededModal()}
                         {this.renderPageContent()}
-                        <Footer />
-                    </React.Fragment>
-                }
-            </Row>
+                        
+                    </Row>  
+                }>
+            </AppLayout>
         );
     }
 }

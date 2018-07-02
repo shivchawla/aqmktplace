@@ -21,9 +21,9 @@ import realtime from '../assets/realtime.svg';
 import test from '../assets/test.svg';
 import track from '../assets/track.svg';
 import performance from '../assets/performance.svg';
-import {Footer} from '../components/Footer';
 import {HomeMeta} from '../metas';
 import '../css/home.css';
+import AppLayout from './AppLayout'
 
 const {youtubeVideoId} = require('../localConfig');
 
@@ -32,11 +32,15 @@ export class Home extends React.Component {
         super(props);
         this.state = {
             selectedTabBar: 'investor',
-            loading: false,
+            loading: true,
             youtubeModalVisible: false
         }
     }
 
+    componentDidMount = () => {
+        this.setState({loading: false});
+    }
+ 
     handleTabBarClick = type => {
         this.setState({selectedTabBar: type});
     }
@@ -735,98 +739,87 @@ export class Home extends React.Component {
         );
     }
 
-    renderFooterMobile = () => {
-        return <Footer mobile={true} hello='sauravbiswas' header='Hello World' />;
-    }
-
-    renderFooterDesktop = () => {
-        return <Footer hello='sauravbiswas' header='Hello World' />;
-    }
-
     render() {
         return (
-            <StyleRoot>
-                <Media 
-                    query="(max-width: 1199px)"
-                    render={() => (
-                        <React.Fragment>
-                            <Media 
-                                query="(max-width: 600px)"
-                                render={() => this.renderVideoPlayerModalMobile()}
-                            />
-                            <Media 
-                                query="(min-width: 601px)"
-                                render={() => this.renderVideoPlayerModalMobile('tablet')}
-                            />
-                        </React.Fragment>
-                    )}
-                />
-                <Media 
-                    query="(min-width: 1200px)"
-                    render={() => this.renderVidePlayerModalDesktop()}
-                />
-                {/* {this.renderVidePlayerModalDesktop()} */}
-                <Col span={24} className='page-container'>
-                    <HomeMeta />
-                    <Media 
-                        query="(max-width: 1199px)"
-                        render={() => {
-                            return (
-                                <Row>
-                                    <React.Fragment>
-                                        {this.renderTopLeftSectionMobile()}
-                                        {this.renderPlayVideoButtonMobile()}
-                                        {this.renderTopHeroImageMobile()}
-                                        {this.renderActionButtonsMobile()}
-                                    </React.Fragment>
-                                </Row>
-                            );
-                        }}
-                    />
-                    <Media
-                        query="(min-width: 1200px)"
-                        render={() => {
-                            return (
-                                <Row className="top-section">
-                                    <React.Fragment>
-                                        {this.renderTopLeftSectionDesktop()}
-                                        {this.renderTopHeroImageDesktop()}
-                                        {this.renderPlayVideoButtonDesktop()}
-                                    </React.Fragment>
-                                </Row>
-                            );
-                        }}
-                    />
-                    <Row className="middle-section" style={{marginTop: '100px'}}>
+            <AppLayout 
+                loading={this.state.loading}
+                content={
+                    <StyleRoot>
                         <Media 
                             query="(max-width: 1199px)"
-                            render={() => this.renderMiddleSectionMobile()}
+                            render={() => (
+                                <React.Fragment>
+                                    <Media 
+                                        query="(max-width: 600px)"
+                                        render={() => this.renderVideoPlayerModalMobile()}
+                                    />
+                                    <Media 
+                                        query="(min-width: 601px)"
+                                        render={() => this.renderVideoPlayerModalMobile('tablet')}
+                                    />
+                                </React.Fragment>
+                            )}
                         />
                         <Media 
                             query="(min-width: 1200px)"
-                            render={() => this.renderMiddleSectionDesktop()}
+                            render={() => this.renderVidePlayerModalDesktop()}
                         />
-                    </Row>
-                    {/*<Row className="lower-section" style={{marginTop: '80px'}}>
-                        <Media 
-                            query="(max-width: 1199px)"
-                            render={() => this.renderLowerSectionMobile()}
-                        />
-                        <Media 
-                            query="(min-width: 1200px)"
-                            render={() => this.renderLowerSectionDesktop()}
-                        />
-                    </Row>*/}
-                    <Media 
-                        query="(max-width: 1199px)"
-                        render={() => this.renderFooterMobile()}
-                    />
-                    <Media 
-                        query="(min-width: 1200px)"
-                        render={() => this.renderFooterDesktop()}
-                    />
-                </Col>
-            </StyleRoot>
+                        {/* {this.renderVidePlayerModalDesktop()} */}
+                        <Col span={24} className='page-container'>
+                            <HomeMeta />
+                            <Media 
+                                query="(max-width: 1199px)"
+                                render={() => {
+                                    return (
+                                        <Row>
+                                            <React.Fragment>
+                                                {this.renderTopLeftSectionMobile()}
+                                                {this.renderPlayVideoButtonMobile()}
+                                                {this.renderTopHeroImageMobile()}
+                                                {this.renderActionButtonsMobile()}
+                                            </React.Fragment>
+                                        </Row>
+                                    );
+                                }}
+                            />
+                            <Media
+                                query="(min-width: 1200px)"
+                                render={() => {
+                                    return (
+                                        <Row className="top-section">
+                                            <React.Fragment>
+                                                {this.renderTopLeftSectionDesktop()}
+                                                {this.renderTopHeroImageDesktop()}
+                                                {this.renderPlayVideoButtonDesktop()}
+                                            </React.Fragment>
+                                        </Row>
+                                    );
+                                }}
+                            />
+                            <Row className="middle-section" style={{marginTop: '100px'}}>
+                                <Media 
+                                    query="(max-width: 1199px)"
+                                    render={() => this.renderMiddleSectionMobile()}
+                                />
+                                <Media 
+                                    query="(min-width: 1200px)"
+                                    render={() => this.renderMiddleSectionDesktop()}
+                                />
+                            </Row>
+                            {/*<Row className="lower-section" style={{marginTop: '80px'}}>
+                                <Media 
+                                    query="(max-width: 1199px)"
+                                    render={() => this.renderLowerSectionMobile()}
+                                />
+                                <Media 
+                                    query="(min-width: 1200px)"
+                                    render={() => this.renderLowerSectionDesktop()}
+                                />
+                            </Row>*/}
+                        </Col>
+                    </StyleRoot>
+                }>
+            </AppLayout>
         );
     }
 }

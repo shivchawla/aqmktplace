@@ -1049,7 +1049,7 @@ class AdviceFormMobileImpl extends React.Component {
                     </Col>
                     {
                         !this.state.preview &&
-                        <Col span={24} style={{marginTop: '-80px', height: '80px', background: '#fff'}}>
+                        <Col span={24} style={{marginTop: '-30px', height: '80px', background: '#fff'}}>
                             {this.renderNavigationButtons()}
                         </Col>
                     }
