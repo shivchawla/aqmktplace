@@ -543,51 +543,55 @@ export class Home extends React.Component {
 
     renderPlayVideoButtonDesktop = () => {
         return (
-            <Col 
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        bottom: '25%',
-                        position: 'absolute'
-                    }} 
-                    span={24}
-            >
-                <div style={styles.bounce}>
-                    <Icon 
-                            className='play-icon animated infinite bounce' 
-                            type="play-circle-o" 
-                            onClick={this.toggleVideoPlayer}
-                    />
-                </div>
-                <span 
-                        style={{marginTop: '5px', fontWeight: 400, color: '#444', fontSize: '14px'}}
+            <StyleRoot>
+                <Col 
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            bottom: '25%',
+                            position: 'absolute'
+                        }} 
+                        span={24}
                 >
-                    Play Video
-                </span>
-            </Col>
+                    <div style={styles.bounce}>
+                        <Icon 
+                                className='play-icon animated infinite bounce' 
+                                type="play-circle-o" 
+                                onClick={this.toggleVideoPlayer}
+                        />
+                    </div>
+                    <span 
+                            style={{marginTop: '5px', fontWeight: 400, color: '#444', fontSize: '14px'}}
+                    >
+                        Play Video
+                    </span>
+                </Col>
+            </StyleRoot>
         );
     }
 
     renderPlayVideoButtonMobile = () => {
         return (
-            <Col 
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        marginTop: '30px'
-                    }} 
-                    span={24}
-            >
-                <div style={styles.bounce}>
-                    <Icon 
-                            className='play-icon animated infinite bounce' 
-                            type="play-circle-o"
-                            onClick={this.toggleVideoPlayer}
-                    />
-                </div>
-            </Col>
+            <StyleRoot>
+                <Col 
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            marginTop: '30px'
+                        }} 
+                        span={24}
+                >
+                    <div style={styles.bounce}>
+                        <Icon 
+                                className='play-icon animated infinite bounce' 
+                                type="play-circle-o"
+                                onClick={this.toggleVideoPlayer}
+                        />
+                    </div>
+                </Col>
+            </StyleRoot>
         );
     }
 
