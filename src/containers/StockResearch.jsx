@@ -11,7 +11,7 @@ import {WatchList} from '../components/WatchList';
 import {CreateWatchList} from '../components/CreateWatchList';
 import {AqPerformanceMetrics} from '../components/AqPerformanceMetrics';
 import {shadowBoxStyle, loadingColor, primaryColor} from '../constants';
-import {getStockData, Utils, getBreadCrumbArray, fetchAjax} from '../utils';
+import {getStockData, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/stockResearch.css';
 import AppLayout from './AppLayout';
 
@@ -103,14 +103,13 @@ class StockResearchImpl extends React.Component {
     onSelect = (value, initialCall = false) => {
         const {latestDetail} = this.state;
         let tickers = [];
-        tickers.push({name: value, destroy: true});
-        this.setState({tickers, loading: true});
-        
+        this.setState({loading: true});
         Promise.all([
             getStockData(value, 'latestDetail'),
-            getStockData(value, 'rollingPerformance')
+            getStockData(value, 'rollingPerformance'),
+            getStockPerformance(value.toUpperCase())
         ])
-        .then(([latestDetailResponse, performanceResponse]) => {
+        .then(([latestDetailResponse, performanceResponse, stockPricehistoryPerformance]) => {
             const {data} = latestDetailResponse;
             latestDetail.ticker = data.security.ticker;
             latestDetail.exchange = data.security.exchange;
@@ -124,11 +123,14 @@ class StockResearchImpl extends React.Component {
             latestDetail.change = _.get(data, 'latestDetailRT.current', 0) != 0.0 ?  Number(((_.get(data, 'latestDetailRT.changePct', 0) || data.latestDetail.values.ChangePct)*100).toFixed(2)) : "-";
 
             latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
+            tickers.push({name: value, destroy: true, data: stockPricehistoryPerformance, noLoadDat: true});
             
             this.setState({
                 selectedPerformanceScreen: 'YTD', 
                 rollingPerformance: performanceResponse.data.rollingPerformance.detail,
-                latestDetail}, () => {
+                latestDetail,
+                tickers
+            }, () => {
                 // Subscribing to real-time data
                 if (!this.props.openAsDialog) {
                     this.setUpSocketConnection();
@@ -178,7 +180,7 @@ class StockResearchImpl extends React.Component {
         }
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.mounted = true;
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
@@ -786,6 +788,9 @@ class StockResearchImpl extends React.Component {
 
     render() {
         return (
+            // this.state.loading
+            // ? <h3>Loading</h3>
+            // : this.renderPageContent()
             <AppLayout 
                 loading={this.state.loading}
                 noFooter={this.props.openAsDialog}
