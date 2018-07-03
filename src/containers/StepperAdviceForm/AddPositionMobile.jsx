@@ -187,8 +187,8 @@ class AddPositionMobileImpl extends React.Component {
                             backgroundColor: primaryColor,
                             height: '64px',
                             alignItems: 'center',
-                           '-webkit-align-items': 'center',
-                           width: '100%'
+                            WebkitAlignItems: 'center',
+                            width: '100%'
                         }}
                 >
                     <Icon 
