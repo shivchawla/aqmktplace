@@ -201,7 +201,7 @@ class AppLayout extends React.Component {
                 />
                 {
                     !this.props.loading &&
-                    <Layout style={{backgroundColor: '#f9f9f9', height:'100%'}}> 
+                    <div style={{backgroundColor: '#f9f9f9', height:'100%'}}> 
                         {this.renderHeader()}
                         <Content>
                             {this.props.content}
@@ -209,7 +209,7 @@ class AppLayout extends React.Component {
                         {!this.props.noFooter &&
                             this.renderFooter()
                         }
-                    </Layout>
+                    </div>
                 }
             </React.Fragment>
         );

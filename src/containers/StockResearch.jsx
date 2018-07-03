@@ -10,7 +10,7 @@ import {AqPageHeader} from '../components/AqPageHeader';
 import {WatchList} from '../components/WatchList';
 import {CreateWatchList} from '../components/CreateWatchList';
 import {AqPerformanceMetrics} from '../components/AqPerformanceMetrics';
-import {shadowBoxStyle, loadingColor, primaryColor} from '../constants';
+import {shadowBoxStyle, loadingColor, primaryColor, horizontalBox} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/stockResearch.css';
 import AppLayout from './AppLayout';
@@ -786,24 +786,34 @@ class StockResearchImpl extends React.Component {
         );
     }
 
+    renderEmptyLoadingScreen = () => {
+        return (
+            <div style={{...horizontalBox, height: '100px', justifyContent: 'center'}}>
+                <h3 style={{fontSize: '18px'}}>Loading...</h3>
+            </div>
+        );
+    }
+
     render() {
         return (
             // this.state.loading
             // ? <h3>Loading</h3>
             // : this.renderPageContent()
-            <AppLayout 
-                loading={this.state.loading}
-                noFooter={this.props.openAsDialog}
-                noHeader={this.props.openAsDialog}
-                content={
-                    <React.Fragment>
-                        <SignupMeta />
-                        {this.renderCreateWatchListModal()}
-                        {this.renderAimsquantRedirectModal()}
-                        {this.renderPageContent()}
-                    </React.Fragment>
-                }>
-            </AppLayout>
+            this.props.openAsDialog 
+            ?   this.state.loading ? this.renderEmptyLoadingScreen() : this.renderPageContent()
+            :   <AppLayout 
+                    loading={this.state.loading}
+                    noFooter={this.props.openAsDialog}
+                    noHeader={this.props.openAsDialog}
+                    content={
+                        <React.Fragment>
+                            <SignupMeta />
+                            {this.renderCreateWatchListModal()}
+                            {this.renderAimsquantRedirectModal()}
+                            {this.renderPageContent()}
+                        </React.Fragment>
+                    }>
+                </AppLayout>
         );
     }
 }
