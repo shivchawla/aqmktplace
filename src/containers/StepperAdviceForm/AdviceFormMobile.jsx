@@ -558,11 +558,11 @@ class AdviceFormMobileImpl extends React.Component {
     }
 
     convertStringToReadable = value => {
-        let splittedArray = _.split(value, '_');
         const errKvp = {
             MAX_SECTOR_EXPOSURE: 'Maximum Sector Exposure',
             MAX_STOCK_EXPOSURE: 'Maximum Stock Exposure',
-            MIN_POS_COUNT: 'Minimum Position Count'
+            MIN_POS_COUNT: 'Minimum Position Count',
+            MAX_NET_VALUE: 'Maximum Net Value'
         };
         
         return errKvp[value];
