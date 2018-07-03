@@ -47,7 +47,7 @@ class AdviceDetailContentImpl extends React.Component {
             // <Spin spinning={this.props.loading}>
             
                 metricsItems.map((item, index) => (
-                    <Col span={8} style={{marginTop: index > 2 ? '20px' : 0}}>
+                    <Col key={index} span={8} style={{marginTop: index > 2 ? '20px' : 0}}>
                         <MetricItem
                             type="mobile" 
                             key={index}
@@ -427,7 +427,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 {
                                                     _.get(sectors, 'detail', []).map((item, index) => {
                                                         return (
-                                                            <React.Fragment>
+                                                            <React.Fragment key={index}>
                                                                 <AqTag 
                                                                         key={index}
                                                                         color={primaryColor}

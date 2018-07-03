@@ -269,7 +269,7 @@ class MyChartNewImpl extends React.Component {
                     this.hideLoader();
                 })
             } else {
-                this.addItemToSeries(item.name, item.data, item.color, true);
+                this.addItemToSeries(item);
             }
         } else {
             if (series.length > legendItems.length) { // Item needs to be added

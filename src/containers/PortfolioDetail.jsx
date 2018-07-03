@@ -756,6 +756,7 @@ class PortfolioDetailImpl extends React.Component {
     render () {
         return (
             <AppLayout 
+                loading={this.state.loading}
                 content = {
                     <React.Fragment>
                         {this.renderPageContent()}

@@ -35,7 +35,6 @@ export class AdviceName extends React.Component {
     }
 
     updateAdviceName = (e) => {
-        console.log(e.currentTarget.children[0].textContent);
         this.props.form.setFieldsValue({adviceName: e.currentTarget.children[0].textContent});
     }
 
@@ -63,8 +62,8 @@ export class AdviceName extends React.Component {
         const {getFieldDecorator} = this.props.form;
 
     
-        const suggestedNamesComponent = this.getSuggestedNames().map(suggestedAdviceName =>
-                                  <div style={{border: `1px solid ${primaryColor}`, cursor: 'pointer', fontSize:'14px', fontWeight:300, display:'inline-block', margin: '5px 5px 0px 0px'}} onClick={this.updateAdviceName}>
+        const suggestedNamesComponent = this.getSuggestedNames().map((suggestedAdviceName, index) =>
+                                  <div key={index} style={{border: `1px solid ${primaryColor}`, cursor: 'pointer', fontSize:'14px', fontWeight:300, display:'inline-block', margin: '5px 5px 0px 0px'}} onClick={this.updateAdviceName}>
                                     <span style={{color: primaryColor, padding:'5px'}}>{suggestedAdviceName}</span>
                                 </div>
                             );

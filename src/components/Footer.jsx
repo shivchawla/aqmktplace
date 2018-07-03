@@ -133,14 +133,13 @@ class FooterImpl extends React.Component{
     
         return (
             <Col span={24} style={{marginTop: '-5px'}}>
-                <Row style={{height: '100px', backgroundColor: '#f9f9f9'}}></Row>
+                <Row style={{height: '100px', backgroundColor: 'transparent'}}></Row>
                 <Row className="footer" style={{marginTop: this.props.windowWidth ? '0px' : '100px', ...this.props.style}}>
                 {this.renderContactUsModal()}
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
-                    <h5 className="footer-group-header">Products</h5>
+                    <h5 className="footer-group-header">Other Products</h5>
                     <div className="footer-list">
-                        <Link className="footer-link" to="/home">MarketPlace</Link>
-                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home`}>Research Platform</a>
+                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home`}>Quant Research</a>
                     </div>
                 </Col>
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">

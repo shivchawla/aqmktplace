@@ -6,7 +6,7 @@ import Loading from 'react-loading-bar';
 import Promise from 'bluebird';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Form, Button, message, Icon} from 'antd';
+import {Row, Col, Form, Button, message, Icon, Modal} from 'antd';
 import {Steps, Button as MobileButton, LocaleProvider} from 'antd-mobile';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
 import {PostWarningModal} from './PostWarningModal';
@@ -64,7 +64,13 @@ class AdviceFormMobileImpl extends React.Component {
             investmentObjectiveApprovalStatus: {}, // Used to get the approval status for investment objective
             otherApprovalStatus: {}, // Used to get the approval status for name and portfolio
             validationStatus: false,
-            approvalRequested: false
+            approvalRequested: false,
+            adviceError: {
+                message: '',
+                errorCode: '',
+                detail: {}
+            },
+            showErrorDialog: false
         };
     }
 
@@ -513,7 +519,31 @@ class AdviceFormMobileImpl extends React.Component {
                     ? openNotification('success', 'Success', 'Successfully Updated Advice')
                     : openNotification('success', 'Success', 'Successfully Created Advice')
                 })
-                .catch(error => handleCreateAjaxError(error, this.props.history, this.props.match.url))
+                .catch(error => {
+                    if (error.response) {
+                        const {response = {}} = error;
+                        const errorCode = _.get(response, 'data.errorCode', 0);
+                        const message = _.get(response, 'data.message', '');
+                        const detail = _.get(response, 'data.detail', {});
+                        this.setState({
+                            adviceError: {
+                                errorCode,
+                                message,
+                                detail
+                            }
+                        }, () => {
+                            errorCode === 1108 && this.toggleAdviceErrorDialog();
+                            this.toggleMarketplaceWarningModal();
+                        });
+                    }
+
+                    return handleCreateAjaxError(
+                        error, 
+                        this.props.history, 
+                        this.props.match.url, 
+                        _.get(error, 'response.data.errorCode', 0) === 1108
+                    )
+                })
                 .finally(() => {
                     this.updateLoader(publish ? 'postToMarketplace' : 'saveForLater', false);
                 })
@@ -521,6 +551,63 @@ class AdviceFormMobileImpl extends React.Component {
                 message.error('Please provide all the details of the advice');
             }
         })
+    }
+
+    toggleAdviceErrorDialog = () => {
+        this.setState({showErrorDialog: !this.state.showErrorDialog});
+    }
+
+    convertStringToReadable = value => {
+        const errKvp = {
+            MAX_SECTOR_EXPOSURE: 'Maximum Sector Exposure',
+            MAX_STOCK_EXPOSURE: 'Maximum Stock Exposure',
+            MIN_POS_COUNT: 'Minimum Position Count',
+            MAX_NET_VALUE: 'Maximum Net Value'
+        };
+        
+        return errKvp[value];
+    }
+
+    renderAdviceErrorDialog = () => {
+        const {errorCode = 0, message = '', detail = {}} = this.state.adviceError;
+        return (
+            <Modal
+                    title={message}
+                    onOk={this.toggleAdviceErrorDialog}
+                    onCancel={this.toggleAdviceErrorDialog}
+                    visible={this.state.showErrorDialog}
+            >
+                <Row>
+                    <Col span={24}>
+                        {
+                            // Getting the keys of all the invalid error items from the response
+                            Object.keys(detail).filter(item => detail[item].valid === false)
+                                .map((invalidKey, index) => {
+                                    return (
+                                        <Row key={index} style={{marginBottom: '20px'}}>
+                                            <Col span={24}>
+                                                <h3 
+                                                        style={{fontSize: '14px', color: metricColor.negative}}
+                                                >
+                                                    {this.convertStringToReadable(invalidKey)}
+                                                </h3>
+                                            </Col>
+                                            <Col span={24}>
+                                                <h3 
+                                                        style={{fontSize: '16px', color: '#4a4a4a'}}
+                                                >
+                                                    {detail[invalidKey].message}
+                                                </h3>
+                                            </Col>
+                                        </Row>
+                                    )
+                                }
+                            )
+                        }
+                    </Col>
+                </Row>
+            </Modal>
+        );
     }
 
     togglePreview = () => {
@@ -1150,6 +1237,7 @@ class AdviceFormMobileImpl extends React.Component {
                 navbarStyle={{height: '72px'}}
                 menuIconStyle={{top: '20px', display: this.state.currentStep === 0 ? 'block' : 'none'}}
             >
+                {this.renderAdviceErrorDialog()}
                 <PostWarningModal 
                         visible={this.state.modal.marketPlaceWarning}
                         onOk={e => this.submitAdvice(e, true)}

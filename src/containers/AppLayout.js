@@ -193,24 +193,24 @@ class AppLayout extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <Layout style={{backgroundColor: '#f9f9f9', height:'100%'}}>
-                    <Loading
-                        show={this.props.loading}
-                        color={loadingColor}
-                        className="main-loader"
-                        showSpinner={false}
-                    />
-                    {
-                        !this.props.loading &&
-                        <React.Fragment> 
-                            {this.renderHeader()}
+                <Loading
+                    show={this.props.loading}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
+                {
+                    !this.props.loading &&
+                    <div style={{backgroundColor: '#f9f9f9', height:'100%'}}> 
+                        {this.renderHeader()}
+                        <Content>
                             {this.props.content}
-                            {!this.props.noFooter &&
-                                this.renderFooter()
-                            }
-                        </React.Fragment>
-                    }
-                </Layout>
+                        </Content>
+                        {!this.props.noFooter &&
+                            this.renderFooter()
+                        }
+                    </div>
+                }
             </React.Fragment>
         );
     }
