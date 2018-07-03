@@ -56,7 +56,7 @@ export const handleGetError = (error, history, redirectUrl) => {
     return error;
 }
 
-export const handleCreateAjaxError = (error, history, redirectUrl) => {
+export const handleCreateAjaxError = (error, history, redirectUrl, disableNotification = false) => {
     Utils.checkForInternet(error, history);
     if (Utils.isLoggedIn()) {
         if (error.response) {
@@ -67,7 +67,7 @@ export const handleCreateAjaxError = (error, history, redirectUrl) => {
             (error.response.status === 403 && _.get(error, 'response.data.code', '') !== 'server_error')
         ) {
             const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating advice');
-            openNotification('error', 'Error', errorMessage);
+            !disableNotification && openNotification('error', 'Error', errorMessage);
         }
     } else {
         history.push('/login');
