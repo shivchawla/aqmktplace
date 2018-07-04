@@ -361,6 +361,7 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                     type={type}
                                 />
                         }
+                        <div style={{height: '50px', backgroundColor: 'transparent'}}></div>
                     </Col>
                 }
             </div>
@@ -514,7 +515,29 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
 
     renderPageContentNew = () => {
         return (
-            <AqMobileLayout>
+            <AqMobileLayout showRightContent={true} style={{alignItems: 'center', WebkitAlignItems: 'center'}}>
+                <div
+                        style={{
+                            width: '100%',
+                            position: 'fixed',
+                            zIndex: '40000',
+                            bottom: '20px',
+                            background: 'transparent'
+                        }}
+                >
+                    <MobileButton 
+                            size="small" 
+                            type="primary" 
+                            style={{
+                                width: '150px',
+                                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
+                                margin: '0 auto'
+                            }}
+                            onClick={() => this.props.history.push('/dashboard/createadvice')}
+                    >
+                        CREATE ADVICE
+                    </MobileButton>
+                </div>
                 <Row style={{backgroundColor: '#fff'}}>
                     <Col span={24} style={{marginTop: '10px'}}>
                         <SearchBar 

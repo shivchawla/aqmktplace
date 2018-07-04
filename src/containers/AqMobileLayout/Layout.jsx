@@ -3,7 +3,7 @@ import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import {slide as HamburgerMenu} from 'react-burger-menu';
 import {Layout, Menu, Icon} from 'antd';
-import {NavBar} from 'antd-mobile';
+import {NavBar, Button as MobileButton} from 'antd-mobile';
 import {sidebarUrls} from './constants';
 import {Utils} from '../../utils';
 import {primaryColor, horizontalBox} from '../../constants';
@@ -164,7 +164,7 @@ class AqMobileLayoutImpl extends React.Component {
                 }
                 {/* </Header> */}
                 <Layout id="menu-wrapper">
-                    <Layout>
+                    <Layout style={this.props.style}>
                         {this.props.children}
                     </Layout>
                 </Layout>
