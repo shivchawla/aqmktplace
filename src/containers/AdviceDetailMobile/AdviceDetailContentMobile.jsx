@@ -3,7 +3,7 @@ import Loadable from 'react-loadable';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import {Spin, Row, Col, Collapse, Radio, Icon, Button} from 'antd';
-import {SegmentedControl, Button as MobileButton} from 'antd-mobile';
+import {SegmentedControl} from 'antd-mobile';
 import {horizontalBox, metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../../constants';
 import {AqTag} from '../../components/AqTag';
 import {WarningIcon} from '../../components/WarningIcon'

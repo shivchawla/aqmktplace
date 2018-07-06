@@ -4,7 +4,7 @@ import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import {AqRate} from '../../components/AqRate';
 import {AqTag} from '../../components/AqTag';
-import {primaryColor, metricColor} from '../../constants';
+import {primaryColor, metricColor, horizontalBox} from '../../constants';
 import {Utils} from '../../utils';
 
 class AdviceListItemMobileImpl extends React.Component {
@@ -90,14 +90,25 @@ class AdviceListItemMobileImpl extends React.Component {
         let {
             name, 
             advisor = {}, 
+            rating, 
             performanceSummary = {}, 
             id,
+            isFollowing,
+            isSubscribed,
+            isApproved,
+            isOwner,
+            isAdmin,
             rebalancingFrequency,
-            rating
+            netValue,
+            approvalStatus = false
         } = this.props.advice;
+        const isPublic = this.props.advice.public;
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
         const advisorName = `${_.get(advisor, 'user.firstName')} ${_.get(advisor, 'user.lastName')}`;
         const advisorId = _.get(advisor, '_id', '');
+        const statusTagColor = isOwner ? '#3cb44b' : isSubscribed ? '#1890ff' : isFollowing ? '#03a7ad' : '#fff';
+        const statusTagLabel = isOwner ? 'Owner' : isSubscribed ? 'Subscribed' : isFollowing ? 'Wishlisted' : "";
+
 
         return (
             <Row 
@@ -122,6 +133,54 @@ class AdviceListItemMobileImpl extends React.Component {
                         </Col>
                         <Col span={24}>
                             <AqRate value={Number(rating)}/>
+                        </Col>
+                        <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', margin: '5px 0'}}>
+                            <Row>
+                                <AqTag 
+                                        tooltipPlacement="bottom"
+                                        text={rebalancingFrequency}
+                                        textStyle={{marginLeft: '5px'}}
+                                        color='#f58231'
+                                        icon='clock-circle-o'
+                                />
+                                
+                                {statusTagLabel!="" &&
+                                    <AqTag 
+                                            text={statusTagLabel}
+                                            color={statusTagColor}
+                                    />
+                                }
+                                {
+                                    (isOwner || isAdmin) &&
+                                    <React.Fragment>
+                                        <AqTag 
+                                                tooltipPlacement='bottom'
+                                                color='#673AB7'
+                                                icon={isPublic ? 'team' : 'lock'}
+                                                iconStyle={{fontWeight: 400, fontSize: '15px', marginRight: '5px'}}
+                                                text={isPublic ? 'Public' : 'Private'}
+                                        />
+                                        {
+                                            approvalStatus &&
+                                            <AqTag 
+                                                    placement='bottom'
+                                                    text='Approval Pending'
+                                                    textStyle={{marginLeft: '5px'}}
+                                                    color='#FFAB00'
+                                            />
+                                        }
+                                        {
+                                            !approvalStatus &&
+                                            <AqTag 
+                                                    tooltipPlacement='bottom'
+                                                    color={isApproved ? '#00897B' : metricColor.negative}
+                                                    text={isApproved ? "Approved" : "Rejected"}
+                                                    textStyle={{marginLeft: '5px'}}
+                                            />
+                                        }
+                                    </React.Fragment>
+                                }
+                            </Row>
                         </Col>
                         <Col span={24} style={{textAlign: 'center'}}>
                             <Row>

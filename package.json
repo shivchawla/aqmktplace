@@ -11,6 +11,7 @@
     "autobind-decorator": "2.1.0",
     "axios": "0.17.1",
     "bluebird": "^3.5.1",
+    "chart.js": "^2.7.2",
     "highcharts": "6.0.7",
     "highcharts-exporting": "0.1.7",
     "highcharts-more": "0.1.7",

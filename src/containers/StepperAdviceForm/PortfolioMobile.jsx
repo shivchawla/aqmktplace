@@ -3,13 +3,15 @@ import _ from 'lodash';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {withRouter} from 'react-router';
 import {Row, Col, Modal, Spin, Select, Icon, Checkbox} from 'antd';
-import {Button as MobileButton, Icon as MobileIcon} from 'antd-mobile';
+import {SegmentedControl} from 'antd-mobile';
 import {AddPositionMobile} from './AddPositionMobile';
 import {metricColor, primaryColor, horizontalBox} from '../../constants';
 import {benchmarks} from '../../constants/benchmarks';
 import {getStepIndex} from './steps';
 import MyChartNew from '../MyChartNew';
 import {MetricItem} from '../../components/MetricItem';
+import {HighChartNew} from '../../components/HighChartNew';
+import {generateColorData} from '../../utils';
 import { Utils } from '../../utils';
 
 const Option = Select.Option;
@@ -31,15 +33,18 @@ export class PortfolioMobileImpl extends React.Component {
             performanceBottomSheetOpen: false,
             selectedPosition: {},
             updatePosition: false,
-            toBeDeletedPositions: []
+            toBeDeletedPositions: [],
+            performanceSheetView: 'Performance',
+            metrics: {}
         };
     }
 
     loadPerformance = benchmark => {
         this.setState({loadingPortfolioPerformance: true});
         this.props.getAdvicePerformance(benchmark)
-        .then(performanceData => {
-            this.setState({highStockSeries: performanceData});
+        .then(data => {
+            const {highStockSeries, portfolioPerformanceMetrics} = data;
+            this.setState({highStockSeries, metrics: portfolioPerformanceMetrics});
         })
         .catch(error => error)
         .finally(() => {
@@ -128,6 +133,131 @@ export class PortfolioMobileImpl extends React.Component {
         );
     }
 
+    handlePerformanceBottomSheetChange = value => {
+        console.log(value);
+        this.setState({
+            performanceSheetView: value
+        })
+    }
+
+    renderComposition = () => {
+        return (
+            <HighChartNew 
+                series={[{name: 'Portfolio Composition', data: this.processDataForPieChart()}]}
+            />
+        );
+    }
+
+    renderMetrics = () => {
+        const style = {
+            display: 'flex',
+            flexDirection: 'column',
+            marginBottom: '20px',
+            textAlign: 'center'
+        };
+        const labelStyle = {color: '#4a4a4a', fontSize: '14px'};
+        const textStyle = {color: '#4a4a4a', fontSize: '18px'}
+        const annualReturn = (_.get(this.state, 'metrics.returns.totalreturn') * 100).toFixed(2);
+        const volatility = (_.get(this.state, 'metrics.deviation.annualstandarddeviation', 0) * 100).toFixed(2);
+        const maxLoss = (_.get(this.state, 'metrics.drawdown.maxdrawdown', 0) * 100).toFixed(2);
+
+        return (
+            <Row gutter={16}>
+                <Col span={8} style={style}>
+                    <h3 
+                            style={{
+                                ...textStyle, 
+                                color: annualReturn < 0 ? metricColor.negative : metricColor.positive
+                            }}
+                    >
+                        {annualReturn} %
+                    </h3>
+                    <h3 style={labelStyle}>Annual Return</h3>
+                </Col>
+                <Col span={8} style={style}>
+                    <h3 style={textStyle}>{volatility} %</h3>
+                    <h3 style={labelStyle}>Volatility</h3>
+                </Col>
+                <Col span={8} style={style}>
+                    <h3 style={{...textStyle, color: metricColor.negative}}>- {maxLoss} %</h3>
+                    <h3 style={labelStyle}>Max Loss</h3>
+                </Col>
+            </Row>
+        );
+    }
+
+    renderCompositionList = () => {
+        const data = this.processDataForPieChart();
+        return (
+            <Row type="flex" align="middle" justify="center">
+                {
+                    data.map((position, index) => {
+                        return (
+                            <Col 
+                                    key={index}
+                                    span={8} 
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        marginBottom: '20px',
+                                        textAlign: 'center'
+                                    }}
+                            >
+                                <h3 style={{color: '#4a4a4a', fontSize: '16px'}}>{position.y} %</h3>
+                                <h3 style={{color: position.color, fontSize: '14px'}}>{position.name}</h3>
+                            </Col>
+                        );
+                    })
+                }
+            </Row>
+        );
+    }
+
+    checkTickerForDuplications = (data, ticker) => {
+        const duplicationIndexes = [];
+        const nData = data.filter((dataItem, index) => {
+            if (dataItem.ticker === ticker) {
+                duplicationIndexes.push(index);
+            }
+            return dataItem.ticker === ticker
+        });
+
+        return {indexes: duplicationIndexes, length: nData.length -1}
+    }
+
+    processDataForPieChart = () => {
+        let data = this.props.positions || [];
+        data = data.filter(item => item.shares > 0);
+        const tickers = data.map(item => item.symbol);
+        const colorData = generateColorData(tickers);
+        let nData = data.map((item, index) => {
+            const duplicateData = this.checkTickerForDuplications(data, item.symbol);
+            let duplicateIndexes = duplicateData.indexes; // [0, 1, 2]
+            const duplicateLength = duplicateData.length;
+            let duplicateTotal = 0;
+            // Removing the current index from the duplicate index array
+            duplicateIndexes = duplicateIndexes.filter(duplicateIndex => {
+                return duplicateIndex !== index
+            });
+            if (duplicateLength > 0) {
+                duplicateIndexes.map(duplicateIndex => {
+                    duplicateTotal += data[duplicateIndex].weight;
+                });
+                duplicateTotal += item.weight;
+            } else {
+                duplicateTotal = item.weight;
+            }
+            
+            return {
+                name: _.get(item, 'symbol', null),
+                y: Number((duplicateTotal * 100).toFixed(2)),
+                color: colorData[_.get(item, 'symbol', null)]
+            }
+        });
+
+        return _.uniqBy(nData, 'name');
+    }
+
     renderAdvicePerformanceBottomSheet = () => {
         return (
             <SwipeableBottomSheet 
@@ -149,8 +279,9 @@ export class PortfolioMobileImpl extends React.Component {
                                     justifyContent: 'center', 
                                     position: 'relative',
                                     marginBottom: '20px',
-                                    backgroundColor: primaryColor,
-                                    height: '64px'
+                                    backgroundColor: '#fff',
+                                    height: '64px',
+                                    borderBottom: '1px solid #eaeaea'
                                 }}
                         >
                             <Icon 
@@ -160,21 +291,48 @@ export class PortfolioMobileImpl extends React.Component {
                                     position: 'absolute', 
                                     left: 0, 
                                     zIndex: '20', 
-                                    color: '#fff',
+                                    color: primaryColor,
                                     marginLeft: '10px'
                                 }}
                                 onClick={this.togglePerformanceBottomSheet}
                             />
-                            <h3 style={{fontSize: '18px', color: '#fff'}}>Advice Performance</h3>
+                            <h3 style={{fontSize: '18px', color: primaryColor}}>Advice Performance</h3>
                         </Col>
-                        <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', padding: '0 10px'}}>
-                            {this.renderBenchmarkDropdown()}
-                        </Col>
-                        <Col span={24} style={{padding: '0 10px'}}>
-                            <MyChartNew 
-                                    series={this.state.highStockSeries} 
-                                    chartId="advice-preview-performance-chart"
+                        <Col span={24} style={{padding: '0 10px', marginBottom: '20px'}}>
+                            <SegmentedControl 
+                                onValueChange={this.handlePerformanceBottomSheetChange} 
+                                values={['Performance', 'Composition']} 
                             />
+                        </Col>
+                        {
+                            this.state.performanceSheetView === 'Performance' &&
+                            <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', padding: '0 10px'}}>
+                                {this.renderBenchmarkDropdown()}
+                            </Col>
+                        }
+                        {
+                            this.state.performanceSheetView === 'Performance' &&
+                            <Col span={24} style={{marginTop: '20px'}}>
+                                {this.renderMetrics()}
+                            </Col>
+                        }
+                        <Col span={24} style={{padding: '0 10px'}}>
+                            {
+                                this.state.performanceSheetView === 'Performance'
+                                ?   <MyChartNew 
+                                            series={this.state.highStockSeries} 
+                                            chartId="advice-preview-performance-chart"
+                                    />
+                                :   <Row>
+                                        <Col span={24}>
+                                            {this.renderComposition()}
+                                        </Col>
+                                        <Col span={24}>
+                                            {this.renderCompositionList()}
+                                        </Col>
+                                    </Row>
+                            }
+                            
                         </Col>
                         {/* <Col span={24}>
                             <MobileButton 
@@ -202,6 +360,8 @@ export class PortfolioMobileImpl extends React.Component {
     togglePerformanceBottomSheet = () => {
         if (!this.state.performanceBottomSheetOpen) {
             this.loadPerformance(this.state.selectedBenchmark);
+        } else {
+            this.setState({performanceSheetView: 'Performance'})
         }
         this.setState({performanceBottomSheetOpen: !this.state.performanceBottomSheetOpen});
     }

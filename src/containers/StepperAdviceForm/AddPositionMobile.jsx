@@ -184,11 +184,12 @@ class AddPositionMobileImpl extends React.Component {
                             ...horizontalBox, 
                             justifyContent: 'center', 
                             position: 'relative',
-                            backgroundColor: primaryColor,
+                            backgroundColor: '#fff',
                             height: '64px',
                             alignItems: 'center',
                             WebkitAlignItems: 'center',
-                            width: '100%'
+                            width: '100%',
+                            borderBottom: '1px solid #eaeaea'
                         }}
                 >
                     <Icon 
@@ -198,12 +199,12 @@ class AddPositionMobileImpl extends React.Component {
                             position: 'absolute', 
                             left: 0, 
                             zIndex: '20', 
-                            color: '#fff',
+                            color: primaryColor,
                             marginLeft: '10px'
                         }}
                         onClick={this.cancelAction}
                     />
-                    <h3 style={{fontSize: '18px', color: '#fff'}}>
+                    <h3 style={{fontSize: '18px', color: primaryColor}}>
                         {this.props.updatePosition ? "Update Position" : "Add Position"}
                     </h3>
                 </div>

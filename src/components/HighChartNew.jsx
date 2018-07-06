@@ -182,7 +182,15 @@ export class HighChartNew extends React.Component {
 
     render() {
         return(
-            <Row style={{height: '320px', ...this.props.chartContainerStyle}} id="chart-container"></Row>
+            <Row 
+                style={{
+                    height: '320px', 
+                    width: '300px', 
+                    margin: '0 auto',
+                    ...this.props.chartContainerStyle
+                }} 
+                id="chart-container"
+            ></Row>
         );
     }
 }

@@ -585,7 +585,7 @@ class StepperAdviceFormImpl extends React.Component {
                 }
             ];
             this.setState({highStockSeries, portfolioPerformanceMetrics});
-            resolve(highStockSeries);
+            resolve({highStockSeries, portfolioPerformanceMetrics});
         })
         .catch(error => {
             handleCreateAjaxError(error, this.props.history, this.props.match.url);
