@@ -258,7 +258,7 @@ class AddPositionMobileImpl extends React.Component {
                                                             <InputItem 
                                                                 type="number"
                                                                 value={this.state.stockData.shares} 
-                                                                onChange={this.handleShareChange} 
+                                                                onChange={this.handleShareChange}
                                                                 style={{paddingLeft: '0px'}}
                                                                 ref={el => this.sharesTextInput = el}
                                                             />

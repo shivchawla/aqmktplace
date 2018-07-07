@@ -335,7 +335,7 @@ class StepperAdviceFormImpl extends React.Component {
                                     key={index}
                                     title={this.getAppropriateStepTitle(step, index)} 
                                     onClick={() => this.goToStep(index)}
-                                    style={{cursor: 'pointer'}}
+                                    style={{cursor: 'pointer', width: '150px'}}
                             />
                         );
                     })

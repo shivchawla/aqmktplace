@@ -95,8 +95,8 @@ export class PortfolioMobileImpl extends React.Component {
                         </Col>
                         <Col span={24}>
                             <MyChartNew 
-                                    series={this.state.highStockSeries} 
-                                    chartId="advice-preview-performance-chart"
+                                series={this.state.highStockSeries} 
+                                chartId="advice-preview-performance-chart"
                             />
                         </Col>
                     </Row>
@@ -156,7 +156,7 @@ export class PortfolioMobileImpl extends React.Component {
             textAlign: 'center'
         };
         const labelStyle = {color: '#4a4a4a', fontSize: '14px'};
-        const textStyle = {color: '#4a4a4a', fontSize: '18px'}
+        const textStyle = {color: '#4a4a4a', fontSize: '20px'}
         const annualReturn = (_.get(this.state, 'metrics.returns.totalreturn') * 100).toFixed(2);
         const volatility = (_.get(this.state, 'metrics.deviation.annualstandarddeviation', 0) * 100).toFixed(2);
         const maxLoss = (_.get(this.state, 'metrics.drawdown.maxdrawdown', 0) * 100).toFixed(2);
@@ -296,26 +296,31 @@ export class PortfolioMobileImpl extends React.Component {
                                 }}
                                 onClick={this.togglePerformanceBottomSheet}
                             />
-                            <h3 style={{fontSize: '18px', color: primaryColor}}>Advice Performance</h3>
-                        </Col>
-                        <Col span={24} style={{padding: '0 10px', marginBottom: '20px'}}>
+
                             <SegmentedControl 
                                 onValueChange={this.handlePerformanceBottomSheetChange} 
                                 values={['Performance', 'Composition']} 
                             />
+
                         </Col>
+                        {/*<Col span={24} style={{padding: '0 10px', marginBottom: '20px'}}>
+                            
+                        </Col>*/}
+                        
+                        {
+                            this.state.performanceSheetView === 'Performance' &&
+                            <Col span={24} style={{marginTop: '5px'}}>
+                                {this.renderMetrics()}
+                            </Col>
+                        }
+
                         {
                             this.state.performanceSheetView === 'Performance' &&
                             <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', padding: '0 10px'}}>
                                 {this.renderBenchmarkDropdown()}
                             </Col>
                         }
-                        {
-                            this.state.performanceSheetView === 'Performance' &&
-                            <Col span={24} style={{marginTop: '20px'}}>
-                                {this.renderMetrics()}
-                            </Col>
-                        }
+
                         <Col span={24} style={{padding: '0 10px'}}>
                             {
                                 this.state.performanceSheetView === 'Performance'

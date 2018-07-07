@@ -48,8 +48,8 @@ export class Portfolio extends React.Component {
             marginBottom: '20px',
             textAlign: 'center'
         };
-        const labelStyle = {color: '#4a4a4a', fontSize: '14px', fontWeight: 700};
-        const textStyle = {color: '#4a4a4a', fontSize: '14px'}
+        const labelStyle = {color: '#4a4a4a', fontSize: '14px', fontWeight: 400};
+        const textStyle = {color: '#4a4a4a', fontSize: '20px'}
         const annualReturn = (_.get(this.state, 'metrics.returns.totalreturn') * 100).toFixed(2);
         const volatility = (_.get(this.state, 'metrics.deviation.annualstandarddeviation', 0) * 100).toFixed(2);
         const maxLoss = (_.get(this.state, 'metrics.drawdown.maxdrawdown', 0) * 100).toFixed(2);
@@ -115,7 +115,7 @@ export class Portfolio extends React.Component {
     renderPositions = () => {
         const data = this.processDataForPieChart();
         return (
-            <Row>
+            <Row type="flex" justify="space-around">
                 {
                     data.map(position => {
                         return (
@@ -128,8 +128,8 @@ export class Portfolio extends React.Component {
                                         textAlign: 'center'
                                     }}
                             >
-                                <h3 style={{color: position.color, fontSize: '14px', fontWeight: 700}}>{position.name}</h3>
-                                <h3 style={{color: '#4a4a4a', fontSize: '14px'}}>{position.y} %</h3>
+                                <h3 style={{color: '#4a4a4a', fontSize: '16px', fontWeight: 300}}>{position.y} %</h3>
+                                <h3 style={{color: position.color, fontSize: '14px', fontWeight: 400}}>{position.name}</h3>
                             </Col>
                         );
                     })
@@ -141,7 +141,7 @@ export class Portfolio extends React.Component {
     renderPerformanceModal = () => {
         return (
             <Modal
-                    title="Performance View"
+                    title="Portfolio Overview"
                     visible={this.state.modal.performance}
                     onOk={this.togglePerformanceModal}
                     onCancel={this.togglePerformanceModal}
@@ -151,15 +151,17 @@ export class Portfolio extends React.Component {
                     footer={null}
             >
                 <Spin spinning={this.state.loadingPortfolioPerformance}>
-                    <Row>
+                    <Row type="flex" align="middle">
                         <Col span={14}>
                             <Row>
+                                <Col span={24} style={{marginTop: '5px'}}>
+                                    {this.renderMetrics()}
+                                </Col>
+
                                 <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                     {this.renderBenchmarkDropdown()}
                                 </Col>
-                                <Col span={24} style={{marginTop: '20px'}}>
-                                    {this.renderMetrics()}
-                                </Col>
+
                                 <Col span={24}>
                                     <MyChartNew 
                                             series={this.state.highStockSeries} 
@@ -283,19 +285,18 @@ export class Portfolio extends React.Component {
                             top: '25px',
                             zIndex: 20
                         }}>
-                    <Tooltip title="View Portfolio Performance" placement="top">
-                        <Button
-                                style={{
-                                    marginLeft: '20px'
-                                }} 
-                                onClick={this.togglePerformanceModal} 
-                                type="secondary"
-                                disabled={this.props.verifiedPositions.length < 1}
-                                icon="area-chart"
-                        >
-                            View Performance
-                        </Button>
-                    </Tooltip>
+                    
+                    <Button
+                            style={{
+                                marginLeft: '20px'
+                            }} 
+                            onClick={this.togglePerformanceModal} 
+                            type="secondary"
+                            disabled={this.props.verifiedPositions.length < 1}
+                            icon="area-chart"
+                    >
+                        Portfolio Overview
+                    </Button>
                     <Tooltip title="To Other Settings" placement="top">
                         <Button 
                                 style={{

@@ -101,7 +101,7 @@ export class InvestmentObjective extends React.Component {
             >
                 <Row {...investmentObjRowProps}>
                     <Col span={24} style={{zIndex: '100'}}>
-                        <div style={labelStyle}>Investor Type</div>
+                        <div style={labelStyle}>Target Investor Type</div>
                     </Col>
                     <Col span={24} style={{marginTop: '-5px'}}>
                         <Picker
