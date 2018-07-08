@@ -282,7 +282,8 @@ class StepperAdviceFormImpl extends React.Component {
             fontWeight: this.state.currentStep === index ? 700 : 300,
             color: this.state.currentStep === index ? primaryColor : '#444',
             marginTop: '10px',
-            display: 'block'
+            display: 'block',
+            width:'170px'
         };
 
         return (

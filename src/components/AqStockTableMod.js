@@ -303,7 +303,7 @@ export class AqStockTableMod extends React.Component {
                         pagination={false} 
                         dataSource={this.state.data} 
                         columns={this.columns} 
-                        size="middle"
+                        size="small"
                         rowClassName="stock-table-col"
                 />
             </Col>
