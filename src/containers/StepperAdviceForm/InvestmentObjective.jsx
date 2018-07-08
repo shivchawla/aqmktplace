@@ -91,7 +91,7 @@ export class InvestmentObjective extends React.Component {
                 <Row {...investmentObjRowProps}>
                     <Col span={24}>
                         <InvestMentObjComponent 
-                            header="Investor Type"
+                            header="Target Investor Type"
                             warning={
                                 this.props.isPublic &&
                                 this.props.isUpdate &&
@@ -144,7 +144,7 @@ export class InvestmentObjective extends React.Component {
                                 'Please enter the Portfolio Valuation of your advice',
                                 !getInvestmentObjectiveWarning(this.props.approvalStatusData, 'portfolioValuation').valid,
                                 getInvestmentObjectiveWarning(this.props.approvalStatusData, 'portfolioValuation').reason,
-                                {label: 4, content: 18, warning: 2}
+                                {label: 5, content: 17, warning: 2}
                             )
                         }
                     </Col>
@@ -157,7 +157,7 @@ export class InvestmentObjective extends React.Component {
                                 'Please enter the Capitalization of your advice',
                                 !getInvestmentObjectiveWarning(this.props.approvalStatusData, 'capitalization').valid,
                                 getInvestmentObjectiveWarning(this.props.approvalStatusData, 'capitalization').reason,
-                                {label: 4, content: 18, warning: 2}
+                                {label: 5, content: 17, warning: 2}
                             )
                         }
                     </Col>

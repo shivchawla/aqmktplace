@@ -8,7 +8,7 @@ export const InvestMentObjComponent = ({
     content, 
     warning = false, 
     reason = '', 
-    span={label: 4, content: 18, warning: 2},
+    span={label: 5, content: 17, warning: 2},
     tooltip={text: null, placement: 'top'}
 }) => {
     return (
