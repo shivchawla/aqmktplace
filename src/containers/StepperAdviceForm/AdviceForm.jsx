@@ -132,6 +132,7 @@ class StepperAdviceFormImpl extends React.Component {
     validateForm = (currentStep = this.state.currentStep) => new Promise((resolve, reject) => {
         const adviceName = ['adviceName'];
         const investmentObjective = [
+            'investmentObjInvestorType',
             'investmentObjGoal',
             'investmentObjPortfolioValuation',
             'investmentObjSectors',
