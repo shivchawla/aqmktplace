@@ -114,7 +114,7 @@ class PortfolioDetailImpl extends React.Component {
     renderAdvicePortfolio = () => {
         return (
             <Row>
-                <PortfolioDetailMeta />
+                <PortfolioDetailMeta name={this.state.name} />
                 <Col span={24} style={{marginTop: '5px'}}>
                     {
                         this.state.presentAdvices.length > 0

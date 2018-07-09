@@ -1341,7 +1341,7 @@ class AdviceDetailImpl extends React.Component {
                 loading = {this.state.loading}
                 content={
                    <Row>
-                        <AdviceDetailMeta />
+                        <AdviceDetailMeta name={this.state.adviceDetail.name}/>
                         {this.renderModal()}
                         {this.renderPostWarningModal()}
                         {this.renderUpdateModal()}

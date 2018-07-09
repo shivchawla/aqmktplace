@@ -166,58 +166,14 @@ class App extends React.Component {
         ReactGA.initialize(gaTrackingId); //Unique Google Analytics tracking number
     }
 
-    componentWillMount() {
-        this.onRouteChanged(this.props.location.pathname);
-    }
-
     componentDidUpdate(prevProps) {
         if (this.props.location !== prevProps.location) { // Route changed
-            this.onRouteChanged(this.props.location.pathname);
             this.fireTracking();
         }
     }
 
     fireTracking = () => {
-        // console.log(window.location.href);
         ReactGA.pageview(window.location.href);
-    }
-
-    onRouteChanged = location => {
-        const locationArray = location.split('/');
-        // Getting the parent path of any route
-        // For eg. if route is /advice/{adviceId} then parent path is advice
-        const regexArray = [
-            {regExp: '^\/advice$', title: 'Screen Advices - AdviceQube'},
-            {regExp: '^\/home$', title: 'Home - AdviceQube'},
-            {regExp: '^\/faq$', title: 'FAQ - AdviceQube'},
-            {regExp: '^\/forgotPassword$', title: 'Forgot Password - AdviceQube'},
-            {regExp: '^\/errorPage$', title: 'No Internet Access - AdviceQube'},
-            {regExp: '^\/forbiddenAccess$', title: 'Forbidden Access - AdviceQube'},
-            {regExp: '^\/$', title: 'Home - AdviceQube'},
-            {regExp: '^\/policies\/tnc$', title: 'Terms and Conditions - AdviceQube'},
-            {regExp: '^\/policies\/privacy$', title: 'Privacy Policy - AdviceQube'},
-            {regExp: '^\/dashboard$', title: 'Investor Dashboard - AdviceQube'},
-            {regExp: '^\/dashboard\/investor\/[A-Za-z0-9]+$', title: 'Investor Dashboard - AdviceQube'},
-            {regExp: '^\/dashboard\/advisor\/[A-Za-z0-9]+$', title: 'Advisor Dashboard - AdviceQube'},
-            {regExp: '^\/dashboard\/createportfolio$', title: 'Create Portfolio - AdviceQube'},
-            {regExp: '^\/dashboard\/createadvice$', title: 'Create Advice - AdviceQube'},
-            {regExp: '^\/stockresearch$', title: 'Stock Research - AdviceQube'},
-            {regExp: '^\/login$', title: 'Login - AdviceQube'},
-            {regExp: '^\/signup$', title: 'Register - AdviceQube'},
-            {regExp: '^\/advice\/[A-Za-z0-9]+$', title: 'Advice Detail - AdviceQube'},
-            {regExp: '^\/advice\/[A-Za-z0-9]+/mobile$', title: 'Advice Detail Mobile - AdviceQube'},
-            {regExp: '^\/dashboard\/updateadvice\/[A-Za-z0-9]+$', title: 'Update Advice - AdviceQube'},
-            {regExp: '^\/dashboard\/advisorprofile\/[A-Za-z0-9]+$', title: 'Advisor Profile - AdviceQube'},
-            {regExp: '^\/dashboard\/portfolio\/[A-Za-z0-9]+$', title: 'Portfolio Detail - AdviceQube'},
-            {regExp: '^\/dashboard\/portfolio\/transactions\/[A-Za-z0-9]+$', title: 'Update Portfolio - AdviceQube'},
-        ];
-        regexArray.map((item, index) => {
-            const expression = new RegExp(item.regExp);
-            if (expression.test(location)) {
-                document.title = item.title;
-                return;
-            }
-        });
     }
 
     render() {

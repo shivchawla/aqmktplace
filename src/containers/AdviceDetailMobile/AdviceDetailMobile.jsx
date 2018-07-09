@@ -1333,7 +1333,7 @@ class AdviceDetailImpl extends React.Component {
                     className="main-loader"
                     showSpinner={false}
                 />
-                <AdviceDetailMeta />
+                <AdviceDetailMeta name = {this.state.adviceDetail.name}/>
                 {this.renderModal()}
                 {this.renderPostWarningModal()}
                 {this.renderUpdateModal()}
