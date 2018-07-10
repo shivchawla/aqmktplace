@@ -5,9 +5,9 @@ export const ScreenAdviceMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>AdviceQube: Screen Investment Portfolios of Experts | </title>
+            <title>AdviceQube: Screen Investment Portfolios of Experts | Best Investment Ideas</title>
             <meta name="description" content="Best Investment Ideas. Screen the best investment advices from professional and investment enthusiasts"/>
-            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, returns, gain"/>
+            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, returns, gain, India, Investment Advice"/>
             <meta name="robots" content="index, follow" />
         </Helmet>
     );
@@ -17,7 +17,7 @@ export const AdviceDetailMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>AdviceQube: ${props.name} | Expert Investment Portfolio</title>
+            <title>AdviceQube: {props.name} | Expert Investment Portfolio</title>
             <meta name="description" content={`${props.name}: Invest in advices from investment experts`}/>
             <meta name="keywords" content="www.adviceqube.com, Investments, Equity, NSE stocks, Investment Advice, Advice, returns, gain"/>
             <meta name="robots" content="index, follow" />
@@ -29,7 +29,7 @@ export const PortfolioDetailMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>AdviceQube: ${props.name}</title>
+            <title>AdviceQube: {props.name}</title>
             <meta name="description" content={`${props.name}: Invest in advices from investment experts`}/>
             <meta name="keywords" content="www.adviceqube.com, Investments, Equity, NSE stocks, Investment Advice, Advice, returns, gain"/>
             <meta name="robots" content="index, follow" />
@@ -69,7 +69,7 @@ export const HomeMeta = props => {
             <meta charSet="utf-8" />
             <title>AdviceQube: Expert-Sourced Investment Portfolio | Best Investment Ideas</title>
             <meta name="description" content="Expert Sourced Investment Portfolio. Screen the best investment ideas from professional and investment enthusiasts"/>
-            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Buy Advice, Sell Advice, returns, gain"/>
+            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Buy Advice, Sell Advice, returns, gain, Investment Advice, India"/>
             <meta name="robots" content="index, follow" />
         </Helmet>
     );
