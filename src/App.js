@@ -159,6 +159,11 @@ const PageNotFound = Loadable({
     loading: () => <Icon type="loading" />
 });
 
+const ContestDesktop = Loadable({
+    loader: () => import('./containers/Contest/Contest'),
+    loading: () => <Icon type="loading" />
+});
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -221,16 +226,17 @@ class App extends React.Component {
                                 <Route exact={true} path='/home' component={Home} /> 
                                 <Route exact={true} path='/' component={Home} /> 
                                 <Route exact={true} path='/advice' component={ScreenAdvices} /> 
+                                <Route path='/contest' component={ContestDesktop} />
                                 <Route path="/stockresearch" exact component={StockResearch} /> 
-                                <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
-                                <Route exact={true} path='/advice/:id' component={AdviceDetail} /> 
-                                <Route exact={true} path='/dashboard/createadvice' component={CreateAdvice} /> 
-                                <Route exact={true} path='/dashboard/createportfolio' component={CreatePortfolio} /> 
-                                <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
-                                <Route exact={true} path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
-                                <Route exact={true} path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> 
-                                <Route exact={true} path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> 
-                                <Route exact={true} path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
+                                <Route path='/tokenUpdate' component={TokenUpdate}/>
+                                <Route path='/advice/:id' component={AdviceDetail} /> 
+                                <Route path='/dashboard/createadvice' component={CreateAdvice} /> 
+                                <Route path='/dashboard/createportfolio' component={CreatePortfolio} /> 
+                                <Route path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
+                                <Route path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
+                                <Route path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> 
+                                <Route path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> 
+                                <Route path='/dashboard/stepperCreateAdvice' component={StepperAdviceForm} /> 
                                 <Route path='/dashboard' component={Dashboard} /> 
                                 <Route path='/policies/privacy' component={Policy} /> 
                                 <Route path='/policies/tnc' component={TnC} /> 
@@ -238,10 +244,10 @@ class App extends React.Component {
                                 <Route path='/errorPage' component={NoIternetAccess} /> 
                                 <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
                                 <Route path='/authMessage' component={AuthMessage} /> 
-                                <Route exact={true} path='/login' component={Login} /> 
-                                <Route exact={true} path='/signup' component={Signup} /> 
-                                <Route exact={true} path='/faq' component={FAQ} /> 
-                                <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
+                                <Route path='/login' component={Login} /> 
+                                <Route path='/signup' component={Signup} /> 
+                                <Route path='/faq' component={FAQ} /> 
+                                <Route path='/resetPassword' component={ResetPassword} /> 
                                 <Route component={PageNotFound} />
                             </Switch>
                         );

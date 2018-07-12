@@ -149,3 +149,10 @@ export const horizontalBox = {
     flexDirection: 'row',
     alignItems: 'center'
 };
+
+export const verticalBox = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center'
+};
