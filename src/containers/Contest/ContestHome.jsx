@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Row, Col, Button, Tabs, Table, Tag, Icon} from 'antd';
 import {primaryColor, verticalBox, horizontalBox} from '../../constants';
-import {metrics, faqs, howItWorksContents, prizes, criterias} from './constants';
+import {scoringMetrics, faqs, howItWorksContents, prizes, criterias, prizeText, scoringText} from './constants';
 
 const TabPane = Tabs.TabPane;
 
@@ -9,10 +9,7 @@ export default class ContestHome extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            metric: {
-                title: 'Total Return',
-                detail: 'The total return of your portfolio'
-            }
+            metric: scoringMetrics[0]
         }
     }
 
@@ -73,7 +70,7 @@ export default class ContestHome extends React.Component {
         return (
             <Row>
                 <Col span={24}>
-                    <h3>The top 10 contest participants are awarded cash prizes on a daily basis. The following prizes are awarded after every trading day</h3>
+                    <h3 style={{margin: '10px 0 10px 0'}}>{prizeText}</h3>
                 </Col>
                 <Col span={24}>
                     <Table 
@@ -102,30 +99,28 @@ export default class ContestHome extends React.Component {
     renderScoring = () => {
         const scoring = {
             header: 'Scoring Function', 
-            content: 'Algorithms are scored based on their out-of-sample returns and trailing volatility.', 
+            content: scoringText, 
         };
 
         return (
             <Row>
-                <Col span={12}>
-                    <Row>
-                        <Col span={24}>
-                            <ScoringCard {...scoring} />
-                        </Col>
-                        <Col span={24}>
-                            <h5 style={{fontSize: '15px', color: '#616161'}}>Metrics</h5>
-                        </Col>
-                        <Col span={24}>
-                            {
-                                metrics.map((metric, index) => 
-                                    <MetricCard onClick={this.selectScoringMetric} key={index} {...metric}/>
-                                )
-                            }
-                        </Col>
-                    </Row>
+                <Col span={24}>
+                    <ScoringCard {...scoring} />
                 </Col>
-                <Col span={12} style={{...verticalBox, alignItems: 'flex-start', padding: '15px'}}>
-                    <h1>{this.state.metric.title}</h1>
+                
+                <Col span={24}>
+                    <h5 style={{fontSize: '16px', color: '#616161'}}>Metrics</h5>
+                </Col>
+                <Col span={24}>
+                    {
+                        scoringMetrics.map((metric, index) => 
+                            <MetricCard onClick={this.selectScoringMetric} key={index} {...metric}/>
+                        )
+                    }
+                </Col>
+                    
+                <Col span={24} style={{...verticalBox, alignItems: 'flex-start', padding: '15px'}}>
+                    {/*<h1>{this.state.metric.title}</h1>*/}
                     <h3>{this.state.metric.detail}</h3>
                 </Col>
             </Row>
@@ -187,7 +182,7 @@ export default class ContestHome extends React.Component {
             <Col span={8} style={containerStyle}>
                 <Row style={{width: '100%'}}>
                     <Col span={24} style={headerContainer}>
-                        <h3 style={{color: '#fff'}}>Ranking</h3>
+                        <h3 style={{color: '#fff'}}>LEADERBOARD</h3>
                     </Col>
                 </Row>
             </Col>
@@ -195,7 +190,7 @@ export default class ContestHome extends React.Component {
     }
 
     selectScoringMetric = header => {
-        const selectedItem = metrics.filter(metric => metric.header === header)[0];
+        const selectedItem = scoringMetrics.filter(metric => metric.header === header)[0];
         this.setState({
             metric: {
                 title: selectedItem.header,
@@ -237,6 +232,7 @@ const CriteriaCard = ({header, content, span=12}) => {
     const containerStyle = {
         marginBottom: '40px',
         borderBottom: '1px solid #eaeaea',
+        height:'80px'
     };
 
     return (
@@ -300,16 +296,7 @@ const MetricCard = ({header, content, span=24, onClick}) => {
     };
 
     return (
-        <Col span={24} onClick={() => onClick(header)}>
-            <Row style={containerStyle} type="flex" align="middle">
-                <Col style={rowColStyle} span={22}>
-                    <h3 style={{fontSize: '15px', color: primaryColor}}>{header}</h3>
-                </Col>
-                <Col span={2}>
-                    <Icon type="right" />
-                </Col>
-            </Row>
-        </Col>
+        <Tag>{header}</Tag>
     );
 }
 
