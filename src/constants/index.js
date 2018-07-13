@@ -63,6 +63,12 @@ export const goals = [
 		field: "To invest in stocks with exposure to single sector",
 		suitability: "Suitable for investors looking to achieve exposure to a particular sector. Sectors trackers are not diversified portfolios and can undergo sudden losses",
 		suggestedName: ['Sector Tracker', "Sector Opportunities"],	
+	},
+	{
+		investorType: "Contest Investors",
+		field: "To invest in stocks with exposure to single sector",
+		suitability: "Suitable for investors looking to achieve exposure to a particular sector. Sectors trackers are not diversified portfolios and can undergo sudden losses",
+		suggestedName: ['Sector Tracker', "Sector Opportunities"],	
 	}
 ];
 export const portfolioValuation = [

@@ -256,20 +256,20 @@ export class AqStockTableMod extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.state !== nextState) {
+        if (this.state !== nextState || this.props !== nextProps) {
             return true;
         } 
         return false;
     }
 
-    componentWillMount() {
-        if (!this.props.isUpdate) {
-            const data = emptyPositions();
-            this.setState({data});
-        } else {
-            this.setState({data: emptyPositions(1).concat(this.props.data)});
-        }
-    }
+    // componentWillMount() {
+    //     if (!this.props.isUpdate) {
+    //         const data = emptyPositions();
+    //         this.setState({data});
+    //     } else {
+    //         this.setState({data: emptyPositions(1).concat(this.props.data)});
+    //     }
+    // }
 
     render() {
         return (
@@ -295,6 +295,7 @@ export class AqStockTableMod extends React.Component {
                                 type="primary" 
                                 onClick={this.addItem}
                                 style={{marginLeft: '20px', width: '40px'}}
+                                disabled={this.props.benchmark === null}
                         />
                     </Tooltip>
                 </Row>
