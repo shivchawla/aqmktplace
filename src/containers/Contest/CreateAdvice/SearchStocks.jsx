@@ -44,8 +44,8 @@ export class SearchStocks extends React.Component {
     }
 
     fetchStocks = (searchQuery = this.state.searchInput) => new Promise(resolve => {
-        const skip = this.state.selectedPage;
         const limit = 10;
+        const skip = this.state.selectedPage * limit;
         const populate = true;
         const universe = _.get(this.props, 'filters.universe', null);
         const sector = _.get(this.props, 'filters.sector', '');
@@ -97,7 +97,8 @@ export class SearchStocks extends React.Component {
                 low: _.get(stock, 'latestDetailRT.low', null),
                 open: _.get(stock, 'latestDetailRT.open', null),
                 current: _.get(stock, 'latestDetailRT.current', null),
-                checked: selectedStocks.indexOf(symbol) >= 0
+                checked: selectedStocks.indexOf(symbol) >= 0,
+                sector: _.get(stock, 'security.detail.Sector', null)
             };
         }).filter(stock => stock.name !== null);
     }
@@ -117,7 +118,7 @@ export class SearchStocks extends React.Component {
             }
             this.setState({selectedStocks, stocks}, () => {
                 const position = {
-                    key: symbol,
+                    key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                     name: _.get(targetStock, 'name', ''),
                     sector: _.get(targetStock, 'sector', null),
                     lastPrice: targetStock.current,
@@ -183,6 +184,14 @@ export class SearchStocks extends React.Component {
                 </Button>
             </Col>
         );
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            return true;
+        }
+
+        return false;
     }
 
     render() {

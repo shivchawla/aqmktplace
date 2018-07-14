@@ -24,7 +24,7 @@ const emptyPositions = (n) => {
             sharesValidationStatus: "success",
             sharesDisabledStatus: true,
             priceHistory: [],
-            weight: 0
+            weight: 0,
         });
     }
     return data;
@@ -89,6 +89,7 @@ export class AqStockTableMod extends React.Component {
                     onSelect={value => {this.handlePressEnter(value, record.key, column)}}
                     handleAutoCompleteChange={value => this.handleAutoCompleteChange(value, record.key, column)}
                     value={text}
+                    stockSearchFilters={this.props.stockSearchFilters}
             />
         );
     }
@@ -170,7 +171,6 @@ export class AqStockTableMod extends React.Component {
     }
 
     asyncGetTarget = (ticker) => {
-        let validationStatus = 'error';
         const target = {};
         return new Promise((resolve, reject) => {
             getStockData(ticker, 'latestDetail')
@@ -286,7 +286,7 @@ export class AqStockTableMod extends React.Component {
                                 onClick={this.deleteItems}
                         />
                     </Tooltip>
-                    <Tooltip
+                    {/* <Tooltip
                             title="Add Positions"
                             placement="top"
                     >
@@ -297,7 +297,7 @@ export class AqStockTableMod extends React.Component {
                                 style={{marginLeft: '20px', width: '40px'}}
                                 disabled={this.props.benchmark === null}
                         />
-                    </Tooltip>
+                    </Tooltip> */}
                 </Row>
                 <Table 
                         rowSelection={this.getRowSelection()} 

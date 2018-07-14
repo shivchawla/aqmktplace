@@ -83,6 +83,7 @@ export class Portfolio extends React.Component {
                 defaultValue={this.state.selectedBenchmark} 
                 style={{width: '150px'}}
                 onChange={value => this.loadPerformance(value)}
+                disabled={true}
         >
             {
                 this.state.benchmarks.map((benchmark, index) => (
@@ -292,7 +293,7 @@ export class Portfolio extends React.Component {
                             onClick={this.togglePerformanceModal} 
                             type="secondary"
                             // disabled={this.props.verifiedPositions.length < 1}
-                            disabled={this.props.benchmark === null}
+                            disabled={this.props.getValidationErrors().length}
                             icon="area-chart"
                     >
                         PORTFOLIO OVERVIEW
@@ -310,24 +311,13 @@ export class Portfolio extends React.Component {
                     </Tooltip>
                 </div>
                 <Col span={24} style={{marginTop: '20px'}}>
-                    {/* {
-                        this.props.error.show &&
-                        <h3 
-                                style={{
-                                    color: metricColor.negative, 
-                                    fontSize: '14px',
-                                    marginBottom: '10px'
-                                }}
-                        >
-                            * {this.props.error.detail}
-                        </h3>
-                    } */}
                     <AqStockTableMod 
                         style={{display: this.props.step >= 3 ? 'block': 'none'}}
                         onChange = {this.props.onChange}
                         data={this.props.data}
                         isUpdate={this.props.isUpdate}
                         benchmark={this.props.benchmark}
+                        stockSearchFilters={this.props.stockSearchFilters}
                     />
                 </Col>
             </Row>

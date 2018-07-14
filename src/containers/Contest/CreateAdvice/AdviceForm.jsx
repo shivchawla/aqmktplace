@@ -2,19 +2,25 @@ import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
-import {Row, Col, Select, Button, Modal} from 'antd';
+import {Row, Col, Select, Button, Modal, Tag} from 'antd';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
+import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
 import AppLayout from '../../../containers/AppLayout';
 import {benchmarks} from '../../../constants/benchmarks';
-import {shadowBoxStyle, horizontalBox, metricColor} from '../../../constants';
-import {fetchAjax, openNotification, Utils, handleCreateAjaxError} from '../../../utils';
+import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor} from '../../../constants';
+import {fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
 
 const {Option} = Select;
 const textColor = '#595959';
 const dateFormat = 'YYYY-MM-DD';
 const {requestUrl} = require('../../../localConfig');
+const defaultAdviceError = {
+    message: '',
+    errorCode: '',
+    detail: {}
+};
 
 export default class ContestAdviceForm extends React.Component {
     constructor(props) {
@@ -29,12 +35,10 @@ export default class ContestAdviceForm extends React.Component {
                 sector: '',
                 universe: 'NIFTY_500'
             },
-            adviceError: {
-                message: '',
-                errorCode: '',
-                detail: {}
-            },
-            showAdviceErrorDialog: false
+            adviceError: defaultAdviceError,
+            showAdviceErrorDialog: false,
+            adviceSubmissionLoading: false,
+            highStockSeries: []
         };
     }
 
@@ -87,7 +91,6 @@ export default class ContestAdviceForm extends React.Component {
             }, () => {
                 this.searchStockComponent.fetchStocks('')
                 .then(() => {
-                    console.log('Call Me');
                     this.toggleSearchStockBottomSheet();
                 })
             });
@@ -97,9 +100,10 @@ export default class ContestAdviceForm extends React.Component {
         });
     }
 
-    handleSubmitAdvice = () => {
+    handleSubmitAdvice = (type='validate') => {
         const adviceUrl = `${requestUrl}/advice`;
-        const requestObject = this.constructCreateAdviceRequestObject();
+        const requestObject = this.constructCreateAdviceRequestObject(type);
+        this.setState({adviceSubmissionLoading: true});
         axios({
             // url: this.props.isUpdate ? `${this.adviceUrl}/${this.props.adviceId}` : this.adviceUrl,
             url: adviceUrl,
@@ -111,8 +115,6 @@ export default class ContestAdviceForm extends React.Component {
         .then(response => {
             const {data} = response;
             const detail = _.get(data, 'detail', {});
-            console.log(data.valid);
-            console.log(detail);
             if (data.valid === false) {
                 this.setState({
                     adviceError: {
@@ -121,8 +123,10 @@ export default class ContestAdviceForm extends React.Component {
                         detail
                     }
                 }, () => {
-                    this.toggleAdviceErrorDialog();
+                    type === 'create' && this.toggleAdviceErrorDialog();
                 });
+            } else {
+                this.setState({adviceError: defaultAdviceError});
             }
         })
         .catch(error => {
@@ -150,6 +154,9 @@ export default class ContestAdviceForm extends React.Component {
                 _.get(error, 'response.data.errorCode', 0) === 1108
             )
         })
+        .finally(() => {
+            this.setState({adviceSubmissionLoading: false});
+        })
     }
 
     toggleAdviceErrorDialog = () => {
@@ -161,7 +168,9 @@ export default class ContestAdviceForm extends React.Component {
             MAX_SECTOR_EXPOSURE: 'Maximum Sector Exposure',
             MAX_STOCK_EXPOSURE: 'Maximum Stock Exposure',
             MIN_POS_COUNT: 'Minimum Position Count',
-            MAX_NET_VALUE: 'Maximum Net Value'
+            MAX_NET_VALUE: 'Maximum Net Value',
+            MIN_SECTOR_COUNT: 'Minimum Sector Count',
+            MAX_SECTOR_COUNT: 'Maximum Sector Count',
         };
         
         return errKvp[value];
@@ -217,6 +226,9 @@ export default class ContestAdviceForm extends React.Component {
                 data={this.state.positions}
                 onChange={this.onChange}
                 benchmark={this.state.benchmark}
+                getAdvicePerformance={this.getAdvicePortfolioPerformance}
+                stockSearchFilters={this.state.stockSearchFilters}
+                getValidationErrors={this.getPortfolioValidationErrors}
             />
         )
     }
@@ -254,14 +266,14 @@ export default class ContestAdviceForm extends React.Component {
         // Check if position is present if present delete from portfolio else add to portfolio
         const targetPosition = positions.filter(positionItem => positionItem.symbol === position.symbol)[0];
         if (targetPosition === undefined) { // Not present in portfolio, add
-            console.log('Position Will be added');
             positions.push(position);
         } else { // Present in the portfolio
-            console.log('Position will be deleted');
             const toBeDeletedIndex = _.findIndex(positions, positionItem => positionItem.symbol === position.symbol);
             positions.splice(toBeDeletedIndex, 1);
         }
-        this.setState({positions: this.updateAllWeights(positions)});
+        this.setState({positions: this.updateAllWeights(positions)}, () => {
+            this.validatePortfolio();
+        });
     }
 
     updateAllWeights = data => {
@@ -282,14 +294,90 @@ export default class ContestAdviceForm extends React.Component {
         return totalValue;
     }
 
+    getAdvicePortfolioPerformance = selectedBenchmark => new Promise((resolve, reject) => {
+        const performanceUrl = `${requestUrl}/performance`;
+        const benchmark = this.state.benchmark;
+        const requestObject = this.constructAdvicePerformanceRequestObject(benchmark);
+        Promise.all([
+            axios({
+                method: 'POST',
+                url: performanceUrl,
+                data: requestObject,
+                headers: Utils.getAuthTokenHeader()
+            }),
+            getStockPerformance(benchmark)
+        ])
+        .then(([portfolioPerformanceResponse, benchmarkPerformanceResponseData]) => {
+            const portfolioPerformanceData = this.processPortfolioPerformanceResponse(portfolioPerformanceResponse);
+            const portfolioPerformanceMetrics = _.get(portfolioPerformanceResponse.data, 'portfolioPerformance.value.true', {});
+            let highStockSeries = [
+                {
+                    name: 'Advice',
+                    data: portfolioPerformanceData,
+                    color: metricColor.neutral
+                },
+                {
+                    name: benchmark,
+                    data: benchmarkPerformanceResponseData,
+                    color: benchmarkColor
+                }
+            ];
+            resolve({highStockSeries, portfolioPerformanceMetrics});
+        })
+        .catch(error => {
+            handleCreateAjaxError(error, this.props.history, this.props.match.url);
+            reject(error);
+        })
+    })
+
+    /*
+        Constructs the request payload for the advice portfolio performance network call
+    */
+    constructAdvicePerformanceRequestObject = (benchmark = 'NIFTY_50') => {
+        const startDate = moment().subtract(1, 'y').format(dateFormat);
+        const endDate = moment().format(dateFormat);
+        const requestObject = {
+            name: '',
+            detail: {
+                startDate,
+                endDate,
+                positions: this.getPortfolioPositions(),
+                cash: 0
+            },
+            benchmark: {
+                ticker: benchmark,
+                securityType: "EQ",
+                country: "IN",
+                exchange: "NSE"
+            }
+        };
+
+        return requestObject;
+    }
+
+    /**
+     *  Processes the response from the /advice/performance network call into HighStock series data format
+     */
+    processPortfolioPerformanceResponse = performanceResponse => {
+        return _.get(performanceResponse.data, 'portfolioPerformance.portfolioValues', []).map(
+            item => {
+                return [moment(item.date, dateFormat).valueOf(), Number(item.netValue.toFixed(2))]
+            }
+        );
+    }
+
     /*
         Changes the content of the portfolio array.
         Passed as a prop to AqStockTableMod
     */
     onChange = positions => {
         this.setState({positions: _.cloneDeep(positions)}, () => {
-            // this.validatePortfolio();
+            this.validatePortfolio();
         });
+    }
+
+    validatePortfolio = () => {
+        this.handleSubmitAdvice('validate');
     }
 
     /**
@@ -352,7 +440,7 @@ export default class ContestAdviceForm extends React.Component {
         Gets the verified positions from the portfolio table.
         A position is validated if the symbol is valid and number of shares > 0
     */
-   getVerifiedPositions = (positions = [...this.state.positions]) => {
+    getVerifiedPositions = (positions = [...this.state.positions]) => {
         const verifiedTransactions = positions.filter(item => {
             return item.symbol.length > 1 && Number(item.shares) > 0 && item.shares.toString().length > 0;
         });
@@ -382,6 +470,33 @@ export default class ContestAdviceForm extends React.Component {
         return positions;
     }
 
+    /**
+     * Returns all the portfolio errors occured while validating the portfolio
+     */
+    getPortfolioValidationErrors = () => {
+        const {detail = {}} = this.state.adviceError;
+        return Object.keys(detail).filter(item => detail[item].valid === false)
+                .map(invalidKey => {
+                    return {
+                        field: this.convertStringToReadable(invalidKey),
+                        message: detail[invalidKey].message
+                    };
+                });
+    }
+
+    renderValidationErrors = () => {
+        const errors = this.getPortfolioValidationErrors();
+        return errors.length > 0
+                ?   <Tag 
+                        style={{marginTop: '20px'}} 
+                        color={metricColor.negative}
+                        onClick={this.toggleAdviceErrorDialog}
+                    >
+                        {errors.length} Portfolio Validation Wanings
+                    </Tag>
+                :   null;
+    }
+
     renderPageContent = () => {
         return (
             <Row className='aq-page-container'>
@@ -392,14 +507,17 @@ export default class ContestAdviceForm extends React.Component {
                     <Row style={leftContainerStyle} type="flex" align="end">
                         <Col span={12}>
                             {this.renderBenchmarkDropdown()}
+                            {this.renderValidationErrors()}
                         </Col>
                         <Col span={12} style={{...horizontalBox, justifyContent: 'flex-end'}}>
                             <Button 
                                     icon="rocket" 
                                     type="primary" 
-                                    onClick={this.handleSubmitAdvice} 
+                                    onClick={() => this.handleSubmitAdvice('create')} 
                                     htmlType="submit"
                                     style={{height: '45px'}}
+                                    loading={this.state.adviceSubmissionLoading}
+                                    disabled={this.getPortfolioValidationErrors().length}
                             >
                                 SUBMIT ADVICE
                             </Button>
@@ -411,11 +529,24 @@ export default class ContestAdviceForm extends React.Component {
                         </Col>
                     </Row>
                 </Col>
+                <Col span={5} offset={1} style={shadowBoxStyle}>
+                    <PortfolioPieChart data={this.state.positions} />
+                </Col>
             </Row>
         );
     } 
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            return true;
+        }
+
+        return false;
+    }
+
     render() {
+        console.log('Advice Form Rendered');
+        
         return (
             <AppLayout content={this.renderPageContent()}/>
         );

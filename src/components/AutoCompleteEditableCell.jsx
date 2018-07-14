@@ -1,6 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
-import {Input, Form, AutoComplete, Icon, Spin, message} from 'antd';
+import _ from 'lodash';
+import {Input, AutoComplete, Icon, Spin, message} from 'antd';
 import {withRouter} from 'react-router';
 import {Utils} from '../utils';
 
@@ -20,10 +21,13 @@ export class AutoCompleteEditableCellImpl extends React.Component {
     }
 
     handleSearch = query => {
+        const industry = _.get(this.props, 'stockSearchFilters.industry', '');
+        const sector = _.get(this.props, 'stockSearchFilters.sector', '');
+        const universe = _.get(this.props, 'stockSearchFilters.universe', '');
         this.setState({spinning: true});
         //Convert the & (or other special characters) in query string to URI component before passing to backend
         const trueQuery = encodeURIComponent(query);
-        const url = `${requestUrl}/stock?search=${trueQuery}`;
+        const url = `${requestUrl}/stock?search=${trueQuery}&universe=${universe}&industry=${industry}&sector=${sector}`;
         axios.get(url, {headers: Utils.getAuthTokenHeader()})
         .then(response => {
             this.setState({dataSource: this.processSearchResponseData(response.data)});
