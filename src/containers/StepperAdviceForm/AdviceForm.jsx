@@ -610,6 +610,7 @@ class StepperAdviceFormImpl extends React.Component {
         .then(([advicePortfolioResponse, adviceSummaryResponse]) => {
             const {name = '', investmentObjective = {}} = adviceSummaryResponse.data;
             const investmentObjGoal = _.get(investmentObjective, 'goal.field', '');
+            const investorType = _.get(investmentObjective, 'goal.investorType', '');
             const investmentObjSectors = _.get(investmentObjective, 'sectors.detail', []);
             const investmentObjPortfolioValuation = _.get(investmentObjective, 'portfolioValuation.field', '');
             const investmentObjCapitalization = _.get(investmentObjective, 'capitalization.field', '');
@@ -634,6 +635,7 @@ class StepperAdviceFormImpl extends React.Component {
             }, () => {
                 this.checkForApprovalErrors();
                 this.props.form.setFieldsValue({
+                    investmentObjInvestorType: investorType,
                     adviceName: name,
                     investmentObjGoal,
                     investmentObjSectors,

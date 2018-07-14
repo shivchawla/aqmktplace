@@ -403,6 +403,7 @@ class AdviceDetailImpl extends React.Component {
         })
         .finally(() => {
             this.setState({loading: false});
+            this.setUpSocketConnection();
         });
     };
 
@@ -535,8 +536,6 @@ class AdviceDetailImpl extends React.Component {
         if (!Utils.isLoggedIn()) {
             this.getDefaultAdviceData();
         } else {
-            this.setUpSocketConnection();
-            // this.getUserData();
             this.getAdviceData();
         }
     }
