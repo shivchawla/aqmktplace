@@ -84,6 +84,7 @@ export const capitalization = [
 ];
 
 export const adviceApprovalPending = 'Approval is pending for this advice';
+export const contestOnly = 'Advice active in Contest';
 export const adviceRejected = 'Advice is rejected. Please fix the advice for suggestions and resubmit for approval';
 export const adviceApproved = 'Advice is approved and open for sale in the marketplace';
 export const advicePublic = 'Public Advice: Advice is visbile and open for sale in the marketplace* (*subject to approval)';

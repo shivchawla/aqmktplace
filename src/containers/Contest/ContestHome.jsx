@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Row, Col, Button, Tabs, Table, Tag, Icon} from 'antd';
 import {primaryColor, verticalBox, horizontalBox} from '../../constants';
 import {scoringMetrics, faqs, howItWorksContents, prizes, criterias, prizeText, scoringText} from './constants';
+import AppLayout from '../../containers/AppLayout';
 
 const TabPane = Tabs.TabPane;
 
@@ -201,11 +202,15 @@ export default class ContestHome extends React.Component {
 
     render() {
         return (
-            <Row style={{height: '100%'}}>
-                {this.renderTopSection()}
-                {this.renderTabsSection()}
-                {this.renderContestRanking()}
-            </Row>
+            <AppLayout
+                content = {
+                    <Row style={{height: '100%'}}>
+                        {this.renderTopSection()}
+                        {this.renderTabsSection()}
+                        {this.renderContestRanking()}
+                    </Row>
+                }>
+            </AppLayout>
         );
     }
 }

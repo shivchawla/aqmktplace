@@ -5,7 +5,7 @@ import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import {AqRate} from '../components/AqRate';
 import {AqTag} from '../components/AqTag';
-import {primaryColor, metricColor, adviceApprovalPending, adviceApproved, adviceRejected, advicePublic, advicePrivate} from '../constants';
+import {primaryColor, metricColor, adviceApprovalPending, adviceApproved, adviceRejected, advicePublic, advicePrivate, contestOnly} from '../constants';
 import medalIcon from '../assets/award.svg';
 import {Utils} from '../utils';
 import '../css/adviceListItem.css';
@@ -99,7 +99,8 @@ class AdviceListItemImpl extends React.PureComponent {
             isAdmin,
             rebalancingFrequency,
             netValue,
-            approvalStatus = false
+            approvalStatus = false,
+            contestOnly
         } = this.props.advice;
         const isPublic = this.props.advice.public;
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
@@ -172,14 +173,17 @@ class AdviceListItemImpl extends React.PureComponent {
                                 {
                                     (isOwner || isAdmin) &&
                                     <React.Fragment>
-                                        <AqTag 
-                                                tooltipTitle={isPublic ? advicePublic : advicePrivate}
-                                                tooltipPlacement='bottom'
-                                                color='#673AB7'
-                                                icon={isPublic ? 'team' : 'lock'}
-                                                iconStyle={{fontWeight: 400, fontSize: '15px', marginRight: '5px'}}
-                                                text={isPublic ? 'Public' : 'Private'}
-                                        />
+                                        
+                                        {   !contestOnly && 
+                                                <AqTag 
+                                                    tooltipTitle={isPublic ? advicePublic : advicePrivate}
+                                                    tooltipPlacement='bottom'
+                                                    color='#673AB7'
+                                                    icon={isPublic ? 'team' : 'lock'}
+                                                    iconStyle={{fontWeight: 400, fontSize: '15px', marginRight: '5px'}}
+                                                    text={isPublic ? 'Public' : 'Private'}
+                                            />
+                                        }
                                         {
                                             approvalStatus &&
                                             <AqTag 
@@ -191,12 +195,22 @@ class AdviceListItemImpl extends React.PureComponent {
                                             />
                                         }
                                         {
-                                            !approvalStatus &&
+                                            !approvalStatus && !contestOnly &&
                                             <AqTag 
                                                     tooltipTitle={isApproved ? adviceApproved : adviceRejected}
                                                     tooltipPlacement='bottom'
                                                     color={isApproved ? '#00897B' : metricColor.negative}
                                                     text={isApproved ? "Approved" : "Rejected"}
+                                                    textStyle={{marginLeft: '5px'}}
+                                            />
+                                        }
+                                        {   
+                                            contestOnly &&
+                                            <AqTag 
+                                                    tooltipTitle={contestOnly}
+                                                    tooltipPlacement='bottom'
+                                                    color='purple'
+                                                    text="Contest"
                                                     textStyle={{marginLeft: '5px'}}
                                             />
                                         }
