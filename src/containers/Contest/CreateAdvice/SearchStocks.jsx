@@ -61,8 +61,6 @@ export class SearchStocks extends React.Component {
 
     renderStockList = () => {
         const {stocks = []} = this.state;
-
-        console.log(this.state.stocks);
         return stocks.map((stock, index) => 
             <StockListItem 
                 key={index} 

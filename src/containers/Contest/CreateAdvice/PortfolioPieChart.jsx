@@ -17,49 +17,23 @@ export class PortfolioPieChart extends React.Component {
         };
     }
 
-    checkTickerForDuplications = (data, ticker) => {
-        const duplicationIndexes = [];
-        const nData = data.filter((dataItem, index) => {
-            if (dataItem.ticker === ticker) {
-                duplicationIndexes.push(index);
-            }
-            return dataItem.ticker === ticker
-        });
-
-        return {indexes: duplicationIndexes, length: nData.length -1}
-    }
-
     processDataForPieChart = () => {
         let {data = []} = this.props;
         data = data.filter(item => item.shares > 0);
-        const tickers = data.map(item => item.symbol);
+        const tickers = _.uniq(data.map(item => item.symbol));
         const colorData = generateColorData(tickers);
-        let nData = data.map((item, index) => {
-            const duplicateData = this.checkTickerForDuplications(data, item.ticker);
-            let duplicateIndexes = duplicateData.indexes; // [0, 1, 2]
-            const duplicateLength = duplicateData.length;
-            let duplicateTotal = 0;
-            // Removing the current index from the duplicate index array
-            duplicateIndexes = duplicateIndexes.filter(duplicateIndex => {
-                return duplicateIndex !== index
-            });
-            if (duplicateLength > 0) {
-                duplicateIndexes.map(duplicateIndex => {
-                    duplicateTotal += data[duplicateIndex].weight;
-                });
-                duplicateTotal += item.weight || 0;
-            } else {
-                duplicateTotal = item.weight || 0;
-            }
+        
+        let nData = tickers.map(ticker => {
+            var weightInTicker = _.sum(data.filter(item => {return item.symbol == ticker}).map(item => item.weight));
             
             return {
-                name: _.get(item, 'ticker', null),
-                y: Number(duplicateTotal.toFixed(2)),
-                color: colorData[_.get(item, 'ticker', null)]
+                name: ticker,
+                y: Number(weightInTicker.toFixed(2)),
+                color: colorData[ticker]
             }
         });
 
-        return _.uniqBy(nData, 'name');
+        return nData;
     }
 
     processSectorsForPieChart = () => {
@@ -101,7 +75,9 @@ export class PortfolioPieChart extends React.Component {
         return (
             <Row style={{backgroundColor: '#fff', padding: '10px'}}>
                 <Col span={24} style={{marginLeft: '-20px'}}>
-                    <HighChartNew 
+                    <HighChartNew
+                        maxSlices={8}
+                        maxWeight={90} 
                         series={[{
                             name: 'Portfolio Composition', 
                             data: this.state.selectedView === 'sector' 
