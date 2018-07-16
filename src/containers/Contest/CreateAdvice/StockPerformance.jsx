@@ -1,7 +1,7 @@
 import * as React from 'react';
 import _  from 'lodash';
 import windowSize from 'react-window-size';
-import {Row, Col, Spin} from 'antd';
+import {Row, Col, Spin, Tabs} from 'antd';
 import HighStock from '../../../containers/MyChartNew';
 import {AqPerformanceMetrics} from '../../../components/AqPerformanceMetrics';
 import {MetricItem} from '../../../components/MetricItem';
@@ -21,7 +21,7 @@ class StockPerformanceImpl extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if(nextProps.stock !== this.props.stock) {
-            this.fetchStockData(nextProps.stock)
+            this.fetchStockData(nextProps.stock.symbol)
         }
     }
 
@@ -85,27 +85,22 @@ class StockPerformanceImpl extends React.Component {
             {label: 'High', value: _.get(latestDetail, 'high', 0)},
             {label: 'Low', value: _.get(latestDetail, 'low', 0)},
             {label: 'Open', value: _.get(latestDetail, 'open', 0)},
-            {label: 'Close', value: _.get(latestDetail, 'close', 0)},
+            {label: 'Prev. Close', value: _.get(latestDetail, 'close', 0)},
             {label: '52W High', value: _.get(latestDetail, 'high_52w', 0)},
             {label: '52W Low', value: _.get(latestDetail, 'low_52w', 0)},
         ];
         return (
-            <Row style={{borderRadius: '4px', border: '1px solid #eaeaea', height: '100%', padding: '10px'}}>
-                <Col span={24} style={{marginBottom: '5px'}}>
-                    <h3>Price Metrics</h3>
-                </Col>
-                <Col>
-                    {
-                        priceMetrics.map((item, index) => {
-                            return (
-                                <Row key={index} style={{marginBottom: '5px'}}>
-                                    <Col span={16}>{item.label}</Col>
-                                    <Col span={8} style={{color: '#3B3737'}}>{this.formatPriceMetrics(item.value)}</Col>
-                                </Row>
-                            );
-                        })
-                    }
-                </Col>
+            <Row style={{borderRadius: '4px', height: '100%', padding: '10px'}}>
+                {
+                    priceMetrics.map((item, index) => {
+                        return (
+                            <Col key={index} span={8} style={{marginTop: '20px', textAlign: 'center'}}>
+                                <h3 style={{fontSize: '18px', color: '#3b3737', fontWeight: 300}}>{this.formatPriceMetrics(item.value)}</h3>
+                                <h3 style={{fontSize: '13px', color: '#000000a6'}}>{item.label}</h3>
+                            </Col>
+                        );
+                    })
+                }
             </Row>
         );
     }
@@ -122,7 +117,7 @@ class StockPerformanceImpl extends React.Component {
 
         return (
             <Row type="flex" justify="space-between">
-                <Col span={4}><MetricItem money value={latestPrice} label="Price" style={{border: 'none'}} /></Col>
+                <Col span={4}><MetricItem money value={latestPrice} label="Price" style={{border: 'none'}} valueStyle={{fontWeight: 300}} /></Col>
                 <Col span={4}><MetricItem money value={change} label="Change" style={{border: 'none'}} /></Col>
                 <Col span={4}><MetricItem percentage value={changePct} label="Change %" style={{border: 'none'}} /></Col>
                 <Col span={4}><MetricItem money value={open} label="Open" style={{border: 'none'}} /></Col>
@@ -144,32 +139,47 @@ class StockPerformanceImpl extends React.Component {
     }
 
     renderPageContent = () => {
+
+        const TabPane = Tabs.TabPane;
         return (
-            <Row style={{padding: '0 20px'}}>
-                <Col style={{textAlign: 'center'}}>
-                    <h3 style={{fontSize: '16px', fontWeight: '700'}}>{this.props.stock}</h3>
-                </Col>
-                <Col span={24} style={{marginTop: '20px'}}>
-                    {this.renderLatestDetail()}
-                </Col>
-                <Col span={24} style={{marginTop: '20px'}}>
-                    <Row gutter={24}>
-                        <Col span={12} style={{height: '200px'}}>
+            <Col style={{padding:'0px 30px', alignItems:'center'}}>
+                <Row style={{margin: '10px 0 20px 0'}}>
+                    <Col style={{textAlign: 'center'}}>
+                        <h3 style={{fontSize: '16px', fontWeight: '700'}}>{this.props.stock.symbol}: {this.props.stock.name}</h3>
+                    </Col>
+                </Row>
+
+                <Tabs defaultActiveKey="1">
+                    <TabPane tab="Price Chart" key="1">
+                        <Col span={24} style={{marginTop: '0px'}}>
+                            <HighStock series={[this.state.series]} />
+                        </Col>
+                    </TabPane>
+                    
+                    <TabPane tab="Price Metrics" key="2">
+                        <Col span={24} style={{marginTop: '20px'}}>
+                            {this.renderPriceMetrics()}
+                            {/*this.renderLatestDetail()*/}
+                        </Col>
+                    </TabPane>
+
+                    <TabPane tab="Rolling Performance" key="3">
+                        <Col span={24} style={{marginTop: '20px', height:'200px'}}>
                             <AqPerformanceMetrics 
+                                type="new"
                                 rollingPerformance={this.state.rollingPerformance} 
-                                style={{height: '100%'}}
+                                style={{height: '100%', border:'none'}}
+                                noTitle
                                 selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
                             />
+                            {/*<Col span={12} style={{height: '200px'}}>
+                                {this.renderPriceMetrics()}
+                            </Col>*/}
                         </Col>
-                        <Col span={12} style={{height: '200px'}}>
-                            {this.renderPriceMetrics()}
-                        </Col>
-                    </Row>
-                </Col>
-                <Col span={24} style={{marginTop: '20px'}}>
-                    <HighStock series={[this.state.series]} />
-                </Col>
-            </Row>
+                    </TabPane>
+                    
+                </Tabs>
+            </Col>
         );
     }
 

@@ -127,17 +127,47 @@ export class HighChartNew extends React.Component {
         if (series.length > 0) {
             this.clearSeries();
             const validIndex = this.getValidIndex(series);
+
             series.map((item, index) => {
+                
+                let nData = item.data;
+
+                //Filter out series for maxSlices and maxWeight
+                //Filter only if number of slices > maxSlices
+                if (this.props.maxSlices && this.props.maxSlices < nData.length) {
+                    
+                    nData = nData.sort((a,b) => {return a.y > b.y ? -1 : a.y < b.y ? 1 : 0});
+                    var cumsum = function(sums, val) {
+                        return sums.concat([ val + 1*sums.slice(-1) ]);
+                    }
+                    
+                    var cumWeight = item.data.map(item => item.y).reduce(cumsum, []);
+
+                    //Default maxWeight = 70
+                    var allowedMaxWeight  = this.props.maxWeight ? this.props.maxWeight : 70;
+                    var idx = _.findLastIndex(cumWeight, (item) => {return item < allowedMaxWeight});
+
+                    idx = Math.max(idx, this.props.maxSlices - 1);
+
+                    if (idx !=-1 && idx < nData.length - 1) {
+                        var otherData = nData.slice(idx + 1);
+                        nData = nData.slice(0, idx + 2);
+                        nData[idx + 1].name = 'Other';
+                        nData[idx + 1].y = _.sum(otherData.map(item => item.y));
+                    }
+                }
+
                 this.chart.addSeries({
                     name: item.name,
-                    data: item.data.map((item, index) => {
+                    data: nData.map((item, index) => {
                         return {
                             ...item,
-                            z: index === validIndex ? 1 : 0
+                            z: index === 0 ? 1 : 0
                         }
                     }),
                 });
             });
+
             this.updateTitle(series);
         }
     }
