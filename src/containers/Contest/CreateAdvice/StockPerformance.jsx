@@ -85,27 +85,22 @@ class StockPerformanceImpl extends React.Component {
             {label: 'High', value: _.get(latestDetail, 'high', 0)},
             {label: 'Low', value: _.get(latestDetail, 'low', 0)},
             {label: 'Open', value: _.get(latestDetail, 'open', 0)},
-            {label: 'Close', value: _.get(latestDetail, 'close', 0)},
+            {label: 'Prev. Close', value: _.get(latestDetail, 'close', 0)},
             {label: '52W High', value: _.get(latestDetail, 'high_52w', 0)},
             {label: '52W Low', value: _.get(latestDetail, 'low_52w', 0)},
         ];
         return (
-            <Row style={{borderRadius: '4px', border: '1px solid #eaeaea', height: '100%', padding: '10px'}}>
-                <Col span={24} style={{marginBottom: '5px'}}>
-                    <h3>Price Metrics</h3>
-                </Col>
-                <Col>
-                    {
-                        priceMetrics.map((item, index) => {
-                            return (
-                                <Row key={index} style={{marginBottom: '5px'}}>
-                                    <Col span={16}>{item.label}</Col>
-                                    <Col span={8} style={{color: '#3B3737'}}>{this.formatPriceMetrics(item.value)}</Col>
-                                </Row>
-                            );
-                        })
-                    }
-                </Col>
+            <Row style={{borderRadius: '4px', height: '100%', padding: '10px'}}>
+                {
+                    priceMetrics.map((item, index) => {
+                        return (
+                            <Col key={index} span={8} style={{marginTop: '20px', textAlign: 'center'}}>
+                                <h3 style={{fontSize: '18px', color: '#3b3737', fontWeight: 300}}>{this.formatPriceMetrics(item.value)}</h3>
+                                <h3 style={{fontSize: '13px', color: '#000000a6'}}>{item.label}</h3>
+                            </Col>
+                        );
+                    })
+                }
             </Row>
         );
     }
@@ -147,7 +142,7 @@ class StockPerformanceImpl extends React.Component {
 
         const TabPane = Tabs.TabPane;
         return (
-            <Col style={{padding:'0px 30px'}}>
+            <Col style={{padding:'0px 30px', alignItems:'center'}}>
                 <Row style={{margin: '10px 0 20px 0'}}>
                     <Col style={{textAlign: 'center'}}>
                         <h3 style={{fontSize: '16px', fontWeight: '700'}}>{this.props.stock.symbol}: {this.props.stock.name}</h3>

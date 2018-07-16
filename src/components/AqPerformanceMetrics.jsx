@@ -2,6 +2,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import {Row, Col, Radio} from 'antd';
 import {Utils} from '../utils';
+import {metricColor} from '../constants/';
 
 const RadioGroup = Radio.Group;
 const RadioButton = Radio.Button;
@@ -50,9 +51,10 @@ export class AqPerformanceMetrics extends React.Component {
                     <Row gutter={8}>
                         {
                             this.state.metrics.map((metric, index) => {
+                                var color = metric.color || '#3b3737'; 
                                 return (
                                     <Col key={index} span={8} style={{marginTop: '20px', textAlign: 'center'}}>
-                                        <h3 style={{fontSize: '18px', color: '#3b3737', fontWeight: 300}}>{metric.value}</h3>
+                                        <h3 style={{fontSize: '18px', color: color, fontWeight: 300}}>{metric.value}</h3>
                                         <h3 style={{fontSize: '12px', color: '#000000a6'}}>{metric.label}</h3>
                                     </Col>
                                 );
@@ -102,12 +104,12 @@ export class AqPerformanceMetrics extends React.Component {
         const drawdown = _.get(selectedTimelineMetrics, 'drawdown', {});
 
         const metrics = [
-            {label: 'Ann. Return', value: Utils.formatReturnTypeVariable(_.get(returns, 'annualreturn', 0))},
+            {label: 'Ann. Return', value: Utils.formatReturnTypeVariable(_.get(returns, 'annualreturn', 0)), color: _.get(returns, 'annualreturn', 0) > 0 ? metricColor.positive : metricColor.negative},
             {label: 'Volatility', value: Utils.formatReturnTypeVariable(_.get(deviation, 'annualstandarddeviation', 0))},
             {label: 'Beta', value: _.get(ratios, 'beta', 0)},
             {label: 'Sharpe Ratio', value: _.get(ratios, 'sharperatio', 0)},
-            {label: 'Alpha', value: Utils.formatReturnTypeVariable(_.get(ratios, 'alpha', 0))},
-            {label: 'Max Loss', value: Utils.formatReturnTypeVariable(_.get(drawdown, 'maxdrawdown', 0))},
+            {label: 'Alpha', value: Utils.formatReturnTypeVariable(_.get(ratios, 'alpha', 0)), color: _.get(ratios, 'alpha', 0) > 0 ? metricColor.positive : metricColor.negative},
+            {label: 'Max Loss', value: Utils.formatReturnTypeVariable(_.get(drawdown, 'maxdrawdown', 0)), color: _.get(drawdown, 'maxdrawdown', 0) > 0 ? metricColor.negative : metricColor.neutral},
         ];
 
         return metrics;
@@ -134,6 +136,8 @@ export class AqPerformanceMetrics extends React.Component {
     }
 
     render() {
+        const {type = "old"} = this.props; 
+
         return (
             <Row 
                 style={{
@@ -147,11 +151,18 @@ export class AqPerformanceMetrics extends React.Component {
                         <h3 style={{fontSize: '16px'}}>Performance Metrics</h3>
                     </Col>
                 }
-                <Col span={14}
-                        style={{display: 'flex', justifyContent: 'flex-end', marginTop: '0px'}}
-                >
-                    {this.renderRadioTimelineSelection(this.getPerformanceTimeline())}
-                </Col>
+                {type=="old" && 
+                    <Col span={14}
+                        style={{display: 'flex', justifyContent: 'flex-end', marginTop: '0px'}}>
+                        {this.renderRadioTimelineSelection(this.getPerformanceTimeline())}
+                    </Col>
+                }
+                {type != "old" && 
+                    <Col span={24}
+                            style={{textAlign: 'center', marginTop: '0px'}}>
+                        {this.renderRadioTimelineSelection(this.getPerformanceTimeline())}
+                    </Col>
+                }
                 <Col span={24} style={{marginTop: '30px'}}>
                     {this.renderPerformanceMetrics()}
                 </Col>
