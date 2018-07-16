@@ -4,6 +4,8 @@ import ContestHome from './ContestHome';
 import LeaderBoard from './LeaderBoard';
 import CreateAdvice from './CreateAdvice/CreateAdvice';
 import UpdateAdvice from './CreateAdvice/UpdateAdvice';
+import ContestTnC from './ContestTnC';
+import ContestAdviceForm from './CreateAdvice/AdviceForm';
 export default class Contest extends React.Component {
     render() {
         return(
@@ -24,6 +26,10 @@ export default class Contest extends React.Component {
                 <Route 
                     path={`${this.props.match.url}/updateadvice/:id`}
                     render={props => <UpdateAdvice {...props}/>} 
+                />
+                <Route 
+                    path={`${this.props.match.url}/terms`}
+                    render={props => <ContestTnC/>} 
                 />
             </React.Fragment>
         );
