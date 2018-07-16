@@ -2,7 +2,8 @@ import * as React from 'react';
 import {Route} from 'react-router-dom';
 import ContestHome from './ContestHome';
 import LeaderBoard from './LeaderBoard';
-import ContestAdviceForm from './CreateAdvice/AdviceForm';
+import CreateAdvice from './CreateAdvice/CreateAdvice';
+import UpdateAdvice from './CreateAdvice/UpdateAdvice';
 export default class Contest extends React.Component {
     render() {
         return(
@@ -18,7 +19,11 @@ export default class Contest extends React.Component {
                 />
                 <Route 
                     path={`${this.props.match.url}/createadvice`}
-                    render={props => <ContestAdviceForm {...props}/>} 
+                    render={props => <CreateAdvice {...props}/>} 
+                />
+                <Route 
+                    path={`${this.props.match.url}/updateadvice/:id`}
+                    render={props => <UpdateAdvice {...props}/>} 
                 />
             </React.Fragment>
         );

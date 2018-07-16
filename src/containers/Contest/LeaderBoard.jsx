@@ -7,7 +7,7 @@ import {fetchAjax} from '../../utils';
 import './css/leaderBoard.css';
 
 const {requestUrl} = require('../../localConfig');
-const contestId = '5b43544514a486a2a1824a9d'; // For testing purpose only, this should be removed
+const contestId = '5b49cbe8f464ce168007bb79'; // For testing purpose only, this should be removed
 
 const leaderboardListItem = {
     adviceName: 'Large Cap Investment Advice',
@@ -143,9 +143,13 @@ export default class LeaderBoard extends React.Component {
             let advices = _.get(contestSummaryData, 'advices', []);
             advices = advices.map(advice => this.processAdviceForLeaderboardListItem(advice));
             advices = _.orderBy(advices, 'rank', 'asc');
+            console.log('Advices', advices);
             this.setState({advices, selectedAdviceId: advices[0].adviceId});
         })
-        .catch(err => err)
+        .catch(err => {
+            console.log(err);
+            return err;
+        })
         .finally(() => {
             this.setState({loading: false});
         })
@@ -178,7 +182,7 @@ export default class LeaderBoard extends React.Component {
                     annualReturn: {label: 'Annual Return', ...this.getAdviceMetric(currentAdviceMetrics, 'annualReturn')},
                     maxLoss: {label: 'Max Loss', ...this.getAdviceMetric(currentAdviceMetrics, 'maxLoss')},
                     sharpe: {label: 'Sharpe', ...this.getAdviceMetric(currentAdviceMetrics, 'sharpe')},
-                    score: Number((_.get(advice, 'latestRank.rating.current.value')).toFixed(2)),
+                    score: Number((_.get(advice, 'latestRank.rating.current.value') || 0).toFixed(2)),
                     alpha: {label: 'Alpha', ...this.getAdviceMetric(currentAdviceMetrics, 'alpha')},
                 },
                 simulated: {
@@ -187,7 +191,7 @@ export default class LeaderBoard extends React.Component {
                     annualReturn: {label: 'Annual Return', ...this.getAdviceMetric(simulatedAdviceMetrics, 'annualReturn')},
                     maxLoss: {label: 'Max Loss', ...this.getAdviceMetric(simulatedAdviceMetrics, 'maxLoss')},
                     sharpe: {label: 'Sharpe', ...this.getAdviceMetric(simulatedAdviceMetrics, 'sharpe')},
-                    score: Number((_.get(advice, 'latestRank.rating.simulated.value')).toFixed(2)),
+                    score: Number((_.get(advice, 'latestRank.rating.simulated.value') || 0).toFixed(2)),
                     alpha: {label: 'Alpha', ...this.getAdviceMetric(simulatedAdviceMetrics, 'alpha')}
                 }
             },
@@ -390,6 +394,7 @@ const MetricContainer = ({header, metrics}) => {
                     if (metric !== undefined) {
                         return (
                             <Col 
+                                    key={index}
                                     span={12} 
                                     style={{
                                         ...verticalBox, 

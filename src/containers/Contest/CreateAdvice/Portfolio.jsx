@@ -1,7 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Row, Col, Button, Modal, Spin, Select, Tooltip} from 'antd';
-import {metricColor, horizontalBox} from '../../../constants';
+import {Row, Col, Button, Modal, Spin, Select, Tooltip, Badge} from 'antd';
+import {metricColor, horizontalBox, primaryColor, verticalBox} from '../../../constants';
 import {generateColorData} from '../../../utils';
 import {AqStockTableMod} from '../../../components/AqStockTableMod';
 import {benchmarks} from '../../../constants/benchmarks';
@@ -150,18 +150,19 @@ export class Portfolio extends React.Component {
                     bodyStyle={{overflow: 'hidden', overflowY: 'scroll', height: '540px'}}
                     style={{top: 20}}
                     footer={null}
+                    destroyOnClose={true}
             >
                 <Spin spinning={this.state.loadingPortfolioPerformance}>
                     <Row type="flex" align="middle">
-                        <Col span={14}>
+                        <Col span={24}>
                             <Row>
                                 <Col span={24} style={{marginTop: '5px'}}>
                                     {this.renderMetrics()}
                                 </Col>
 
-                                <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {/* <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                     {this.renderBenchmarkDropdown()}
-                                </Col>
+                                </Col> */}
 
                                 <Col span={24}>
                                     <MyChartNew 
@@ -171,7 +172,7 @@ export class Portfolio extends React.Component {
                                 </Col>
                             </Row>
                         </Col>
-                        <Col 
+                        {/* <Col 
                                 span={10} 
                                 style={{
                                     display: 'flex', 
@@ -194,7 +195,7 @@ export class Portfolio extends React.Component {
                                     {this.renderPositions()}
                                 </Col>
                             </Row>
-                        </Col>
+                        </Col> */}
                     </Row>
                 </Spin>
             </Modal>
@@ -267,6 +268,14 @@ export class Portfolio extends React.Component {
         return _.uniqBy(nData, 'name');
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || (!_.isEqual(nextState, this.state))) {
+            return true;
+        }
+
+        return false;
+    }
+
     render() {
         return (
             <Row style={{display: 'block'}} type="flex">
@@ -284,8 +293,8 @@ export class Portfolio extends React.Component {
                             right: '0px', 
                             top: '25px',
                             zIndex: 20
-                        }}>
-                    
+                        }}
+                >
                     <Button
                             style={{
                                 marginLeft: '20px'
@@ -293,26 +302,28 @@ export class Portfolio extends React.Component {
                             onClick={this.togglePerformanceModal} 
                             type="secondary"
                             // disabled={this.props.verifiedPositions.length < 1}
-                            disabled={this.props.getValidationErrors().length}
+                            disabled={this.props.data.length < 1}
                             icon="area-chart"
                     >
-                        PORTFOLIO OVERVIEW
+                        PERFORMANCE
                     </Button>
-                    <Tooltip title="Search Stocks" placement="top">
-                        <Button 
-                                style={{marginLeft: '20px'}} 
-                                type="primary" 
-                                icon="search"
-                                onClick={this.props.toggleBottomSheet}
-                                disabled={this.props.benchmark === null}
-                        >
-                            SEARCH STOCKS
-                        </Button>
-                    </Tooltip>
+                    {
+                        this.props.data.length > 0 &&
+                        <Tooltip title="Search Stocks" placement="top">
+                            <Button 
+                                    style={{marginLeft: '20px'}} 
+                                    type="primary" 
+                                    icon="plus-circle-o"
+                                    onClick={this.props.toggleBottomSheet}
+                                    disabled={this.props.benchmark === null}
+                            >
+                                ADD STOCKS
+                            </Button>
+                        </Tooltip>
+                    }
                 </div>
                 <Col span={24} style={{marginTop: '20px'}}>
                     <AqStockTableMod 
-                        style={{display: this.props.step >= 3 ? 'block': 'none'}}
                         onChange = {this.props.onChange}
                         data={this.props.data}
                         isUpdate={this.props.isUpdate}
@@ -320,6 +331,20 @@ export class Portfolio extends React.Component {
                         stockSearchFilters={this.props.stockSearchFilters}
                     />
                 </Col>
+                {
+                    this.props.data.length === 0 &&
+                    <Col span={24} style={{...verticalBox, marginTop: '40px'}}>
+                        <h3>Please Add Stocks to your Portfolio</h3>
+                        <Button 
+                                style={{marginTop: '20px', fontSize: '18px', height: '45px'}} 
+                                type="primary" 
+                                icon="plus-circle-o"
+                                onClick={this.props.toggleBottomSheet}
+                        >
+                            ADD STOCKS
+                        </Button>
+                    </Col>
+                }
             </Row>
         );
     }

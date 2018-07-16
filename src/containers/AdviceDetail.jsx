@@ -16,7 +16,7 @@ import {MetricItem} from '../components/MetricItem';
 import {AqPageHeader} from '../components/AqPageHeader';
 import {AdviceDetailCrumb} from '../constants/breadcrumbs';
 import {AdviceDetailMeta} from '../metas';
-import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance} from '../utils';
+import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance, openNotification, handleCreateAjaxError} from '../utils';
 import {benchmarks as benchmarkArray} from '../constants/benchmarks';
 import '../css/adviceDetail.css';
 import AppLayout from './AppLayout';
@@ -79,6 +79,7 @@ const approvalObj = {
         fieldName: 'User Text'
     }
 };
+const contestId = '5b49cbe8f464ce168007bb79';
 
 class AdviceDetailImpl extends React.Component {
     socketOpenConnectionTimeout = 1000;
@@ -89,6 +90,7 @@ class AdviceDetailImpl extends React.Component {
         this.state = {
             data: [],
             adviceDetail: {
+                active: false,
                 name: 'Advice Name',
                 description: '',
                 approvalStatus: "pending",
@@ -105,6 +107,7 @@ class AdviceDetailImpl extends React.Component {
                 isOwner: false,
                 isSubscribed: false,
                 isFollowing: false,
+                contestOnly: false,
                 benchmark: '',
                 approval: [],
                 approvalStatus: false,
@@ -157,6 +160,7 @@ class AdviceDetailImpl extends React.Component {
             postToMarketPlaceLoading: false,
             requestApprovalLoading: false,
             loading: true,
+            withdrawAdviceLoading: false
         };
 
         this.performanceSummary = {};
@@ -197,6 +201,7 @@ class AdviceDetailImpl extends React.Component {
             isAdmin = false,
             numSubscribers = 0,
             numFollowers = 0,
+            contestOnly = false,
             portfolio = {},
             performanceSummary = {},
             netValue = 0,
@@ -238,7 +243,8 @@ class AdviceDetailImpl extends React.Component {
                 isPublic: _.get(response.data, 'public', false),
                 investmentObjective,
                 approval,
-                approvalRequested
+                approvalRequested,
+                contestOnly
             },
             metrics: {
                 ...this.state.metrics,
@@ -369,15 +375,19 @@ class AdviceDetailImpl extends React.Component {
         const adviceId = this.props.match.params.id;
         const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
         const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
+        const adviceContestUrl = `${requestUrl}/contest/${contestId}/${adviceId}`;
         this.setState({loading: true});
         return Promise.all([
             fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
             fetchAjax(advicePerformanceUrl, this.props.history, this.props.match.url),
+            fetchAjax(adviceContestUrl, this.props.history, this.props.match.url)
         ]) 
-        .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
+        .then(([adviceSummaryResponse, advicePerformanceResponse, adviceContestResponse]) => {
             const benchmark = _.get(adviceSummaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
             this.getAdviceSummary(adviceSummaryResponse);
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
+            const adviceActive = _.get(adviceContestResponse.data, 'active', false);
+            this.setState({adviceDetail: {...this.state.adviceDetail, active: adviceActive}});
             //ADVICE SUMMARY IN BACKEND first calculated full performance
             //With the right output from backend, this call (advice performance) can be
             //made redundant 
@@ -1109,6 +1119,56 @@ class AdviceDetailImpl extends React.Component {
         })
     }
 
+    withdrawAdviceFromContest = () => {
+        const withdrawAdviceUrl = `${requestUrl}/contest/${contestId}/${this.props.match.params.id}?type=withdraw`;
+        this.setState({withdrawAdviceLoading: true});
+        axios({
+            method: 'POST',
+            url: withdrawAdviceUrl,
+            headers: Utils.getAuthTokenHeader()
+        })
+        .then(response => {
+            const active = _.get(response.data, 'active', false);
+            this.setState({adviceDetail: {...this.state.adviceDetail, active}});
+            openNotification('info', 'Success', 'Advice Successfully Withdrawn from contest');
+        })
+        .catch(error => {
+            return handleCreateAjaxError(
+                error, 
+                this.props.history, 
+                this.props.match.url
+            );
+        })
+        .finally(() => {
+            this.setState({withdrawAdviceLoading: false});
+        })
+    }
+
+    prohibitAdvice = () => {
+        const prohibitAdviceUrl = `${requestUrl}/contest/${contestId}/${this.props.match.params.id}?type=prohibit`;
+        this.setState({withdrawAdviceLoading: true});
+        axios({
+            method: 'POST',
+            url: prohibitAdviceUrl,
+            headers: Utils.getAuthTokenHeader()
+        })
+        .then(response => {
+            const active = _.get(response.data, 'active', false);
+            this.setState({adviceDetail: {...this.state.adviceDetail, active}});
+            openNotification('info', 'Success', 'Advice Successfully Prohibited from contest');
+        })
+        .catch(error => {
+            return handleCreateAjaxError(
+                error, 
+                this.props.history, 
+                this.props.match.url
+            );
+        })
+        .finally(() => {
+            this.setState({withdrawAdviceLoading: false});
+        })
+    }
+
     togglePostWarningModal = () => {
         this.setState({postWarningModalVisible: !this.state.postWarningModalVisible});
     }
@@ -1154,12 +1214,14 @@ class AdviceDetailImpl extends React.Component {
         const isValid = _.get(this.state, 'adviceDetail.approval.status', false);
         const isAdmin = _.get(this.state, 'adviceDetail.isAdmin', false);
         const isPublic = _.get(this.state, 'adviceDetail.isPublic', false);
+        const active = _.get(this.state, 'adviceDetail.active', false);
+        const contestOnly = _.get(this.state, 'adviceDetail.contestOnly', false);
         const approvalRequested = _.get(this.state, 'adviceDetail.approvalRequested', false);
         if (!isOwner) {
             return (
                 <div style={{width: '95%'}}>
                     {/* {this.renderApprovalButtons(small)} */}
-                    <Button
+                    {/* <Button
                             onClick={() => 
                                 Utils.isLoggedIn() 
                                 ? unsubscriptionPending ? this.toggleUnsubscriptionModal() : this.toggleDialog() 
@@ -1176,7 +1238,18 @@ class AdviceDetailImpl extends React.Component {
                             ? "BUY ADVICE" 
                             : unsubscriptionPending ? "UNSUBSCRIPTION PENDING" : "CANCEL SUBSCRIPTION"
                         }
-                    </Button>
+                    </Button> */}
+                    {
+                        isAdmin && contestOnly && active &&
+                        <Button
+                                onClick={this.prohibitAdvice}
+                                className={className}
+                                style={buttonStyle}
+                                type="primary"
+                        >
+                            PROHIBIT ADVICE
+                        </Button>
+                    }
                     <Button
                             onClick={() => 
                                 Utils.isLoggedIn()
@@ -1196,6 +1269,32 @@ class AdviceDetailImpl extends React.Component {
                 <div style={{width: '95%'}}>
                     {/* {this.renderApprovalButtons(small)} */}
                     {
+                        this.state.adviceDetail.contestOnly &&
+                        this.state.adviceDetail.isPublic &&
+                        this.state.adviceDetail.active &&
+                        <Button 
+                                onClick={this.withdrawAdviceFromContest} 
+                                className={className} 
+                                style={buttonStyle} 
+                                type="primary"
+                                loading={this.state.withdrawAdviceLoading}
+                        >
+                            WITHDRAW
+                        </Button>
+                    }
+                    {
+                        isAdmin && contestOnly && active &&
+                        <Button
+                                onClick={this.prohibitAdvice}
+                                className={className}
+                                style={buttonStyle}
+                                type="primary"
+                        >
+                            PROHIBIT ADVICE
+                        </Button>
+                    }
+                    {
+                        !this.state.adviceDetail.contestOnly &&
                         this.state.adviceDetail.isPublic &&
                         !isValid &&
                         !this.state.adviceDetail.approvalRequested &&
@@ -1221,9 +1320,9 @@ class AdviceDetailImpl extends React.Component {
                         </Button>
                     }
                     {
-                        ((!approvalRequested && isPublic) || !isPublic) &&
+                        // ((!approvalRequested && isPublic) || !isPublic) &&
                         <Button
-                                onClick={() => this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`)}
+                                onClick={() => this.props.history.push(`/contest/updateadvice/${this.props.match.params.id}`)}
                                 className={className}
                                 style={buttonStyle}
                         >
@@ -1327,7 +1426,7 @@ class AdviceDetailImpl extends React.Component {
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}
-                            {this.renderApprovalTabs()}
+                            {/* {this.renderApprovalTabs()} */}
                         </Col>
                     </Row>
                 </React.Fragment>

@@ -1,11 +1,10 @@
 import * as React from 'react';
 import _  from 'lodash';
 import {Row, Col, Input, Icon, Checkbox, Button, Tag} from 'antd';
-import {withRouter} from 'react-router';
 import {StockPerformance} from './StockPerformance';
 import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../constants';
-import {Utils, fetchAjax} from '../../../utils';
-
+import {fetchAjax, Utils} from '../../../utils';
+import '../css/searchStocks.css';
 
 const {Search} = Input;
 const {requestUrl} = require('../../../localConfig');
@@ -54,7 +53,8 @@ export class SearchStocks extends React.Component {
         const url = `${requestUrl}/stock?search=${searchQuery}&populate=${populate}&universe=${universe}&sector=${sector}&industry=${industry}&skip=${skip}&limit=${limit}`;
         fetchAjax(url, this.props.history, this.props.pageUrl)
         .then(({data: stockResponseData}) => {
-            this.setState({stocks: this.processStockList(stockResponseData)});
+            const stocks = this.processStockList(stockResponseData);
+            this.setState({stocks});
             resolve(true);
         });
     })
@@ -67,6 +67,7 @@ export class SearchStocks extends React.Component {
                 {...stock} 
                 onClick={this.handleStockListItemClick} 
                 onAddIconClick={this.conditionallyAddItemToSelectedArray}
+                selected={stock.symbol === this.state.selectedStock}
             />
         )
     }
@@ -135,7 +136,6 @@ export class SearchStocks extends React.Component {
     componentWillReceiveProps(nextProps) {
         if (!_.isEqual(nextProps, this.props)) {
             this.syncStockListWithPortfolio(nextProps.portfolioPositions);
-            // console.log(this.props.portfolioPositions);
         }
     }
 
@@ -155,6 +155,7 @@ export class SearchStocks extends React.Component {
 
     componentWillMount() {
         this.fetchStocks('');
+        this.syncStockListWithPortfolio(this.props.portfolioPositions);
     }
 
     handlePagination = type => {
@@ -199,6 +200,8 @@ export class SearchStocks extends React.Component {
         const universe = _.get(this.props, 'filters.universe', null);
         const sector = _.get(this.props, 'filters.sector', null);
         const industry = _.get(this.props, 'filters.industry', null);
+        const toggleIconType = this.state.selectedStocks.length === 0 ? 'close-circle' : 'plus-square';
+        const toggleIconColor = this.state.selectedStocks.length === 0 ? textColor : primaryColor;
 
         return (
             <Row>
@@ -220,11 +223,20 @@ export class SearchStocks extends React.Component {
                             }
                     </Row>
 
-                    <Icon 
-                        style={{fontSize: '24px', cursor: 'pointer', padding:'20px'}} 
-                        type="close-circle" 
-                        onClick={this.props.toggleBottomSheet}
-                    />
+                    {
+                        this.state.selectedStocks.length === 0 
+                        ?   <Icon 
+                                style={{fontSize: '24px', cursor: 'pointer', color: toggleIconColor}} 
+                                type={toggleIconType}
+                                onClick={this.props.toggleBottomSheet}
+                            />
+                        :   <Button 
+                                    onClick={this.props.toggleBottomSheet} 
+                                    type="primary" 
+                            >
+                                ADD ({this.state.selectedStocks.length})
+                            </Button>
+                    }
                 </Col>
 
                 <Col span={12} style={{padding: '20px'}}>
@@ -238,14 +250,14 @@ export class SearchStocks extends React.Component {
     }
 }
 
-// export const SearchStocks = withRouter(SearchStocksImpl);
-
-const StockListItem = ({symbol, name, change, changePct, close, open, current, onClick, checked = false, onAddIconClick}) => {
+const StockListItem = ({symbol, name, change, changePct, close, open, current, onClick, checked = false, onAddIconClick, selected = false}) => {
     const containerStyle = {
         borderBottom: '1px solid #eaeaea',
         color: textColor,
-        marginBottom: '20px',
-        cursor: 'pointer'
+        // marginTop: '20px',
+        cursor: 'pointer',
+        backgroundColor: selected ? '#CFD8DC' : '#fff',
+        padding: '10px'
     };
 
     const detailContainerStyle = {
@@ -264,7 +276,7 @@ const StockListItem = ({symbol, name, change, changePct, close, open, current, o
     const nChangePct = (changePct * 100).toFixed(2);
 
     return (
-        <Row style={containerStyle} type="flex" align="middle">
+        <Row className='stock-row' style={containerStyle} type="flex" align="middle">
             <Col span={1} onClick={() => onAddIconClick(symbol)}>
                 <AddIcon checked={checked}/>
             </Col>

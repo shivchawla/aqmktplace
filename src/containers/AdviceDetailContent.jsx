@@ -110,7 +110,8 @@ class AdviceDetailContentImpl extends React.Component {
             approvalRequested = true,
             isAdmin = false,
             isPublic = false,
-            approval = {}
+            approval = {},
+            contestOnly = false
         } = this.props.adviceDetail || {};
         const {
             annualReturn = 0, 
@@ -149,11 +150,15 @@ class AdviceDetailContentImpl extends React.Component {
                         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <h1 style={adviceNameStyle}>{name}</h1>
                             {
-                                isPublic && !approvalStatus && !this.getWarning('name').valid && !approvalRequested &&
-                                <WarningIcon reason={this.getWarning('name').reason}/>
+                                !contestOnly 
+                                && isPublic 
+                                && !approvalStatus 
+                                && !this.getWarning('name').valid 
+                                && !approvalRequested 
+                                && <WarningIcon reason={this.getWarning('name').reason}/>
                             }
                             {
-                                (isOwner || isAdmin) && approvalRequested && isPublic &&
+                                !contestOnly && (isOwner || isAdmin) && approvalRequested && isPublic &&
                                 <AqTag 
                                         color='#FFAB00' 
                                         tooltipTitle={adviceApprovalPending}
@@ -162,7 +167,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 />
                             }
                             {
-                                (isOwner || isAdmin) && !approvalRequested && isPublic &&
+                                !contestOnly && (isOwner || isAdmin) && !approvalRequested && isPublic &&
                                 <AqTag 
                                         color={approvalStatus ? primaryColor : metricColor.negative}
                                         tooltipTitle={approvalStatus ? adviceApproved : adviceRejected}
@@ -212,35 +217,38 @@ class AdviceDetailContentImpl extends React.Component {
                             span={24} 
                             style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}
                     >
-                        <AqTag 
+                        {
+                            !contestOnly &&
+                            <AqTag 
                                 tooltipTitle='Rebalancing Frequency: The advice is rebalanced/updated at this frequency'
                                 tooltipPlacement='bottom'
                                 color='#f58231'
                                 text={this.props.adviceDetail.rebalanceFrequency}
                                 icon='clock-circle-o'
                                 iconStyle={{fontWeight: '400', marginRight: '5px'}}
-                        />
+                            />  
+                        }
                         {
                             isOwner &&
                             <AqTag 
-                                    tooltipTitle='You are the owner of this advice'
-                                    tooltipPlacement='bottom'
-                                    icon='user'
-                                    iconStyle={{marginRight: '5px'}}
-                                    color='#3cb44b'
-                                    text='Owner'
+                                tooltipTitle='You are the owner of this advice'
+                                tooltipPlacement='bottom'
+                                icon='user'
+                                iconStyle={{marginRight: '5px'}}
+                                color='#3cb44b'
+                                text='Owner'
                             />
                         }
                         {
-                            (this.props.adviceDetail.isSubscribed || this.props.adviceDetail.isFollowing) &&
+                            !contestOnly && (this.props.adviceDetail.isSubscribed || this.props.adviceDetail.isFollowing) &&
                             <AqTag 
-                                    tooltipTitle={this.props.adviceDetail.isSubscribed ? 'You are subscribed to this advice' : 'You have wislisted this advice'}
-                                    text={this.props.adviceDetail.isSubscribed ? 'Subscribed' : 'Wishlisted'}
-                                    color='rgb(24, 144, 255)'
+                                tooltipTitle={this.props.adviceDetail.isSubscribed ? 'You are subscribed to this advice' : 'You have wislisted this advice'}
+                                text={this.props.adviceDetail.isSubscribed ? 'Subscribed' : 'Wishlisted'}
+                                color='rgb(24, 144, 255)'
                             />
                         }
                         {
-                            this.props.adviceDetail.isOwner &&
+                            !contestOnly && this.props.adviceDetail.isOwner &&
                             <AqTag 
                                     color='#673AB7'
                                     tooltipTitle={this.props.adviceDetail.isPublic ? advicePublic : advicePrivate}
@@ -290,122 +298,126 @@ class AdviceDetailContentImpl extends React.Component {
                         defaultActiveKey={defaultActiveKey} 
                         onChange={this.onCollapseChange}
                 >
-                    <Panel
-                            key="1"
-                            style={customPanelStyle}
-                            header={<h3 style={metricsHeaderStyle}>Investment Objective</h3>}
-                    >
-                        <Row className="row-container" >
-                            <Col span={24}>
-                                <Row>
-                                    <Col span={24}>
-                                        <InvestmentObjItem 
-                                                label="Goal" 
-                                                value={_.get(goal, 'field', '-')} 
-                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('goal').valid && !approvalRequested}
-                                                reason={this.getInvestmentObjWarning('goal').reason}
-                                        />
-                                    </Col>
-                                </Row>
-
-                                <Row style={{marginTop: '25px'}}>
-                                    <Col span={24}>
-                                        <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
-                                    </Col>
-                                </Row>
-
-                                <Row style={{marginTop: '25px'}}>
-                                    <Col span={24}>
-                                        <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
-                                    </Col>
-                                </Row>
-                            
-                                <Row style={{marginTop: '25px'}}>
-                                    <Col span={6}>
-                                        <InvestmentObjItem  
-                                                showTag 
-                                                label="Valuation" 
-                                                value={_.get(portfolioValuation, 'field', '-')}
-                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('portfolioValuation').valid && !approvalRequested}
-                                                reason={this.getInvestmentObjWarning('portfolioValuation').reason}
-                                        />
-                                    </Col>
-                                    <Col span={6}>
-                                        <InvestmentObjItem 
-                                                showTag 
-                                                label="Capitalization" 
-                                                value={_.get(capitalization, 'field', '-')}
-                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('capitalization').valid && !approvalRequested}
-                                                reason={this.getInvestmentObjWarning('capitalization').reason}
-                                        />
-                                    </Col>
-                                    <Col span={12}>
-                                        <div style={{display: 'flex', flexDirection: 'column'}}>
-                                            <div style={{
-                                                    display: 'flex', 
-                                                    flexDirection: 'row',
-                                                    overflow: 'hidden',
-                                                    overflowX: 'scroll'
-                                                }}
-                                            >
-                                                {
-                                                    sectors.map((item, index) => {
-                                                        return (
-                                                            <AqTag 
-                                                                    key={index}
-                                                                    color={primaryColor}
-                                                                    text={item}
-                                                                    textStyle={{fontSize: '14px'}}
-                                                            />
-                                                        );
-                                                    })
-                                                }
-                                            </div>
-                                            <div style={{display: 'flex', flexDirection: 'row', marginTop: '5px'}}>
-                                                <h3 
-                                                        style={{fontSize: '13px', color: '#515151', fontWeight: '700'}}
-                                                >
-                                                    Sectors
-                                                </h3>
-                                                {/*
-                                                    isPublic && 
-                                                    isPublic && 
-                                                    !approvalStatus && 
-                                                    !this.getInvestmentObjWarning('sectors').valid &&
-                                                    !approvalRequested &&
-                                                    <WarningIcon 
-                                                            reason={this.getInvestmentObjWarning('sectors').reason}
-                                                    />
-                                                */}
-                                            </div>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            {
-                                _.get(userText, 'detail', '').length > 0 &&
-                                <Col span={24} style={{marginTop: '10px'}}>
-                                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                                        <h3 style={{fontSize: '14px', fontWeight: '700'}}>Description</h3>
-                                        {
-                                            isPublic && 
-                                            isPublic && 
-                                            !approvalStatus && 
-                                            !this.getInvestmentObjWarning('userText').valid &&
-                                            !approvalRequested &&
-                                            <WarningIcon 
-                                                    reason={this.getInvestmentObjWarning('userText').reason}
+                    {
+                        !contestOnly &&
+                        <Panel
+                                key="1"
+                                style={customPanelStyle}
+                                header={<h3 style={metricsHeaderStyle}>Investment Objective</h3>}
+                        >
+                            <Row className="row-container" >
+                                <Col span={24}>
+                                    <Row>
+                                        <Col span={24}>
+                                            <InvestmentObjItem 
+                                                    label="Goal" 
+                                                    value={_.get(goal, 'field', '-')} 
+                                                    warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('goal').valid && !approvalRequested}
+                                                    reason={this.getInvestmentObjWarning('goal').reason}
                                             />
-                                        }
-                                    </div>
-                                    <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
+                                        </Col>
+                                    </Row>
+
+                                    <Row style={{marginTop: '25px'}}>
+                                        <Col span={24}>
+                                            <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
+                                        </Col>
+                                    </Row>
+
+                                    <Row style={{marginTop: '25px'}}>
+                                        <Col span={24}>
+                                            <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
+                                        </Col>
+                                    </Row>
+                                
+                                    <Row style={{marginTop: '25px'}}>
+                                        <Col span={6}>
+                                            <InvestmentObjItem  
+                                                    showTag 
+                                                    label="Valuation" 
+                                                    value={_.get(portfolioValuation, 'field', '-')}
+                                                    warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('portfolioValuation').valid && !approvalRequested}
+                                                    reason={this.getInvestmentObjWarning('portfolioValuation').reason}
+                                            />
+                                        </Col>
+                                        <Col span={6}>
+                                            <InvestmentObjItem 
+                                                    showTag 
+                                                    label="Capitalization" 
+                                                    value={_.get(capitalization, 'field', '-')}
+                                                    warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('capitalization').valid && !approvalRequested}
+                                                    reason={this.getInvestmentObjWarning('capitalization').reason}
+                                            />
+                                        </Col>
+                                        <Col span={12}>
+                                            <div style={{display: 'flex', flexDirection: 'column'}}>
+                                                <div style={{
+                                                        display: 'flex', 
+                                                        flexDirection: 'row',
+                                                        overflow: 'hidden',
+                                                        overflowX: 'scroll'
+                                                    }}
+                                                >
+                                                    {
+                                                        sectors.map((item, index) => {
+                                                            return (
+                                                                <AqTag 
+                                                                        key={index}
+                                                                        color={primaryColor}
+                                                                        text={item}
+                                                                        textStyle={{fontSize: '14px'}}
+                                                                />
+                                                            );
+                                                        })
+                                                    }
+                                                </div>
+                                                <div style={{display: 'flex', flexDirection: 'row', marginTop: '5px'}}>
+                                                    <h3 
+                                                            style={{fontSize: '13px', color: '#515151', fontWeight: '700'}}
+                                                    >
+                                                        Sectors
+                                                    </h3>
+                                                    {/*
+                                                        isPublic && 
+                                                        isPublic && 
+                                                        !approvalStatus && 
+                                                        !this.getInvestmentObjWarning('sectors').valid &&
+                                                        !approvalRequested &&
+                                                        <WarningIcon 
+                                                                reason={this.getInvestmentObjWarning('sectors').reason}
+                                                        />
+                                                    */}
+                                                </div>
+                                            </div>
+                                        </Col>
+                                    </Row>
                                 </Col>
-                            }
-                            <Col span={24} style={{marginTop: '20px'}}>
-                                <h5 style={{fontSize: '12px'}}>* All investors are advised to conduct their own independent research into individual stocks before making a purchase decision. In addition, investors are advised that past stock performance is not indicative of future price action.</h5>
-                            </Col>
-                        </Row>
-                    </Panel>
+                                {
+                                    _.get(userText, 'detail', '').length > 0 &&
+                                    <Col span={24} style={{marginTop: '10px'}}>
+                                        <div style={{display: 'flex', flexDirection: 'row'}}>
+                                            <h3 style={{fontSize: '14px', fontWeight: '700'}}>Description</h3>
+                                            {
+                                                !contestOnly &&
+                                                isPublic && 
+                                                isPublic && 
+                                                !approvalStatus && 
+                                                !this.getInvestmentObjWarning('userText').valid &&
+                                                !approvalRequested &&
+                                                <WarningIcon 
+                                                        reason={this.getInvestmentObjWarning('userText').reason}
+                                                />
+                                            }
+                                        </div>
+                                        <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
+                                    </Col>
+                                }
+                                <Col span={24} style={{marginTop: '20px'}}>
+                                    <h5 style={{fontSize: '12px'}}>* All investors are advised to conduct their own independent research into individual stocks before making a purchase decision. In addition, investors are advised that past stock performance is not indicative of future price action.</h5>
+                                </Col>
+                            </Row>
+                        </Panel>
+                    }
 
                     {
                         (isSubscribed || isOwner || isAdmin) &&
@@ -417,6 +429,7 @@ class AdviceDetailContentImpl extends React.Component {
                                     <Col span={6} style={{display: 'flex', flexDirection: 'row'}}>
                                         <h3 style={metricsHeaderStyle}>Portfolio</h3>
                                         {
+                                            !contestOnly &&
                                             isPublic && 
                                             !approvalStatus && 
                                             !this.getPortfolioWarnings().valid &&

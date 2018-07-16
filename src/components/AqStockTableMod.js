@@ -42,17 +42,24 @@ export class AqStockTableMod extends React.Component {
                 width: 200
             },
             {
-                title: 'SHARES',
-                dataIndex: 'shares',
-                key: 'shares',
+                title: 'EFF TOTAL',
+                dataIndex: 'effTotal',
+                key: 'effTotal',
                 render: (text, record) => this.renderColumns(
                         text, 
                         record, 
-                        'shares', 
+                        'effTotal', 
                         'number', 
                         record.sharesValidationStatus,
                         record.sharesDisabledStatus
                     ),
+                width: 150,
+            },
+            {
+                title: 'SHARES',
+                dataIndex: 'shares',
+                key: 'shares',
+                render: val => <span>{val}</span>,
                 width: 150,
             },
             {
@@ -79,7 +86,7 @@ export class AqStockTableMod extends React.Component {
         ];
         this.state = {
             selectedRows: [],
-            data: [],
+            data: this.props.data,
         };
     }
 
@@ -111,27 +118,32 @@ export class AqStockTableMod extends React.Component {
         const newData = [...this.state.data];
         let target = newData.filter(item => item.key === key)[0];
         if (target) {
-            if (type === 'number') {
-                target[column] = value >= 0 ? value : 0;
-            } else {
-                target[column] = value;
-            }
-            value = value.length > 0 ? value : 0;   
-            target['totalValue'] = value >= 0 ? Number((value * target['lastPrice']).toFixed(2)) : 0;
-            this.updateAllWeights(newData);
-            this.setState({data: newData});
-            this.props.onChange(newData);
+            const lastPrice = target['lastPrice'];
+            target[column] = value >= 0 ? value : 0;
+            value = value.length > 0 ? value : 0;
+            const shares = this.calculateSharesFromTotalReturn(value, lastPrice);
+            target['shares'] = shares;
+            target['totalValue'] = Number((shares * lastPrice).toFixed(2));
+            // target['totalValue'] = value >= 0 ? Number((value * lastPrice).toFixed(2)) : 0;
+            this.updateAllWeights(newData).then(data => {
+                this.setState({data});
+                this.props.onChange(data);
+            });
         }
     }
 
-    updateAllWeights = (data) => {
+    calculateSharesFromTotalReturn = (effTotalReturn = 0, lastPrice = 0) => {
+        return Math.floor(effTotalReturn / lastPrice);
+    }
+
+    updateAllWeights = data => new Promise((resolve, reject) => {
         const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
-        return data.map((item, index) => {
+        resolve (data.map((item, index) => {
             const weight = totalSummation === 0 ? 0 : Number(((item['totalValue'] / totalSummation * 100)).toFixed(2));
             item['weight'] = weight;
             return item;
-        });
-    }
+        }));
+    })
 
     handlePressEnter = (value, key, column) => {
         const newData = [...this.state.data];

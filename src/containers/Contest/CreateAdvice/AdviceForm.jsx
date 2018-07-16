@@ -2,7 +2,8 @@ import * as React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
-import {Row, Col, Select, Button, Modal, Tag} from 'antd';
+import {withRouter} from 'react-router';
+import {Row, Col, Select, Button, Modal, Tag, Icon} from 'antd';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
@@ -11,6 +12,7 @@ import AppLayout from '../../../containers/AppLayout';
 import {benchmarks} from '../../../constants/benchmarks';
 import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor} from '../../../constants';
 import {fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
+import { MetricItem } from '../../../components/MetricItem';
 
 const {Option} = Select;
 const textColor = '#595959';
@@ -21,15 +23,16 @@ const defaultAdviceError = {
     errorCode: '',
     detail: {}
 };
+this.benchmark = 'NIFTY_50';
 
-export default class ContestAdviceForm extends React.Component {
+class ContestAdviceFormImpl extends React.Component {
     constructor(props) {
         super(props);
         this.searchStockComponent = null;
         this.state = {
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: true,
+            bottomSheetOpenStatus: false,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -38,7 +41,9 @@ export default class ContestAdviceForm extends React.Component {
             adviceError: defaultAdviceError,
             showAdviceErrorDialog: false,
             adviceSubmissionLoading: false,
-            highStockSeries: []
+            highStockSeries: [],
+            openBenchmarkChangeModal: false,
+            loading: false
         };
     }
 
@@ -51,10 +56,14 @@ export default class ContestAdviceForm extends React.Component {
                     <h3 style={labelTextStyle}>Portfolio Benchmark</h3>
                 </Col>
                 <Col span={24}>
-                    <Select 
+                    <Select
+                            disabled={this.props.isUpdate} 
                             style={dropdownStyle} 
-                            defaultValue={this.state.benchmark} 
-                            onChange={this.handleBenchmarkChange}
+                            value={this.state.benchmark} 
+                            onChange={value => this.state.positions.length > 0 
+                                        ? this.handleBenchmarkChange(value) 
+                                        : this.handleEmptyPortfolioBenchmarkChange(value)
+                                    }
                     >
                         {
                             benchmarks.map((benchmark, index) => {
@@ -63,11 +72,25 @@ export default class ContestAdviceForm extends React.Component {
                         }
                     </Select>
                 </Col>
+                <Col span={24}>
+                    {
+                        this.state.loadingBenchmarkConfig &&
+                        <div style={{...horizontalBox, marginTop: '10px'}}>
+                            <h3 style={{fontSize: '12px'}}>Loading Benchmark Config</h3>
+                            <Icon style={{fontSize: '18px', marginLeft: '5px'}} type="loading" />
+                        </div>
+                    }
+                </Col>
             </Row>
         );
     }
 
     handleBenchmarkChange = benchmark => {
+        this.benchmark = benchmark;
+        this.toggleBenchmarkChangeModal();
+    }
+
+    handleEmptyPortfolioBenchmarkChange = benchmark => {
         this.setState({benchmark}, () => {
             this.fetchBenchmarkConfig(benchmark);
         });
@@ -75,6 +98,7 @@ export default class ContestAdviceForm extends React.Component {
 
     fetchBenchmarkConfig = benchmark => {
         const confgUrl = `${requestUrl}/config?type=contest&benchmark=${benchmark}`;
+        this.setState({loadingBenchmarkConfig: true});
         fetchAjax(confgUrl, this.props.history, this.props.match.url)
         .then(configResponse => {
             const configData = configResponse.data;
@@ -96,20 +120,41 @@ export default class ContestAdviceForm extends React.Component {
             });
         })
         .finally(() => {
+            this.setState({loadingBenchmarkConfig: false});
             openNotification('info', 'Configurations Loaded', `New Configurations loaded for Benchmark: ${benchmark}`);
+        });
+    }
+
+    resetPortfolioWithNewBenchmark = () => {
+        const benchmark = this.benchmark;
+        this.setState({benchmark, openBenchmarkChangeModal: false}, () => {
+            this.fetchBenchmarkConfig(benchmark);
         });
     }
 
     handleSubmitAdvice = (type='validate') => {
         const adviceUrl = `${requestUrl}/advice`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
+        let adviceId = null;
         this.setState({adviceSubmissionLoading: true});
         axios({
-            // url: this.props.isUpdate ? `${this.adviceUrl}/${this.props.adviceId}` : this.adviceUrl,
-            url: adviceUrl,
-            // method: this.props.isUpdate ? 'PATCH' : 'POST',
-            method: 'POST',
-            data: requestObject,
+            url: type === 'validate' 
+                    ? adviceUrl 
+                    : this.props.isUpdate 
+                            ? `${adviceUrl}/${this.props.adviceId}` 
+                            : adviceUrl,
+            // url: adviceUrl,
+            method: type === 'validate' 
+                    ? 'POST' 
+                    : this.props.isUpdate 
+                            ? 'PATCH' 
+                            : 'POST',
+            // method: 'POST',
+            data: type === 'validate' 
+                    ? requestObject 
+                    : this.props.isUpdate 
+                            ? requestObject.advice 
+                            : requestObject,
             headers: Utils.getAuthTokenHeader()
         })
         .then(response => {
@@ -125,28 +170,44 @@ export default class ContestAdviceForm extends React.Component {
                 }, () => {
                     type === 'create' && this.toggleAdviceErrorDialog();
                 });
+
+                return null;
             } else {
                 this.setState({adviceError: defaultAdviceError});
+                const contestId = '5b49cbe8f464ce168007bb79';
+                adviceId = _.get(response.data, '_id', null);
+                const contestUrl = `${requestUrl}/contest/${contestId}/${adviceId}?type=enter`;
+                if (type !== 'validate') {
+                    const contestRequest =  type === 'validate' 
+                        ?   Promise.resolve({update: false})
+                        :   this.props.isUpdate
+                            ?   Promise.resolve({update: true})
+                            :   axios({
+                                    url: contestUrl,
+                                    method: 'POST',
+                                    headers: Utils.getAuthTokenHeader()
+                                });
+                
+                    return contestRequest;
+                }  
+                return null;              
             }
         })
-        .catch(error => {
-            if (error.response) {
-                const {response = {}} = error;
-                const errorCode = _.get(response, 'data.errorCode', 0);
-                const message = _.get(response, 'data.message', '');
-                const detail = _.get(response, 'data.detail', {});
-                this.setState({
-                    adviceError: {
-                        errorCode,
-                        message,
-                        detail
-                    }
-                }, () => {
-                    errorCode === 1108 && this.toggleAdviceErrorDialog();
-                    this.toggleAdviceErrorDialog();
-                });
+        .then(response => {
+            if (response != null) {
+                const update = _.get(response, 'update', false);
+                if (update) {
+                    // openNotification('Success', 'Success', 'Advice Successfully Updated');
+                    this.props.history.push(`/advice/${adviceId}`);
+                } else {
+                    // openNotification('Success', 'Contest Participation Successful', 'Successfully participated in contest');
+                    this.props.history.push(`/advice/${adviceId}`);
+                }
             }
-
+            // this.props.history.push(`/advice/${adviceId}`);
+            // openNotification('Success', 'Success', 'Advice Successfully Updated');
+        })
+        .catch(error => {
             return handleCreateAjaxError(
                 error, 
                 this.props.history, 
@@ -175,7 +236,6 @@ export default class ContestAdviceForm extends React.Component {
         
         return errKvp[value];
     }
-
 
     renderAdviceErrorDialog = () => {
         const {errorCode = 0, message = '', detail = {}} = this.state.adviceError;
@@ -281,8 +341,16 @@ export default class ContestAdviceForm extends React.Component {
         return data.map((item, index) => {
             const weight = totalSummation === 0 ? 0 : Number(((item['totalValue'] / totalSummation * 100)).toFixed(2));
             item['weight'] = weight;
+            const total = item.lastPrice > 10000 ? item.lastPrice : 10000;
+            item['effTotal'] = total;
+            item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
+            item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);
             return item;
         });
+    }
+
+    calculateSharesFromTotalReturn = (effTotalReturn = 0, lastPrice = 0) => {
+        return Math.floor(effTotalReturn / lastPrice);
     }
 
     getTotalValueSummation = data => {
@@ -497,30 +565,58 @@ export default class ContestAdviceForm extends React.Component {
                 :   null;
     }
 
+    toggleBenchmarkChangeModal = () => {
+        this.setState({openBenchmarkChangeModal: !this.state.openBenchmarkChangeModal});
+    }
+
+    renderBenchmarkChangeWarningModal = () => {
+        return (
+            <Modal
+                    visible={this.state.openBenchmarkChangeModal}
+                    title="Warning"
+                    onOk={this.resetPortfolioWithNewBenchmark}
+                    onCancel={this.toggleBenchmarkChangeModal}
+            >
+                <Row>
+                    <Col span={24}>
+                        <h3>Changing the Benchmark will reset your portfolio to empty. Are you sure you want to change the benchmark ?</h3>
+                    </Col>
+                </Row>
+            </Modal>
+        );
+    }
+
+    renderNetValue = () => {
+        return (
+            <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                <MetricItem 
+                    value={this.state.positions.length}
+                    label="Number of positions"
+                />
+                <MetricItem 
+                    value={this.getNetvalue()}
+                    label="Net Value"
+                    money
+                />
+            </div>
+        );
+    }
+
     renderPageContent = () => {
         return (
             <Row className='aq-page-container'>
                 {this.renderAdviceErrorDialog()}
                 {this.renderSearchStocksBottomSheet()}
+                {this.renderBenchmarkChangeWarningModal()}
                 <Col span={24} style={{height: '40px'}}></Col>
-                <Col span={18} style={{...shadowBoxStyle}}>
-                    <Row style={leftContainerStyle} type="flex" align="end">
-                        <Col span={12}>
+                <Col span={18} style={{...shadowBoxStyle, minHeight: '600px'}}>
+                    <Row style={leftContainerStyle} type="flex" align="start">
+                        <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
                             {this.renderBenchmarkDropdown()}
-                            {this.renderValidationErrors()}
+                            {this.renderNetValue()}
                         </Col>
-                        <Col span={12} style={{...horizontalBox, justifyContent: 'flex-end'}}>
-                            <Button 
-                                    icon="rocket" 
-                                    type="primary" 
-                                    onClick={() => this.handleSubmitAdvice('create')} 
-                                    htmlType="submit"
-                                    style={{height: '45px'}}
-                                    loading={this.state.adviceSubmissionLoading}
-                                    disabled={this.getPortfolioValidationErrors().length}
-                            >
-                                SUBMIT ADVICE
-                            </Button>
+                        <Col span={24}>
+                            {this.renderValidationErrors()}
                         </Col>
                     </Row>
                     <Row style={{margin: '0 20px', marginBottom: '20px'}}>
@@ -529,12 +625,125 @@ export default class ContestAdviceForm extends React.Component {
                         </Col>
                     </Row>
                 </Col>
-                <Col span={5} offset={1} style={shadowBoxStyle}>
-                    <PortfolioPieChart data={this.state.positions} />
+                <Col span={6} style={{paddingLeft: '15px'}}>
+                    <Row>
+                        <Col span={24}>
+                            <Button 
+                                    icon="rocket" 
+                                    type="primary" 
+                                    onClick={() => this.handleSubmitAdvice('create')} 
+                                    htmlType="submit"
+                                    style={{height: '45px', width: '100%'}}
+                                    loading={this.state.adviceSubmissionLoading}
+                                    disabled={this.getPortfolioValidationErrors().length || this.state.positions.length < 1}
+                            >
+                                {this.props.isUpdate ? 'UPDATE ADVICE' : 'SUBMIT ADVICE'}
+                            </Button>
+                        </Col>
+                        {
+                            this.state.positions.length > 0 &&
+                            <Col span={24} style={{...shadowBoxStyle, marginTop: '20px'}}>
+                                <PortfolioPieChart data={this.state.positions} />
+                            </Col>
+                        }
+                    </Row>
                 </Col>
             </Row>
         );
     } 
+
+    getBenchmarkConfig = benchmark => new Promise((resolve, reject) => {
+        const confgUrl = `${requestUrl}/config?type=contest&benchmark=${benchmark}`;
+        fetchAjax(confgUrl, this.props.history, this.props.match.url)
+        .then(configResponse => {
+            const configData = configResponse.data;
+            const sector = _.get(configData, 'sector', '');
+            const industry = _.get(configData, 'industry', '');
+            const universe = _.get(configData, 'universe', 'NIFTY_500');
+            this.setState({
+                stockSearchFilters: {
+                    industry,
+                    sector,
+                    universe
+                }
+            }, () => {resolve(true)})
+        })
+        .catch(error => reject(error));
+    }) 
+
+    getAdviceSummaryAndPortfolio = adviceId => {
+        let benchmark = null;
+        this.setState({loading: true});
+        Promise.all([
+            this.getAdviceSummary(adviceId),
+            this.getAdvicePortfolio(adviceId)
+        ])
+        .then(([adviceSummary, advicePortfolio]) => {
+            benchmark = _.get(adviceSummary, 'portfolio.benchmark.ticker');
+            const positions = _.get(advicePortfolio, 'detail.positions', []);
+            this.setState({
+                benchmark,
+                positions: this.processPositions(positions)
+            });
+        })
+        .then(() => {
+            return this.getBenchmarkConfig(benchmark);
+        })
+        // .then(() => {
+        //     this.searchStockComponent.fetchStocks('')
+        // })
+        .catch(err => err)
+        .finally(() => {
+            this.setState({loading: false});
+        })        
+    }
+
+    processPositions = positions => {
+        return positions.map(position => {
+            const total = Number((_.get(position, 'quantity', 0) * _.get(position, 'lastPrice', 0)).toFixed(2))
+            return {
+                key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                ticker: _.get(position, 'security.ticker', null),
+                symbol: _.get(position, 'security.ticker', null),
+                effTotal: total,
+                shares: Number(_.get(position, 'quantity', 0)),
+                lastPrice: Number(_.get(position, 'lastPrice', 0)),
+                totalValue: total,
+                weight: Number((_.get(position, 'weightInPortfolio', 0) * 100).toFixed(2))
+            };
+        })
+    }
+
+    getAdviceSummary = adviceId => new Promise((resolve, reject) => {
+        const adviceSumaryUrl = `${requestUrl}/advice/${adviceId}`;
+        fetchAjax(adviceSumaryUrl, this.props.history, this.props.match.url)
+        .then(response => resolve(response.data))
+        .catch(error => reject(error));
+    })
+
+    getAdvicePortfolio = adviceId => new Promise((resolve, reject) => {
+        const advicePortfolioUrl = `${requestUrl}/advice/${adviceId}/portfolio`;
+        fetchAjax(advicePortfolioUrl, this.props.history, this.props.match.url)
+        .then(response => resolve(response.data))
+        .catch(error => reject(error));
+    })
+
+    getNetvalue = () => {
+        const {positions = []} = this.state;
+        let totalValue = 0;
+        positions.map(position => {
+            totalValue += position.totalValue;
+        });
+
+        return totalValue;
+    }
+
+    componentWillMount() {
+        if (this.props.isUpdate) {
+            const adviceId = this.props.adviceId;
+            this.getAdviceSummaryAndPortfolio(adviceId);
+        }
+    }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
@@ -545,14 +754,16 @@ export default class ContestAdviceForm extends React.Component {
     }
 
     render() {
-        console.log('Advice Form Rendered');
-        
         return (
-            <AppLayout content={this.renderPageContent()}/>
+            <AppLayout 
+                content={this.renderPageContent()} 
+                loading={this.state.loading}
+            />
         );
     }
 }
 
+export default withRouter(ContestAdviceFormImpl);
 
 const leftContainerStyle = {
     padding: '20px'

@@ -71,7 +71,6 @@ export class PortfolioPieChart extends React.Component {
     // }
 
     render() {
-        console.log('Pie Chart Rendered');
         return (
             <Row style={{backgroundColor: '#fff', padding: '10px'}}>
                 <Col span={24} style={{marginLeft: '-20px'}}>
