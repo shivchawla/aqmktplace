@@ -316,6 +316,14 @@ export class Utils{
 		}
 	}
 
+	static formatReturnTypeVariable(value) {
+		if (value && typeof(value) == "number"){
+			return `${(value * 100.0).toFixed(2)}%`; 
+		} else{
+			return value;
+		}
+	}
+
 	static openSocketConnection() {
 		if ((!this.webSocket || this.webSocket.readyState != WebSocket.OPEN) && this.isLoggedIn()) {
 			if (this.webSocket) {

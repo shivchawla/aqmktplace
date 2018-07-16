@@ -1,10 +1,11 @@
 import * as React from 'react';
 import _  from 'lodash';
-import {Row, Col, Input, Icon, Checkbox, Button} from 'antd';
+import {Row, Col, Input, Icon, Checkbox, Button, Tag} from 'antd';
 import {withRouter} from 'react-router';
 import {StockPerformance} from './StockPerformance';
 import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../constants';
-import {fetchAjax} from '../../../utils';
+import {Utils, fetchAjax} from '../../../utils';
+
 
 const {Search} = Input;
 const {requestUrl} = require('../../../localConfig');
@@ -61,6 +62,7 @@ export class SearchStocks extends React.Component {
     renderStockList = () => {
         const {stocks = []} = this.state;
 
+        console.log(this.state.stocks);
         return stocks.map((stock, index) => 
             <StockListItem 
                 key={index} 
@@ -195,34 +197,42 @@ export class SearchStocks extends React.Component {
     }
 
     render() {
-        const containerStyle = {
-            padding: '20px'
-        };
+        
         const universe = _.get(this.props, 'filters.universe', null);
         const sector = _.get(this.props, 'filters.sector', null);
         const industry = _.get(this.props, 'filters.industry', null);
 
         return (
-            <Row style={containerStyle}>
-                <Col span={24} style={topHeaderContainer}>
-                    <div>
-                        <h3 style={{fontSize: '14px'}}>Add Stocks to your Portfolio</h3>
-                        <div style={horizontalBox}>
-                            <h3 style={{fontSize: '14px'}}>Universe: {universe}</h3>
-                            <h3 style={{fontSize: '14px'}}>, Sector: {sector}</h3>
-                            <h3 style={{fontSize: '14px'}}>, Industry: {industry}</h3>
-                        </div>
-                    </div>
+            <Row>
+                <Col span={24} style={{...topHeaderContainer, borderBottom: '1px solid'}}>
+                    
+                    <Row type="flex" align="middle" style={{padding: '10px 20px 5px 20px'}}>
+                        <h3 style={{fontSize: '24px', marginRight: '10px'}}>Add Stocks to your Portfolio</h3>
+                            <span style={{fontSize: '14px', marginRight: '5px'}}> Allowed Universe: </span>
+                            {industry && 
+                                <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
+                            }
+
+                            {sector && 
+                                <Tag style={{fontSize: '14px'}}>{sector}</Tag>
+                            }
+                            
+                            {universe && 
+                                <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
+                            }
+                    </Row>
+
                     <Icon 
-                        style={{fontSize: '24px', cursor: 'pointer'}} 
+                        style={{fontSize: '24px', cursor: 'pointer', padding:'20px'}} 
                         type="close-circle" 
                         onClick={this.props.toggleBottomSheet}
                     />
                 </Col>
-                <Col span={12}>
+
+                <Col span={12} style={{padding: '20px'}}>
                     {this.renderSearchStocksList()}
                 </Col>
-                <Col span={12}>
+                <Col span={12} style={{padding: '20px'}}>
                     <StockPerformance stock={this.state.selectedStock}/>
                 </Col>
             </Row>
@@ -260,20 +270,20 @@ const StockListItem = ({symbol, name, change, changePct, close, open, current, o
             <Col span={1} onClick={() => onAddIconClick(symbol)}>
                 <AddIcon checked={checked}/>
             </Col>
-            <Col span={15} style={leftContainerStyle} onClick={() => onClick(symbol)}>
+            <Col span={15} style={leftContainerStyle} onClick={() => onClick({symbol, name})}>
                 <div style={horizontalBox}>
                     <h3 style={{fontSize: '16px', fontWeight: '700'}}>{symbol}</h3>
                     <Icon style={{color: changeColor, marginLeft: '10px'}} type={changeIcon} />
                 </div>
                 <h3 style={{fontSize: '12px'}}>{name}</h3>
             </Col>
-            <Col span={8} style={detailContainerStyle} onClick={() => onClick(symbol)}>
+            <Col span={8} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
                 <div style={horizontalBox}>
-                    <h3 style={{fontSize: '18px', fontWeight: '700'}}>{current}</h3>
+                    <h3 style={{fontSize: '18px', fontWeight: '700'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
                 </div>
                 <div style={horizontalBox}>
-                    <h3 style={{color: changeColor, fontSize: '14px', marginLeft: '10px'}}>{change > 0 && '+'} {change}</h3>
-                    <h3 style={{color: changeColor, marginLeft: '5px', fontSize: '14px'}}>({change > 0 && '+'} {nChangePct} %)</h3>
+                    <h3 style={{color: changeColor, fontSize: '14px', marginLeft: '10px'}}>{change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(change)}</h3>
+                    <h3 style={{color: changeColor, marginLeft: '5px', fontSize: '14px'}}>({change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(nChangePct)} %)</h3>
                 </div>
             </Col>
         </Row>
@@ -290,4 +300,5 @@ const AddIcon = ({checked = false}) => {
 const topHeaderContainer = {
     ...horizontalBox,
     justifyContent: 'space-between',
+    borderBottom: '1px solid lightgrey'
 };
