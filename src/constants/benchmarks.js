@@ -4,8 +4,10 @@ export const benchmarks = [
     // "NIFTY_200",
     // "NIFTY_500",
     "NIFTY_MIDCAP_50",
+    "NIFTY_DIV_OPP_50",
     "NIFTY_AUTO",
     "NIFTY_BANK",
+    "NIFTY_CONSUMPTION",
     "NIFTY_FIN_SERVICE",
     "NIFTY_FMCG",
     "NIFTY_IT",
@@ -19,6 +21,5 @@ export const benchmarks = [
     "NIFTY_ENERGY",
     "NIFTY_INFRA",
     "NIFTY_MNC",
-    "NIFTY_SERV_SECTOR",
-    "NIFTY_CONSUMPTION",
+    "NIFTY_SERV_SECTOR"
 ];
