@@ -1,17 +1,102 @@
 import * as React from 'react';
-import {Row, Col, Button, Tabs, Table, Tag, Icon} from 'antd';
+import _ from 'lodash';
+import {Row, Col, Button, Tabs, Table, Tag, Icon, Select} from 'antd';
 import {primaryColor, verticalBox, horizontalBox} from '../../constants';
 import {scoringMetrics, faqs, howItWorksContents, prizes, criterias, prizeText, scoringText} from './constants';
+import {processAdviceForLeaderboardListItem} from './utils';
+import {fetchAjax} from '../../utils';
 import AppLayout from '../../containers/AppLayout';
 
 const TabPane = Tabs.TabPane;
+const Option = Select.Option;
+const {requestUrl} = require('../../localConfig');
 
 export default class ContestHome extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            metric: scoringMetrics[0]
+            metric: scoringMetrics[0],
+            activeContests: [],
+            loading: false,
+            selectedContestId: null,
+            selectedContest: {},
+            advices: [], // list of advices currently participating in the contest
         }
+    }
+
+    getActiveContests = () => {
+        const contestsUrl = `${requestUrl}/contest`;
+        this.setState({loading: true});
+        fetchAjax(contestsUrl, this.props.history, this.props.match.url)
+        .then(response => {
+            let contests = _.get(response.data, 'contests', []).map(contest => {
+                return {
+                    id: _.get(contest, '_id', null),
+                    name: _.get(contest, 'name', null)
+                };
+            })
+            this.setState({activeContests: contests});
+            if (contests[0] !== undefined) {
+                this.setState({selectedContestId: contests[0].id, selectedContest: contests[0]});
+                return this.getLatestContestSummary(contests[0].id, false);
+            }
+
+            return null;
+        })
+        .catch(err => err)
+        .finally(() => {
+            this.setState({loading: false});
+        })
+    }
+
+     // Gets the summary of the latest ongoing contest
+    getLatestContestSummary = (contestId = this.state.selectedContestId, showLoader=true) => {
+        showLoader && this.setState({loading: true});
+        const limit = 10;
+        const skip = 0;
+        const contestSummaryUrl = `${requestUrl}/contest/${contestId}/advices?skip=${skip}&limit=${limit}`;
+        fetchAjax(contestSummaryUrl, this.props.history, this.props.match.params.url)
+        .then(({data: contestSummaryData}) => {
+            let advices = _.get(contestSummaryData, 'advices', []);
+            advices = advices.map(advice => processAdviceForLeaderboardListItem(advice));
+            advices = _.orderBy(advices, 'rank', 'asc');
+            console.log(advices);
+            this.setState({advices, selectedAdviceId: advices[0].adviceId});
+        })
+        .catch(err => {
+            return err;
+        })
+        .finally(() => {
+            showLoader && this.setState({loading: false});
+        })
+    }
+
+    renderWinnerRankingList = () => {
+        return (
+            <Row>
+                <Col span={24} style={{padding: '10px'}}>
+                    <Row>
+                        <Col span={4} style={{fontSize: '16px', color: primaryColor}}>Rank</Col>
+                        <Col span={16} style={{fontSize: '16px', color: primaryColor}}>Name</Col>
+                        <Col span={4} style={{fontSize: '16px', color: primaryColor}}>Score</Col>
+                    </Row>
+                </Col>
+                <Col span={24}>
+                    {
+                        this.state.advices.map((advice, index) => {
+                            return (
+                                <LeaderboardItem 
+                                    striped={index % 2 === 0}
+                                    rank={index + 1} 
+                                    name={advice.advisorName}
+                                    score={_.get(advice, 'metrics.simulated.score', 0)}
+                                />
+                            );
+                        })
+                    }
+                </Col>
+            </Row>
+        );
     }
 
     renderTopSection = () => {
@@ -35,7 +120,13 @@ export default class ContestHome extends React.Component {
                 <Row style={{height: '100%'}}>
                     <Col span={16} style={{...verticalBox, height: '100%'}}>
                         <h1 style={{color: '#fff'}}>Compete to win cash prizes.10 winners daily.</h1>
-                        <Button icon="rocket" style={buttonStyle}>Submit Entry</Button>
+                        <Button 
+                                icon="rocket" 
+                                style={buttonStyle}
+                                onClick={() => this.props.history.push('/contest/createadvice/how')}
+                        >
+                            Submit Entry
+                        </Button>
                     </Col>
                 </Row>
             </Col>
@@ -162,7 +253,7 @@ export default class ContestHome extends React.Component {
         const containerStyle = {
             ...verticalBox,
             justifyContent: 'flex-start',
-            position: 'fixed',
+            position: 'absolute',
             top: '20px',
             right: '20px',
             backgroundColor: '#fff',
@@ -177,16 +268,39 @@ export default class ContestHome extends React.Component {
             height: '60px',
             width: '100%',
             padding: '10px',
-            backgroundColor: '#607D8B'
+            backgroundColor: '#607D8B',
+            justifyContent: 'space-between'
         }
+
         return (
             <Col span={8} style={containerStyle}>
                 <Row style={{width: '100%'}}>
                     <Col span={24} style={headerContainer}>
                         <h3 style={{color: '#fff'}}>LEADERBOARD</h3>
+                        {this.renderContestDropdown()}
+                    </Col>
+                    <Col span={24}>
+                        {this.renderWinnerRankingList()}
                     </Col>
                 </Row>
             </Col>
+        );
+    }
+
+    renderContestDropdown = () => {
+        const {activeContests = []} = this.state;
+        return (
+            <Select 
+                    style={{width: 200}} 
+                    value={this.state.selectedContestId} 
+                    onChange={this.handleContestChange}
+            >
+                {
+                    activeContests.map((contest, index) => {
+                        return <Option key={index} value={_.get(contest, 'id', null)}>{_.get(contest, 'name', null)}</Option>
+                    })
+                }
+            </Select>
         );
     }
 
@@ -200,9 +314,14 @@ export default class ContestHome extends React.Component {
         });
     }
 
+    componentWillMount() {
+        this.getActiveContests();
+    }
+
     render() {
         return (
             <AppLayout
+                noHeader
                 content = {
                     <Row style={{height: '100%'}}>
                         {this.renderTopSection()}
@@ -302,6 +421,16 @@ const MetricCard = ({header, content, span=24, onClick}) => {
 
     return (
         <Tag>{header}</Tag>
+    );
+}
+
+const LeaderboardItem = ({rank, name, score, striped=false}) => {
+    return (
+        <Row style={{padding: '20px 10px', backgroundColor: striped ? '#ECEFF1' : '#fff'}}>
+            <Col span={4} style={{fontSize: '16px'}}>{rank}</Col>
+            <Col span={16} style={{fontSize: '16px'}}>{name}</Col>
+            <Col span={4} style={{fontSize: '16px'}}>{score}</Col>
+        </Row>
     );
 }
 

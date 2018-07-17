@@ -21,6 +21,7 @@ export class SearchStocks extends React.Component {
             selectedPage: 0,
             portfolioLoading: false
         };
+        this.localStocks = []; // Used to get the list of all stocks obtained from N/W calls
     }
 
     renderSearchStocksList = () => {
@@ -56,9 +57,26 @@ export class SearchStocks extends React.Component {
         .then(({data: stockResponseData}) => {
             const stocks = this.processStockList(stockResponseData);
             this.setState({stocks});
+            this.pushStocksToLocalArray(stocks);
             resolve(true);
         });
     })
+
+    resetSearchFilters = () => new Promise((resolve, reject) => {
+        this.setState({selectedPage: 0}, () => this.fetchStocks('').then(() => resolve(true)));
+    })
+
+    pushStocksToLocalArray = (stocks = []) => {
+        const localStocks = [...this.localStocks];
+        stocks.map(stock => {
+            const stockIndex = _.findIndex(localStocks, localStock => localStock.symbol === stock.symbol);
+            if (stockIndex === -1) {
+                localStocks.push(stock)
+            }
+        });
+        this.localStocks = localStocks;
+        console.log(this.localStocks);
+    }
 
     renderStockList = () => {
         const {stocks = []} = this.state;
@@ -107,25 +125,30 @@ export class SearchStocks extends React.Component {
 
     conditionallyAddItemToSelectedArray = (symbol, addToPortfolio = false) => {
         const selectedStocks = [...this.state.selectedStocks];
+        const localStocks = [...this.localStocks];
         const stocks = [...this.state.stocks];
         const selectedStockIndex = selectedStocks.indexOf(symbol);
         const targetStock = stocks.filter(stock => stock.symbol === symbol)[0];
+        const targetLocalStock = localStocks.filter(stock => stock.symbol === symbol)[0];
         if (targetStock !== undefined) {
             if (selectedStockIndex === -1) {
                 selectedStocks.push(symbol);
                 targetStock.checked = true;
+                targetLocalStock.checked = true;
             } else {
                 selectedStocks.splice(selectedStockIndex, 1);
                 targetStock.checked = false;
+                targetLocalStock.checked = false;
             }
             this.setState({selectedStocks, stocks});
+            this.localStocks = localStocks;
         }
     }
 
     addSelectedStocksToPortfolio = () => {
-        let stocks = [...this.state.stocks];
-        stocks = stocks.filter(stock => stock.checked === true);
-        const positions = stocks.map(stock => {
+        let localStocks = [...this.localStocks];
+        localStocks = localStocks.filter(stock => stock.checked === true);
+        const positions = localStocks.map(stock => {
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 name: _.get(stock, 'name', ''),
@@ -154,14 +177,22 @@ export class SearchStocks extends React.Component {
     syncStockListWithPortfolio = positions => {
         const selectedStocks = positions.map(position => position.symbol);
         let stocks = [...this.state.stocks]; 
+        let localStocks = [...this.localStocks];
         stocks = stocks.map(stock => {
             // If stock is present in the portfolio mark checked as true else false
             const stockIndex = _.findIndex(positions, position => position.symbol === stock.symbol);
             let checked = stockIndex !== -1 ? true : false;
 
-            return {...stock,checked};
+            return {...stock, checked};
         });
+        localStocks = localStocks.map(stock => {
+            // If stock is present in the portfolio mark checked as true else false
+            const stockIndex = _.findIndex(positions, position => position.symbol === stock.symbol);
+            let checked = stockIndex !== -1 ? true : false;
 
+            return {...stock, checked};
+        })
+        this.localStocks = localStocks;
         this.setState({selectedStocks, stocks});
     }
 

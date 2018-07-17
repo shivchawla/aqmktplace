@@ -32,7 +32,7 @@ class ContestAdviceFormImpl extends React.Component {
         this.state = {
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: true,
+            bottomSheetOpenStatus: false,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -113,7 +113,7 @@ class ContestAdviceFormImpl extends React.Component {
                 },
                 positions: []
             }, () => {
-                this.searchStockComponent.fetchStocks('')
+                this.searchStockComponent.resetSearchFilters()
                 .then(() => {
                     this.toggleSearchStockBottomSheet();
                 })
@@ -323,7 +323,15 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
-        this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
+        const positions = [...this.state.positions];
+        console.log('Positions', positions);
+        selectedPositions.map(selectedPosition => {
+            const getPresentPositionIndex = _.findIndex(positions, position => position.symbol === selectedPosition.symbol);
+            if (getPresentPositionIndex === -1) { // Position not be present in the portfolio and should be added
+                positions.push(selectedPosition);
+            }   
+        });
+        this.setState({positions: this.updateAllWeights(positions)}, () => {
             this.handleSubmitAdvice('validate')
             .then(() => resolve(true));
         });
@@ -334,7 +342,10 @@ class ContestAdviceFormImpl extends React.Component {
         return data.map((item, index) => {
             const weight = totalSummation === 0 ? 0 : Number(((item['totalValue'] / totalSummation * 100)).toFixed(2));
             item['weight'] = weight;
-            const total = item.lastPrice > 10000 ? item.lastPrice : 10000;
+            const total = item.effTotal !== undefined
+                    ? item.effTotal
+                    : item.lastPrice > 10000 ? item.lastPrice : 10000
+            // const total = item.lastPrice > 10000 ? item.lastPrice : 10000;
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
             item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);
@@ -601,12 +612,19 @@ class ContestAdviceFormImpl extends React.Component {
                 {this.renderAdviceErrorDialog()}
                 {this.renderSearchStocksBottomSheet()}
                 {this.renderBenchmarkChangeWarningModal()}
-                <Col span={24} style={{height: '40px'}}></Col>
+                <Col span={24} style={{height: '40px', marginTop: '10px'}}>
+                    <h3 style={{fontSize: '22px'}}>
+                        {this.props.isUpdate ? 'Update Advice' : 'Create Advice'}
+                    </h3>
+                </Col>
                 <Col span={18} style={{...shadowBoxStyle, minHeight: '600px'}}>
                     <Row style={leftContainerStyle} type="flex" align="start">
                         <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
                             {this.renderBenchmarkDropdown()}
-                            {this.renderNetValue()}
+                            {
+                                this.state.positions.length > 0 &&
+                                this.renderNetValue()
+                            }
                         </Col>
                         <Col span={24}>
                             {this.renderValidationErrors()}

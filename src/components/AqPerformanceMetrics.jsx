@@ -120,12 +120,17 @@ export class AqPerformanceMetrics extends React.Component {
         this.setState({metrics: this.getMetrics(performanceTimeline[0])});
     }
 
+    componentWillReceiveProps(nextProps) {
+        const performanceTimeline = this.getPerformanceTimeline();
+        this.setState({metrics: this.getMetrics(performanceTimeline[0])});
+    }
+
     /*
         Gets the selected timelines provided by the user
         eg: ['ytd', '1y', '2y', ...]
     */
-    getPerformanceTimeline = () => { 
-        let {rollingPerformance = {}, selectedTimeline = []} = this.props;
+    getPerformanceTimeline = (props=this.props) => { 
+        let {rollingPerformance = {}, selectedTimeline = []} = props;
         // console.log(Object.keys(rollingPerformance));
         // console.log(selectedTimeline);
         // const timelineToDelete = _.difference(Object.keys(rollingPerformance), selectedTimeline);

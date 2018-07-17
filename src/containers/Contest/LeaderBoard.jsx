@@ -1,13 +1,17 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Row, Col, Badge, Icon, Button, Select} from 'antd';
+import {Row, Col, Badge, Icon, Button, Select, Radio} from 'antd';
 import Radium, {StyleRoot} from 'radium';
 import AppLayout from '../AppLayout';
 import {primaryColor, verticalBox, horizontalBox, metricColor} from '../../constants';
 import {fetchAjax} from '../../utils';
 import './css/leaderBoard.css';
+import {formatMetric} from './utils';
 
 const Option = Select.Option;
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+
 const {requestUrl} = require('../../localConfig');
 // const contestId = '5b49cbe8f464ce168007bb79'; // For testing purpose only, this should be removed
 
@@ -68,74 +72,77 @@ export default class LeaderBoard extends React.Component {
             limit: 10,
             activeContests: [],
             selectedContestId: null,
-            selectedContest: {}
+            selectedContest: {},
+            showActivePerformance: true
         };
     }
 
     renderLeaderboardListHeader = () => {
-        const disabledColor = '#BDBDBD';
-
+        const headerStyle = {fontSize: '14px', color: '#fff', fontWeight:300, paddingLeft: '10px'};
         return (
             <Row
                     type="flex"
                     align="middle" 
                     style={{
                         borderBottom: '1px solid #eaeaea', 
-                        backgroundColor: '#fff',
+                        //backgroundColor: '#fff',
+                        backgroundColor: primaryColor,
+                        color: '#fff',
                         height: '40px',
                         borderTopLeftRadius: '4px',
                         borderTopRightRadius: '4px',
                         paddingTop: '7px'
                     }}
             >
-                <Col span={12}>
-                    <Row>
-                        <Col span={2} style={{paddingLeft: '10px'}}>
-                            <Button
-                                style={{
-                                    fontSize: '20px', 
-                                    fontWeight: '700', 
-                                    color: this.state.selectedPage === 0 ? disabledColor : primaryColor,
-                                    backgroundColor: '#fff',
-                                    border: 'none',
-                                    marginTop: '-6px'
-                                }} 
-                                shape="circle"
-                                icon="left" 
-                                disabled={this.state.selectedPage === 0}
-                                onClick={() => this.handlePagination('previous')}
-                            />
-                        </Col>
-                        {/* <Col offset={4} span={20}> */}
-                        <Col offset={2} span={20}>
-                            <h3 style={{color: primaryColor, fontSize: '14px'}}>ADVICE</h3>
-                        </Col>
-                    </Row>
-                </Col>
                 <Col span={4}>
-                    <h3 style={{color: primaryColor, fontSize: '14px'}}>TOTAL RETURN</h3>
+                    <h3 style={headerStyle}>RANK</h3>
                 </Col>
-                <Col span={4}>
-                    <h3 style={{color: primaryColor, fontSize: '14px'}}>VOLATILITY</h3>
+                <Col span={6}>
+                    <h3 style={headerStyle}>NAME</h3>
+                </Col>
+                <Col span={5}>
+                    <h3 style={headerStyle}>EXCESS RETURN</h3>
+                </Col>
+                <Col span={5}>
+                    <h3 style={headerStyle}>TRACKING ERROR</h3>
                 </Col>
                 <Col span={4} style={{...horizontalBox, position: 'relative'}}>
-                    <h3 style={{color: primaryColor, fontSize: '14px'}}>SCORE</h3>
+                    <h3 style={headerStyle}>SCORE</h3>
+                </Col>
+            </Row>
+        );
+    }
+
+    renderPagination() {
+        const disabledColor = '#BDBDBD';
+        return (
+            <Row type="flex" justify="space-between" style={{marginTop: '10px'}}>
+                <Col span={4} >
                     <Button
                         style={{
-                            fontSize: '20px', 
-                            fontWeight: '700', 
-                            color: this.state.advices.length % 10 !== 0 ? disabledColor : primaryColor,
-                            position: 'absolute',
-                            right: '20px',
-                            backgroundColor: '#fff',
-                            border: 'none'
+                            fontSize: '14px', 
+                            fontWeight: '300', 
+                            color: this.state.selectedPage === 0 ? disabledColor : '#fff',
+                            //backgroundColor: '#fff',
+                            //border: 'none',
+                            //marginTop: '-6px'
                         }} 
                         type="primary"
-                        shape="circle"
-                        icon="right" 
+                        disabled={this.state.selectedPage === 0}
+                        onClick={() => this.handlePagination('previous')}
+                    >PREVIOUS</Button>
+                </Col>
+
+                <Col span={4} style={{textAlign:'end'}}>
+                    <Button
+                        style={{
+                            fontSize: '14px', 
+                            fontWeight: '300', 
+                            color: this.state.advices.length % 10 !== 0 ? disabledColor : '#fff'}} 
+                        type="primary"
                         disabled={this.state.advices.length % 10 !== 0}
                         onClick={() => this.handlePagination('next')}
-                    />
+                    >NEXT</Button>
                 </Col>
             </Row>
         );
@@ -149,7 +156,7 @@ export default class LeaderBoard extends React.Component {
                 <Col span={24}>
                     {this.renderLeaderboardListHeader()}
                 </Col>
-                <Col span={24} style={{padding: '20px', paddingTop: '0px'}}>
+                <Col span={24}>
                     {
                         leaders.map((leader, index) => 
                             <LeaderItem 
@@ -162,6 +169,10 @@ export default class LeaderBoard extends React.Component {
                         )
                     }
                 </Col>
+                <Col span={24}>
+                    {this.renderPagination()}
+                </Col>
+
             </Row>
         );
 
@@ -238,28 +249,35 @@ export default class LeaderBoard extends React.Component {
         const rank = _.get(advice, 'latestRank.value', null);
         const simulatedRank = _.get(advice, 'latestRank.rating.simulated.rank', null);
 
+        console.log(currentAdviceMetrics);
+        console.log(this.getAdviceMetric(simulatedAdviceMetrics, 'concentration'));
+
         return {
             adviceName,
             advisorName,
             adviceId,
             metrics: {
                 current: {
-                    totalReturn: {label: 'Total Return', ...this.getAdviceMetric(currentAdviceMetrics, 'totalReturn')},
-                    volatility: {label: 'Volatility', ...this.getAdviceMetric(currentAdviceMetrics, 'volatility')},
-                    annualReturn: {label: 'Annual Return', ...this.getAdviceMetric(currentAdviceMetrics, 'annualReturn')},
-                    maxLoss: {label: 'Max Loss', ...this.getAdviceMetric(currentAdviceMetrics, 'maxLoss')},
-                    sharpe: {label: 'Sharpe', ...this.getAdviceMetric(currentAdviceMetrics, 'sharpe')},
+                    //totalReturn: {label: 'Total Return', ...this.getAdviceMetric(currentAdviceMetrics, 'totalReturn')},
+                    annualReturn: {label: 'Excess Return', ...this.getAdviceMetric(currentAdviceMetrics, 'annualReturn')},
+                    volatility: {label: 'Tracking Error', ...this.getAdviceMetric(currentAdviceMetrics, 'volatility')},
+                    maxLoss: {label: 'Max. Loss', ...this.getAdviceMetric(currentAdviceMetrics, 'maxLoss')},
+                    sharpe: {label: 'Information Ratio', ...this.getAdviceMetric(currentAdviceMetrics, 'sharpe')},
                     score: Number((_.get(advice, 'latestRank.rating.current.value') || 0).toFixed(2)),
-                    alpha: {label: 'Alpha', ...this.getAdviceMetric(currentAdviceMetrics, 'alpha')},
+                    calmar: {label: 'Calmar Ratio', ...this.getAdviceMetric(currentAdviceMetrics, 'calmar')},
+                    concentration: {label: 'Diversification', ...this.getAdviceMetric(currentAdviceMetrics, 'concentration')},
+                    //alpha: {label: 'Alpha', ...this.getAdviceMetric(currentAdviceMetrics, 'alpha')},
                 },
                 simulated: {
-                    totalReturn: {label: 'Total Return', ...this.getAdviceMetric(simulatedAdviceMetrics, 'totalReturn')},
-                    volatility: {label: 'Volatility', ...this.getAdviceMetric(simulatedAdviceMetrics, 'volatility')},
-                    annualReturn: {label: 'Annual Return', ...this.getAdviceMetric(simulatedAdviceMetrics, 'annualReturn')},
-                    maxLoss: {label: 'Max Loss', ...this.getAdviceMetric(simulatedAdviceMetrics, 'maxLoss')},
-                    sharpe: {label: 'Sharpe', ...this.getAdviceMetric(simulatedAdviceMetrics, 'sharpe')},
+                    //totalReturn: {label: 'Total Return', ...this.getAdviceMetric(simulatedAdviceMetrics, 'totalReturn')},
+                    annualReturn: {label: 'Excess Return', ...this.getAdviceMetric(simulatedAdviceMetrics, 'annualReturn')},
+                    volatility: {label: 'Tracking Error', ...this.getAdviceMetric(simulatedAdviceMetrics, 'volatility')},
+                    maxLoss: {label: 'Max. Loss', ...this.getAdviceMetric(simulatedAdviceMetrics, 'maxLoss')},
+                    sharpe: {label: 'Information Ratio', ...this.getAdviceMetric(simulatedAdviceMetrics, 'sharpe')},
                     score: Number((_.get(advice, 'latestRank.rating.simulated.value') || 0).toFixed(2)),
-                    alpha: {label: 'Alpha', ...this.getAdviceMetric(simulatedAdviceMetrics, 'alpha')}
+                    //alpha: {label: 'Alpha', ...this.getAdviceMetric(simulatedAdviceMetrics, 'alpha')},
+                    calmar: {label: 'Calmar Ratio', ...this.getAdviceMetric(simulatedAdviceMetrics, 'calmar')},
+                    concentration: {label: 'Diversification', ...this.getAdviceMetric(simulatedAdviceMetrics, 'concentration')}
                 }
             },
             rank,
@@ -299,14 +317,20 @@ export default class LeaderBoard extends React.Component {
             const adviceMetrics = _.get(selectedAdvice, `metrics.${metricType}`, {});
             const metricKeys = Object.keys(adviceMetrics);
 
-            return metricKeys.map(key => {
-                if (key !== 'score') {
-                    return {
-                        metricValue: adviceMetrics[key].metricValue,
-                        rank: adviceMetrics[key].rank,
-                        label: adviceMetrics[key].label
-                    };
-                }
+            var pctMetrics = ['annualReturn', 'volatility', 'maxLoss'];
+            
+            return metricKeys.filter(key => key!="score").map(key => {
+                var idx = pctMetrics.indexOf(key);
+                var rawVal = _.get(adviceMetrics,`${key}.metricValue`, NaN);
+                var adjustedVal = idx != -1 ? 
+                                    formatMetric(rawVal, "pct") : formatMetric(rawVal);
+                                    
+
+                return {
+                    metricValue: adjustedVal,
+                    rank: adviceMetrics[key].rank,
+                    label: adviceMetrics[key].label
+                };
             })
         } else {
             return metrics;
@@ -328,17 +352,15 @@ export default class LeaderBoard extends React.Component {
     }
 
     renderMetricsHeader = (rank, header, score) => {
-        const rankColor = rank === 1 ? metricColor.positive : '#565656d9';
-
         return (
-            <Row>
+            <Row >
                 <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
-                    <Badge style={{backgroundColor: rankColor}} count={rank}/>
-                    <h3 style={{marginLeft: '5px'}}>{header}</h3>
+                    
+                    <h3 style={{marginLeft: '5px', fontWeight: 300}}><span style={{color: primaryColor, marginRight:'4px'}}>{rank}</span>{header}</h3>
                 </Col>
                 <Col span={24} style={verticalBox}>
-                    <h3 style={{fontSize: '14px'}}>
-                        Score: <span style={{fontSize: '16px', fontWeight: 700}}>{score}</span>
+                    <h3 style={{fontSize: '14px', fontWeight: 300}}>
+                        Score: <span style={{fontSize: '16px', fontWeight: 300}}>{score}</span>
                     </h3>
                 </Col>
             </Row>
@@ -357,7 +379,7 @@ export default class LeaderBoard extends React.Component {
         const {activeContests = []} = this.state;
         return (
             <Select 
-                    style={{width: 200, position: 'absolute', right: 0}} 
+                    style={{width: 200}} 
                     value={this.state.selectedContestId} 
                     onChange={this.handleContestChange}
             >
@@ -370,6 +392,10 @@ export default class LeaderBoard extends React.Component {
         );
     }
 
+    onPerformanceToggle = (e) => {
+        this.setState({showActivePerformance: e.target.value == '0'});
+    }
+
     renderPageContent() {
         const {advices = [], selectedAdviceId = null} = this.state;
         const selectedAdvice = advices.filter(advice => advice.adviceId === selectedAdviceId)[0];
@@ -377,77 +403,76 @@ export default class LeaderBoard extends React.Component {
         const adviceNameStyle = {
             marginTop: '10px',
             marginLeft: '10px',
-            fontSize: '18px',
-            fontWeight: '700',
+            fontSize: '20px',
+            fontWeight: '300',
             color: primaryColor,
+            //color: '#fff',
             cursor: 'pointer',
-            textAlign: 'center'
+            height: '40px'
         };
+
         const currentMetrics = this.processMetricsForSelectedAdvice('current');
         const simulatedMetrics = this.processMetricsForSelectedAdvice('simulated');
 
         return (
-            <Row style={{padding: '20px', paddingTop: '10px'}}>
-                <Col span={24} style={{...horizontalBox, marginBottom: '20px'}}>
-                    <Row>
-                        <Col span={24}>
-                            <h3 style={{fontSize: '26px', color: '#252a2f', marginBottom: '0px'}}>
-                                <span 
-                                        style={{
-                                            color: primaryColor, 
-                                            marginRight: '10px',
-                                            display: 'inline-block',
-                                            paddingRight: '10px',
-                                            borderRight: `1px solid ${primaryColor}`
-                                        }}
-                                >
-                                    {this.state.selectedContest.name}
-                                </span>
-                                Leaderboard
-                            </h3>
-                        </Col>
-                        <Col span={24}>
-                            <h5 style={{fontSize: '14px', color: '#6F6F6F'}}>View leaderboard of the selected contest</h5>
-                        </Col>
-                    </Row>
-                    {this.renderContestDropdown()}
+            <Row gutter={0} style={{padding: '10px 20px'}}>
+                <Col span={16} style={{marginBottom: '20px'}}>
+                    <h3 style={{fontSize: '26px', color: primaryColor, marginBottom: '0px'}}>
+                        Leaderboard
+                    </h3>
+                    <h5 style={{fontSize: '14px', color: '#6F6F6F'}}>For {this.state.selectedContest.name}</h5>
+                    <div style={{textAlign: 'end', marginTop: '-30px'}}>{this.renderContestDropdown()}</div>
                 </Col>
-                <Col 
-                        span={16}
-                        style={{
-                            backgroundColor: '#fff',
-                            boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
-                            borderRadius: '4px',
-                        }}
-                >
+
+                <Col span={16}>
                     {this.renderLeaderList()}
                 </Col>
                 <Col 
-                        offset={1}
-                        span={7}
-                        style={{
-                            boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)', 
-                            height: '-webkit-fill-available',
-                            backgroundColor: '#fff',
-                        }}
+                    span={7}
+                    offset={1}
+                    style={{
+                        boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)', 
+                        height: '-webkit-fill-available',
+                        backgroundColor: '#fff',
+                        marginTop:'-40px',
+                        height:'500px'
+                    }}
                 >
-                    <div style={{...horizontalBox, justifyContent: 'center'}}>
-                        <h3 
-                                onClick={() => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)} 
-                                style={adviceNameStyle}
-                        >
+                    <div style={{...horizontalBox, marginTop:'0px', justifyContent: 'center', borderTop:`0px solid ${primaryColor}`, borderBottom: '1px solid lightgrey', color: primaryColor, backgroundColor: '#fff'}}>
+                        <h3  style={adviceNameStyle}>
                             {adviceName}
                         </h3>
-                        <Icon type="right" style={{fontSize: '20px', color: primaryColor, marginTop: '10px', marginLeft: '10px'}}/>
                     </div>
-                    <MetricContainer 
-                        header={this.renderMetricsHeader(_.get(selectedAdvice, 'rank', null), 'Current Performance', _.get(selectedAdvice, 'metrics.current.score', 0))}
+                    
+                    <div style={{textAlign: 'center', margin: '20px 0'}}>
+                        <RadioGroup onChange={this.onPerformanceToggle} defaultValue="0">
+                            <RadioButton value="0">Active</RadioButton>
+                            <RadioButton value="1">Historical</RadioButton>
+                        </RadioGroup>
+                    </div>
+
+                    {this.state.showActivePerformance ?
+                        <MetricContainer 
+                        header={this.renderMetricsHeader(_.get(selectedAdvice, 'rank', null), 'Active Performance', _.get(selectedAdvice, 'metrics.current.score', 0))}
                         metrics={currentMetrics} 
-                    />
-                    <MetricContainer 
-                        header={this.renderMetricsHeader(_.get(selectedAdvice, 'simulatedRank', null), 'Simulated Performance', _.get(selectedAdvice, 'metrics.simulated.score', 0))}
-                        metrics={simulatedMetrics} 
-                    />
+                        />
+                    :
+                        <MetricContainer 
+                            header={this.renderMetricsHeader(_.get(selectedAdvice, 'simulatedRank', null), 'Historical Performance', _.get(selectedAdvice, 'metrics.simulated.score', 0))}
+                            metrics={simulatedMetrics} 
+                        />
+                    }
+
+                    <div style={{textAlign: 'center', marginTop: '40px'}}>
+                        <Button 
+                            type="primary" 
+                            style={{width: '150px',fontWeight: 300}} 
+                            onClick={() => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)}
+                            >
+                            DETAIL
+                        </Button>
+                    </div>
+
                 </Col>
             </Row>
         );
@@ -456,13 +481,13 @@ export default class LeaderBoard extends React.Component {
     render() {
         return (
             <AppLayout
-                noFooter={true}
                 content={<StyleRoot>{this.renderPageContent()}</StyleRoot>}
                 loading={this.state.loading}
             ></AppLayout>
         );
     }
 }
+ 
 
 let LeaderItem = ({leaderItem, onClick, selected}) => {
     const containerStyle = {
@@ -470,38 +495,31 @@ let LeaderItem = ({leaderItem, onClick, selected}) => {
         cursor: 'pointer',
         paddingBottom: '10px',
         paddingTop: '15px',
-        marginTop: '10px',
-        backgroundColor: selected ? '#ECEFF1' : '#fff'
+        marginTop: '0px',
+        backgroundColor: selected ? '#e6f5f3' : '#fff'
     };
     const adviceId = _.get(leaderItem, 'adviceId', null);
+    const metricStyle = {paddingLeft: '10px', fontSize: '14px'};
+
+    const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
+    const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct")
 
     return (
         <Row className='leader-item' style={containerStyle} onClick={() => onClick(adviceId)} >
-            <Col span={12}>
-                <Row>
-                    <Col span={3}>
-                        <h3 style={{fontSize: '14px', margin: 0}}>{leaderItem.rank} .</h3>
-                    </Col>
-                    <Col span={20}>
-                        <Row>
-                            <Col span={24}>
-                                <h3 style={{fontSize: '14px', margin: 0}}>{leaderItem.adviceName}</h3>
-                            </Col>
-                            <Col span={24}>
-                                <h5 style={{fontSize: '12px', margin: 0}}>{leaderItem.advisorName}</h5>
-                            </Col>
-                        </Row>
-                    </Col>
-                </Row>
+            <Col span={4}>
+                <h3 style={{...metricStyle, margin: 0}}>{leaderItem.rank} .</h3>
+            </Col>
+            <Col span={6}>
+                <h5 style={{...metricStyle, margin: 0}}>{leaderItem.advisorName}</h5>
+            </Col>
+            <Col span={5}>
+                <h3 style={metricStyle}>{annualReturn}</h3>
+            </Col>
+            <Col span={5}>
+                <h3 style={metricStyle}>{volatility}</h3>
             </Col>
             <Col span={4}>
-                <h3 style={{fontSize: '14px'}}>{((leaderItem.metrics.current.totalReturn).metricValue * 100).toFixed(2)} %</h3>
-            </Col>
-            <Col span={4} style={{paddingLeft: '10px'}}>
-                <h3 style={{fontSize: '14px'}}>{((leaderItem.metrics.current.volatility).metricValue * 100).toFixed(2)} %</h3>
-            </Col>
-            <Col span={4} style={{paddingLeft: '12px'}}>
-                <h3 style={{fontSize: '14px'}}>{(leaderItem.metrics.current.score).toFixed(2)} / 100</h3>
+                <h3 style={metricStyle}>{(leaderItem.metrics.current.score).toFixed(2)} / 100</h3>
             </Col>
         </Row>
     );
@@ -515,6 +533,9 @@ const MetricContainer = ({header, metrics}) => {
             </Col>
             {
                 metrics.map((metric, index) => {
+                    var borderRight = index % 2 == 0 ? '0.5px solid #E5E5E5' : 'none';
+                    var borderBottom = index < 4 ? '0.5px solid #E5E5E5' : 'none';
+                
                     if (metric !== undefined) {
                         return (
                             <Col 
@@ -522,7 +543,8 @@ const MetricContainer = ({header, metrics}) => {
                                     span={12} 
                                     style={{
                                         ...verticalBox, 
-                                        border: '1px solid #E5E5E5', 
+                                        borderRight: borderRight,
+                                        borderBottom: borderBottom,
                                         padding: '5px',
                                         boxSizing: 'border-box'
                                     }}
@@ -546,31 +568,27 @@ let ContestMetricItems = ({metricValue, rank, label}) => {
         fontWeight: '700', 
         color: primaryColor
     };
-    const rankBadgeColor = rank === 1 ? metricColor.positive : '#565656d9';
-    const metricValueRounded = metricValue.toFixed(2);
+    // const rankBadgeColor = rank === 1 ? metricColor.positive : '#565656d9';
+    // const metricValueRounded = (metricValue || 0).toFixed(2);
 
 
     return (
         <Col span={24} style={containerStyle}>
             <Row type="flex" justify="center" style={{position: 'relative'}}>
                 <Col 
-                        span={4} 
-                        style={{
-                            ...horizontalBox, 
-                            position: 'absolute',
-                            left: '5px',
-                            alignItems: 'flex-start', 
-                            justifyContent: 'flex-start'
-                        }}
+                    span={4} 
+                    style={{
+                        ...horizontalBox, 
+                        position: 'absolute',
+                        left: '5px',
+                        alignItems: 'flex-start', 
+                        justifyContent: 'flex-start'
+                    }}
                 >
-                    <Badge 
-                        style={{backgroundColor: rankBadgeColor}} 
-                        count={rank} 
-                    />
                 </Col>
                 <Col span={20} style={{...verticalBox, width: 'fit-content'}}>
-                    <h5 style={{fontSize: '12px', display: 'inline-block'}}>{label}</h5>
-                    <h5 style={{fontSize: '14px', display: 'inline-block'}}>{metricValueRounded}</h5>
+                    <h5 style={{fontSize: '16px', display: 'inline-block', fontWeight: 300}}><span style={{backgroundColor: '#fff', color: primaryColor, marginRight: '4px'}}>{rank}</span>{label}</h5>
+                    <h5 style={{fontSize: '16px', display: 'inline-block', fontWeight: 300}}>{metricValue}</h5>
                 </Col>
             </Row>
         </Col>

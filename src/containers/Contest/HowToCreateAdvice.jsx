@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Row, Col, Button} from 'antd';
+import {withRouter} from 'react-router';
 import {primaryColor} from '../../constants';
 import AppLayout from '../../containers/AppLayout';
 import selectStocksSvg from '../../assets/SelectStocks1.svg';
@@ -29,11 +30,10 @@ const StepDescription = ({title, image}) => {
     );
 };
 
-export default class HowToCreateAdvice extends React.Component {
+class HowToCreateAdvice extends React.Component {
     
     renderPageContent() {
         return (
-
             <Row style={{marginTop: '30px', fontSize: '16px'}}>
                 <Col style={{textAlign:'center'}}>
                     <h1 style={{color: primaryColor}}>Creating a contest entry in 3 <i>simple</i> steps!!</h1>
@@ -63,7 +63,7 @@ export default class HowToCreateAdvice extends React.Component {
                     <Button 
                         type="primary" 
                         style={{fontWeight: 300, width: '200px', fontSize: '18px'}}
-                        onClick=''>
+                        onClick={() => this.props.history.push('/contest/createadvice/edit')}>
                         CREATE
                     </Button>
                 </Col>
@@ -78,6 +78,8 @@ export default class HowToCreateAdvice extends React.Component {
         );
     }
 };
+
+export default withRouter(HowToCreateAdvice);
 
 const h3Style = {
     fontSize: '18px',

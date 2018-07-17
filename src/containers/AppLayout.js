@@ -78,18 +78,15 @@ class AppLayout extends React.Component {
                         <Menu.Item key="signup">Signup</Menu.Item>
                     }
                 </Menu>
-                {
-                    Utils.isLoggedIn() &&
-                    <React.Fragment>
-                        {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
-                        <Button 
-                            type="primary" 
-                            onClick={() => this.props.history.push('/dashboard/createadvice')}
-                            style={{marginTop: '18px'}}>
-                            Create Advice
-                        </Button>                                        
-                    </React.Fragment>
-                }
+                <React.Fragment>
+                    {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
+                    <Button 
+                        type="primary" 
+                        onClick={() => this.props.history.push('/contest/createadvice/how')}
+                        style={{marginTop: '18px'}}>
+                        CONTEST
+                    </Button>                                        
+                </React.Fragment>
             </Col> 
         );
     }
@@ -202,11 +199,15 @@ class AppLayout extends React.Component {
                 {
                     !this.props.loading &&
                     <div style={{backgroundColor: '#f9f9f9', height:'100%'}}> 
-                        {this.renderHeader()}
+                        {
+                            !this.props.noHeader &&
+                            this.renderHeader()
+                        }
                         <Content>
                             {this.props.content}
                         </Content>
-                        {!this.props.noFooter &&
+                        {
+                            !this.props.noFooter &&
                             this.renderFooter()
                         }
                     </div>
