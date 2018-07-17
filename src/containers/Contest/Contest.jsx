@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Route} from 'react-router-dom';
 import ContestHome from './ContestHome';
 import LeaderBoard from './LeaderBoard';
+import HowToCreateAdvice from './HowToCreateAdvice';
 import CreateAdvice from './CreateAdvice/CreateAdvice';
 import UpdateAdvice from './CreateAdvice/UpdateAdvice';
 import ContestTnC from './ContestTnC';
@@ -20,7 +21,11 @@ export default class Contest extends React.Component {
                     render={props => <LeaderBoard {...props}/>} 
                 />
                 <Route 
-                    path={`${this.props.match.url}/createadvice`}
+                    path={`${this.props.match.url}/createadvice/how`}
+                    render={props => <HowToCreateAdvice/>} 
+                />
+                <Route 
+                    path={`${this.props.match.url}/createadvice/edit`}
                     render={props => <CreateAdvice {...props}/>} 
                 />
                 <Route 

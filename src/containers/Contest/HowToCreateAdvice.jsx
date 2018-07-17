@@ -1,0 +1,90 @@
+import * as React from 'react';
+import {Row, Col, Button} from 'antd';
+import {primaryColor} from '../../constants';
+import AppLayout from '../../containers/AppLayout';
+import selectStocksSvg from '../../assets/SelectStocks1.svg';
+import selectBenchmarkSvg from '../../assets/SelectBenchmark.svg';
+import submitEntrySvg from '../../assets/SubmitEntry1.svg';
+
+const StepDescription = ({title, image}) => {
+    const containerStyle = {
+        //border: '1px solid #eaeaea',
+        margin: '0 10px',
+        //padding: '15px',
+        //borderRadius: '4px',
+        //height: '200px',
+        textAlign:'center',
+        boxShadow: '0 0 8px rgba(0,0,0,0.5)',
+        transform: 'scale(0.8, 0.8)',
+        background: 'white'
+
+    };
+
+    const imgWdith = image.width ? image.width : '100%';
+    return (
+        <Col span={6} style={containerStyle}>
+            <h3 style={{margin: '10px 0px 20px 0px'}}><i>{title}</i></h3>
+            <object style={{width: image.width}} type="image/svg+xml" data={image.src}></object>
+        </Col>
+    );
+};
+
+export default class HowToCreateAdvice extends React.Component {
+    
+    renderPageContent() {
+        return (
+
+            <Row style={{marginTop: '30px', fontSize: '16px'}}>
+                <Col style={{textAlign:'center'}}>
+                    <h1 style={{color: primaryColor}}>Creating a contest entry in 3 <i>simple</i> steps!!</h1>
+                </Col>
+ 
+                <Col>
+                    <Row type="flex" justify="space-around" style={{marginTop: '-5px', fontSize: '16px'}}>
+                        <StepDescription
+                            title="Select a Benchmark"
+                            image={{src: selectBenchmarkSvg, width: '85%'}}>
+                        </StepDescription>
+                        
+                        <StepDescription
+                            title="Add Stocks to Portfolio"
+                            image={{src: selectStocksSvg}}>
+                        </StepDescription>
+
+                        <StepDescription
+                            title="Adjust Weight and Submit"
+                            image={{src:submitEntrySvg}}>
+                        </StepDescription>
+
+                    </Row>
+                </Col>
+
+                 <Col style={{textAlign:'center', marginTop: '-5px'}}>
+                    <Button 
+                        type="primary" 
+                        style={{fontWeight: 300, width: '200px', fontSize: '18px'}}
+                        onClick=''>
+                        CREATE
+                    </Button>
+                </Col>
+               
+            </Row>
+        );
+    }
+
+    render() {
+        return (
+            <AppLayout content={this.renderPageContent()}/>
+        );
+    }
+};
+
+const h3Style = {
+    fontSize: '18px',
+    color: primaryColor
+};
+
+const bulletStyle = {
+    marginBottom: '8px',
+    lineHeight: '20px'
+};
