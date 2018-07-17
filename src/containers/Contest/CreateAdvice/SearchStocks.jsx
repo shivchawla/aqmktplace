@@ -245,12 +245,12 @@ export class SearchStocks extends React.Component {
                                 type="primary" 
                                 loading={this.state.portfolioLoading}
                         >
-                            ADD
+                            SELECTED
                             <Badge 
                                 style={{
                                     backgroundColor: '#fff', 
                                     color: primaryColor, 
-                                    fontSize: '16px', 
+                                    fontSize: '14px', 
                                     marginLeft: '5px'
                                 }} 
                                 count={this.state.selectedStocks.length}
