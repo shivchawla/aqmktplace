@@ -86,7 +86,7 @@ export class SearchStocks extends React.Component {
                 {...stock} 
                 onClick={this.handleStockListItemClick} 
                 onAddIconClick={this.conditionallyAddItemToSelectedArray}
-                selected={stock.symbol === this.state.selectedStock}
+                selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
             />
         )
     }
@@ -238,8 +238,7 @@ export class SearchStocks extends React.Component {
         return false;
     }
 
-    render() {
-        
+    render() { 
         const universe = _.get(this.props, 'filters.universe', null);
         const sector = _.get(this.props, 'filters.sector', null);
         const industry = _.get(this.props, 'filters.industry', null);

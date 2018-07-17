@@ -149,7 +149,7 @@ class StockPerformanceImpl extends React.Component {
                     </Col>
                 </Row>
 
-                <Tabs defaultActiveKey="3" animated={false}>
+                <Tabs defaultActiveKey="1" animated={false}>
                     <TabPane tab="Price Chart" key="1">
                         <Col span={24} style={{marginTop: '0px'}}>
                             <HighStock series={[this.state.series]} />
