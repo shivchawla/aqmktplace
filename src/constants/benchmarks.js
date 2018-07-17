@@ -7,7 +7,7 @@ export const benchmarks = [
     "NIFTY_DIV_OPP_50",
     "NIFTY_AUTO",
     "NIFTY_BANK",
-    "NIFTY_CONSUMPTION"
+    "NIFTY_CONSUMPTION",
     "NIFTY_FIN_SERVICE",
     "NIFTY_FMCG",
     "NIFTY_IT",
