@@ -1,14 +1,15 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Row, Col, Badge, Icon, Button} from 'antd';
+import {Row, Col, Badge, Icon, Button, Select} from 'antd';
 import Radium, {StyleRoot} from 'radium';
 import AppLayout from '../AppLayout';
 import {primaryColor, verticalBox, horizontalBox, metricColor} from '../../constants';
 import {fetchAjax} from '../../utils';
 import './css/leaderBoard.css';
 
+const Option = Select.Option;
 const {requestUrl} = require('../../localConfig');
-const contestId = '5b49cbe8f464ce168007bb79'; // For testing purpose only, this should be removed
+// const contestId = '5b49cbe8f464ce168007bb79'; // For testing purpose only, this should be removed
 
 const leaderboardListItem = {
     adviceName: 'Large Cap Investment Advice',
@@ -64,7 +65,10 @@ export default class LeaderBoard extends React.Component {
             selectedAdviceId: null,
             loading: false,
             selectedPage: 0,
-            limit: 10
+            limit: 10,
+            activeContests: [],
+            selectedContestId: null,
+            selectedContest: {}
         };
     }
 
@@ -149,6 +153,7 @@ export default class LeaderBoard extends React.Component {
                     {
                         leaders.map((leader, index) => 
                             <LeaderItem 
+                                key={index}
                                 selected={_.get(leader, 'adviceId', null) === this.state.selectedAdviceId}
                                 leaderItem={leader} 
                                 index={index + 1} 
@@ -171,9 +176,34 @@ export default class LeaderBoard extends React.Component {
         return leaders;
     }
 
-    // Gets the summary of the latest ongoing contest
-    getLatestContestSummary = () => {
+    getActiveContests = () => {
+        const contestsUrl = `${requestUrl}/contest`;
         this.setState({loading: true});
+        fetchAjax(contestsUrl, this.props.history, this.props.match.url)
+        .then(response => {
+            let contests = _.get(response.data, 'contests', []).map(contest => {
+                return {
+                    id: _.get(contest, '_id', null),
+                    name: _.get(contest, 'name', null)
+                };
+            })
+            this.setState({activeContests: contests});
+            if (contests[0] !== undefined) {
+                this.setState({selectedContestId: contests[0].id, selectedContest: contests[0]});
+                return this.getLatestContestSummary(contests[0].id, false);
+            }
+
+            return null;
+        })
+        .catch(err => err)
+        .finally(() => {
+            this.setState({loading: false});
+        })
+    }
+
+    // Gets the summary of the latest ongoing contest
+    getLatestContestSummary = (contestId = this.state.selectedContestId, showLoader=true) => {
+        showLoader && this.setState({loading: true});
         const limit = this.state.limit;
         const skip = this.state.selectedPage * limit;
         const contestSummaryUrl = `${requestUrl}/contest/${contestId}/advices?skip=${skip}&limit=${limit}`;
@@ -188,7 +218,7 @@ export default class LeaderBoard extends React.Component {
             return err;
         })
         .finally(() => {
-            this.setState({loading: false});
+            showLoader && this.setState({loading: false});
         })
     }
 
@@ -294,7 +324,7 @@ export default class LeaderBoard extends React.Component {
     }
 
     componentWillMount() {
-        this.getLatestContestSummary();
+        this.getActiveContests();
     }
 
     renderMetricsHeader = (rank, header, score) => {
@@ -312,6 +342,31 @@ export default class LeaderBoard extends React.Component {
                     </h3>
                 </Col>
             </Row>
+        );
+    }
+
+    handleContestChange = contestId => {
+        this.setState({
+            selectedContestId: contestId, 
+            selectedContest: this.state.activeContests.filter(contest => contest.id === contestId)[0]
+        });
+        this.getLatestContestSummary(contestId);
+    }
+
+    renderContestDropdown = () => {
+        const {activeContests = []} = this.state;
+        return (
+            <Select 
+                    style={{width: 200, position: 'absolute', right: 0}} 
+                    value={this.state.selectedContestId} 
+                    onChange={this.handleContestChange}
+            >
+                {
+                    activeContests.map((contest, index) => {
+                        return <Option key={index} value={_.get(contest, 'id', null)}>{_.get(contest, 'name', null)}</Option>
+                    })
+                }
+            </Select>
         );
     }
 
@@ -333,9 +388,29 @@ export default class LeaderBoard extends React.Component {
 
         return (
             <Row style={{padding: '20px', paddingTop: '10px'}}>
-                <Col span={24} style={{marginBottom: '20px'}}>
-                    <h3 style={{fontSize: '26px', color: '#252a2f', marginBottom: '0px'}}>Leaderboard</h3>
-                    <h5 style={{fontSize: '14px', color: '#6F6F6F'}}>View leaderboard of the recent contest</h5>
+                <Col span={24} style={{...horizontalBox, marginBottom: '20px'}}>
+                    <Row>
+                        <Col span={24}>
+                            <h3 style={{fontSize: '26px', color: '#252a2f', marginBottom: '0px'}}>
+                                <span 
+                                        style={{
+                                            color: primaryColor, 
+                                            marginRight: '10px',
+                                            display: 'inline-block',
+                                            paddingRight: '10px',
+                                            borderRight: `1px solid ${primaryColor}`
+                                        }}
+                                >
+                                    {this.state.selectedContest.name}
+                                </span>
+                                Leaderboard
+                            </h3>
+                        </Col>
+                        <Col span={24}>
+                            <h5 style={{fontSize: '14px', color: '#6F6F6F'}}>View leaderboard of the selected contest</h5>
+                        </Col>
+                    </Row>
+                    {this.renderContestDropdown()}
                 </Col>
                 <Col 
                         span={16}
@@ -354,9 +429,6 @@ export default class LeaderBoard extends React.Component {
                             boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)', 
                             height: '-webkit-fill-available',
                             backgroundColor: '#fff',
-                            // position: 'fixed',
-                            // right: '20px',
-                            // top: '100px'
                         }}
                 >
                     <div style={{...horizontalBox, justifyContent: 'center'}}>
