@@ -10,7 +10,7 @@ import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
 import AppLayout from '../../../containers/AppLayout';
 import {benchmarks} from '../../../constants/benchmarks';
-import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor} from '../../../constants';
+import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox} from '../../../constants';
 import {fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
 import { MetricItem } from '../../../components/MetricItem';
 
@@ -32,7 +32,7 @@ class ContestAdviceFormImpl extends React.Component {
         this.state = {
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: false,
+            bottomSheetOpenStatus: true,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -132,7 +132,7 @@ class ContestAdviceFormImpl extends React.Component {
         });
     }
 
-    handleSubmitAdvice = (type='validate') => {
+    handleSubmitAdvice = (type='validate') => new Promise((resolve, reject) => {
         const adviceUrl = `${requestUrl}/advice`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
         let adviceId = null;
@@ -217,8 +217,9 @@ class ContestAdviceFormImpl extends React.Component {
         })
         .finally(() => {
             this.setState({adviceSubmissionLoading: false});
+            resolve(true);
         })
-    }
+    })
 
     toggleAdviceErrorDialog = () => {
         this.setState({showAdviceErrorDialog: !this.state.showAdviceErrorDialog});
@@ -310,7 +311,7 @@ class ContestAdviceFormImpl extends React.Component {
             >
                 <SearchStocks 
                     toggleBottomSheet={this.toggleSearchStockBottomSheet}
-                    addPosition={this.conditionallyAddPosition}
+                    addPositions={this.conditionallyAddPosition}
                     portfolioPositions={this.state.positions}
                     filters={this.state.stockSearchFilters}
                     ref={el => this.searchStockComponent = el}
@@ -321,20 +322,12 @@ class ContestAdviceFormImpl extends React.Component {
         )
     }
 
-    conditionallyAddPosition = position => {
-        const positions = [...this.state.positions];
-        // Check if position is present if present delete from portfolio else add to portfolio
-        const targetPosition = positions.filter(positionItem => positionItem.symbol === position.symbol)[0];
-        if (targetPosition === undefined) { // Not present in portfolio, add
-            positions.push(position);
-        } else { // Present in the portfolio
-            const toBeDeletedIndex = _.findIndex(positions, positionItem => positionItem.symbol === position.symbol);
-            positions.splice(toBeDeletedIndex, 1);
-        }
-        this.setState({positions: this.updateAllWeights(positions)}, () => {
-            this.validatePortfolio();
+    conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
+        this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
+            this.handleSubmitAdvice('validate')
+            .then(() => resolve(true));
         });
-    }
+    })
 
     updateAllWeights = data => {
         const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
@@ -642,7 +635,8 @@ class ContestAdviceFormImpl extends React.Component {
                         </Col>
                         {
                             this.state.positions.length > 0 &&
-                            <Col span={24} style={{...shadowBoxStyle, marginTop: '20px'}}>
+                            <Col span={24} style={{...shadowBoxStyle, ...verticalBox, marginTop: '20px'}}>
+                                <h3 style={{fontSize: '16px', marginTop: '10px'}}>Portfolio Composition</h3>
                                 <PortfolioPieChart data={this.state.positions} />
                             </Col>
                         }

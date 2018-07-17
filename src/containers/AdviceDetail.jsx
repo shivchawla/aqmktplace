@@ -380,14 +380,16 @@ class AdviceDetailImpl extends React.Component {
         return Promise.all([
             fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
             fetchAjax(advicePerformanceUrl, this.props.history, this.props.match.url),
-            fetchAjax(adviceContestUrl, this.props.history, this.props.match.url)
+            // fetchAjax(adviceContestUrl, this.props.history, this.props.match.url)
         ]) 
-        .then(([adviceSummaryResponse, advicePerformanceResponse, adviceContestResponse]) => {
+        // .then(([adviceSummaryResponse, advicePerformanceResponse, adviceContestResponse]) => {
+        .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
             const benchmark = _.get(adviceSummaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
+            const contestOnly = _.get(adviceSummaryResponse.data, 'contestOnly', false);
             this.getAdviceSummary(adviceSummaryResponse);
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
-            const adviceActive = _.get(adviceContestResponse.data, 'active', false);
-            this.setState({adviceDetail: {...this.state.adviceDetail, active: adviceActive}});
+            // const adviceActive = _.get(adviceContestResponse.data, 'active', false);
+            // this.setState({adviceDetail: {...this.state.adviceDetail, active: adviceActive}});
             //ADVICE SUMMARY IN BACKEND first calculated full performance
             //With the right output from backend, this call (advice performance) can be
             //made redundant 
@@ -396,13 +398,16 @@ class AdviceDetailImpl extends React.Component {
             const authorizedToViewPortfolio = adviceDetail.isSubscribed || adviceDetail.isOwner || adviceDetail.isAdmin;
             return Promise.all([
                 authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null,
+                contestOnly ? fetchAjax(adviceContestUrl, this.props.history, this.props.match.url): null,
                 this.getAdvicePerformance(advicePerformanceResponse.data, benchmark)
             ])
         })
-        .then(([advicePortfolioResponse])  => {
+        .then(([advicePortfolioResponse, adviceContestResponse])  => {
             if (advicePortfolioResponse) {
                 this.getAdviceDetail(advicePortfolioResponse);
             }
+            const adviceActive = _.get(adviceContestResponse.data, 'active', false);
+            this.setState({adviceDetail: {...this.state.adviceDetail, active: adviceActive}});
         })
         .catch(error => {
             this.setState({

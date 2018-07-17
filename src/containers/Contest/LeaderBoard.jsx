@@ -1,6 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Row, Col, Badge} from 'antd';
+import {Row, Col, Badge, Icon, Button} from 'antd';
+import Radium, {StyleRoot} from 'radium';
 import AppLayout from '../AppLayout';
 import {primaryColor, verticalBox, horizontalBox, metricColor} from '../../constants';
 import {fetchAjax} from '../../utils';
@@ -61,18 +62,21 @@ export default class LeaderBoard extends React.Component {
         this.state = {
             advices: [], // list of advices currently participating in the contest
             selectedAdviceId: null,
-            loading: false
+            loading: false,
+            selectedPage: 0,
+            limit: 10
         };
     }
 
     renderLeaderboardListHeader = () => {
+        const disabledColor = '#BDBDBD';
+
         return (
             <Row
                     type="flex"
                     align="middle" 
                     style={{
                         borderBottom: '1px solid #eaeaea', 
-                        marginBottom: '20px',
                         backgroundColor: '#fff',
                         height: '40px',
                         borderTopLeftRadius: '4px',
@@ -82,7 +86,24 @@ export default class LeaderBoard extends React.Component {
             >
                 <Col span={12}>
                     <Row>
-                        <Col offset={4} span={20}>
+                        <Col span={2} style={{paddingLeft: '10px'}}>
+                            <Button
+                                style={{
+                                    fontSize: '20px', 
+                                    fontWeight: '700', 
+                                    color: this.state.selectedPage === 0 ? disabledColor : primaryColor,
+                                    backgroundColor: '#fff',
+                                    border: 'none',
+                                    marginTop: '-6px'
+                                }} 
+                                shape="circle"
+                                icon="left" 
+                                disabled={this.state.selectedPage === 0}
+                                onClick={() => this.handlePagination('previous')}
+                            />
+                        </Col>
+                        {/* <Col offset={4} span={20}> */}
+                        <Col offset={2} span={20}>
                             <h3 style={{color: primaryColor, fontSize: '14px'}}>ADVICE</h3>
                         </Col>
                     </Row>
@@ -93,8 +114,24 @@ export default class LeaderBoard extends React.Component {
                 <Col span={4}>
                     <h3 style={{color: primaryColor, fontSize: '14px'}}>VOLATILITY</h3>
                 </Col>
-                <Col span={4}>
+                <Col span={4} style={{...horizontalBox, position: 'relative'}}>
                     <h3 style={{color: primaryColor, fontSize: '14px'}}>SCORE</h3>
+                    <Button
+                        style={{
+                            fontSize: '20px', 
+                            fontWeight: '700', 
+                            color: this.state.advices.length % 10 !== 0 ? disabledColor : primaryColor,
+                            position: 'absolute',
+                            right: '20px',
+                            backgroundColor: '#fff',
+                            border: 'none'
+                        }} 
+                        type="primary"
+                        shape="circle"
+                        icon="right" 
+                        disabled={this.state.advices.length % 10 !== 0}
+                        onClick={() => this.handlePagination('next')}
+                    />
                 </Col>
             </Row>
         );
@@ -112,7 +149,7 @@ export default class LeaderBoard extends React.Component {
                     {
                         leaders.map((leader, index) => 
                             <LeaderItem 
-                                key={index} 
+                                selected={_.get(leader, 'adviceId', null) === this.state.selectedAdviceId}
                                 leaderItem={leader} 
                                 index={index + 1} 
                                 onClick={this.handleAdviceItemClicked} 
@@ -137,17 +174,17 @@ export default class LeaderBoard extends React.Component {
     // Gets the summary of the latest ongoing contest
     getLatestContestSummary = () => {
         this.setState({loading: true});
-        const contestSummaryUrl = `${requestUrl}/contest/${contestId}`;
+        const limit = this.state.limit;
+        const skip = this.state.selectedPage * limit;
+        const contestSummaryUrl = `${requestUrl}/contest/${contestId}/advices?skip=${skip}&limit=${limit}`;
         fetchAjax(contestSummaryUrl, this.props.history, this.props.match.params.url)
         .then(({data: contestSummaryData}) => {
             let advices = _.get(contestSummaryData, 'advices', []);
             advices = advices.map(advice => this.processAdviceForLeaderboardListItem(advice));
             advices = _.orderBy(advices, 'rank', 'asc');
-            console.log('Advices', advices);
             this.setState({advices, selectedAdviceId: advices[0].adviceId});
         })
         .catch(err => {
-            console.log(err);
             return err;
         })
         .finally(() => {
@@ -246,6 +283,16 @@ export default class LeaderBoard extends React.Component {
         }
     }
 
+    handlePagination = type => {
+        let {selectedPage = 0} = this.state;
+        selectedPage = type === 'next' ? selectedPage + 1 : selectedPage - 1;
+        this.setState({
+            selectedPage
+        }, () => {
+            this.getLatestContestSummary();
+        })
+    }
+
     componentWillMount() {
         this.getLatestContestSummary();
     }
@@ -312,12 +359,15 @@ export default class LeaderBoard extends React.Component {
                             // top: '100px'
                         }}
                 >
-                    <h3 
-                            onClick={() => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)} 
-                            style={adviceNameStyle}
-                    >
-                        {adviceName}
-                    </h3>
+                    <div style={{...horizontalBox, justifyContent: 'center'}}>
+                        <h3 
+                                onClick={() => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)} 
+                                style={adviceNameStyle}
+                        >
+                            {adviceName}
+                        </h3>
+                        <Icon type="right" style={{fontSize: '20px', color: primaryColor, marginTop: '10px', marginLeft: '10px'}}/>
+                    </div>
                     <MetricContainer 
                         header={this.renderMetricsHeader(_.get(selectedAdvice, 'rank', null), 'Current Performance', _.get(selectedAdvice, 'metrics.current.score', 0))}
                         metrics={currentMetrics} 
@@ -335,32 +385,34 @@ export default class LeaderBoard extends React.Component {
         return (
             <AppLayout
                 noFooter={true}
-                content={this.renderPageContent()}
+                content={<StyleRoot>{this.renderPageContent()}</StyleRoot>}
                 loading={this.state.loading}
             ></AppLayout>
         );
     }
 }
 
-const LeaderItem = ({leaderItem, index, onClick}) => {
+let LeaderItem = ({leaderItem, onClick, selected}) => {
     const containerStyle = {
         borderBottom: '1px solid #eaeaea',
-        marginBottom: '10px',
         cursor: 'pointer',
-        paddingBottom: '10px'
+        paddingBottom: '10px',
+        paddingTop: '15px',
+        marginTop: '10px',
+        backgroundColor: selected ? '#ECEFF1' : '#fff'
     };
     const adviceId = _.get(leaderItem, 'adviceId', null);
 
     return (
-        <Row style={containerStyle} onClick={() => onClick(adviceId)} >
+        <Row className='leader-item' style={containerStyle} onClick={() => onClick(adviceId)} >
             <Col span={12}>
                 <Row>
-                    <Col span={4}>
-                        <h3 style={{fontSize: '14px', margin: 0, width: '200px'}}>{leaderItem.rank} .</h3>
+                    <Col span={3}>
+                        <h3 style={{fontSize: '14px', margin: 0}}>{leaderItem.rank} .</h3>
                     </Col>
                     <Col span={20}>
                         <Row>
-                            <Col span={22}>
+                            <Col span={24}>
                                 <h3 style={{fontSize: '14px', margin: 0}}>{leaderItem.adviceName}</h3>
                             </Col>
                             <Col span={24}>
@@ -373,15 +425,15 @@ const LeaderItem = ({leaderItem, index, onClick}) => {
             <Col span={4}>
                 <h3 style={{fontSize: '14px'}}>{((leaderItem.metrics.current.totalReturn).metricValue * 100).toFixed(2)} %</h3>
             </Col>
-            <Col span={4}>
+            <Col span={4} style={{paddingLeft: '10px'}}>
                 <h3 style={{fontSize: '14px'}}>{((leaderItem.metrics.current.volatility).metricValue * 100).toFixed(2)} %</h3>
             </Col>
-            <Col span={4}>
+            <Col span={4} style={{paddingLeft: '12px'}}>
                 <h3 style={{fontSize: '14px'}}>{(leaderItem.metrics.current.score).toFixed(2)} / 100</h3>
             </Col>
         </Row>
     );
-}
+};
 
 const MetricContainer = ({header, metrics}) => {
     return (
@@ -413,7 +465,7 @@ const MetricContainer = ({header, metrics}) => {
     );
 }
 
-const ContestMetricItems = ({metricValue, rank, label}) => {
+let ContestMetricItems = ({metricValue, rank, label}) => {
     const containerStyle = {
         marginBottom: '10px'
     };
@@ -452,3 +504,4 @@ const ContestMetricItems = ({metricValue, rank, label}) => {
         </Col>
     );
 }
+

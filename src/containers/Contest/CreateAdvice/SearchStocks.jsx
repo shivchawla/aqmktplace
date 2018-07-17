@@ -1,6 +1,6 @@
 import * as React from 'react';
 import _  from 'lodash';
-import {Row, Col, Input, Icon, Checkbox, Button, Tag} from 'antd';
+import {Row, Col, Input, Icon, Badge, Button, Tag} from 'antd';
 import {StockPerformance} from './StockPerformance';
 import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../constants';
 import {fetchAjax, Utils} from '../../../utils';
@@ -18,7 +18,8 @@ export class SearchStocks extends React.Component {
             searchInput: '',
             selectedStock: '',
             selectedStocks: [], // This will contain the symbols of all stocks that are selected
-            selectedPage: 0
+            selectedPage: 0,
+            portfolioLoading: false
         };
     }
 
@@ -104,7 +105,7 @@ export class SearchStocks extends React.Component {
         }).filter(stock => stock.name !== null);
     }
 
-    conditionallyAddItemToSelectedArray = (symbol, addToPortfolio = true) => {
+    conditionallyAddItemToSelectedArray = (symbol, addToPortfolio = false) => {
         const selectedStocks = [...this.state.selectedStocks];
         const stocks = [...this.state.stocks];
         const selectedStockIndex = selectedStocks.indexOf(symbol);
@@ -117,20 +118,31 @@ export class SearchStocks extends React.Component {
                 selectedStocks.splice(selectedStockIndex, 1);
                 targetStock.checked = false;
             }
-            this.setState({selectedStocks, stocks}, () => {
-                const position = {
-                    key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                    name: _.get(targetStock, 'name', ''),
-                    sector: _.get(targetStock, 'sector', null),
-                    lastPrice: targetStock.current,
-                    shares: 1,
-                    symbol: symbol,
-                    ticker: symbol,
-                    totalValue: targetStock.current,
-                };
-                addToPortfolio && this.props.addPosition(position);
-            });
+            this.setState({selectedStocks, stocks});
         }
+    }
+
+    addSelectedStocksToPortfolio = () => {
+        let stocks = [...this.state.stocks];
+        stocks = stocks.filter(stock => stock.checked === true);
+        const positions = stocks.map(stock => {
+            return {
+                key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                name: _.get(stock, 'name', ''),
+                sector: _.get(stock, 'sector', null),
+                lastPrice: stock.current,
+                shares: 1,
+                symbol: stock.symbol,
+                ticker: stock.symbol,
+                totalValue: stock.current,
+            };
+        });
+        this.setState({portfolioLoading: true});
+        this.props.addPositions(positions)
+        .then(() => {
+            this.props.toggleBottomSheet();
+            this.setState({portfolioLoading: false});
+        })
     }
 
     componentWillReceiveProps(nextProps) {
@@ -200,14 +212,17 @@ export class SearchStocks extends React.Component {
         const universe = _.get(this.props, 'filters.universe', null);
         const sector = _.get(this.props, 'filters.sector', null);
         const industry = _.get(this.props, 'filters.industry', null);
-        const toggleIconType = this.state.selectedStocks.length === 0 ? 'close-circle' : 'plus-square';
         const toggleIconColor = this.state.selectedStocks.length === 0 ? textColor : primaryColor;
 
         return (
             <Row>
-                <Col span={24} style={{...topHeaderContainer, borderBottom: '1px solid'}}>
-                    
-                    <Row type="flex" align="middle" style={{padding: '10px 20px 5px 20px'}}>
+                <Col span={24} style={{...topHeaderContainer, borderBottom: '1px solid #DFDFDF'}}>
+                    <Row type="flex" align="middle" style={{padding: '10px 20px 5px 0px'}}>
+                        <Icon 
+                            style={{fontSize: '24px', cursor: 'pointer', color: toggleIconColor, marginRight: '20px'}} 
+                            type="close-circle"
+                            onClick={this.props.toggleBottomSheet}
+                        />
                         <h3 style={{fontSize: '24px', marginRight: '10px'}}>Add Stocks to your Portfolio</h3>
                             <span style={{fontSize: '14px', marginRight: '5px'}}> Allowed Universe: </span>
                             {industry && 
@@ -224,18 +239,23 @@ export class SearchStocks extends React.Component {
                     </Row>
 
                     {
-                        this.state.selectedStocks.length === 0 
-                        ?   <Icon 
-                                style={{fontSize: '24px', cursor: 'pointer', color: toggleIconColor}} 
-                                type={toggleIconType}
-                                onClick={this.props.toggleBottomSheet}
+                        this.state.selectedStocks.length > 0 &&
+                        <Button 
+                                onClick={this.addSelectedStocksToPortfolio} 
+                                type="primary" 
+                                loading={this.state.portfolioLoading}
+                        >
+                            ADD
+                            <Badge 
+                                style={{
+                                    backgroundColor: '#fff', 
+                                    color: primaryColor, 
+                                    fontSize: '16px', 
+                                    marginLeft: '5px'
+                                }} 
+                                count={this.state.selectedStocks.length}
                             />
-                        :   <Button 
-                                    onClick={this.props.toggleBottomSheet} 
-                                    type="primary" 
-                            >
-                                ADD ({this.state.selectedStocks.length})
-                            </Button>
+                        </Button>
                     }
                 </Col>
 
@@ -257,7 +277,8 @@ const StockListItem = ({symbol, name, change, changePct, close, open, current, o
         // marginTop: '20px',
         cursor: 'pointer',
         backgroundColor: selected ? '#CFD8DC' : '#fff',
-        padding: '10px'
+        padding: '10px',
+        paddingRight: '0px'
     };
 
     const detailContainerStyle = {
@@ -277,9 +298,6 @@ const StockListItem = ({symbol, name, change, changePct, close, open, current, o
 
     return (
         <Row className='stock-row' style={containerStyle} type="flex" align="middle">
-            <Col span={1} onClick={() => onAddIconClick(symbol)}>
-                <AddIcon checked={checked}/>
-            </Col>
             <Col span={15} style={leftContainerStyle} onClick={() => onClick({symbol, name})}>
                 <div style={horizontalBox}>
                     <h3 style={{fontSize: '16px', fontWeight: '700'}}>{symbol}</h3>
@@ -296,6 +314,9 @@ const StockListItem = ({symbol, name, change, changePct, close, open, current, o
                     <h3 style={{color: changeColor, marginLeft: '5px', fontSize: '14px'}}>({change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(nChangePct)} %)</h3>
                 </div>
             </Col>
+            <Col span={1} onClick={() => onAddIconClick(symbol)}>
+                <AddIcon checked={checked}/>
+            </Col>
         </Row>
     );
 }
@@ -310,5 +331,6 @@ const AddIcon = ({checked = false}) => {
 const topHeaderContainer = {
     ...horizontalBox,
     justifyContent: 'space-between',
-    borderBottom: '1px solid lightgrey'
+    borderBottom: '1px solid lightgrey',
+    padding: '0 20px'
 };

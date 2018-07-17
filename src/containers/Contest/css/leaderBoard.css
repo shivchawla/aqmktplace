@@ -1,3 +1,14 @@
 h1, h2, h3, h4, h5 {
     margin: 0;
 }
+.leader-item {
+    background-color: '#fff';
+    transition: all 0.4s ease-in-out;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.leader-item:hover {
+    box-shadow: 0 6px 10px rgba(171, 171, 171, 0.5);
+    background-color: '#B2DFDB'
+}

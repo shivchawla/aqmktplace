@@ -73,7 +73,7 @@ export class PortfolioPieChart extends React.Component {
     render() {
         return (
             <Row style={{backgroundColor: '#fff', padding: '10px'}}>
-                <Col span={24} style={{marginLeft: '-20px'}}>
+                <Col span={24}>
                     <HighChartNew
                         maxSlices={8}
                         maxWeight={90} 
