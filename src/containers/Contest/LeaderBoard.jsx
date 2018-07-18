@@ -1,12 +1,13 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Row, Col, Badge, Icon, Button, Select, Radio} from 'antd';
+import {Row, Col, Badge, Icon, Button, Select, Radio, Tooltip} from 'antd';
 import Radium, {StyleRoot} from 'radium';
 import AppLayout from '../AppLayout';
 import {primaryColor, verticalBox, horizontalBox, metricColor} from '../../constants';
 import {fetchAjax} from '../../utils';
 import './css/leaderBoard.css';
 import {formatMetric} from './utils';
+import {metricDefs} from './constants';
 
 const Option = Select.Option;
 const RadioButton = Radio.Button;
@@ -249,9 +250,6 @@ export default class LeaderBoard extends React.Component {
         const rank = _.get(advice, 'latestRank.value', null);
         const simulatedRank = _.get(advice, 'latestRank.rating.simulated.rank', null);
 
-        console.log(currentAdviceMetrics);
-        console.log(this.getAdviceMetric(simulatedAdviceMetrics, 'concentration'));
-
         return {
             adviceName,
             advisorName,
@@ -265,7 +263,7 @@ export default class LeaderBoard extends React.Component {
                     sharpe: {label: 'Information Ratio', ...this.getAdviceMetric(currentAdviceMetrics, 'sharpe')},
                     score: Number((_.get(advice, 'latestRank.rating.current.value') || 0).toFixed(2)),
                     calmar: {label: 'Calmar Ratio', ...this.getAdviceMetric(currentAdviceMetrics, 'calmar')},
-                    concentration: {label: 'Diversification', ...this.getAdviceMetric(currentAdviceMetrics, 'concentration')},
+                    concentration: {label: 'Concentration', ...this.getAdviceMetric(currentAdviceMetrics, 'concentration')},
                     //alpha: {label: 'Alpha', ...this.getAdviceMetric(currentAdviceMetrics, 'alpha')},
                 },
                 simulated: {
@@ -277,7 +275,7 @@ export default class LeaderBoard extends React.Component {
                     score: Number((_.get(advice, 'latestRank.rating.simulated.value') || 0).toFixed(2)),
                     //alpha: {label: 'Alpha', ...this.getAdviceMetric(simulatedAdviceMetrics, 'alpha')},
                     calmar: {label: 'Calmar Ratio', ...this.getAdviceMetric(simulatedAdviceMetrics, 'calmar')},
-                    concentration: {label: 'Diversification', ...this.getAdviceMetric(simulatedAdviceMetrics, 'concentration')}
+                    concentration: {label: 'Concentration', ...this.getAdviceMetric(simulatedAdviceMetrics, 'concentration')}
                 }
             },
             rank,
@@ -329,7 +327,8 @@ export default class LeaderBoard extends React.Component {
                 return {
                     metricValue: adjustedVal,
                     rank: adviceMetrics[key].rank,
-                    label: adviceMetrics[key].label
+                    label: adviceMetrics[key].label,
+                    tooltip: _.get(metricDefs, key, "")
                 };
             })
         } else {
@@ -356,11 +355,11 @@ export default class LeaderBoard extends React.Component {
             <Row >
                 <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
                     
-                    <h3 style={{marginLeft: '5px', fontWeight: 300}}><span style={{color: primaryColor, marginRight:'4px'}}>{rank}</span>{header}</h3>
+                    <h3 style={{marginLeft: '5px', fontWeight: 400, fontSize: '14px'}}><span style={{color: primaryColor, marginRight:'4px'}}>{rank}</span>{header}</h3>
                 </Col>
                 <Col span={24} style={verticalBox}>
-                    <h3 style={{fontSize: '14px', fontWeight: 300}}>
-                        Score: <span style={{fontSize: '16px', fontWeight: 300}}>{score}</span>
+                    <h3 style={{fontSize: '14px', fontWeight: 400}}>
+                        Score: <span style={{fontSize: '14px', fontWeight: 400}}>{score}</span>
                     </h3>
                 </Col>
             </Row>
@@ -438,7 +437,7 @@ export default class LeaderBoard extends React.Component {
                         height:'500px'
                     }}
                 >
-                    <div style={{...horizontalBox, marginTop:'0px', justifyContent: 'center', borderTop:`0px solid ${primaryColor}`, borderBottom: '1px solid lightgrey', color: primaryColor, backgroundColor: '#fff'}}>
+                    <div style={{...horizontalBox, marginTop:'0px', justifyContent: 'center', borderTop:`0px solid ${primaryColor}`, borderBottom: `1px solid ${primaryColor}`, color: primaryColor, backgroundColor: '#fff'}}>
                         <h3  style={adviceNameStyle}>
                             {adviceName}
                         </h3>
@@ -559,7 +558,7 @@ const MetricContainer = ({header, metrics}) => {
     );
 }
 
-let ContestMetricItems = ({metricValue, rank, label}) => {
+let ContestMetricItems = ({metricValue, rank, label, tooltip}) => {
     const containerStyle = {
         marginBottom: '10px'
     };
@@ -571,6 +570,7 @@ let ContestMetricItems = ({metricValue, rank, label}) => {
     // const rankBadgeColor = rank === 1 ? metricColor.positive : '#565656d9';
     // const metricValueRounded = (metricValue || 0).toFixed(2);
 
+    console.log(tooltip);
 
     return (
         <Col span={24} style={containerStyle}>
@@ -587,8 +587,11 @@ let ContestMetricItems = ({metricValue, rank, label}) => {
                 >
                 </Col>
                 <Col span={20} style={{...verticalBox, width: 'fit-content'}}>
-                    <h5 style={{fontSize: '16px', display: 'inline-block', fontWeight: 300}}><span style={{backgroundColor: '#fff', color: primaryColor, marginRight: '4px'}}>{rank}</span>{label}</h5>
-                    <h5 style={{fontSize: '16px', display: 'inline-block', fontWeight: 300}}>{metricValue}</h5>
+                    <Tooltip title={tooltip} placement="top">
+                        <h5 style={{fontSize: '14px', display: 'inline-block', fontWeight: 400}}><span style={{backgroundColor: '#fff', color: primaryColor, marginRight: '4px'}}>{rank}</span>{label}</h5>
+                    </Tooltip>
+                    <h5 style={{fontSize: '14px', display: 'inline-block', fontWeight: 400}}>{metricValue}</h5>
+                    
                 </Col>
             </Row>
         </Col>

@@ -55,34 +55,28 @@ class AppLayout extends React.Component {
                         mode="horizontal"
                         onClick={this.handleNavMenuClick}
                         selectedKeys={[this.state.parentPath]}
-                >
-                    {
-                        Utils.isLoggedIn() &&
-                        <Menu.Item 
-                                key="contest" 
-                                style={{...horizontalBox, fontSize: '16px', fontWeight: 700, color: '#595959'}}
-                        >
-                            {/* <div style={verticalBox}>
-                                <h3 style={{...horizontalBox, fontSize: '16px', fontWeight: 700, color: '#595959'}}> */}
-                                    CONTEST
-                                    <Badge 
-                                        style={{marginLeft: '5px'}} 
-                                        status="processing" 
-                                        color={primaryColor}
-                                    />
-                                {/* </h3>
-                            </div> */}
-                        </Menu.Item>
-                    }
-                    {
-                        Utils.isLoggedIn() &&
-                        <Menu.Item key="dashboard">Dashboard</Menu.Item>
-                    }
+                >   
                     {
                         !Utils.isLoggedIn() &&
                         <Menu.Item key={'home'}>Home</Menu.Item>
                     }
+                    
+                    <Menu.Item 
+                            key="contest" 
+                            style={{...horizontalBox, color: '#595959'}}
+                    >
+                        Contest
+                        <div style={{marginTop: '-15px', fontSize: '10px', color:'red'}}>NEW</div>
+                                
+                    </Menu.Item>
+
+                    {
+                        Utils.isLoggedIn() &&
+                        <Menu.Item key="dashboard">Dashboard</Menu.Item>
+                    }
+
                     <Menu.Item key="advice">Screen Advices</Menu.Item>
+                    
                     {
                         Utils.isLoggedIn() &&
                         <Menu.Item key="stockresearch">Stock Research</Menu.Item>
