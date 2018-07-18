@@ -657,7 +657,7 @@ class ContestAdviceFormImpl extends React.Component {
                                     loading={this.state.adviceSubmissionLoading}
                                     disabled={this.getPortfolioValidationErrors().length || this.state.positions.length < 1}
                             >
-                                {this.props.isUpdate ? 'UPDATE ENTRY' : 'SUBMIT ENTRY'}
+                                {this.props.isUpdate ? 'UPDATE ENTRY' : 'ENTER CONTEST'}
                             </Button>
                         </Col>
                         {
