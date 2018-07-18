@@ -6,7 +6,7 @@ import HighStock from '../../../containers/MyChartNew';
 import {AqPerformanceMetrics} from '../../../components/AqPerformanceMetrics';
 import {MetricItem} from '../../../components/MetricItem';
 import {getStockData, getStockPerformance, Utils} from '../../../utils';
-import {horizontalBox} from '../../../constants';
+import {horizontalBox, verticalBox} from '../../../constants';
 
 class StockPerformanceImpl extends React.Component {
     constructor(props) {
@@ -15,7 +15,8 @@ class StockPerformanceImpl extends React.Component {
             series: {name: 'Stock Performance', data: []},
             loading: false,
             rollingPerformance: {},
-            latestDetail: {}
+            latestDetail: {},
+            showErrorScreen: false
         };
     }
 
@@ -45,11 +46,15 @@ class StockPerformanceImpl extends React.Component {
             this.setState({
                 latestDetail: this.getPriceMetrics(latestDetail),
                 series: {...this.state.series, data: stockPerformance},
-                rollingPerformance: _.get(rollingPerformanceResponse, 'data.rollingPerformance.detail', {})
+                rollingPerformance: _.get(rollingPerformanceResponse, 'data.rollingPerformance.detail', {}),
+                showErrorScreen: false
             });
         })
-        .catch(err => {
-            console.log(err);
+        .catch(error => {
+            const errorStatus = _.get(error, 'response.status', null);
+            if (errorStatus === 400 || errorStatus === 403) {
+                this.setState({showErrorScreen: true});
+            }
         })
         .finally(() => {
             this.setState({loading: false});
@@ -139,7 +144,6 @@ class StockPerformanceImpl extends React.Component {
     }
 
     renderPageContent = () => {
-
         const TabPane = Tabs.TabPane;
         return (
             <Col style={{padding:'0px 30px', alignItems:'center'}}>
@@ -148,38 +152,50 @@ class StockPerformanceImpl extends React.Component {
                         <h3 style={{fontSize: '16px', fontWeight: '700'}}>{this.props.stock.symbol}: {this.props.stock.name}</h3>
                     </Col>
                 </Row>
+                {
+                    this.state.showErrorScreen 
+                    ?   this.showErrorScreen()
+                    :   <Tabs defaultActiveKey="1" animated={false}>
+                            <TabPane tab="Price Chart" key="1">
+                                <Col span={24} style={{marginTop: '0px'}}>
+                                    <HighStock series={[this.state.series]} />
+                                </Col>
+                            </TabPane>
+                            
+                            <TabPane tab="Price Metrics" key="2">
+                                <Col span={24} style={{marginTop: '20px'}}>
+                                    {this.renderPriceMetrics()}
+                                    {/*this.renderLatestDetail()*/}
+                                </Col>
+                            </TabPane>
 
-                <Tabs defaultActiveKey="1" animated={false}>
-                    <TabPane tab="Price Chart" key="1">
-                        <Col span={24} style={{marginTop: '0px'}}>
-                            <HighStock series={[this.state.series]} />
-                        </Col>
-                    </TabPane>
-                    
-                    <TabPane tab="Price Metrics" key="2">
-                        <Col span={24} style={{marginTop: '20px'}}>
-                            {this.renderPriceMetrics()}
-                            {/*this.renderLatestDetail()*/}
-                        </Col>
-                    </TabPane>
-
-                    <TabPane tab="Rolling Performance" key="3">
-                        <Col span={24} style={{marginTop: '20px', height:'200px'}}>
-                            <AqPerformanceMetrics 
-                                type="new"
-                                rollingPerformance={this.state.rollingPerformance} 
-                                style={{height: '100%', border:'none'}}
-                                noTitle
-                                selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
-                            />
-                            {/*<Col span={12} style={{height: '200px'}}>
-                                {this.renderPriceMetrics()}
-                            </Col>*/}
-                        </Col>
-                    </TabPane>
-                    
-                </Tabs>
+                            <TabPane tab="Rolling Performance" key="3">
+                                <Col span={24} style={{marginTop: '20px', height:'200px'}}>
+                                    <AqPerformanceMetrics 
+                                        type="new"
+                                        rollingPerformance={this.state.rollingPerformance} 
+                                        style={{height: '100%', border:'none'}}
+                                        noTitle
+                                        selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
+                                    />
+                                    {/*<Col span={12} style={{height: '200px'}}>
+                                        {this.renderPriceMetrics()}
+                                    </Col>*/}
+                                </Col>
+                            </TabPane>
+                        </Tabs>
+                }
             </Col>
+        );
+    }
+
+    showErrorScreen = () => {
+        return (
+            <Row>
+                <Col span={24} style={verticalBox}>
+                    <h3 style={{fontSize: '14px'}}>Oops, No data found.</h3>
+                </Col>
+            </Row>
         );
     }
 

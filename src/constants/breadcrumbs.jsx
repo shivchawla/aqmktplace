@@ -11,6 +11,10 @@ export const AdviceDetailCrumb = [
     {name: 'Screen Advices', url: '/advice'}
 ];
 
+export const ContestAdviceDetailCrumb = [
+    {name: 'Leaderboard', url: '/contest/leaderboard'}
+];
+
 export const UpdateAdviceCrumb = [
     //...AdviceDetailCrumb
    ...CreateAdviceCrumb

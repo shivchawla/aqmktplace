@@ -55,12 +55,7 @@ class AppLayout extends React.Component {
                         mode="horizontal"
                         onClick={this.handleNavMenuClick}
                         selectedKeys={[this.state.parentPath]}
-                >   
-                    {
-                        !Utils.isLoggedIn() &&
-                        <Menu.Item key={'home'}>Home</Menu.Item>
-                    }
-                    
+                >                       
                     <Menu.Item 
                             key="contest" 
                             style={{...horizontalBox, color: '#595959'}}

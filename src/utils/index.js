@@ -110,12 +110,12 @@ export class Utils{
 		return "/assets/policy/tnc.txt";
 	}
 
-	static goToLoginPage(history, fromUrl){
+	static goToLoginPage(history, fromUrl, redirect=false){
 		if (fromUrl){
 			this.localStorageSave('redirectToUrlFromLogin', fromUrl);
 		}
 		if (history){
-			Utils.logoutUser();
+			!redirect && Utils.logoutUser();
 			history.push('/login');
 		}
 	}

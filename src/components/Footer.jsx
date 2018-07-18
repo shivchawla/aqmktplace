@@ -137,6 +137,15 @@ class FooterImpl extends React.Component{
                 <Row className="footer" style={{marginTop: this.props.windowWidth ? '0px' : '100px', ...this.props.style}}>
                 {this.renderContactUsModal()}
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
+                    <h5 className="footer-group-header">Company</h5>
+                    <div className="footer-list">
+                        <Link className="footer-link" to="/aboutus">About Us</Link>
+                        <Link className="footer-link" to="/aboutus/whoWeAre">People</Link>
+                        <Link className="footer-link" to="/aboutus/careers">Careers</Link>
+                        <Link className="footer-link" to="/aboutus/connectWithUs">Connect</Link>
+                    </div>
+                </Col>
+                <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">Other Products</h5>
                     <div className="footer-list">
                         <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home`}>Quant Research</a>
@@ -149,13 +158,13 @@ class FooterImpl extends React.Component{
                         <Link className="footer-link" to="/policies/privacy">Privacy Policy</Link>
                     </div>
                 </Col>
-                <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
+                {/* <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">AimsQuant</h5>
                     <div className="footer-list">
                         <a className="footer-link" target="_blank" href={`${aimsquantUrl}/community`}>Community</a>
                         <a className="footer-link" target="_blank" href={`${aimsquantUrl}/research`}>Research</a>
                     </div>
-                </Col>
+                </Col> */}
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">Help</h5>
                     <div className="footer-list">

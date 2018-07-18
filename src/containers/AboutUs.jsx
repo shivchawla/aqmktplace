@@ -267,4 +267,4 @@ export default Form.create()(AboutUs);
 const contactUsInputStyle = {
   fontSize: '14px',
   color: '#4C4C4C'
-}
+};

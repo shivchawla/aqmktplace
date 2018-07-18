@@ -6,6 +6,7 @@ import {scoringMetrics, faqs, howItWorksContents, prizes, criterias, prizeText, 
 import {processAdviceForLeaderboardListItem} from './utils';
 import {fetchAjax} from '../../utils';
 import AppLayout from '../../containers/AppLayout';
+import logo from "../../assets/logo-advq-new.png";
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -93,7 +94,7 @@ export default class ContestHome extends React.Component {
                                     striped={index % 2 === 0}
                                     rank={index + 1} 
                                     name={advice.advisorName}
-                                    score={_.get(advice, 'metrics.simulated.score', 0)}
+                                    score={_.get(advice, 'metrics.current.score', 0)}
                                 />
                             );
                         })
@@ -123,13 +124,31 @@ export default class ContestHome extends React.Component {
             <Col span={24} style={containerStyle}>
                 <Row style={{height: '100%'}}>
                     <Col span={16} style={{...verticalBox, height: '100%'}}>
+                        <div style={{
+                            display: 'flex', 
+                            flexDirection: 'row', 
+                            alignItems: 'center',
+                            position: 'absolute',
+                            left: '20px',
+                            top: '20px'
+                        }}>
+                            <img src={logo} style={{height: '40px', marginTop: '-10px'}}/>
+                            {/* <h1 onClick={() => this.props.history.push('/home')} 
+                                style={{...headerColor, cursor: 'pointer', marginLeft: '10px', marginTop: '-5px'}}>
+                                <span style={{...biggerFont, color:'#fff'}}>A</span>
+                                <span style={{color: '#fff'}}>DVICE</span>
+                                <span style={{...biggerFont, color: '#fff'}}>Q</span>
+                                <span style={{color: '#fff'}}>UBE</span>
+
+                            </h1> */}
+                        </div>
                         <h1 style={{color: '#fff', fontSize: '40px', fontWeight: 300}}>Investment Idea Contest</h1>
                         <h3 style={{color: '#fff', fontSize: '18px', fontWeight: 300}}>Beat the market and win cash prizes every week</h3>
   
                         <Button 
                                 icon="rocket" 
                                 style={buttonStyle}
-                                onClick={() => this.props.history.push('/contest/createadvice/how')}
+                                onClick={() => this.props.history.push('/contest/createadvice')}
                         >
                             Submit Entry
                         </Button>
@@ -234,7 +253,7 @@ export default class ContestHome extends React.Component {
 
         return (
             <Col span={16} style={containerStyle}>
-                <Tabs animated={false} defaultActiveKey="5">
+                <Tabs animated={false} defaultActiveKey="1">
                     <TabPane tab="HOW IT WORKS" key="1">{this.renderHowItWorks()}</TabPane>
                     <TabPane tab="PRIZES" key="2">{this.renderPrizeList()}</TabPane>
                     <TabPane tab="CRITERIA" key="3">{this.renderCriteriaList()}</TabPane>
@@ -281,7 +300,7 @@ export default class ContestHome extends React.Component {
 
         return (
             <Col span={8} style={containerStyle}>
-                <Row style={{width: '100%', position: 'relative'}}>
+                <Row style={{position: 'relative'}}>
                     <Col span={24} style={headerContainer}>
                         <h3 style={{color: '#fff'}}>LEADERBOARD</h3>
                         {this.renderContestDropdown()}
@@ -467,3 +486,14 @@ const cardContentTextStyle = {
     fontSize: '15px',
     color: '#596572'
 };
+
+const headerColor = {
+    color: '#595959',
+    fontSize: '16px'
+};
+
+const biggerFont = {
+    fontSize: '24px',
+    fontWeight: '400',
+    //color: primaryColor
+}

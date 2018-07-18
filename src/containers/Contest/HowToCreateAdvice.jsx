@@ -6,6 +6,7 @@ import AppLayout from '../../containers/AppLayout';
 import selectStocksSvg from '../../assets/SelectStocks1.svg';
 import selectBenchmarkSvg from '../../assets/SelectBenchmark.svg';
 import submitEntrySvg from '../../assets/SubmitEntry1.svg';
+import {Utils} from '../../utils';
 
 const StepDescription = ({title, image}) => {
     const containerStyle = {
@@ -61,15 +62,26 @@ class HowToCreateAdvice extends React.Component {
 
                  <Col style={{textAlign:'center', marginTop: '-5px'}}>
                     <Button 
-                        type="primary" 
-                        style={{fontWeight: 300, width: '200px', fontSize: '18px'}}
-                        onClick={() => this.props.history.push('/contest/createadvice/edit')}>
+                            type="primary" 
+                            style={{fontWeight: 300, width: '200px', fontSize: '18px'}}
+                            onClick={() => this.props.history.push('/contest/createadvice/edit')}
+                    >
                         CREATE
                     </Button>
                 </Col>
                
             </Row>
         );
+    }
+
+    componentDidMount() {
+        if (!Utils.isLoggedIn()) {
+            Utils.goToLoginPage(this.props.history, this.props.match.url, true);
+        } else {
+            if (this.props.isUpdate) {
+                this.getAdvice(this.props.adviceId);
+            }
+        }
     }
 
     render() {
