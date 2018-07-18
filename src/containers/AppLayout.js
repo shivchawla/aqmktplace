@@ -1,9 +1,9 @@
 import * as React from 'react';
 import Media from 'react-media';
-import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
+import {Layout, Menu, Row, Col, Badge} from 'antd';
 import withRouter from 'react-router-dom/withRouter';
 import {Utils} from '../utils';
-import {primaryColor, verticalBox} from '../constants';
+import {primaryColor, verticalBox, horizontalBox} from '../constants';
 import logo from "../assets/logo-advq-new.png";
 import {Footer as AqFooter} from '../components/Footer';
 import Loading from 'react-loading-bar';
@@ -58,12 +58,20 @@ class AppLayout extends React.Component {
                 >
                     {
                         Utils.isLoggedIn() &&
-                        <Menu.Item key="contest">
-                            <div style={verticalBox}>
-                                <h3 style={{fontSize: '16px', fontWeight: 700, color: '#595959'}}>
-                                    CONTEST <span style={{color: primaryColor, fontSize: '12px'}}>(NEW)</span>
-                                </h3>
-                            </div>
+                        <Menu.Item 
+                                key="contest" 
+                                style={{...horizontalBox, fontSize: '16px', fontWeight: 700, color: '#595959'}}
+                        >
+                            {/* <div style={verticalBox}>
+                                <h3 style={{...horizontalBox, fontSize: '16px', fontWeight: 700, color: '#595959'}}> */}
+                                    CONTEST
+                                    <Badge 
+                                        style={{marginLeft: '5px'}} 
+                                        status="processing" 
+                                        color={primaryColor}
+                                    />
+                                {/* </h3>
+                            </div> */}
                         </Menu.Item>
                     }
                     {
@@ -208,7 +216,7 @@ class AppLayout extends React.Component {
                 />
                 {
                     !this.props.loading &&
-                    <div style={{backgroundColor: '#f9f9f9', height:'100%'}}> 
+                    <div style={{height:'100%'}}> 
                         
                         {!this.props.noHeader &&
                             this.renderHeader()

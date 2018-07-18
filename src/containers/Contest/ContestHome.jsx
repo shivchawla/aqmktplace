@@ -73,7 +73,7 @@ export default class ContestHome extends React.Component {
 
     renderWinnerRankingList = () => {
         return (
-            <Row>
+            <Row style={{position: 'relative'}}>
                 <Col span={24} style={{padding: '10px'}}>
                     <Row>
                         <Col span={4} style={{fontSize: '16px', color: primaryColor}}>Rank</Col>
@@ -81,7 +81,11 @@ export default class ContestHome extends React.Component {
                         <Col span={4} style={{fontSize: '16px', color: primaryColor}}>Score</Col>
                     </Row>
                 </Col>
-                <Col span={24}>
+                <Col 
+                        className='ranking-container'
+                        span={24} 
+                        style={{overflow: 'hiddden', overflowY: 'scroll'}}
+                >
                     {
                         this.state.advices.map((advice, index) => {
                             return (
@@ -213,9 +217,9 @@ export default class ContestHome extends React.Component {
                     }
                 </Col>
                     
-                <Col span={24} style={{...verticalBox, alignItems: 'flex-start', padding: '15px'}}>
-                    {/*<h1>{this.state.metric.title}</h1>*/}
-                    <h3>{this.state.metric.detail}</h3>
+                <Col span={24} style={{...verticalBox, alignItems: 'flex-start', padding: '15px', paddingLeft: 0}}>
+                    <h1>{this.state.metric.header}</h1>
+                    <h3>{this.state.metric.content}</h3>
                 </Col>
             </Row>
         );
@@ -230,7 +234,7 @@ export default class ContestHome extends React.Component {
 
         return (
             <Col span={16} style={containerStyle}>
-                <Tabs animated={false} defaultActiveKey="4">
+                <Tabs animated={false} defaultActiveKey="5">
                     <TabPane tab="HOW IT WORKS" key="1">{this.renderHowItWorks()}</TabPane>
                     <TabPane tab="PRIZES" key="2">{this.renderPrizeList()}</TabPane>
                     <TabPane tab="CRITERIA" key="3">{this.renderCriteriaList()}</TabPane>
@@ -271,12 +275,13 @@ export default class ContestHome extends React.Component {
             width: '100%',
             padding: '10px',
             backgroundColor: '#607D8B',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            position: 'relative'
         }
 
         return (
             <Col span={8} style={containerStyle}>
-                <Row style={{width: '100%'}}>
+                <Row style={{width: '100%', position: 'relative'}}>
                     <Col span={24} style={headerContainer}>
                         <h3 style={{color: '#fff'}}>LEADERBOARD</h3>
                         {this.renderContestDropdown()}
@@ -285,6 +290,22 @@ export default class ContestHome extends React.Component {
                         {this.renderWinnerRankingList()}
                     </Col>
                 </Row>
+                <Button
+                        className='button-container' 
+                        span={24} 
+                        style={{
+                            position: 'absolute', 
+                            bottom: '20px', 
+                            zIndex: '20px',
+                            backgroundColor: primaryColor,
+                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                            cursor: 'pointer',
+                            color:'#fff'
+                        }}
+                        onClick={() => this.props.history.push('/contest/leaderboard')}
+                >
+                    MORE
+                </Button>
             </Col>
         );
     }
@@ -310,8 +331,8 @@ export default class ContestHome extends React.Component {
         const selectedItem = scoringMetrics.filter(metric => metric.header === header)[0];
         this.setState({
             metric: {
-                title: selectedItem.header,
-                detail: selectedItem.content
+                header: selectedItem.header,
+                content: selectedItem.content
             }
         });
     }
@@ -395,12 +416,13 @@ const FAQCard = ({header, content, span=12}) => {
     const containerStyle = {
         ...verticalBox,
         alignItems: 'flex-start',
+        justifyContent: 'flex-start',
         padding: '0 10px',
-        marginBottom: '60px'
+        marginBottom: '60px',
     };
 
     return (
-        <Col span={span} style={containerStyle}>
+        <Col span={12} style={containerStyle}>
             <h3 style={cardHeaderTextStyle}>{header}</h3>
             <h5 style={cardContentTextStyle}>{content}</h5>
         </Col>
@@ -422,13 +444,13 @@ const MetricCard = ({header, content, span=24, onClick}) => {
     };
 
     return (
-        <Tag>{header}</Tag>
+        <Tag onClick={() => onClick(header)}>{header}</Tag>
     );
 }
 
 const LeaderboardItem = ({rank, name, score, striped=false}) => {
     return (
-        <Row style={{padding: '20px 10px', backgroundColor: striped ? '#ECEFF1' : '#fff'}}>
+        <Row style={{padding: '15px 10px', backgroundColor: striped ? '#ECEFF1' : '#fff'}}>
             <Col span={4} style={{fontSize: '16px'}}>{rank}</Col>
             <Col span={16} style={{fontSize: '16px'}}>{name}</Col>
             <Col span={4} style={{fontSize: '16px'}}>{score}</Col>
