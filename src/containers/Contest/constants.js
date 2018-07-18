@@ -7,9 +7,19 @@ export const scoringMetrics = [
     {header: 'Tracking Errror', content: 'Annualized standard deviation of daily returns of portfolio in excess to the benchmark'},
     {header: 'Maximum Loss', content: "Maximum Loss incurred by the portfolio in excess to the benchmark" },
     {header: 'Information Ratio', content: 'Ratio of Excess Return to Tracking Error. Metric to measure consistency of portfolio returns.'},
-    {header: 'Calmar Ratio', content: 'Ratio of Excess Return to max losss. Metric to measure the ability to recover loss in portfolio'},
+    {header: 'Calmar Ratio', content: 'Ratio of Excess Return to Max Loss. Metric to measure the ability to recover loss in portfolio'},
     {header: "Portfolio Concentration", content: "Metric to measure portfolio diversification"}
 ];
+
+//Define them for excess return 
+export const metricDefs = {
+    annualReturn: 'Annualized total return of portfolio in excess to the benchmark',
+    volatility: 'Annualized standard deviation of daily returns of portfolio in excess to the benchmark',
+    maxLoss: "Maximum Loss incurred by the portfolio in excess to the benchmark" ,
+    sharpe: 'Ratio of Excess Return to Tracking Error. Metric to measure consistency of portfolio returns.',
+    calmar: 'Ratio of Excess Return to Max Loss. Metric to measure the ability to recover loss in portfolio',
+    concentration: "Metric to measure portfolio diversification. It is computed as sum of square of portfolio weights"
+};
 
 export const faqs = [
     {
