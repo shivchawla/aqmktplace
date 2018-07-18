@@ -83,6 +83,48 @@ export const capitalization = [
     "Large Cap"
 ];
 
+export const aboutUsText = {
+	introduction: {
+		tagline: "Invest in your Ideas with tools of professionals",
+		main: "AimsQuant aims to bridge the data and technology gap between investment \
+        enthusiasts and great investments. We want to create an ecosystem \
+        where data scientists, quantitative analysts, programmers and investment \
+        enthusiasts come together to create the best investment ideas.",
+    },
+
+    whatWeBuild: {
+    	tagline: "Quantitative Research Platform",
+    	main: "In ever expanding financial markets it is important to systematically \
+    		scrutinize investment ideas and separate real investment signals from noise. \
+		 	At AimsQuant, we are building an easy to use web platform to systematically \
+		 	research investment ideas. With access to superior tools and free data, we \
+		 	want to democratize the investment arena. At AimsQuant, anyone can build and \
+		 	test investment strategies, share it with the community for the feeback or \
+		 	trade it on personal account.",
+    },
+
+    whoWeAre: {
+    	tagline: "They call us 'Quants'",
+    	main: "We are bunch of Quants and Technologists who enjoy financial markets \
+		 	and making efficient technology. We aim to simplify investment science \
+		 	and filter noise from real investment ideas."
+    },
+
+    careers: {
+    	tagline: "Those we fix inefficienies!!",
+    	main: "We are always looking for highly motivated individuals interested in \
+    		technology and financial markets. If you like to solve problems and build \
+    		efficient technology, we would love to be in touch."
+    },
+
+    connect :{
+    	tagline: "Like what we are building?",
+    	main: "We always welcome insightful thoughts, great mentors and helpful \
+    		suggestions. If you are an industry expert or an investor, we are eager to learn your opinion."
+    }
+
+}
+
 export const adviceApprovalPending = 'Approval is pending for this advice';
 export const contestOnly = 'Advice active in Contest';
 export const adviceRejected = 'Advice is rejected. Please fix the advice for suggestions and resubmit for approval';

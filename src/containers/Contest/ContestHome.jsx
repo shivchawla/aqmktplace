@@ -119,7 +119,9 @@ export default class ContestHome extends React.Component {
             <Col span={24} style={containerStyle}>
                 <Row style={{height: '100%'}}>
                     <Col span={16} style={{...verticalBox, height: '100%'}}>
-                        <h1 style={{color: '#fff'}}>Compete to win cash prizes.10 winners daily.</h1>
+                        <h1 style={{color: '#fff', fontSize: '40px', fontWeight: 300}}>Investment Idea Contest</h1>
+                        <h3 style={{color: '#fff', fontSize: '18px', fontWeight: 300}}>Beat the market and win cash prizes every week</h3>
+  
                         <Button 
                                 icon="rocket" 
                                 style={buttonStyle}

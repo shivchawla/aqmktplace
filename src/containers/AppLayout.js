@@ -199,8 +199,8 @@ class AppLayout extends React.Component {
                 {
                     !this.props.loading &&
                     <div style={{backgroundColor: '#f9f9f9', height:'100%'}}> 
-                        {
-                            !this.props.noHeader &&
+                        
+                        {!this.props.noHeader &&
                             this.renderHeader()
                         }
                         <Content>

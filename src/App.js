@@ -34,6 +34,11 @@ const Home = Loadable({
     loading: () => <Icon type="loading" />
 });
 
+const AboutUs = Loadable({
+    loader: () => import('./containers/AboutUs'),
+    loading: () => <Icon type="loading" />
+});
+
 const StockResearch = Loadable({
     loader: () => import('./containers/StockResearch'),
     loading: () => <Icon type="loading" />
@@ -190,7 +195,8 @@ class App extends React.Component {
                         return (
                             <Switch>
                                 <Route exact={true} path='/home' component={Home} /> 
-                                <Route exact={true} path='/' component={Home} /> 
+                                <Route exact={true} path='/' component={Home} />
+                                <Route exact={true} path='/aboutus' component={AboutUs} /> 
                                 <Route exact={true} path='/advice' component={ScreenAdviceMobile} /> 
                                 <Route path="/stockresearch" exact component={WorkInProgress} /> 
                                 <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
@@ -224,7 +230,8 @@ class App extends React.Component {
                         return (
                             <Switch>
                                 <Route exact={true} path='/home' component={Home} /> 
-                                <Route exact={true} path='/' component={Home} /> 
+                                <Route exact={true} path='/' component={Home} />
+                                <Route exact={true} path='/aboutus' component={AboutUs} />  
                                 <Route exact={true} path='/advice' component={ScreenAdvices} /> 
                                 <Route path='/contest' component={ContestDesktop} />
                                 <Route path="/stockresearch" exact component={StockResearch} /> 

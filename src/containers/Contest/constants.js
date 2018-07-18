@@ -3,19 +3,18 @@ import enterContestIcon from '../../assets/enter-contest.svg';
 export const scoringText = 'The theme of the contest is to award experts with Investment Ideas that perform better than the market. For this purpose, our scoring function will largely depend on excess return over chosen benchmark.';
 
 export const scoringMetrics = [
-    {header: 'Value Addition', content: 'Annualized total return of portfolio in excess to the benchmark'},
+    {header: 'Excess Return', content: 'Annualized total return of portfolio in excess to the benchmark'},
     {header: 'Tracking Errror', content: 'Annualized standard deviation of daily returns of portfolio in excess to the benchmark'},
-    {header: 'Information Ratio', content: 'Ratio of Value Addition to Tracking Error. Metric to measure consistency of portfolio returns.'},
-    {header: 'Beta', content: 'Beta coefficient of the portfolio returns'},
-    {header: 'Alpha', content: 'Alpha of the portfolio'},
-    {header: 'Maximum Drawdown', content: "Maximum Loss incurred by the portfolio in excess to the benchmark" },
-    {header: "Portfolio Concentration", content:"Metric to measure portfolio diversification"}
+    {header: 'Maximum Loss', content: "Maximum Loss incurred by the portfolio in excess to the benchmark" },
+    {header: 'Information Ratio', content: 'Ratio of Excess Return to Tracking Error. Metric to measure consistency of portfolio returns.'},
+    {header: 'Calmar Ratio', content: 'Ratio of Excess Return to max losss. Metric to measure the ability to recover loss in portfolio'},
+    {header: "Portfolio Concentration", content: "Metric to measure portfolio diversification"}
 ];
 
 export const faqs = [
     {
         header: 'How do I enter the contest?', 
-        content: 'Click “Create Advice” and create a valid Investment Portfolio for the chosen benchmark. Then click “Enter Contest".'
+        content: 'Click “Submit Entry", follow 3 simple steps to create a valid Investment Portfolio. Then click “Enter Contest".'
     },
     {
         header: 'What kind of Investment Idea are you looking for?',
@@ -23,11 +22,11 @@ export const faqs = [
     },
     {
         header: 'What is the rationale behind the scoring criteria?',
-        content: 'The scoring criteria is a cross-sectional measure that ranks 3 return measures, 3 risk measures and 1 diversity measure. It is to make sure that Investment Portfolio are good quality investment ideas and not just random luck events.'
+        content: 'The scoring criteria is a cross-sectional measure that ranks multiple meetrics measuring return, risk and portfolio diversity. It is to make sure that Investment Portfolio are good quality investment ideas and not just random luck events.'
     },
     {
         header: 'Will you see my Investment Portfolio?',
-        content: 'Yes. We will look at your investment portfolio for evaluation purposes. We will NOT use your investment portfolio without explicit consent.'
+        content: 'We will look at your investment portfolio ONLY for evaluation purposes. We will NOT use your investment portfolio without explicit consent.'
     },
     {
         header: 'Can I withdraw my entry from the contest?',
@@ -69,13 +68,12 @@ export const howItWorksContents = [
 export const prizeText = "The top 5 contest participants are awarded cash prizes on a weekly basis. The following prizes are awarded after every week:";
 
 export const prizes = [
-    {key: 1, rank: '1st Place', reward: '4000'},
-    {key: 2, rank: '2nd Place', reward: '2500'},
-    {key: 3, rank: '3rd Place', reward: '1500'},
-    {key: 4, rank: '4th Place', reward: '1000'},
-    {key: 5, rank: '5th Place', reward: '1000'},
+    {key: 1, rank: '1st Place', reward: 'Rs 4000'},
+    {key: 2, rank: '2nd Place', reward: 'Rs 2500'},
+    {key: 3, rank: '3rd Place', reward: 'Rs 1500'},
+    {key: 4, rank: '4th Place', reward: 'Rs 1000'},
+    {key: 5, rank: '5th Place', reward: 'Rs 1000'},
 ];
-
 
 export const criterias = [
     {header: 'Returns', content: 'Your Investment Idea must make money.'},
