@@ -50,11 +50,9 @@ export class Home extends React.Component {
             <div>
                 <Col span={24}>
                     <h3 className='tab-content-text'>
-                        While you spend time researching stock markets 
-                        for best investment ideas, let us take care of the 
-                        rest. Perfect platform for expert investment 
-                        advisor, corporate advisory or a skillful stock 
-                        picker looking to expand their business.
+                        Compete to showcase your Investment Ideas on the platform.
+                        Participate in our Investment Idea contest, win prizes and sell the winning ideas.
+                        Perfect platform for expert investment advisor and skillful stock pickers
                     </h3>
                 </Col>
                 <Col span={12}>
@@ -63,8 +61,8 @@ export class Home extends React.Component {
                 <Col span={12} className="tab-content-button-container">
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => this.props.history.push('/dashboard/createadvice')}>
-                        Create Investment Advice
+                        onClick={() => this.props.history.push('/contest')}>
+                        Enter Contest
                     </Button>
                 </Col>
             </div>
@@ -76,11 +74,9 @@ export class Home extends React.Component {
             <React.Fragment>
                 <Col span={24}>
                     <h3 className='tab-content-text' style={{lineHeight: '26px', paddingRight: '10px'}}>
-                        While you spend time researching stock markets 
-                        for best investment ideas, let us take care of the 
-                        rest. Perfect platform for expert investment 
-                        advisor, corporate advisory or a skillful stock 
-                        picker looking to expand their business.
+                        Compete to showcase your Investment Ideas on the platform.
+                        Participate in our Investment Idea contest, win prizes and sell the winning ideas.
+                        Perfect platform for expert investment advisor and skillful stock pickers
                     </h3>
                 </Col>
                 <Col 
@@ -109,8 +105,8 @@ export class Home extends React.Component {
                 >
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => this.props.history.push('/dashboard/createadvice')}>
-                        Create Investment Advice
+                        onClick={() => this.props.history.push('/contest')}>
+                        Enter Contest
                     </Button>
                 </Col>
             </React.Fragment>
@@ -124,15 +120,15 @@ export class Home extends React.Component {
                     key="1" 
                     icon={people}
                     small={type === 'small' ? true : false}
-                    header="Expand your Business"
-                    content="While you focus primarily on improving your investment advices, we help you find the investors"/>
+                    header="Marketplace for experts"
+                    content="While you focus primarily on improving your investment ideas, we help you find the investors"/>
                 
                 <DetailListComponent 
                     key="2" 
                     icon={globe}
                     small={type === 'small' ? true : false}
                     header="Barrier Less Investment Advisory"
-                    content="The power of online to everyone. Now, you can sell your ideas to anyone, anywhere in the world"
+                    content="The power of online to everyone. Now, you can sell your winner ideas to anyone, anywhere in the world"
                     style={{marginTop: type === 'small' ? '40px' : '110px'}}/>
                 <DetailListComponent
                     key="3"  
@@ -150,9 +146,8 @@ export class Home extends React.Component {
             <div>
                 <Col span={24}>
                     <h3 className='tab-content-text'>
-                    Only careful and systematic approach towards stock market can generate returns. 
-                    Meet advisors who meticulously research stock market to generate 
-                    the best investment ideas, not just from India but from around the globe. 
+                    Only careful and systematic approach towards stock market can generate consistent alpha. 
+                    Find winner Investment Ideas from experts, not just from India but from around the globe. 
                     </h3>
                 </Col>
                 <Col span={12}>
@@ -232,7 +227,7 @@ export class Home extends React.Component {
                     icon={performance}
                     small={type === 'small' ? true : false}
                     header="Best Investment Ideas"
-                    content="With many advisors/advices on the platform, select the best advice that fits your needs."/>
+                    content="With many winner ideas on the platform, select the best that fits your needs."/>
 
                 <DetailListComponent 
                     key="2" 
@@ -347,8 +342,8 @@ export class Home extends React.Component {
                         <h1 className="hero-text">Expert-Sourced<br></br>Investment Portfolio</h1>
                     </Col>
                     <Col span={24}>
-                        <h5 className="hero-description-text">
-                            Best investment ideas.<br></br>Let the experts help you build the portfolio you desire
+                        <h5 style={{fontWeight:300}} className="hero-description-text">
+                            <i>Best Investment Ideas</i><br></br>Let the experts help you build the portfolio you desire
                         </h5>
                     </Col>
                     {this.renderActionButtonsDesktop()}
@@ -432,9 +427,9 @@ export class Home extends React.Component {
                 <Button 
                         style={{marginLeft: '20px'}}
                         className="action-buttons"
-                        onClick={() => this.props.history.push('/dashboard/createadvice')}
+                        onClick={() => this.props.history.push('/contest')}
                 >
-                    Create Investment Advice
+                    Enter Contest
                 </Button>
             </Col>
         );
@@ -458,7 +453,7 @@ export class Home extends React.Component {
                                     className="create-advice-button-mobile"
                                     onClick={() => this.props.history.push('/dashboard/createadvice')}
                             >
-                                Create Investment Advice
+                                Enter Contest
                             </Button>
                         </Col>
                     )}
@@ -487,7 +482,7 @@ export class Home extends React.Component {
                             <Button 
                                     className="create-advice-button-mobile"
                                     style={{marginTop: 0}}
-                                    onClick={() => this.props.history.push('/dashboard/createadvice')}
+                                    onClick={() => this.props.history.push('/contest')}
                             >
                                 Create Investment Advice
                             </Button>
@@ -602,7 +597,7 @@ export class Home extends React.Component {
                     <Col className='tab-bar'>
                         <TabBarElement 
                                 onClick={() => this.handleTabBarClick('advisor')} 
-                                text='Advisor' 
+                                text='Expert' 
                                 isSelected={this.state.selectedTabBar === 'advisor' ? true : false} 
                         />
                         <TabBarElement 
