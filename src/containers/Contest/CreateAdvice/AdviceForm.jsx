@@ -135,6 +135,7 @@ class ContestAdviceFormImpl extends React.Component {
     handleSubmitAdvice = (type='validate') => new Promise((resolve, reject) => {
         const adviceUrl = `${requestUrl}/advice`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
+        const contestId = '5b49cbe8f464ce168007bb79';
         let adviceId = null;
         this.setState({adviceSubmissionLoading: true});
         axios({
@@ -174,7 +175,6 @@ class ContestAdviceFormImpl extends React.Component {
                 return null;
             } else {
                 this.setState({adviceError: defaultAdviceError});
-                const contestId = '5b49cbe8f464ce168007bb79';
                 adviceId = _.get(response.data, '_id', null);
                 const contestUrl = `${requestUrl}/contest/${contestId}/${adviceId}?type=enter`;
                 if (type !== 'validate') {
@@ -196,13 +196,14 @@ class ContestAdviceFormImpl extends React.Component {
         .then(response => {
             if (response != null) {
                 const update = _.get(response, 'update', false);
-                if (update) {
-                    // openNotification('Success', 'Success', 'Advice Successfully Updated');
-                    this.props.history.push(`/advice/${adviceId}`);
-                } else {
-                    // openNotification('Success', 'Contest Participation Successful', 'Successfully participated in contest');
-                    this.props.history.push(`/advice/${adviceId}`);
-                }
+                // if (update) {
+                //     // openNotification('Success', 'Success', 'Advice Successfully Updated');
+                //     this.props.history.push(`/advice/${adviceId}`);
+                // } else {
+                //     // openNotification('Success', 'Contest Participation Successful', 'Successfully participated in contest');
+                //     this.props.history.push(`/advice/${adviceId}`);
+                // }
+                this.props.history.push(`/contest/entry/${contestId}/${adviceId}`);
             }
             // this.props.history.push(`/advice/${adviceId}`);
             // openNotification('Success', 'Success', 'Advice Successfully Updated');
@@ -337,18 +338,26 @@ class ContestAdviceFormImpl extends React.Component {
         });
     })
 
-    updateAllWeights = data => {
-        const totalSummation = Number(this.getTotalValueSummation(data).toFixed(2));
-        return data.map((item, index) => {
-            const weight = totalSummation === 0 ? 0 : Number(((item['totalValue'] / totalSummation * 100)).toFixed(2));
-            item['weight'] = weight;
+    calculateTotalReturnFromTargetTotal = data => {
+        return data.map(item => {
             const total = item.effTotal !== undefined
                     ? item.effTotal
                     : item.lastPrice > 10000 ? item.lastPrice : 10000
-            // const total = item.lastPrice > 10000 ? item.lastPrice : 10000;
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
             item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);
+
+            return item;
+        })
+    }
+
+    updateAllWeights = data => {
+        const nData = this.calculateTotalReturnFromTargetTotal(data);
+        const totalSummation = Number(this.getTotalValueSummation(nData).toFixed(2));
+        return nData.map(item => {
+            const weight = totalSummation === 0 ? 0 : Number(((item['totalValue'] / totalSummation * 100)).toFixed(2));
+            item['weight'] = weight;
+
             return item;
         });
     }
