@@ -16,7 +16,7 @@ const StepDescription = ({title, image}) => {
         //borderRadius: '4px',
         //height: '200px',
         textAlign:'center',
-        boxShadow: '0 0 8px rgba(0,0,0,0.5)',
+        boxShadow: '0 10px 10px rgba(0,0,0,0.2)',
         transform: 'scale(0.8, 0.8)',
         background: 'white'
 
@@ -25,7 +25,7 @@ const StepDescription = ({title, image}) => {
     const imgWdith = image.width ? image.width : '100%';
     return (
         <Col span={6} style={containerStyle}>
-            <h3 style={{margin: '10px 0px 20px 0px'}}><i>{title}</i></h3>
+            <h3 style={{margin: '10px 0px 20px 0px', fontSize: '19px', color: primaryColor}}><i>{title}</i></h3>
             <object style={{width: image.width}} type="image/svg+xml" data={image.src}></object>
         </Col>
     );

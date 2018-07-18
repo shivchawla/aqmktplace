@@ -4,7 +4,7 @@ export const benchmarks = [
     // "NIFTY_200",
     // "NIFTY_500",
     "NIFTY_MIDCAP_50",
-    "NIFTY_DIV_OPP_50",
+    "NIFTY_DIV_OPPS_50",
     "NIFTY_AUTO",
     "NIFTY_BANK",
     "NIFTY_CONSUMPTION",
