@@ -1,44 +1,82 @@
 import React, { Component } from 'react';
-import {Button} from 'antd';
+import axios from 'axios';
+import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
 import ReactDOM from 'react-dom';
-import {withRouter} from 'react-router-dom';
 import AppLayout from './AppLayout';
 import {aboutUsText} from '../constants';
+import {Utils} from '../utils';
 
-const AboutUsItem = (ref, item) => {
-      
-    return (
-        <div ref={ref} className="full-screen-container" 
-          style={{'background': 'white', 'padding': '4% 10% 4% 10%'}}>
-          <h1 style={{'fontSize': 'calc(8px + 1.5vw)', 'fontWeight': 'bolder', 'marginTop': '10%'}}>{item.header}</h1>
-          <p style={{'fontSize':'calc(7px + 1.5vw)', 'color': 'teal'}}>
-            {item.tagline}
-          </p>
-          <div style={{'display': 'inline-flex', 'alignItems': 'center'}}>
-              <div className="link-text" style={{'padding': '0px'}}>
-                <h4 style={{'marginTop': '20px'}}>{item.main}</h4>
-                {/*<div style={{'paddingTop': '25px'}}> 
-                    <a href='mailto:connect@aimsquant.com'><Button type="primary" className="register-button">CONTACT US</Button></a>
-                </div>*/}
-              </div>
-          </div>
-        </div>
-    );
+const FormItem = Form.Item;
+const TextArea = Input.TextArea;
+const {requestUrl} = require('../localConfig');
+class AboutUsItem extends React.Component {
+    render() {
+      const {reference, item, connect = false, readMoreClick=undefined, careerOnClick=undefined} = this.props;
+
+      return (
+          <Col span={24} className="full-screen-container" 
+            style={{'background': 'white', 'padding': '4% 10% 4% 10%'}}>
+            <h1 style={{'fontSize': 'calc(8px + 1.5vw)', 'fontWeight': 'bolder', 'marginTop': '10%'}}>{item.header}</h1>
+            <p style={{'fontSize':'calc(7px + 1.5vw)', 'color': 'teal'}}>
+              {item.tagline}
+            </p>
+            <div style={{'display': 'inline-flex', 'alignItems': 'center'}}>
+                <div className="link-text" style={{'padding': '0px'}}>
+                  <h4 style={{'marginTop': '20px'}}>{item.main}</h4>
+                  <div style={{'paddingTop': '25px'}}> 
+                      {
+                        connect &&
+                        <Button 
+                            type="primary" 
+                            className="register-button" 
+                            onClick={this.props.toggleConnectModal}
+                        >
+                          CONTACT US
+                        </Button>
+                      }
+                      {
+                        readMoreClick !== undefined &&
+                        <Button 
+                            type="primary" 
+                            className="register-button" 
+                            onClick={readMoreClick}
+                        >
+                          READ MORE
+                        </Button>
+                      }
+                      {
+                        careerOnClick !== undefined &&
+                        <Button 
+                            type="primary" 
+                            className="register-button" 
+                            onClick={careerOnClick}
+                        >
+                          APPLY
+                        </Button>
+                      }
+                  </div>
+                </div>
+            </div>
+          </Col>
+      );
+    }
 }
 
 class AboutUs extends Component {
-
   constructor(props){
   	super();
   	this.state = {
-
+      contactUsModalvisible: false,
+      feedBackLoading: false
   	};
+  }
 
-    this.handleScrollToElement = (key) =>{
-      const tesNode = ReactDOM.findDOMNode(this.refs[key])
-      if (tesNode){
-        window.scrollTo(0, tesNode.offsetTop);
-      }
+  handleScrollToElement = (key) =>{
+    const tesNode = ReactDOM.findDOMNode(this.refs[key]);
+    console.log(this.refs);
+    console.log(tesNode);
+    if (tesNode){
+      window.scrollTo(0, tesNode.offsetTop);
     }
   }
 
@@ -69,95 +107,151 @@ class AboutUs extends Component {
 
   }
 
+  toggleContactUsModal = () => {
+    this.setState({contactUsModalvisible: !this.state.contactUsModalvisible});
+  }
+
+  submitContactUsForm = e => {
+      e.preventDefault();
+      const feedbackUrl = `${requestUrl}/user/sendFeedback`;
+      this.props.form.validateFields((err, values) => {
+          if (!err) {
+              this.setState({feedBackLoading: true});
+
+              axios({
+                  url: feedbackUrl,
+                  method: 'POST',
+                  data: {
+                      "feedback": values.emailDetail,
+                      "subject": values.emailSubject,
+                      "to": "connect@aimsquant.com",
+                      "from": values.email
+                  }
+              })
+              .then(response => {
+                  message.success('Thanks for your message!');
+                  this.setState({contactUsModalvisible: !this.state.contactUsModalvisible});
+                  this.props.form.resetFields();
+              })
+              .catch(error => {
+                  message.error('Sorry, Error occured while sending message');
+              })
+              .finally(() => {
+                  this.setState({feedBackLoading: false});
+              });
+          }
+      })
+  }
+
+  renderContactUsModal = () => {
+    const {getFieldDecorator} = this.props.form;
+
+    return (
+        <Modal
+                title="Contact Us"
+                visible={this.state.contactUsModalvisible}
+                onCancel={this.toggleContactUsModal}
+                footer={[
+                    <Button onClick={this.toggleContactUsModal}>CANCEL</Button>,
+                    <Button 
+                            type="primary" 
+                            loading={this.state.feedBackLoading} 
+                            onClick={this.submitContactUsForm}
+                    >
+                        SEND
+                    </Button>
+                ]}
+        >
+            <Row>
+                <Form onSubmit={this.submitContactUsForm}>
+                    
+                    <Col span={24}>
+                        <h3 style={contactUsInputStyle}>Subject</h3>
+                        <FormItem>
+                            {
+                                getFieldDecorator('emailSubject', {
+                                    initialValue: 'Connect with AimsQuant',
+                                    rules: [{required: true, message: 'Please provide a valid subject'}]
+                                })(
+                                    <Input placeholder='Subject' disabled/>
+                                )
+                            }
+                        </FormItem>
+                    </Col>
+
+                    <Col span={24} style={{marginTop: '20px'}}>
+                        <h3 style={contactUsInputStyle}>Email</h3>
+                        <FormItem>
+                            {
+                                getFieldDecorator('email', {
+                                    initialValue: Utils.isLoggedIn() ? Utils.getLoggedInUserEmail() : '',
+                                    rules: [
+                                        {required: true, message: 'Please provide a valid email'},
+                                        {type: 'email', message: 'Please provide a valid email'}
+                                    ]
+                                })(
+                                    <Input placeholder='Email'/>
+                                )
+                            }
+                        </FormItem>
+                    </Col>
+                    
+                    <Col span={24} style={{marginTop: '20px'}}>
+                        <h3 style={{...contactUsInputStyle}}>Message</h3>
+                        <FormItem>
+                            {
+                                getFieldDecorator('emailDetail', {
+                                    rules: [{required: true, message: 'Please write a valid message'}]
+                                })(
+                                    <TextArea style={{marginTop: '4px'}} placeholder="Write a message" rows={4}/>
+                                )
+                            }
+                        </FormItem>
+                    </Col>
+                </Form>
+            </Row>
+        </Modal>
+    );
+  }
+
   renderPageContent() {
 
     const {introduction, whatWeBuild, whoWeAre, careers, connect} = aboutUsText;
 
     return (
-	    <div>
-        <AboutUsItem ref="aboutUs" item={introduction}/>
-        <AboutUsItem ref="whatWeBuild" item={whatWeBuild}/>
-        <AboutUsItem ref="whoWeAre" item={whoWeAre}/>
-        <AboutUsItem ref="careers" item={careers}/>
-        <AboutUsItem ref="connectWithUs" item={connect}/>
-
-        {/*<div ref="aboutUs" className="full-screen-container" 
-          style={{'background': 'white', 'padding': '4% 10% 4% 10%'}}>
-          <h1 style={{'fontSize': 'calc(8px + 1.5vw)', 'fontWeight': 'bolder'}}>About Us</h1>
-          <p style={{'fontSize':'calc(7px + 1.5vw)', 'color': 'teal'}}>
-            {introduction.tagline}
-          </p>
-          <div style={{'display': 'inline-flex', 'alignItems': 'center', 'padding': '2% 6% 0 6%'}}>
-              <img className="link-image" src="./assets/images/link.png" alt="Link" />
-              <div className="link-text">
-                <h4>{introduction.main}</h4>
-                <div style={{'paddingTop': '15px'}}>
-                    <Button onClick={() => {this.handleScrollToElement('whatWeBuild')}} className="register-button">Read More</Button>
-                </div>
-              </div>
-          </div>
-        </div>
-        <div ref="whatWeBuild" className="full-screen-container" 
-          style={{'background': 'white', 'padding': '4% 10% 4% 10%'}}>
-          <h1 style={{'fontSize': 'calc(8px + 1.5vw)', 'fontWeight': 'bolder', 'marginTop': '10%'}}>What are we building</h1>
-          <p style={{'fontSize':'calc(7px + 1.5vw)', 'color': 'teal'}}>
-            {whatWeBuild.tagline}
-          </p>
-          <div style={{'display': 'inline-flex', 'alignItems': 'center'}}>
-              <div className="link-text" style={{'padding': '0px'}}>
-                <h4 style={{'marginTop': '10px'}}>{whatWeBuild.main}</h4>
-                <div style={{'paddingTop': '25px'}}> 
-                    <Button onClick={() => {this.handleScrollToElement('whoWeAre')}} className="register-button">Read More</Button>
-                </div>
-              </div>
-          </div>
-        </div>
-        <div ref="whoWeAre" className="full-screen-container" 
-          style={{'background': 'white', 'padding': '4% 10% 4% 10%'}}>
-          <h1 style={{'fontSize': 'calc(8px + 1.5vw)', 'fontWeight': 'bolder', 'marginTop': '10%'}}>Who We Are</h1>
-          <p style={{'fontSize':'calc(7px + 1.5vw)', 'color': 'teal'}}>
-            {whoWeAre.tagline}
-          </p>
-          <div style={{'display': 'inline-flex', 'alignItems': 'center'}}>
-              <div className="link-text" style={{'padding': '0px'}}>
-                <h4 style={{'marginTop': '20px'}}>{whoWeAre.main}</h4>
-                <div style={{'paddingTop': '25px'}}> 
-                    <Button onClick={() => {this.handleScrollToElement('careers')}} className="register-button">Read More</Button>
-                </div>
-              </div>
-          </div>
-        </div>
-        <div ref="careers" className="full-screen-container" 
-          style={{'background': 'white', 'padding': '4% 10% 4% 10%'}}>
-          <h1 style={{'fontSize': 'calc(8px + 1.5vw)', 'fontWeight': 'bolder', 'marginTop': '10%'}}>Careers</h1>
-          <p style={{'fontSize':'calc(7px + 1.5vw)', 'color': 'teal'}}>
-            {careers.tagline}
-          </p>
-          <div style={{'display': 'inline-flex', 'alignItems': 'center'}}>
-              <div className="link-text" style={{'padding': '0px'}}>
-                <h4 style={{'marginTop': '20px'}}>{careers.main}</h4>
-                <div style={{'paddingTop': '25px'}}> 
-                    <a href='mailto:careers@aimsquant.com'><Button type="primary" className="register-button">APPLY FOR A JOB</Button></a>
-                </div>
-              </div>
-          </div>
-        </div>
-        <div ref="connectWithUs" className="full-screen-container" 
-          style={{'background': 'white', 'padding': '4% 10% 4% 10%'}}>
-          <h1 style={{'fontSize': 'calc(8px + 1.5vw)', 'fontWeight': 'bolder', 'marginTop': '10%'}}>Connect With Us</h1>
-          <p style={{'fontSize':'calc(7px + 1.5vw)', 'color': 'teal'}}>
-            {connect.tagline}
-          </p>
-          <div style={{'display': 'inline-flex', 'alignItems': 'center'}}>
-              <div className="link-text" style={{'padding': '0px'}}>
-                <h4 style={{'marginTop': '20px'}}>{connect.main}</h4>
-                <div style={{'paddingTop': '25px'}}> 
-                    <a href='mailto:connect@aimsquant.com'><Button type="primary" className="register-button">CONTACT US</Button></a>
-                </div>
-              </div>
-          </div>
-        </div>*/}
-	    </div>
+	    <Row>
+        {this.renderContactUsModal()}
+        <AboutUsItem 
+          ref="aboutUs"
+          item={introduction} 
+          readMoreClick={() => this.handleScrollToElement('whatWeBuild')}
+        />
+        <AboutUsItem 
+          ref="whatWeBuild"
+          item={whatWeBuild} 
+          scrollButton
+          readMoreClick={() => this.handleScrollToElement('whoWeAre')}
+        />
+        <AboutUsItem
+          ref="whoWeAre" 
+          item={whoWeAre} 
+          scrollButton
+          readMoreClick={() => this.handleScrollToElement('careers')}
+        />
+        <AboutUsItem
+          ref="careers" 
+          item={careers} 
+          scrollButton
+          careerOnClick={() => {document.location.href = 'mailto:connect@aimsquant.com'}}
+          // readMoreClick={() => this.handleScrollToElement('whatWeBuild')}
+        />
+        <AboutUsItem
+          ref="connectWithUs" 
+          item={connect} 
+          connect 
+          toggleConnectModal={this.toggleContactUsModal}
+        />
+	    </Row>
     );
   }
 
@@ -168,4 +262,9 @@ class AboutUs extends Component {
   }
 }
 
-export default withRouter(AboutUs);
+export default Form.create()(AboutUs);
+
+const contactUsInputStyle = {
+  fontSize: '14px',
+  color: '#4C4C4C'
+}

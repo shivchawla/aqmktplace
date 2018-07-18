@@ -3,7 +3,7 @@ import Media from 'react-media';
 import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
 import withRouter from 'react-router-dom/withRouter';
 import {Utils} from '../utils';
-import {primaryColor} from '../constants';
+import {primaryColor, verticalBox} from '../constants';
 import logo from "../assets/logo-advq-new.png";
 import {Footer as AqFooter} from '../components/Footer';
 import Loading from 'react-loading-bar';
@@ -58,6 +58,16 @@ class AppLayout extends React.Component {
                 >
                     {
                         Utils.isLoggedIn() &&
+                        <Menu.Item key="contest">
+                            <div style={verticalBox}>
+                                <h3 style={{fontSize: '16px', fontWeight: 700, color: '#595959'}}>
+                                    CONTEST <span style={{color: primaryColor, fontSize: '12px'}}>(NEW)</span>
+                                </h3>
+                            </div>
+                        </Menu.Item>
+                    }
+                    {
+                        Utils.isLoggedIn() &&
                         <Menu.Item key="dashboard">Dashboard</Menu.Item>
                     }
                     {
@@ -80,12 +90,12 @@ class AppLayout extends React.Component {
                 </Menu>
                 <React.Fragment>
                     {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
-                    <Button 
+                    {/* <Button 
                         type="primary" 
-                        onClick={() => this.props.history.push('/contest/createadvice/how')}
+                        onClick={() => this.props.history.push('/contest')}
                         style={{marginTop: '18px'}}>
                         CONTEST
-                    </Button>                                        
+                    </Button>                                         */}
                 </React.Fragment>
             </Col> 
         );

@@ -85,6 +85,7 @@ export const capitalization = [
 
 export const aboutUsText = {
 	introduction: {
+		header: "About Us",
 		tagline: "Invest in your Ideas with tools of professionals",
 		main: "AimsQuant aims to bridge the data and technology gap between investment \
         enthusiasts and great investments. We want to create an ecosystem \
@@ -93,6 +94,7 @@ export const aboutUsText = {
     },
 
     whatWeBuild: {
+		header: "What are we building",
     	tagline: "Quantitative Research Platform",
     	main: "In ever expanding financial markets it is important to systematically \
     		scrutinize investment ideas and separate real investment signals from noise. \
@@ -104,6 +106,7 @@ export const aboutUsText = {
     },
 
     whoWeAre: {
+		header: "Who We Are",
     	tagline: "They call us 'Quants'",
     	main: "We are bunch of Quants and Technologists who enjoy financial markets \
 		 	and making efficient technology. We aim to simplify investment science \
@@ -111,6 +114,7 @@ export const aboutUsText = {
     },
 
     careers: {
+		header: "Careers",
     	tagline: "Those we fix inefficienies!!",
     	main: "We are always looking for highly motivated individuals interested in \
     		technology and financial markets. If you like to solve problems and build \
@@ -118,6 +122,7 @@ export const aboutUsText = {
     },
 
     connect :{
+		header: "Connect With Us",
     	tagline: "Like what we are building?",
     	main: "We always welcome insightful thoughts, great mentors and helpful \
     		suggestions. If you are an industry expert or an investor, we are eager to learn your opinion."

@@ -19,7 +19,8 @@ export class SearchStocks extends React.Component {
             selectedStock: '',
             selectedStocks: [], // This will contain the symbols of all stocks that are selected
             selectedPage: 0,
-            portfolioLoading: false
+            portfolioLoading: false,
+            loadingStocks: false
         };
         this.localStocks = []; // Used to get the list of all stocks obtained from N/W calls
     }
@@ -32,7 +33,10 @@ export class SearchStocks extends React.Component {
                 </Col>
                 {this.renderPagination()}
                 <Col span={24} style={{marginTop: '20px'}}>
-                    {this.renderStockList()}
+                    {
+                        !this.state.loadingStocks &&
+                        this.renderStockList()
+                    }
                 </Col>
             </Row>
         );
@@ -53,13 +57,17 @@ export class SearchStocks extends React.Component {
         const sector = _.get(this.props, 'filters.sector', '');
         const industry = _.get(this.props, 'filters.industry', '');
         const url = `${requestUrl}/stock?search=${searchQuery}&populate=${populate}&universe=${universe}&sector=${sector}&industry=${industry}&skip=${skip}&limit=${limit}`;
+        this.setState({loadingStocks: true});
         fetchAjax(url, this.props.history, this.props.pageUrl)
         .then(({data: stockResponseData}) => {
             const stocks = this.processStockList(stockResponseData);
             this.setState({stocks});
             this.pushStocksToLocalArray(stocks);
             resolve(true);
-        });
+        })
+        .finally(() => {
+            this.setState({loadingStocks: false});
+        })
     })
 
     resetSearchFilters = () => new Promise((resolve, reject) => {
@@ -75,7 +83,6 @@ export class SearchStocks extends React.Component {
             }
         });
         this.localStocks = localStocks;
-        console.log(this.localStocks);
     }
 
     renderStockList = () => {
@@ -220,6 +227,10 @@ export class SearchStocks extends React.Component {
                 >
                     Previous
                 </Button>
+                {
+                    this.state.loadingStocks &&
+                    <Icon type="loading" style={{fontSize: '20px'}}/>
+                }
                 <Button
                         onClick={() => this.handlePagination('next')}  
                         disabled={this.state.stocks.length % 10 !== 0}

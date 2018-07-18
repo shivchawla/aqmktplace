@@ -443,8 +443,12 @@ class ContestAdviceFormImpl extends React.Component {
         Passed as a prop to AqStockTableMod
     */
     onChange = positions => {
-        this.setState({positions: _.cloneDeep(positions)}, () => {
+        const validatePortfolio = _.debounce(() => {
             this.validatePortfolio();
+        }, 1000);
+
+        this.setState({positions: _.cloneDeep(positions)}, () => {
+            validatePortfolio();
         });
     }
 
@@ -614,7 +618,7 @@ class ContestAdviceFormImpl extends React.Component {
                 {this.renderBenchmarkChangeWarningModal()}
                 <Col span={24} style={{height: '40px', marginTop: '10px'}}>
                     <h3 style={{fontSize: '22px'}}>
-                        {this.props.isUpdate ? 'Update Advice' : 'Create Advice'}
+                        {this.props.isUpdate ? 'Update Contest Entry' : 'Create Contest Entry'}
                     </h3>
                 </Col>
                 <Col span={18} style={{...shadowBoxStyle, minHeight: '600px'}}>
@@ -648,7 +652,7 @@ class ContestAdviceFormImpl extends React.Component {
                                     loading={this.state.adviceSubmissionLoading}
                                     disabled={this.getPortfolioValidationErrors().length || this.state.positions.length < 1}
                             >
-                                {this.props.isUpdate ? 'UPDATE ADVICE' : 'SUBMIT ADVICE'}
+                                {this.props.isUpdate ? 'UPDATE ENTRY' : 'SUBMIT ENTRY'}
                             </Button>
                         </Col>
                         {
