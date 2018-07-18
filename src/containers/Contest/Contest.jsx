@@ -7,11 +7,12 @@ import CreateAdvice from './CreateAdvice/CreateAdvice';
 import UpdateAdvice from './CreateAdvice/UpdateAdvice';
 import ContestAdviceDetail from './ContestAdviceDetail';
 import ContestTnC from './ContestTnC';
-import ContestAdviceForm from './CreateAdvice/AdviceForm';
+import {ContestHomeMeta} from '../../metas';
 export default class Contest extends React.Component {
     render() {
         return(
             <React.Fragment>
+                <ContestHomeMeta />
                 <Route 
                     exact={true} 
                     path={`${this.props.match.url}`} 

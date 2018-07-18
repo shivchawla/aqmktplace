@@ -1,8 +1,14 @@
 import * as React from 'react';
 import AdviceForm from './AdviceForm';
+import {ContestUpdateAdviceMeta} from '../../../metas';
 
 export default class UpdateAdvice extends React.Component {
     render() {
-        return <AdviceForm isUpdate={true} adviceId={this.props.match.params.id} />
+        return (
+            <React.Fragment>
+                <ContestUpdateAdviceMeta />
+                <AdviceForm isUpdate={true} adviceId={this.props.match.params.id} />
+            </React.Fragment>
+        );
     }
 }

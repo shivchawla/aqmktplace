@@ -141,3 +141,57 @@ export const StockResearchMeta = props => {
     );
 }
 
+export const ContestHomeMeta = props => {
+    return (
+        <Helmet>
+            <meta charSet="utf-8" />
+            <title>AdviceQube: Stock Research | Screen stocks from Indian Equity Markets</title>
+            <meta name="description" content="Homepage for AdviceQube contests"/>
+            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Stock Research, returns"/>
+            <meta name="robots" content="index, follow" />
+        </Helmet>
+    );
+}
+
+
+export const ContestCreateAdviceMeta = props => {
+    return (
+        <Helmet>
+            <meta charSet="utf-8" />
+            <link rel="canonical" href="https://www.adviceqube.com/advisordashboard"/>
+        </Helmet>
+    );
+}
+
+export const ContestUpdateAdviceMeta = props => {
+    return (
+        <Helmet>
+            <meta charSet="utf-8" />
+            <link rel="canonical" href="https://www.adviceqube.com/advisordashboard"/>
+        </Helmet>
+    );
+}
+
+export const ContestAdviceDetailMeta = props => {
+    return (
+        <Helmet>
+            <meta charSet="utf-8" />
+            <title>AdviceQube: {props.name} | Expert Investment Portfolio</title>
+            <meta name="description" content={`${props.name}: Invest in advices from investment experts`}/>
+            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, NSE stocks, Investment Advice, Advice, returns, gain"/>
+            <meta name="robots" content="index, follow" />
+        </Helmet>
+    );
+}
+
+export const ContestLeaderboardMeta = props => {
+    return (
+        <Helmet>
+            <meta charSet="utf-8" />
+            <title>AdviceQube: {props.name} | Expert Investment Portfolio</title>
+            <meta name="description" content={`${props.name}: Invest in advices from investment experts`}/>
+            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, NSE stocks, Investment Advice, Advice, returns, gain"/>
+            <meta name="robots" content="index, follow" />
+        </Helmet>
+    );
+}

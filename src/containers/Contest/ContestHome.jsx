@@ -7,6 +7,7 @@ import {processAdviceForLeaderboardListItem} from './utils';
 import {fetchAjax} from '../../utils';
 import AppLayout from '../../containers/AppLayout';
 import logo from "../../assets/logo-advq-new.png";
+import {ContestHomeMeta} from '../../metas';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -366,11 +367,14 @@ export default class ContestHome extends React.Component {
                 noHeader
                 content = {
                     <Row style={{height: '100%'}}>
+                        <ContestHomeMeta />
                         {this.renderTopSection()}
                         {this.renderTabsSection()}
                         {this.renderContestRanking()}
                     </Row>
-                }>
+                }
+                loading={this.state.loading}
+            >
             </AppLayout>
         );
     }

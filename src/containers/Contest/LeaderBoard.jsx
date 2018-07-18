@@ -8,6 +8,7 @@ import {fetchAjax} from '../../utils';
 import './css/leaderBoard.css';
 import {formatMetric} from './utils';
 import {metricDefs} from './constants';
+import {ContestHomeMeta} from '../../metas';
 
 const Option = Select.Option;
 const RadioButton = Radio.Button;
@@ -415,6 +416,7 @@ export default class LeaderBoard extends React.Component {
 
         return (
             <Row gutter={0} style={{padding: '10px 20px'}}>
+                <ContestHomeMeta />
                 <Col span={16} style={{marginBottom: '20px'}}>
                     <h3 style={{fontSize: '26px', color: primaryColor, marginBottom: '0px'}}>
                         Leaderboard
@@ -480,7 +482,7 @@ export default class LeaderBoard extends React.Component {
     render() {
         return (
             <AppLayout
-                content={<StyleRoot>{this.renderPageContent()}</StyleRoot>}
+                content={this.renderPageContent()}
                 loading={this.state.loading}
             ></AppLayout>
         );
