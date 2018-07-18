@@ -167,12 +167,12 @@ export class SearchStocks extends React.Component {
                 totalValue: stock.current,
             };
         });
-        this.setState({portfolioLoading: true});
+        // this.setState({portfolioLoading: true});
         this.props.addPositions(positions)
-        .then(() => {
-            this.props.toggleBottomSheet();
-            this.setState({portfolioLoading: false});
-        })
+        // .then(() => {
+        this.props.toggleBottomSheet();
+            // this.setState({portfolioLoading: false});
+        // })
     }
 
     componentWillReceiveProps(nextProps) {

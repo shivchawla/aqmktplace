@@ -325,14 +325,7 @@ class ContestAdviceFormImpl extends React.Component {
 
     conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
         const positions = [...this.state.positions];
-        console.log('Positions', positions);
-        selectedPositions.map(selectedPosition => {
-            const getPresentPositionIndex = _.findIndex(positions, position => position.symbol === selectedPosition.symbol);
-            if (getPresentPositionIndex === -1) { // Position not be present in the portfolio and should be added
-                positions.push(selectedPosition);
-            }   
-        });
-        this.setState({positions: this.updateAllWeights(positions)}, () => {
+        this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
             this.handleSubmitAdvice('validate')
             .then(() => resolve(true));
         });
@@ -340,6 +333,9 @@ class ContestAdviceFormImpl extends React.Component {
 
     calculateTotalReturnFromTargetTotal = data => {
         return data.map(item => {
+            // Check if the position was already present in the positions array
+            const positionIndex = _.findIndex(this.state.positions, position => position.symbol === item.symbol);
+            item.effTotal = positionIndex !== -1 ? this.state.positions[positionIndex].effTotal : undefined;
             const total = item.effTotal !== undefined
                     ? item.effTotal
                     : item.lastPrice > 10000 ? item.lastPrice : 10000
