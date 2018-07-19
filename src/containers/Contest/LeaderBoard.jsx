@@ -404,7 +404,7 @@ export default class LeaderBoard extends React.Component {
         const adviceName = selectedAdvice !== undefined ? selectedAdvice.adviceName: '';
 
         const adviceNameStyle = {
-            fontSize: '16px',
+            fontSize: '18px',
             fontWeight: '400',
             color: primaryColor,
             height: '30px',
@@ -436,26 +436,27 @@ export default class LeaderBoard extends React.Component {
                         height: '-webkit-fill-available',
                         backgroundColor: '#fff',
                         marginTop:'-40px',
-                        height:'500px'
+                        height:'500px',
+                        borderTop: `5px solid ${primaryColor}`
                     }}
                 >
                     <div style={{...horizontalBox, 
-                            margin:'-10px auto', 
-                            padding: '2px 0',
-                            border: `1px solid ${primaryColor}`, 
+                            margin:'10px auto 0px auto', 
+                            padding: '5px 0',
+                            //border: `1px solid ${primaryColor}`, 
                             width: '80%', 
                             color: primaryColor, 
-                            backgroundColor: '#fbf8f8',
+                            backgroundColor: '#fff',
                             display:'block'}}>
                         <h3  style={{...adviceNameStyle, marginBottom: '-10px'}}>
                             {advisorName}
                         </h3>
-                        <span style={{fontSize: '11px', display: 'block', textAlign: 'center'}}>
+                        <span style={{fontSize: '12px', display: 'block', textAlign: 'center'}}>
                             ({adviceName})
                         </span>
                     </div>
                     
-                    <div style={{textAlign: 'center', margin: '50px 0 20px 0'}}>
+                    <div style={{textAlign: 'center', margin: '20px 0 20px 0'}}>
                         <RadioGroup size="small" onChange={this.onPerformanceToggle} defaultValue="0">
                             <RadioButton value="0">Active</RadioButton>
                             <RadioButton value="1">Historical</RadioButton>
