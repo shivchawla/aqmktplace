@@ -146,12 +146,6 @@ class FooterImpl extends React.Component{
                     </div>
                 </Col>
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
-                    <h5 className="footer-group-header">Other Products</h5>
-                    <div className="footer-list">
-                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home`}>Quant Research</a>
-                    </div>
-                </Col>
-                <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                     <h5 className="footer-group-header">Policies</h5>
                     <div className="footer-list">
                         <Link className="footer-link" to="/policies/tnc">Terms of use</Link>
@@ -172,6 +166,14 @@ class FooterImpl extends React.Component{
                         <a style={{color: '#fff'}} onClick={this.toggleContactUsModal}>Contact Us</a>
                     </div>
                 </Col>
+
+                <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
+                    <h5 className="footer-group-header">Other Products</h5>
+                    <div className="footer-list">
+                        <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home`}>Quant Research</a>
+                    </div>
+                </Col>
+                
                 <Col span={24} style={aimsquantContainerStyle}>
                     <h3 style={{color: '#fff', fontSize: '12px'}}>
                         AimsQuant Private Limited
