@@ -7,7 +7,11 @@ export default class UpdateAdvice extends React.Component {
         return (
             <React.Fragment>
                 <ContestUpdateAdviceMeta />
-                <AdviceForm isUpdate={true} adviceId={this.props.match.params.id} />
+                <AdviceForm 
+                    isUpdate={true} 
+                    adviceId={this.props.match.params.id} 
+                    contestId={this.props.match.params.contestId}
+                />
             </React.Fragment>
         );
     }

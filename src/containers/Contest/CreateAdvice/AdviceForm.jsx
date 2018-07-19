@@ -43,7 +43,8 @@ class ContestAdviceFormImpl extends React.Component {
             adviceSubmissionLoading: false,
             highStockSeries: [],
             openBenchmarkChangeModal: false,
-            loading: false
+            loading: false,
+            contestId: null
         };
     }
 
@@ -135,7 +136,7 @@ class ContestAdviceFormImpl extends React.Component {
     handleSubmitAdvice = (type='validate') => new Promise((resolve, reject) => {
         const adviceUrl = `${requestUrl}/advice`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
-        const contestId = '5b49cbe8f464ce168007bb79';
+        const contestId = this.props.isUpdate ? this.props.contestId : this.state.contestId;
         let adviceId = null;
         this.setState({adviceSubmissionLoading: true});
         axios({
@@ -692,9 +693,8 @@ class ContestAdviceFormImpl extends React.Component {
         .catch(error => reject(error));
     }) 
 
-    getAdviceSummaryAndPortfolio = adviceId => {
+    getAdviceSummaryAndPortfolio = adviceId => new Promise((resolve, reject) => {
         let benchmark = null;
-        this.setState({loading: true});
         Promise.all([
             this.getAdviceSummary(adviceId),
             this.getAdvicePortfolio(adviceId)
@@ -710,14 +710,11 @@ class ContestAdviceFormImpl extends React.Component {
         .then(() => {
             return this.getBenchmarkConfig(benchmark);
         })
-        // .then(() => {
-        //     this.searchStockComponent.fetchStocks('')
-        // })
-        .catch(err => err)
-        .finally(() => {
-            this.setState({loading: false});
-        })        
-    }
+        .then(() => {
+            resolve(true);
+        })
+        .catch(err => reject(err));
+    })
 
     processPositions = positions => {
         return positions.map(position => {
@@ -759,11 +756,40 @@ class ContestAdviceFormImpl extends React.Component {
         return totalValue;
     }
 
+    getActiveContestToParticipate = () => new Promise((resolve, reject) => {
+        const contestsUrl = `${requestUrl}/contest?current=true`;
+        fetchAjax(contestsUrl, this.props.history, this.props.match.url)
+        .then(contestResponse => {
+            const contestData = contestResponse.data;
+            const contests = _.get(contestData, 'contests', []);
+            if (contests.length > 0) {
+                const currentContestId = _.get(contests[0], '_id', null);
+                resolve(currentContestId);
+            } else {
+                reject({message: 'No Contest Found'});
+            }
+        })
+        .catch(err => reject(err));
+    })
+
     componentWillMount() {
+        this.setState({loading: true});
         if (this.props.isUpdate) {
             const adviceId = this.props.adviceId;
-            this.getAdviceSummaryAndPortfolio(adviceId);
+            this.getAdviceSummaryAndPortfolio(adviceId)
+            .finally(() => {
+                this.setState({loading: false});
+            })
+        } else {
+            this.getActiveContestToParticipate()
+            .then(contestId => {
+                this.setState({contestId});
+            })
+            .finally(() => {
+                this.setState({loading: false});
+            })
         }
+        
     }
 
     shouldComponentUpdate(nextProps, nextState) {

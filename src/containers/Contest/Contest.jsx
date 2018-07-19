@@ -40,7 +40,7 @@ export default class Contest extends React.Component {
                 />
                 <Route
                     exact={true} 
-                    path={`${this.props.match.url}/updateadvice/:id`}
+                    path={`${this.props.match.url}/updateadvice/:contestId/:id`}
                     render={props => <UpdateAdvice {...props}/>} 
                 />
                 <Route
