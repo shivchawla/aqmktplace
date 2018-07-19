@@ -44,7 +44,9 @@ class ContestAdviceFormImpl extends React.Component {
             highStockSeries: [],
             openBenchmarkChangeModal: false,
             loading: false,
-            contestId: null
+            contestId: null,
+            noActiveContests: false,
+            notPresentInLatestContest: false
         };
     }
 
@@ -177,11 +179,11 @@ class ContestAdviceFormImpl extends React.Component {
             } else {
                 this.setState({adviceError: defaultAdviceError});
                 adviceId = _.get(response.data, '_id', null);
-                const contestUrl = `${requestUrl}/contest/${contestId}/${adviceId}?type=enter`;
+                const contestUrl = `${requestUrl}/contest/${adviceId}/action?type=enter`;
                 if (type !== 'validate') {
                     const contestRequest =  type === 'validate' 
                         ?   Promise.resolve({update: false})
-                        :   this.props.isUpdate
+                        :   this.props.isUpdate && !this.state.notPresentInLatestContest
                             ?   Promise.resolve({update: true})
                             :   axios({
                                     url: contestUrl,
@@ -204,7 +206,7 @@ class ContestAdviceFormImpl extends React.Component {
                 //     // openNotification('Success', 'Contest Participation Successful', 'Successfully participated in contest');
                 //     this.props.history.push(`/advice/${adviceId}`);
                 // }
-                this.props.history.push(`/contest/entry/${contestId}/${adviceId}`);
+                this.props.history.push(`/contest/entry/${adviceId}`);
             }
             // this.props.history.push(`/advice/${adviceId}`);
             // openNotification('Success', 'Success', 'Advice Successfully Updated');
@@ -616,6 +618,16 @@ class ContestAdviceFormImpl extends React.Component {
         );
     }
 
+    renderNoActiveContestsScreen = () => {
+        return (
+            <Row style={{height: '400px', marginTop: '100px'}}>
+                <Col span={24} style={verticalBox}>
+                    <h1 style={{fontSize: '16px'}}>There are currently no active Contests to participate</h1>
+                </Col>
+            </Row>
+        );
+    }
+
     renderPageContent = () => {
         return (
             <Row className='aq-page-container'>
@@ -658,7 +670,13 @@ class ContestAdviceFormImpl extends React.Component {
                                     loading={this.state.adviceSubmissionLoading}
                                     disabled={this.getPortfolioValidationErrors().length || this.state.positions.length < 1}
                             >
-                                {this.props.isUpdate ? 'UPDATE ENTRY' : 'SUBMIT ENTRY'}
+                                {
+                                    this.props.isUpdate 
+                                        ? this.state.notPresentInLatestContest
+                                            ? "UDPDATE AND ENTER CONTEST"
+                                            : "UPDATE ENTRY"
+                                        : 'SUBMIT ENTRY'
+                                }
                             </Button>
                         </Col>
                         {
@@ -697,7 +715,8 @@ class ContestAdviceFormImpl extends React.Component {
         let benchmark = null;
         Promise.all([
             this.getAdviceSummary(adviceId),
-            this.getAdvicePortfolio(adviceId)
+            this.getAdvicePortfolio(adviceId),
+            this.getAdviceSummaryInContest()
         ])
         .then(([adviceSummary, advicePortfolio]) => {
             benchmark = _.get(adviceSummary, 'portfolio.benchmark.ticker');
@@ -746,6 +765,20 @@ class ContestAdviceFormImpl extends React.Component {
         .catch(error => reject(error));
     })
 
+    getAdviceSummaryInContest = adviceId => new Promise((resolve, reject) => {
+        const contestAdviceUrl = `${requestUrl}/contest/entry/${this.props.match.params.id}`;
+        const errorCallback = error => {
+            const errorMessage = _.get(error, 'response.data.message', '');
+            if (errorMessage === 'Advice is not present in this contest') {
+                this.setState({notPresentInLatestContest: true});
+            }
+        };
+        fetchAjax(contestAdviceUrl, this.props.history, this.props.match.url, undefined, errorCallback)
+        .finally(() => {
+            resolve(true);
+        })
+    })
+
     getNetvalue = () => {
         const {positions = []} = this.state;
         let totalValue = 0;
@@ -783,7 +816,11 @@ class ContestAdviceFormImpl extends React.Component {
         } else {
             this.getActiveContestToParticipate()
             .then(contestId => {
+                console.log(contestId);
                 this.setState({contestId});
+            })
+            .catch(err => {
+                this.setState({noActiveContests: true});
             })
             .finally(() => {
                 this.setState({loading: false});
@@ -803,8 +840,13 @@ class ContestAdviceFormImpl extends React.Component {
     render() {
         return (
             <AppLayout 
-                content={this.renderPageContent()} 
+                content={
+                    this.state.noActiveContests
+                    ? this.renderNoActiveContestsScreen()
+                    : this.renderPageContent()
+                } 
                 loading={this.state.loading}
+                noFooter={this.state.noActiveContests}
             />
         );
     }

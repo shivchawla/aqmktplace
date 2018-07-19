@@ -30,7 +30,7 @@ export default class Contest extends React.Component {
                 />
                 <Route 
                     exact={true}
-                    path={`${this.props.match.url}/entry/:contestId/:id`}
+                    path={`${this.props.match.url}/entry/:id`}
                     render={props => <ContestAdviceDetail {...props}/>} 
                 />
                 <Route
@@ -40,12 +40,12 @@ export default class Contest extends React.Component {
                 />
                 <Route
                     exact={true} 
-                    path={`${this.props.match.url}/updateadvice/:contestId/:id`}
+                    path={`${this.props.match.url}/updateadvice/:id`}
                     render={props => <UpdateAdvice {...props}/>} 
                 />
                 <Route
                     exact={true} 
-                    path={`${this.props.match.url}/terms`}
+                    path={`${this.props.match.url}/rules`}
                     render={props => <ContestTnC/>} 
                 />
             </React.Fragment>

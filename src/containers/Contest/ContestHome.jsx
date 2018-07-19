@@ -1,5 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
+import windowSize from 'react-window-size';
 import {Row, Col, Button, Tabs, Table, Tag, Icon, Select} from 'antd';
 import {primaryColor, verticalBox, horizontalBox} from '../../constants';
 import {scoringMetrics, faqs, howItWorksContents, prizes, criterias, prizeText, scoringText} from './constants';
@@ -13,7 +14,7 @@ const TabPane = Tabs.TabPane;
 const Option = Select.Option;
 const {requestUrl} = require('../../localConfig');
 
-export default class ContestHome extends React.Component {
+class ContestHome extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -93,7 +94,7 @@ export default class ContestHome extends React.Component {
                             return (
                                 <LeaderboardItem 
                                     striped={index % 2 === 0}
-                                    rank={index + 1} 
+                                    rank={advice.rank} 
                                     name={advice.advisorName}
                                     score={_.get(advice, 'metrics.current.score', 0)}
                                 />
@@ -125,14 +126,18 @@ export default class ContestHome extends React.Component {
             <Col span={24} style={containerStyle}>
                 <Row style={{height: '100%'}}>
                     <Col span={16} style={{...verticalBox, height: '100%'}}>
-                        <div style={{
-                            display: 'flex', 
-                            flexDirection: 'row', 
-                            alignItems: 'center',
-                            position: 'absolute',
-                            left: '20px',
-                            top: '20px'
-                        }}>
+                        <div 
+                                style={{
+                                    display: 'flex', 
+                                    flexDirection: 'row', 
+                                    alignItems: 'center',
+                                    position: 'absolute',
+                                    left: '20px',
+                                    top: '20px',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => this.props.history.push('/home')}
+                        >
                             <img src={logo} style={{height: '40px', marginTop: '-10px'}}/>
                             {/* <h1 onClick={() => this.props.history.push('/home')} 
                                 style={{...headerColor, cursor: 'pointer', marginLeft: '10px', marginTop: '-5px'}}>
@@ -275,6 +280,16 @@ export default class ContestHome extends React.Component {
         );
     }
 
+    renderNoActiveParticipants = () => {
+        return (
+            <Row style={{marginTop: '100px'}}>
+                <Col span={24} style={{textAlign: 'center'}}>
+                    <h3>There are no active participants in the contest yet.</h3>
+                </Col>
+            </Row>
+        );
+    }
+
     renderContestRanking = () => {
         const containerStyle = {
             ...verticalBox,
@@ -284,7 +299,7 @@ export default class ContestHome extends React.Component {
             right: '20px',
             backgroundColor: '#fff',
             boxShadow: '0 5px 16px rgba(154, 154, 154, 0.5)',
-            height: '95%',
+            height: this.props.windowHeight - 50,
             borderRadius: '6px',
             overflow: 'hidden'
         };
@@ -301,31 +316,38 @@ export default class ContestHome extends React.Component {
 
         return (
             <Col span={8} style={containerStyle}>
-                <Row style={{position: 'relative'}}>
+                <Row style={{position: 'relative', height: '100%'}}>
                     <Col span={24} style={headerContainer}>
                         <h3 style={{color: '#fff'}}>LEADERBOARD</h3>
                         {this.renderContestDropdown()}
                     </Col>
                     <Col span={24}>
-                        {this.renderWinnerRankingList()}
+                        {
+                            this.state.advices.length > 0 
+                            ? this.renderWinnerRankingList()
+                            : this.renderNoActiveParticipants()
+                        }
                     </Col>
                 </Row>
-                <Button
-                        className='button-container' 
-                        span={24} 
-                        style={{
-                            position: 'absolute', 
-                            bottom: '20px', 
-                            zIndex: '20px',
-                            backgroundColor: primaryColor,
-                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
-                            cursor: 'pointer',
-                            color:'#fff'
-                        }}
-                        onClick={() => this.props.history.push('/contest/leaderboard')}
-                >
-                    MORE
-                </Button>
+                {
+                    this.state.advices.length > 0 &&
+                    <Button
+                            className='button-container' 
+                            span={24} 
+                            style={{
+                                position: 'absolute', 
+                                bottom: '20px', 
+                                zIndex: '20px',
+                                backgroundColor: primaryColor,
+                                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                                cursor: 'pointer',
+                                color:'#fff'
+                            }}
+                            onClick={() => this.props.history.push('/contest/leaderboard')}
+                    >
+                        MORE
+                    </Button>
+                }
             </Col>
         );
     }
@@ -366,7 +388,7 @@ export default class ContestHome extends React.Component {
             <AppLayout
                 noHeader
                 content = {
-                    <Row style={{height: '100%'}}>
+                    <Row style={{height: this.props.windowHeight + 100}}>
                         <ContestHomeMeta />
                         {this.renderTopSection()}
                         {this.renderTabsSection()}
@@ -379,6 +401,8 @@ export default class ContestHome extends React.Component {
         );
     }
 }
+
+export default windowSize(ContestHome);
 
 const HowItWorksCard = ({image, header, content, span=7}) => {
     const containerStyle = {

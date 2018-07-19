@@ -468,7 +468,7 @@ export default class LeaderBoard extends React.Component {
                         <Button 
                             type="primary" 
                             style={{width: '150px',fontWeight: 300}} 
-                            onClick={() => this.props.history.push(`/contest/entry/${this.state.selectedContestId}/${this.state.selectedAdviceId}`)}
+                            onClick={() => this.props.history.push(`/contest/entry/${this.state.selectedAdviceId}`)}
                             >
                             DETAIL
                         </Button>

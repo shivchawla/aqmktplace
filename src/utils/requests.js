@@ -13,10 +13,10 @@ export const getStockData = (ticker, field='priceHistory', detailType='detail') 
     });
 };
 
-export const fetchAjax = (url, history, redirectUrl = '/advice', header=undefined) => {
+export const fetchAjax = (url, history, redirectUrl = '/advice', header=undefined, errorCallback = undefined) => {
     return axios.get(url, {headers: header ? header : Utils.getAuthTokenHeader()})
     .catch(error => {
-        return handleGetError(error, history, redirectUrl);
+        return errorCallback !== undefined ? errorCallback(error) : handleGetError(error, history, redirectUrl);
     })
 };
 

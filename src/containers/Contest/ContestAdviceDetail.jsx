@@ -159,7 +159,8 @@ class AdviceDetailImpl extends React.Component {
             postToMarketPlaceLoading: false,
             requestApprovalLoading: false,
             loading: true,
-            withdrawAdviceLoading: false
+            withdrawAdviceLoading: false,
+            notPresentInLatestContest: false
         };
 
         this.performanceSummary = {};
@@ -370,12 +371,19 @@ class AdviceDetailImpl extends React.Component {
     //Just "response" is a poor name, 
     //Choose adviceSummaryResponse or advicePortfolioResponse etc.
     
+    handleErrorNotFoundInContestError = error => {
+        const errorMessage = _.get(error, 'response.data.message', '');
+        if (errorMessage === 'Advice is not present in this contest') {
+            this.setState({notPresentInLatestContest: true});
+        }
+    }
+    
     getAdviceData = (startDate = moment().format('YYYY-MM-DD')) => {
         const contestId = this.props.match.params.contestId;
         const adviceId = this.props.match.params.id;
         const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
         const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
-        const adviceContestUrl = `${requestUrl}/contest/${contestId}/${adviceId}`;
+        const adviceContestUrl = `${requestUrl}/contest/entry/${adviceId}`;
         this.setState({loading: true});
         return Promise.all([
             fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
@@ -398,7 +406,7 @@ class AdviceDetailImpl extends React.Component {
             const authorizedToViewPortfolio = adviceDetail.isSubscribed || adviceDetail.isOwner || adviceDetail.isAdmin;
             return Promise.all([
                 authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null,
-                contestOnly ? fetchAjax(adviceContestUrl, this.props.history, this.props.match.url): null,
+                contestOnly ? fetchAjax(adviceContestUrl, this.props.history, this.props.match.url, undefined, this.handleErrorNotFoundInContestError): null,
                 this.getAdvicePerformance(advicePerformanceResponse.data, benchmark)
             ])
         })
@@ -1126,7 +1134,7 @@ class AdviceDetailImpl extends React.Component {
 
     withdrawAdviceFromContest = () => {
         const contestId = this.props.match.params.contestId;
-        const withdrawAdviceUrl = `${requestUrl}/contest/${contestId}/${this.props.match.params.id}?type=withdraw`;
+        const withdrawAdviceUrl = `${requestUrl}/contest/${this.props.match.params.id}/action?type=withdraw`;
         this.setState({withdrawAdviceLoading: true});
         axios({
             method: 'POST',
@@ -1152,7 +1160,7 @@ class AdviceDetailImpl extends React.Component {
 
     prohibitAdvice = () => {
         const contestId = this.props.match.params.contestId;
-        const prohibitAdviceUrl = `${requestUrl}/contest/${contestId}/${this.props.match.params.id}?type=prohibit`;
+        const prohibitAdviceUrl = `${requestUrl}/contest/${this.props.match.params.id}/action?type=prohibit`;
         this.setState({withdrawAdviceLoading: true});
         axios({
             method: 'POST',
@@ -1276,6 +1284,19 @@ class AdviceDetailImpl extends React.Component {
                 <div style={{width: '95%'}}>
                     {/* {this.renderApprovalButtons(small)} */}
                     {
+                        // ((!approvalRequested && isPublic) || !isPublic) &&
+                        <Button
+                                onClick={() => this.props.history.push(`/contest/updateadvice/${this.props.match.params.id}`)}
+                                className={className}
+                                style={buttonStyle}
+                                type="primary"
+                        >
+                            {
+                                this.state.notPresentInLatestContest ? "ENTER IN CONTEST" : "UPDATE ENTRY"
+                            }
+                        </Button>
+                    }
+                    {
                         this.state.adviceDetail.contestOnly &&
                         this.state.adviceDetail.isPublic &&
                         this.state.adviceDetail.active &&
@@ -1283,7 +1304,6 @@ class AdviceDetailImpl extends React.Component {
                                 onClick={this.withdrawAdviceFromContest} 
                                 className={className} 
                                 style={buttonStyle} 
-                                type="primary"
                                 loading={this.state.withdrawAdviceLoading}
                         >
                             WITHDRAW
@@ -1295,7 +1315,6 @@ class AdviceDetailImpl extends React.Component {
                                 onClick={this.prohibitAdvice}
                                 className={className}
                                 style={buttonStyle}
-                                type="primary"
                         >
                             PROHIBIT ADVICE
                         </Button>
@@ -1309,7 +1328,6 @@ class AdviceDetailImpl extends React.Component {
                                 onClick={this.requestApproval} 
                                 className={className} 
                                 style={buttonStyle} 
-                                type="primary"
                                 loading={this.state.requestApprovalLoading}
                         >
                             REQUEST APPROVAL
@@ -1321,22 +1339,10 @@ class AdviceDetailImpl extends React.Component {
                                 onClick={this.togglePostWarningModal} 
                                 className={className} 
                                 style={buttonStyle} 
-                                type="primary"
                         >
                             POST  TO MARKETPLACE
                         </Button>
-                    }
-                    {
-                        // ((!approvalRequested && isPublic) || !isPublic) &&
-                        <Button
-                                onClick={() => this.props.history.push(`/contest/updateadvice/${this.props.match.params.contestId}/${this.props.match.params.id}`)}
-                                className={className}
-                                style={buttonStyle}
-                        >
-                            UPDATE ADVICE
-                        </Button>
-                    }
-                    
+                    }                    
                 </div>
             );
         }

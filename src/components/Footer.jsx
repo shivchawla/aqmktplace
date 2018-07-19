@@ -156,6 +156,7 @@ class FooterImpl extends React.Component{
                     <div className="footer-list">
                         <Link className="footer-link" to="/policies/tnc">Terms of use</Link>
                         <Link className="footer-link" to="/policies/privacy">Privacy Policy</Link>
+                        <Link className="footer-link" to="/contest/rules">Contest Rules</Link>
                     </div>
                 </Col>
                 {/* <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">

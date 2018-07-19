@@ -93,3 +93,4 @@ export const criterias = [
     {header: 'Beta', content: 'Your Investment Idea should not be very conservative or aggressive in comparison to chosen benchmark'},
     {header: 'Maximum Loss', content: 'Your Investment Idea should not lose more than 10% in comparison to chosen benchmark'},
 ];
+
