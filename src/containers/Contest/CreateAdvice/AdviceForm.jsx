@@ -675,7 +675,7 @@ class ContestAdviceFormImpl extends React.Component {
                                         ? this.state.notPresentInLatestContest
                                             ? "UDPDATE AND ENTER CONTEST"
                                             : "UPDATE ENTRY"
-                                        : 'SUBMIT ENTRY'
+                                        : 'ENTER CONTEST'
                                 }
                             </Button>
                         </Col>
