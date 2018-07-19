@@ -125,10 +125,13 @@ export class AqStockTableMod extends React.Component {
             target['shares'] = shares;
             target['totalValue'] = Number((shares * lastPrice).toFixed(2));
             // target['totalValue'] = value >= 0 ? Number((value * lastPrice).toFixed(2)) : 0;
-            this.updateAllWeights(newData).then(data => {
-                this.setState({data});
-                this.props.onChange(data);
-            });
+            // this.updateAllWeights(newData).then(data => {
+            //     this.setState({data});
+            //     this.props.onChange(data);
+            // });
+            this.updateAllWeights(newData)
+            this.setState({newData});
+            this.props.onChange(newData);
         }
     }
 

@@ -52,7 +52,7 @@ class ContestHome extends React.Component {
         })
     }
 
-     // Gets the summary of the latest ongoing contest
+    // Gets the summary of the latest ongoing contest
     getLatestContestSummary = (contestId = this.state.selectedContestId, showLoader=true) => {
         showLoader && this.setState({loading: true});
         const limit = 10;
@@ -237,7 +237,12 @@ class ContestHome extends React.Component {
                 <Col span={24}>
                     {
                         scoringMetrics.map((metric, index) => 
-                            <MetricCard onClick={this.selectScoringMetric} key={index} {...metric}/>
+                            <MetricCard 
+                                onClick={this.selectScoringMetric} 
+                                key={index} 
+                                {...metric}
+                                selected={this.state.metric.header === metric.header}
+                            />
                         )
                     }
                 </Col>
@@ -259,12 +264,13 @@ class ContestHome extends React.Component {
 
         return (
             <Col span={16} style={containerStyle}>
-                <Tabs animated={false} defaultActiveKey="1">
+                <Tabs animated={false} defaultActiveKey="4">
                     <TabPane tab="HOW IT WORKS" key="1">{this.renderHowItWorks()}</TabPane>
                     <TabPane tab="PRIZES" key="2">{this.renderPrizeList()}</TabPane>
                     <TabPane tab="CRITERIA" key="3">{this.renderCriteriaList()}</TabPane>
                     <TabPane tab="SCORING" key="4">{this.renderScoring()}</TabPane>
                     <TabPane tab="FAQ" key="5">{this.renderFAQ()}</TabPane>
+                    <TabPane tab="MY ENTRIES" key="6">{this.renderFAQ()}</TabPane>
                 </Tabs>
             </Col>
         );
@@ -476,7 +482,7 @@ const FAQCard = ({header, content, span=12}) => {
     );
 };
 
-const MetricCard = ({header, content, span=24, onClick}) => {
+const MetricCard = ({header, selected = false, onClick}) => {
     const containerStyle = {
         backgroundColor: '#FBFBFB',
         borderRadius: '4px',
@@ -491,7 +497,12 @@ const MetricCard = ({header, content, span=24, onClick}) => {
     };
 
     return (
-        <Tag onClick={() => onClick(header)}>{header}</Tag>
+        <Tag 
+                color={selected ? primaryColor : null} 
+                onClick={() => onClick(header)}
+        >
+            {header}
+        </Tag>
     );
 }
 
