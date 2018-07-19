@@ -61,8 +61,6 @@ const metrics = [
         label: 'Max Loss'
     }
 ];
-
-
 export default class LeaderBoard extends React.Component {
     constructor(props) {
         super(props);
@@ -75,7 +73,8 @@ export default class LeaderBoard extends React.Component {
             activeContests: [],
             selectedContestId: null,
             selectedContest: {},
-            showActivePerformance: true
+            showActivePerformance: true,
+            maxAdviceCount: 0
         };
     }
 
@@ -116,6 +115,7 @@ export default class LeaderBoard extends React.Component {
     }
 
     renderPagination() {
+        const advicesDisplayed = (this.state.selectedPage * this.state.limit) + this.state.limit;
         const disabledColor = '#BDBDBD';
         return (
             <Row type="flex" justify="space-between" style={{marginTop: '10px'}}>
@@ -142,9 +142,11 @@ export default class LeaderBoard extends React.Component {
                             fontWeight: '300', 
                             color: this.state.advices.length % 10 !== 0 ? disabledColor : '#fff'}} 
                         type="primary"
-                        disabled={this.state.advices.length % 10 !== 0}
+                        disabled={advicesDisplayed >= this.state.maxAdviceCount}
                         onClick={() => this.handlePagination('next')}
-                    >NEXT</Button>
+                    >
+                        NEXT
+                    </Button>
                 </Col>
             </Row>
         );
@@ -223,9 +225,10 @@ export default class LeaderBoard extends React.Component {
         fetchAjax(contestSummaryUrl, this.props.history, this.props.match.params.url)
         .then(({data: contestSummaryData}) => {
             let advices = _.get(contestSummaryData, 'advices', []);
+            const adviceCount = _.get(contestSummaryData, 'advicesCount', 0);
             advices = advices.map(advice => this.processAdviceForLeaderboardListItem(advice));
             advices = _.orderBy(advices, 'rank', 'asc');
-            this.setState({advices, selectedAdviceId: advices[0].adviceId});
+            this.setState({advices, selectedAdviceId: advices[0].adviceId, maxAdviceCount: adviceCount});
         })
         .catch(err => {
             return err;
@@ -370,9 +373,9 @@ export default class LeaderBoard extends React.Component {
     handleContestChange = contestId => {
         this.setState({
             selectedContestId: contestId, 
-            selectedContest: this.state.activeContests.filter(contest => contest.id === contestId)[0]
-        });
-        this.getLatestContestSummary(contestId);
+            selectedContest: this.state.activeContests.filter(contest => contest.id === contestId)[0],
+            selectedPage: 0
+        }, () => this.getLatestContestSummary(contestId));
     }
 
     renderContestDropdown = () => {

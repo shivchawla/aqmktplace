@@ -12,6 +12,7 @@ export const AdviceDetailCrumb = [
 ];
 
 export const ContestAdviceDetailCrumb = [
+    {name: 'Contest', url: '/contest'},
     {name: 'Leaderboard', url: '/contest/leaderboard'}
 ];
 

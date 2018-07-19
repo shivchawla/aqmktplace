@@ -132,9 +132,9 @@ export default class Dashboard extends React.Component {
                                     <Menu.Item key="subscribedAdvices">{this.getMenuItem('Subscribed Advices')}</Menu.Item>
                                 </SubMenu>
                                 <SubMenu key="advisor" title={advisorTitle}>
-                                    <Menu.Item key="myAdvices">{this.getMenuItem('My Advices')}</Menu.Item>
-                                    <Menu.Item key="advicePerformance">{this.getMenuItem('Advice Performance')}</Menu.Item>
-                                    <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item>
+                                    <Menu.Item key="myAdvices">{this.getMenuItem('My Entries')}</Menu.Item>
+                                    <Menu.Item key="advicePerformance">{this.getMenuItem('Entry Performance')}</Menu.Item>
+                                    {/* <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item> */}
                                 </SubMenu>
                                 <Menu.Item key="createPortfolio">{createPortfolioTitle}</Menu.Item>
                                 <SubMenu key="account" title={accountTitle}>

@@ -3,6 +3,7 @@ import _ from 'lodash';
 import windowSize from 'react-window-size';
 import {Row, Col, Button, Tabs, Table, Tag, Icon, Select} from 'antd';
 import {primaryColor, verticalBox, horizontalBox} from '../../constants';
+import {AdviceListItemMod} from '../../components/AdviceListeItemMod';
 import {scoringMetrics, faqs, howItWorksContents, prizes, criterias, prizeText, scoringText} from './constants';
 import {processAdviceForLeaderboardListItem} from './utils';
 import {fetchAjax} from '../../utils';
@@ -24,10 +25,12 @@ class ContestHome extends React.Component {
             selectedContestId: null,
             selectedContest: {},
             advices: [], // list of advices currently participating in the contest
+            userEntries: [], // advices of the user inside contest,
+            selectedUserEntryPage: 0
         }
     }
 
-    getActiveContests = () => {
+    getActiveContests = () => new Promise((resolve, reject) => {
         const contestsUrl = `${requestUrl}/contest`;
         this.setState({loading: true});
         fetchAjax(contestsUrl, this.props.history, this.props.match.url)
@@ -45,15 +48,18 @@ class ContestHome extends React.Component {
             }
 
             return null;
+        })        
+        .then(() => {
+            resolve(true);
         })
-        .catch(err => err)
+        .catch(err => reject(err))
         .finally(() => {
             this.setState({loading: false});
         })
-    }
+    })
 
     // Gets the summary of the latest ongoing contest
-    getLatestContestSummary = (contestId = this.state.selectedContestId, showLoader=true) => {
+    getLatestContestSummary = (contestId = this.state.selectedContestId, showLoader=true) => new Promise((resolve, reject) => {
         showLoader && this.setState({loading: true});
         const limit = 10;
         const skip = 0;
@@ -63,16 +69,14 @@ class ContestHome extends React.Component {
             let advices = _.get(contestSummaryData, 'advices', []);
             advices = advices.map(advice => processAdviceForLeaderboardListItem(advice));
             advices = _.orderBy(advices, 'rank', 'asc');
-            console.log(advices);
             this.setState({advices, selectedAdviceId: advices[0].adviceId});
+            resolve(true);
         })
-        .catch(err => {
-            return err;
-        })
+        .catch(err => reject(err))
         .finally(() => {
             showLoader && this.setState({loading: false});
         })
-    }
+    })
 
     renderWinnerRankingList = () => {
         return (
@@ -93,6 +97,7 @@ class ContestHome extends React.Component {
                         this.state.advices.map((advice, index) => {
                             return (
                                 <LeaderboardItem 
+                                    key={index}
                                     striped={index % 2 === 0}
                                     rank={advice.rank} 
                                     name={advice.advisorName}
@@ -256,6 +261,66 @@ class ContestHome extends React.Component {
 
     }
 
+    getUserAdvices = () => new Promise((resolve, reject) => {
+        const limit = 10;
+        const skip = this.state.selectedUserEntryPage * limit;
+        const adviceUrl = `${requestUrl}/advice?personal=1&contestOnly=true&skip=${skip}&limit=${limit}`;
+        fetchAjax(adviceUrl, this.props.history, this.props.match.url)
+        .then(advicesResponse => {
+            const advices = _.get(advicesResponse.data, 'advices', []);
+            const count = _.get(advicesResponse.data, 'count', 0);
+            resolve({advices: this.processAdvices(advices), count});
+        })
+        .catch(err => reject(err));
+    })
+
+
+    processAdvices = (responseAdvices) => {
+        const advices = [];
+        responseAdvices.map((advice, index) => {
+            advices.push({
+                contestOnly: true,
+                isFollowing: advice.isFollowing || false,
+                id: advice._id || 0,
+                name: advice.name || '',
+                advisor: advice.advisor || {},
+                createdDate: advice.createdDate || '',
+                heading: advice.heading || '',
+                subscribers: advice.numSubscribers || 0,
+                followers: advice.numFollowers || 0,
+                rating: Number(_.get(advice, 'rating.current', 0) || 0).toFixed(2),
+                performanceSummary: advice.performanceSummary,
+                rebalancingFrequency: _.get(advice, 'rebalance', 'N/A'),
+                isApproved: _.get(advice, 'latestApproval.status', false),
+                approvalStatus: _.get(advice, 'approvalRequested', false),
+                isOwner: _.get(advice, 'isOwner', false),
+                isAdmin: _.get(advice, 'isAdmin', false),
+                isSubscribed: _.get(advice, 'isSubscribed', false),
+                isTrending: false,
+                public: _.get(advice, 'public', false),
+                netValue: advice.netValue,
+            })
+        });
+
+        return advices;
+    }
+
+    renderMyEntriesList = () => {
+        return (
+            <Row>
+                <Col span={24}>
+                    {
+                        this.state.userEntries.map((advice, index) => {
+                            return (
+                                <AdviceListItemMod key={index} advice={advice} contestOnly={true}/>
+                            );
+                        })
+                    }
+                </Col>
+            </Row>
+        );
+    }
+
     renderTabsSection = () => {
         const containerStyle = {
             padding: '10px 20px',
@@ -264,13 +329,13 @@ class ContestHome extends React.Component {
 
         return (
             <Col span={16} style={containerStyle}>
-                <Tabs animated={false} defaultActiveKey="4">
+                <Tabs animated={false} defaultActiveKey="1">
                     <TabPane tab="HOW IT WORKS" key="1">{this.renderHowItWorks()}</TabPane>
                     <TabPane tab="PRIZES" key="2">{this.renderPrizeList()}</TabPane>
                     <TabPane tab="CRITERIA" key="3">{this.renderCriteriaList()}</TabPane>
                     <TabPane tab="SCORING" key="4">{this.renderScoring()}</TabPane>
                     <TabPane tab="FAQ" key="5">{this.renderFAQ()}</TabPane>
-                    <TabPane tab="MY ENTRIES" key="6">{this.renderFAQ()}</TabPane>
+                    <TabPane tab="MY ENTRIES" key="6">{this.renderMyEntriesList()}</TabPane>
                 </Tabs>
             </Col>
         );
@@ -386,7 +451,14 @@ class ContestHome extends React.Component {
     }
 
     componentWillMount() {
-        this.getActiveContests();
+        Promise.all([
+            this.getActiveContests(),
+            this.getUserAdvices()
+        ])
+        .then(([contestResponse, userAdvices]) => {
+            const advices = _.get(userAdvices, 'advices', []);
+            this.setState({userEntries: advices});
+        })
     }
 
     render() {

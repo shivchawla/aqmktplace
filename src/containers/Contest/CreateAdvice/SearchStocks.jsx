@@ -44,7 +44,7 @@ export class SearchStocks extends React.Component {
 
     handleSearchInputChange = e => {
         const searchQuery = e.target.value;
-        this.setState({searchInput: searchQuery}, () => {
+        this.setState({searchInput: searchQuery, selectedPage: 0}, () => {
             this.fetchStocks();
         });
     }
@@ -149,6 +149,16 @@ export class SearchStocks extends React.Component {
             }
             this.setState({selectedStocks, stocks});
             this.localStocks = localStocks;
+        } else {
+            if (selectedStockIndex === -1) {
+                selectedStocks.push(symbol);
+                targetLocalStock.checked = true;
+            } else {
+                selectedStocks.splice(selectedStockIndex, 1);
+                targetLocalStock.checked = false;
+            }
+            this.setState({selectedStocks});
+            this.localStocks = localStocks;
         }
     }
 
@@ -249,6 +259,34 @@ export class SearchStocks extends React.Component {
         return false;
     }
 
+    renderSelectedStocks = () => {
+        const selectedStocks = [...this.state.selectedStocks];
+
+        return (
+            <Row>
+                {
+                    selectedStocks.map((stock, index) => {
+                        console.log(this.state.selectedStocks.length);
+                        return (
+                            <Tag 
+                                    style={{marginBottom: '5px'}}
+                                    color='blue'
+                                    key={stock}
+                                    closable
+                                    onClose={() => {
+                                        console.log(stock);
+                                        this.conditionallyAddItemToSelectedArray(stock)
+                                    }}
+                            >
+                                {stock}
+                            </Tag>
+                        );
+                    })
+                }
+            </Row>
+        );
+    }
+
     render() { 
         const universe = _.get(this.props, 'filters.universe', null);
         const sector = _.get(this.props, 'filters.sector', null);
@@ -264,7 +302,15 @@ export class SearchStocks extends React.Component {
                             type="close-circle"
                             onClick={this.props.toggleBottomSheet}
                         />
-                        <h3 style={{fontSize: '24px', marginRight: '10px'}}>Add Stocks to your Portfolio</h3>
+                        <h3 
+                                style={{
+                                    fontSize: this.state.selectedStocks.length === 0 ? '24px' : '14px', 
+                                    marginRight: '10px',
+                                    transition: 'all 0.4s ease-in-out'
+                                }}
+                        >
+                            Add Stocks to your Portfolio
+                        </h3>
                             <span style={{fontSize: '14px', marginRight: '5px'}}> Allowed Universe: </span>
                             {industry && 
                                 <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
@@ -278,7 +324,6 @@ export class SearchStocks extends React.Component {
                                 <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
                             }
                     </Row>
-
                     {
                         this.state.selectedStocks.length > 0 &&
                         <Button 
@@ -304,6 +349,7 @@ export class SearchStocks extends React.Component {
                     {this.renderSearchStocksList()}
                 </Col>
                 <Col span={12} style={{padding: '20px'}}>
+                    {this.renderSelectedStocks()}
                     <StockPerformance stock={this.state.selectedStock}/>
                 </Col>
             </Row>

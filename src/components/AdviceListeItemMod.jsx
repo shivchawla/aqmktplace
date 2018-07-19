@@ -18,10 +18,12 @@ class AdviceListItemImpl extends React.PureComponent {
         }
     }
 
-    handleClick = (id) => {
-        this.props.history.push(`/advice/${id}`);
+    handleClick = (id, contestOnly) => {
+        contestOnly 
+            ? this.props.history.push(`/contest/entry/${id}`) 
+            : this.props.history.push(`/advice/${id}`)
     }
-
+    
     renderAnnualReturnIcon = annualReturn => {
         return (
             <Row style={{textAlign: 'center'}}>
@@ -117,7 +119,7 @@ class AdviceListItemImpl extends React.PureComponent {
                 className="advice-card" 
                 style={{backgroundColor: cardBackgroundColor}} 
                 align="top" 
-                onClick={e => this.handleClick(id)}>
+                onClick={e => this.handleClick(id, contestOnly)}>
 
                 <Col span={24} style={{paddingLeft:'10px', paddingRight:'10px'}}>
                     <Row type="flex" justify="space-between">
@@ -129,10 +131,16 @@ class AdviceListItemImpl extends React.PureComponent {
                             <Row>
                                 <Col span={14}>
                                     By
-                                    <span id ="advisorName" style={{color: primaryColor, marginRight: '5px'}}
-                                        onClick={e => {
-                                        e.stopPropagation();
-                                        this.props.history.push(`/dashboard/advisorprofile/${advisorId}`)}}>{` ${advisorName}`}
+                                    <span 
+                                            id ="advisorName" style={{color: primaryColor, marginRight: '5px'}}
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                contestOnly 
+                                                ? null 
+                                                : this.props.history.push(`/dashboard/advisorprofile/${advisorId}`)}
+                                            }
+                                    >
+                                        {` ${advisorName}`}
                                     </span>
                                 </Col>
                             </Row>
@@ -155,16 +163,19 @@ class AdviceListItemImpl extends React.PureComponent {
                             </Row>
                             
                             <Row style={{marginTop: '5px'}}>
-                                <AqTag 
-                                        tooltipTitle="Rebalancing Frequency: The advice is rebalanced/updated at this frequency"
-                                        tooltipPlacement="bottom"
-                                        text={rebalancingFrequency}
-                                        textStyle={{marginLeft: '5px'}}
-                                        color='#f58231'
-                                        icon='clock-circle-o'
-                                />
-                                
-                                {statusTagLabel!="" &&
+                                {
+                                    !contestOnly &&
+                                    <AqTag 
+                                            tooltipTitle="Rebalancing Frequency: The advice is rebalanced/updated at this frequency"
+                                            tooltipPlacement="bottom"
+                                            text={rebalancingFrequency}
+                                            textStyle={{marginLeft: '5px'}}
+                                            color='#f58231'
+                                            icon='clock-circle-o'
+                                    />
+                                }                                
+                                {
+                                    statusTagLabel!="" && !contestOnly &&
                                     <AqTag 
                                             text={statusTagLabel}
                                             color={statusTagColor}
@@ -174,7 +185,8 @@ class AdviceListItemImpl extends React.PureComponent {
                                     (isOwner || isAdmin) &&
                                     <React.Fragment>
                                         
-                                        {   !contestOnly && 
+                                        {
+                                               !contestOnly && 
                                                 <AqTag 
                                                     tooltipTitle={isPublic ? advicePublic : advicePrivate}
                                                     tooltipPlacement='bottom'
@@ -185,7 +197,7 @@ class AdviceListItemImpl extends React.PureComponent {
                                             />
                                         }
                                         {
-                                            approvalStatus &&
+                                            approvalStatus && !contestOnly &&
                                             <AqTag 
                                                     tooltipTitle={adviceApprovalPending}
                                                     placement='bottom'

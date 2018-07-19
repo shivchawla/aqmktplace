@@ -32,7 +32,7 @@ class ContestAdviceFormImpl extends React.Component {
         this.state = {
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: false,
+            bottomSheetOpenStatus: true,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -138,7 +138,6 @@ class ContestAdviceFormImpl extends React.Component {
     handleSubmitAdvice = (type='validate') => new Promise((resolve, reject) => {
         const adviceUrl = `${requestUrl}/advice`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
-        const contestId = this.props.isUpdate ? this.props.contestId : this.state.contestId;
         let adviceId = null;
         this.setState({adviceSubmissionLoading: true});
         axios({
@@ -814,11 +813,14 @@ class ContestAdviceFormImpl extends React.Component {
                 this.setState({loading: false});
             })
         } else {
-            this.getActiveContestToParticipate()
-            .then(contestId => {
-                console.log(contestId);
-                this.setState({contestId});
-            })
+            Promise.all([
+                this.handleSubmitAdvice(),   
+                this.getActiveContestToParticipate()
+            ])
+            // .then(contestId => {
+            //     console.log(contestId);
+            //     this.setState({contestId});
+            // })
             .catch(err => {
                 this.setState({noActiveContests: true});
             })
