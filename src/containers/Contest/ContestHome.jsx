@@ -274,7 +274,7 @@ class ContestHome extends React.Component {
 
         return (
             <Col span={16} style={containerStyle}>
-                <Tabs animated={false} defaultActiveKey="4">
+                <Tabs animated={false} defaultActiveKey="1">
                     <TabPane tab="HOW IT WORKS" key="1">{this.renderHowItWorks()}</TabPane>
                     <TabPane tab="PRIZES" key="2">{this.renderPrizeList()}</TabPane>
                     <TabPane tab="CRITERIA" key="3">{this.renderCriteriaList()}</TabPane>
