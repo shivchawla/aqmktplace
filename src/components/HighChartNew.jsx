@@ -147,13 +147,13 @@ export class HighChartNew extends React.Component {
                     var allowedMaxWeight  = this.props.maxWeight ? this.props.maxWeight : 70;
                     var idx = _.findLastIndex(cumWeight, (item) => {return item < allowedMaxWeight});
 
-                    idx = Math.max(idx, this.props.maxSlices - 1);
+                    idx = Math.min(idx, this.props.maxSlices - 1);
 
                     if (idx !=-1 && idx < nData.length - 1) {
                         var otherData = nData.slice(idx + 1);
                         nData = nData.slice(0, idx + 2);
                         nData[idx + 1].name = 'Other';
-                        nData[idx + 1].y = _.sum(otherData.map(item => item.y));
+                        nData[idx + 1].y = Math.round(_.sum(otherData.map(item => item.y)),2);
                     }
                 }
 
