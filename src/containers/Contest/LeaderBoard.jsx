@@ -118,7 +118,7 @@ export default class LeaderBoard extends React.Component {
     renderPagination() {
         const disabledColor = '#BDBDBD';
         return (
-            <Row type="flex" justify="space-between" style={{marginTop: '10px'}}>
+            <Row type="flex" justify="space-between" style={{marginBottom: '10px'}}>
                 <Col span={4} >
                     <Button
                         style={{
@@ -128,8 +128,8 @@ export default class LeaderBoard extends React.Component {
                             //backgroundColor: '#fff',
                             //border: 'none',
                             //marginTop: '-6px'
-                        }} 
-                        type="primary"
+                        }}
+                        size="small" 
                         disabled={this.state.selectedPage === 0}
                         onClick={() => this.handlePagination('previous')}
                     >PREVIOUS</Button>
@@ -141,7 +141,7 @@ export default class LeaderBoard extends React.Component {
                             fontSize: '14px', 
                             fontWeight: '300', 
                             color: this.state.advices.length % 10 !== 0 ? disabledColor : '#fff'}} 
-                        type="primary"
+                        size="small"
                         disabled={this.state.advices.length % 10 !== 0}
                         onClick={() => this.handlePagination('next')}
                     >NEXT</Button>
@@ -156,8 +156,13 @@ export default class LeaderBoard extends React.Component {
         return (
             <Row>
                 <Col span={24}>
+                    {this.renderPagination()}
+                </Col>
+
+                <Col span={24}>
                     {this.renderLeaderboardListHeader()}
                 </Col>
+                
                 <Col span={24}>
                     {
                         leaders.map((leader, index) => 
@@ -171,10 +176,6 @@ export default class LeaderBoard extends React.Component {
                         )
                     }
                 </Col>
-                <Col span={24}>
-                    {this.renderPagination()}
-                </Col>
-
             </Row>
         );
 
@@ -399,16 +400,15 @@ export default class LeaderBoard extends React.Component {
     renderPageContent() {
         const {advices = [], selectedAdviceId = null} = this.state;
         const selectedAdvice = advices.filter(advice => advice.adviceId === selectedAdviceId)[0];
+        const advisorName = selectedAdvice !== undefined ? selectedAdvice.advisorName: '';
         const adviceName = selectedAdvice !== undefined ? selectedAdvice.adviceName: '';
+
         const adviceNameStyle = {
-            marginTop: '10px',
-            marginLeft: '10px',
-            fontSize: '20px',
-            fontWeight: '300',
+            fontSize: '16px',
+            fontWeight: '400',
             color: primaryColor,
-            //color: '#fff',
-            cursor: 'pointer',
-            height: '40px'
+            height: '30px',
+            textAlign:'center'
         };
 
         const currentMetrics = this.processMetricsForSelectedAdvice('current');
@@ -439,14 +439,24 @@ export default class LeaderBoard extends React.Component {
                         height:'500px'
                     }}
                 >
-                    <div style={{...horizontalBox, marginTop:'0px', justifyContent: 'center', borderTop:`0px solid ${primaryColor}`, borderBottom: `1px solid ${primaryColor}`, color: primaryColor, backgroundColor: '#fff'}}>
-                        <h3  style={adviceNameStyle}>
-                            {adviceName}
+                    <div style={{...horizontalBox, 
+                            margin:'-10px auto', 
+                            padding: '2px 0',
+                            border: `1px solid ${primaryColor}`, 
+                            width: '80%', 
+                            color: primaryColor, 
+                            backgroundColor: '#fbf8f8',
+                            display:'block'}}>
+                        <h3  style={{...adviceNameStyle, marginBottom: '-10px'}}>
+                            {advisorName}
                         </h3>
+                        <span style={{fontSize: '11px', display: 'block', textAlign: 'center'}}>
+                            ({adviceName})
+                        </span>
                     </div>
                     
-                    <div style={{textAlign: 'center', margin: '20px 0'}}>
-                        <RadioGroup onChange={this.onPerformanceToggle} defaultValue="0">
+                    <div style={{textAlign: 'center', margin: '50px 0 20px 0'}}>
+                        <RadioGroup size="small" onChange={this.onPerformanceToggle} defaultValue="0">
                             <RadioButton value="0">Active</RadioButton>
                             <RadioButton value="1">Historical</RadioButton>
                         </RadioGroup>
