@@ -1,24 +1,24 @@
 import enterContestIcon from '../../assets/enter-contest.svg';
 
-export const scoringText = 'The theme of the contest is to award experts with Investment Ideas that perform better than the market. For this purpose, our scoring function will largely depend on excess return over chosen benchmark.';
+export const scoringText = 'The theme of the contest is to award experts with Investment Ideas that perform better than the market. For this purpose, our scoring function will largely depend on excess return over the chosen benchmark.';
 
 export const scoringMetrics = [
     {header: 'Excess Return', content: 'Annualized total return of portfolio in excess to the benchmark'},
-    {header: 'Tracking Errror', content: 'Annualized standard deviation of daily returns of portfolio in excess to the benchmark'},
+    {header: 'Tracking Errror', content: 'Annualized standard deviation of daily excess returns'},
     {header: 'Maximum Loss', content: "Maximum Loss incurred by the portfolio in excess to the benchmark" },
     {header: 'Information Ratio', content: 'Ratio of Excess Return to Tracking Error. Metric to measure consistency of portfolio returns.'},
     {header: 'Calmar Ratio', content: 'Ratio of Excess Return to Max Loss. Metric to measure the ability to recover loss in portfolio'},
-    {header: "Portfolio Concentration", content: "Metric to measure portfolio diversification"}
+    {header: "Portfolio Concentration", content: "Metric to measure portfolio diversification. High concentration implies low diversification"}
 ];
 
 //Define them for excess return 
 export const metricDefs = {
     annualReturn: 'Annualized total return of portfolio in excess to the benchmark',
-    volatility: 'Annualized standard deviation of daily returns of portfolio in excess to the benchmark',
+    volatility: 'Annualized standard deviation of of daily excess returns',
     maxLoss: "Maximum Loss incurred by the portfolio in excess to the benchmark" ,
     sharpe: 'Ratio of Excess Return to Tracking Error. Metric to measure consistency of portfolio returns.',
     calmar: 'Ratio of Excess Return to Max Loss. Metric to measure the ability to recover loss in portfolio',
-    concentration: "Metric to measure portfolio diversification. It is computed as sum of square of portfolio weights"
+    concentration: "Metric to measure portfolio diversification. High concentration implies low diversification"
 };
 
 export const faqs = [

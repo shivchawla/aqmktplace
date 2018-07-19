@@ -84,7 +84,7 @@ class FooterImpl extends React.Component{
                             <FormItem>
                                 {
                                     getFieldDecorator('emailSubject', {
-                                        initialValue: 'Connect with AimsQuant',
+                                        initialValue: 'Connect with AdviceQube',
                                         rules: [{required: true, message: 'Please provide a valid subject'}]
                                     })(
                                         <Input placeholder='Subject' disabled/>
@@ -140,9 +140,9 @@ class FooterImpl extends React.Component{
                     <h5 className="footer-group-header">Company</h5>
                     <div className="footer-list">
                         <Link className="footer-link" to="/aboutus">About Us</Link>
-                        <Link className="footer-link" to="/aboutus/whoWeAre">People</Link>
+                        <Link className="footer-link" to="/aboutus/people">People</Link>
                         <Link className="footer-link" to="/aboutus/careers">Careers</Link>
-                        <Link className="footer-link" to="/aboutus/connectWithUs">Connect</Link>
+                        <Link className="footer-link" to="/aboutus/connect">Connect</Link>
                     </div>
                 </Col>
                 <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">

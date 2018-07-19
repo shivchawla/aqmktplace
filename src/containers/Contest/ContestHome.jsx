@@ -8,6 +8,7 @@ import {processAdviceForLeaderboardListItem} from './utils';
 import {fetchAjax} from '../../utils';
 import AppLayout from '../../containers/AppLayout';
 import logo from "../../assets/logo-advq-new.png";
+import contestFormula from "../../assets/contestFormula2.png";
 import {ContestHomeMeta} from '../../metas';
 
 const TabPane = Tabs.TabPane;
@@ -232,8 +233,17 @@ class ContestHome extends React.Component {
                 </Col>
                 
                 <Col span={24}>
+                    <h5 style={{fontSize: '18px', color: '#616161', fontStyle:'italic'}}>Excess Return  = Return of Investment Idea -  Return of Benchmark</h5>
+                </Col>
+
+                <Col span={24}>
+                    <img style={{marginLeft:'-30px'}} src={contestFormula}/>
+                </Col>
+
+                <Col span={24}>
                     <h5 style={{fontSize: '16px', color: '#616161'}}>Metrics</h5>
                 </Col>
+
                 <Col span={24}>
                     {
                         scoringMetrics.map((metric, index) => 
@@ -248,7 +258,7 @@ class ContestHome extends React.Component {
                 </Col>
                     
                 <Col span={24} style={{...verticalBox, alignItems: 'flex-start', padding: '15px', paddingLeft: 0}}>
-                    <h1>{this.state.metric.header}</h1>
+                    <h2>{this.state.metric.header}</h2>
                     <h3>{this.state.metric.content}</h3>
                 </Col>
             </Row>
@@ -471,7 +481,8 @@ const FAQCard = ({header, content, span=12}) => {
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         padding: '0 10px',
-        marginBottom: '60px',
+        //marginBottom: '60px',
+        height:'200px'
     };
 
     return (

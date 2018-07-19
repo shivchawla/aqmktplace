@@ -15,14 +15,15 @@ class AboutUsItem extends React.Component {
 
       return (
           <Col span={24} className="full-screen-container" 
-            style={{'background': 'white', 'padding': '4% 10% 4% 10%'}}>
-            <h1 style={{'fontSize': 'calc(8px + 1.5vw)', 'fontWeight': 'bolder', 'marginTop': '10%'}}>{item.header}</h1>
-            <p style={{'fontSize':'calc(7px + 1.5vw)', 'color': 'teal'}}>
+            style={{'background': 'white', 'padding': '0% 10% 14% 10%'}}>
+
+            <h1 style={{'fontSize': 'calc(12px + 1.5vw)', 'fontWeight': 'bolder', 'marginTop': '10%'}}>{item.header}</h1>
+            <p style={{'fontSize':'calc(10px + 1.5vw)', 'color': 'teal', marginBottom:'0px'}}>
               {item.tagline}
             </p>
             <div style={{'display': 'inline-flex', 'alignItems': 'center'}}>
                 <div className="link-text" style={{'padding': '0px'}}>
-                  <h4 style={{'marginTop': '20px'}}>{item.main}</h4>
+                  <h4 style={{fontSize: '18px', width: '80%', textAlign: 'justify'}}>{item.main}</h4>
                   <div style={{'paddingTop': '25px'}}> 
                       {
                         connect &&
@@ -73,28 +74,28 @@ class AboutUs extends Component {
 
   handleScrollToElement = (key) =>{
     const tesNode = ReactDOM.findDOMNode(this.refs[key]);
-    console.log(this.refs);
-    console.log(tesNode);
     if (tesNode){
       window.scrollTo(0, tesNode.offsetTop);
     }
   }
 
-  componentDidMount(){
-  	if (this.props.pageChange){
-  		this.props.pageChange('aboutUs');
+  componentWillReceiveProps(nextProps){
+    console.log(nextProps.location);
+
+  	if (nextProps.pageChange){
+  		nextProps.pageChange('aboutUs');
   	}
 
-    if (this.props.location){
-      if (this.props.location.pathname === '/people'){
+    if (nextProps.location){
+      if (nextProps.location.pathname === '/aboutus/people'){
         setTimeout(() =>{
           this.handleScrollToElement('whoWeAre');
         }, 100);
-      }else if (this.props.location.pathname === '/careers'){
+      }else if (nextProps.location.pathname === '/aboutus/careers'){
         setTimeout(() =>{
           this.handleScrollToElement('careers');
         }, 100);
-      }else if (this.props.location.pathname === '/connect'){
+      }else if (nextProps.location.pathname === '/aboutus/connect'){
         setTimeout(() =>{
           this.handleScrollToElement('connectWithUs');
         }, 100);
