@@ -102,7 +102,7 @@ export default class Dashboard extends React.Component {
 
     render() {
         const investorTitle = <span style={subMenuLabelStyle}><Icon type="shopping-cart" />Investor Dashboard</span>;
-        const advisorTitle = <span style={subMenuLabelStyle}><Icon type="rocket" />Advisor Dashboard</span>;
+        const advisorTitle = <span style={subMenuLabelStyle}><Icon type="rocket" />Contest Dashboard</span>;
         const createPortfolioTitle = <span style={subMenuLabelStyle}><Icon type="plus-square-o" />Create Portfolio</span>;
         const accountTitle = <span style={subMenuLabelStyle}><Icon type="user" />Account</span>;
 

@@ -32,7 +32,7 @@ class ContestAdviceFormImpl extends React.Component {
         this.state = {
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: true,
+            bottomSheetOpenStatus: false,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -739,6 +739,7 @@ class ContestAdviceFormImpl extends React.Component {
             const total = Number((_.get(position, 'quantity', 0) * _.get(position, 'lastPrice', 0)).toFixed(2))
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                sector: _.get(position, 'security.detail.Sector', null),
                 ticker: _.get(position, 'security.ticker', null),
                 symbol: _.get(position, 'security.ticker', null),
                 effTotal: total,

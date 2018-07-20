@@ -160,7 +160,9 @@ class AdviceDetailImpl extends React.Component {
             requestApprovalLoading: false,
             loading: true,
             withdrawAdviceLoading: false,
-            notPresentInLatestContest: false
+            notPresentInLatestContest: false,
+            withdrawModalVisible: false,
+            prohibitModalVisible: false
         };
 
         this.performanceSummary = {};
@@ -528,6 +530,44 @@ class AdviceDetailImpl extends React.Component {
                     }
                 </h3>
             </Modal>
+        );
+    }
+
+    toggleWitdrawOrProhibitModal = (modalType) => {
+        this.setState({[modalType]: !this.state[modalType]});
+    }
+
+    onProhibitButtonClicked = () => {
+        this.prohibitAdvice();
+        this.toggleWitdrawOrProhibitModal('prohibitModalVisible');
+    }
+
+    onWithdrawButtonClicked = () => {
+        this.withdrawAdviceFromContest();
+        this.toggleWitdrawOrProhibitModal('withdrawModalVisible');
+    }
+
+    renderProhibitModal = () => {
+        return (
+            <WarningActionModal 
+                visible={this.state.prohibitModalVisible}
+                onOk={this.onProhibitButtonClicked}
+                onCancel={() => this.toggleWitdrawOrProhibitModal('prohibitModalVisible')}
+                title="Prohibit Warning"
+                text="Are you sure you want to prohibit this Entry"
+            />
+        );
+    }
+
+    renderWithdrawModal = () => {
+        return (
+            <WarningActionModal 
+                visible={this.state.withdrawModalVisible}
+                onOk={this.onWithdrawButtonClicked}
+                onCancel={() => this.toggleWitdrawOrProhibitModal('withdrawModalVisible')}
+                title="Withdraw Warning"
+                text="Are you sure you want to withdraw this Entry from the ongoing contest !"
+            />
         );
     }
 
@@ -1257,7 +1297,7 @@ class AdviceDetailImpl extends React.Component {
                     {
                         isAdmin && contestOnly && active &&
                         <Button
-                                onClick={this.prohibitAdvice}
+                                onClick={() => this.toggleWitdrawOrProhibitModal('prohibitModalVisible')}
                                 className={className}
                                 style={buttonStyle}
                                 type="primary"
@@ -1301,7 +1341,7 @@ class AdviceDetailImpl extends React.Component {
                         this.state.adviceDetail.isPublic &&
                         this.state.adviceDetail.active &&
                         <Button 
-                                onClick={this.withdrawAdviceFromContest} 
+                                onClick={() => this.toggleWitdrawOrProhibitModal('withdrawModalVisible')}
                                 className={className} 
                                 style={buttonStyle} 
                                 loading={this.state.withdrawAdviceLoading}
@@ -1312,9 +1352,10 @@ class AdviceDetailImpl extends React.Component {
                     {
                         isAdmin && contestOnly && active &&
                         <Button
-                                onClick={this.prohibitAdvice}
+                                onClick={() => this.toggleWitdrawOrProhibitModal('prohibitModalVisible')}
                                 className={className}
                                 style={buttonStyle}
+                                loading={this.state.withdrawAdviceLoading}
                         >
                             PROHIBIT ADVICE
                         </Button>
@@ -1413,6 +1454,8 @@ class AdviceDetailImpl extends React.Component {
             this.state.notAuthorized
             ?   <ForbiddenAccess />
             :   <React.Fragment>
+                    {this.renderProhibitModal()}
+                    {this.renderWithdrawModal()}
                     <Row style={{marginBottom:'20px'}} className='aq-page-container'>
                         <AqPageHeader title={name} breadCrumbs={breadCrumbs}>
                             <Col xl={0} xs={24} md={24} style={{textAlign: 'right'}}>
@@ -1467,6 +1510,23 @@ class AdviceDetailImpl extends React.Component {
 }
 
 export default withRouter(AdviceDetailImpl);
+
+const WarningActionModal = ({title, visible, onOk, onCancel, text}) => {
+    return (
+        <Modal
+                title={title.toUpperCase()}
+                visible={visible}
+                onOk={onOk}
+                onCancel={onCancel}
+        >
+            <Row>
+                <Col span={24}>
+                    <h3 style={{fontSize: '14px'}}>{text}</h3>
+                </Col>
+            </Row>
+        </Modal>
+    );
+}
 
 const approvalRowContainerStyle = {
     padding: '0 15px',

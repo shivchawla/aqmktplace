@@ -195,6 +195,8 @@ export default class LeaderBoard extends React.Component {
 
     getActiveContests = () => {
         const contestsUrl = `${requestUrl}/contest`;
+        // Check if contestId is passed from the url
+        const contestId = _.get(this.props, 'match.params.id', null);
         this.setState({loading: true});
         fetchAjax(contestsUrl, this.props.history, this.props.match.url)
         .then(response => {
@@ -205,11 +207,17 @@ export default class LeaderBoard extends React.Component {
                 };
             })
             this.setState({activeContests: contests});
-            if (contests[0] !== undefined) {
-                this.setState({selectedContestId: contests[0].id, selectedContest: contests[0]});
-                return this.getLatestContestSummary(contests[0].id, false);
-            }
+            if (contestId !== null) {
+                const selectedContestIndex = _.findIndex(contests, contest => contest.id === contestId);
+                this.setState({selectedContestId: contestId, selectedContest: contests[selectedContestIndex]});
 
+                return this.getLatestContestSummary(contestId, false);
+            } else if(contests[contests.length - 1] !== undefined) {
+                this.setState({selectedContestId: contests[contests.length - 1].id, selectedContest: contests[contests.length - 1]});
+
+                return this.getLatestContestSummary(contests[contests.length - 1].id, false);
+            }
+            
             return null;
         })
         .catch(err => err)
@@ -352,10 +360,6 @@ export default class LeaderBoard extends React.Component {
         })
     }
 
-    componentWillMount() {
-        this.getActiveContests();
-    }
-
     renderMetricsHeader = (rank, header, score) => {
         return (
             <Row >
@@ -494,6 +498,10 @@ export default class LeaderBoard extends React.Component {
         );
     }
 
+    componentWillMount() {
+        this.getActiveContests();
+    }
+
     render() {
         return (
             <AppLayout
@@ -584,10 +592,6 @@ let ContestMetricItems = ({metricValue, rank, label, tooltip}) => {
         fontWeight: '700', 
         color: primaryColor
     };
-    // const rankBadgeColor = rank === 1 ? metricColor.positive : '#565656d9';
-    // const metricValueRounded = (metricValue || 0).toFixed(2);
-
-    console.log(tooltip);
 
     return (
         <Col span={24} style={containerStyle}>
