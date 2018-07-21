@@ -4,7 +4,7 @@ import windowSize from 'react-window-size';
 import {Row, Col, Button, Tabs, Table, Tag, Icon, Select} from 'antd';
 import {primaryColor, verticalBox, horizontalBox} from '../../constants';
 import {AdviceListItemMod} from '../../components/AdviceListeItemMod';
-import {scoringMetrics, faqs, howItWorksContents, prizes, criterias, prizeText, scoringText} from './constants';
+import {scoringMetrics, faqs, howItWorksContents, prizes, requirements, prizeText, scoringText} from './constants';
 import {processAdviceForLeaderboardListItem} from './utils';
 import {fetchAjax} from '../../utils';
 import AppLayout from '../../containers/AppLayout';
@@ -213,12 +213,12 @@ class ContestHome extends React.Component {
         );
     }
 
-    renderCriteriaList = () => {
+    renderRequirementList = () => {
         return (
             <Row style={{marginTop: '20px'}}>
                 {
-                    criterias.map((criteria, index) => {
-                        return <CriteriaCard key={index} {...criteria} />
+                    requirements.map((requirement, index) => {
+                        return <RequirementCard key={index} {...requirement} />
                     })
                 }
             </Row>
@@ -342,7 +342,7 @@ class ContestHome extends React.Component {
                 <Tabs animated={false} defaultActiveKey="1">
                     <TabPane tab="HOW IT WORKS" key="1">{this.renderHowItWorks()}</TabPane>
                     <TabPane tab="PRIZES" key="2">{this.renderPrizeList()}</TabPane>
-                    <TabPane tab="CRITERIA" key="3">{this.renderCriteriaList()}</TabPane>
+                    <TabPane tab="REQUIREMENTS" key="3">{this.renderRequirementList()}</TabPane>
                     <TabPane tab="SCORING" key="4">{this.renderScoring()}</TabPane>
                     <TabPane tab="FAQ" key="5">{this.renderFAQ()}</TabPane>
                     <TabPane tab="MY ENTRIES" key="6">{this.renderMyEntriesList()}</TabPane>
@@ -514,7 +514,7 @@ const HowItWorksCard = ({image, header, content, span=7}) => {
     );
 };
 
-const CriteriaCard = ({header, content, span=12}) => {
+const RequirementCard = ({header, content, span=12}) => {
     const containerStyle = {
         marginBottom: '40px',
         borderBottom: '1px solid #eaeaea',
