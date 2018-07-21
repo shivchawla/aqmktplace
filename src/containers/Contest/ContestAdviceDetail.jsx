@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Tabs, Button, Modal, message, Input} from 'antd';
+import {Row, Col, Tabs, Button, Modal, message, Input, Select} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, loadingColor, shadowBoxStyle, benchmarkColor, primaryColor, buttonStyle} from '../../constants';
 import UpdateAdvice from '../../containers/UpdateAdvice';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
@@ -90,6 +90,8 @@ class AdviceDetailImpl extends React.Component {
             data: [],
             adviceDetail: {
                 active: false,
+                withdrawn: false,
+                prohibited: false,
                 name: 'Advice Name',
                 description: '',
                 approvalStatus: "pending",
@@ -162,7 +164,8 @@ class AdviceDetailImpl extends React.Component {
             withdrawAdviceLoading: false,
             notPresentInLatestContest: false,
             withdrawModalVisible: false,
-            prohibitModalVisible: false
+            prohibitModalVisible: false,
+            participatedContests: [],
         };
 
         this.performanceSummary = {};
@@ -379,6 +382,10 @@ class AdviceDetailImpl extends React.Component {
             this.setState({notPresentInLatestContest: true});
         }
     }
+
+    handleAllContestAdviceSummaryError = error => {
+        // console.log('Advice Not found in any contest');
+    }
     
     getAdviceData = (startDate = moment().format('YYYY-MM-DD')) => {
         const contestId = this.props.match.params.contestId;
@@ -386,6 +393,7 @@ class AdviceDetailImpl extends React.Component {
         const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
         const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
         const adviceContestUrl = `${requestUrl}/contest/entry/${adviceId}`;
+        const adviceAllContestUrl = `${requestUrl}/contest/entry/all/${adviceId}`;
         this.setState({loading: true});
         return Promise.all([
             fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
@@ -398,26 +406,33 @@ class AdviceDetailImpl extends React.Component {
             const contestOnly = _.get(adviceSummaryResponse.data, 'contestOnly', false);
             this.getAdviceSummary(adviceSummaryResponse);
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
-            // const adviceActive = _.get(adviceContestResponse.data, 'active', false);
-            // this.setState({adviceDetail: {...this.state.adviceDetail, active: adviceActive}});
-            //ADVICE SUMMARY IN BACKEND first calculated full performance
-            //With the right output from backend, this call (advice performance) can be
-            //made redundant 
             
             const adviceDetail = this.state.adviceDetail;
             const authorizedToViewPortfolio = adviceDetail.isSubscribed || adviceDetail.isOwner || adviceDetail.isAdmin;
             return Promise.all([
                 authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null,
-                contestOnly ? fetchAjax(adviceContestUrl, this.props.history, this.props.match.url, undefined, this.handleErrorNotFoundInContestError): null,
+                contestOnly && fetchAjax(adviceContestUrl, this.props.history, this.props.match.url, undefined, this.handleErrorNotFoundInContestError),
+                contestOnly && fetchAjax(adviceAllContestUrl, this.props.history, this.props.match.url, undefined, this.handleAllContestAdviceSummaryError),
                 this.getAdvicePerformance(advicePerformanceResponse.data, benchmark)
             ])
         })
-        .then(([advicePortfolioResponse, adviceContestResponse])  => {
+        .then(([advicePortfolioResponse, adviceContestResponse, allContestResponse])  => {
             if (advicePortfolioResponse) {
                 this.getAdviceDetail(advicePortfolioResponse);
             }
+            const participatedContests = _.get(allContestResponse.data, 'contests', []);
             const adviceActive = _.get(adviceContestResponse.data, 'active', false);
-            this.setState({adviceDetail: {...this.state.adviceDetail, active: adviceActive}});
+            const withdrawn = _.get(adviceContestResponse.data, 'withDrawn', false);
+            const prohibited = _.get(adviceContestResponse.data, 'prohibited', false);
+            this.setState({
+                adviceDetail: {
+                    ...this.state.adviceDetail, 
+                    active: adviceActive,
+                    withdrawn,
+                    prohibited
+                },
+                participatedContests: participatedContests,
+            });
         })
         .catch(error => {
             this.setState({
@@ -554,7 +569,7 @@ class AdviceDetailImpl extends React.Component {
                 onOk={this.onProhibitButtonClicked}
                 onCancel={() => this.toggleWitdrawOrProhibitModal('prohibitModalVisible')}
                 title="Prohibit Warning"
-                text="Are you sure you want to prohibit this Entry"
+                text="Are you sure you want to prohibit this Entry !"
             />
         );
     }
@@ -1323,19 +1338,18 @@ class AdviceDetailImpl extends React.Component {
             return (
                 <div style={{width: '95%'}}>
                     {/* {this.renderApprovalButtons(small)} */}
-                    {
-                        // ((!approvalRequested && isPublic) || !isPublic) &&
-                        <Button
-                                onClick={() => this.props.history.push(`/contest/updateadvice/${this.props.match.params.id}`)}
-                                className={className}
-                                style={buttonStyle}
-                                type="primary"
-                        >
-                            {
-                                this.state.notPresentInLatestContest ? "ENTER IN CONTEST" : "UPDATE ENTRY"
-                            }
-                        </Button>
-                    }
+                    <Button
+                            onClick={() => this.props.history.push(`/contest/updateadvice/${this.props.match.params.id}`)}
+                            className={className}
+                            style={buttonStyle}
+                            type="primary"
+                    >
+                        {
+                            (this.state.notPresentInLatestContest || !this.state.adviceDetail.active) 
+                                ? "ENTER IN CONTEST" 
+                                : "UPDATE ENTRY"
+                        }
+                    </Button>
                     {
                         this.state.adviceDetail.contestOnly &&
                         this.state.adviceDetail.isPublic &&
@@ -1479,6 +1493,7 @@ class AdviceDetailImpl extends React.Component {
                                 handlePerformanceToggleChange={this.handlePerformanceToggleChange}
                                 performanceType={this.state.performanceType}
                                 loading={false}
+                                participatedContests={this.state.participatedContests}
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}
@@ -1521,7 +1536,7 @@ const WarningActionModal = ({title, visible, onOk, onCancel, text}) => {
         >
             <Row>
                 <Col span={24}>
-                    <h3 style={{fontSize: '14px'}}>{text}</h3>
+                    <h3 style={{fontSize: '16px'}}>{text}</h3>
                 </Col>
             </Row>
         </Modal>

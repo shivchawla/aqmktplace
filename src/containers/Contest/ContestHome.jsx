@@ -43,9 +43,9 @@ class ContestHome extends React.Component {
                 };
             })
             this.setState({activeContests: contests});
-            if (contests[0] !== undefined) {
-                this.setState({selectedContestId: contests[0].id, selectedContest: contests[0]});
-                return this.getLatestContestSummary(contests[0].id, false);
+            if (contests[contests.length - 1] !== undefined) {
+                this.setState({selectedContestId: contests[contests.length - 1].id, selectedContest: contests[contests.length - 1]});
+                return this.getLatestContestSummary(contests[contests.length - 1].id, false);
             }
 
             return null;
@@ -436,17 +436,21 @@ class ContestHome extends React.Component {
     renderContestDropdown = () => {
         const {activeContests = []} = this.state;
         return (
-            <Select 
-                    style={{width: 200}} 
-                    value={this.state.selectedContestId} 
-                    onChange={this.handleContestChange}
-            >
-                {
-                    activeContests.map((contest, index) => {
-                        return <Option key={index} value={_.get(contest, 'id', null)}>{_.get(contest, 'name', null)}</Option>
-                    })
-                }
-            </Select>
+            // <Select 
+            //         style={{width: 200}} 
+            //         value={this.state.selectedContestId} 
+            //         onChange={this.handleContestChange}
+            //         disabled={true}
+            // >
+            //     {
+            //         activeContests.map((contest, index) => {
+            //             return <Option key={index} value={_.get(contest, 'id', null)}>{_.get(contest, 'name', null)}</Option>
+            //         })
+            //     }
+            // </Select>
+            <h3 style={{color: '#fff', fontSize: '14px', marginRight: '5px'}}>
+                {_.get(this.state, 'selectedContest.name', '')}
+            </h3>
         );
     }
 

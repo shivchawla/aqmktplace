@@ -595,7 +595,6 @@ class AdvisorDashboard extends React.Component {
         }
     }
 
-
     takeAction = () => {
         if (this.mounted) {
             this.subscribeToAllAdvices(this.state.advices);
@@ -665,7 +664,7 @@ class AdvisorDashboard extends React.Component {
                 <Row 
                     key={index} 
                     style={{padding: '10px 20px', cursor: 'pointer', }}
-                    onClick={() => this.props.history.push(`/advice/${advice._id}`)}
+                    onClick={() => this.props.history.push(`/contest/entry/${advice._id}`)}
                     className='advice-row'>
                     <Col span={7}>
                         <ListMetricItem label="Name" value={advice.name} />

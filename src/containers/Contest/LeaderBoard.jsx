@@ -124,10 +124,6 @@ export default class LeaderBoard extends React.Component {
                         style={{
                             fontSize: '14px', 
                             fontWeight: '300', 
-                            color: this.state.selectedPage === 0 ? disabledColor : '#fff',
-                            //backgroundColor: '#fff',
-                            //border: 'none',
-                            //marginTop: '-6px'
                         }}
                         size="small" 
                         disabled={this.state.selectedPage === 0}
@@ -140,7 +136,7 @@ export default class LeaderBoard extends React.Component {
                         style={{
                             fontSize: '14px', 
                             fontWeight: '300', 
-                            color: this.state.advices.length % 10 !== 0 ? disabledColor : '#fff'}} 
+                        }} 
                         type="primary"
                         disabled={advicesDisplayed >= this.state.maxAdviceCount}
                         size="small"
@@ -337,7 +333,6 @@ export default class LeaderBoard extends React.Component {
                 var adjustedVal = idx != -1 ? 
                                     formatMetric(rawVal, "pct") : formatMetric(rawVal);
                                     
-
                 return {
                     metricValue: adjustedVal,
                     rank: adviceMetrics[key].rank,

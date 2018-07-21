@@ -237,9 +237,9 @@ class App extends React.Component {
                                 <Route path="/stockresearch" exact component={StockResearch} /> 
                                 <Route path='/tokenUpdate' component={TokenUpdate}/>
                                 <Route path='/advice/:id' component={AdviceDetail} /> 
-                                <Route path='/dashboard/createadvice' component={CreateAdvice} /> 
+                                {/* <Route path='/dashboard/createadvice' component={CreateAdvice} />  */}
                                 <Route path='/dashboard/createportfolio' component={CreatePortfolio} /> 
-                                <Route path='/dashboard/updateadvice/:id' component={UpdateAdvice} /> 
+                                {/* <Route path='/dashboard/updateadvice/:id' component={UpdateAdvice} />  */}
                                 <Route path='/dashboard/portfolio/:id' component={PortfolioDetail} /> 
                                 <Route path='/dashboard/portfolio/transactions/:id' component={PortfolioAddTransactions} /> 
                                 <Route path='/dashboard/advisorprofile/:id' component={AdvisorProfile} /> 

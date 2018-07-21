@@ -21,7 +21,14 @@ const {requestUrl} = require('../../../localConfig');
 const defaultAdviceError = {
     message: '',
     errorCode: '',
-    detail: {}
+    detail: {
+        MAX_NET_VALUE: {valid: true},
+        MAX_SECTOR_COUNT: {valid: true},
+        MAX_STOCK_EXPOSURE: {valid: true},
+        MIN_POS_COUNT: {valid: true},
+        MIN_SECTOR_COUNT: {valid: true},
+        MAX_SECTOR_EXPOSURE: {valid: true}
+    }
 };
 this.benchmark = 'NIFTY_50';
 
@@ -30,6 +37,7 @@ class ContestAdviceFormImpl extends React.Component {
         super(props);
         this.searchStockComponent = null;
         this.state = {
+            adviceActive: false,
             positions: [],
             benchmark: 'NIFTY_50',
             bottomSheetOpenStatus: false,
@@ -182,7 +190,7 @@ class ContestAdviceFormImpl extends React.Component {
                 if (type !== 'validate') {
                     const contestRequest =  type === 'validate' 
                         ?   Promise.resolve({update: false})
-                        :   this.props.isUpdate && !this.state.notPresentInLatestContest
+                        :   this.props.isUpdate && this.state.adviceActive
                             ?   Promise.resolve({update: true})
                             :   axios({
                                     url: contestUrl,
@@ -245,7 +253,7 @@ class ContestAdviceFormImpl extends React.Component {
         const {errorCode = 0, message = '', detail = {}} = this.state.adviceError;
         return (
             <Modal
-                    title={message}
+                    title="Portfolio Validation Status"
                     onOk={this.toggleAdviceErrorDialog}
                     onCancel={this.toggleAdviceErrorDialog}
                     visible={this.state.showAdviceErrorDialog}
@@ -254,22 +262,38 @@ class ContestAdviceFormImpl extends React.Component {
                     <Col span={24}>
                         {
                             // Getting the keys of all the invalid error items from the response
-                            Object.keys(detail).filter(item => detail[item].valid === false)
+                            Object.keys(detail)
                                 .map((invalidKey, index) => {
                                     return (
                                         <Row key={index} style={{marginBottom: '20px'}}>
-                                            <Col span={24}>
-                                                <h3 
-                                                        style={{fontSize: '14px', color: metricColor.negative}}
-                                                >
+                                            <Col span={24} style={horizontalBox}>
+                                                <Icon 
+                                                    style={{
+                                                        fontSize: '18px', 
+                                                        marginRight: '10px',
+                                                        color: detail[invalidKey].valid === false 
+                                                            ? metricColor.negative 
+                                                            : metricColor.positive
+                                                    }}
+                                                    type={
+                                                        detail[invalidKey].valid === false 
+                                                        ? "exclamation-circle"
+                                                        : "check-circle"
+                                                    }
+                                                />
+                                                <h3 style={{fontSize: '14px'}}>
                                                     {this.convertStringToReadable(invalidKey)}
                                                 </h3>
                                             </Col>
                                             <Col span={24}>
                                                 <h3 
-                                                        style={{fontSize: '16px', color: '#4a4a4a'}}
+                                                        style={{fontSize: '16px', color: '#4a4a4a', marginLeft: '28px'}}
                                                 >
-                                                    {detail[invalidKey].message}
+                                                    {
+                                                        detail[invalidKey].message === undefined
+                                                        ? 'Valid'
+                                                        : detail[invalidKey].message
+                                                    }
                                                 </h3>
                                             </Col>
                                         </Row>
@@ -391,7 +415,7 @@ class ContestAdviceFormImpl extends React.Component {
             const portfolioPerformanceMetrics = _.get(portfolioPerformanceResponse.data, 'portfolioPerformance.value.true', {});
             let highStockSeries = [
                 {
-                    name: 'Advice',
+                    name: 'Contest Entry',
                     data: portfolioPerformanceData,
                     color: metricColor.neutral
                 },
@@ -569,15 +593,19 @@ class ContestAdviceFormImpl extends React.Component {
 
     renderValidationErrors = () => {
         const errors = this.getPortfolioValidationErrors();
-        return errors.length > 0
-                ?   <Tag 
-                        style={{marginTop: '20px'}} 
-                        color={metricColor.negative}
-                        onClick={this.toggleAdviceErrorDialog}
-                    >
-                        {errors.length} Portfolio Validation Wanings
-                    </Tag>
-                :   null;
+        return (
+            <Tag 
+                    style={{marginTop: '20px'}} 
+                    color={errors.length > 0 ? metricColor.negative : metricColor.positive}
+                    onClick={this.toggleAdviceErrorDialog}
+            >
+                {
+                    errors.length > 0
+                    ? `${errors.length} Portfolio Validation Wanings`
+                    :  'Valid Portfolio'
+                }
+            </Tag>
+        );
     }
 
     toggleBenchmarkChangeModal = () => {
@@ -671,7 +699,7 @@ class ContestAdviceFormImpl extends React.Component {
                             >
                                 {
                                     this.props.isUpdate 
-                                        ? this.state.notPresentInLatestContest
+                                        ? (this.state.notPresentInLatestContest || !this.state.adviceActive)
                                             ? "UDPDATE AND ENTER CONTEST"
                                             : "UPDATE ENTRY"
                                         : 'ENTER CONTEST'
@@ -774,6 +802,10 @@ class ContestAdviceFormImpl extends React.Component {
             }
         };
         fetchAjax(contestAdviceUrl, this.props.history, this.props.match.url, undefined, errorCallback)
+        .then(adviceResponse => {
+            const adviceActive = _.get(adviceResponse.data, 'active', false);
+            this.setState({adviceActive});
+        })
         .finally(() => {
             resolve(true);
         })
@@ -818,10 +850,6 @@ class ContestAdviceFormImpl extends React.Component {
                 this.handleSubmitAdvice(),   
                 this.getActiveContestToParticipate()
             ])
-            // .then(contestId => {
-            //     console.log(contestId);
-            //     this.setState({contestId});
-            // })
             .catch(err => {
                 this.setState({noActiveContests: true});
             })

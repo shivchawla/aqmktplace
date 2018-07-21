@@ -66,7 +66,7 @@ export const handleCreateAjaxError = (error, history, redirectUrl, disableNotifi
         if (error.response.status === 400 || 
             (error.response.status === 403 && _.get(error, 'response.data.code', '') !== 'server_error')
         ) {
-            const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating advice');
+            const errorMessage = _.get(error.response, 'data.message', 'Error occurred while creating Contest Entry');
             !disableNotification && openNotification('error', 'Error', errorMessage);
         }
     } else {
