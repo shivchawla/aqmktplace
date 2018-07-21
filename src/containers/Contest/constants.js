@@ -64,7 +64,8 @@ export const faqs = [
     },
     {
         header: 'What’s the fine print?',
-        content: 'Please check out contest rules for complete details and legal policies'
+        content: 'Please check out <a href="https://www.adviceqube.com/contest/rules"><span>Contest Rules</span></a> for complete details and legal policies'
+
     }
     
 ];

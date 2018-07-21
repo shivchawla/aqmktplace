@@ -59,12 +59,13 @@ const metrics = [
         label: 'Max Loss'
     }
 ];
+
 class AdviceDetailContentImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             selectedContestId: _.get(props, `participatedContests[${props.participatedContests.length - 1}]._id`, null),
-            showCurrentRankView: false
+            showCurrentRankView: true
         }
     }
     
@@ -77,9 +78,10 @@ class AdviceDetailContentImpl extends React.Component {
             totalReturn = 0, 
             nstocks = 0
         } = this.props.metrics || {};
-        const {followers = 0, subscribers = 0} = this.props.adviceDetail || {};
+        const {followers = 0, subscribers = 0, contestOnly} = this.props.adviceDetail || {};
+        var subscriberOrFollowers = contestOnly ? {value: followers, label: 'Wishlisters'} : {value: subscribers, label: 'Subscribers'};
         const metricsItems = [
-            {value: subscribers, label: 'Subscribers'},
+            subscriberOrFollowers,
             {value: nstocks, label: 'Num. of Stocks'},
             {value: annualReturn, label: 'Annual Return', percentage: true, color: true, fixed: 2, tooltipText: `Compounded annual growth rate ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
             {value: volatility, label: 'Volatility', percentage: true, fixed: 2, tooltipText: `Annualized standard deviation of daily returns ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
@@ -163,19 +165,36 @@ class AdviceDetailContentImpl extends React.Component {
             const adviceMetrics = _.get(selectedAdvice, `adviceSummary.latestRank.rating.${metricType}.detail`, []);
 
             var pctMetrics = ['annualReturn', 'volatility', 'maxLoss'];
+            var labels =  {
+                annualReturn: {label: "Excess Return", index: 0},
+                volatility: {label: "Tracking Error", index: 1},
+                maxLoss: {label: 'Maximum Loss', index: 2},
+                sharpe: {label: 'Information Ratio', index: 3},
+                calmar: {label: 'Calmar Ratio', index: 4},
+                concentration: {label: 'Concentration', index: 5}
+            };
+                        
             return adviceMetrics.map(metricItem => {
                 const field = metricItem.field;
-                const rawVal = metricItem.metricValue;
+                var rawVal = metricItem.metricValue;
+                if (field == "maxLoss") {
+                    rawVal *=-1;
+                }
+
                 var idx = pctMetrics.indexOf(field);
                 const adjustedVal = idx != -1 ? formatMetric(rawVal, "pct") : formatMetric(rawVal);
+                const color = ["annualReturn", "maxLoss"].indexOf(field) != -1 ? rawVal > 0 ? metricColor.positive : rawVal < 0 ? metricColor.negative : '#353535' : '#353535';
 
                 return {
                     metricValue: adjustedVal,
                     rank: metricItem.rank,
-                    label: metricItem.field,
-                    tooltip: _.get(metricDefs, field, "")
+                    label: _.get(labels, `${metricItem.field}.label`, ''),
+                    index: _.get(labels, `${metricItem.field}.index`, 0),
+                    tooltip: _.get(metricDefs, field, ""),
+                    color: color
                 }
-            })
+            }).sort((a,b) => {return a.index < b.index ? -1 : 1});
+
         } else {
             return metrics;
         }
@@ -210,7 +229,7 @@ class AdviceDetailContentImpl extends React.Component {
             dailyReturns = 0
         } = this.props.metrics || {};
         const {goal = {}, capitalization = {}, portfolioValuation = {}, userText = {}} = investmentObjective;
-        const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["1", "2","3", "5"] : ["1", "3"] : ["1", "3"];
+        const defaultActiveKey = Utils.isLoggedIn() ? (isSubscribed || isOwner) ? ["1", "2","3", "5"] : ["1","5","3"] : ["1","5","3"];
         const tickers = _.get(this.props, 'tickers', []);
         const {netValue = 0, dailyNAVChangePct = 0} = this.props.metrics || {};
         const netValueMetricItem = {
@@ -272,7 +291,7 @@ class AdviceDetailContentImpl extends React.Component {
                             }
                         </div>
                         {
-                            advisor.user &&
+                            advisor.user && !contestOnly ?
                             <h5 
                                     style={{...userStyle, cursor: 'pointer'}} 
                                     onClick={() => this.props.history.push(`/dashboard/advisorProfile/${advisor._id}`)}
@@ -280,9 +299,15 @@ class AdviceDetailContentImpl extends React.Component {
                                 By <span style={{color: primaryColor}}>{advisor.user.firstName} {advisor.user.lastName}</span>
                                 <span style={dateStyle}>{updatedDate}</span>
                             </h5>
+                        :
+                            <h5 style={{...userStyle}} >
+                                By <span style={{color: primaryColor}}>{advisor.user.firstName} {advisor.user.lastName}</span>
+                                <span style={dateStyle}>{updatedDate}</span>
+                            </h5>
+
                         }
                         {
-                            !this.props.preview &&
+                            !this.props.preview && !contestOnly &&
                             <AqRate value={rating} />
                         }
                     </Col>
@@ -326,7 +351,7 @@ class AdviceDetailContentImpl extends React.Component {
                         {
                             isOwner &&
                             <AqTag 
-                                tooltipTitle='You are the owner of this advice'
+                                tooltipTitle={contestOnly ? 'You are the owner of this contest entry' : 'You are the owner of this advice'}
                                 tooltipPlacement='bottom'
                                 icon='user'
                                 iconStyle={{marginRight: '5px'}}
@@ -402,8 +427,8 @@ class AdviceDetailContentImpl extends React.Component {
                                 <RadioGroup 
                                         defaultValue={false} 
                                         size="small" onChange={this.props.handlePerformanceToggleChange}>
-                                    <RadioButton value={true}>Realized</RadioButton>
-                                    <RadioButton value={false}>Simulated</RadioButton>
+                                    <RadioButton value={true}>Active</RadioButton>
+                                    <RadioButton value={false}>Historical</RadioButton>
                                 </RadioGroup>
                             </div>
                         }
@@ -541,7 +566,7 @@ class AdviceDetailContentImpl extends React.Component {
                         </Panel>
                     }
                     {
-                        this.props.adviceDetail.contestOnly && selectedContest &&
+                        contestOnly && selectedContest &&
                         <Panel 
                                 key="5"
                                 style={customPanelStyle}
@@ -677,64 +702,67 @@ export const AdviceDetailContent = withRouter(AdviceDetailContentImpl);
 
 const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle, currentMetrics, simulatedMetrics, contestDropdown}) => {
     return (
-        <Col 
-            span={24}
-            style={{
-                boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)', 
-                height: '-webkit-fill-available',
-                backgroundColor: '#fff',
-                marginTop:'-40px',
-                height:'500px',
-                borderTop: `5px solid ${primaryColor}`
-            }}
-        >          
-            {contestDropdown()}
-            <div style={{textAlign: 'center', margin: '20px 0 20px 0'}}>
-                <RadioGroup size="small" onChange={onPerformanceToggle} defaultValue="0">
-                    <RadioButton value="0">Active</RadioButton>
-                    <RadioButton value="1">Historical</RadioButton>
-                </RadioGroup>
-            </div>
+        <Row>
 
-            {view ?
-                <MetricContainer 
-                    header={
-                        <MetricHeader 
-                            rank={_.get(selectedAdvice, 'latestRank.rating.current.rank', null)}
-                            header='Active Performance'
-                            score={_.get(selectedAdvice, 'latestRank.rating.current.value', 0).toFixed(2)}
-                        />
-                    }
-                    metrics={currentMetrics} 
-                />
-            :
-                <MetricContainer 
-                    metrics={simulatedMetrics} 
-                    header={
-                        <MetricHeader 
-                            rank={_.get(selectedAdvice, 'latestRank.rating.simulated.rank', null)}
-                            header='Historical Performance'
-                            score={_.get(selectedAdvice, 'latestRank.rating.simulated.value', 0).toFixed(2)}
-                        />
-                    }
-                />
-            }
-        </Col>
+            <Col 
+                span={24} 
+                style={{
+                    display: 'flex', 
+                    justifyContent: 'flex-end', 
+                    top: '-40px', 
+                    position:'absolute', 
+                }}>
+                {contestDropdown()}
+            </Col>
+            
+            <Col>          
+                <div style={{textAlign: 'center', margin: '0 0 20px 0'}}>
+                    <RadioGroup size="small" onChange={onPerformanceToggle} defaultValue="0">
+                        <RadioButton value="0">Active</RadioButton>
+                        <RadioButton value="1">Historical</RadioButton>
+                    </RadioGroup>
+                </div>
+
+                {view ?
+                    <MetricContainer 
+                        header={
+                            <MetricHeader 
+                                rank={_.get(selectedAdvice, 'latestRank.rating.current.rank', null)}
+                                header='Active Performance'
+                                score={_.get(selectedAdvice, 'latestRank.rating.current.value', 0).toFixed(2)}
+                            />
+                        }
+                        metrics={currentMetrics} 
+                    />
+                :
+                    <MetricContainer 
+                        metrics={simulatedMetrics} 
+                        header={
+                            <MetricHeader 
+                                rank={_.get(selectedAdvice, 'latestRank.rating.simulated.rank', null)}
+                                header='Historical Performance'
+                                score={_.get(selectedAdvice, 'latestRank.rating.simulated.value', 0).toFixed(2)}
+                            />
+                        }
+                    />
+                }
+            </Col>
+        </Row>
     );
 }
 
 const MetricHeader = ({rank, header, score}) => {
     return (
         <Row >
-            <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
-                
-                <h3 style={{marginLeft: '5px', fontWeight: 400, fontSize: '14px'}}><span style={{color: primaryColor, marginRight:'4px'}}>{rank}</span>{header}</h3>
-            </Col>
             <Col span={24} style={verticalBox}>
-                <h3 style={{fontSize: '14px', fontWeight: 400}}>
-                    Score: <span style={{fontSize: '14px', fontWeight: 400}}>{score}</span>
+                <h3 style={{fontSize: '16px', fontWeight: 400}}>
+                    Score: <span style={{fontSize: '16px', fontWeight: 400}}>{score}</span>
                 </h3>
             </Col>
+            <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
+                <h3 style={{marginLeft: '5px', fontWeight: 400, fontSize: '16px', marginBottom:'10px'}}><span style={{color: primaryColor, marginRight:'4px'}}>{rank}</span>{header}</h3>
+            </Col>
+            
         </Row>
     );
 }
@@ -747,20 +775,15 @@ const MetricContainer = ({header, metrics}) => {
             </Col>
             {
                 metrics.map((metric, index) => {
-                    var borderRight = index % 2 == 0 ? '0.5px solid #E5E5E5' : 'none';
-                    var borderBottom = index < 4 ? '0.5px solid #E5E5E5' : 'none';
                 
                     if (metric !== undefined) {
                         return (
                             <Col 
                                     key={index}
-                                    span={12} 
+                                    span={8} 
                                     style={{
                                         ...verticalBox, 
-                                        borderRight: borderRight,
-                                        borderBottom: borderBottom,
                                         padding: '5px',
-                                        boxSizing: 'border-box'
                                     }}
                             >
                                 <ContestMetricItems key={index} {...metric} />
@@ -773,7 +796,7 @@ const MetricContainer = ({header, metrics}) => {
     );
 }
 
-let ContestMetricItems = ({metricValue, rank, label, tooltip}) => {
+let ContestMetricItems = ({metricValue, rank, label, tooltip, color}) => {
     const containerStyle = {
         marginBottom: '10px'
     };
@@ -798,10 +821,10 @@ let ContestMetricItems = ({metricValue, rank, label, tooltip}) => {
                 >
                 </Col>
                 <Col span={20} style={{...verticalBox, width: 'fit-content'}}>
+                    <h5 style={{fontSize: '18px', display: 'inline-block', fontWeight: 400, color: color}}>{metricValue}</h5>
                     <Tooltip title={tooltip} placement="top">
-                        <h5 style={{fontSize: '14px', display: 'inline-block', fontWeight: 400}}><span style={{backgroundColor: '#fff', color: primaryColor, marginRight: '4px'}}>{rank}</span>{label}</h5>
+                        <h5 style={{fontSize: '16px', display: 'inline-block', fontWeight: 400}}><span style={{backgroundColor: '#fff', color: primaryColor, marginRight: '4px'}}>{rank}</span>{label}</h5>
                     </Tooltip>
-                    <h5 style={{fontSize: '14px', display: 'inline-block', fontWeight: 400}}>{metricValue}</h5>
                     
                 </Col>
             </Row>

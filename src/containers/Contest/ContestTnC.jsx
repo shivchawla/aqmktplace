@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {primaryColor} from '../../constants';
 import AppLayout from '../../containers/AppLayout';
+import contestFormula from "../../assets/contestFormula2.png";
 
 export default class ContestTnC extends React.Component {
     
@@ -10,7 +11,7 @@ export default class ContestTnC extends React.Component {
             <div style={{padding: '20px 40px', fontSize: '16px'}}>
                 <h1 style={{marginBottom:'40px'}}><span>Contest Rules</span></h1>
                 <h3 style={h3Style}><span >Overview</span></h3>
-                <p><span>The Contest at AdviceQube is a weekly competition that awards cash prizes to the best Investment Idea. The contest is based on Indian markets and designed to evaluate long only equity portfolio using subset of trade-able equities on National Stock Exchange, India . As such, contest entries are required to have certain structural properties. Entries that meet all the structural criteria are scored and ranked after each trading day. Each week, the top 5 participants are awarded a cash prize.</span></p>
+                <p><span>The Contest at AdviceQube is a weekly competition that awards cash prizes to the best Investment Idea. The contest is based on Indian markets and designed to evaluate long only equity portfolio using subset of trade-able equities on National Stock Exchange, India . As such, contest entries are required to have certain structural properties. Entries that meet all the structural requirements are scored and ranked after each trading day. Each week, the top 5 participants are awarded a cash prize.</span></p>
                 <p>&nbsp;</p>
                 <h3 style={h3Style}><span >Eligibility</span></h3>
                 <p style={bulletStyle}><span>1. To be eligible to take part in the Contest, Participants must have a registered AdviceQube account. If a Participant doesn&rsquo;t have an account yet, the Participant can sign up </span><a href="https://www.adviceqube.com/signup"><span >here</span></a><span >.</span></p>
@@ -19,14 +20,14 @@ export default class ContestTnC extends React.Component {
                 <p style={bulletStyle}><span >4. There is no fee for entry and no purchase is necessary.</span></p>
                 <p>&nbsp;</p>
                 <h3 style={h3Style}><span >Criteria</span></h3>
-                <p><span >In order to be eligible for participation in the Contest, entries are required to meet a particular set of criteria. All entries are checked for applicable criteria before submission. In addition, after the submission of entry, criteria are checked at the end of every trading day for the time the entry remains active in the contest. If Participant&rsquo;s entry fails one or more of the criteria at any point during the contest, it will be disqualified from the Contest. These are the criteria that are required of all Contest Investment Idea:</span></p>
+                <p><span >In order to be eligible for participation in the Contest, entries are required to meet a particular set of requirements. All entries are checked for applicable requirements before submission. In addition, after the submission of entry, requirements are checked at the end of every trading day for the time the entry remains active in the contest. If Participant&rsquo;s entry fails one or more of the requirement at any point during the contest, it will be disqualified from the Contest. These are the requirements that are required of all Contest Investment Idea:</span></p>
                 <p><br /><strong>NIFTY_500 Stocks only</strong><span >: Contest entries can choose stocks only from a broad universe of NIFTY_500 stocks in addition to any other universe constraints introduced by the chosen benchmark. For ex: If you chose NIFTY_50 as the benchmark, then you have choose from any stocks in NIFTY_500. If you chose NIFTY_AUTO as the benchmark, then you can choose any stock that belongs to Automobile sector and is a part of NIFTY_500 universe.</span></p>
                 <p><strong>Position count: </strong><span >Contest entries must have at-least </span><strong>ten</strong><span > positions at all times in the investment portfolio. </span></p>
                 <p><strong>Low position concentration</strong><span >: Contest entries cannot have more than 12.5% of their capital invested in any one asset. This is checked at the end of each trading day. &nbsp;Due to market movement, your investment portfolio may exceed this limit to a hard limit of 15%. In case the limit exceed the hard limit of 15%, position must be adjusted immediately back to under 12.5%.</span></p>
                 <p><strong>Sector count: </strong><span >&nbsp;Contest entries with diversified benchmark (NIFTY_50, NIFTY_MIDCAP_50 or NIFTY_DIV_OPPS_50) &nbsp;entries must have positions in at-least </span><strong>four</strong><span > sectors. </span></p>
                 <p><strong>Low sector concentration</strong><span >: Contest entries with diversified benchmark (NIFTY_50, NIFTY_MIDCAP_50 or NIFTY_DIV_OPPS_50) cannot have more than 35% of their capital invested in any one sector. This is checked at the end of each trading day. &nbsp;Due to market movement, your investment portfolio may exceed this limit to a hard limit of 40%. In case the limit exceed the hard limit of 40%, position must be adjusted immediately back to under 35%.</span></p>
                 <p><strong>Positive returns</strong><span >: Contest entries must have positive total excess returns as measured by performance of investment portfolio over the benchmark. For ex: If the chosen benchmark made 10%, then Contest entry must make more than 10%. This is used only at the end contest and not evaluated on a daily basis.</span></p>
-                <p><strong>Maximum Loss</strong><span >: Contest entries must not lose more than 10% over the chosen benchmark. For ex: If the chosen benchmark is down (total return) by 5%, then the contest entry must not lose more than 15%. This criteria is evaluated at the end of every day. The entry will be disqualified for the contest if this criteria gets violated.</span></p>
+                <p><strong>Maximum Loss</strong><span >: Contest entries must not lose more than 10% over the chosen benchmark. For ex: If the chosen benchmark is down (total return) by 5%, then the contest entry must not lose more than 15%. This requirement is evaluated at the end of every day. The entry will be disqualified for the contest if this requirement gets violated.</span></p>
                 <h3 style={h3Style}><span >Submission</span></h3>
                 <p style={bulletStyle}><span >1. Contest entry can be submitted before Sunday 12:00 AM. Contest entries submitted will be evaluated for period for 5 weeks starting that Sunday and results will be declared at the end of 5 weeks. Entries submitted after Sunday 12:00 AM will become a part of the next contest BUT will be evaluated from the beginning of the submission and score at the end of 5 weeks from next Sunday.</span></p>
                 <p style={bulletStyle}><span >2. To submit an entry to the Contest, the participant must create a valid investment portfolio as mentioned above in Criteria (see &ldquo;Criteria&rdquo; section above).</span></p>
@@ -39,7 +40,7 @@ export default class ContestTnC extends React.Component {
                 <p style={bulletStyle}><span >9. Participant's intellectual property will remain Participant's property; However, we may look at Participant's Investment Portfolio for additional checks. We WILL NOT use/distribute participant&rsquo;s investment portfolio without explicit consent.</span></p>
                 <p>&nbsp;</p>
                 <h3 style={h3Style}><span >Scoring and Ranking</span></h3>
-                <p><span >Contest entries that meet all the structural criteria (see &ldquo;Criteria&rdquo; section above) are ranked after every trading day based on a scoring function. The score of an entry is based on its out-of-sample excess returns over the benchmark. Entries are rewarded a high score for achieving high returns, high diversity and low risk.</span></p>
+                <p><span >Contest entries that meet all the structural requirements (see &ldquo;Requirements&rdquo; section above) are ranked after every trading day based on a scoring function. The score of an entry is based on its out-of-sample excess returns over the benchmark. Entries are rewarded a high score for achieving high returns, high diversity and low risk.</span></p>
                 <p><span >As the contest is designed to &nbsp;award Investment Ideas that perform better than the market. For this purpose, our scoring function will largely depend on excess Return over chosen benchmark.</span></p>
                 <p><em><span >Excess Return &nbsp;= Return of Investment Idea - &nbsp;Return of Benchmark</span></em></p>
                 <p><span >The Investment Idea is evaluated over multiple financial metrics based on </span><em><span >Excess Return. </span></em><span >Below if the list of metric used to evaluate the Investment Idea:</span></p>
@@ -49,10 +50,8 @@ export default class ContestTnC extends React.Component {
                 <p style={bulletStyle}><span >4. Information Ratio</span></p>
                 <p style={bulletStyle}><span >5. Calmar Ratio</span></p>
                 <p style={bulletStyle}><span >6. Portfolio Concentration</span></p>
-                <p><br /><br /></p>
-                <p><span >where R(c)</span><span >: </span><span >Fractional rank of Criteria c across all Investment Ideas</span></p>
-                <p>&nbsp;</p>
-                <p><span >At the end of each day, participants are ranked based on their highest scoring active entry at the end of that day. The minimum score that an entry or participant can have is 0. The top 10 participants will be displayed on the </span><a href="https://www.adviceqube.com/contest"><span >leaderboard</span></a><span > every day.</span></p>
+                <img style={{marginLeft:'-30px'}} src={contestFormula}/>
+                <p><span >At the end of each day, participants are ranked based on their highest scoring active entry at the end of that day. The minimum score that an entry or participant can have is 0. The top 10 participants will be displayed on the </span><a href="https://www.adviceqube.com/contest/leaderboard"><span >leaderboard</span></a><span > every day.</span></p>
                 <p>&nbsp;</p>
                 <h3 style={h3Style}><span >Other Rules</span></h3>
                 <p style={bulletStyle}><span >1. Each Participant may have only one AdviceQube account. If the Participant submits entries from more than one account, all entries may be disqualified.</span></p>
@@ -66,7 +65,7 @@ export default class ContestTnC extends React.Component {
                                 <p><span >PLACE</span></p>
                             </td>
                             <td style={{height: '43.375px'}}>
-                                <p><span >REWARD</span></p>
+                                <p><span style={{marginLeft:'40px'}}>REWARD</span></p>
                             </td>
                         </tr>
                         <tr style={{height: '46px'}}>
@@ -74,7 +73,7 @@ export default class ContestTnC extends React.Component {
                                 <p><span >1st Place</span></p>
                             </td>
                             <td style={{height: '46px'}}>
-                                <p><span >Rs. 4000</span></p>
+                                <p><span style={{marginLeft:'40px'}}>Rs. 4000</span></p>
                             </td>
                         </tr>
                         <tr style={{height: '46px'}}>
@@ -82,7 +81,7 @@ export default class ContestTnC extends React.Component {
                                 <p><span >2nd Place</span></p>
                             </td>
                             <td style={{height: '46px'}}>
-                                <p><span >Rs. 2500</span></p>
+                                <p><span style={{marginLeft:'40px'}}>Rs. 2500</span></p>
                             </td>
                         </tr>
                         <tr style={{height: '46px'}}>
@@ -90,7 +89,7 @@ export default class ContestTnC extends React.Component {
                                 <p><span >3rd Place</span></p>
                             </td>
                             <td style={{height: '46px'}}>
-                                <p><span >Rs. 1500</span></p>
+                                <p><span style={{marginLeft:'40px'}}>Rs. 1500</span></p>
                             </td>
                         </tr>
                         <tr style={{height: '46px'}}>
@@ -98,7 +97,7 @@ export default class ContestTnC extends React.Component {
                                 <p><span >4th Place</span></p>
                             </td>
                             <td style={{height: '46px'}}>
-                                <p><span >Rs. 1000</span></p>
+                                <p><span style={{marginLeft:'40px'}}>Rs. 1000</span></p>
                             </td>
                         </tr>
                         <tr style={{height: '46px'}}>
@@ -106,7 +105,7 @@ export default class ContestTnC extends React.Component {
                                 <p><span >5th Place</span></p>
                             </td>
                             <td style={{height: '46px'}}>
-                                <p><span >Rs. 1000</span></p>
+                                <p><span style={{marginLeft:'40px'}}>Rs. 1000</span></p>
                             </td>
                         </tr>
                         <tr style={{height: '18px'}}>
@@ -116,13 +115,12 @@ export default class ContestTnC extends React.Component {
                     </tbody>
                 </table>
                 <p><span >An individual may only win one prize per week. The top Investment Idea score can come from any of a participant&rsquo;s (up to) 3 active contest entries. In the event that multiple participants tie for a rank in the top 5, that prize, as well as the next </span><strong>n</strong><span > prizes will be split evenly among the tied participants, where </span><strong>n</strong><span > is the number of participants that tied for that rank. For example, if 3 people tie for 3rd place, the 3rd, 4th and 5th place prizes will be added together, and then split evenly by the tied participants. In the event that there are fewer than </span><strong>n</strong><span > prizes available , then the remaining prizes will be split evenly among the remaining winners. For example, if 2 people tie for 5th place, they will split the 5th place price evenly. Note that there is no advantage to submitting the same algorithm more than once; Participants are ranked based on their top entry each day.</span></p>
-                <p>&nbsp;</p>
                 <p><span >The overall score of each winner will be public during the prize period. No one, except AdviceQube, will see the winners&rsquo; Investment Idea.</span></p>
                 <p><span >AdviceQube will email winners at the end of each week in order to pay out prizes. </span></p>
                 <p>&nbsp;</p>
                 <h3 style={h3Style}><span >General Conditions</span></h3>
                 <p style={bulletStyle}><span >1. Prizes are non-transferable to other AdviceQube members or to other accounts.</span></p>
-                <p style={bulletStyle}><span >2. AdviceQube reserves the right at its sole discretion to alter, amend, modify, suspend or terminate this Contest, or any aspect of it, including but not limited to changing the prize frequency, prize amount, criteria, scoring rules, at any time and without prior notice. In such event AdviceQube will make reasonable efforts to notify all Participants by email.</span></p>
+                <p style={bulletStyle}><span >2. AdviceQube reserves the right at its sole discretion to alter, amend, modify, suspend or terminate this Contest, or any aspect of it, including but not limited to changing the prize frequency, prize amount, requirements, scoring rules, at any time and without prior notice. In such event AdviceQube will make reasonable efforts to notify all Participants by email.</span></p>
                 <p style={bulletStyle}><span >3. AdviceQube will make all reasonable efforts to support the acceptance of entries. Entries may not be successfully processed because of errors or failures. Those errors or failures may be caused by AdviceQube, the Participant, third parties, or a combination of parties. AdviceQube will not be liable or otherwise responsible for any entry that cannot be processed, regardless of the cause of the problem.</span></p>
                 <p style={bulletStyle}><span >4. AdviceQube will have complete discretion over interpretation of the Contest Rules, administration of the Contest and selection of the Winners. Decisions of AdviceQube as to the administration of the Contest, interpretation of the Contest Rules and the selection of the Winners will be binding and final.</span></p>
                 <p style={bulletStyle}><span >5. Participant agrees and gives his/her express consent for AdviceQube to use or publish without additional compensation in any medium (including, without limitation, in print, via television, via the internet, via email and or/other electronic form) and/or share with its agents, business partners and successors during and after the Contest, information for publicity purposes including photographs, videotape or digital recordings that AdviceQube &nbsp;takes of Participant, Participant's AdviceQube profile, public written statements, and Investment Idea performance for all or part of the Contest, without compensation. Participant hereby waives any rights, claims or interests that Participant may have to control the use of any or all of the publicity material in whatever medium used.</span></p>

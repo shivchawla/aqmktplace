@@ -314,7 +314,7 @@ class AdviceDetailImpl extends React.Component {
         .then(benchmarkResponse => {
             if (performance.simulated && simulatedPerformance.length > 0) {
                 tickers.push({
-                    name: 'Simulated Performance',
+                    name: 'Historical Performance',
                     data: simulatedPerformance,
                     color: simulatedPerformanceColor,
                     noLoadData: true
@@ -323,7 +323,7 @@ class AdviceDetailImpl extends React.Component {
     
             if (performance.current && Utils.isLoggedIn() && truePerformance.length > 0) {
                 tickers.push({
-                    name: 'True Performance',
+                    name: 'Active Performance',
                     data: truePerformance,
                     color: currentPerformanceColor,
                     noLoadData: true
@@ -471,16 +471,6 @@ class AdviceDetailImpl extends React.Component {
         });
     };
 
-    renderAdviceData = () => {
-        const {followers, subscribers, rating} = this.state.adviceDetail;
-        return (
-            <Row>
-                <MetricItem value={followers} label="Followers" style={{border: 'none'}} />
-                <MetricItem value={rating} label="Average Rating" style={{border: 'none'}} />
-                <MetricItem value={subscribers} label="Subscribers" style={{border: 'none'}} />
-            </Row>
-        );
-    };
 
     toggleDialog = () => {
         const {adviceDetail} = this.state;
