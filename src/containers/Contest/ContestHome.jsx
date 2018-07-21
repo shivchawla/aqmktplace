@@ -1,7 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import windowSize from 'react-window-size';
-import {Row, Col, Button, Tabs, Table, Tag, Icon, Select} from 'antd';
+import {Row, Col, Button, Tabs, Table, Tag, Icon, Select, Badge} from 'antd';
 import {primaryColor, verticalBox, horizontalBox} from '../../constants';
 import {AdviceListItemMod} from '../../components/AdviceListeItemMod';
 import {scoringMetrics, faqs, howItWorksContents, prizes, requirements, prizeText, scoringText} from './constants';
@@ -11,6 +11,7 @@ import AppLayout from '../../containers/AppLayout';
 import logo from "../../assets/logo-advq-new.png";
 import contestFormula from "../../assets/contestFormula2.png";
 import {ContestHomeMeta} from '../../metas';
+import Countdown from 'react-countdown-now';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -27,7 +28,8 @@ class ContestHome extends React.Component {
             selectedContest: {},
             advices: [], // list of advices currently participating in the contest
             userEntries: [], // advices of the user inside contest,
-            selectedUserEntryPage: 0
+            selectedUserEntryPage: 0,
+            currentContest: null
         }
     }
 
@@ -39,12 +41,13 @@ class ContestHome extends React.Component {
             let contests = _.get(response.data, 'contests', []).map(contest => {
                 return {
                     id: _.get(contest, '_id', null),
-                    name: _.get(contest, 'name', null)
+                    name: _.get(contest, 'name', null),
+                    startDate: _.get(contest, 'startDate', null)
                 };
             })
             this.setState({activeContests: contests});
             if (contests[contests.length - 1] !== undefined) {
-                this.setState({selectedContestId: contests[contests.length - 1].id, selectedContest: contests[contests.length - 1]});
+                this.setState({selectedContestId: contests[contests.length - 1].id, selectedContest: contests[contests.length - 1], currentContest: contests[contests.length - 1]});
                 return this.getLatestContestSummary(contests[contests.length - 1].id, false);
             }
 
@@ -154,7 +157,7 @@ class ContestHome extends React.Component {
 
                             </h1> */}
                         </div>
-                        <h1 style={{color: '#fff', fontSize: '40px', fontWeight: 300}}>Investment Idea Contest</h1>
+                        <h1 style={{color: '#fff', fontSize: '40px', fontWeight: 300, marginTop:'50px'}}>Investment Idea Contest</h1>
                         <h3 style={{color: '#fff', fontSize: '18px', fontWeight: 300}}>Beat the market and win cash prizes every week</h3>
   
                         <Button 
@@ -164,9 +167,28 @@ class ContestHome extends React.Component {
                         >
                             Submit Entry
                         </Button>
+
+                        {this.state.currentContest &&
+                            <div style={{marginTop:'30px', fontSize:'16px', color:'#fff', fontWeight:300, textAlign:'center'}}>Submission ends in
+                                <Countdown date = {new Date(this.state.currentContest.startDate)} renderer={this.renderCountdown}/> 
+                            </div>
+                        }
                     </Col>
                 </Row>
             </Col>
+        );
+    }
+
+    renderCountdown = ({total, days, hours, minutes, seconds}) => {
+        //return `${days}D ${hours}H ${minutes}M ${seconds}S`;
+        const timeStyle = {border:'1px solid', backgroundColor:'#fff', fontSize:'14px', margin:'0 2px', padding:'2px', color: primaryColor, fontWeight:400, width:'35px'};
+        return (
+            <div style={horizontalBox}>
+                <div style={timeStyle}>{days}</div>
+                <div style={timeStyle}>{hours}</div>
+                <div style={timeStyle}>{minutes}</div>
+                <div style={timeStyle}>{seconds}</div>
+            </div>
         );
     }
 
@@ -564,7 +586,7 @@ const FAQCard = ({header, content, span=12}) => {
     return (
         <Col span={12} style={containerStyle}>
             <h3 style={cardHeaderTextStyle}>{header}</h3>
-            <h5 style={cardContentTextStyle}>{content}</h5>
+            <h5 dangerouslySetInnerHTML={{__html: content}} style={cardContentTextStyle}></h5>
         </Col>
     );
 };
