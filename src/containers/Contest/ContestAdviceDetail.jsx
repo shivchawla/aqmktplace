@@ -386,6 +386,29 @@ class AdviceDetailImpl extends React.Component {
     handleAllContestAdviceSummaryError = error => {
         // console.log('Advice Not found in any contest');
     }
+
+    getAdviceLatestContestSummary = () => {
+        const adviceContestUrl = `${requestUrl}/contest/entry/${this.props.match.params.id}`;
+        fetchAjax(
+            adviceContestUrl, 
+            this.props.history, 
+            this.props.match.url, undefined, this.handleErrorNotFoundInContestError
+        )
+        .then(contestResponse => {
+            const adviceActive = _.get(contestResponse.data, 'active', false);
+            const withdrawn = _.get(contestResponse.data, 'withDrawn', false);
+            const prohibited = _.get(contestResponse.data, 'prohibited', false);
+            this.setState({
+                adviceDetail: {
+                    ...this.state.adviceDetail, 
+                    active: adviceActive,
+                    withdrawn,
+                    prohibited
+                }
+            });
+        })
+        .catch(err => err);
+    }
     
     getAdviceData = (startDate = moment().format('YYYY-MM-DD')) => {
         const contestId = this.props.match.params.contestId;
@@ -1200,6 +1223,7 @@ class AdviceDetailImpl extends React.Component {
             const active = _.get(response.data, 'active', false);
             this.setState({adviceDetail: {...this.state.adviceDetail, active}});
             openNotification('info', 'Success', 'Advice Successfully Withdrawn from contest');
+            this.getAdviceLatestContestSummary();
         })
         .catch(error => {
             return handleCreateAjaxError(
@@ -1214,7 +1238,6 @@ class AdviceDetailImpl extends React.Component {
     }
 
     prohibitAdvice = () => {
-        const contestId = this.props.match.params.contestId;
         const prohibitAdviceUrl = `${requestUrl}/contest/${this.props.match.params.id}/action?type=prohibit`;
         this.setState({withdrawAdviceLoading: true});
         axios({
@@ -1226,6 +1249,7 @@ class AdviceDetailImpl extends React.Component {
             const active = _.get(response.data, 'active', false);
             this.setState({adviceDetail: {...this.state.adviceDetail, active}});
             openNotification('info', 'Success', 'Advice Successfully Prohibited from contest');
+            this.getAdviceLatestContestSummary();
         })
         .catch(error => {
             return handleCreateAjaxError(
