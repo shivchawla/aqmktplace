@@ -122,7 +122,7 @@ export default class LeaderBoard extends React.Component {
                 <Col span={4} >
                     <Button
                         style={{
-                            fontSize: '14px', 
+                            fontSize: '12px', 
                             fontWeight: '300', 
                         }}
                         size="small" 
@@ -134,7 +134,7 @@ export default class LeaderBoard extends React.Component {
                 <Col span={4} style={{textAlign:'end'}}>
                     <Button
                         style={{
-                            fontSize: '14px', 
+                            fontSize: '12px', 
                             fontWeight: '300', 
                         }} 
                         type="primary"

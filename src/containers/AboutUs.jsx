@@ -23,7 +23,7 @@ class AboutUsItem extends React.Component {
             </p>
             <div style={{'display': 'inline-flex', 'alignItems': 'center'}}>
                 <div className="link-text" style={{'padding': '0px'}}>
-                  <h4 style={{fontSize: '18px', width: '80%', textAlign: 'justify'}}>{item.main}</h4>
+                  <h4 style={{fontSize: '17px', width: '80%', marginTop:'5px'}}>{item.main}</h4>
                   <div style={{'paddingTop': '25px'}}> 
                       {
                         connect &&

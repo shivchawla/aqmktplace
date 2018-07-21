@@ -85,12 +85,13 @@ export const prizes = [
     {key: 5, rank: '5th Place', reward: 'Rs 1000'},
 ];
 
-export const criterias = [
+export const requirements = [
     {header: 'Returns', content: 'Your Investment Idea must make money.'},
     {header: 'Portfolio Concentration', content: 'Your Investment Idea must not over-invest in single stock.'},
     {header: 'Sector Concentration', content: 'Your Investment Idea must not over-invest in single sector*.'},
-    {header: 'Turnover', content: 'Your Invesment Idea must not change abruptly in a single day.'},
-    {header: 'Beta', content: 'Your Investment Idea should not be very conservative or aggressive in comparison to chosen benchmark'},
+    {header: 'Position Count', content: 'Your Investment Idea must invest in at-least 10 stocks'},
+    {header: 'Sector Count', content: 'Your Investment Idea must invest in at-least 4 sectors*'},
+    {header: 'Allowed Capital', content: 'Your Investment Idea should not use a capital more than 5 lacs'},
     {header: 'Maximum Loss', content: 'Your Investment Idea should not lose more than 10% in comparison to chosen benchmark'},
 ];
 
