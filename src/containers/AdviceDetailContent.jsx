@@ -63,7 +63,7 @@ class AdviceDetailContentImpl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedContestId: props.participatedContests[props.participatedContests.length - 1]._id,
+            selectedContestId: _.get(props, `participatedContests[${props.participatedContests.length - 1}]._id`, null),
             showCurrentRankView: false
         }
     }
@@ -541,7 +541,7 @@ class AdviceDetailContentImpl extends React.Component {
                         </Panel>
                     }
                     {
-                        this.props.adviceDetail.contestOnly &&
+                        this.props.adviceDetail.contestOnly && selectedContest &&
                         <Panel 
                                 key="5"
                                 style={customPanelStyle}

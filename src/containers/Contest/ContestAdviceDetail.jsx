@@ -443,7 +443,8 @@ class AdviceDetailImpl extends React.Component {
             if (advicePortfolioResponse) {
                 this.getAdviceDetail(advicePortfolioResponse);
             }
-            const participatedContests = _.get(allContestResponse.data, 'contests', []);
+            const participatedContests = _.get(allContestResponse, 'data', []);
+            console.log(allContestResponse);
             const adviceActive = _.get(adviceContestResponse.data, 'active', false);
             const withdrawn = _.get(adviceContestResponse.data, 'withDrawn', false);
             const prohibited = _.get(adviceContestResponse.data, 'prohibited', false);
