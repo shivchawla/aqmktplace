@@ -270,33 +270,6 @@ class AdviceDetailContentImpl extends React.Component {
                                         tagStyle={{marginLeft: '10px'}}
                                 />
                             }
-                            {
-                                contestOnly && active &&
-                                <AqTag 
-                                        color={primaryColor}
-                                        tooltipTitle="This is an active entry"
-                                        text="Active"
-                                        tagStyle={{marginLeft: '10px'}}
-                                />
-                            }
-                            {
-                                contestOnly && withdrawn &&
-                                <AqTag 
-                                        color={metricColor.neutral}
-                                        tooltipTitle="This Entry is withdrawn"
-                                        text="Withdrawn"
-                                        tagStyle={{marginLeft: '10px'}}
-                                />
-                            }
-                            {
-                                contestOnly && prohibited &&
-                                <AqTag 
-                                        color={metricColor.negative}
-                                        tooltipTitle="This is entry is prohibited from the current entry"
-                                        text="Prohibited"
-                                        tagStyle={{marginLeft: '10px'}}
-                                />
-                            }
                         </div>
                         {
                             advisor.user &&
@@ -377,6 +350,33 @@ class AdviceDetailContentImpl extends React.Component {
                                     text={this.props.adviceDetail.isPublic ? 'Public' : 'Private'}
                                     icon={this.props.adviceDetail.isPublic ? 'team' : 'lock'}
                                     iconStyle={{fontWeight: '400', fontSize: '15px', marginRight: '5px'}}
+                            />
+                        }
+                        {
+                            contestOnly && active &&
+                            <AqTag 
+                                    color={primaryColor}
+                                    tooltipTitle="This is an active entry"
+                                    text="Active"
+                                    tagStyle={{marginLeft: '10px'}}
+                            />
+                        }
+                        {
+                            contestOnly && withdrawn &&
+                            <AqTag 
+                                    color={metricColor.neutral}
+                                    tooltipTitle="This Entry is withdrawn"
+                                    text="Withdrawn"
+                                    tagStyle={{marginLeft: '10px'}}
+                            />
+                        }
+                        {
+                            contestOnly && prohibited &&
+                            <AqTag 
+                                    color={metricColor.negative}
+                                    tooltipTitle="This is entry is prohibited from the current entry"
+                                    text="Prohibited"
+                                    tagStyle={{marginLeft: '10px'}}
                             />
                         }
                         {this.renderTrendingApprovedIcon()}
