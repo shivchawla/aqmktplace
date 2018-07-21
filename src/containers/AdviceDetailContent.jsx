@@ -79,7 +79,7 @@ class AdviceDetailContentImpl extends React.Component {
         } = this.props.metrics || {};
         const {followers = 0, subscribers = 0} = this.props.adviceDetail || {};
         const metricsItems = [
-            {value: subscribers, label: 'Subscribers'},
+            {value: followers, label: 'Followers'},
             {value: nstocks, label: 'Num. of Stocks'},
             {value: annualReturn, label: 'Annual Return', percentage: true, color: true, fixed: 2, tooltipText: `Compounded annual growth rate ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},
             {value: volatility, label: 'Volatility', percentage: true, fixed: 2, tooltipText: `Annualized standard deviation of daily returns ${this.props.performanceType == "Simulated" ? "over last year (simulated) for Current Portfolio" : "since inception"}`},

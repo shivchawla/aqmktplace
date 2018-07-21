@@ -100,7 +100,8 @@ class AdviceListItemMobileImpl extends React.Component {
             isAdmin,
             rebalancingFrequency,
             netValue,
-            approvalStatus = false
+            approvalStatus = false,
+            contestOnly = false
         } = this.props.advice;
         const isPublic = this.props.advice.public;
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
@@ -136,22 +137,26 @@ class AdviceListItemMobileImpl extends React.Component {
                         </Col>
                         <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', margin: '5px 0'}}>
                             <Row>
-                                <AqTag 
-                                        tooltipPlacement="bottom"
-                                        text={rebalancingFrequency}
-                                        textStyle={{marginLeft: '5px'}}
-                                        color='#f58231'
-                                        icon='clock-circle-o'
-                                />
+                                {
+                                    !contestOnly && 
+                                    <AqTag 
+                                            tooltipPlacement="bottom"
+                                            text={rebalancingFrequency}
+                                            textStyle={{marginLeft: '5px'}}
+                                            color='#f58231'
+                                            icon='clock-circle-o'
+                                    />
+                                }
                                 
-                                {statusTagLabel!="" &&
+                                {
+                                    statusTagLabel!="" && !contestOnly && 
                                     <AqTag 
                                             text={statusTagLabel}
                                             color={statusTagColor}
                                     />
                                 }
                                 {
-                                    (isOwner || isAdmin) &&
+                                    (isOwner || isAdmin) && !contestOnly && 
                                     <React.Fragment>
                                         <AqTag 
                                                 tooltipPlacement='bottom'
@@ -161,7 +166,7 @@ class AdviceListItemMobileImpl extends React.Component {
                                                 text={isPublic ? 'Public' : 'Private'}
                                         />
                                         {
-                                            approvalStatus &&
+                                            approvalStatus && !contestOnly && 
                                             <AqTag 
                                                     placement='bottom'
                                                     text='Approval Pending'
@@ -170,12 +175,20 @@ class AdviceListItemMobileImpl extends React.Component {
                                             />
                                         }
                                         {
-                                            !approvalStatus &&
+                                            !approvalStatus && !contestOnly && 
                                             <AqTag 
                                                     tooltipPlacement='bottom'
                                                     color={isApproved ? '#00897B' : metricColor.negative}
                                                     text={isApproved ? "Approved" : "Rejected"}
                                                     textStyle={{marginLeft: '5px'}}
+                                            />
+                                        }
+                                        {
+                                            contestOnly && 
+                                            <AqTag 
+                                                    tooltipPlacement='bottom'
+                                                    color={metricColor.negative}
+                                                    text="Contest"
                                             />
                                         }
                                     </React.Fragment>

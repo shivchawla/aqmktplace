@@ -1,4 +1,6 @@
-import enterContestIcon from '../../assets/enter-contest.svg';
+import enterContestIcon from '../../assets/portfolio-icon.svg';
+import beatTheMarket from '../../assets/entry-performance-chart.svg';
+import winPrize from '../../assets/prize.svg';
 
 export const scoringText = 'The theme of the contest is to award experts with Investment Ideas that perform better than the market. For this purpose, our scoring function will largely depend on excess return over the chosen benchmark.';
 
@@ -71,8 +73,8 @@ export const faqs = [
 
 export const howItWorksContents = [
     {image: enterContestIcon, header: 'Enter Contest', content: 'Write an algorithm, and submit it to the contest. Submissions are entered into the contest starting at the next market open.'},
-    {image: enterContestIcon, header: 'Enter Contest', content: 'Write an algorithm, and submit it to the contest. Submissions are entered into the contest starting at the next market open.'},
-    {image: enterContestIcon, header: 'Enter Contest', content: 'Write an algorithm, and submit it to the contest. Submissions are entered into the contest starting at the next market open.'}
+    {image: beatTheMarket, header: 'Enter Contest', content: 'Write an algorithm, and submit it to the contest. Submissions are entered into the contest starting at the next market open.'},
+    {image: winPrize, header: 'Enter Contest', content: 'Write an algorithm, and submit it to the contest. Submissions are entered into the contest starting at the next market open.'}
 ];
 
 export const prizeText = "The top 5 contest participants are awarded cash prizes on a weekly basis. The following prizes are awarded after every week:";

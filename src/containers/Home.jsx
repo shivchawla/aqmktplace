@@ -31,7 +31,7 @@ export class Home extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedTabBar: 'investor',
+            selectedTabBar: 'advisor',
             loading: true,
             youtubeModalVisible: false
         }
@@ -451,7 +451,7 @@ export class Home extends React.Component {
                             </Button>
                             <Button 
                                     className="create-advice-button-mobile"
-                                    onClick={() => this.props.history.push('/dashboard/createadvice')}
+                                    onClick={() => this.props.history.push('/contest')}
                             >
                                 Enter Contest
                             </Button>
@@ -630,7 +630,7 @@ export class Home extends React.Component {
                     <Col className='tab-bar'>
                         <TabBarElement 
                                 onClick={() => this.handleTabBarClick('advisor')} 
-                                text='Advisor' 
+                                text='Expert' 
                                 isSelected={this.state.selectedTabBar === 'advisor' ? true : false} 
                         />
                         <TabBarElement 
@@ -773,7 +773,7 @@ export class Home extends React.Component {
                                         <Row>
                                             <React.Fragment>
                                                 {this.renderTopLeftSectionMobile()}
-                                                {this.renderPlayVideoButtonMobile()}
+                                                {/* {this.renderPlayVideoButtonMobile()} */}
                                                 {this.renderTopHeroImageMobile()}
                                                 {this.renderActionButtonsMobile()}
                                             </React.Fragment>
@@ -789,7 +789,7 @@ export class Home extends React.Component {
                                             <React.Fragment>
                                                 {this.renderTopLeftSectionDesktop()}
                                                 {this.renderTopHeroImageDesktop()}
-                                                {this.renderPlayVideoButtonDesktop()}
+                                                {/* {this.renderPlayVideoButtonDesktop()} */}
                                             </React.Fragment>
                                         </Row>
                                     );

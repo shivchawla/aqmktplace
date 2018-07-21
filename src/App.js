@@ -164,7 +164,7 @@ const PageNotFound = Loadable({
     loading: () => <Icon type="loading" />
 });
 
-const ContestDesktop = Loadable({
+const Contest = Loadable({
     loader: () => import('./containers/Contest/Contest'),
     loading: () => <Icon type="loading" />
 });
@@ -198,6 +198,7 @@ class App extends React.Component {
                                 <Route exact={true} path='/' component={Home} />
                                 <Route exact={true} path='/aboutus' component={AboutUs} /> 
                                 <Route exact={true} path='/advice' component={ScreenAdviceMobile} /> 
+                                <Route path='/contest' component={Contest} />
                                 <Route path="/stockresearch" exact component={WorkInProgress} /> 
                                 <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
                                 <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} /> 
@@ -233,7 +234,7 @@ class App extends React.Component {
                                 <Route exact={true} path='/' component={Home} />
                                 <Route path='/aboutus' component={AboutUs} />  
                                 <Route exact={true} path='/advice' component={ScreenAdvices} /> 
-                                <Route path='/contest' component={ContestDesktop} />
+                                <Route path='/contest' component={Contest} />
                                 <Route path="/stockresearch" exact component={StockResearch} /> 
                                 <Route path='/tokenUpdate' component={TokenUpdate}/>
                                 <Route path='/advice/:id' component={AdviceDetail} /> 

@@ -1,20 +1,31 @@
 import * as React from 'react';
 import _ from 'lodash';
 import windowSize from 'react-window-size';
-import {Row, Col, Button, Tabs, Table, Tag, Icon, Select} from 'antd';
-import {primaryColor, verticalBox, horizontalBox} from '../../constants';
-import {AdviceListItemMod} from '../../components/AdviceListeItemMod';
-import {scoringMetrics, faqs, howItWorksContents, prizes, requirements, prizeText, scoringText} from './constants';
-import {processAdviceForLeaderboardListItem} from './utils';
-import {fetchAjax, Utils} from '../../utils';
-import AppLayout from '../../containers/AppLayout';
-import logo from "../../assets/logo-advq-new.png";
-import contestFormula from "../../assets/contestFormula2.png";
-import {ContestHomeMeta} from '../../metas';
+import {StickyContainer, Sticky} from 'react-sticky';
+import {Row, Col, Button, Table, Tag, Icon, Select} from 'antd';
+import {Tabs} from 'antd-mobile';
+import {primaryColor, verticalBox, horizontalBox} from '../../../constants';
+// import {AdviceListItemMod} from '../../../components/AdviceListeItemMod';
+import {AdviceListItemMobile as AdviceListItemMod} from '../../ScreenAdviceMobile/AdviceListItem';
+import {scoringMetrics, faqs, howItWorksContents, prizes, requirements, prizeText, scoringText} from '../constants';
+import {processAdviceForLeaderboardListItem} from '../utils';
+import {fetchAjax, Utils} from '../../../utils';
+import AppLayout from '../../../containers/AppLayout';
+import logo from "../../../assets/logo-advq-new.png";
+import contestFormula from "../../../assets/contestFormula2.png";
+import {ContestHomeMeta} from '../../../metas';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
-const {requestUrl} = require('../../localConfig');
+const {requestUrl} = require('../../../localConfig');
+const tabs = [
+    { title: 'HOW' },
+    { title: 'PRIZES' },
+    { title: 'REQ' },
+    { title: 'SCORING' },
+    { title: 'FAQ' },
+    { title: 'ENTRIES' },
+];
 
 class ContestHome extends React.Component {
     constructor(props) {
@@ -115,14 +126,14 @@ class ContestHome extends React.Component {
     renderTopSection = () => {
         const containerStyle = {
             backgroundColor: '#00B79C',
-            height: '300px',
+            height: '250px',
         };
 
         const buttonStyle = {
             marginTop: '20px',
             border: 'none',
             outline: 'none',
-            height: '50px',
+            height: '40px',
             width: '150px',
             fontSize: '16px',
             backgroundColor: '#fff'
@@ -131,7 +142,7 @@ class ContestHome extends React.Component {
         return (
             <Col span={24} style={containerStyle}>
                 <Row style={{height: '100%'}}>
-                    <Col span={16} style={{...verticalBox, height: '100%'}}>
+                    <Col span={24} style={{...verticalBox, height: '100%'}}>
                         <div 
                                 style={{
                                     display: 'flex', 
@@ -145,17 +156,28 @@ class ContestHome extends React.Component {
                                 onClick={() => this.props.history.push('/home')}
                         >
                             <img src={logo} style={{height: '40px', marginTop: '-10px'}}/>
-                            {/* <h1 onClick={() => this.props.history.push('/home')} 
-                                style={{...headerColor, cursor: 'pointer', marginLeft: '10px', marginTop: '-5px'}}>
-                                <span style={{...biggerFont, color:'#fff'}}>A</span>
-                                <span style={{color: '#fff'}}>DVICE</span>
-                                <span style={{...biggerFont, color: '#fff'}}>Q</span>
-                                <span style={{color: '#fff'}}>UBE</span>
-
-                            </h1> */}
                         </div>
-                        <h1 style={{color: '#fff', fontSize: '40px', fontWeight: 300}}>Investment Idea Contest</h1>
-                        <h3 style={{color: '#fff', fontSize: '18px', fontWeight: 300}}>Beat the market and win cash prizes every week</h3>
+                        <h1 
+                                style={{
+                                    color: '#fff', 
+                                    fontSize: '24px', 
+                                    fontWeight: 400, 
+                                    margin: 0, 
+                                    marginTop: '40px'
+                                }}
+                        >
+                            Investment Idea Contest
+                        </h1>
+                        <h3 
+                                style={{
+                                    color: '#fff', 
+                                    fontSize: '16px', 
+                                    fontWeight: 400,
+                                    textAlign: 'center'
+                                }}
+                        >
+                            Beat the market and win cash prizes every week
+                        </h3>
   
                         <Button 
                                 icon="rocket" 
@@ -172,7 +194,7 @@ class ContestHome extends React.Component {
 
     renderHowItWorks = () => {   
         return (
-            <Row type="flex" justify="space-between" style={{marginTop: '50px'}}>
+            <Row type="flex" justify="space-between" style={{marginTop: '20px'}}>
                 {
                     howItWorksContents.map((item, index) => {
                         return <HowItWorksCard key={index} {...item} />
@@ -197,9 +219,9 @@ class ContestHome extends React.Component {
             }
         ];
         return (
-            <Row>
-                <Col span={24}>
-                    <h3 style={{margin: '10px 0 10px 0'}}>{prizeText}</h3>
+            <Row style={{padding: '0 10px'}}>
+                <Col span={24} style={{marginTop: '20px'}}>
+                    <h3 style={{fontSize: '14px', margin: '10px 0 10px 0'}}>{prizeText}</h3>
                 </Col>
                 <Col span={24}>
                     <Table 
@@ -218,7 +240,12 @@ class ContestHome extends React.Component {
             <Row style={{marginTop: '20px'}}>
                 {
                     requirements.map((requirement, index) => {
-                        return <RequirementCard key={index} {...requirement} />
+                        return (
+                            <RequirementCard 
+                                height={index === 0 ? 60 : 80} 
+                                key={index} {...requirement} 
+                            />
+                        );
                     })
                 }
             </Row>
@@ -233,23 +260,32 @@ class ContestHome extends React.Component {
 
         return (
             <Row>
-                <Col span={24}>
+                <Col span={24} style={{marginTop: '20px'}}>
                     <ScoringCard {...scoring} />
                 </Col>
                 
-                <Col span={24}>
-                    <h5 style={{fontSize: '18px', color: '#616161', fontStyle:'italic'}}>Excess Return  = Return of Investment Idea -  Return of Benchmark</h5>
+                <Col span={24} style={{padding: '0 10px'}}>
+                    <h5 
+                            style={{
+                                fontSize: '14px', 
+                                color: '#616161', 
+                                fontStyle:'italic',
+                                marginTop: '20px'
+                            }}
+                    >
+                        Excess Return  = Return of Investment Idea -  Return of Benchmark
+                    </h5>
                 </Col>
 
-                <Col span={24}>
-                    <img style={{marginLeft:'-30px'}} src={contestFormula}/>
+                <Col span={24} style={{padding: '0 10px'}}>
+                    <img style={{marginLeft:'-18px', width: '110%'}} src={contestFormula}/>
                 </Col>
 
-                <Col span={24}>
+                <Col span={24} style={{padding: '0 10px'}}>
                     <h5 style={{fontSize: '16px', color: '#616161'}}>Metrics</h5>
                 </Col>
 
-                <Col span={24}>
+                <Col span={24} style={{padding: '0 10px'}}>
                     {
                         scoringMetrics.map((metric, index) => 
                             <MetricCard 
@@ -262,9 +298,12 @@ class ContestHome extends React.Component {
                     }
                 </Col>
                     
-                <Col span={24} style={{...verticalBox, alignItems: 'flex-start', padding: '15px', paddingLeft: 0}}>
-                    <h2>{this.state.metric.header}</h2>
-                    <h3>{this.state.metric.content}</h3>
+                <Col 
+                        span={24} 
+                        style={{...verticalBox, alignItems: 'flex-start', padding: '0 10px', marginTop: '20px'}}
+                >
+                    <h2 style={{fontSize: '16px'}}>{this.state.metric.header}</h2>
+                    <h3 style={{fontSize: '14px', color: '#616161'}}>{this.state.metric.content}</h3>
                 </Col>
             </Row>
         );
@@ -283,7 +322,6 @@ class ContestHome extends React.Component {
         })
         .catch(err => reject(err));
     })
-
 
     processAdvices = (responseAdvices) => {
         const advices = [];
@@ -318,11 +356,20 @@ class ContestHome extends React.Component {
     renderMyEntriesList = () => {
         return (
             <Row>
-                <Col span={24}>
+                <Col span={24} style={{marginTop: '20px'}}>
                     {
                         this.state.userEntries.map((advice, index) => {
                             return (
-                                <AdviceListItemMod key={index} advice={advice} contestOnly={true}/>
+                                <React.Fragment>
+                                    <AdviceListItemMod key={index} advice={advice} contestOnly={true}/>
+                                    <div 
+                                        style={{
+                                            height: '6px', 
+                                            backgroundColor: '#eaeaea',
+                                            margin: '10px 0'
+                                        }}
+                                    />
+                                </React.Fragment>
                             );
                         })
                     }
@@ -331,29 +378,48 @@ class ContestHome extends React.Component {
         );
     }
 
+    renderTabBar = props => {
+        return (
+            <Sticky>
+                {
+                    ({ style }) => <div style={{ ...style, zIndex: 1 }}>
+                        <Tabs.DefaultTabBar renderTab={this.renderTab} {...props} />
+                    </div>
+                }
+            </Sticky>
+        );
+    }
+
+    renderTab = data => {
+        return (
+            <h3 style={{width: 'fit-content', fontSize: '12px'}}>{data.title}</h3>
+        );
+    }
+
     renderTabsSection = () => {
         const containerStyle = {
             padding: '10px 20px',
             paddingRight: '40px'
         };
-
+        
         return (
-            <Col span={16} style={containerStyle}>
-                <Tabs animated={false} defaultActiveKey="1">
-                    <TabPane tab="HOW IT WORKS" key="1">{this.renderHowItWorks()}</TabPane>
-                    <TabPane tab="PRIZES" key="2">{this.renderPrizeList()}</TabPane>
-                    <TabPane tab="REQUIREMENTS" key="3">{this.renderRequirementList()}</TabPane>
-                    <TabPane tab="SCORING" key="4">{this.renderScoring()}</TabPane>
-                    <TabPane tab="FAQ" key="5">{this.renderFAQ()}</TabPane>
-                    <TabPane tab="MY ENTRIES" key="6">{this.renderMyEntriesList()}</TabPane>
-                </Tabs>
-            </Col>
+            <Tabs 
+                    tabs={Utils.isLoggedIn() ? tabs : tabs.slice(0 , tabs.length - 1)}
+                    renderTab={this.renderTab}
+            >
+                {this.renderHowItWorks()}
+                {this.renderPrizeList()}
+                {this.renderRequirementList()}
+                {this.renderScoring()}
+                {this.renderFAQ()}
+                {this.renderMyEntriesList()}
+            </Tabs>
         );
     }
 
     renderFAQ = () => {        
         return (
-            <Row>
+            <Row style={{marginTop: '20px'}}>
                 {
                     faqs.map((faq, index) => <FAQCard key={index} {...faq} />)
                 }
@@ -436,18 +502,6 @@ class ContestHome extends React.Component {
     renderContestDropdown = () => {
         const {activeContests = []} = this.state;
         return (
-            // <Select 
-            //         style={{width: 200}} 
-            //         value={this.state.selectedContestId} 
-            //         onChange={this.handleContestChange}
-            //         disabled={true}
-            // >
-            //     {
-            //         activeContests.map((contest, index) => {
-            //             return <Option key={index} value={_.get(contest, 'id', null)}>{_.get(contest, 'name', null)}</Option>
-            //         })
-            //     }
-            // </Select>
             <h3 style={{color: '#fff', fontSize: '14px', marginRight: '5px'}}>
                 {_.get(this.state, 'selectedContest.name', '')}
             </h3>
@@ -479,12 +533,12 @@ class ContestHome extends React.Component {
         return (
             <AppLayout
                 noHeader
+                noFooter
                 content = {
-                    <Row style={{height: this.props.windowHeight + 100}}>
+                    <Row style={{height: '100%', paddingBottom: '50px'}}>
                         <ContestHomeMeta />
                         {this.renderTopSection()}
                         {this.renderTabsSection()}
-                        {this.renderContestRanking()}
                     </Row>
                 }
                 loading={this.state.loading}
@@ -496,13 +550,15 @@ class ContestHome extends React.Component {
 
 export default windowSize(ContestHome);
 
-const HowItWorksCard = ({image, header, content, span=7}) => {
+const HowItWorksCard = ({image, header, content, span=24}) => {
     const containerStyle = {
         ...verticalBox,
         border: '1px solid #eaeaea',
         margin: '0 10px',
         padding: '15px',
-        borderRadius: '4px'
+        borderRadius: '4px',
+        marginBottom: '20px',
+        width: '95%'
     };
 
     return (
@@ -514,11 +570,12 @@ const HowItWorksCard = ({image, header, content, span=7}) => {
     );
 };
 
-const RequirementCard = ({header, content, span=12}) => {
+const RequirementCard = ({header, content, span=24, height=80}) => {
     const containerStyle = {
-        marginBottom: '40px',
+        padding: '0 10px',
+        marginBottom: '10px',
         borderBottom: '1px solid #eaeaea',
-        height:'80px'
+        height,
     };
 
     return (
@@ -542,7 +599,7 @@ const ScoringCard = ({header, content, metrics}) => {
         alignItems: 'flex-start'
     }
     return (
-        <Row style={{marginBottom: '30px'}}>
+        <Row style={{padding: '0 10px',marginBottom: '30px'}}>
             <Col span={24} style={containerStyle}>
                 <h3 style={cardHeaderTextStyle}>{header}</h3>
                 <h5 style={cardContentTextStyle}>{content}</h5>
@@ -551,18 +608,17 @@ const ScoringCard = ({header, content, metrics}) => {
     );
 };
 
-const FAQCard = ({header, content, span=12}) => {
+const FAQCard = ({header, content, span=24}) => {
     const containerStyle = {
         ...verticalBox,
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         padding: '0 10px',
-        //marginBottom: '60px',
-        height:'200px'
+        marginBottom: '40px',
     };
 
     return (
-        <Col span={12} style={containerStyle}>
+        <Col span={span} style={containerStyle}>
             <h3 style={cardHeaderTextStyle}>{header}</h3>
             <h5 style={cardContentTextStyle}>{content}</h5>
         </Col>
@@ -573,9 +629,10 @@ const MetricCard = ({header, selected = false, onClick}) => {
     const containerStyle = {
         backgroundColor: '#FBFBFB',
         borderRadius: '4px',
+        margin: '0 10px',
         marginBottom: '20px',
         cursor: 'pointer',
-        padding: '10px'
+        padding: '0 10px'
     };
 
     const rowColStyle = {
@@ -585,6 +642,7 @@ const MetricCard = ({header, selected = false, onClick}) => {
 
     return (
         <Tag 
+                style={{marginBottom: '10px'}}
                 color={selected ? primaryColor : null} 
                 onClick={() => onClick(header)}
         >
@@ -595,7 +653,7 @@ const MetricCard = ({header, selected = false, onClick}) => {
 
 const LeaderboardItem = ({rank, name, score, striped=false}) => {
     return (
-        <Row style={{padding: '15px 10px', backgroundColor: striped ? '#ECEFF1' : '#fff'}}>
+        <Row style={{margin: '0 10px', padding: '15px 10px', backgroundColor: striped ? '#ECEFF1' : '#fff'}}>
             <Col span={4} style={{fontSize: '16px'}}>{rank}</Col>
             <Col span={16} style={{fontSize: '16px'}}>{name}</Col>
             <Col span={4} style={{fontSize: '16px'}}>{score}</Col>
@@ -604,7 +662,7 @@ const LeaderboardItem = ({rank, name, score, striped=false}) => {
 }
 
 const cardHeaderTextStyle = {
-    fontSize: '18px',
+    fontSize: '16px',
     color: '#252a2f'
 };
 
