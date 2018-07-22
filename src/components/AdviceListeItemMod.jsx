@@ -75,7 +75,7 @@ class AdviceListItemImpl extends React.PureComponent {
         return (
             <Row type="flex" style={{marginRight:'15px'}}>
                 <Col span={24} style={{textAlign: 'right'}}>
-                    <span style={{fontSize: '12px'}}>Min. Investment Value</span>
+                    <span style={{fontSize: '12px'}}>{!this.props.contestOnly ? "Min. Investment Value" : "Net Value"}</span>
                 </Col>    
 
                 <Col span={24}>
@@ -84,6 +84,15 @@ class AdviceListItemImpl extends React.PureComponent {
                     </h5>
                 </Col>
             </Row>
+        );
+    }
+
+    contestTooltipTitle = (contestDetail) => {
+        return (
+            <div>{contestDetail.map(item => {
+                    <span>{item.name} ({item.rank})</span>;
+                })}
+            </div>
         );
     }
 
@@ -102,8 +111,30 @@ class AdviceListItemImpl extends React.PureComponent {
             rebalancingFrequency,
             netValue,
             approvalStatus = false,
-            contestOnly
+            contestOnly,
+            contest
         } = this.props.advice;
+
+        var activeInContest = false;
+        var withdrawnFromContest = true;
+        var prohibitedFromContest = true;
+
+        const contestDetail = contest ? contest.map(item => {
+            return {
+                name: item.name, 
+                contestActive: item.active, 
+                active: item.adviceSummary.active, 
+                prohibited: item.adviceSummary.prohibited, 
+                withdrawn: item.adviceSummary.withDrawn, 
+                rank: _.get(item, 'adviceSummary.latestRank.value', null)
+            };}) : [];
+
+        contestDetail.map(item => {
+            activeInContest  = activeInContest || item.active;
+            withdrawnFromContest = withdrawnFromContest && item.withdrawn;
+            prohibitedFromContest = prohibitedFromContest && item.prohibited;
+        });
+
         const isPublic = this.props.advice.public;
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
         const statusTagColor = isOwner ? '#3cb44b' : isSubscribed ? '#1890ff' : isFollowing ? '#03a7ad' : '#fff';
@@ -111,6 +142,7 @@ class AdviceListItemImpl extends React.PureComponent {
         const advisorName = `${_.get(advisor, 'user.firstName')} ${_.get(advisor, 'user.lastName')}`;
         const advisorId = _.get(advisor, '_id', '');
         const statusTagStyle = {border:'1px solid', borderColor:statusTagColor};
+
 
         return (
 
@@ -219,10 +251,10 @@ class AdviceListItemImpl extends React.PureComponent {
                                         {   
                                             contestOnly &&
                                             <AqTag 
-                                                    tooltipTitle={contestOnly}
-                                                    tooltipPlacement='bottom'
+                                                    tooltipTitle={this.contestTooltipTitle(contestDetail)}
+                                                    tooltipPlacement='right'
                                                     color='purple'
-                                                    text="Contest"
+                                                    text={activeInContest ? "Active" : withdrawnFromContest ? "Withdrawn" : prohibitedFromContest ? "Prohibited" : ""}
                                                     textStyle={{marginLeft: '5px'}}
                                             />
                                         }

@@ -331,6 +331,7 @@ class ContestHome extends React.Component {
                 isTrending: false,
                 public: _.get(advice, 'public', false),
                 netValue: advice.netValue,
+                contest: advice.contest
             })
         });
 
