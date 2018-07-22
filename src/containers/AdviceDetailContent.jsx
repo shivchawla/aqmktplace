@@ -300,7 +300,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 <span style={dateStyle}>{updatedDate}</span>
                             </h5>
                         :
-                            <h5 style={{...userStyle}} >
+                            <h5 style={{...userStyle, marginTop:'-15px'}} >
                                 By <span style={{color: primaryColor}}>{advisor.user.firstName} {advisor.user.lastName}</span>
                                 <span style={dateStyle}>{updatedDate}</span>
                             </h5>

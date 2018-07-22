@@ -1360,7 +1360,7 @@ class AdviceDetailImpl extends React.Component {
                     >
                         {
                             (this.state.notPresentInLatestContest || !this.state.adviceDetail.active) 
-                                ? "ENTER IN CONTEST" 
+                                ? "ENTER CONTEST" 
                                 : "UPDATE ENTRY"
                         }
                     </Button>

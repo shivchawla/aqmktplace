@@ -190,9 +190,12 @@ class AdviceListItemImpl extends React.PureComponent {
                     <Row style={{marginTop: '5px'}} type="flex" justify="space-between">
 
                         <Col span={12} style={{marginTop: '-5px'}}>
-                            <Row>
-                                <AqRate value={Number(rating)}/>
-                            </Row>
+                            
+                            {!contestOnly &&
+                                <Row>
+                                    <AqRate value={Number(rating)}/>
+                                </Row>
+                            }
                             
                             <Row style={{marginTop: '5px'}}>
                                 {
