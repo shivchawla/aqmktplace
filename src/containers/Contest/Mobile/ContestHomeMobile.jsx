@@ -267,13 +267,13 @@ class ContestHome extends React.Component {
                 <Col span={24} style={{padding: '0 10px'}}>
                     <h5 
                             style={{
-                                fontSize: '14px', 
+                                fontSize: '12x', 
                                 color: '#616161', 
                                 fontStyle:'italic',
-                                marginTop: '20px'
+                                //marginTop: '20px'
                             }}
                     >
-                        Excess Return  = Return of Investment Idea -  Return of Benchmark
+                        Excess Return = Return of Investment Idea -  Return of Benchmark
                     </h5>
                 </Col>
 

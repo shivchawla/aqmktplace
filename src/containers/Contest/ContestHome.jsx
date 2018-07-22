@@ -157,8 +157,8 @@ class ContestHome extends React.Component {
 
                             </h1> */}
                         </div>
-                        <h1 style={{color: '#fff', fontSize: '40px', fontWeight: 300, marginTop:'50px'}}>Investment Idea Contest</h1>
-                        <h3 style={{color: '#fff', fontSize: '18px', fontWeight: 300}}>Beat the market and win cash prizes every week</h3>
+                        <div style={{color: '#fff', fontSize: '40px', fontWeight: 300, marginTop:'50px'}}>Investment Idea Contest</div>
+                        <div style={{color: '#fff', fontSize: '18px', fontWeight: 300, marginTop:'-10px'}}>Beat the market and win cash prizes every week</div>
   
                         <Button 
                                 icon="rocket" 
@@ -194,7 +194,7 @@ class ContestHome extends React.Component {
 
     renderHowItWorks = () => {   
         return (
-            <Row type="flex" justify="space-between" style={{marginTop: '50px'}}>
+            <Row type="flex" justify="space-between" style={{marginTop: '20px'}}>
                 {
                     howItWorksContents.map((item, index) => {
                         return <HowItWorksCard key={index} {...item} />
@@ -520,18 +520,20 @@ export default windowSize(ContestHome);
 
 const HowItWorksCard = ({image, header, content, span=7}) => {
     const containerStyle = {
-        ...verticalBox,
+        //...verticalBox,
         border: '1px solid #eaeaea',
         margin: '0 10px',
-        padding: '15px',
-        borderRadius: '4px'
+        padding: '30px 15px 15px 15px',
+        borderRadius: '4px',
+        height:'300px',
+        textAlign:'center'
     };
 
     return (
         <Col span={span} style={containerStyle}>
             <img src={image} />
-            <h3 style={{...cardHeaderTextStyle, marginTop: '20px'}}>{header}</h3>
-            <h5 style={{...cardContentTextStyle, textAlign: 'center'}}>{content}</h5>
+            <h3 style={{...cardHeaderTextStyle, fontSize:'18px', marginTop:'20px'}}>{header}</h3>
+            <h5 style={{...cardContentTextStyle, fontSize:'15px'}}>{content}</h5>
         </Col>
     );
 };

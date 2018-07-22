@@ -1,6 +1,6 @@
-import enterContestIcon from '../../assets/portfolio-icon.svg';
-import beatTheMarket from '../../assets/entry-performance-chart.svg';
-import winPrize from '../../assets/prize.svg';
+import createPortfolio from '../../assets/CreatePortfolio.svg';
+import updateEntry from '../../assets/UpdateEntry.svg';
+import winPrize from '../../assets/WinPrizes.svg';
 
 export const scoringText = 'The theme of the contest is to award experts with Investment Ideas that perform better than the market. For this purpose, our scoring function will largely depend on excess return over the chosen benchmark.';
 
@@ -34,7 +34,7 @@ export const faqs = [
     },
     {
         header: 'What is the rationale behind the scoring criteria?',
-        content: 'The scoring criteria is a cross-sectional measure that ranks multiple meetrics measuring return, risk and portfolio diversity. It is to make sure that Investment Portfolio are good quality investment ideas and not just random luck events.'
+        content: 'The scoring criteria is a cross-sectional measure that ranks multiple metrics measuring return, risk and portfolio diversity. It is to make sure that Investment Portfolio are good quality investment ideas and not just random luck events.'
     },
     {
         header: 'Will you see my Investment Portfolio?',
@@ -42,11 +42,11 @@ export const faqs = [
     },
     {
         header: 'Can I withdraw my entry from the contest?',
-        content: 'Yes. You can click “Withdraw From Contest” on the Advice Detail page. You cannot re-enter the same contest once withdrawn. It’s recommended to NOT withdraw to prevent any entry limit issues.'
+        content: 'Yes. You can click “Withdraw From Contest” on the entry detail page. You cannot re-enter the same contest once withdrawn and will only be allowed to enter the upcoming contest.'
     },
     {
         header: 'Is there any submission deadline?',
-        content: 'The contest is a rolling contest on a weekly basis. This means a NEW contest is automatically created every week.'
+        content: 'The contest is a rolling contest on a weekly basis. This means a NEW contest is automatically created every week and entries are accepted till the following Sunday.'
     },
     {
         header: 'Can I submit multiple entries in the contest?',
@@ -58,7 +58,7 @@ export const faqs = [
     },
     {
         header: 'How long are the entries evaluated?',
-        content: 'The contest are evaluated for at-least for 1 month. The entries are automatically rolled into the next contest and the overall performance is used for ranking purposes.'
+        content: 'The entries are evaluated for at-least 1 month. The entries are automatically rolled into the next contest and the overall performance is used for ranking purposes.'
     },
     {
         header: 'Do I have to re-enter in new weekly contests?',
@@ -73,9 +73,9 @@ export const faqs = [
 ];
 
 export const howItWorksContents = [
-    {image: enterContestIcon, header: 'Enter Contest', content: 'Write an algorithm, and submit it to the contest. Submissions are entered into the contest starting at the next market open.'},
-    {image: beatTheMarket, header: 'Enter Contest', content: 'Write an algorithm, and submit it to the contest. Submissions are entered into the contest starting at the next market open.'},
-    {image: winPrize, header: 'Enter Contest', content: 'Write an algorithm, and submit it to the contest. Submissions are entered into the contest starting at the next market open.'}
+    {image: createPortfolio, header: 'Submit Portfolio', content: 'Create a diversified portfolio, and submit it to the contest. Entries are evaluated on continuous basis at market close.'},
+    {image: updateEntry, header: 'Track and Update', content: 'Track performance and portfolio, and update your entry daily to out-perform the benchmark.'},
+    {image: winPrize, header: 'Win Prizes', content: 'The top 5 participants are awarded a cash prize weekly. Prizes worth Rs. 10,000 are awarded each week.'}
 ];
 
 export const prizeText = "The top 5 contest participants are awarded cash prizes on a weekly basis. The following prizes are awarded after every week:";
