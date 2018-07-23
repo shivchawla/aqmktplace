@@ -800,7 +800,7 @@ class AdvisorDashboard extends React.Component {
                                         <Col span={24}>
                                             <DashboardCard 
                                                     headerStyle={headerStyle}
-                                                    title="MY ADVICES"
+                                                    title="MY ENTRIES"
                                                     cardStyle={{marginTop:'10px', height:'550px'}}  
                                                     menu={this.renderSortingMenu()}
                                                     loading={this.state.myAdvicesLoading}
