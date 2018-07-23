@@ -1428,6 +1428,7 @@ class AdviceDetailImpl extends React.Component {
                                 handlePerformanceToggleChange={this.handlePerformanceToggleChange}
                                 performanceType={this.state.performanceType}
                                 loading={false}
+                                participatedContests={[]}
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}

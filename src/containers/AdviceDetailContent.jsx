@@ -63,8 +63,9 @@ const metrics = [
 class AdviceDetailContentImpl extends React.Component {
     constructor(props) {
         super(props);
+        const participatedContestLength = _.get(props, 'participatedContests', []).length;
         this.state = {
-            selectedContestId: _.get(props, `participatedContests[${props.participatedContests.length - 1}]._id`, null),
+            selectedContestId: _.get(props, `participatedContests[${participatedContestLength - 1}]._id`, null),
             showCurrentRankView: true
         }
     }
