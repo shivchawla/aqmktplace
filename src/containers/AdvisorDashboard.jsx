@@ -784,13 +784,13 @@ class AdvisorDashboard extends React.Component {
                     {
                         this.state.showEmptyScreen
                         ?   <Col span={24} style={emptyPortfolioStyle}>
-                                <h1>You have not created any advices yet. Get started by creating One</h1>
+                                <h1>You have not created any entries yet. Get started by creating one</h1>
                                 <Button 
                                         type="primary" 
-                                        onClick={() => this.props.history.push('/dashboard/createadvice')}
+                                        onClick={() => this.props.history.push('/contest/createadvice')}
                                         style={{marginTop: '20px'}}
                                 >
-                                    Create Advice
+                                    Create Entry
                                 </Button>
                             </Col>
                         :   <Col span={24} className='advisorDashboardContainer' style={{height: '100%'}}>
@@ -823,9 +823,9 @@ class AdvisorDashboard extends React.Component {
                                                     loading={this.state.advicePerformanceLoading}
                                                     menu={
                                                         <ArrowButton 
-                                                                text="Go To Advice"
+                                                                text="Go To Entry"
                                                                 onClick={
-                                                                    () => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)
+                                                                    () => this.props.history.push(`/contest/entry/${this.state.selectedAdviceId}`)
                                                                 }
                                                         />
                                                     }
