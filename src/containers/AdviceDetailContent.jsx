@@ -730,7 +730,7 @@ const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle, curren
                             <MetricHeader 
                                 rank={_.get(selectedAdvice, 'latestRank.rating.current.rank', null)}
                                 header='Active Performance'
-                                score={_.get(selectedAdvice, 'latestRank.rating.current.value', 0).toFixed(2)}
+                                score={(_.get(selectedAdvice, 'latestRank.rating.current.value', 0) || 0).toFixed(2)}
                             />
                         }
                         metrics={currentMetrics} 
@@ -742,7 +742,7 @@ const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle, curren
                             <MetricHeader 
                                 rank={_.get(selectedAdvice, 'latestRank.rating.simulated.rank', null)}
                                 header='Historical Performance'
-                                score={_.get(selectedAdvice, 'latestRank.rating.simulated.value', 0).toFixed(2)}
+                                score={(_.get(selectedAdvice, 'latestRank.rating.simulated.value', 0) || 0).toFixed(2)}
                             />
                         }
                     />

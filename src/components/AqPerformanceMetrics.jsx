@@ -122,7 +122,9 @@ export class AqPerformanceMetrics extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         const performanceTimeline = this.getPerformanceTimeline();
-        this.setState({metrics: this.getMetrics(performanceTimeline[0])});
+        if (!_.isEqual(nextProps, this.props)) {
+            this.setState({metrics: this.getMetrics(performanceTimeline[0])});
+        }
     }
 
     /*
@@ -131,18 +133,11 @@ export class AqPerformanceMetrics extends React.Component {
     */
     getPerformanceTimeline = (props=this.props) => { 
         let {rollingPerformance = {}, selectedTimeline = []} = props;
-        // console.log(Object.keys(rollingPerformance));
-        // console.log(selectedTimeline);
-        // const timelineToDelete = _.difference(Object.keys(rollingPerformance), selectedTimeline);
-        // console.log(timelineToDelete);
-        // rollingPerformance = _.omit(rollingPerformance, ...timelineToDelete);
-        // // return Object.keys(rollingPerformance);
         return selectedTimeline;
     }
-
+    
     render() {
         const {type = "old"} = this.props; 
-
         return (
             <Row 
                 style={{
