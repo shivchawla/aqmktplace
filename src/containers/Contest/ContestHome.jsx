@@ -61,7 +61,9 @@ class ContestHome extends React.Component {
         .then(() => {
             resolve(true);
         })
-        .catch(err => reject(err))
+        .catch(err => {
+            reject(err)
+        })
         .finally(() => {
             this.setState({loading: false});
         })
@@ -78,7 +80,7 @@ class ContestHome extends React.Component {
             let advices = _.get(contestSummaryData, 'advices', []);
             advices = advices.map(advice => processAdviceForLeaderboardListItem(advice));
             advices = _.orderBy(advices, 'rank', 'asc');
-            this.setState({advices, selectedAdviceId: advices[0].adviceId});
+            this.setState({advices, selectedAdviceId: _.get(advices, '[0].adviceId', null)});
             resolve(true);
         })
         .catch(err => reject(err))
@@ -308,7 +310,9 @@ class ContestHome extends React.Component {
             const count = _.get(advicesResponse.data, 'count', 0);
             resolve({advices: this.processAdvices(advices), count});
         })
-        .catch(err => reject(err));
+        .catch(err => {
+            reject(err);
+        });
     })
 
 
@@ -498,6 +502,7 @@ class ContestHome extends React.Component {
             Utils.isLoggedIn() && this.getUserAdvices()
         ])
         .then(([contestResponse, userAdvices]) => {
+            
             const advices = _.get(userAdvices, 'advices', []);
             this.setState({userEntries: advices});
         })
