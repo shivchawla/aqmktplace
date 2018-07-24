@@ -1327,7 +1327,7 @@ class AdviceDetailImpl extends React.Component {
                     {
                         // ((!approvalRequested && isPublic) || !isPublic) &&
                         <Button
-                                onClick={() => this.props.history.push(`/contest/updateadvice/${this.props.match.params.id}`)}
+                                onClick={() => this.props.history.push(`/contest/updateentry/${this.props.match.params.id}`)}
                                 className={className}
                                 style={buttonStyle}
                         >

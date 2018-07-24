@@ -160,6 +160,7 @@ export class SearchStocks extends React.Component {
             this.setState({selectedStocks});
             this.localStocks = localStocks;
         }
+        console.log(this.localStocks);
     }
 
     addSelectedStocksToPortfolio = () => {
@@ -211,10 +212,35 @@ export class SearchStocks extends React.Component {
         })
         this.localStocks = localStocks;
         this.setState({selectedStocks, stocks});
+        console.log('Local Stocks', this.localStocks);
+    }
+
+    initializeSelectedStocks = () => {
+        const positions = [...this.props.portfolioPositions];
+        const selectedStocks = positions.map(position => position.symbol);
+        this.localStocks = positions.map(position => {
+            return {
+                change: 0,
+                changePct: 0,
+                checked: true,
+                close: _.get(position, 'lastPrice', 0),
+                current: _.get(position, 'lastPrice', 0),
+                high: 0,
+                low: 0,
+                name: '',
+                open: 0,
+                sector: _.get(position, 'sector', ''),
+                symbol: _.get(position, 'symbol', '')
+            }
+        });
+        this.setState({selectedStocks});
     }
 
     componentWillMount() {
         this.fetchStocks('');
+        if (this.props.isUpdate) {
+            this.initializeSelectedStocks();
+        }
         this.syncStockListWithPortfolio(this.props.portfolioPositions);
     }
 
@@ -266,7 +292,6 @@ export class SearchStocks extends React.Component {
             <Row>
                 {
                     selectedStocks.map((stock, index) => {
-                        console.log(this.state.selectedStocks.length);
                         return (
                             <Tag 
                                     style={{marginBottom: '5px'}}
@@ -325,7 +350,7 @@ export class SearchStocks extends React.Component {
                             }
                     </Row>
                     {
-                        this.state.selectedStocks.length > 0 &&
+                        // this.state.selectedStocks.length > 0 &&
                         <Button 
                                 onClick={this.addSelectedStocksToPortfolio} 
                                 type="primary" 

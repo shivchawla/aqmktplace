@@ -347,6 +347,7 @@ class ContestAdviceFormImpl extends React.Component {
                     ref={el => this.searchStockComponent = el}
                     history={this.props.history}
                     pageUrl={this.props.match.url}
+                    isUpdate={this.props.isUpdate}
                 />
             </SwipeableBottomSheet>
         )
