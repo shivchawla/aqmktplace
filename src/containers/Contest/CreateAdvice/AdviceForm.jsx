@@ -605,7 +605,7 @@ class ContestAdviceFormImpl extends React.Component {
             >
                 {
                     errors.length > 0
-                    ? `${errors.length} Portfolio Validation Wanings`
+                    ? `${errors.length} Portfolio Validation Warnings`
                     :  'Valid Portfolio'
                 }
             </Tag>
