@@ -154,6 +154,7 @@ export class Portfolio extends React.Component {
                 isUpdate={this.props.isUpdate}
                 togglePerformanceModal={this.togglePerformanceModal}
                 toggleBottomSheet={this.props.toggleBottomSheet}
+                updateSelectedPosition={this.props.updateIndividualPosition}
             />
         );
     }

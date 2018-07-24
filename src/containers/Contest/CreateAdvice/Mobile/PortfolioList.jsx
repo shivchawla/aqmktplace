@@ -415,6 +415,7 @@ class PortfolioListImpl extends React.Component {
                     updatePosition={this.state.updatePosition}
                     selectedPosition={this.state.selectedPosition}
                     toggleBottomSheet={this.toggleBottomSheet}
+                    updateSelectedPosition={this.props.updateSelectedPosition}
                 />
             </SwipeableBottomSheet>
         );

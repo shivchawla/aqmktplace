@@ -1,7 +1,10 @@
 import * as React from 'react';
+import Media from 'react-media';
+import {Motion, spring} from 'react-motion';
 import _  from 'lodash';
 import {Row, Col, Input, Icon, Badge, Button, Tag} from 'antd';
 import {StockPerformance} from './StockPerformance';
+import {screenSize} from './constants';
 import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../constants';
 import {fetchAjax, Utils} from '../../../utils';
 import '../css/searchStocks.css';
@@ -20,7 +23,8 @@ export class SearchStocks extends React.Component {
             selectedStocks: [], // This will contain the symbols of all stocks that are selected
             selectedPage: 0,
             portfolioLoading: false,
-            loadingStocks: false
+            loadingStocks: false,
+            stockPerformanceOpen: false
         };
         this.localStocks = []; // Used to get the list of all stocks obtained from N/W calls
     }
@@ -88,17 +92,37 @@ export class SearchStocks extends React.Component {
     renderStockList = () => {
         const {stocks = []} = this.state;
         return stocks.map((stock, index) => 
-            <StockListItem 
-                key={index} 
-                {...stock} 
-                onClick={this.handleStockListItemClick} 
-                onAddIconClick={this.conditionallyAddItemToSelectedArray}
-                selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
-            />
+            <React.Fragment>
+                <Media 
+                    query={`(max-width: ${screenSize.mobile})`}
+                    render={() => (
+                        <StockListItemMobile 
+                            key={index} 
+                            {...stock} 
+                            onClick={this.handleStockListItemClick} 
+                            onAddIconClick={this.conditionallyAddItemToSelectedArray}
+                            selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
+                        />
+                    )}
+                />
+                <Media 
+                    query={`(min-width: ${screenSize.desktop})`}
+                    render={() => (
+                        <StockListItem 
+                            key={index} 
+                            {...stock} 
+                            onClick={this.handleStockListItemClick} 
+                            onAddIconClick={this.conditionallyAddItemToSelectedArray}
+                            selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
+                        />
+                    )}
+                />
+            </React.Fragment>
         )
     }
 
     handleStockListItemClick = stock => {
+        this.toggleStockPerformanceOpen();
         this.setState({selectedStock: stock});
     }
 
@@ -259,6 +283,67 @@ export class SearchStocks extends React.Component {
         return false;
     }
 
+    toggleStockPerformanceOpen = () => {
+        this.setState({stockPerformanceOpen: !this.state.stockPerformanceOpen});
+    }
+
+    renderStockListDetails = () => {
+        return (
+            <React.Fragment>
+                <Media 
+                    query={`(max-width: ${screenSize.mobile})`}
+                    render={() => (
+                        <Motion
+                                style={{
+                                    detailX: spring(this.state.stockPerformanceOpen ? 0 : 600),
+                                    listX: spring(this.state.stockPerformanceOpen ? -600 : 0)
+                                }}>
+                            {
+                                ({detailX, listX}) => 
+                                    <React.Fragment>
+                                        <Col 
+                                                span={24} 
+                                                style={{
+                                                    padding: '20px',
+                                                    transform: `translate3d(${listX}px, 0, 0)`
+                                                }}
+                                        >
+                                            {this.renderSearchStocksList()}
+                                        </Col>
+                                        <Col 
+                                                span={24} 
+                                                style={{
+                                                    transform: `translate3d(${detailX}px, 0, 0)`,
+                                                    top: '85px',
+                                                    position: 'absolute'
+                                                }}
+                                        >
+                                            {this.renderSelectedStocks()}
+                                            <StockPerformance stock={this.state.selectedStock}/>
+                                        </Col>
+                                    </React.Fragment>
+                            }
+                        </Motion>
+                    )}
+                />
+                <Media 
+                    query={`(min-width: ${screenSize.desktop})`}
+                    render={() => (
+                        <React.Fragment>
+                            <Col span={12} style={{padding: '20px'}}>
+                                {this.renderSearchStocksList()}
+                            </Col>
+                            <Col span={12} style={{padding: '20px'}}>
+                                {this.renderSelectedStocks()}
+                                <StockPerformance stock={this.state.selectedStock}/>
+                            </Col>
+                        </React.Fragment>
+                    )}
+                />
+            </React.Fragment>
+        );
+    }
+    
     renderSelectedStocks = () => {
         const selectedStocks = [...this.state.selectedStocks];
 
@@ -266,7 +351,6 @@ export class SearchStocks extends React.Component {
             <Row>
                 {
                     selectedStocks.map((stock, index) => {
-                        console.log(this.state.selectedStocks.length);
                         return (
                             <Tag 
                                     style={{marginBottom: '5px'}}
@@ -274,7 +358,51 @@ export class SearchStocks extends React.Component {
                                     key={stock}
                                     closable
                                     onClose={() => {
-                                        console.log(stock);
+                                        this.conditionallyAddItemToSelectedArray(stock)
+                                    }}
+                            >
+                                {stock}
+                            </Tag>
+                        );
+                    })
+                }
+            </Row>
+        );
+    }
+
+    renderSelectedStocksMobile = () => {
+        const selectedStocks = [...this.state.selectedStocks];
+        return (
+            <Row 
+                    className='selected-stocks-mobile'
+                    style={{
+                        position: 'fixed',
+                        width: '100%',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+                        padding: '20px',
+                        backgroundColor: '#fff',
+                        height: '50px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        bottom: '20px',
+                        zIndex: '200',
+                        overflow: 'hidden',
+                        overflowX: 'scroll',
+                        borderTop: '1px solid #eaeaea',
+                        borderBottom: '1px solid #eaeaea'
+                    }}
+            >
+                {
+                    selectedStocks.map((stock, index) => {
+                        return (
+                            <Tag 
+                                    style={{
+                                        marginBottom: '5px', 
+                                    }}
+                                    color='blue'
+                                    key={stock}
+                                    closable
+                                    onClose={() => {
                                         this.conditionallyAddItemToSelectedArray(stock)
                                     }}
                             >
@@ -295,34 +423,66 @@ export class SearchStocks extends React.Component {
 
         return (
             <Row>
+                {this.renderSelectedStocksMobile()}
                 <Col span={24} style={{...topHeaderContainer, borderBottom: '1px solid #DFDFDF'}}>
                     <Row type="flex" align="middle" style={{padding: '10px 20px 5px 0px'}}>
                         <Icon 
-                            style={{fontSize: '24px', cursor: 'pointer', color: toggleIconColor, marginRight: '20px'}} 
-                            type="close-circle"
-                            onClick={this.props.toggleBottomSheet}
+                            style={{fontSize: '24px', cursor: 'pointer', color: toggleIconColor, marginRight: '5px'}} 
+                            type={this.state.stockPerformanceOpen ? "left" : "close-circle"}
+                            onClick={
+                                () => this.state.stockPerformanceOpen
+                                ? this.toggleStockPerformanceOpen()
+                                : this.props.toggleBottomSheet()
+                            }
                         />
-                        <h3 
-                                style={{
-                                    fontSize: this.state.selectedStocks.length === 0 ? '24px' : '14px', 
-                                    marginRight: '10px',
-                                    transition: 'all 0.4s ease-in-out'
-                                }}
-                        >
-                            Add Stocks to your Portfolio
-                        </h3>
-                            <span style={{fontSize: '14px', marginRight: '5px'}}> Allowed Universe: </span>
-                            {industry && 
-                                <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
-                            }
+                        <Media 
+                            query='(max-width: 600px)'
+                            render={() => (
+                                <h3 
+                                        style={{
+                                            fontSize: '16px', 
+                                            marginRight: '10px',
+                                        }}
+                                >
+                                    {
+                                        this.state.stockPerformanceOpen ? 'Stock Performance' : 'Add Stocks to your Portfolio'
+                                    }
+                                </h3>
+                            )}
+                        />
+                        <Media 
+                            query='(min-width: 601px)'
+                            render={() => (
+                                <h3 
+                                        style={{
+                                            fontSize: this.state.selectedStocks.length === 0 ? '24px' : '14px', 
+                                            marginRight: '10px',
+                                            transition: 'all 0.4s ease-in-out'
+                                        }}
+                                >
+                                    {
+                                        this.state.stockPerformanceOpen ? 'Stock Performance' : 'Add Stocks to your Portfolio'
+                                    }
+                                </h3>
+                            )}
+                        />
+                        {
+                            !this.state.stockPerformanceOpen &&
+                            <React.Fragment>
+                                <span style={{fontSize: '14px', marginRight: '5px'}}> Allowed Universe: </span>
+                                {industry && 
+                                    <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
+                                }
 
-                            {sector && 
-                                <Tag style={{fontSize: '14px'}}>{sector}</Tag>
-                            }
-                            
-                            {universe && 
-                                <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
-                            }
+                                {sector && 
+                                    <Tag style={{fontSize: '14px'}}>{sector}</Tag>
+                                }
+                                
+                                {universe && 
+                                    <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
+                                }
+                            </React.Fragment>
+                        }
                     </Row>
                     {
                         this.state.selectedStocks.length > 0 &&
@@ -344,17 +504,68 @@ export class SearchStocks extends React.Component {
                         </Button>
                     }
                 </Col>
-
-                <Col span={12} style={{padding: '20px'}}>
-                    {this.renderSearchStocksList()}
-                </Col>
-                <Col span={12} style={{padding: '20px'}}>
-                    {this.renderSelectedStocks()}
-                    <StockPerformance stock={this.state.selectedStock}/>
-                </Col>
+                {this.renderStockListDetails()}
             </Row>
         );
     }
+}
+
+const StockListItemMobile = props => {
+    const {symbol, name, change, changePct, current, onClick, checked = false, onAddIconClick, selected = false} = props;
+    const containerStyle = {
+        borderBottom: '1px solid #eaeaea',
+        color: textColor,
+        // marginTop: '20px',
+        cursor: 'pointer',
+        backgroundColor: '#fff',
+        padding: '10px 0',
+    };
+
+    const detailContainerStyle = {
+        ...verticalBox,
+        alignItems: 'flex-end',
+        paddingRight: '10px'
+    };
+
+    const leftContainerStyle = {
+        ...verticalBox,
+        alignItems: 'flex-start'
+    };
+
+    const changeColor = change < 0 ? metricColor.negative : metricColor.positive;
+    const changeIcon = change < 0 ? 'caret-down' : 'caret-up';
+    const nChangePct = (changePct * 100).toFixed(2);
+
+    return (
+        <Row className='stock-row' style={containerStyle} type="flex" align="middle">
+            <Col span={12} style={leftContainerStyle} onClick={() => onClick({symbol, name})}>
+                <div style={horizontalBox}>
+                    <h3 style={{fontSize: '16px', fontWeight: '700'}}>{symbol}</h3>
+                    <Icon style={{color: changeColor, marginLeft: '10px'}} type={changeIcon} />
+                </div>
+                <div style={horizontalBox}>
+                    <h3 style={{fontSize: '14px', fontWeight: '400'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
+                </div>
+            </Col>
+            <Col span={11} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
+                <div style={horizontalBox}>
+                    <h3 
+                            style={{color: changeColor, fontSize: '14px', marginLeft: '10px', fontWeight: '700'}}
+                    >
+                        {change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(change)}
+                    </h3>
+                    <h3 
+                            style={{color: changeColor, marginLeft: '5px', fontSize: '14px'}}
+                    >
+                        ({change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(nChangePct)} %)
+                    </h3>
+                </div>
+            </Col>
+            <Col span={1} onClick={() => onAddIconClick(symbol)}>
+                <AddIcon checked={checked}/>
+            </Col>
+        </Row>
+    );
 }
 
 const StockListItem = ({symbol, name, change, changePct, close, open, current, onClick, checked = false, onAddIconClick, selected = false}) => {

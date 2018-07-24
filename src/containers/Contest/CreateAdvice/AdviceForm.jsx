@@ -41,7 +41,7 @@ class ContestAdviceFormImpl extends React.Component {
             adviceActive: false,
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: false,
+            bottomSheetOpenStatus: true,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -318,6 +318,7 @@ class ContestAdviceFormImpl extends React.Component {
                 getAdvicePerformance={this.getAdvicePortfolioPerformance}
                 stockSearchFilters={this.state.stockSearchFilters}
                 getValidationErrors={this.getPortfolioValidationErrors}
+                updateIndividualPosition={this.updateIndividualPosition}
             />
         )
     }
@@ -331,6 +332,7 @@ class ContestAdviceFormImpl extends React.Component {
             <SwipeableBottomSheet 
                         fullScreen 
                         style={{zIndex: '20000'}}
+                        overlayStyle={{overflow: 'hidden'}}
                         open={this.state.bottomSheetOpenStatus}
                         onChange={this.toggleSearchStockBottomSheet}
                         swipeableViewsProps={{
@@ -372,6 +374,17 @@ class ContestAdviceFormImpl extends React.Component {
 
             return item;
         })
+    }
+
+    updateIndividualPosition = position => {
+        const positions = [...this.state.positions];
+        const targetPosition = positions.filter(positionItem => positionItem.key === position.key)[0];
+        if (targetPosition !== undefined) {
+            targetPosition.shares = position.shares;
+            targetPosition.effTotal = position.effTotal;
+            targetPosition.totalValue = position.totalValue;
+        }
+        this.setState({positions: this.updateAllWeights(positions)});
     }
 
     updateAllWeights = data => {

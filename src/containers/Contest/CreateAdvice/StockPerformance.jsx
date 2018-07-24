@@ -1,7 +1,9 @@
 import * as React from 'react';
 import _  from 'lodash';
+import Media from 'react-media';
 import windowSize from 'react-window-size';
 import {Row, Col, Spin, Tabs} from 'antd';
+import {Tabs as MobileTabs} from 'antd-mobile';
 import HighStock from '../../../containers/MyChartNew';
 import {AqPerformanceMetrics} from '../../../components/AqPerformanceMetrics';
 import {MetricItem} from '../../../components/MetricItem';
@@ -143,8 +145,75 @@ class StockPerformanceImpl extends React.Component {
         );
     }
 
-    renderPageContent = () => {
+    renderDesktopTabs = () => {
         const TabPane = Tabs.TabPane;
+
+        return (
+            <Tabs defaultActiveKey="1" animated={false}>
+                <TabPane tab="Price Chart" key="1">
+                    <Col span={24} style={{marginTop: '0px'}}>
+                        <HighStock series={[this.state.series]} />
+                    </Col>
+                </TabPane>
+                
+                <TabPane tab="Price Metrics" key="2">
+                    <Col span={24} style={{marginTop: '20px'}}>
+                        {this.renderPriceMetrics()}
+                        {/*this.renderLatestDetail()*/}
+                    </Col>
+                </TabPane>
+
+                <TabPane tab="Rolling Performance" key="3">
+                    <Col span={24} style={{marginTop: '20px', height:'200px'}}>
+                        <AqPerformanceMetrics 
+                            type="new"
+                            rollingPerformance={this.state.rollingPerformance} 
+                            style={{height: '100%', border:'none'}}
+                            noTitle
+                            selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
+                        />
+                        {/*<Col span={12} style={{height: '200px'}}>
+                            {this.renderPriceMetrics()}
+                        </Col>*/}
+                    </Col>
+                </TabPane>
+            </Tabs>
+        );
+    }
+
+    renderMobileTabs = () => {
+        const tabs = [
+            {title: <span>Performance</span>},
+            {title: <span>Price</span>},
+            {title: <span>Rolling</span>}
+        ];
+
+        return (
+            <MobileTabs tabs={tabs}>
+                <Col span={24} style={{marginTop: '10px'}}>
+                    <HighStock series={[this.state.series]} />
+                </Col>
+                <Col span={24} style={{marginTop: '20px'}}>
+                    {this.renderPriceMetrics()}
+                    {/*this.renderLatestDetail()*/}
+                </Col>
+                <Col span={24} style={{marginTop: '20px', height:'200px'}}>
+                    <AqPerformanceMetrics 
+                        type="new"
+                        rollingPerformance={this.state.rollingPerformance} 
+                        style={{height: '100%', border:'none'}}
+                        noTitle
+                        selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
+                    />
+                    {/*<Col span={12} style={{height: '200px'}}>
+                        {this.renderPriceMetrics()}
+                    </Col>*/}
+                </Col>
+            </MobileTabs>
+        );
+    }
+
+    renderPageContent = () => {
         return (
             <Col style={{padding:'0px 30px', alignItems:'center'}}>
                 <Row style={{margin: '10px 0 20px 0'}}>
@@ -155,35 +224,16 @@ class StockPerformanceImpl extends React.Component {
                 {
                     this.state.showErrorScreen 
                     ?   this.showErrorScreen()
-                    :   <Tabs defaultActiveKey="1" animated={false}>
-                            <TabPane tab="Price Chart" key="1">
-                                <Col span={24} style={{marginTop: '0px'}}>
-                                    <HighStock series={[this.state.series]} />
-                                </Col>
-                            </TabPane>
-                            
-                            <TabPane tab="Price Metrics" key="2">
-                                <Col span={24} style={{marginTop: '20px'}}>
-                                    {this.renderPriceMetrics()}
-                                    {/*this.renderLatestDetail()*/}
-                                </Col>
-                            </TabPane>
-
-                            <TabPane tab="Rolling Performance" key="3">
-                                <Col span={24} style={{marginTop: '20px', height:'200px'}}>
-                                    <AqPerformanceMetrics 
-                                        type="new"
-                                        rollingPerformance={this.state.rollingPerformance} 
-                                        style={{height: '100%', border:'none'}}
-                                        noTitle
-                                        selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
-                                    />
-                                    {/*<Col span={12} style={{height: '200px'}}>
-                                        {this.renderPriceMetrics()}
-                                    </Col>*/}
-                                </Col>
-                            </TabPane>
-                        </Tabs>
+                    :   <React.Fragment>
+                            <Media 
+                                query='(max-width: 600px)'
+                                render={() => this.renderMobileTabs()}
+                            />
+                            <Media 
+                                query='(min-width: 601px)'
+                                render={() => this.renderDesktopTabs()}
+                            />
+                        </React.Fragment>
                 }
             </Col>
         );

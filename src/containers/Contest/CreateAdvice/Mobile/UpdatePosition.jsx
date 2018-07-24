@@ -139,7 +139,7 @@ class UpdatePositionMobileImpl extends React.Component {
 
     calculateSharesFromTargetTotal = targetTotal => {
         const lastPrice = _.get(this.props, 'selectedPosition.lastPrice', 0);
-        return targetTotal / lastPrice;
+        return Math.floor(targetTotal / lastPrice);
     }
 
     clearPageDetails = callback => {
@@ -159,7 +159,7 @@ class UpdatePositionMobileImpl extends React.Component {
 
     updatePosition = () => {
         const stockData = {...this.state.stockData};
-        this.props.updatePortfolioPosition(stockData);
+        this.props.updateSelectedPosition(stockData);
         this.clearPageDetails(this.props.toggleBottomSheet);
     }
 
@@ -296,10 +296,10 @@ class UpdatePositionMobileImpl extends React.Component {
                     <Row gutter={24}>
                         <Col span={24}>
                             <MobileButton 
-                                    onClick={this.updateOrAddPosition} 
+                                    onClick={this.updatePosition} 
                                     type="primary" 
                             >
-                                {this.props.updatePosition ? "UPDATE" : "ADD"}
+                                DONE
                             </MobileButton>
                         </Col>
                     </Row>
