@@ -42,7 +42,7 @@ export class AqStockTableMod extends React.Component {
                 width: 200
             },
             {
-                title: 'EFF TOTAL',
+                title: 'TARGET TOTAL',
                 dataIndex: 'effTotal',
                 key: 'effTotal',
                 render: (text, record) => this.renderColumns(

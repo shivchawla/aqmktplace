@@ -754,7 +754,10 @@ class ContestAdviceFormImpl extends React.Component {
             });
         })
         .then(() => {
-            return this.getBenchmarkConfig(benchmark);
+            return Promise.all([
+                this.handleSubmitAdvice(),
+                this.getBenchmarkConfig(benchmark)
+            ])
         })
         .then(() => {
             resolve(true);
