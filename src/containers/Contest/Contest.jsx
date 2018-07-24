@@ -25,6 +25,11 @@ export default class Contest extends React.Component {
                                 path={`${this.props.match.url}`} 
                                 render={props => <ContestHomeMobile {...props}/>} 
                             />
+                            <Route 
+                                exact={true} 
+                                path={`${this.props.match.url}/createadvice/edit`} 
+                                render={props => <CreateAdvice {...props}/>} 
+                            />
                             <Route component={PageNotFound} />
                         </Switch>
                     )}

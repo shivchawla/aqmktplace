@@ -148,7 +148,13 @@ export class Portfolio extends React.Component {
 
     renderPortfolioList = () => {
         return (
-            <PortfolioList />
+            <PortfolioList 
+                onChange={this.props.onChange}
+                positions={this.props.data}
+                isUpdate={this.props.isUpdate}
+                togglePerformanceModal={this.togglePerformanceModal}
+                toggleBottomSheet={this.props.toggleBottomSheet}
+            />
         );
     }
 
@@ -206,18 +212,6 @@ export class Portfolio extends React.Component {
         );
     }
 
-    renderButtonsMobile = () => {
-
-    }
-
-    renderActionButtons = () => {
-        return (
-            <React.Fragment>
-                <Media />
-            </React.Fragment>
-        );
-    }
-
     renderBenchmarkDropdownDesktop = () => {
         return (
             <Col>
@@ -236,7 +230,10 @@ export class Portfolio extends React.Component {
             <Row style={{display: 'block'}} type="flex">
                 {this.renderPerformanceModal()}
                 {this.renderBenchmarkDropdownDesktop()}
-                {this.renderActionButtonsDesktop()}
+                <Media 
+                    query={`(min-width: ${screenSize.desktop})`}
+                    render={() => this.renderActionButtonsDesktop()}
+                />
                 {this.renderPortfolio()}
                 {
                     this.props.data.length === 0 &&

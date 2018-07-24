@@ -1,5 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
+import Media from 'react-media';
 import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
@@ -307,7 +308,7 @@ class ContestAdviceFormImpl extends React.Component {
         );
     }
 
-    renderPortfolioTable = () => {
+    renderPortfolio = () => {
         return (
             <Portfolio 
                 toggleBottomSheet={this.toggleSearchStockBottomSheet}
@@ -655,7 +656,7 @@ class ContestAdviceFormImpl extends React.Component {
         );
     }
 
-    renderPageContent = () => {
+    renderPageContestDesktop = () => {
         return (
             <Row className='aq-page-container'>
                 {this.renderAdviceErrorDialog()}
@@ -681,7 +682,7 @@ class ContestAdviceFormImpl extends React.Component {
                     </Row>
                     <Row style={{margin: '0 20px', marginBottom: '20px'}}>
                         <Col span={24}>
-                            {this.renderPortfolioTable()}
+                            {this.renderPortfolio()}
                         </Col>
                     </Row>
                 </Col>
@@ -718,6 +719,36 @@ class ContestAdviceFormImpl extends React.Component {
             </Row>
         );
     } 
+
+    renderPageContestMobile = () => {
+        return (
+            <Row>
+                {this.renderAdviceErrorDialog()}
+                {this.renderSearchStocksBottomSheet()}
+                {this.renderBenchmarkChangeWarningModal()}
+                <Col span={24} style={{height: '40px', marginTop: '10px'}}>
+                    <h3 style={{fontSize: '16px', marginLeft: '10px'}}>
+                        {this.props.isUpdate ? 'Update Contest Entry' : 'Create Contest Entry'}
+                    </h3>
+                </Col>
+                <Col span={24} style={{...shadowBoxStyle, minHeight: '600px'}}>
+                    <Row style={leftContainerStyle} type="flex" align="start">
+                        <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
+                            {this.renderBenchmarkDropdown()}
+                        </Col>
+                        <Col span={24}>
+                            {this.renderValidationErrors()}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={24}>
+                            {this.renderPortfolio()}
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
+        );
+    }
 
     getBenchmarkConfig = benchmark => new Promise((resolve, reject) => {
         const confgUrl = `${requestUrl}/config?type=contest&benchmark=${benchmark}`;
@@ -869,6 +900,21 @@ class ContestAdviceFormImpl extends React.Component {
         }
 
         return false;
+    }
+
+    renderPageContent = () => {
+        return (
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => this.renderPageContestMobile()}
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => this.renderPageContestDesktop()}
+                />
+            </React.Fragment>
+        );
     }
 
     render() {
