@@ -12,6 +12,7 @@ import logo from "../../assets/logo-advq-new.png";
 import contestFormula from "../../assets/contestFormula2.png";
 import {ContestHomeMeta} from '../../metas';
 import Countdown from 'react-countdown-now';
+import DateHelper from '../../utils/date';
 
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
@@ -28,8 +29,7 @@ class ContestHome extends React.Component {
             selectedContest: {},
             advices: [], // list of advices currently participating in the contest
             userEntries: [], // advices of the user inside contest,
-            selectedUserEntryPage: 0,
-            currentContest: null
+            selectedUserEntryPage: 0
         }
     }
 
@@ -46,9 +46,14 @@ class ContestHome extends React.Component {
                 };
             })
             this.setState({activeContests: contests});
-            if (contests[contests.length - 1] !== undefined) {
-                this.setState({selectedContestId: contests[contests.length - 1].id, selectedContest: contests[contests.length - 1], currentContest: contests[contests.length - 1]});
-                return this.getLatestContestSummary(contests[contests.length - 1].id, false);
+
+            var allActiveContests = contests.filter(item => {return DateHelper.compareDates(item.startDate, new Date()) == 1});
+            //Use the first active contest
+            //IMPROVE: Better sort by dates before using
+            if (allActiveContests[0] !== undefined) {
+                let activeContest = allActiveContests[0];
+                this.setState({selectedContestId: activeContest.id, selectedContest: activeContest});
+                return this.getLatestContestSummary(activeContest.id, false);
             }
 
             return null;
@@ -170,9 +175,9 @@ class ContestHome extends React.Component {
                             Submit Entry
                         </Button>
 
-                        {this.state.currentContest &&
+                        {this.state.selectedContest &&
                             <div style={{marginTop:'30px', fontSize:'16px', color:'#fff', fontWeight:300, textAlign:'center'}}>Submission ends in
-                                <Countdown date = {new Date(this.state.currentContest.startDate)} renderer={this.renderCountdown}/> 
+                                <Countdown date = {new Date(this.state.selectedContest.startDate)} renderer={this.renderCountdown}/> 
                             </div>
                         }
                     </Col>

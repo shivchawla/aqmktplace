@@ -4,7 +4,7 @@ import _ from 'lodash';
 import axios from 'axios';
 import {withRouter} from 'react-router';
 import {Icon, Button, Input, AutoComplete, Spin, Row, Col, Tabs, Radio, Modal, message} from 'antd';
-import {SignupMeta} from '../metas';
+import {StockResearchMeta} from '../metas';
 import {DashboardCard} from '../components/DashboardCard';
 import {AqPageHeader} from '../components/AqPageHeader';
 import {WatchList} from '../components/WatchList';
@@ -807,7 +807,7 @@ class StockResearchImpl extends React.Component {
                     noHeader={this.props.openAsDialog}
                     content={
                         <React.Fragment>
-                            <SignupMeta />
+                            <StockResearchMeta />
                             {this.renderCreateWatchListModal()}
                             {this.renderAimsquantRedirectModal()}
                             {this.renderPageContent()}
