@@ -160,7 +160,6 @@ export class SearchStocks extends React.Component {
             this.setState({selectedStocks});
             this.localStocks = localStocks;
         }
-        console.log(this.localStocks);
     }
 
     addSelectedStocksToPortfolio = () => {
@@ -212,7 +211,6 @@ export class SearchStocks extends React.Component {
         })
         this.localStocks = localStocks;
         this.setState({selectedStocks, stocks});
-        console.log('Local Stocks', this.localStocks);
     }
 
     initializeSelectedStocks = () => {
