@@ -420,16 +420,16 @@ export class Home extends React.Component {
             <Col span={24}>
                 <Button 
                         className="signup-button"
-                        onClick={() => this.props.history.push('/advice')}
+                        onClick={() => this.props.history.push('/contest')}
                 >
-                    Find Investment Advice
+                    Enter Contest
                 </Button>
                 <Button 
                         style={{marginLeft: '20px'}}
                         className="action-buttons"
-                        onClick={() => this.props.history.push('/contest')}
+                        onClick={() => this.props.history.push('/advice')}
                 >
-                    Enter Contest
+                    Find Investment Advice
                 </Button>
             </Col>
         );
@@ -445,15 +445,15 @@ export class Home extends React.Component {
                             <Button 
                                     className="signup-button-mobile"
                                     style={{marginTop: 0}}
-                                    onClick={() => this.props.history.push('/advice')}
-                            >
-                                Find Investment Advice
-                            </Button>
-                            <Button 
-                                    className="create-advice-button-mobile"
                                     onClick={() => this.props.history.push('/contest')}
                             >
                                 Enter Contest
+                            </Button>
+                            <Button 
+                                    className="create-advice-button-mobile"
+                                    onClick={() => this.props.history.push('/advice')}
+                            >
+                                Find Investment Advice
                             </Button>
                         </Col>
                     )}
@@ -474,17 +474,17 @@ export class Home extends React.Component {
                             <Button 
                                     className="signup-button-mobile"
                                     style={{marginTop: 0}}
-                                    onClick={() => this.props.history.push('/advice')}
+                                    onClick={() => this.props.history.push('/contest')}
                             >
-                                Find Investment Advice
+                                Enter Contest
                             </Button>
                             <div style={{width: '40px'}}></div>
                             <Button 
                                     className="create-advice-button-mobile"
                                     style={{marginTop: 0}}
-                                    onClick={() => this.props.history.push('/contest')}
+                                    onClick={() => this.props.history.push('/advice')}
                             >
-                                Create Investment Advice
+                                Find Investment Advice
                             </Button>
                         </Col>
                     )}

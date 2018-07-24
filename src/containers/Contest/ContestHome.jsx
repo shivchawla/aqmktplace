@@ -165,7 +165,7 @@ class ContestHome extends React.Component {
                         <Button 
                                 icon="rocket" 
                                 style={buttonStyle}
-                                onClick={() => this.props.history.push('/contest/createadvice')}
+                                onClick={() => this.props.history.push('/contest/createentry')}
                         >
                             Submit Entry
                         </Button>

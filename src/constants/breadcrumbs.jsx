@@ -1,6 +1,6 @@
 export const investorDashboard = [];
 export const CreateAdviceCrumb = [
-    {name: 'Dashboard', url: '/dashboard/advisor/myAdvices'}
+    {name: 'Contest', url: '/contest'}
 ];
 
 export const CreatePortfolioCrumb = [

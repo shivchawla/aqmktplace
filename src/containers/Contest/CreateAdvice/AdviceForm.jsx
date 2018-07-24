@@ -8,10 +8,12 @@ import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
+import {AqPageHeader} from '../../../components/AqPageHeader';
 import AppLayout from '../../../containers/AppLayout';
 import {benchmarks} from '../../../constants/benchmarks';
 import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox} from '../../../constants';
-import {fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
+import {CreateAdviceCrumb} from '../../../constants/breadcrumbs';
+import {getBreadCrumbArray, fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
 import { MetricItem } from '../../../components/MetricItem';
 
 const {Option} = Select;
@@ -54,7 +56,8 @@ class ContestAdviceFormImpl extends React.Component {
             loading: false,
             contestId: null,
             noActiveContests: false,
-            notPresentInLatestContest: false
+            notPresentInLatestContest: false,
+            name: ''
         };
     }
 
@@ -656,11 +659,21 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     renderPageContent = () => {
+        const breadCrumbs = this.props.isUpdate
+                ? getBreadCrumbArray(CreateAdviceCrumb, [
+                    {name: this.state.name, url: `/contest/entry/${this.props.adviceId}`},
+                    {name: 'Update Entry'}
+                ])
+                : getBreadCrumbArray(CreateAdviceCrumb, [
+                    {name: 'Create Entry'}
+                ]);
+
         return (
             <Row className='aq-page-container'>
                 {this.renderAdviceErrorDialog()}
                 {this.renderSearchStocksBottomSheet()}
                 {this.renderBenchmarkChangeWarningModal()}
+                <AqPageHeader title="Create Advice" breadCrumbs={breadCrumbs} />
                 <Col span={24} style={{height: '40px', marginTop: '10px'}}>
                     <h3 style={{fontSize: '22px'}}>
                         {this.props.isUpdate ? 'Update Contest Entry' : 'Create Contest Entry'}
@@ -747,8 +760,10 @@ class ContestAdviceFormImpl extends React.Component {
         ])
         .then(([adviceSummary, advicePortfolio]) => {
             benchmark = _.get(adviceSummary, 'portfolio.benchmark.ticker');
+            const name = _.get(adviceSummary, 'name', '');
             const positions = _.get(advicePortfolio, 'detail.positions', []);
             this.setState({
+                name,
                 benchmark,
                 positions: this.processPositions(positions)
             });
@@ -871,7 +886,7 @@ class ContestAdviceFormImpl extends React.Component {
         return false;
     }
 
-    render() {
+    render() {                
         return (
             <AppLayout 
                 content={

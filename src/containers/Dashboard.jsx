@@ -1,5 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
+import windowSize from 'react-window-size';
 import Loadable from 'react-loadable';
 import {Route} from 'react-router-dom';
 import {Layout, Menu, Icon, Button} from 'antd';
@@ -18,13 +19,13 @@ const AdvisorDashboard = Loadable({
 const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
 
-export default class Dashboard extends React.Component {
+class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             view: {
-                page: 'investor',
-                section: 'performanceSummary'
+                page: 'advisor',
+                section: 'myAdvices'
             }
         }
     }
@@ -50,7 +51,7 @@ export default class Dashboard extends React.Component {
     getSelectedSection = () => {
         const crumbs = _.split(this.props.location.pathname, '/');
         if (crumbs[crumbs.length - 1] === 'dashboard' || crumbs[crumbs.length - 1].length < 1) {
-            return 'performanceSummary';
+            return 'myAdvices';
         }
         return crumbs[crumbs.length - 1];
     }
@@ -110,7 +111,7 @@ export default class Dashboard extends React.Component {
              <AppLayout
                 noFooter={true} 
                 content={
-                    <Layout style={{height: '100%'}}>
+                    <Layout style={{height: this.props.windowHeight}}>
                         <Sider 
                                 width={250} 
                                 style={{ background: '#fff'}}
@@ -119,9 +120,14 @@ export default class Dashboard extends React.Component {
                             <Menu
                                     mode="inline"
                                     defaultSelectedKeys={[this.getSelectedSection()]}
-                                    defaultOpenKeys={['investor', 'advisor']}
+                                    defaultOpenKeys={['advisor']}
                                     onClick={this.handleMenuClick}
                             >
+                                <SubMenu key="advisor" title={advisorTitle}>
+                                    <Menu.Item key="myAdvices">{this.getMenuItem('My Entries')}</Menu.Item>
+                                    <Menu.Item key="advicePerformance">{this.getMenuItem('Entry Performance')}</Menu.Item>
+                                    {/* <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item> */}
+                                </SubMenu>
                                 <SubMenu 
                                         key="investor" 
                                         title={investorTitle}
@@ -130,11 +136,6 @@ export default class Dashboard extends React.Component {
                                     <Menu.Item key="portfolioSummary">{this.getMenuItem('Portfolio Summary')}</Menu.Item>
                                     <Menu.Item key="createdPortfolios">{this.getMenuItem('Created Portfolios')}</Menu.Item>
                                     <Menu.Item key="subscribedAdvices">{this.getMenuItem('Subscribed Advices')}</Menu.Item>
-                                </SubMenu>
-                                <SubMenu key="advisor" title={advisorTitle}>
-                                    <Menu.Item key="myAdvices">{this.getMenuItem('My Entries')}</Menu.Item>
-                                    <Menu.Item key="advicePerformance">{this.getMenuItem('Entry Performance')}</Menu.Item>
-                                    {/* <Menu.Item key="metrics">{this.getMenuItem('Metrics')}</Menu.Item> */}
                                 </SubMenu>
                                 <Menu.Item key="createPortfolio">{createPortfolioTitle}</Menu.Item>
                                 <SubMenu key="account" title={accountTitle}>
@@ -146,17 +147,17 @@ export default class Dashboard extends React.Component {
                         <Layout style={{paddingTop: '10px', paddingLeft: '10px'}}>
                             <Content style={{overflow: 'hidden', overflowY: 'scroll'}}>
                                 <Route 
+                                        path={`${this.props.match.url}`} 
                                         exact={true}
-                                        path={`${this.props.match.url}/advisor/:section`} 
                                         render={
                                             props => <AdvisorDashboard {...props} />
                                         }
                                 />
                                 <Route 
-                                        path={`${this.props.match.url}`} 
                                         exact={true}
+                                        path={`${this.props.match.url}/advisor/:section`} 
                                         render={
-                                            props => <InvestorDashboard {...props} />
+                                            props => <AdvisorDashboard {...props} />
                                         }
                                 />
                                 <Route 
@@ -174,6 +175,8 @@ export default class Dashboard extends React.Component {
         );
     }
 }
+
+export default windowSize(Dashboard);
 
 const subMenuLabelStyle = {
     fontWeight: 700

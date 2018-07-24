@@ -56,8 +56,8 @@ class Login extends Component {
                 const redirectUrl = Utils.getRedirectAfterLoginUrl();
                 if (redirectUrl){
                   this.props.history.push(redirectUrl);
-                }else{
-                  this.props.history.push('/advice');
+                } else{
+                  this.props.history.push('/contest');
                 }
               }else{
                 this.updateState({
@@ -87,7 +87,7 @@ class Login extends Component {
   componentDidMount(){
     this._mounted = true;
   	if (Utils.isLoggedIn()){
-      this.props.history.push('/advice');
+      this.props.history.push('/contest');
     }else{
       // if (this.props.pageChange){
       //   this.props.pageChange('login');

@@ -64,7 +64,7 @@ class HowToCreateAdvice extends React.Component {
                     <Button 
                             type="primary" 
                             style={{fontWeight: 300, width: '200px', fontSize: '18px'}}
-                            onClick={() => this.props.history.push('/contest/createadvice/edit')}
+                            onClick={() => this.props.history.push('/contest/createentry/edit')}
                     >
                         CREATE
                     </Button>

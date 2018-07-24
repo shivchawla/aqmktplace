@@ -185,7 +185,6 @@ class AdvisorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
             return error;
         })
         .finally(() => {
@@ -471,7 +470,6 @@ class AdvisorDashboard extends React.Component {
 
     getAdvicePerformance = advice => {
         const newTickers = [];
-        console.log(advice);
         const url = `${requestUrl}/performance/advice/${advice._id}`;
         this.setState({advicePerformanceLoading: true, selectedAdviceId: advice._id});
         Promise.all([
@@ -566,7 +564,7 @@ class AdvisorDashboard extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            Promise.all([this.getUserDashboardData()])
+            this.getUserDashboardData();
         }
     }
 
@@ -787,7 +785,7 @@ class AdvisorDashboard extends React.Component {
                                 <h1>You have not created any entries yet. Get started by creating one</h1>
                                 <Button 
                                         type="primary" 
-                                        onClick={() => this.props.history.push('/contest/createadvice')}
+                                        onClick={() => this.props.history.push('/contest/createentry')}
                                         style={{marginTop: '20px'}}
                                 >
                                     Create Entry
