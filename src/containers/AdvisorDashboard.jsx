@@ -480,14 +480,14 @@ class AdvisorDashboard extends React.Component {
             const simulatedPerformance = _.get(adviceResponse.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             const currentPerformance = _.get(adviceResponse.data, 'current.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
-                name: `Advice - Simulated`,
+                name: `Entry - Simulated`,
                 data: simulatedPerformance,
                 color: simulatedPerformanceColor,
                 noLoadData: true,
             });
 
             newTickers.push({
-                name: `Advice - Current`,
+                name: `Entry - Current`,
                 data: currentPerformance,
                 color: currentPerformanceColor,
                 noLoadData: true,
@@ -761,7 +761,7 @@ class AdvisorDashboard extends React.Component {
 
     renderPageContent = () => {
         const {radioValue} = this.state;
-        const breadCrumbArray = getBreadCrumbArray([{name: 'Advisor Dashboard'}]);
+        const breadCrumbArray = getBreadCrumbArray([{name: 'Contest Dashboard'}]);
         const button = !this.state.showEmptyScreen ? {route: '/advisordashboard/createadvice', title: 'Create Advice'} : null;
         if (this.state.notAuthorized) {
             return <ForbiddenAccess />
@@ -770,7 +770,7 @@ class AdvisorDashboard extends React.Component {
                 <Row className='aq-page-container'>
                     <AqPageHeader 
                             backgroundColor='transparent'
-                            title="Advisor Dashboard" 
+                            title="Contest Dashboard" 
                             breadCrumbs = {breadCrumbArray} 
                     >
                         {
