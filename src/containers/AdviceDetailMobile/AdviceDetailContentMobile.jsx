@@ -139,8 +139,8 @@ class AdviceDetailContentImpl extends React.Component {
             var labels =  {
                 annualReturn: {label: "Excess Return", index: 0},
                 volatility: {label: "Tracking Error", index: 1},
-                maxLoss: {label: 'Maximum Loss', index: 2},
-                sharpe: {label: 'Information Ratio', index: 3},
+                maxLoss: {label: 'Max Loss', index: 2},
+                sharpe: {label: 'Inf. Ratio', index: 3},
                 calmar: {label: 'Calmar Ratio', index: 4},
                 concentration: {label: 'Concentration', index: 5}
             };
@@ -472,7 +472,7 @@ class AdviceDetailContentImpl extends React.Component {
                             <SegmentedControl 
                                 onValueChange={this.props.handlePerformanceToggleChange}
                                 values={['Realized', 'Simulated']} 
-                                selectedIndex={1}
+                                selectedIndex={this.props.performanceType === 'Simulated' ? 1 : 0}
                             />
                         }
                     </Col>

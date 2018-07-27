@@ -727,6 +727,7 @@ export const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle,
                                 style={{width: '50%'}}
                                 values={['Active', 'Historical']}
                                 onChange={onPerformanceToggle}
+                                selectedIndex={view === true ? 0 : 1}
                             />
                         }
                     />
