@@ -46,7 +46,7 @@ class ContestAdviceFormImpl extends React.Component {
             adviceActive: false,
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: true,
+            bottomSheetOpenStatus: false,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
