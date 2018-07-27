@@ -170,20 +170,47 @@ export class SearchStocks extends React.Component {
      */
     processStockList = (stocks = []) => {
         const selectedStocks = [...this.state.selectedStocks];
-
         return stocks.map(stock => {
             const symbol = _.get(stock, 'security.ticker', null);
+            const close = _.get(stock, 'latestDetailRT.close', 0) !== 0 
+                ?  _.get(stock, 'latestDetailRT.close', 0)
+                :  _.get(stock, 'latestDetail.values.Close', 0);
+
+            const change = _.get(stock, 'latestDetailRT.change', 0) !== 0 
+                    ?  _.get(stock, 'latestDetailRT.change', 0)
+                    :  _.get(stock, 'latestDetail.values.Change', 0);
+
+            const changePct = _.get(stock, 'latestDetailRT.changePct', 0) !== 0 
+                    ?  _.get(stock, 'latestDetailRT.changePct', 0)
+                    :  _.get(stock, 'latestDetail.values.ChangePct', 0);
+
+            const high = _.get(stock, 'latestDetailRT.high', 0) !== 0 
+                    ?  _.get(stock, 'latestDetailRT.high', 0)
+                    :  _.get(stock, 'latestDetail.values.High', 0);
+
+            const low = _.get(stock, 'latestDetailRT.low', 0) !== 0 
+                    ?  _.get(stock, 'latestDetailRT.low', 0)
+                    :  _.get(stock, 'latestDetail.values.Low', 0);
+            
+            const open = _.get(stock, 'latestDetailRT.open', 0) !== 0 
+                    ?  _.get(stock, 'latestDetailRT.open', 0)
+                    :  _.get(stock, 'latestDetail.values.Open', 0);
+
+            const current = _.get(stock, 'latestDetailRT.current', 0) !== 0 
+                    ?  _.get(stock, 'latestDetailRT.current', 0)
+                    :  _.get(stock, 'latestDetail.values.Close', 0);
+
 
             return {
                 symbol,
                 name: _.get(stock, 'security.detail.Nse_Name', null),
-                change: _.get(stock, 'latestDetailRT.change', null),
-                changePct: _.get(stock, 'latestDetailRT.changePct', null),
-                close: _.get(stock, 'latestDetailRT.close', null),
-                high: _.get(stock, 'latestDetailRT.high', null),
-                low: _.get(stock, 'latestDetailRT.low', null),
-                open: _.get(stock, 'latestDetailRT.open', null),
-                current: _.get(stock, 'latestDetailRT.current', null),
+                change,
+                changePct,
+                close,
+                high,
+                low,
+                open,
+                current,
                 checked: selectedStocks.indexOf(symbol) >= 0,
                 sector: _.get(stock, 'security.detail.Sector', null)
             };
