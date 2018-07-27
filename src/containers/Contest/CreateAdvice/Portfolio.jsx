@@ -1,6 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import Media from 'react-media';
+import {Motion, spring} from 'react-motion';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Row, Col, Button, Modal, Spin, Select, Tooltip, Badge, Icon} from 'antd';
 import {SegmentedControl} from 'antd-mobile';
@@ -142,66 +143,76 @@ export class Portfolio extends React.Component {
 
     renderAdvicePerformanceBottomSheet = () => {
         return (
-            <SwipeableBottomSheet 
-                    id="performance-bottom-sheet"
-                    fullScreen 
-                    style={{zIndex: '10'}}
-                    open={this.state.performanceBottomSheetOpen}
-                    onChange={this.togglePerformanceBottomSheet}
-            >
-                <Spin spinning={this.state.loadingPortfolioPerformance}>
-                    <Row type="flex" align="middle">
-                        <Col span={24}>
-                            <Row>
-                                <Col 
-                                        style={{
-                                            ...horizontalBox, 
-                                            justifyContent: 'center', 
-                                            position: 'relative',
-                                            marginBottom: '20px',
-                                            backgroundColor: '#fff',
-                                            height: '64px',
-                                            borderBottom: '1px solid #eaeaea'
-                                        }}
-                                >
-                                    <Icon 
-                                        type="close" 
-                                        style={{
-                                            fontSize: '22px', 
-                                            position: 'absolute', 
-                                            left: 0, 
-                                            zIndex: '20', 
-                                            color: primaryColor,
-                                            marginLeft: '10px'
-                                        }}
-                                        onClick={this.togglePerformanceBottomSheet}
-                                    />
-
-                                    <SegmentedControl 
-                                        onValueChange={this.handlePerformanceBottomSheetChange} 
-                                        values={['Performance', 'Composition']} 
-                                        selectedIndex={this.state.performanceSheetView === 'Performance' ? 0 : 1}
-                                    />
-
-                                </Col>
-                                <Col span={24} style={{marginTop: '5px'}}>
-                                    {this.renderMetrics()}
-                                </Col>
-                                {
-                                    this.state.performanceSheetView === 'Performance'
-                                    ?   <Col span={24} style={{padding: '0 20px'}}>
-                                            <MyChartNew 
-                                                    series={this.state.highStockSeries} 
-                                                    chartId="advice-preview-performance-chart-bottom-sheet"
+            <Motion style={{x: spring(this.state.performanceBottomSheetOpen ? -145 : global.screen.height)}}>
+            {
+                ({x}) => (
+                    <div
+                        style={{
+                            transform: `translate3d(0, ${x}px, 0)`,
+                            position: 'fixed',
+                            backgroundColor: '#fff',
+                            zIndex: '10000',
+                            height: global.screen.height
+                        }}
+                    >
+                        <Spin spinning={this.state.loadingPortfolioPerformance}>
+                            <Row 
+                                    type="flex" 
+                                    align="middle" 
+                            >
+                                <Col span={24}>
+                                    <Row>
+                                        <Col 
+                                                style={{
+                                                    ...horizontalBox, 
+                                                    justifyContent: 'center', 
+                                                    position: 'relative',
+                                                    marginBottom: '20px',
+                                                    backgroundColor: '#fff',
+                                                    height: '64px',
+                                                    borderBottom: '1px solid #eaeaea'
+                                                }}
+                                        >
+                                            <Icon 
+                                                type="close" 
+                                                style={{
+                                                    fontSize: '22px', 
+                                                    position: 'absolute', 
+                                                    left: 0, 
+                                                    zIndex: '20', 
+                                                    color: primaryColor,
+                                                    marginLeft: '10px'
+                                                }}
+                                                onClick={this.togglePerformanceBottomSheet}
                                             />
+
+                                            <SegmentedControl 
+                                                onValueChange={this.handlePerformanceBottomSheetChange} 
+                                                values={['Performance', 'Composition']} 
+                                                selectedIndex={this.state.performanceSheetView === 'Performance' ? 0 : 1}
+                                            />
+
                                         </Col>
-                                    :   this.props.renderPortfolioPieChart("chart-container-mobile")
-                                }
+                                        <Col span={24} style={{marginTop: '5px'}}>
+                                            {this.renderMetrics()}
+                                        </Col>
+                                        {
+                                            this.state.performanceSheetView === 'Performance'
+                                            ?   <Col span={24} style={{padding: '0 20px'}}>
+                                                    <MyChartNew 
+                                                            series={this.state.highStockSeries} 
+                                                            chartId="advice-preview-performance-chart-bottom-sheet"
+                                                    />
+                                                </Col>
+                                            :   this.props.renderPortfolioPieChart("chart-container-mobile")
+                                        }
+                                    </Row>
+                                </Col>
                             </Row>
-                        </Col>
-                    </Row>
-                </Spin>
-            </SwipeableBottomSheet>
+                        </Spin>
+                    </div>
+                )}
+            </Motion>
         );
     }
 

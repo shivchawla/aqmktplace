@@ -70,7 +70,7 @@ export default class SearchStockHeader extends React.Component {
                                     type="primary" 
                                     loading={this.props.portfolioLoading}
                             >
-                                <Icon type="shopping-cart" style={{fontSize: '18px'}}/>
+                                <Icon type="form" style={{fontSize: '18px'}}/>
                                 <Badge 
                                     style={{
                                         backgroundColor: '#fff', 
@@ -80,35 +80,6 @@ export default class SearchStockHeader extends React.Component {
                                     count={this.props.selectedStocks.length}
                                 />
                             </Button>
-                        }
-                    </Col>
-                    <Col 
-                            span={24} 
-                            style={{
-                                ...horizontalBox, 
-                                alignItems: 'center',
-                                marginLeft: '10px',
-                                marginTop: '5px',
-                                marginBottom: '10px',
-                                justifyContent: 'center'
-                            }}
-                    >
-                        {
-                            !this.props.stockPerformanceOpen &&
-                            <React.Fragment>
-                                <span style={{fontSize: '14px', marginRight: '5px'}}>Universe:</span>
-                                {industry && 
-                                    <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
-                                }
-
-                                {sector && 
-                                    <Tag style={{fontSize: '14px'}}>{sector}</Tag>
-                                }
-                                
-                                {universe && 
-                                    <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
-                                }
-                            </React.Fragment>
                         }
                     </Col>
                     {this.props.renderSelectedStocks()}

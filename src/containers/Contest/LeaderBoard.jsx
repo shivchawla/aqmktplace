@@ -6,7 +6,7 @@ import {SegmentedControl} from  'antd-mobile';
 import AppLayout from '../AppLayout';
 import LeaderboardMobile from './LeaderBoardMobile';
 import {primaryColor, verticalBox, horizontalBox} from '../../constants';
-import {fetchAjax} from '../../utils';
+import {fetchAjax, Utils} from '../../utils';
 import './css/leaderBoard.css';
 import {formatMetric} from './utils';
 import {metricDefs} from './constants';
@@ -73,7 +73,7 @@ export default class LeaderBoard extends React.Component {
             selectedPage: 0,
             limit: 10,
             activeContests: [],
-            selectedContestId: null,
+            selectedContestId: Utils.getFromLocalStorage('contestId') || null,
             selectedContest: {},
             showActivePerformance: true,
             maxAdviceCount: 0
@@ -227,7 +227,9 @@ export default class LeaderBoard extends React.Component {
     getActiveContests = () => {
         const contestsUrl = `${requestUrl}/contest`;
         // Check if contestId is passed from the url
-        const contestId = _.get(this.props, 'match.params.id', null);
+        const contestId = this.state.selectedContestId !== (null || undefined) 
+                ? this.state.selectedContestId 
+                : _.get(this.props, 'match.params.id', null);
         this.setState({loading: true});
         fetchAjax(contestsUrl, this.props.history, this.props.match.url)
         .then(response => {
@@ -240,7 +242,8 @@ export default class LeaderBoard extends React.Component {
             this.setState({activeContests: contests});
             if (contestId !== null) {
                 const selectedContestIndex = _.findIndex(contests, contest => contest.id === contestId);
-                this.setState({selectedContestId: contestId, selectedContest: contests[selectedContestIndex]});
+                this.setState({
+                    selectedContestId: contestId, selectedContest: contests[selectedContestIndex]});
 
                 return this.getLatestContestSummary(contestId, false);
             } else if(contests[contests.length - 1] !== undefined) {
@@ -407,6 +410,7 @@ export default class LeaderBoard extends React.Component {
     }
 
     handleContestChange = contestId => {
+        Utils.localStorageSave('contestId', contestId);
         this.setState({
             selectedContestId: contestId, 
             selectedContest: this.state.activeContests.filter(contest => contest.id === contestId)[0],

@@ -114,7 +114,7 @@ class HowToCreateAdvice extends React.Component {
                     query="(max-width: 600px)"
                     render={() => (
                         <AqMobileLayout 
-                                customHeader={<h3 style={{fontSize: '14px'}}>CREATE ENTRY STEPS</h3>}
+                                customHeader={<h3 style={{fontSize: '16px'}}>HOW TO CREATE ENTRY</h3>}
                                 previousPageUrl='/contest/createentry'
                         >
                             {this.renderPageContentMobile()}

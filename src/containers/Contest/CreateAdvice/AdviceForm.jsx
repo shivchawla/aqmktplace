@@ -1109,7 +1109,7 @@ class ContestAdviceFormImpl extends React.Component {
                                     loading={this.state.loading}
                                     innerPage={true} 
                                     customHeader={
-                                        <h3 style={{fontSize: '14px', marginLeft: '10px'}}>
+                                        <h3 style={{fontSize: '16px', marginLeft: '10px'}}>
                                             {
                                                 this.props.isUpdate 
                                                 ? 'UPDATE CONTEST ENTRY' 

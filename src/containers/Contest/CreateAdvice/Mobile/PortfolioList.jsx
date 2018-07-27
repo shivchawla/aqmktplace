@@ -1,5 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
+import {Motion, spring} from 'react-motion';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {withRouter} from 'react-router';
 import {Row, Col, Modal, Spin, Select, Icon, Checkbox} from 'antd';
@@ -149,21 +150,30 @@ class PortfolioListImpl extends React.Component {
 
     renderUpdatePositionBottomSheet = () => {
         return (
-            <SwipeableBottomSheet 
-                    fullScreen 
-                    style={{zIndex: '10'}}
-                    open={this.state.addPositionBottomSheetOpen}
-                    onChange={this.toggleBottomSheet}
-            >
-                <UpdatePosition
-                    addPosition={this.addPosition} 
-                    updatePortfolioPosition={this.props.updatePosition}
-                    updatePosition={this.state.updatePosition}
-                    selectedPosition={this.state.selectedPosition}
-                    toggleBottomSheet={this.toggleBottomSheet}
-                    updateSelectedPosition={this.props.updateSelectedPosition}
-                />
-            </SwipeableBottomSheet>
+            <Motion style={{x: spring(this.state.addPositionBottomSheetOpen ? -145 : global.screen.height)}}>
+                {
+                    ({x}) => (
+                        <div
+                                style={{
+                                    transform: `translate3d(0, ${x}px, 0)`,
+                                    position: 'fixed',
+                                    backgroundColor: '#fff',
+                                    zIndex: '10000',
+                                    height: global.screen.height
+                                }}
+                        >
+                            <UpdatePosition
+                                addPosition={this.addPosition} 
+                                updatePortfolioPosition={this.props.updatePosition}
+                                updatePosition={this.state.updatePosition}
+                                selectedPosition={this.state.selectedPosition}
+                                toggleBottomSheet={this.toggleBottomSheet}
+                                updateSelectedPosition={this.props.updateSelectedPosition}
+                            />
+                        </div>
+                    )
+                }
+            </Motion>
         );
     }
 
@@ -256,6 +266,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     // marginTop: '20px',
                     borderRadius: '2px'
                 }}
+                onClick={() => onClick(position)}
         >
             <Col span={24}>
                 {
@@ -275,18 +286,18 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     <Col span={20}>
                         <h3 style={{color: primaryColor, fontSize: '16px'}}>{symbol}</h3>
                     </Col>
-                    <Col span={2}>
+                    {/* <Col span={2}>
                         <Icon 
                                 onClick={() => onClick(position)}
                                 style={{fontSize: '20px'}} 
                                 type="edit" 
                         />
-                    </Col>
+                    </Col> */}
                 </Row>
             </Col>
             <Col span={24}>
                 <Row type="flex" align="middle" justify="space-between" style={{padding: '0 20px'}}>
-                    <Col span={8}>
+                    <Col span={6}>
                         <MetricItem 
                             label="Num. of Shares"
                             value={shares}
@@ -295,7 +306,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                             noNumeric={true}
                         />
                     </Col>
-                    <Col span={8}>
+                    <Col span={6}>
                         <MetricItem 
                             label="Total"
                             value={Number(totalValue.toFixed(2))}
@@ -304,7 +315,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                             money
                         />
                     </Col>
-                    <Col span={8}>
+                    {/* <Col span={8}>
                         <MetricItem 
                             label="Target Total"
                             value={effTotal}
@@ -312,8 +323,8 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                             valueStyle={metricValueStyle}
                             money
                         />  
-                    </Col>
-                    <Col span={8}>
+                    </Col> */}
+                    <Col span={6}>
                         <MetricItem 
                             label="Weight"
                             value={`${weight} %`}

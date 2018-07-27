@@ -75,9 +75,8 @@ export class SearchStocks extends React.Component {
                 {
                     !this.state.loadingStocks 
                     && this.state.stocks.length >= 8 
-                    && this.renderPaginationMobile()
+                    && this.renderPaginationMobile(true)
                 }
-                <div style={{width: '100%', height: '80px'}}></div>
             </Row>
         );
     }
@@ -364,7 +363,12 @@ export class SearchStocks extends React.Component {
         );
     }
 
-    renderPaginationMobile = () => {
+    renderPaginationMobile = (hideBenchmarkConfig = false) => {
+        const universe = _.get(this.props, 'filters.universe', null);
+        const sector = _.get(this.props, 'filters.sector', null);
+        const industry = _.get(this.props, 'filters.industry', null);
+        const toggleIconColor = this.state.selectedStocks.length === 0 ? textColor : primaryColor;
+
         return (
             <Col 
                     span={24} 
@@ -375,22 +379,58 @@ export class SearchStocks extends React.Component {
                         padding: '0 15px'
                     }}
             >
-                <Button 
-                    onClick={() => this.handlePagination('previous')} 
-                    disabled={this.state.selectedPage === 0}
-                    shape="circle"
-                    icon="left"
-                />
-                {
-                    this.state.loadingStocks &&
-                    <Icon type="loading" style={{fontSize: '20px'}}/>
-                }
-                <Button
-                    onClick={() => this.handlePagination('next')}  
-                    disabled={this.state.stocks.length % 10 !== 0}
-                    shape="circle"
-                    icon="right"
-                />
+                <Row style={{width: '100%'}}>
+                    <Col span={2}>
+                        <Button 
+                            onClick={() => this.handlePagination('previous')} 
+                            disabled={this.state.selectedPage === 0}
+                            shape="circle"
+                            icon="left"
+                        />
+                    </Col>
+                    <Col span={20} style={{padding: '0 5px'}}>
+                        {
+                            this.state.loadingStocks 
+                            ?   <Icon type="loading" style={{fontSize: '20px'}}/>
+                            :   !hideBenchmarkConfig &&
+                                <div 
+                                        style={{
+                                            ...horizontalBox, 
+                                            alignItems: 'center',
+                                            marginLeft: '10px',
+                                            marginTop: '5px',
+                                            marginBottom: '10px',
+                                            justifyContent: 'center'
+                                        }}
+                                >
+                                    {
+                                        !this.props.stockPerformanceOpen &&
+                                        <React.Fragment>
+                                            {industry && 
+                                                <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
+                                            }
+
+                                            {sector && 
+                                                <Tag style={{fontSize: '14px'}}>{sector}</Tag>
+                                            }
+                                            
+                                            {universe && 
+                                                <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
+                                            }
+                                        </React.Fragment>
+                                    }
+                                </div>
+                        }
+                    </Col>
+                    <Col span={2}>
+                        <Button
+                            onClick={() => this.handlePagination('next')}  
+                            disabled={this.state.stocks.length % 10 !== 0}
+                            shape="circle"
+                            icon="right"
+                        />
+                    </Col>
+                </Row>
             </Col>
         );
     }
@@ -518,13 +558,12 @@ export class SearchStocks extends React.Component {
                     {
                         selectedStocks.map((stock, index) => {
                             return (
-                                <Tag 
+                                <TagMobile 
                                         selected
                                         style={{
-                                            marginBottom: '5px',
-                                            // marginRight: '15px' ,
-                                            // border: `1px solid ${primaryColor}`,
-                                            // color: primaryColor
+                                            marginRight: '15px' ,
+                                            border: `1px solid #5ce5ea`,
+                                            color: '#5ce5ea'
                                         }}
                                         color='blue'
                                         key={stock}
@@ -534,7 +573,7 @@ export class SearchStocks extends React.Component {
                                         }}
                                 >
                                     {stock}
-                                </Tag>
+                                </TagMobile>
                             );
                         })
                     }
@@ -544,11 +583,6 @@ export class SearchStocks extends React.Component {
     }
 
     render() { 
-        const universe = _.get(this.props, 'filters.universe', null);
-        const sector = _.get(this.props, 'filters.sector', null);
-        const industry = _.get(this.props, 'filters.industry', null);
-        const toggleIconColor = this.state.selectedStocks.length === 0 ? textColor : primaryColor;
-
         return (
             <Row 
                     style={{
@@ -628,13 +662,16 @@ const StockListItemMobile = props => {
                     <Icon style={{color: changeColor, marginLeft: '10px'}} type={changeIcon} />
                 </div>
                 <div style={horizontalBox}>
-                    <h3 style={{fontSize: '14px', fontWeight: '400'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
+                    <h3 style={{fontSize: '14px', fontWeight: '400'}}>
+                        {name}
+                    </h3>
                 </div>
             </Col>
             <Col span={11} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
+                <h3 style={{fontSize: '15px', fontWeight: '700'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
                 <div style={horizontalBox}>
                     <h3 
-                            style={{color: changeColor, fontSize: '14px', marginLeft: '10px', fontWeight: '700'}}
+                            style={{color: changeColor, fontSize: '14px', marginLeft: '10px', fontWeight: '400'}}
                     >
                         {change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(change)}
                     </h3>
