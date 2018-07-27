@@ -1,5 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
+import Media from 'react-media';
+import {SegmentedControl} from 'antd-mobile';
 import {Radio, Row, Col} from 'antd';
 import {generateColorData} from '../../../utils';
 import {HighChartNew} from '../../../components/HighChartNew';
@@ -58,8 +60,8 @@ export class PortfolioPieChart extends React.Component {
         return sectorData;
     }
 
-    onChange = e => {
-        this.setState({selectedView: e.target.value});
+    onChange = value => {
+        this.setState({selectedView: value.toLowerCase()});
     }
 
     // shouldComponentUpdate(nextProps, nextState) {
@@ -89,10 +91,25 @@ export class PortfolioPieChart extends React.Component {
                     />
                 </Col>
                 <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
-                    <RadioGroup defaultValue="stock" onChange={this.onChange} size="small">
-                        <RadioButton value="stock">Stock</RadioButton>
-                        <RadioButton value="sector">Sector</RadioButton>
-                    </RadioGroup>
+                    <Media 
+                        query="(max-width: 600px)"
+                        render={() => (
+                            <SegmentedControl 
+                                values={['Stock', 'Sector']}
+                                onValueChange={this.onChange}
+                                selectedIndex={this.state.selectedView === 'stock' ? 0 : 1}
+                            />
+                        )}
+                    />
+                    <Media 
+                        query="(min-width: 601px)"
+                        render={() => (
+                            <RadioGroup defaultValue="stock" onChange={e => this.onChange(e.target.value)} size="small">
+                                <RadioButton value="stock">Stock</RadioButton>
+                                <RadioButton value="sector">Sector</RadioButton>
+                            </RadioGroup>
+                        )}
+                    />
                 </Col>
             </Row>
         );

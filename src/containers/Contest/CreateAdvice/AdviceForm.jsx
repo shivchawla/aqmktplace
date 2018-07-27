@@ -1,11 +1,12 @@
 import * as React from 'react';
 import _ from 'lodash';
 import Media from 'react-media';
+import {StickyContainer, Sticky} from 'react-sticky';
 import {Motion, spring} from 'react-motion';
 import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Select, Button, Modal, Tag, Icon} from 'antd';
+import {Row, Col, Select, Button, Modal, Tag, Icon, Affix} from 'antd';
 import {Button as MobileButton, Picker, List, LocaleProvider} from 'antd-mobile';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
@@ -45,7 +46,7 @@ class ContestAdviceFormImpl extends React.Component {
             adviceActive: false,
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: false,
+            bottomSheetOpenStatus: true,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -120,10 +121,10 @@ class ContestAdviceFormImpl extends React.Component {
                                     ? this.onBenchmarkPickerChange(value)
                                     : this.handleEmptyPortfolioBenchmarkChange(value[0])
                                 }
-                        extra='Benchmark'
+                        extra={this.state.benchmark}
                 >
                     <List.Item style={{paddingLeft: '0px', paddingRight: '0px'}} arrow="horizontal">
-                        {this.state.benchmark}
+                        Benchmark
                     </List.Item>
                 </Picker>
             </Col>
@@ -468,7 +469,9 @@ class ContestAdviceFormImpl extends React.Component {
             targetPosition.effTotal = position.effTotal;
             targetPosition.totalValue = position.totalValue;
         }
-        this.setState({positions: this.updateAllWeights(positions)});
+        this.setState({positions: this.updateAllWeights(positions)}, () => {
+            this.handleSubmitAdvice();
+        });
     }
 
     updateAllWeights = data => {
@@ -693,7 +696,7 @@ class ContestAdviceFormImpl extends React.Component {
         const errors = this.getPortfolioValidationErrors();
         return (
             <Tag 
-                    style={{marginTop}} 
+                    style={{marginTop, boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)'}} 
                     color={errors.length > 0 ? metricColor.negative : metricColor.positive}
                     onClick={this.toggleAdviceErrorDialog}
             >
@@ -882,31 +885,37 @@ class ContestAdviceFormImpl extends React.Component {
                 {
                     this.renderAddStocksButtonMobile()
                 }
-                <Col 
-                        span={24} 
-                        style={{
-                            ...horizontalBox,
-                            height: '40px', 
-                            marginTop: '10px',
-                            justifyContent: 'center'
-                        }}
-                >
-                    {this.renderValidationErrors('0px')}
-                </Col>
-                <Col span={24}>
-                    <Row 
-                            style={{padding: '0px', paddingLeft: '10px', paddingBottom: '5px'}} 
-                            type="flex" 
-                            align="start"
-                    >
-                        {this.renderBenchmarkDropdownMobile()}
-                    </Row>
-                    <Row>
+                <div style={{display: !this.state.bottomSheetOpenStatus ? 'block' : 'none'}}>
+                    <StickyContainer className='container'>
+                        <Affix offsetTop={0}>
+                            <Col 
+                                    span={24} 
+                                    style={{
+                                        ...horizontalBox,
+                                        height: '40px', 
+                                        marginTop: '10px',
+                                        justifyContent: 'center'
+                                    }}
+                            >
+                                {this.renderValidationErrors('0px')}
+                            </Col>
+                        </Affix>
                         <Col span={24}>
-                            {this.renderPortfolio()}
+                            <Row 
+                                    style={{padding: '0px', paddingLeft: '10px', paddingBottom: '5px'}} 
+                                    type="flex" 
+                                    align="start"
+                            >
+                                {this.renderBenchmarkDropdownMobile()}
+                            </Row>
+                            <Row>
+                                <Col span={24}>
+                                    {this.renderPortfolio()}
+                                </Col>
+                            </Row>
                         </Col>
-                    </Row>
-                </Col>
+                    </StickyContainer>
+                </div>
             </Row>
         );
     }
@@ -1092,8 +1101,8 @@ class ContestAdviceFormImpl extends React.Component {
                                         <h3 style={{fontSize: '14px', marginLeft: '10px'}}>
                                             {
                                                 this.props.isUpdate 
-                                                ? 'Update Contest Entry' 
-                                                : 'Create Contest Entry'
+                                                ? 'UPDATE CONTEST ENTRY' 
+                                                : 'CREATE CONTEST ENTRY'
                                             }
                                         </h3>
                                     }

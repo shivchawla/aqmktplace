@@ -38,153 +38,8 @@ class PortfolioListImpl extends React.Component {
         };
     }
 
-    loadPerformance = benchmark => {
-        this.setState({loadingPortfolioPerformance: true});
-        this.props.getAdvicePerformance(benchmark)
-        .then(data => {
-            const {highStockSeries, portfolioPerformanceMetrics} = data;
-            this.setState({highStockSeries, metrics: portfolioPerformanceMetrics});
-        })
-        .catch(error => error)
-        .finally(() => {
-            this.setState({loadingPortfolioPerformance: false});
-        })
-    }
-
-    renderBenchmarkDropdown = () => (
-        <Select 
-                defaultValue={this.state.selectedBenchmark} 
-                style={{width: '150px'}}
-                onChange={value => this.loadPerformance(value)}
-        >
-            {
-                this.state.benchmarks.map((benchmark, index) => (
-                    <Option key={index} value={benchmark}>{benchmark}</Option>
-                ))
-            }
-        </Select>
-    )
-
-    togglePerformanceModal = () => {
-        if (!this.state.modal.performance) {
-            this.loadPerformance(this.state.selectedBenchmark);
-        }
-        this.setState({modal: {
-            ...this.state.modal,
-            performance: !this.state.modal.performance
-        }});
-    }
-
-    renderPerformanceModal = () => {
-        return (
-            <Modal
-                    title="Performance View"
-                    visible={this.state.modal.performance}
-                    onOk={this.togglePerformanceModal}
-                    onCancel={this.togglePerformanceModal}
-                    width={980}
-                    bodyStyle={{overflow: 'hidden', overflowY: 'scroll', height: '500px'}}
-                    style={{top: 20}}
-                    footer={null}
-            >
-                <Spin spinning={this.state.loadingPortfolioPerformance}>
-                    <Row>
-                        <Col span={24} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                            {this.renderBenchmarkDropdown()}
-                        </Col>
-                        <Col span={24}>
-                            <MyChartNew 
-                                series={this.state.highStockSeries} 
-                                chartId="advice-preview-performance-chart-modal"
-                            />
-                        </Col>
-                    </Row>
-                </Spin>
-            </Modal>
-        );
-    }
-
     shouldComponentUpdate(nextProps) {
         return true;
-    }
-
-    handlePerformanceBottomSheetChange = value => {
-        this.setState({
-            performanceSheetView: value
-        })
-    }
-
-    renderComposition = () => {
-        return (
-            <HighChartNew 
-                series={[{name: 'Portfolio Composition', data: this.processDataForPieChart()}]}
-            />
-        );
-    }
-
-    renderMetrics = () => {
-        const style = {
-            display: 'flex',
-            flexDirection: 'column',
-            marginBottom: '20px',
-            textAlign: 'center'
-        };
-        const labelStyle = {color: '#4a4a4a', fontSize: '14px'};
-        const textStyle = {color: '#4a4a4a', fontSize: '20px'}
-        const annualReturn = (_.get(this.state, 'metrics.returns.totalreturn') * 100).toFixed(2);
-        const volatility = (_.get(this.state, 'metrics.deviation.annualstandarddeviation', 0) * 100).toFixed(2);
-        const maxLoss = (_.get(this.state, 'metrics.drawdown.maxdrawdown', 0) * 100).toFixed(2);
-
-        return (
-            <Row gutter={16}>
-                <Col span={8} style={style}>
-                    <h3 
-                            style={{
-                                ...textStyle, 
-                                color: annualReturn < 0 ? metricColor.negative : metricColor.positive
-                            }}
-                    >
-                        {annualReturn} %
-                    </h3>
-                    <h3 style={labelStyle}>Annual Return</h3>
-                </Col>
-                <Col span={8} style={style}>
-                    <h3 style={textStyle}>{volatility} %</h3>
-                    <h3 style={labelStyle}>Volatility</h3>
-                </Col>
-                <Col span={8} style={style}>
-                    <h3 style={{...textStyle, color: metricColor.negative}}>- {maxLoss} %</h3>
-                    <h3 style={labelStyle}>Max Loss</h3>
-                </Col>
-            </Row>
-        );
-    }
-
-    renderCompositionList = () => {
-        const data = this.processDataForPieChart();
-        return (
-            <Row type="flex" align="middle" justify="center">
-                {
-                    data.map((position, index) => {
-                        return (
-                            <Col 
-                                    key={index}
-                                    span={8} 
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        marginBottom: '20px',
-                                        textAlign: 'center'
-                                    }}
-                            >
-                                <h3 style={{color: '#4a4a4a', fontSize: '16px'}}>{position.y} %</h3>
-                                <h3 style={{color: position.color, fontSize: '14px'}}>{position.name}</h3>
-                            </Col>
-                        );
-                    })
-                }
-            </Row>
-        );
     }
 
     checkTickerForDuplications = (data, ticker) => {
@@ -232,101 +87,6 @@ class PortfolioListImpl extends React.Component {
         return _.uniqBy(nData, 'name');
     }
 
-    renderAdvicePerformanceBottomSheet = () => {
-        return (
-            <SwipeableBottomSheet 
-                    id="performance-bottom-sheet"
-                    fullScreen 
-                    style={{zIndex: '10'}}
-                    open={this.state.performanceBottomSheetOpen}
-                    onChange={this.togglePerformanceBottomSheet}
-            >
-                <Spin spinning={this.state.loadingPortfolioPerformance}>
-                    <Row 
-                            style={{
-                                height: '-webkit-fill-available'
-                            }}
-                    >
-                        <Col 
-                                style={{
-                                    ...horizontalBox, 
-                                    justifyContent: 'center', 
-                                    position: 'relative',
-                                    marginBottom: '20px',
-                                    backgroundColor: '#fff',
-                                    height: '64px',
-                                    borderBottom: '1px solid #eaeaea'
-                                }}
-                        >
-                            <Icon 
-                                type="close" 
-                                style={{
-                                    fontSize: '22px', 
-                                    position: 'absolute', 
-                                    left: 0, 
-                                    zIndex: '20', 
-                                    color: primaryColor,
-                                    marginLeft: '10px'
-                                }}
-                                onClick={this.togglePerformanceBottomSheet}
-                            />
-
-                            <SegmentedControl 
-                                onValueChange={this.handlePerformanceBottomSheetChange} 
-                                values={['Performance', 'Composition']} 
-                            />
-
-                        </Col>
-                        {/*<Col span={24} style={{padding: '0 10px', marginBottom: '20px'}}>
-                            
-                        </Col>*/}
-                        
-                        {
-                            this.state.performanceSheetView === 'Performance' &&
-                            <Col span={24} style={{marginTop: '5px'}}>
-                                {this.renderMetrics()}
-                            </Col>
-                        }
-
-                        {
-                            this.state.performanceSheetView === 'Performance' &&
-                            <Col span={24} style={{display: 'flex', justifyContent: 'flex-end', padding: '0 10px'}}>
-                                {this.renderBenchmarkDropdown()}
-                            </Col>
-                        }
-
-                        <Col span={24} style={{padding: '0 10px'}}>
-                            {
-                                this.state.performanceSheetView === 'Performance'
-                                ?   <MyChartNew 
-                                            series={this.state.highStockSeries} 
-                                            chartId="advice-preview-performance-chart"
-                                    />
-                                :   <Row>
-                                        <Col span={24}>
-                                            {this.renderComposition()}
-                                        </Col>
-                                        <Col span={24}>
-                                            {this.renderCompositionList()}
-                                        </Col>
-                                    </Row>
-                            }
-                            
-                        </Col>
-                        {/* <Col span={24}>
-                            <MobileButton 
-                                    type="primary" 
-                                    onClick={this.togglePerformanceBottomSheet}
-                            >
-                                Close
-                            </MobileButton>
-                        </Col> */}
-                    </Row>
-                </Spin>
-            </SwipeableBottomSheet>
-        );
-    }
-
     addPosition = position => {
         this.props.addPosition(position);
         this.toggleBottomSheet();
@@ -336,20 +96,6 @@ class PortfolioListImpl extends React.Component {
         this.setState({addPositionBottomSheetOpen: !this.state.addPositionBottomSheetOpen});
     }
 
-    togglePerformanceBottomSheet = () => {
-        if (!this.state.performanceBottomSheetOpen) {
-            this.loadPerformance(this.state.selectedBenchmark);
-        } else {
-            this.setState({performanceSheetView: 'Performance'})
-        }
-        this.setState({performanceBottomSheetOpen: !this.state.performanceBottomSheetOpen});
-    }
-
-    addPositionHandleClick = () => {
-        this.setState({updatePosition: false}, () => {
-            this.toggleBottomSheet();
-        });
-    }
 
     handlePositionClick = position => {
         this.setState({selectedPosition: position, updatePosition: true}, () => {
@@ -426,8 +172,6 @@ class PortfolioListImpl extends React.Component {
 
         return (
             <Col style={{display: 'block'}}>
-                {/* {this.renderAdvicePerformanceBottomSheet()} */}
-                {/* {this.renderPerformanceModal()} */}
                 {this.renderUpdatePositionBottomSheet()}
                 <Col 
                         span={24} 
@@ -494,6 +238,7 @@ class PortfolioListImpl extends React.Component {
                 <Col span={24} style={{marginTop: '10px'}}>
                     {this.renderPositions()}
                 </Col>
+                <Col span={24} style={{height: '60px'}}></Col>
             </Col>
         );
     }
@@ -541,7 +286,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
             </Col>
             <Col span={24}>
                 <Row type="flex" align="middle" justify="space-between" style={{padding: '0 20px'}}>
-                    <Col span={6}>
+                    <Col span={8}>
                         <MetricItem 
                             label="Num. of Shares"
                             value={shares}
@@ -550,7 +295,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                             noNumeric={true}
                         />
                     </Col>
-                    <Col span={6}>
+                    <Col span={8}>
                         <MetricItem 
                             label="Total"
                             value={Number(totalValue.toFixed(2))}
@@ -559,7 +304,16 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                             money
                         />
                     </Col>
-                    <Col span={6}>
+                    <Col span={8}>
+                        <MetricItem 
+                            label="Target Total"
+                            value={effTotal}
+                            labelStyle={metricLabelStyle}
+                            valueStyle={metricValueStyle}
+                            money
+                        />  
+                    </Col>
+                    <Col span={8}>
                         <MetricItem 
                             label="Weight"
                             value={`${weight} %`}
@@ -571,7 +325,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     </Col>
                 </Row>
             </Col>
-            <Col span={24} style={{...verticalBox, padding: '0 20px'}}>
+            {/* <Col span={24} style={{...verticalBox, padding: '0 20px'}}>
                 <MetricItem 
                     label="Target Total"
                     value={effTotal}
@@ -579,7 +333,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     valueStyle={metricValueStyle}
                     money
                 />  
-            </Col>
+            </Col> */}
             <Col span={24} style={{marginTop: '12px'}}>
                 <div style={{height: '7px', backgroundColor: '#efeff4', marginTop: '5px'}}></div>
             </Col>

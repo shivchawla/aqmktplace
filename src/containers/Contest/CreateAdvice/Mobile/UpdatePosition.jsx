@@ -286,6 +286,12 @@ class UpdatePositionMobileImpl extends React.Component {
                                     value={`₹ ${Utils.formatMoneyValueMaxTwoDecimals(totalValue)}`} 
                                 />
                             </Col>
+                            <Col span={24}>
+                                <StockDetailComponent 
+                                    label="Shares" 
+                                    value={shares} 
+                                />
+                            </Col>
                         </Row>
                     </Col>
                 </Spin>

@@ -66,7 +66,10 @@ export default class LeaderBoardMobile extends React.Component {
 
     render() {
         return (
-            <AqMobileLayout loading={this.props.loading}>
+            <AqMobileLayout 
+                    loading={this.props.loading}
+                    customHeader={<h3 style={{fontSize: '14px'}}>LEADERBOARD</h3>}
+            >
                 {this.renderBottomSheet()}
                 <Row>
                     <Col span={24} style={{...horizontalBox, justifyContent: 'center', marginTop: '15px'}}>

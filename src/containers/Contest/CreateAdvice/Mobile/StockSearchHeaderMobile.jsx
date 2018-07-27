@@ -61,20 +61,21 @@ export default class SearchStockHeader extends React.Component {
                                         right: '10px',
                                         fontSize: '12px',
                                         height: '30px',
-                                        padding: '5px',
-                                        width: '105px'
+                                        width: '65px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
                                     }}
                                     onClick={this.props.addSelectedStocksToPortfolio} 
                                     type="primary" 
                                     loading={this.props.portfolioLoading}
                             >
-                                SELECTED
+                                <Icon type="shopping-cart" style={{fontSize: '18px'}}/>
                                 <Badge 
                                     style={{
                                         backgroundColor: '#fff', 
                                         color: primaryColor, 
                                         fontSize: '14px', 
-                                        marginLeft: '5px'
                                     }} 
                                     count={this.props.selectedStocks.length}
                                 />
@@ -110,6 +111,7 @@ export default class SearchStockHeader extends React.Component {
                             </React.Fragment>
                         }
                     </Col>
+                    {this.props.renderSelectedStocks()}
                 </Row>
             </Col>
         );

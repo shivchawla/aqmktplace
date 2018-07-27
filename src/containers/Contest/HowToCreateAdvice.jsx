@@ -113,7 +113,7 @@ class HowToCreateAdvice extends React.Component {
                 <Media 
                     query="(max-width: 600px)"
                     render={() => (
-                        <AqMobileLayout>
+                        <AqMobileLayout customHeader={<h3 style={{fontSize: '14px'}}>CREATE ENTRY STEPS</h3>}>
                             {this.renderPageContentMobile()}
                         </AqMobileLayout>
                     )}

@@ -3,7 +3,7 @@ import Media from 'react-media';
 import {Motion, spring} from 'react-motion';
 import _  from 'lodash';
 import {Row, Col, Input, Icon, Badge, Button, Tag} from 'antd';
-import {SearchBar} from 'antd-mobile';
+import {SearchBar, Tag as TagMobile} from 'antd-mobile';
 import {StockPerformance} from './StockPerformance';
 import {screenSize} from './constants';
 import SearchStockHeader from './Mobile/SearchStockHeader';
@@ -77,6 +77,7 @@ export class SearchStocks extends React.Component {
                     && this.state.stocks.length >= 8 
                     && this.renderPaginationMobile()
                 }
+                <div style={{width: '100%', height: '80px'}}></div>
             </Row>
         );
     }
@@ -378,7 +379,7 @@ export class SearchStocks extends React.Component {
                                                 }}
                                         >
                                             {this.renderSearchStockListMobile()}
-                                            <div style={{width: '100%', height: '80px'}}></div>
+                                            <div style={{height: '100px'}}></div>
                                         </Col>
                                         <Col 
                                                 span={24} 
@@ -442,40 +443,35 @@ export class SearchStocks extends React.Component {
     renderSelectedStocksMobile = () => {
         const selectedStocks = [...this.state.selectedStocks];
         return (
-            <Row 
-                    className='selected-stocks-mobile'
-                    style={{
-                        position: 'fixed',
-                        width: '100%',
-                        padding: '10px',
-                        height: '50px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        bottom: '20px',
-                        zIndex: '200',
-                    }}
-            >
-                <Col 
+            this.state.selectedStocks.length > 0 
+            && !this.state.stockPerformanceOpen 
+            && global.screen.width <= 600
+            ?   <Col 
                         span={24}
+                        className='selectedstocks-mobile'
                         style={{
                             ...horizontalBox,
-                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+                            width: '100%',
+                            zIndex: '200',
                             backgroundColor: '#fff',
                             height: '50px',
                             overflow: 'hidden',
                             overflowX: 'scroll',
                             borderTop: '1px solid #eaeaea',
                             borderBottom: '1px solid #eaeaea',
-                            borderRadius: '4px',
-                            padding: '0 5px'
+                            padding: '0 10px',
                         }}
                 >
                     {
                         selectedStocks.map((stock, index) => {
                             return (
                                 <Tag 
+                                        selected
                                         style={{
-                                            marginBottom: '5px', 
+                                            marginBottom: '5px',
+                                            // marginRight: '15px' ,
+                                            // border: `1px solid ${primaryColor}`,
+                                            // color: primaryColor
                                         }}
                                         color='blue'
                                         key={stock}
@@ -490,7 +486,7 @@ export class SearchStocks extends React.Component {
                         })
                     }
                 </Col>
-            </Row>
+            : null
         );
     }
 
@@ -505,15 +501,10 @@ export class SearchStocks extends React.Component {
                     style={{
                         width: global.screen.width, 
                         overflow: 'hidden', 
-                        height: global.screen.height
+                        height: global.screen.height,
+                        position: 'relative'
                     }}
             >
-                {
-                    this.state.selectedStocks.length > 0 
-                    && !this.state.stockPerformanceOpen 
-                    && global.screen.width <= 600
-                    && this.renderSelectedStocksMobile()
-                }
                 <Media 
                     query='(max-width: 600px)'
                     render={() => 
@@ -526,6 +517,7 @@ export class SearchStocks extends React.Component {
                                 addSelectedStocksToPortfolio={this.addSelectedStocksToPortfolio}
                                 portfolioLoading={this.state.portfolioLoading}
                                 toggleStockPerformanceOpen={this.toggleStockPerformanceOpen}
+                                renderSelectedStocks={this.renderSelectedStocksMobile}
                         />
                     }
                 />
@@ -577,7 +569,7 @@ const StockListItemMobile = props => {
 
     return (
         <Row className='stock-row' style={containerStyle} type="flex" align="middle">
-            <Col span={12} style={leftContainerStyle} onClick={() => onClick({symbol, name})}>
+            <Col span={11} style={leftContainerStyle} onClick={() => onClick({symbol, name})}>
                 <div style={horizontalBox}>
                     <h3 style={{fontSize: '16px', fontWeight: '700'}}>{symbol}</h3>
                     <Icon style={{color: changeColor, marginLeft: '10px'}} type={changeIcon} />
@@ -586,7 +578,7 @@ const StockListItemMobile = props => {
                     <h3 style={{fontSize: '14px', fontWeight: '400'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
                 </div>
             </Col>
-            <Col span={10} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
+            <Col span={11} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
                 <div style={horizontalBox}>
                     <h3 
                             style={{color: changeColor, fontSize: '14px', marginLeft: '10px', fontWeight: '700'}}

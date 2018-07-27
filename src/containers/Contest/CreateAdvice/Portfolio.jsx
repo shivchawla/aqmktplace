@@ -180,6 +180,7 @@ export class Portfolio extends React.Component {
                                     <SegmentedControl 
                                         onValueChange={this.handlePerformanceBottomSheetChange} 
                                         values={['Performance', 'Composition']} 
+                                        selectedIndex={this.state.performanceSheetView === 'Performance' ? 0 : 1}
                                     />
 
                                 </Col>
