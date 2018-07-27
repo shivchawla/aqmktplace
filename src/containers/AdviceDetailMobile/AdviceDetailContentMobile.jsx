@@ -417,7 +417,7 @@ class AdviceDetailContentImpl extends React.Component {
                                                 style={{fontSize: '16px'}}
                                                 onClick={() => 
                                                     Utils.isLoggedIn()
-                                                    ? this.props.history.push(`/contest/updateadvice/${this.props.match.params.id}`)
+                                                    ? this.props.history.push(`/contest/updateentry/${this.props.match.params.id}`)
                                                     : this.redirectToLogin()
                                                 }
                                         >

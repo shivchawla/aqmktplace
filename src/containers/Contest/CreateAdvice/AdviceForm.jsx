@@ -12,11 +12,13 @@ import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
+import {AqPageHeader} from '../../../components/AqPageHeader';
 import AppLayout from '../../../containers/AppLayout';
 import {AqMobileLayout} from '../../AqMobileLayout/Layout';
 import {benchmarks} from '../../../constants/benchmarks';
-import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox, goals} from '../../../constants';
-import {fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
+import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox} from '../../../constants';
+import {CreateAdviceCrumb} from '../../../constants/breadcrumbs';
+import {getBreadCrumbArray, fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
 import { MetricItem } from '../../../components/MetricItem';
 import enUS from 'antd-mobile/lib/locale-provider/en_US';
 
@@ -60,7 +62,8 @@ class ContestAdviceFormImpl extends React.Component {
             loading: false,
             contestId: null,
             noActiveContests: false,
-            notPresentInLatestContest: false
+            notPresentInLatestContest: false,
+            name: ''
         };
     }
 
@@ -367,59 +370,59 @@ class ContestAdviceFormImpl extends React.Component {
     renderSearchStocksBottomSheet = () => {
         return (
             <React.Fragment>
-            <Media 
-                query="(max-width: 600px)"
-                render={() => (
-                    <Motion style={{x: spring(this.state.bottomSheetOpenStatus ? -44 : -(global.screen.height + 45))}}>
-                        {
-                            ({x}) => 
-                                <div 
-                                    style={{
-                                        transform: `translate3d(0, ${x}px, 0)`,
-                                        position: 'absolute',
-                                        zIndex: '20',
-                                        backgroundColor: '#fff'
-                                    }}
-                                >
-                                    <SearchStocks 
-                                        toggleBottomSheet={this.toggleSearchStockBottomSheet}
-                                        addPositions={this.conditionallyAddPosition}
-                                        portfolioPositions={this.state.positions}
-                                        filters={this.state.stockSearchFilters}
-                                        ref={el => this.searchStockComponent = el}
-                                        history={this.props.history}
-                                        pageUrl={this.props.match.url}
-                                    />
-                                </div>
-                        }
-                    </Motion>
-                )}
-            />
-            <Media 
-                query="(min-width: 601px)"
-                render={() => (
-                    <SwipeableBottomSheet 
-                            fullScreen 
-                            style={{zIndex: '20000'}}
-                            overlayStyle={{overflow: 'hidden'}}
-                            open={this.state.bottomSheetOpenStatus}
-                            onChange={this.toggleSearchStockBottomSheet}
-                            swipeableViewsProps={{
-                                disabled: false
-                            }}
-                    >
-                        <SearchStocks 
-                            toggleBottomSheet={this.toggleSearchStockBottomSheet}
-                            addPositions={this.conditionallyAddPosition}
-                            portfolioPositions={this.state.positions}
-                            filters={this.state.stockSearchFilters}
-                            ref={el => this.searchStockComponent = el}
-                            history={this.props.history}
-                            pageUrl={this.props.match.url}
-                        />
-                    </SwipeableBottomSheet>
-                )}
-            />
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => (
+                        <Motion style={{x: spring(this.state.bottomSheetOpenStatus ? -44 : -(global.screen.height + 45))}}>
+                            {
+                                ({x}) => 
+                                    <div 
+                                        style={{
+                                            transform: `translate3d(0, ${x}px, 0)`,
+                                            position: 'absolute',
+                                            zIndex: '20',
+                                            backgroundColor: '#fff'
+                                        }}
+                                    >
+                                        <SearchStocks 
+                                            toggleBottomSheet={this.toggleSearchStockBottomSheet}
+                                            addPositions={this.conditionallyAddPosition}
+                                            portfolioPositions={this.state.positions}
+                                            filters={this.state.stockSearchFilters}
+                                            ref={el => this.searchStockComponent = el}
+                                            history={this.props.history}
+                                            pageUrl={this.props.match.url}
+                                        />
+                                    </div>
+                            }
+                        </Motion>
+                    )}
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => (
+                        <SwipeableBottomSheet 
+                                fullScreen 
+                                style={{zIndex: '20000'}}
+                                overlayStyle={{overflow: 'hidden'}}
+                                open={this.state.bottomSheetOpenStatus}
+                                onChange={this.toggleSearchStockBottomSheet}
+                                swipeableViewsProps={{
+                                    disabled: false
+                                }}
+                        >
+                            <SearchStocks 
+                                toggleBottomSheet={this.toggleSearchStockBottomSheet}
+                                addPositions={this.conditionallyAddPosition}
+                                portfolioPositions={this.state.positions}
+                                filters={this.state.stockSearchFilters}
+                                ref={el => this.searchStockComponent = el}
+                                history={this.props.history}
+                                pageUrl={this.props.match.url}
+                            />
+                        </SwipeableBottomSheet>
+                    )}
+                />
             </React.Fragment>
         )
     }
@@ -702,7 +705,7 @@ class ContestAdviceFormImpl extends React.Component {
             >
                 {
                     errors.length > 0
-                    ? `${errors.length} Portfolio Validation Wanings`
+                    ? `${errors.length} Portfolio Validation Warnings`
                     :  'Valid Portfolio'
                 }
             </Tag>
@@ -948,8 +951,10 @@ class ContestAdviceFormImpl extends React.Component {
         ])
         .then(([adviceSummary, advicePortfolio]) => {
             benchmark = _.get(adviceSummary, 'portfolio.benchmark.ticker');
+            const name = _.get(adviceSummary, 'name', '');
             const positions = _.get(advicePortfolio, 'detail.positions', []);
             this.setState({
+                name,
                 benchmark,
                 positions: this.processPositions(positions)
             });

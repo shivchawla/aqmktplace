@@ -44,7 +44,7 @@ class HowToCreateAdvice extends React.Component {
                     <Button 
                             type="primary" 
                             style={{fontWeight: 300, width: '200px', fontSize: '18px'}}
-                            onClick={() => this.props.history.push('/contest/createadvice/edit')}
+                            onClick={() => this.props.history.push('/contest/createentry/edit')}
                     >
                         CREATE
                     </Button>
@@ -67,7 +67,7 @@ class HowToCreateAdvice extends React.Component {
                     <Button 
                             type="primary" 
                             style={{fontWeight: 300, width: '200px', fontSize: '18px', marginTop: '20px'}}
-                            onClick={() => this.props.history.push('/contest/createadvice/edit')}
+                            onClick={() => this.props.history.push('/contest/createentry/edit')}
                     >
                         CREATE
                     </Button>
@@ -113,7 +113,10 @@ class HowToCreateAdvice extends React.Component {
                 <Media 
                     query="(max-width: 600px)"
                     render={() => (
-                        <AqMobileLayout customHeader={<h3 style={{fontSize: '14px'}}>CREATE ENTRY STEPS</h3>}>
+                        <AqMobileLayout 
+                                customHeader={<h3 style={{fontSize: '14px'}}>CREATE ENTRY STEPS</h3>}
+                                previousPageUrl='/contest/createentry'
+                        >
                             {this.renderPageContentMobile()}
                         </AqMobileLayout>
                     )}

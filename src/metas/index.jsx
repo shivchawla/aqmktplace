@@ -114,6 +114,7 @@ export const UpdatePortfolioMeta = props => {
 export const LoginMeta = props => {
     return (
         <Helmet>
+            <title>Login | AdviceQube</title>
             <meta charSet="utf-8" />
             <link rel="canonical" href="https://www.adviceqube.com"/>
         </Helmet>
@@ -123,6 +124,7 @@ export const LoginMeta = props => {
 export const SignupMeta = props => {
     return (
         <Helmet>
+            <title>Signup | AdviceQube</title>
             <meta charSet="utf-8" />
             <link rel="canonical" href="https://www.adviceqube.com"/>
         </Helmet>
@@ -133,7 +135,7 @@ export const StockResearchMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>AdviceQube: Stock Research | Screen stocks from Indian Equity Markets</title>
+            <title>Stock Research | Screen stocks from Indian Equity Markets | AdviceQube</title>
             <meta name="description" content="Search and compare stocks from Indian Equity Markets. Visualize historical stock performance over various horizons"/>
             <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Stock Research, returns"/>
             <meta name="robots" content="index, follow" />
@@ -145,9 +147,9 @@ export const ContestHomeMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>AdviceQube: Stock Research | Screen stocks from Indian Equity Markets</title>
-            <meta name="description" content="Homepage for AdviceQube contests"/>
-            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Stock Research, returns"/>
+            <title>Investment Idea Contest | AdviceQube</title>
+            <meta name="description" content="Compete with your best Investment Ideas and win prizes"/>
+            <meta name="keywords" content="www.adviceqube.com, Contest, Competition, Trading Challenge, Investments, Equity NSE stocks, Cash prize"/>
             <meta name="robots" content="index, follow" />
         </Helmet>
     );
@@ -157,8 +159,9 @@ export const ContestHomeMeta = props => {
 export const ContestCreateAdviceMeta = props => {
     return (
         <Helmet>
+            <title>Create Investment Portfolio for Contest| AdviceQube</title>
             <meta charSet="utf-8" />
-            <link rel="canonical" href="https://www.adviceqube.com/advisordashboard"/>
+            <link rel="canonical" href="https://www.adviceqube.com/contest"/>
         </Helmet>
     );
 }
@@ -167,7 +170,8 @@ export const ContestUpdateAdviceMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <link rel="canonical" href="https://www.adviceqube.com/advisordashboard"/>
+            <title>Update Investment Portfolio for Contest | AdviceQube</title>
+            <link rel="canonical" href="https://www.adviceqube.com/contest"/>
         </Helmet>
     );
 }
@@ -176,10 +180,9 @@ export const ContestAdviceDetailMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>AdviceQube: {props.name} | Expert Investment Portfolio</title>
-            <meta name="description" content={`${props.name}: Invest in advices from investment experts`}/>
-            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, NSE stocks, Investment Advice, Advice, returns, gain"/>
-            <meta name="robots" content="index, follow" />
+            <title>Contest Entry Detail | AdviceQube</title>
+            <meta name="keywords" content="www.adviceqube.com, Contest, Competition, Trading Challenge, Investments, Equity NSE stocks, Cash prize"/>
+            <link rel="canonical" href="https://www.adviceqube.com/contest"/>
         </Helmet>
     );
 }
@@ -188,9 +191,9 @@ export const ContestLeaderboardMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>AdviceQube: {props.name} | Expert Investment Portfolio</title>
-            <meta name="description" content={`${props.name}: Invest in advices from investment experts`}/>
-            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, NSE stocks, Investment Advice, Advice, returns, gain"/>
+            <title>Leaderboard | AdviceQube Investment Idea Contest</title>
+            <meta name="description" content="Leader for Investment Idea Contest"/>
+            <meta name="keywords" content="www.adviceqube.com, Leaderboard, Contest, Competition, Trading Challenge, Investments, Equity NSE stocks, Cash prize"/>
             <meta name="robots" content="index, follow" />
         </Helmet>
     );

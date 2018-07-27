@@ -1327,7 +1327,7 @@ class AdviceDetailImpl extends React.Component {
                     {
                         // ((!approvalRequested && isPublic) || !isPublic) &&
                         <Button
-                                onClick={() => this.props.history.push(`/contest/updateadvice/${this.props.match.params.id}`)}
+                                onClick={() => this.props.history.push(`/contest/updateentry/${this.props.match.params.id}`)}
                                 className={className}
                                 style={buttonStyle}
                         >
@@ -1428,6 +1428,7 @@ class AdviceDetailImpl extends React.Component {
                                 handlePerformanceToggleChange={this.handlePerformanceToggleChange}
                                 performanceType={this.state.performanceType}
                                 loading={false}
+                                participatedContests={[]}
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}

@@ -65,9 +65,9 @@ const metrics = [
 class AdviceDetailContentImpl extends React.Component {
     constructor(props) {
         super(props);
-        console.log(this.props.participatedContests);
+        const participatedContestLength = _.get(props, 'participatedContests', []).length;
         this.state = {
-            selectedContestId: _.get(props, `participatedContests[${props.participatedContests.length - 1}]._id`, null),
+            selectedContestId: _.get(props, `participatedContests[${participatedContestLength - 1}]._id`, null),
             showCurrentRankView: true
         }
     }
@@ -747,7 +747,7 @@ export const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle,
                             <MetricHeader 
                                 rank={_.get(selectedAdvice, 'latestRank.rating.current.rank', null)}
                                 header='Active Performance'
-                                score={_.get(selectedAdvice, 'latestRank.rating.current.value', 0).toFixed(2)}
+                                score={(_.get(selectedAdvice, 'latestRank.rating.current.value', 0) || 0).toFixed(2)}
                             />
                         }
                         metrics={currentMetrics} 
@@ -759,7 +759,7 @@ export const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle,
                             <MetricHeader 
                                 rank={_.get(selectedAdvice, 'latestRank.rating.simulated.rank', null)}
                                 header='Historical Performance'
-                                score={_.get(selectedAdvice, 'latestRank.rating.simulated.value', 0).toFixed(2)}
+                                score={(_.get(selectedAdvice, 'latestRank.rating.simulated.value', 0) || 0).toFixed(2)}
                             />
                         }
                     />

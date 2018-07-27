@@ -185,7 +185,6 @@ class AdvisorDashboard extends React.Component {
             });
         })
         .catch(error => {
-            console.log(error);
             return error;
         })
         .finally(() => {
@@ -471,7 +470,6 @@ class AdvisorDashboard extends React.Component {
 
     getAdvicePerformance = advice => {
         const newTickers = [];
-        console.log(advice);
         const url = `${requestUrl}/performance/advice/${advice._id}`;
         this.setState({advicePerformanceLoading: true, selectedAdviceId: advice._id});
         Promise.all([
@@ -482,14 +480,14 @@ class AdvisorDashboard extends React.Component {
             const simulatedPerformance = _.get(adviceResponse.data, 'simulated.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             const currentPerformance = _.get(adviceResponse.data, 'current.portfolioValues', []).map(item => [moment(item.date).valueOf(), item.netValue]);
             newTickers.push({
-                name: `Advice - Simulated`,
+                name: `Entry - Simulated`,
                 data: simulatedPerformance,
                 color: simulatedPerformanceColor,
                 noLoadData: true,
             });
 
             newTickers.push({
-                name: `Advice - Current`,
+                name: `Entry - Current`,
                 data: currentPerformance,
                 color: currentPerformanceColor,
                 noLoadData: true,
@@ -566,7 +564,7 @@ class AdvisorDashboard extends React.Component {
         if (!Utils.isLoggedIn()) {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
-            Promise.all([this.getUserDashboardData()])
+            this.getUserDashboardData();
         }
     }
 
@@ -763,7 +761,7 @@ class AdvisorDashboard extends React.Component {
 
     renderPageContent = () => {
         const {radioValue} = this.state;
-        const breadCrumbArray = getBreadCrumbArray([{name: 'Advisor Dashboard'}]);
+        const breadCrumbArray = getBreadCrumbArray([{name: 'Contest Dashboard'}]);
         const button = !this.state.showEmptyScreen ? {route: '/advisordashboard/createadvice', title: 'Create Advice'} : null;
         if (this.state.notAuthorized) {
             return <ForbiddenAccess />
@@ -772,7 +770,7 @@ class AdvisorDashboard extends React.Component {
                 <Row className='aq-page-container'>
                     <AqPageHeader 
                             backgroundColor='transparent'
-                            title="Advisor Dashboard" 
+                            title="Contest Dashboard" 
                             breadCrumbs = {breadCrumbArray} 
                     >
                         {
@@ -784,13 +782,13 @@ class AdvisorDashboard extends React.Component {
                     {
                         this.state.showEmptyScreen
                         ?   <Col span={24} style={emptyPortfolioStyle}>
-                                <h1>You have not created any advices yet. Get started by creating One</h1>
+                                <h1>You have not created any entries yet. Get started by creating one</h1>
                                 <Button 
                                         type="primary" 
-                                        onClick={() => this.props.history.push('/dashboard/createadvice')}
+                                        onClick={() => this.props.history.push('/contest/createentry')}
                                         style={{marginTop: '20px'}}
                                 >
-                                    Create Advice
+                                    Create Entry
                                 </Button>
                             </Col>
                         :   <Col span={24} className='advisorDashboardContainer' style={{height: '100%'}}>
@@ -800,7 +798,7 @@ class AdvisorDashboard extends React.Component {
                                         <Col span={24}>
                                             <DashboardCard 
                                                     headerStyle={headerStyle}
-                                                    title="MY ADVICES"
+                                                    title="MY ENTRIES"
                                                     cardStyle={{marginTop:'10px', height:'550px'}}  
                                                     menu={this.renderSortingMenu()}
                                                     loading={this.state.myAdvicesLoading}
@@ -823,9 +821,9 @@ class AdvisorDashboard extends React.Component {
                                                     loading={this.state.advicePerformanceLoading}
                                                     menu={
                                                         <ArrowButton 
-                                                                text="Go To Advice"
+                                                                text="Go To Entry"
                                                                 onClick={
-                                                                    () => this.props.history.push(`/advice/${this.state.selectedAdviceId}`)
+                                                                    () => this.props.history.push(`/contest/entry/${this.state.selectedAdviceId}`)
                                                                 }
                                                         />
                                                     }

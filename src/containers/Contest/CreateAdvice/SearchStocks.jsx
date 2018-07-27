@@ -300,8 +300,32 @@ export class SearchStocks extends React.Component {
         this.setState({selectedStocks, stocks});
     }
 
+    initializeSelectedStocks = () => {
+        const positions = [...this.props.portfolioPositions];
+        const selectedStocks = positions.map(position => position.symbol);
+        this.localStocks = positions.map(position => {
+            return {
+                change: 0,
+                changePct: 0,
+                checked: true,
+                close: _.get(position, 'lastPrice', 0),
+                current: _.get(position, 'lastPrice', 0),
+                high: 0,
+                low: 0,
+                name: '',
+                open: 0,
+                sector: _.get(position, 'sector', ''),
+                symbol: _.get(position, 'symbol', '')
+            }
+        });
+        this.setState({selectedStocks});
+    }
+
     componentWillMount() {
         this.fetchStocks('');
+        if (this.props.isUpdate) {
+            this.initializeSelectedStocks();
+        }
         this.syncStockListWithPortfolio(this.props.portfolioPositions);
     }
 

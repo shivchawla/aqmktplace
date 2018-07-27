@@ -175,7 +175,7 @@ export class Utils{
 		this.localStorageSaveObject('adviceFilter', {});
 		this.localStorageSave('selectedPage', 1);
 		this.localStorageSave('selectedTab', 'all');
-		this.localStorageSave('redirectToUrlFromLogin', '/advice');
+		this.localStorageSave('redirectToUrlFromLogin', '/contest');
 		this.setLoggedInUserInfo({});
 	}
 

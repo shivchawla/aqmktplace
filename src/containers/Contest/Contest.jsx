@@ -28,17 +28,17 @@ export default class Contest extends React.Component {
                             />
                             <Route 
                                 exact={true} 
-                                path={`${this.props.match.url}/createadvice`} 
+                                path={`${this.props.match.url}/createentry`} 
                                 render={props => <HowToCreateAdvice {...props}/>} 
                             />
                             <Route 
                                 exact={true} 
-                                path={`${this.props.match.url}/createadvice/edit`} 
+                                path={`${this.props.match.url}/createentry/edit`} 
                                 render={props => <CreateAdvice {...props}/>} 
                             />
                             <Route
                                 exact={true} 
-                                path={`${this.props.match.url}/updateadvice/:id`}
+                                path={`${this.props.match.url}/updateentry/:id`}
                                 render={props => <UpdateAdvice {...props}/>} 
                             />
                             <Route 
@@ -75,7 +75,7 @@ export default class Contest extends React.Component {
                             />
                             <Route
                                 exact={true} 
-                                path={`${this.props.match.url}/createadvice`}
+                                path={`${this.props.match.url}/createentry`}
                                 render={props => <HowToCreateAdvice/>} 
                             />
                             <Route 
@@ -85,12 +85,12 @@ export default class Contest extends React.Component {
                             />
                             <Route
                                 exact={true} 
-                                path={`${this.props.match.url}/createadvice/edit`}
+                                path={`${this.props.match.url}/createentry/edit`}
                                 render={props => <CreateAdvice {...props}/>} 
                             />
                             <Route
                                 exact={true} 
-                                path={`${this.props.match.url}/updateadvice/:id`}
+                                path={`${this.props.match.url}/updateentry/:id`}
                                 render={props => <UpdateAdvice {...props}/>} 
                             />
                             <Route

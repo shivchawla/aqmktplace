@@ -2,12 +2,12 @@
 * @Author: Shiv Chawla
 * @Date:   2018-03-31 19:38:33
 * @Last Modified by:   Shiv Chawla
-* @Last Modified time: 2018-06-14 10:53:21
+* @Last Modified time: 2018-07-23 10:06:14
 */
 
 module.exports.compareDates = function(date1, date2) {
-	var t1 = new Date(date1).getTime();
-	var t2 = new Date(date2).getTime();
+	var t1 = exports.getDate(date1).getTime();
+	var t2 = exports.getDate(date2).getTime();
 
 	return (t1 < t2) ? -1 : (t1 == t2) ? 0 : 1;
 };
