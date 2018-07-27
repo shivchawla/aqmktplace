@@ -95,7 +95,7 @@ class PortfolioListImpl extends React.Component {
                         <Col span={24}>
                             <MyChartNew 
                                 series={this.state.highStockSeries} 
-                                chartId="advice-preview-performance-chart"
+                                chartId="advice-preview-performance-chart-modal"
                             />
                         </Col>
                     </Row>
@@ -426,8 +426,8 @@ class PortfolioListImpl extends React.Component {
 
         return (
             <Col style={{display: 'block'}}>
-                {this.renderAdvicePerformanceBottomSheet()}
-                {this.renderPerformanceModal()}
+                {/* {this.renderAdvicePerformanceBottomSheet()} */}
+                {/* {this.renderPerformanceModal()} */}
                 {this.renderUpdatePositionBottomSheet()}
                 <Col 
                         span={24} 
@@ -462,11 +462,11 @@ class PortfolioListImpl extends React.Component {
                         />
                         <h3 style={{fontSize: '16px', marginLeft: '35px'}}>Add Positions</h3>
                         <div style={horizontalBox}>
-                            <Icon 
+                            {/* <Icon 
                                 onClick={this.props.toggleBottomSheet} 
                                 type="plus-circle" 
                                 style={{fontSize: '22px', fontWeight: '700', marginRight: '20px', color: primaryColor}} 
-                            />
+                            /> */}
                             <Icon 
                                 onClick={() => this.props.positions.length >= 1 && this.props.togglePerformanceModal()} 
                                 type="line-chart" 
@@ -562,8 +562,9 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     <Col span={6}>
                         <MetricItem 
                             label="Weight"
-                            value={weight}
+                            value={`${weight} %`}
                             // percentage
+                            noNumeric
                             labelStyle={metricLabelStyle}
                             valueStyle={metricValueStyle}
                         />

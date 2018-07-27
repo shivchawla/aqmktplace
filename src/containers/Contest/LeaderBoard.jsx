@@ -1,9 +1,11 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Row, Col, Badge, Icon, Button, Select, Radio, Tooltip} from 'antd';
-import Radium, {StyleRoot} from 'radium';
+import Media from 'react-media';
+import {Row, Col, Button, Select, Radio, Tooltip} from 'antd';
+import {SegmentedControl} from  'antd-mobile';
 import AppLayout from '../AppLayout';
-import {primaryColor, verticalBox, horizontalBox, metricColor} from '../../constants';
+import LeaderboardMobile from './LeaderBoardMobile';
+import {primaryColor, verticalBox, horizontalBox} from '../../constants';
 import {fetchAjax} from '../../utils';
 import './css/leaderBoard.css';
 import {formatMetric} from './utils';
@@ -146,6 +148,39 @@ export default class LeaderBoard extends React.Component {
                     </Button>
                 </Col>
             </Row>
+        );
+    }
+
+    renderPaginationMobile = () => {
+        const advicesDisplayed = (this.state.selectedPage * this.state.limit) + this.state.limit;
+
+        return (
+            <Col 
+                    span={24} 
+                    style={{
+                        ...horizontalBox, 
+                        justifyContent: 'space-between', 
+                        marginTop: '10px',
+                        padding: '0 15px'
+                    }}
+            >
+                <Button 
+                    disabled={this.state.selectedPage === 0}
+                    onClick={() => this.handlePagination('previous')}
+                    shape="circle"
+                    icon="left"
+                />
+                {/* {
+                    this.state.loadingStocks &&
+                    <Icon type="loading" style={{fontSize: '20px'}}/>
+                } */}
+                <Button
+                    disabled={advicesDisplayed >= this.state.maxAdviceCount}
+                    onClick={() => this.handlePagination('next')}
+                    icon="right"
+                    shape="circle"
+                />
+            </Col>
         );
     }
 
@@ -379,11 +414,11 @@ export default class LeaderBoard extends React.Component {
         }, () => this.getLatestContestSummary(contestId));
     }
 
-    renderContestDropdown = () => {
+    renderContestDropdown = (width = '200px') => {
         const {activeContests = []} = this.state;
         return (
             <Select 
-                    style={{width: 200}} 
+                    style={{width}} 
                     value={this.state.selectedContestId} 
                     onChange={this.handleContestChange}
             >
@@ -397,26 +432,10 @@ export default class LeaderBoard extends React.Component {
     }
 
     onPerformanceToggle = (e) => {
-        this.setState({showActivePerformance: e.target.value == '0'});
+        this.setState({showActivePerformance: !this.state.showActivePerformance});
     }
 
     renderPageContent() {
-        const {advices = [], selectedAdviceId = null} = this.state;
-        const selectedAdvice = advices.filter(advice => advice.adviceId === selectedAdviceId)[0];
-        const advisorName = selectedAdvice !== undefined ? selectedAdvice.advisorName: '';
-        const adviceName = selectedAdvice !== undefined ? selectedAdvice.adviceName: '';
-
-        const adviceNameStyle = {
-            fontSize: '18px',
-            fontWeight: '400',
-            color: primaryColor,
-            height: '30px',
-            textAlign:'center'
-        };
-
-        const currentMetrics = this.processMetricsForSelectedAdvice('current');
-        const simulatedMetrics = this.processMetricsForSelectedAdvice('simulated');
-
         return (
             <Row gutter={0} style={{padding: '10px 20px'}}>
                 <ContestHomeMeta />
@@ -443,51 +462,7 @@ export default class LeaderBoard extends React.Component {
                         borderTop: `5px solid ${primaryColor}`
                     }}
                 >
-                    <div style={{...horizontalBox, 
-                            margin:'10px auto 0px auto', 
-                            padding: '5px 0',
-                            //border: `1px solid ${primaryColor}`, 
-                            width: '80%', 
-                            color: primaryColor, 
-                            backgroundColor: '#fff',
-                            display:'block'}}>
-                        <h3  style={{...adviceNameStyle, marginBottom: '-10px'}}>
-                            {advisorName}
-                        </h3>
-                        <span style={{fontSize: '12px', display: 'block', textAlign: 'center'}}>
-                            ({adviceName})
-                        </span>
-                    </div>
-                    
-                    <div style={{textAlign: 'center', margin: '20px 0 20px 0'}}>
-                        <RadioGroup size="small" onChange={this.onPerformanceToggle} defaultValue="0">
-                            <RadioButton value="0">Active</RadioButton>
-                            <RadioButton value="1">Historical</RadioButton>
-                        </RadioGroup>
-                    </div>
-
-                    {this.state.showActivePerformance ?
-                        <MetricContainer 
-                        header={this.renderMetricsHeader(_.get(selectedAdvice, 'rank', null), 'Active Performance', _.get(selectedAdvice, 'metrics.current.score', 0))}
-                        metrics={currentMetrics} 
-                        />
-                    :
-                        <MetricContainer 
-                            header={this.renderMetricsHeader(_.get(selectedAdvice, 'simulatedRank', null), 'Historical Performance', _.get(selectedAdvice, 'metrics.simulated.score', 0))}
-                            metrics={simulatedMetrics} 
-                        />
-                    }
-
-                    <div style={{textAlign: 'center', marginTop: '40px'}}>
-                        <Button 
-                            type="primary" 
-                            style={{width: '150px',fontWeight: 300}} 
-                            onClick={() => this.props.history.push(`/contest/entry/${this.state.selectedAdviceId}`)}
-                            >
-                            DETAIL
-                        </Button>
-                    </div>
-
+                    {this.renderContestDetailMetrics()}
                 </Col>
             </Row>
         );
@@ -497,16 +472,161 @@ export default class LeaderBoard extends React.Component {
         this.getActiveContests();
     }
 
+    renderContestDetailMetrics = () => {
+        const {advices = [], selectedAdviceId = null} = this.state;
+        const selectedAdvice = advices.filter(advice => advice.adviceId === selectedAdviceId)[0];
+        const advisorName = selectedAdvice !== undefined ? selectedAdvice.advisorName: '';
+        const adviceName = selectedAdvice !== undefined ? selectedAdvice.adviceName: '';
+
+        const adviceNameStyle = {
+            fontSize: '18px',
+            fontWeight: '400',
+            color: primaryColor,
+            height: '30px',
+            textAlign:'center'
+        };
+
+        const currentMetrics = this.processMetricsForSelectedAdvice('current');
+        const simulatedMetrics = this.processMetricsForSelectedAdvice('simulated');
+
+
+
+        return (
+            <ContestDetailMetrics 
+                entryDetail={{
+                    adviceName, 
+                    advisorName, 
+                    selectedAdvice,
+                    currentMetrics, 
+                    simulatedMetrics
+                }}
+                onPerformanceToggle={this.onPerformanceToggle}
+                showActivePerformance={this.state.showActivePerformance}
+                history={this.props.history}
+                renderMetricsHeader={this.renderMetricsHeader}
+                selectedAdviceId={this.state.selectedAdviceId}
+            />
+        );
+    }
+
     render() {
         return (
-            <AppLayout
-                content={this.renderPageContent()}
-                loading={this.state.loading}
-            ></AppLayout>
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() =>
+                        <LeaderboardMobile 
+                            leaders={this.state.advices} 
+                            renderContestDetail={this.renderContestDetailMetrics}
+                            onLeaderItemClick={this.handleAdviceItemClicked} 
+                            renderPagination={this.renderPaginationMobile}
+                            loading={this.state.loading}
+                            renderContestDropdown={this.renderContestDropdown}
+                        />
+                    }
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() =>
+                        <AppLayout
+                            content={this.renderPageContent()}
+                            loading={this.state.loading}
+                        />
+                    }
+                />
+            </React.Fragment>
         );
     }
 }
  
+const ContestDetailMetrics = ({entryDetail, onPerformanceToggle, showActivePerformance, history, renderMetricsHeader, selectedAdviceId}) => {
+    const {
+        advisorName = '', 
+        adviceName = '', 
+        selectedAdvice = {},
+        currentMetrics = {},
+        simulatedMetrics = {}
+    } = entryDetail;
+    const adviceNameStyle = {
+        fontSize: '18px',
+        fontWeight: '400',
+        color: primaryColor,
+        height: '30px',
+        textAlign:'center'
+    };
+
+    return (
+        <React.Fragment>
+            <div style={{
+                ...horizontalBox, 
+                    margin:'10px auto 0px auto', 
+                    padding: '5px 0',
+                    //border: `1px solid ${primaryColor}`, 
+                    width: '80%', 
+                    color: primaryColor, 
+                    backgroundColor: '#fff',
+                    display:'block'}}>
+                <h3  style={{...adviceNameStyle, marginBottom: '-10px'}}>
+                    {advisorName}
+                </h3>
+                <span style={{fontSize: '12px', display: 'block', textAlign: 'center'}}>
+                    ({adviceName})
+                </span>
+            </div>
+            
+            <div 
+                    style={{
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        margin: '20px 0 20px 0'
+                    }}
+            >
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => (
+                        <SegmentedControl 
+                            style={{width: '60%'}}
+                            values={['Active', 'Historical']}
+                            onChange={onPerformanceToggle}
+                            selectedIndex={showActivePerformance === true ? 0 : 1}
+                        />
+                    )}
+                />
+                <Media 
+                    query="(min-width: 600px)"
+                    render={() => (
+                        <RadioGroup size="small" onChange={onPerformanceToggle} defaultValue="0">
+                            <RadioButton value="0">Active</RadioButton>
+                            <RadioButton value="1">Historical</RadioButton>
+                        </RadioGroup>
+                    )}
+                />
+            </div>
+
+            {showActivePerformance ?
+                <MetricContainer 
+                header={renderMetricsHeader(_.get(selectedAdvice, 'rank', null), 'Active Performance', _.get(selectedAdvice, 'metrics.current.score', 0))}
+                metrics={currentMetrics} 
+                />
+            :
+                <MetricContainer 
+                    header={renderMetricsHeader(_.get(selectedAdvice, 'simulatedRank', null), 'Historical Performance', _.get(selectedAdvice, 'metrics.simulated.score', 0))}
+                    metrics={simulatedMetrics} 
+                />
+            }
+
+            <div style={{textAlign: 'center', marginTop: '40px'}}>
+                <Button 
+                    type="primary" 
+                    style={{width: '150px',fontWeight: 300}} 
+                    onClick={() => history.push(`/contest/entry/${selectedAdviceId}`)}
+                    >
+                    DETAIL
+                </Button>
+            </div>
+        </React.Fragment>
+    );
+}
 
 let LeaderItem = ({leaderItem, onClick, selected}) => {
     const containerStyle = {

@@ -71,12 +71,15 @@ export class PortfolioPieChart extends React.Component {
     // }
 
     render() {
+        const {chartId = "chart-container"} = this.props;
+
         return (
             <Row style={{backgroundColor: '#fff', padding: '10px'}}>
                 <Col span={24}>
                     <HighChartNew
                         maxSlices={8}
                         maxWeight={90} 
+                        chartId={chartId}
                         series={[{
                             name: 'Portfolio Composition', 
                             data: this.state.selectedView === 'sector' 

@@ -2,12 +2,15 @@ import * as React from 'react';
 import Loadable from 'react-loadable';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
-import {Spin, Row, Col, Collapse, Radio, Icon, Button} from 'antd';
+import {Spin, Row, Col, Collapse, Radio, Icon, Button, Select} from 'antd';
 import {SegmentedControl} from 'antd-mobile';
+import {formatMetric, contestMetrics as metrics} from '../Contest/utils';
+import {metricDefs} from '../Contest/constants';
 import {horizontalBox, metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../../constants';
 import {AqTag} from '../../components/AqTag';
+import {AdviceContestMetrics, MetricHeader, MetricContainer} from '../../containers/AdviceDetailContent';
 import {WarningIcon} from '../../components/WarningIcon'
-import {IconItem} from '../../components/IconItem';
+import {IconItem} from '../../components/IconItem'
 import {AqRate} from '../../components/AqRate';
 import {PositionItems} from './PositionItems';
 import {MetricItem} from '../../components/MetricItem';
@@ -20,9 +23,19 @@ const MyChartNew = Loadable({
     loader: () => import('../MyChartNew'),
     loading: () => <div>Loading</div>
 });
+const Option = Select.Option;
 const Panel = Collapse.Panel;
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
 
 class AdviceDetailContentImpl extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedContestId: _.get(props, `participatedContests[${props.participatedContests.length - 1}]._id`, null),
+            showCurrentRankView: true
+        };
+    }
     
     renderAdviceMetrics = () => {
         const {
@@ -118,12 +131,71 @@ class AdviceDetailContentImpl extends React.Component {
         return {valid: invalidCount === 0, reasons};
     }
 
+    processMetricsForSelectedAdvice = (selectedAdvice, metricType) => {
+        if (selectedAdvice !== undefined) {
+            const adviceMetrics = _.get(selectedAdvice, `adviceSummary.latestRank.rating.${metricType}.detail`, []);
+
+            var pctMetrics = ['annualReturn', 'volatility', 'maxLoss'];
+            var labels =  {
+                annualReturn: {label: "Excess Return", index: 0},
+                volatility: {label: "Tracking Error", index: 1},
+                maxLoss: {label: 'Maximum Loss', index: 2},
+                sharpe: {label: 'Information Ratio', index: 3},
+                calmar: {label: 'Calmar Ratio', index: 4},
+                concentration: {label: 'Concentration', index: 5}
+            };
+                        
+            return adviceMetrics.map(metricItem => {
+                const field = metricItem.field;
+                var rawVal = metricItem.metricValue;
+                if (field == "maxLoss") {
+                    rawVal *=-1;
+                }
+
+                var idx = pctMetrics.indexOf(field);
+                const adjustedVal = idx != -1 ? formatMetric(rawVal, "pct") : formatMetric(rawVal);
+                const color = ["annualReturn", "maxLoss"].indexOf(field) != -1 ? rawVal > 0 ? metricColor.positive : rawVal < 0 ? metricColor.negative : '#353535' : '#353535';
+
+                return {
+                    metricValue: adjustedVal,
+                    rank: metricItem.rank,
+                    label: _.get(labels, `${metricItem.field}.label`, ''),
+                    index: _.get(labels, `${metricItem.field}.index`, 0),
+                    tooltip: _.get(metricDefs, field, ""),
+                    color: color
+                }
+            }).sort((a,b) => {return a.index < b.index ? -1 : 1});
+
+        } else {
+            return metrics;
+        }
+    }
+
+    onRankRadioClick = () => {
+        this.setState({showCurrentRankView: !this.state.showCurrentRankView});
+    }
 
     redirectToLogin = () => {
         Utils.localStorageSave('redirectToUrlFromLogin', this.props.match.url);
         this.props.history.push('/login');
     }
 
+    handleContestDropdownChange = contestId => {
+        this.setState({selectedContestId: contestId});
+    }
+
+    renderParticipatedContestDropdown = () => {
+        const participatedContests = [...this.props.participatedContests];
+        return (
+            <Select value={this.state.selectedContestId} onChange={this.handleContestDropdownChange}>
+                {
+                    participatedContests.map((contest, index) => {
+                        return <Option key={index} value={contest._id}>{contest.name}</Option>
+                    })
+                }
+            </Select>
+        );
+    }
 
     renderPageContent() {
         const {
@@ -139,7 +211,11 @@ class AdviceDetailContentImpl extends React.Component {
             isAdmin = false,
             isPublic = false,
             approval = {},
-            unsubscriptionPending = false
+            unsubscriptionPending = false,
+            contestOnly = false,
+            active = false,
+            withdrawn = false,
+            prohibited = false
         } = this.props.adviceDetail || {};
         const {
             annualReturn = 0, 
@@ -162,6 +238,10 @@ class AdviceDetailContentImpl extends React.Component {
         const notOwnerColumns = ['name', 'symbol', 'shares', 'price', 'sector', 'weight'];
         const portfolioTableColumns = ((isOwner || isAdmin) && !this.props.preview) ? ownerColumns : notOwnerColumns;
         const approvalStatus = _.get(approval, 'status', false);
+        // Selected participated contest operation
+        const selectedContest = this.props.participatedContests.filter(contest => contest._id === this.state.selectedContestId)[0];
+        const currentMetrics = this.processMetricsForSelectedAdvice(selectedContest, 'current');
+        const simulatedMetrics = this.processMetricsForSelectedAdvice(selectedContest, 'simulated');
 
         return (
             <Col span={24} style={{backgroundColor: '#fff'}}>
@@ -188,14 +268,17 @@ class AdviceDetailContentImpl extends React.Component {
                         }
                     </Col>
                     <Col span={24} style={{...horizontalBox, justifyContent: 'center', marginTop: '10px'}}>
-                        <AqTag 
+                        {
+                            !contestOnly && 
+                            <AqTag 
                                 tooltipTitle='Rebalancing Frequency: The advice is rebalanced/updated at this frequency'
                                 tooltipPlacement='bottom'
                                 color='#f58231'
                                 text={this.props.adviceDetail.rebalanceFrequency}
                                 icon='clock-circle-o'
                                 iconStyle={{fontWeight: '400', marginRight: '5px'}}
-                        />
+                            />
+                        }
                         {
                             isOwner &&
                             <AqTag 
@@ -208,6 +291,33 @@ class AdviceDetailContentImpl extends React.Component {
                             />
                         }
                         {
+                            contestOnly && active &&
+                            <AqTag 
+                                    color={primaryColor}
+                                    tooltipTitle="This is an active entry"
+                                    text="Active"
+                                    tagStyle={{marginLeft: '10px'}}
+                            />
+                        }
+                        {
+                            contestOnly && withdrawn &&
+                            <AqTag 
+                                    color={metricColor.neutral}
+                                    tooltipTitle="This Entry is withdrawn"
+                                    text="Withdrawn"
+                                    tagStyle={{marginLeft: '10px'}}
+                            />
+                        }
+                        {
+                            contestOnly && prohibited &&
+                            <AqTag 
+                                    color={metricColor.negative}
+                                    tooltipTitle="This is entry is prohibited from the current entry"
+                                    text="Prohibited"
+                                    tagStyle={{marginLeft: '10px'}}
+                            />
+                        }
+                        {
                             (isSubscribed || isFollowing) &&
                             <AqTag 
                                     tooltipTitle={isSubscribed ? 'You are subscribed to this advice' : 'You have wislisted this advice'}
@@ -216,7 +326,7 @@ class AdviceDetailContentImpl extends React.Component {
                             />
                         }
                         {
-                            isOwner &&
+                            !contestOnly && isOwner &&
                             <AqTag 
                                     color='#673AB7'
                                     tooltipTitle={isPublic ? 'This advice is Public' : 'This advice is private'}
@@ -226,7 +336,7 @@ class AdviceDetailContentImpl extends React.Component {
                             />
                         }
                         {
-                            (isOwner || isAdmin) && approvalRequested && isPublic &&
+                            !contestOnly && (isOwner || isAdmin) && approvalRequested && isPublic &&
                             <AqTag 
                                     color='#FFAB00'
                                     text="Approval Requested"
@@ -270,7 +380,8 @@ class AdviceDetailContentImpl extends React.Component {
                         >
                             {
                                 !isOwner
-                                ?   <Button 
+                                ?   !contestOnly &&
+                                    <Button 
                                             onClick={() => 
                                                 Utils.isLoggedIn() 
                                                 ? unsubscriptionPending 
@@ -284,18 +395,35 @@ class AdviceDetailContentImpl extends React.Component {
                                     >
                                         {!isSubscribed ? "BUY ADVICE" : "UNSUBSCRIBE"}
                                     </Button>
-                                :   ((!approvalRequested && isPublic) || !isPublic) &&
-                                    <Button 
+                                :   ((!approvalRequested && isPublic) || !isPublic || contestOnly) && isOwner &&
+                                    <div 
+                                            style={{
+                                                ...horizontalBox,
+                                                width: '100%',
+                                                justifyContent: 'space-around'
+                                            }}
+                                    >
+                                        {
+                                            active &&
+                                            <Button 
+                                                    style={{fontSize: '16px'}}
+                                                    onClick={this.props.withdrawAdviceFromContest}
+                                            >
+                                                WITHDRAW
+                                            </Button>
+                                        }
+                                        <Button 
                                                 type="primary" 
-                                                style={{fontSize: '16px', width: '40%'}}
+                                                style={{fontSize: '16px'}}
                                                 onClick={() => 
                                                     Utils.isLoggedIn()
-                                                    ? this.props.history.push(`/dashboard/updateadvice/${this.props.match.params.id}`)
+                                                    ? this.props.history.push(`/contest/updateadvice/${this.props.match.params.id}`)
                                                     : this.redirectToLogin()
                                                 }
                                         >
-                                            UPDATE
-                                    </Button>
+                                            {active ? "UPDATE" : "ENTER CONTEST"}
+                                        </Button>
+                                    </div>
                             }
                             {
                                 !isOwner &&
@@ -359,129 +487,151 @@ class AdviceDetailContentImpl extends React.Component {
                 </Row>
                 <Collapse 
                         bordered={false} 
-                        defaultActiveKey={defaultActiveKey} 
+                        defaultActiveKey={[...defaultActiveKey, '6']} 
                 >
-                    <Panel
-                            key="1"
-                            style={customPanelStyle}
-                            header={<h3 style={{...metricsHeaderStyle, fontSize: '16px'}}>Investment Objective</h3>}
-                    >
-                        <Row className="row-container" >
-                            <Col span={24}>
-                                <Row>
-                                    <Col span={24}>
-                                        <InvestmentObjItem 
-                                                label="Goal" 
-                                                value={_.get(goal, 'field', '-')} 
-                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('goal').valid && !approvalRequested}
-                                                reason={this.getInvestmentObjWarning('goal').reason}
-                                        />
-                                    </Col>
-                                </Row>
-
-                                <Row style={{marginTop: '15px'}}>
-                                    <Col span={24} style={{marginTop: '10px'}}>
-                                        <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
-                                    </Col>
-                                </Row>
-
-                                <Row style={{marginTop: '15px'}}>
-                                    <Col span={24} style={{marginTop: '10px'}}>
-                                        <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
-                                    </Col>
-                                </Row>
-                            
-                                <Row style={{marginTop: '15px'}}>
-                                    <Col span={8}>
-                                        <InvestmentObjItem  
-                                                showTag 
-                                                label="Valuation" 
-                                                value={_.get(portfolioValuation, 'field', '-')}
-                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('portfolioValuation').valid && !approvalRequested}
-                                                reason={this.getInvestmentObjWarning('portfolioValuation').reason}
-                                        />
-                                    </Col>
-                                    <Col span={8}>
-                                        <InvestmentObjItem 
-                                                showTag 
-                                                label="Capitalization" 
-                                                value={_.get(capitalization, 'field', '-')}
-                                                warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('capitalization').valid && !approvalRequested}
-                                                reason={this.getInvestmentObjWarning('capitalization').reason}
-                                        />
-                                    </Col>
-                                    <Col 
-                                            span={_.get(sectors, 'detail', []).length > 1 ? 24 : 8}
-                                            style={{
-                                                marginTop: _.get(sectors, 'detail', []).length > 1 ? '20px' : '0px'
-                                            }}
-                                    >
-                                        <div style={{display: 'flex', flexDirection: 'column'}}>
-                                            <div style={{
-                                                    display: 'flex', 
-                                                    flexDirection: 'row',
-                                                    overflow: 'hidden',
-                                                    overflowX: 'scroll'
-                                                }}
-                                            >
-                                                {
-                                                    _.get(sectors, 'detail', []).map((item, index) => {
-                                                        return (
-                                                            <React.Fragment key={index}>
-                                                                <AqTag 
-                                                                        key={index}
-                                                                        color={primaryColor}
-                                                                        text={item}
-                                                                        textStyle={{fontSize: '14px'}}
-                                                                />
-                                                            </React.Fragment>
-                                                        );
-                                                    })
-                                                }
-                                            </div>
-                                            <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                                <h3 
-                                                        style={{fontSize: '16px', color: '#515151', fontWeight: '700'}}
-                                                >
-                                                    Sectors
-                                                </h3>
-                                                {
-                                                    isPublic && 
-                                                    isPublic && 
-                                                    !approvalStatus && 
-                                                    !this.getInvestmentObjWarning('sectors').valid &&
-                                                    !approvalRequested &&
-                                                    <WarningIcon 
-                                                            reason={this.getInvestmentObjWarning('sectors').reason}
-                                                    />
-                                                }
-                                            </div>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            {
-                                _.get(userText, 'detail', '').length > 0 &&
-                                <Col span={24} style={{marginTop: '10px'}}>
-                                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                                        <h3 style={{fontSize: '14px', fontWeight: '700'}}>Description</h3>
-                                        {
-                                            isPublic && 
-                                            isPublic && 
-                                            !approvalStatus && 
-                                            !this.getInvestmentObjWarning('userText').valid &&
-                                            !approvalRequested &&
-                                            <WarningIcon 
-                                                    reason={this.getInvestmentObjWarning('userText').reason}
+                    {
+                        !contestOnly &&
+                        <Panel
+                                key="1"
+                                style={customPanelStyle}
+                                header={<h3 style={{...metricsHeaderStyle, fontSize: '16px'}}>Investment Objective</h3>}
+                        >
+                            <Row className="row-container" >
+                                <Col span={24}>
+                                    <Row>
+                                        <Col span={24}>
+                                            <InvestmentObjItem 
+                                                    label="Goal" 
+                                                    value={_.get(goal, 'field', '-')} 
+                                                    warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('goal').valid && !approvalRequested}
+                                                    reason={this.getInvestmentObjWarning('goal').reason}
                                             />
-                                        }
-                                    </div>
-                                    <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
-                                </Col>
-                            }
-                        </Row>
-                    </Panel>
+                                        </Col>
+                                    </Row>
 
+                                    <Row style={{marginTop: '15px'}}>
+                                        <Col span={24} style={{marginTop: '10px'}}>
+                                            <InvestmentObjItem label="Investor Type" value={_.get(goal, 'investorType', '-')}/>
+                                        </Col>
+                                    </Row>
+
+                                    <Row style={{marginTop: '15px'}}>
+                                        <Col span={24} style={{marginTop: '10px'}}>
+                                            <InvestmentObjItem label="Suitability" value={_.get(goal, 'suitability', '-')}/>
+                                        </Col>
+                                    </Row>
+                                
+                                    <Row style={{marginTop: '15px'}}>
+                                        <Col span={8}>
+                                            <InvestmentObjItem  
+                                                    showTag 
+                                                    label="Valuation" 
+                                                    value={_.get(portfolioValuation, 'field', '-')}
+                                                    warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('portfolioValuation').valid && !approvalRequested}
+                                                    reason={this.getInvestmentObjWarning('portfolioValuation').reason}
+                                            />
+                                        </Col>
+                                        <Col span={8}>
+                                            <InvestmentObjItem 
+                                                    showTag 
+                                                    label="Capitalization" 
+                                                    value={_.get(capitalization, 'field', '-')}
+                                                    warning={isPublic && !approvalStatus && !this.getInvestmentObjWarning('capitalization').valid && !approvalRequested}
+                                                    reason={this.getInvestmentObjWarning('capitalization').reason}
+                                            />
+                                        </Col>
+                                        <Col 
+                                                span={_.get(sectors, 'detail', []).length > 1 ? 24 : 8}
+                                                style={{
+                                                    marginTop: _.get(sectors, 'detail', []).length > 1 ? '20px' : '0px'
+                                                }}
+                                        >
+                                            <div style={{display: 'flex', flexDirection: 'column'}}>
+                                                <div style={{
+                                                        display: 'flex', 
+                                                        flexDirection: 'row',
+                                                        overflow: 'hidden',
+                                                        overflowX: 'scroll'
+                                                    }}
+                                                >
+                                                    {
+                                                        _.get(sectors, 'detail', []).map((item, index) => {
+                                                            return (
+                                                                <React.Fragment key={index}>
+                                                                    <AqTag 
+                                                                            key={index}
+                                                                            color={primaryColor}
+                                                                            text={item}
+                                                                            textStyle={{fontSize: '14px'}}
+                                                                    />
+                                                                </React.Fragment>
+                                                            );
+                                                        })
+                                                    }
+                                                </div>
+                                                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                    <h3 
+                                                            style={{fontSize: '16px', color: '#515151', fontWeight: '700'}}
+                                                    >
+                                                        Sectors
+                                                    </h3>
+                                                    {
+                                                        isPublic && 
+                                                        isPublic && 
+                                                        !approvalStatus && 
+                                                        !this.getInvestmentObjWarning('sectors').valid &&
+                                                        !approvalRequested &&
+                                                        <WarningIcon 
+                                                                reason={this.getInvestmentObjWarning('sectors').reason}
+                                                        />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                                {
+                                    _.get(userText, 'detail', '').length > 0 &&
+                                    <Col span={24} style={{marginTop: '10px'}}>
+                                        <div style={{display: 'flex', flexDirection: 'row'}}>
+                                            <h3 style={{fontSize: '14px', fontWeight: '700'}}>Description</h3>
+                                            {
+                                                isPublic && 
+                                                isPublic && 
+                                                !approvalStatus && 
+                                                !this.getInvestmentObjWarning('userText').valid &&
+                                                !approvalRequested &&
+                                                <WarningIcon 
+                                                        reason={this.getInvestmentObjWarning('userText').reason}
+                                                />
+                                            }
+                                        </div>
+                                        <h5 style={{fontSize: '16px'}}>{_.get(userText, 'detail', '')}</h5>
+                                    </Col>
+                                }
+                            </Row>
+                        </Panel>
+                    }
+                    {
+                        contestOnly && Utils.isLoggedIn() &&
+                        <Panel
+                                key="6"
+                                header={<h3 style={{...metricsHeaderStyle, fontSize: '16px'}}>Contest Detail</h3>}
+                        >   
+                            <Row>
+                                <AdviceContestMetrics 
+                                    selectedAdvice={selectedContest.adviceSummary}
+                                    onPerformanceToggle={this.onRankRadioClick}
+                                    currentMetrics={currentMetrics}
+                                    simulatedMetrics={simulatedMetrics}
+                                    advisorName=''
+                                    adviceName=''
+                                    view={this.state.showCurrentRankView}
+                                    contestDropdown={null}
+                                />
+                            </Row>
+                        </Panel>
+                    }
                     {
                         (isSubscribed || isOwner || isAdmin) &&
                         <Panel
@@ -542,7 +692,7 @@ class AdviceDetailContentImpl extends React.Component {
                 <Row>
                     <Col span={24} style={{textAlign: 'center'}}>
                         {
-                            (!isOwner &&  !isSubscribed) &&
+                            (!isOwner &&  !isSubscribed) && !contestOnly &&
                             <Button 
                                     onClick={() => 
                                         Utils.isLoggedIn() 
@@ -563,7 +713,7 @@ class AdviceDetailContentImpl extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (!_.isEqual(this.props, nextProps)) {
+        if (!_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState)) {
             return true;
         } 
         return false;

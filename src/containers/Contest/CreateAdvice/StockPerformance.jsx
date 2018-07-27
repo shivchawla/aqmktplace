@@ -215,7 +215,7 @@ class StockPerformanceImpl extends React.Component {
 
     renderPageContent = () => {
         return (
-            <Col style={{padding:'0px 30px', alignItems:'center'}}>
+            <Col style={{padding:'0px 20px', alignItems:'center'}}>
                 <Row style={{margin: '10px 0 20px 0'}}>
                     <Col style={{textAlign: 'center'}}>
                         <h3 style={{fontSize: '16px', fontWeight: '700'}}>{this.props.stock.symbol}: {this.props.stock.name}</h3>

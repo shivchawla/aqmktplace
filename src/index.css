@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Lato:400,700,300|Montserrat:400,500|Nunito');
+* {
+  -webkit-overflow-scrolling: touch;
+}
 
 html, body, #root {
   width: 100%;

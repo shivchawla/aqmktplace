@@ -1,19 +1,23 @@
 import * as React from 'react';
 import _ from 'lodash';
 import Media from 'react-media';
+import {Motion, spring} from 'react-motion';
 import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Row, Col, Select, Button, Modal, Tag, Icon} from 'antd';
+import {Button as MobileButton, Picker, List, LocaleProvider} from 'antd-mobile';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
 import AppLayout from '../../../containers/AppLayout';
+import {AqMobileLayout} from '../../AqMobileLayout/Layout';
 import {benchmarks} from '../../../constants/benchmarks';
-import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox} from '../../../constants';
+import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox, goals} from '../../../constants';
 import {fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
 import { MetricItem } from '../../../components/MetricItem';
+import enUS from 'antd-mobile/lib/locale-provider/en_US';
 
 const {Option} = Select;
 const textColor = '#595959';
@@ -41,7 +45,7 @@ class ContestAdviceFormImpl extends React.Component {
             adviceActive: false,
             positions: [],
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: true,
+            bottomSheetOpenStatus: false,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -94,6 +98,35 @@ class ContestAdviceFormImpl extends React.Component {
                     }
                 </Col>
             </Row>
+        );
+    }
+
+    onBenchmarkPickerChange = value => {
+        // this.setState({benchmark: value[0]});
+        this.benchmark = value[0];
+        this.toggleBenchmarkChangeModal();
+    }
+
+    renderBenchmarkDropdownMobile = () => {
+        return (
+            <Col span={24}>
+                <Picker
+                        data={benchmarks.map(benchmark => {return {label: benchmark, value: benchmark}})}
+                        title=""
+                        cols={1}
+                        okText="Select"
+                        dismissText="Cancel"
+                        onChange={value => this.state.positions.length > 0 
+                                    ? this.onBenchmarkPickerChange(value)
+                                    : this.handleEmptyPortfolioBenchmarkChange(value[0])
+                                }
+                        extra='Benchmark'
+                >
+                    <List.Item style={{paddingLeft: '0px', paddingRight: '0px'}} arrow="horizontal">
+                        {this.state.benchmark}
+                    </List.Item>
+                </Picker>
+            </Col>
         );
     }
 
@@ -254,6 +287,7 @@ class ContestAdviceFormImpl extends React.Component {
         const {errorCode = 0, message = '', detail = {}} = this.state.adviceError;
         return (
             <Modal
+                    style={{top: '10px'}}
                     title="Portfolio Validation Status"
                     onOk={this.toggleAdviceErrorDialog}
                     onCancel={this.toggleAdviceErrorDialog}
@@ -319,6 +353,8 @@ class ContestAdviceFormImpl extends React.Component {
                 stockSearchFilters={this.state.stockSearchFilters}
                 getValidationErrors={this.getPortfolioValidationErrors}
                 updateIndividualPosition={this.updateIndividualPosition}
+                deletePositions={this.deletePositions}
+                renderPortfolioPieChart={this.renderPortfolioPieChart}
             />
         )
     }
@@ -329,26 +365,61 @@ class ContestAdviceFormImpl extends React.Component {
 
     renderSearchStocksBottomSheet = () => {
         return (
-            <SwipeableBottomSheet 
-                        fullScreen 
-                        style={{zIndex: '20000'}}
-                        overlayStyle={{overflow: 'hidden'}}
-                        open={this.state.bottomSheetOpenStatus}
-                        onChange={this.toggleSearchStockBottomSheet}
-                        swipeableViewsProps={{
-                            disabled: false
-                        }}
-            >
-                <SearchStocks 
-                    toggleBottomSheet={this.toggleSearchStockBottomSheet}
-                    addPositions={this.conditionallyAddPosition}
-                    portfolioPositions={this.state.positions}
-                    filters={this.state.stockSearchFilters}
-                    ref={el => this.searchStockComponent = el}
-                    history={this.props.history}
-                    pageUrl={this.props.match.url}
-                />
-            </SwipeableBottomSheet>
+            <React.Fragment>
+            <Media 
+                query="(max-width: 600px)"
+                render={() => (
+                    <Motion style={{x: spring(this.state.bottomSheetOpenStatus ? -44 : -(global.screen.height + 45))}}>
+                        {
+                            ({x}) => 
+                                <div 
+                                    style={{
+                                        transform: `translate3d(0, ${x}px, 0)`,
+                                        position: 'absolute',
+                                        zIndex: '20',
+                                        backgroundColor: '#fff'
+                                    }}
+                                >
+                                    <SearchStocks 
+                                        toggleBottomSheet={this.toggleSearchStockBottomSheet}
+                                        addPositions={this.conditionallyAddPosition}
+                                        portfolioPositions={this.state.positions}
+                                        filters={this.state.stockSearchFilters}
+                                        ref={el => this.searchStockComponent = el}
+                                        history={this.props.history}
+                                        pageUrl={this.props.match.url}
+                                    />
+                                </div>
+                        }
+                    </Motion>
+                )}
+            />
+            <Media 
+                query="(min-width: 601px)"
+                render={() => (
+                    <SwipeableBottomSheet 
+                            fullScreen 
+                            style={{zIndex: '20000'}}
+                            overlayStyle={{overflow: 'hidden'}}
+                            open={this.state.bottomSheetOpenStatus}
+                            onChange={this.toggleSearchStockBottomSheet}
+                            swipeableViewsProps={{
+                                disabled: false
+                            }}
+                    >
+                        <SearchStocks 
+                            toggleBottomSheet={this.toggleSearchStockBottomSheet}
+                            addPositions={this.conditionallyAddPosition}
+                            portfolioPositions={this.state.positions}
+                            filters={this.state.stockSearchFilters}
+                            ref={el => this.searchStockComponent = el}
+                            history={this.props.history}
+                            pageUrl={this.props.match.url}
+                        />
+                    </SwipeableBottomSheet>
+                )}
+            />
+            </React.Fragment>
         )
     }
 
@@ -359,6 +430,19 @@ class ContestAdviceFormImpl extends React.Component {
             .then(() => resolve(true));
         });
     })
+
+    deletePositions = toBeDeletedPositions => {
+        const positions = [...this.state.positions];
+        toBeDeletedPositions.map(toBeDeletedPosition => {
+            const positionIndex = _.findIndex(positions, position => position.key === toBeDeletedPosition.key);
+            if (positionIndex > -1) {
+                positions.splice(positionIndex, 1);
+            }
+        });
+        this.setState({positions: this.updateAllWeights(positions)}, () => {
+            this.handleSubmitAdvice('validate')
+        });
+    }
 
     calculateTotalReturnFromTargetTotal = data => {
         return data.map(item => {
@@ -605,11 +689,11 @@ class ContestAdviceFormImpl extends React.Component {
                 });
     }
 
-    renderValidationErrors = () => {
+    renderValidationErrors = (marginTop = '20px') => {
         const errors = this.getPortfolioValidationErrors();
         return (
             <Tag 
-                    style={{marginTop: '20px'}} 
+                    style={{marginTop}} 
                     color={errors.length > 0 ? metricColor.negative : metricColor.positive}
                     onClick={this.toggleAdviceErrorDialog}
             >
@@ -628,7 +712,8 @@ class ContestAdviceFormImpl extends React.Component {
 
     renderBenchmarkChangeWarningModal = () => {
         return (
-            <Modal
+            <Modal 
+                    style={{top: '20px'}}
                     visible={this.state.openBenchmarkChangeModal}
                     title="Warning"
                     onOk={this.resetPortfolioWithNewBenchmark}
@@ -669,21 +754,30 @@ class ContestAdviceFormImpl extends React.Component {
         );
     }
 
+    renderPortfolioPieChart = (chartId = "chart-container-desktop") => {
+        return (
+            <Col span={24} style={{...shadowBoxStyle, ...verticalBox, marginTop: '20px'}}>
+                <h3 style={{fontSize: '16px', marginTop: '10px'}}>Portfolio Composition</h3>
+                <PortfolioPieChart chartId={chartId} data={this.state.positions} />
+            </Col>
+        );
+    }
+
     renderPageContestDesktop = () => {
         return (
             <Row className='aq-page-container'>
                 {this.renderAdviceErrorDialog()}
                 {this.renderSearchStocksBottomSheet()}
                 {this.renderBenchmarkChangeWarningModal()}
-                <Col span={24} style={{height: '40px', marginTop: '10px'}}>
+                {/* <Col span={24} style={{height: '40px', marginTop: '10px'}}>
                     <h3 style={{fontSize: '22px'}}>
                         {this.props.isUpdate ? 'Update Contest Entry' : 'Create Contest Entry'}
                     </h3>
-                </Col>
+                </Col> */}
                 <Col span={18} style={{...shadowBoxStyle, minHeight: '600px'}}>
                     <Row style={leftContainerStyle} type="flex" align="start">
                         <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
-                            {this.renderBenchmarkDropdown()}
+                            {this.renderBenchmarkDropdown()} 
                             {
                                 this.state.positions.length > 0 &&
                                 this.renderNetValue()
@@ -722,10 +816,7 @@ class ContestAdviceFormImpl extends React.Component {
                         </Col>
                         {
                             this.state.positions.length > 0 &&
-                            <Col span={24} style={{...shadowBoxStyle, ...verticalBox, marginTop: '20px'}}>
-                                <h3 style={{fontSize: '16px', marginTop: '10px'}}>Portfolio Composition</h3>
-                                <PortfolioPieChart data={this.state.positions} />
-                            </Col>
+                            this.renderPortfolioPieChart()
                         }
                     </Row>
                 </Col>
@@ -733,25 +824,82 @@ class ContestAdviceFormImpl extends React.Component {
         );
     } 
 
+    renderAddStocksButtonMobile = () => {
+        const errors = this.getPortfolioValidationErrors();
+
+        return (
+            <div
+                    style={{
+                        ...horizontalBox, 
+                        width: '100%',
+                        position: 'fixed',
+                        zIndex: '10',
+                        bottom: '20px',
+                        background: 'transparent',
+                        justifyContent: 'space-between'
+                    }}
+            >
+                <MobileButton 
+                        size="small" 
+                        style={{
+                            width: '150px',
+                            boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
+                            margin: '0 auto',
+                            background: '#30B9AD',
+                            color: '#fff'
+                        }}
+                        onClick={this.toggleSearchStockBottomSheet}
+                        disabled={this.state.adviceSubmissionLoading}
+                >
+                    ADD STOCKS
+                </MobileButton>
+                {
+                    errors.length === 0 &&
+                    <MobileButton 
+                            size="small" 
+                            type="primary" 
+                            style={{
+                                width: '150px',
+                                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
+                                margin: '0 auto'
+                            }}
+                            loading={this.state.adviceSubmissionLoading}
+                            onClick={() => this.handleSubmitAdvice('create')} 
+                    >
+                        {this.props.isUpdate ? "UPDATE ENTRY" : "CREATE ENTRY"}
+                    </MobileButton>
+                }
+            </div>
+        );
+    }
+
     renderPageContestMobile = () => {
         return (
             <Row>
                 {this.renderAdviceErrorDialog()}
                 {this.renderSearchStocksBottomSheet()}
                 {this.renderBenchmarkChangeWarningModal()}
-                <Col span={24} style={{height: '40px', marginTop: '10px'}}>
-                    <h3 style={{fontSize: '16px', marginLeft: '10px'}}>
-                        {this.props.isUpdate ? 'Update Contest Entry' : 'Create Contest Entry'}
-                    </h3>
+                {
+                    this.renderAddStocksButtonMobile()
+                }
+                <Col 
+                        span={24} 
+                        style={{
+                            ...horizontalBox,
+                            height: '40px', 
+                            marginTop: '10px',
+                            justifyContent: 'center'
+                        }}
+                >
+                    {this.renderValidationErrors('0px')}
                 </Col>
-                <Col span={24} style={{...shadowBoxStyle, minHeight: '600px'}}>
-                    <Row style={leftContainerStyle} type="flex" align="start">
-                        <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
-                            {this.renderBenchmarkDropdown()}
-                        </Col>
-                        <Col span={24}>
-                            {this.renderValidationErrors()}
-                        </Col>
+                <Col span={24}>
+                    <Row 
+                            style={{padding: '0px', paddingLeft: '10px', paddingBottom: '5px'}} 
+                            type="flex" 
+                            align="start"
+                    >
+                        {this.renderBenchmarkDropdownMobile()}
                     </Row>
                     <Row>
                         <Col span={24}>
@@ -932,15 +1080,50 @@ class ContestAdviceFormImpl extends React.Component {
 
     render() {
         return (
-            <AppLayout 
-                content={
-                    this.state.noActiveContests
-                    ? this.renderNoActiveContestsScreen()
-                    : this.renderPageContent()
-                } 
-                loading={this.state.loading}
-                noFooter={this.state.noActiveContests}
-            />
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => 
+                        <LocaleProvider locale={enUS}>
+                            <AqMobileLayout 
+                                    loading={this.state.loading}
+                                    innerPage={true} 
+                                    customHeader={
+                                        <h3 style={{fontSize: '14px', marginLeft: '10px'}}>
+                                            {
+                                                this.props.isUpdate 
+                                                ? 'Update Contest Entry' 
+                                                : 'Create Contest Entry'
+                                            }
+                                        </h3>
+                                    }
+                            >
+                                {
+                                    this.state.noActiveContests
+                                    ? this.renderNoActiveContestsScreen()
+                                    : this.renderPageContent()
+                                }
+                            </AqMobileLayout>
+                        </LocaleProvider>
+                    }
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => 
+                        <LocaleProvider locale={enUS}>
+                            <AppLayout 
+                                content={
+                                    this.state.noActiveContests
+                                    ? this.renderNoActiveContestsScreen()
+                                    : this.renderPageContent()
+                                } 
+                                loading={this.state.loading}
+                                noFooter={this.state.noActiveContests || global.screen.width <= 600}
+                            />
+                        </LocaleProvider>
+                    }
+                />
+            </React.Fragment>
         );
     }
 }

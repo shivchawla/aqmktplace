@@ -3,11 +3,15 @@ import Media from 'react-media';
 import {Motion, spring} from 'react-motion';
 import _  from 'lodash';
 import {Row, Col, Input, Icon, Badge, Button, Tag} from 'antd';
+import {SearchBar} from 'antd-mobile';
 import {StockPerformance} from './StockPerformance';
 import {screenSize} from './constants';
+import SearchStockHeader from './Mobile/SearchStockHeader';
+import SearchStockHeaderMobile from './Mobile/StockSearchHeaderMobile';
 import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../constants';
 import {fetchAjax, Utils} from '../../../utils';
 import '../css/searchStocks.css';
+
 
 const {Search} = Input;
 const {requestUrl} = require('../../../localConfig');
@@ -46,8 +50,39 @@ export class SearchStocks extends React.Component {
         );
     }
 
-    handleSearchInputChange = e => {
-        const searchQuery = e.target.value;
+    renderSearchStockListMobile = () => {
+        return (
+            <Row>
+                <Col span={24}>
+                    {/* <Search placeholder="Search Stocks" onChange={this.handleSearchInputChange}/> */}
+                    <SearchBar 
+                        placeholder="Search Stocks"
+                        onChange={value => this.handleSearchInputChange(value, 'mobile')}
+                    />
+                </Col>
+                {this.renderPaginationMobile()}
+                <Col 
+                        span={24} 
+                        style={{
+                            padding: '0 15px'
+                        }}
+                >
+                    {
+                        !this.state.loadingStocks &&
+                        this.renderStockList()
+                    }
+                </Col>
+                {
+                    !this.state.loadingStocks 
+                    && this.state.stocks.length >= 8 
+                    && this.renderPaginationMobile()
+                }
+            </Row>
+        );
+    }
+
+    handleSearchInputChange = (e, type = 'desktop') => {
+        const searchQuery = type === 'desktop' ? e.target.value : e;
         this.setState({searchInput: searchQuery, selectedPage: 0}, () => {
             this.fetchStocks();
         });
@@ -92,7 +127,7 @@ export class SearchStocks extends React.Component {
     renderStockList = () => {
         const {stocks = []} = this.state;
         return stocks.map((stock, index) => 
-            <React.Fragment>
+            <React.Fragment key={index}>
                 <Media 
                     query={`(max-width: ${screenSize.mobile})`}
                     render={() => (
@@ -275,6 +310,37 @@ export class SearchStocks extends React.Component {
         );
     }
 
+    renderPaginationMobile = () => {
+        return (
+            <Col 
+                    span={24} 
+                    style={{
+                        ...horizontalBox, 
+                        justifyContent: 'space-between', 
+                        marginTop: '10px',
+                        padding: '0 15px'
+                    }}
+            >
+                <Button 
+                    onClick={() => this.handlePagination('previous')} 
+                    disabled={this.state.selectedPage === 0}
+                    shape="circle"
+                    icon="left"
+                />
+                {
+                    this.state.loadingStocks &&
+                    <Icon type="loading" style={{fontSize: '20px'}}/>
+                }
+                <Button
+                    onClick={() => this.handlePagination('next')}  
+                    disabled={this.state.stocks.length % 10 !== 0}
+                    shape="circle"
+                    icon="right"
+                />
+            </Col>
+        );
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
         if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
             return true;
@@ -304,11 +370,15 @@ export class SearchStocks extends React.Component {
                                         <Col 
                                                 span={24} 
                                                 style={{
-                                                    padding: '20px',
-                                                    transform: `translate3d(${listX}px, 0, 0)`
+                                                    transform: `translate3d(${listX}px, 0, 0)`,
+                                                    height: '100%',
+                                                    overflowX: 'hidden',
+                                                    overflowY: 'scroll',
+                                                    paddingBottom: '80px'
                                                 }}
                                         >
-                                            {this.renderSearchStocksList()}
+                                            {this.renderSearchStockListMobile()}
+                                            <div style={{width: '100%', height: '80px'}}></div>
                                         </Col>
                                         <Col 
                                                 span={24} 
@@ -318,7 +388,6 @@ export class SearchStocks extends React.Component {
                                                     position: 'absolute'
                                                 }}
                                         >
-                                            {this.renderSelectedStocks()}
                                             <StockPerformance stock={this.state.selectedStock}/>
                                         </Col>
                                     </React.Fragment>
@@ -378,39 +447,49 @@ export class SearchStocks extends React.Component {
                     style={{
                         position: 'fixed',
                         width: '100%',
-                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
-                        padding: '20px',
-                        backgroundColor: '#fff',
+                        padding: '10px',
                         height: '50px',
                         display: 'flex',
                         alignItems: 'center',
                         bottom: '20px',
                         zIndex: '200',
-                        overflow: 'hidden',
-                        overflowX: 'scroll',
-                        borderTop: '1px solid #eaeaea',
-                        borderBottom: '1px solid #eaeaea'
                     }}
             >
-                {
-                    selectedStocks.map((stock, index) => {
-                        return (
-                            <Tag 
-                                    style={{
-                                        marginBottom: '5px', 
-                                    }}
-                                    color='blue'
-                                    key={stock}
-                                    closable
-                                    onClose={() => {
-                                        this.conditionallyAddItemToSelectedArray(stock)
-                                    }}
-                            >
-                                {stock}
-                            </Tag>
-                        );
-                    })
-                }
+                <Col 
+                        span={24}
+                        style={{
+                            ...horizontalBox,
+                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+                            backgroundColor: '#fff',
+                            height: '50px',
+                            overflow: 'hidden',
+                            overflowX: 'scroll',
+                            borderTop: '1px solid #eaeaea',
+                            borderBottom: '1px solid #eaeaea',
+                            borderRadius: '4px',
+                            padding: '0 5px'
+                        }}
+                >
+                    {
+                        selectedStocks.map((stock, index) => {
+                            return (
+                                <Tag 
+                                        style={{
+                                            marginBottom: '5px', 
+                                        }}
+                                        color='blue'
+                                        key={stock}
+                                        closable
+                                        onClose={() => {
+                                            this.conditionallyAddItemToSelectedArray(stock)
+                                        }}
+                                >
+                                    {stock}
+                                </Tag>
+                            );
+                        })
+                    }
+                </Col>
             </Row>
         );
     }
@@ -422,88 +501,48 @@ export class SearchStocks extends React.Component {
         const toggleIconColor = this.state.selectedStocks.length === 0 ? textColor : primaryColor;
 
         return (
-            <Row>
-                {this.renderSelectedStocksMobile()}
-                <Col span={24} style={{...topHeaderContainer, borderBottom: '1px solid #DFDFDF'}}>
-                    <Row type="flex" align="middle" style={{padding: '10px 20px 5px 0px'}}>
-                        <Icon 
-                            style={{fontSize: '24px', cursor: 'pointer', color: toggleIconColor, marginRight: '5px'}} 
-                            type={this.state.stockPerformanceOpen ? "left" : "close-circle"}
-                            onClick={
-                                () => this.state.stockPerformanceOpen
-                                ? this.toggleStockPerformanceOpen()
-                                : this.props.toggleBottomSheet()
-                            }
+            <Row 
+                    style={{
+                        width: global.screen.width, 
+                        overflow: 'hidden', 
+                        height: global.screen.height
+                    }}
+            >
+                {
+                    this.state.selectedStocks.length > 0 
+                    && !this.state.stockPerformanceOpen 
+                    && global.screen.width <= 600
+                    && this.renderSelectedStocksMobile()
+                }
+                <Media 
+                    query='(max-width: 600px)'
+                    render={() => 
+                        <SearchStockHeaderMobile 
+                                filters={this.props.filters}
+                                selectedStocks={this.state.selectedStocks}
+                                stockPerformanceOpen={this.state.stockPerformanceOpen}
+                                toggleBottomSheet={this.props.toggleBottomSheet}
+                                stockPerformanceOpen={this.state.stockPerformanceOpen}
+                                addSelectedStocksToPortfolio={this.addSelectedStocksToPortfolio}
+                                portfolioLoading={this.state.portfolioLoading}
+                                toggleStockPerformanceOpen={this.toggleStockPerformanceOpen}
                         />
-                        <Media 
-                            query='(max-width: 600px)'
-                            render={() => (
-                                <h3 
-                                        style={{
-                                            fontSize: '16px', 
-                                            marginRight: '10px',
-                                        }}
-                                >
-                                    {
-                                        this.state.stockPerformanceOpen ? 'Stock Performance' : 'Add Stocks to your Portfolio'
-                                    }
-                                </h3>
-                            )}
-                        />
-                        <Media 
-                            query='(min-width: 601px)'
-                            render={() => (
-                                <h3 
-                                        style={{
-                                            fontSize: this.state.selectedStocks.length === 0 ? '24px' : '14px', 
-                                            marginRight: '10px',
-                                            transition: 'all 0.4s ease-in-out'
-                                        }}
-                                >
-                                    {
-                                        this.state.stockPerformanceOpen ? 'Stock Performance' : 'Add Stocks to your Portfolio'
-                                    }
-                                </h3>
-                            )}
-                        />
-                        {
-                            !this.state.stockPerformanceOpen &&
-                            <React.Fragment>
-                                <span style={{fontSize: '14px', marginRight: '5px'}}> Allowed Universe: </span>
-                                {industry && 
-                                    <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
-                                }
-
-                                {sector && 
-                                    <Tag style={{fontSize: '14px'}}>{sector}</Tag>
-                                }
-                                
-                                {universe && 
-                                    <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
-                                }
-                            </React.Fragment>
-                        }
-                    </Row>
-                    {
-                        this.state.selectedStocks.length > 0 &&
-                        <Button 
-                                onClick={this.addSelectedStocksToPortfolio} 
-                                type="primary" 
-                                loading={this.state.portfolioLoading}
-                        >
-                            SELECTED
-                            <Badge 
-                                style={{
-                                    backgroundColor: '#fff', 
-                                    color: primaryColor, 
-                                    fontSize: '14px', 
-                                    marginLeft: '5px'
-                                }} 
-                                count={this.state.selectedStocks.length}
-                            />
-                        </Button>
                     }
-                </Col>
+                />
+                <Media 
+                    query='(min-width: 601px)'
+                    render={() => 
+                        <SearchStockHeader 
+                            filters={this.props.filters}
+                            selectedStocks={this.state.selectedStocks}
+                            stockPerformanceOpen={this.state.stockPerformanceOpen}
+                            toggleBottomSheet={this.props.toggleBottomSheet}
+                            stockPerformanceOpen={this.state.stockPerformanceOpen}
+                            addSelectedStocksToPortfolio={this.addSelectedStocksToPortfolio}
+                            portfolioLoading={this.state.portfolioLoading}
+                        />
+                    }
+                />
                 {this.renderStockListDetails()}
             </Row>
         );
@@ -547,7 +586,7 @@ const StockListItemMobile = props => {
                     <h3 style={{fontSize: '14px', fontWeight: '400'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
                 </div>
             </Col>
-            <Col span={11} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
+            <Col span={10} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
                 <div style={horizontalBox}>
                     <h3 
                             style={{color: changeColor, fontSize: '14px', marginLeft: '10px', fontWeight: '700'}}
@@ -561,8 +600,8 @@ const StockListItemMobile = props => {
                     </h3>
                 </div>
             </Col>
-            <Col span={1} onClick={() => onAddIconClick(symbol)}>
-                <AddIcon checked={checked}/>
+            <Col span={2} onClick={() => onAddIconClick(symbol)}>
+                <AddIcon checked={checked} size='24px'/>
             </Col>
         </Row>
     );
@@ -619,11 +658,11 @@ const StockListItem = ({symbol, name, change, changePct, close, open, current, o
     );
 }
 
-const AddIcon = ({checked = false}) => {
+const AddIcon = ({checked = false, size = '20px'}) => {
     const type = checked ? "minus-circle-o" : "plus-circle";
     const color = checked ? metricColor.negative : primaryColor;
 
-    return <Icon style={{fontSize: '20px', color}} type={type} />
+    return <Icon style={{fontSize: size, color}} type={type} />
 }
 
 const topHeaderContainer = {

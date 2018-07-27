@@ -1,7 +1,9 @@
 import * as React from 'react';
 import _ from 'lodash';
 import Media from 'react-media';
-import {Row, Col, Button, Modal, Spin, Select, Tooltip, Badge} from 'antd';
+import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
+import {Row, Col, Button, Modal, Spin, Select, Tooltip, Badge, Icon} from 'antd';
+import {SegmentedControl} from 'antd-mobile';
 import {metricColor, horizontalBox, primaryColor, verticalBox} from '../../../constants';
 import {generateColorData} from '../../../utils';
 import {AqStockTableMod} from '../../../components/AqStockTableMod';
@@ -9,6 +11,7 @@ import PortfolioList from './Mobile/PortfolioList';
 import {benchmarks} from '../../../constants/benchmarks';
 import MyChartNew from '../../MyChartNew';
 import {HighChartNew} from '../../../components/HighChartNew';
+import '../css/portfolioMobile.css';
 
 const Option = Select.Option;
 const screenSize = {mobile: '600px', desktop: '601px'};
@@ -25,7 +28,9 @@ export class Portfolio extends React.Component {
             selectedBenchmark: benchmarks[0],
             highStockSeries: [],
             pieChartSeries: [],
-            metrics: {}
+            metrics: {},
+            performanceBottomSheetOpen: false,
+            performanceSheetView: 'Performance'
         };
     }
 
@@ -46,17 +51,17 @@ export class Portfolio extends React.Component {
         const style = {
             display: 'flex',
             flexDirection: 'column',
-            marginBottom: '20px',
+            marginBottom: global.screen.width > 600 ? '20px' : '16px',
             textAlign: 'center'
         };
-        const labelStyle = {color: '#4a4a4a', fontSize: '14px', fontWeight: 400};
-        const textStyle = {color: '#4a4a4a', fontSize: '20px'}
+        const labelStyle = {color: '#4a4a4a', fontSize: global.screen.width > 600 ? '14px' : '12px', fontWeight: 400};
+        const textStyle = {color: '#4a4a4a', fontSize: global.screen.width > 600 ? '20px' : '16px'}
         const annualReturn = (_.get(this.state, 'metrics.returns.totalreturn') * 100).toFixed(2);
         const volatility = (_.get(this.state, 'metrics.deviation.annualstandarddeviation', 0) * 100).toFixed(2);
         const maxLoss = (_.get(this.state, 'metrics.drawdown.maxdrawdown', 0) * 100).toFixed(2);
 
         return (
-            <Row gutter={16}>
+            <Row>
                 <Col span={8} style={style}>
                     <h3 
                             style={{
@@ -113,7 +118,7 @@ export class Portfolio extends React.Component {
                                 <Col span={24}>
                                     <MyChartNew 
                                             series={this.state.highStockSeries} 
-                                            chartId="advice-preview-performance-chart"
+                                            chartId="advice-preview-performance-chart-modal"
                                     />
                                 </Col>
                             </Row>
@@ -121,6 +126,81 @@ export class Portfolio extends React.Component {
                     </Row>
                 </Spin>
             </Modal>
+        );
+    }
+
+    togglePerformanceBottomSheet = () => {
+        if (!this.state.modal.performance) {
+            this.loadPerformance(this.state.selectedBenchmark);
+        }
+        this.setState({performanceBottomSheetOpen: !this.state.performanceBottomSheetOpen});
+    }
+
+    handlePerformanceBottomSheetChange = value => {
+        this.setState({performanceSheetView: value});
+    }
+
+    renderAdvicePerformanceBottomSheet = () => {
+        return (
+            <SwipeableBottomSheet 
+                    id="performance-bottom-sheet"
+                    fullScreen 
+                    style={{zIndex: '10'}}
+                    open={this.state.performanceBottomSheetOpen}
+                    onChange={this.togglePerformanceBottomSheet}
+            >
+                <Spin spinning={this.state.loadingPortfolioPerformance}>
+                    <Row type="flex" align="middle">
+                        <Col span={24}>
+                            <Row>
+                                <Col 
+                                        style={{
+                                            ...horizontalBox, 
+                                            justifyContent: 'center', 
+                                            position: 'relative',
+                                            marginBottom: '20px',
+                                            backgroundColor: '#fff',
+                                            height: '64px',
+                                            borderBottom: '1px solid #eaeaea'
+                                        }}
+                                >
+                                    <Icon 
+                                        type="close" 
+                                        style={{
+                                            fontSize: '22px', 
+                                            position: 'absolute', 
+                                            left: 0, 
+                                            zIndex: '20', 
+                                            color: primaryColor,
+                                            marginLeft: '10px'
+                                        }}
+                                        onClick={this.togglePerformanceBottomSheet}
+                                    />
+
+                                    <SegmentedControl 
+                                        onValueChange={this.handlePerformanceBottomSheetChange} 
+                                        values={['Performance', 'Composition']} 
+                                    />
+
+                                </Col>
+                                <Col span={24} style={{marginTop: '5px'}}>
+                                    {this.renderMetrics()}
+                                </Col>
+                                {
+                                    this.state.performanceSheetView === 'Performance'
+                                    ?   <Col span={24} style={{padding: '0 20px'}}>
+                                            <MyChartNew 
+                                                    series={this.state.highStockSeries} 
+                                                    chartId="advice-preview-performance-chart-bottom-sheet"
+                                            />
+                                        </Col>
+                                    :   this.props.renderPortfolioPieChart("chart-container-mobile")
+                                }
+                            </Row>
+                        </Col>
+                    </Row>
+                </Spin>
+            </SwipeableBottomSheet>
         );
     }
 
@@ -152,9 +232,10 @@ export class Portfolio extends React.Component {
                 onChange={this.props.onChange}
                 positions={this.props.data}
                 isUpdate={this.props.isUpdate}
-                togglePerformanceModal={this.togglePerformanceModal}
+                togglePerformanceModal={this.togglePerformanceBottomSheet}
                 toggleBottomSheet={this.props.toggleBottomSheet}
                 updateSelectedPosition={this.props.updateIndividualPosition}
+                deletePositions={this.props.deletePositions}
             />
         );
     }
@@ -231,6 +312,7 @@ export class Portfolio extends React.Component {
             <Row style={{display: 'block'}} type="flex">
                 {this.renderPerformanceModal()}
                 {this.renderBenchmarkDropdownDesktop()}
+                {this.renderAdvicePerformanceBottomSheet()}
                 <Media 
                     query={`(min-width: ${screenSize.desktop})`}
                     render={() => this.renderActionButtonsDesktop()}
@@ -240,14 +322,17 @@ export class Portfolio extends React.Component {
                     this.props.data.length === 0 &&
                     <Col span={24} style={{...verticalBox, marginTop: '40px'}}>
                         <h3>Please Add Stocks to your Portfolio</h3>
-                        <Button 
-                                style={{marginTop: '20px', fontSize: '18px', height: '45px'}} 
-                                type="primary" 
-                                icon="plus-circle-o"
-                                onClick={this.props.toggleBottomSheet}
-                        >
-                            ADD STOCKS
-                        </Button>
+                        {
+                            global.screen.width > 600 &&
+                            <Button 
+                                    style={{marginTop: '20px', fontSize: '18px', height: '45px'}} 
+                                    type="primary" 
+                                    icon="plus-circle-o"
+                                    onClick={this.props.toggleBottomSheet}
+                            >
+                                ADD STOCKS
+                            </Button>
+                        }
                     </Col>
                 }
             </Row>

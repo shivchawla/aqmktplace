@@ -18,7 +18,7 @@ import {MetricItem} from '../../components/MetricItem';
 import {AqPageHeader} from '../../components/AqPageHeader';
 import {AdviceDetailCrumb} from '../../constants/breadcrumbs';
 import {AdviceDetailMeta} from '../../metas';
-import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance} from '../../utils';
+import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance, openNotification, handleCreateAjaxError} from '../../utils';
 import {benchmarks as benchmarkArray} from '../../constants/benchmarks';
 import '../../css/adviceDetail.css';
 
@@ -110,7 +110,11 @@ class AdviceDetailImpl extends React.Component {
                 approval: [],
                 approvalStatus: false,
                 investmentObjective: {},
-                approvalRequested: false
+                approvalRequested: false,
+                contestOnly: false,
+                active: false,
+                withdrawn: false,
+                prohibited: false
             },
             metrics: {
                 annualReturn: 0,
@@ -157,7 +161,8 @@ class AdviceDetailImpl extends React.Component {
             approvalObj,
             postWarningModalVisible: false,
             postToMarketPlaceLoading: false,
-            requestApprovalLoading: false
+            requestApprovalLoading: false,
+            participatedContests: [],
         };
 
         this.performanceSummary = {};
@@ -203,7 +208,8 @@ class AdviceDetailImpl extends React.Component {
             netValue = 0,
             stocks = 0,
             approvalStatus = 'pending',
-            rebalance = ''
+            rebalance = '',
+            contestOnly = false
         } = response.data;
         
         this.performanceSummary = performanceSummary;
@@ -239,7 +245,8 @@ class AdviceDetailImpl extends React.Component {
                 isPublic: _.get(response.data, 'public', false),
                 investmentObjective,
                 approval,
-                approvalRequested
+                approvalRequested,
+                contestOnly
             },
             metrics: {
                 ...this.state.metrics,
@@ -293,6 +300,29 @@ class AdviceDetailImpl extends React.Component {
             },
             portfolio: response.data.portfolio
         });
+    }
+
+    getAdviceLatestContestSummary = () => {
+        const adviceContestUrl = `${requestUrl}/contest/entry/${this.props.match.params.id}`;
+        fetchAjax(
+            adviceContestUrl, 
+            this.props.history, 
+            this.props.match.url, undefined, this.handleErrorNotFoundInContestError
+        )
+        .then(contestResponse => {
+            const adviceActive = _.get(contestResponse.data, 'active', false);
+            const withdrawn = _.get(contestResponse.data, 'withDrawn', false);
+            const prohibited = _.get(contestResponse.data, 'prohibited', false);
+            this.setState({
+                adviceDetail: {
+                    ...this.state.adviceDetail, 
+                    active: adviceActive,
+                    withdrawn,
+                    prohibited
+                }
+            });
+        })
+        .catch(err => err);
     }
 
     getAdvicePerformance = (performance, benchmark = 'NIFTY_50') => new Promise((resolve, reject) => {
@@ -370,6 +400,8 @@ class AdviceDetailImpl extends React.Component {
         const adviceId = this.props.match.params.id;
         const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
         const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
+        const adviceContestUrl = `${requestUrl}/contest/entry/${adviceId}`;
+        const adviceAllContestUrl = `${requestUrl}/contest/entry/all/${adviceId}`;
         this.setState({show: true});
         return Promise.all([
             fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
@@ -377,6 +409,7 @@ class AdviceDetailImpl extends React.Component {
         ]) 
         .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
             const benchmark = _.get(adviceSummaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
+            const contestOnly = _.get(adviceSummaryResponse.data, 'contestOnly', false);
             this.getAdviceSummary(adviceSummaryResponse);
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
             //ADVICE SUMMARY IN BACKEND first calculated full performance
@@ -387,13 +420,28 @@ class AdviceDetailImpl extends React.Component {
             const authorizedToViewPortfolio = adviceDetail.isSubscribed || adviceDetail.isOwner || adviceDetail.isAdmin;
             return Promise.all([
                 authorizedToViewPortfolio ? fetchAjax(advicePortfolioUrl) : null,
+                contestOnly && fetchAjax(adviceContestUrl, this.props.history, this.props.match.url, undefined, this.handleErrorNotFoundInContestError),
+                contestOnly && fetchAjax(adviceAllContestUrl, this.props.history, this.props.match.url, undefined, this.handleAllContestAdviceSummaryError),
                 this.getAdvicePerformance(advicePerformanceResponse.data, benchmark)
             ])
         })
-        .then(([advicePortfolioResponse])  => {
+        .then(([advicePortfolioResponse, adviceContestResponse, allContestResponse])  => {
             if (advicePortfolioResponse) {
                 this.getAdviceDetail(advicePortfolioResponse);
             }
+            const participatedContests = _.get(allContestResponse, 'data', []);
+            const adviceActive = _.get(adviceContestResponse.data, 'active', false);
+            const withdrawn = _.get(adviceContestResponse.data, 'withDrawn', false);
+            const prohibited = _.get(adviceContestResponse.data, 'prohibited', false);
+            this.setState({
+                adviceDetail: {
+                    ...this.state.adviceDetail, 
+                    active: adviceActive,
+                    withdrawn,
+                    prohibited
+                },
+                participatedContests: participatedContests,
+            });
         })
         .catch(error => {
             this.setState({
@@ -1292,8 +1340,36 @@ class AdviceDetailImpl extends React.Component {
         })
     }
 
+    withdrawAdviceFromContest = () => {
+        const contestId = this.props.match.params.contestId;
+        const withdrawAdviceUrl = `${requestUrl}/contest/${this.props.match.params.id}/action?type=withdraw`;
+        this.setState({withdrawAdviceLoading: true});
+        axios({
+            method: 'POST',
+            url: withdrawAdviceUrl,
+            headers: Utils.getAuthTokenHeader()
+        })
+        .then(response => {
+            const active = _.get(response.data, 'active', false);
+            this.setState({adviceDetail: {...this.state.adviceDetail, active}});
+            openNotification('info', 'Success', 'Advice Successfully Withdrawn from contest');
+            this.getAdviceLatestContestSummary();
+        })
+        .catch(error => {
+            return handleCreateAjaxError(
+                error, 
+                this.props.history, 
+                this.props.match.url
+            );
+        })
+        .finally(() => {
+            this.setState({withdrawAdviceLoading: false});
+        })
+    }
+
+
     renderPageContent = () => {
-        const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
+        const {name, heading, description, advisor, updatedDate, contestOnly} = this.state.adviceDetail;
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
         const unsubscriptionPending = _.get(this.state, 'adviceResponse.subscriptionDetail.unsubscriptionPending', false);
         const breadCrumbs = getBreadCrumbArray(AdviceDetailCrumb, [
@@ -1303,7 +1379,7 @@ class AdviceDetailImpl extends React.Component {
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />
-            :   <AqMobileLayout innerPage={true} previousPageUrl='/advice'>
+            :   <AqMobileLayout innerPage={true} previousPageUrl={contestOnly ? undefined : '/advice'}>
                     <AdviceDetailContentMobile 
                             adviceDetail={{...this.state.adviceDetail, unsubscriptionPending}}
                             metrics={this.state.metrics}
@@ -1319,6 +1395,8 @@ class AdviceDetailImpl extends React.Component {
                             toggleSubscriptionModal={this.toggleDialog}
                             toggleUnsubscriptionModal={this.toggleUnsubscriptionModal}
                             followAdvice={this.followAdvice}
+                            participatedContests={this.state.participatedContests}
+                            withdrawAdviceFromContest={this.withdrawAdviceFromContest}
                     />
                 </AqMobileLayout>
         );
