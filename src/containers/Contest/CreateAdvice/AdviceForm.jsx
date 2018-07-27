@@ -392,6 +392,7 @@ class ContestAdviceFormImpl extends React.Component {
                                             ref={el => this.searchStockComponent = el}
                                             history={this.props.history}
                                             pageUrl={this.props.match.url}
+                                            isUpdate={this.props.isUpdate}
                                         />
                                     </div>
                             }
@@ -419,6 +420,7 @@ class ContestAdviceFormImpl extends React.Component {
                                 ref={el => this.searchStockComponent = el}
                                 history={this.props.history}
                                 pageUrl={this.props.match.url}
+                                isUpdate={this.props.isUpdate}
                             />
                         </SwipeableBottomSheet>
                     )}
@@ -973,12 +975,16 @@ class ContestAdviceFormImpl extends React.Component {
 
     processPositions = positions => {
         return positions.map(position => {
-            const total = Number((_.get(position, 'quantity', 0) * _.get(position, 'lastPrice', 0)).toFixed(2))
+            const total = Number((_.get(position, 'quantity', 0) * _.get(position, 'lastPrice', 0)).toFixed(2));
+            const symbol = _.get(position, 'security.detail.NSE_ID', null) !== null
+                    ? _.get(position, 'security.detail.NSE_ID', null) 
+                    : _.get(position, 'security.ticker', null);
+
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 sector: _.get(position, 'security.detail.Sector', null),
-                ticker: _.get(position, 'security.ticker', null),
-                symbol: _.get(position, 'security.ticker', null),
+                ticker: symbol,
+                symbol,
                 effTotal: total,
                 shares: Number(_.get(position, 'quantity', 0)),
                 lastPrice: Number(_.get(position, 'lastPrice', 0)),

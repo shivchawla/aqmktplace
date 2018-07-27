@@ -613,7 +613,7 @@ class AdviceDetailContentImpl extends React.Component {
                         </Panel>
                     }
                     {
-                        contestOnly && Utils.isLoggedIn() &&
+                        contestOnly && Utils.isLoggedIn() && selectedContest &&
                         <Panel
                                 key="6"
                                 header={<h3 style={{...metricsHeaderStyle, fontSize: '16px'}}>Contest Detail</h3>}

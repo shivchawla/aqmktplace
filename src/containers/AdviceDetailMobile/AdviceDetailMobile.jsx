@@ -390,6 +390,18 @@ class AdviceDetailImpl extends React.Component {
         });
     }
 
+    handleErrorNotFoundInContestError = error => {
+        const errorMessage = _.get(error, 'response.data.message', '');
+        if (errorMessage === 'Advice is not present in this contest') {
+            this.setState({notPresentInLatestContest: true});
+        }
+    }
+
+    handleAllContestAdviceSummaryError = error => {
+        // console.log('Advice Not found in any contest');
+    }
+
+
     //THIS IS BUGGY - 02/05/2018
     //ADVICE PORTFOLIO IS FETCHED ONLY WHEN USER IS AUTHORIZED
     //Also, choose the right variable name
@@ -1379,7 +1391,11 @@ class AdviceDetailImpl extends React.Component {
         return (
             this.state.notAuthorized
             ?   <ForbiddenAccess />
-            :   <AqMobileLayout innerPage={true} previousPageUrl={contestOnly ? undefined : '/advice'}>
+            :   <AqMobileLayout 
+                        innerPage={true} 
+                        previousPageUrl={contestOnly ? '/contest/leaderboard' : '/advice'}
+                        customHeader={<h3 style={{fontSize: '14px'}}>ENTRY DETAIL</h3>}
+                >
                     <AdviceDetailContentMobile 
                             adviceDetail={{...this.state.adviceDetail, unsubscriptionPending}}
                             metrics={this.state.metrics}

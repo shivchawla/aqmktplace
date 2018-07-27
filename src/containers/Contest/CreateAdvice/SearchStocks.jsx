@@ -171,7 +171,9 @@ export class SearchStocks extends React.Component {
     processStockList = (stocks = []) => {
         const selectedStocks = [...this.state.selectedStocks];
         return stocks.map(stock => {
-            const symbol = _.get(stock, 'security.ticker', null);
+            const symbol = _.get(stock, 'security.detail.NSE_ID', null) !== null
+                    ? _.get(stock, 'security.detail.NSE_ID', null) 
+                    : _.get(stock, 'security.ticker', null);
             const close = _.get(stock, 'latestDetailRT.close', 0) !== 0 
                 ?  _.get(stock, 'latestDetailRT.close', 0)
                 :  _.get(stock, 'latestDetail.values.Close', 0);

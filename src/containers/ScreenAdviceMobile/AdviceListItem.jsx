@@ -9,7 +9,9 @@ import {Utils} from '../../utils';
 
 class AdviceListItemMobileImpl extends React.Component {
     handleClick = (id) => {
-        this.props.history.push(`/advice/${id}`);
+        this.props.contestOnly 
+            ? this.props.history.push(`/contest/entry/${id}`) 
+            : this.props.history.push(`/advice/${id}`)
     }
 
     renderAnnualReturnIcon = annualReturn => {
