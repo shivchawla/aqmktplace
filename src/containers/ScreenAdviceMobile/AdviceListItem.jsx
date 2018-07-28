@@ -88,6 +88,15 @@ class AdviceListItemMobileImpl extends React.Component {
         return false;
     }
 
+    contestTooltipTitle = (contestDetail) => {
+        return (
+            <div>{contestDetail.map(item => {
+                    <span>{item.name} ({item.rank})</span>;
+                })}
+            </div>
+        );
+    }
+
     render() {
         let {
             name, 
@@ -103,14 +112,36 @@ class AdviceListItemMobileImpl extends React.Component {
             rebalancingFrequency,
             netValue,
             approvalStatus = false,
-            contestOnly = false
+            contestOnly = false,
+            contest
         } = this.props.advice;
+        
         const isPublic = this.props.advice.public;
         const cardBackgroundColor = '#fff' ; //isOwner ? '#E8EAF6' : (isSubscribed ? '#E0F2F1' : '#fff');
         const advisorName = `${_.get(advisor, 'user.firstName')} ${_.get(advisor, 'user.lastName')}`;
         const advisorId = _.get(advisor, '_id', '');
         const statusTagColor = isOwner ? '#3cb44b' : isSubscribed ? '#1890ff' : isFollowing ? '#03a7ad' : '#fff';
         const statusTagLabel = isOwner ? 'Owner' : isSubscribed ? 'Subscribed' : isFollowing ? 'Wishlisted' : "";
+        var activeInContest = false;
+        var withdrawnFromContest = true;
+        var prohibitedFromContest = true;
+
+        const contestDetail = contest ? contest.map(item => {
+            return {
+                name: item.name, 
+                contestActive: item.active, 
+                active: item.adviceSummary.active, 
+                prohibited: item.adviceSummary.prohibited, 
+                withdrawn: item.adviceSummary.withDrawn, 
+                rank: _.get(item, 'adviceSummary.latestRank.value', null)
+            };}) : [];
+
+        contestDetail.map(item => {
+            activeInContest  = activeInContest || item.active;
+            withdrawnFromContest = withdrawnFromContest && item.withdrawn;
+            prohibitedFromContest = prohibitedFromContest && item.prohibited;
+        });
+
 
 
         return (
@@ -185,15 +216,26 @@ class AdviceListItemMobileImpl extends React.Component {
                                                     textStyle={{marginLeft: '5px'}}
                                             />
                                         }
-                                        {
-                                            contestOnly && 
-                                            <AqTag 
-                                                    tooltipPlacement='bottom'
-                                                    color={metricColor.negative}
-                                                    text="Contest"
-                                            />
-                                        }
                                     </React.Fragment>
+                                }
+                                {
+                                    (isOwner || isAdmin) && contestOnly &&
+                                    <AqTag 
+                                            tooltipPlacement='bottom'
+                                            color={isApproved ? '#00897B' : metricColor.negative}
+                                            text="Contest"
+                                            textStyle={{marginLeft: '5px'}}
+                                    />
+                                }
+                                {   
+                                    contestOnly &&
+                                    <AqTag 
+                                            tooltipTitle={this.contestTooltipTitle(contestDetail)}
+                                            tooltipPlacement='right'
+                                            color='purple'
+                                            text={activeInContest ? "Active" : withdrawnFromContest ? "Withdrawn" : prohibitedFromContest ? "Prohibited" : ""}
+                                            textStyle={{marginLeft: '5px'}}
+                                    />
                                 }
                             </Row>
                         </Col>

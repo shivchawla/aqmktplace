@@ -436,7 +436,7 @@ export default class LeaderBoard extends React.Component {
     }
 
     onPerformanceToggle = (e) => {
-        this.setState({showActivePerformance: !this.state.showActivePerformance});
+        this.setState({showActivePerformance: e.target.value});
     }
 
     renderPageContent() {
@@ -599,9 +599,13 @@ const ContestDetailMetrics = ({entryDetail, onPerformanceToggle, showActivePerfo
                 <Media 
                     query="(min-width: 600px)"
                     render={() => (
-                        <RadioGroup size="small" onChange={onPerformanceToggle} defaultValue="0">
-                            <RadioButton value="0">Active</RadioButton>
-                            <RadioButton value="1">Historical</RadioButton>
+                        <RadioGroup 
+                                size="small" 
+                                onChange={onPerformanceToggle} 
+                                value={showActivePerformance}
+                        >
+                            <RadioButton value={true}>Active</RadioButton>
+                            <RadioButton value={false}>Historical</RadioButton>
                         </RadioGroup>
                     )}
                 />

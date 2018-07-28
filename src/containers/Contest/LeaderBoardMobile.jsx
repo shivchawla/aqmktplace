@@ -1,5 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
+import {Motion, spring} from 'react-motion';
 import {Row, Col, Icon} from 'antd';
 import {horizontalBox, verticalBox, primaryColor} from '../../constants';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
@@ -21,21 +22,41 @@ export default class LeaderBoardMobile extends React.Component {
 
     renderBottomSheet = () => {
         return (
-            <SwipeableBottomSheet 
-                    fullScreen 
-                    style={{zIndex: '20000'}}
-                    overlayStyle={{overflow: 'hidden'}}
-                    open={this.state.bottomSheetOpenStatus}
-                    onChange={this.toggleBottomSheet}
-                    swipeableViewsProps={{
-                        disabled: false
-                    }}
-            >
-                <EntryDetailBottomSheet 
-                    closeBottomSheet={this.toggleBottomSheet}
-                    renderContestDetail={this.props.renderContestDetail}
-                />
-            </SwipeableBottomSheet>
+            // <SwipeableBottomSheet 
+            //         fullScreen 
+            //         style={{zIndex: '20000'}}
+            //         overlayStyle={{overflow: 'hidden'}}
+            //         open={this.state.bottomSheetOpenStatus}
+            //         onChange={this.toggleBottomSheet}
+            //         swipeableViewsProps={{
+            //             disabled: false
+            //         }}
+            // >
+                // <EntryDetailBottomSheet 
+                //     closeBottomSheet={this.toggleBottomSheet}
+                //     renderContestDetail={this.props.renderContestDetail}
+                // />
+            // </SwipeableBottomSheet>
+            <Motion style={{x: spring(this.state.bottomSheetOpenStatus ? -44 : global.screen.height)}}>
+                {
+                    ({x}) => (
+                        <div 
+                                style={{
+                                    transform: `translate3d(0, ${x}px, 0)`,
+                                    position: 'fixed',
+                                    backgroundColor: '#fff',
+                                    zIndex: '10000',
+                                    height: global.screen.height
+                                }}
+                        >
+                            <EntryDetailBottomSheet 
+                                closeBottomSheet={this.toggleBottomSheet}
+                                renderContestDetail={this.props.renderContestDetail}
+                            />
+                        </div>
+                    )
+                }
+            </Motion>
         );
     }
 
