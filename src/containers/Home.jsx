@@ -21,6 +21,10 @@ import realtime from '../assets/realtime.svg';
 import test from '../assets/test.svg';
 import track from '../assets/track.svg';
 import performance from '../assets/performance.svg';
+import CreatePortfolio from '../assets/CreatePortfolio-Home.svg';
+import EnterContest from '../assets/EnterContest2-Home.svg';
+import WinPrizes from '../assets/WinPrizes-Home.svg';
+import ExpertIdea from '../assets/ExpertIdea-Home.svg';
 import {HomeMeta} from '../metas';
 import '../css/home.css';
 import AppLayout from './AppLayout'
@@ -62,7 +66,7 @@ export class Home extends React.Component {
                     <Button 
                         className="home-action-buttons"
                         onClick={() => this.props.history.push('/contest')}>
-                        Enter Contest
+                        ENTER CONTEST
                     </Button>
                 </Col>
             </div>
@@ -106,7 +110,7 @@ export class Home extends React.Component {
                     <Button 
                         className="home-action-buttons"
                         onClick={() => this.props.history.push('/contest')}>
-                        Enter Contest
+                        ENTER CONTEST
                     </Button>
                 </Col>
             </React.Fragment>
@@ -157,7 +161,7 @@ export class Home extends React.Component {
                     <Button 
                         className="home-action-buttons"
                         onClick={() => this.props.history.push('/advice')} >
-                        Find Investment Advices
+                        FIND INVESTMENT IDEAS
                     </Button>
                 </Col>
             </div>
@@ -212,7 +216,7 @@ export class Home extends React.Component {
                     <Button 
                         className="home-action-buttons"
                         onClick={() => this.props.history.push('/advice')} >
-                        Find Investment Advices
+                        FIND INVESTMENT IDEAS
                     </Button>
                 </Col>
             </React.Fragment>
@@ -422,14 +426,14 @@ export class Home extends React.Component {
                         className="signup-button"
                         onClick={() => this.props.history.push('/contest')}
                 >
-                    Enter Contest
+                    ENTER CONTEST
                 </Button>
                 <Button 
                         style={{marginLeft: '20px'}}
                         className="action-buttons"
                         onClick={() => this.props.history.push('/advice')}
                 >
-                    Find Investment Advice
+                    FIND INVESTMENT IDEAS
                 </Button>
             </Col>
         );
@@ -447,13 +451,13 @@ export class Home extends React.Component {
                                     style={{marginTop: 0}}
                                     onClick={() => this.props.history.push('/contest')}
                             >
-                                Enter Contest
+                                ENTER CONTEST
                             </Button>
                             <Button 
                                     className="create-advice-button-mobile"
                                     onClick={() => this.props.history.push('/advice')}
                             >
-                                Find Investment Advice
+                                FIND INVESTMENT IDEAS
                             </Button>
                         </Col>
                     )}
@@ -476,7 +480,7 @@ export class Home extends React.Component {
                                     style={{marginTop: 0}}
                                     onClick={() => this.props.history.push('/contest')}
                             >
-                                Enter Contest
+                                ENTER CONTEST
                             </Button>
                             <div style={{width: '40px'}}></div>
                             <Button 
@@ -484,7 +488,7 @@ export class Home extends React.Component {
                                     style={{marginTop: 0}}
                                     onClick={() => this.props.history.push('/advice')}
                             >
-                                Find Investment Advice
+                                FIND INVESTMENT IDEAS
                             </Button>
                         </Col>
                     )}
@@ -593,6 +597,7 @@ export class Home extends React.Component {
     renderMiddleSectionDesktop = () => {
         return (
             <React.Fragment>
+                <h3 style={{textAlign: 'center', fontSize:'24px', color: 'teal', marginBottom:'50px'}}>INVESTMENT IDEA MARKETPLACE</h3>
                 <Col span={10} className="middle-left-section">
                     <Col className='tab-bar'>
                         <TabBarElement 
@@ -626,6 +631,7 @@ export class Home extends React.Component {
     renderMiddleSectionMobile = () => {
         return (
             <React.Fragment>
+                <h3 style={{textAlign: 'center', fontSize:'20px', color: 'teal', marginBottom:'30px'}}>INVESTMENT IDEA MARKETPLACE</h3>
                 <Col span={24} className="middle-left-section">
                     <Col className='tab-bar'>
                         <TabBarElement 
@@ -660,7 +666,7 @@ export class Home extends React.Component {
         );
     }
 
-    renderLowerSectionDesktop = () => {
+    renderLowerSectionDesktop_O = () => {
         return (
             <React.Fragment>
                 <h3 className="lower-section-header">Other Features</h3>
@@ -695,7 +701,45 @@ export class Home extends React.Component {
         );
     }
 
-    renderLowerSectionMobile = () => {
+    renderLowerSectionDesktop = () => {
+        return (
+            <React.Fragment>
+                <h3 className="lower-section-header">HOW IT WORKS?</h3>
+                <Row type="flex" className="lower-section-card-container">
+                    <Col span={14} style={{paddingLeft: '50px', textAlign:'left'}}>
+                    <HowCard 
+                        key="2"
+                        icon={EnterContest}
+                        header="Step 1: Enter Contest"
+                        content="Create a diversified portfolio to beat the market."
+                        container
+                    />
+                    </Col>
+
+                    <Col offset={12} span={12} style={{paddingRight: '-10px', textAlign: 'right', marginTop:'-80px'}}>
+                        <HowCard
+                            key="3" 
+                            icon={WinPrizes}
+                            header="Step 2: Win cash prizes"
+                            content="Beat the market benchmark and win cash prizes every week worth Rs.10,000"
+                            right
+                        />
+                    </Col>
+
+                    <Col span={13} style={{paddingLeft: '0px', textAlign: 'left', marginTop:'-110px'}}>
+                        <HowCard
+                            key="4" 
+                            icon={ExpertIdea}
+                            header="Step 3: Expert Portfolio Allocation"
+                            content='Winners contribute to the “Expert Portfolio” and earn royalty'
+                        />
+                    </Col>
+                </Row>
+            </React.Fragment>
+        );
+    }
+
+    renderLowerSectionMobile_O = () => {
         return (
             <React.Fragment>
                 <h3 className="lower-section-header">Other Features</h3>
@@ -734,6 +778,46 @@ export class Home extends React.Component {
                             containerStyle={{marginTop: '20px'}}
                     />
                 </Col>
+            </React.Fragment>
+        );
+    }
+
+    renderLowerSectionMobile = () => {
+        return (
+            <React.Fragment>
+                <h3 className="lower-section-header" style={{marginTop: '50px'}}>HOW IT WORKS?</h3>
+                <Row type="flex" className="lower-section-card-container">
+                    <Col span={24} style={{textAlign:'center'}}>
+                    <HowCard 
+                        key="2"
+                        icon={EnterContest}
+                        header="Step 1: Enter Contest"
+                        content="Create a diversified portfolio to beat the market."
+                        mobile
+                    />
+                    </Col>
+
+                    <Col span={24} style={{textAlign: 'center'}}>
+                        <HowCard
+                            key="3" 
+                            icon={WinPrizes}
+                            header="Step 2: Win cash prizes"
+                            content="Beat the market benchmark and win cash prizes every week worth Rs.10,000"
+                            right
+                            mobile
+                        />
+                    </Col>
+
+                    <Col span={24} style={{textAlign: 'center'}}>
+                        <HowCard
+                            key="4" 
+                            icon={ExpertIdea}
+                            header="Step 3: Expert Portfolio Allocation"
+                            content='Winners contribute to the “Expert Portfolio” and earn royalty'
+                            mobile
+                        />
+                    </Col>
+                </Row>
             </React.Fragment>
         );
     }
@@ -795,7 +879,19 @@ export class Home extends React.Component {
                                     );
                                 }}
                             />
-                            <Row className="middle-section" style={{marginTop: '100px'}}>
+                            
+                            <Row className="lower-section" style={{marginTop: '30px', height:'100vh', minHeight: '600px'}}>
+                                <Media 
+                                    query="(max-width: 1199px)"
+                                    render={() => this.renderLowerSectionMobile()}
+                                />
+                                <Media 
+                                    query="(min-width: 1200px)"
+                                    render={() => this.renderLowerSectionDesktop()}
+                                />
+                            </Row>
+
+                            <Row className="middle-section" style={{marginTop: '50px'}}>
                                 <Media 
                                     query="(max-width: 1199px)"
                                     render={() => this.renderMiddleSectionMobile()}
@@ -851,6 +947,112 @@ const DetailListComponent = props => {
         </Row>
     );
 };
+
+const HowCard = props => {
+    const {icon, header, content, iconStyle, mobile = false, containerStyle, right} = props;
+    const mobileStyle = {
+        backgroundColor: '#fff',
+        width: '100%',
+        padding: '10px',
+        //paddingBottom: '20px',
+        //boxShadow: '0 4px 32px rgba(193, 193, 193, 0.5)',
+        borderRadius: '4px'
+    };
+    const desktopStyle = {
+        backgroundColor: '#fff',
+        //display: 'flex', 
+        //flexDirection: 'column', 
+        //justifyContent: 'center', 
+        alignItems: 'center',
+        //width: '300px',
+        padding: '10px',
+        //paddingBottom: '20px',
+        //boxShadow: '0 4px 32px rgba(193, 193, 193, 0.5)',
+        //borderRadius: '4px'
+    };
+
+    return (
+        mobile
+        ?   <Row style={{...mobileStyle, ...containerStyle}}>
+                <Col span={24}>
+                    <img 
+                        style={{
+                            transform: 'scale(1, 1)', 
+                            marginTop: '10px',
+                            width: '120px', 
+                            height: '60px', 
+                            ...iconStyle
+                        }} 
+                        src={icon}
+                    />
+                </Col>
+                <Col span={24}>
+                    <Row>
+                        <Col span={24}>
+                            <div 
+                                style={{
+                                    textAlign: 'center', 
+                                    color: '#00A2A2', 
+                                    fontSize: '20px',
+                                    fontWeight: 300 
+                                    //marginTop: '5px',
+                                    //marginLeft: '10px',
+                                    //marginBottom: 0
+                                }}
+                            >
+                                {header}
+                            </div>
+                        </Col>
+                        <Col span={24}>
+                            <div 
+                                style={{
+                                    fontSize: '16px', 
+                                    color: '#333333',
+                                    textAlign: 'center',
+                                    //marginLeft: '10px'
+                                }}
+                            >
+                                {content}
+                            </div>
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
+        :   <div style={{...desktopStyle, ...containerStyle, display: 'inline-flex'}}>
+                {!right && 
+                    <img 
+                        style={{
+                            //transform: 'scale(3, 3)', 
+                            marginTop: '10px', 
+                            //size:'200px',
+                            //width: '70px', 
+                            //height: '40px', 
+                            ...iconStyle
+                        }} 
+                        src={icon}/>
+                }
+
+                <div style={{marginTop:'00px', marginRight: right ? '20px' : '0px', marginLeft: !right ? '20px' : '0px'}}>
+                    <div style={{color: '#00A2A2', fontSize: '20px', marginTop: '0px', fontWeight:300}}>{header}</div>
+                    <div style={{fontSize: '16px', color: '#333333', marginTop: '0px', fontWeight:400}}>{content}</div>
+                </div>
+
+                {right &&
+                    <img 
+                        style={{
+                            //transform: 'scale(3, 3)', 
+                            marginTop: '10px', 
+                            //size:'200px',
+                            //width: '70px', 
+                            //height: '40px', 
+                            ...iconStyle
+                        }} 
+                        src={icon}/>
+                }
+            </div>
+    );
+};
+
 
 const FeatureCard = props => {
     const {icon, header, content, iconStyle, small = false, containerStyle} = props;
