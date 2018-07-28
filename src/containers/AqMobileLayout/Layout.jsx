@@ -23,6 +23,8 @@ class AqMobileLayoutImpl extends React.Component {
     }
 
     renderHeader = () => {
+        console.log(this.props.previousPageUrl);
+
         return (
             <NavBar
                 mode="light"
@@ -33,7 +35,7 @@ class AqMobileLayoutImpl extends React.Component {
                         onClick = {
                             () => 
                                 this.props.innerPage 
-                                ? this.props.previousPageUrl !== undefined
+                                ? this.props.previousPageUrl
                                   ? this.props.history.push(this.props.previousPageUrl)
                                   : this.props.history.goBack()
                                 : this.toggleSideMenu()}
@@ -99,15 +101,14 @@ class AqMobileLayoutImpl extends React.Component {
                             style={{
                                 display: 'flex', 
                                 justifyContent: 'space-between', 
-                                paddingTop: '10px', 
-                                paddingRight: '10px',
+                                padding: '5px 15px', 
                                 alignItems: 'center',
                                 borderBottom: '1px solid #eaeaea'
                             }}
                     >
                         <div 
                                 onClick={() => this.props.history.push('/home')} 
-                                style={{...horizontalBox, marginLeft: '15px'}}
+                                style={{...horizontalBox}}
                         >
                             <img src={logo} style={{height: '25px'}}/>
                             <div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
@@ -194,7 +195,7 @@ const SideMenuItem = ({menuItem}) => {
                 menuItem.icon &&
                 <Icon style={{fontSize: '18px', color: primaryColor}} type={menuItem.icon}/>
             }
-            <h3 style={{fontSize: '16px', color: '#686868'}}>{menuItem.name}</h3>
+            <h3 style={{fontSize: '17px', color: '#686868'}}>{menuItem.name}</h3>
         </div>
     );
 }

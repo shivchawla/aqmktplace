@@ -20,6 +20,7 @@ const {requestUrl} = require('../../../localConfig');
 const tabs = [
     { title: 'HOW' },
     { title: 'PRIZES' },
+    { title: 'LEADER' },
     { title: 'REQ' },
     { title: 'SCORING' },
     { title: 'FAQ' },
@@ -129,7 +130,7 @@ class ContestHome extends React.Component {
         };
 
         const buttonStyle = {
-            marginTop: '20px',
+            marginTop: '10px',
             border: 'none',
             outline: 'none',
             height: '40px',
@@ -172,7 +173,8 @@ class ContestHome extends React.Component {
                                     color: '#fff', 
                                     fontSize: '16px', 
                                     fontWeight: 400,
-                                    textAlign: 'center'
+                                    textAlign: 'center',
+                                    marginTop:'-5px'
                                 }}
                         >
                             Beat the market and win cash prizes every week
@@ -185,6 +187,7 @@ class ContestHome extends React.Component {
                         >
                             Submit Entry
                         </Button>
+
                     </Col>
                 </Row>
             </Col>
@@ -200,6 +203,22 @@ class ContestHome extends React.Component {
                     })
                 }
             </Row>
+        );
+    }
+
+    renderLeaderboard = () => { 
+  
+        return (
+            <div style={{margin:'40px auto', textAlign:'center'}} >
+                <div>Check our leaderboard here</div> 
+                <Button 
+                    type="primary"
+                    style={{marginTop:'10px'}}
+                    onClick={() => this.props.history.push('/contest/leaderboard')}
+                >
+                    Leaderboard
+                </Button>
+            </div>
         );
     }
 
@@ -409,6 +428,7 @@ class ContestHome extends React.Component {
             >
                 {this.renderHowItWorks()}
                 {this.renderPrizeList()}
+                {this.renderLeaderboard()}
                 {this.renderRequirementList()}
                 {this.renderScoring()}
                 {this.renderFAQ()}

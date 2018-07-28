@@ -533,9 +533,9 @@ class ScreenAdviceMobileImpl extends React.PureComponent {
                                 boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
                                 margin: '0 auto'
                             }}
-                            onClick={() => this.props.history.push('/contest/createentry')}
+                            onClick={() => this.props.history.push('/contest')}
                     >
-                        CREATE ENTRY
+                        CONTEST
                     </MobileButton>
                 </div>
                 <Row style={{backgroundColor: '#fff'}}>

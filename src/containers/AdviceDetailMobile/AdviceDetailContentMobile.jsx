@@ -8,7 +8,7 @@ import {formatMetric, contestMetrics as metrics} from '../Contest/utils';
 import {metricDefs} from '../Contest/constants';
 import {horizontalBox, metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected} from '../../constants';
 import {AqTag} from '../../components/AqTag';
-import {AdviceContestMetrics, MetricHeader, MetricContainer} from '../../containers/AdviceDetailContent';
+import {AdviceContestMetricsMobile, MetricHeader, MetricContainer} from '../../containers/AdviceDetailContent';
 import {WarningIcon} from '../../components/WarningIcon'
 import {IconItem} from '../../components/IconItem'
 import {AqRate} from '../../components/AqRate';
@@ -471,7 +471,7 @@ class AdviceDetailContentImpl extends React.Component {
                             this.props.showPerformanceToggle &&
                             <SegmentedControl 
                                 onValueChange={this.props.handlePerformanceToggleChange}
-                                values={['Realized', 'Simulated']} 
+                                values={['Active', 'Historical']} 
                                 selectedIndex={this.props.performanceType === 'Simulated' ? 1 : 0}
                             />
                         }
@@ -619,7 +619,7 @@ class AdviceDetailContentImpl extends React.Component {
                                 header={<h3 style={{...metricsHeaderStyle, fontSize: '16px'}}>Contest Detail</h3>}
                         >   
                             <Row>
-                                <AdviceContestMetrics 
+                                <AdviceContestMetricsMobile 
                                     selectedAdvice={selectedContest.adviceSummary}
                                     onPerformanceToggle={this.onRankRadioClick}
                                     currentMetrics={currentMetrics}

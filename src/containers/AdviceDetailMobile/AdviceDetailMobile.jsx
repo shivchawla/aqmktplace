@@ -1393,8 +1393,8 @@ class AdviceDetailImpl extends React.Component {
             ?   <ForbiddenAccess />
             :   <AqMobileLayout 
                         innerPage={true} 
-                        previousPageUrl={contestOnly ? '/contest/leaderboard' : '/advice'}
-                        customHeader={<h3 style={{fontSize: '16px'}}>ENTRY DETAIL</h3>}
+                        previousPageUrl={contestOnly ? null : '/advice'}
+                        customHeader={<h3 style={{fontSize: '16px'}}>{contestOnly ? "Contest Entry Detail" : "Advice Detail"}</h3>}
                 >
                     <AdviceDetailContentMobile 
                             adviceDetail={{...this.state.adviceDetail, unsubscriptionPending}}

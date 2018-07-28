@@ -69,7 +69,7 @@ export default class LeaderBoardMobile extends React.Component {
         const {leaders = []} = this.props;
 
         return (
-            <Col span={24} style={{marginTop: '20px'}}>
+            <Col span={24}>
                 {
                     leaders.map((leader, index) => {
                         return (
@@ -103,15 +103,14 @@ export default class LeaderBoardMobile extends React.Component {
         return (
             <AqMobileLayout 
                     loading={this.props.loading}
-                    customHeader={<h3 style={{fontSize: '14px'}}>LEADERBOARD</h3>}
+                    customHeader={<h3 style={{fontSize: '16px'}}>Leaderboard</h3>}
             >
                 {this.renderBottomSheet()}
                 <Row>
                     <Col span={24} style={{...horizontalBox, justifyContent: 'center', marginTop: '15px'}}>
                         {this.props.renderContestDropdown('150px')}
                     </Col>
-                    <Col span={24}>{this.props.renderPagination()}</Col>
-                    <Col span={24}>{this.renderParticipants()}</Col>
+                    <Col span={24} style={{marginTop:'5px'}}>{this.renderParticipants()}</Col>
                     <Col span={24}>
                         {
                             !this.props.loading && this.props.leaders.length >= 6 &&
@@ -131,8 +130,7 @@ const LeaderItem = ({leaderItem, onClick, getRankColor}) => {
     const adviceId = _.get(leaderItem, 'adviceId', null);
     
     const containerStyle = {
-        margin: '0 10px',
-        marginBottom: '20px',
+        margin: '5px 10px 0px 10px',
         borderRadius: '2px',
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
         border: '1px solid #eaeaea',
@@ -144,17 +142,17 @@ const LeaderItem = ({leaderItem, onClick, getRankColor}) => {
     return (
         <Row style={containerStyle} onClick={() => onClick(adviceId)}>
             <Col span={24} style={horizontalBox}>
-                <h3 style={{color: '#767676', position: 'absolute', top: '20px'}}>{leaderItem.rank}</h3>
-                <h3 style={{marginLeft: '25px'}}>{leaderItem.advisorName}</h3>
+                <h3 style={{color: '#767676'}}>{leaderItem.rank}</h3>
+                <h3 style={{marginLeft: '18px'}}>{leaderItem.advisorName}</h3>
             </Col>
             <Col span={24} style={{marginLeft: '26px'}}>
                 <Row>
-                    <LeaderboardMetricItems 
+                    <LeaderboardMetricItems
                         label="Excess Return"
                         value={annualReturn}
                     />
                     <LeaderboardMetricItems 
-                        label="Excess Return"
+                        label="Tracking Error"
                         value={volatility}
                     />
                     <LeaderboardMetricItems 
@@ -170,7 +168,7 @@ const LeaderItem = ({leaderItem, onClick, getRankColor}) => {
 const LeaderboardMetricItems = ({label, value, onClick = null}) => {
     return (
         <Col span={8} onClick={onClick}>
-            <MetricItem 
+            <MetricItem
                 label={label}
                 value={value}
                 labelStyle={{fontSize: '12px', color: '#767676'}}

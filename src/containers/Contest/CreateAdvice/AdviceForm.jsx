@@ -330,7 +330,7 @@ class ContestAdviceFormImpl extends React.Component {
                                                 >
                                                     {
                                                         detail[invalidKey].message === undefined
-                                                        ? 'Valid'
+                                                        ? 'Valid' 
                                                         : detail[invalidKey].message
                                                     }
                                                 </h3>
@@ -1112,8 +1112,8 @@ class ContestAdviceFormImpl extends React.Component {
                                         <h3 style={{fontSize: '16px', marginLeft: '10px'}}>
                                             {
                                                 this.props.isUpdate 
-                                                ? 'UPDATE CONTEST ENTRY' 
-                                                : 'CREATE CONTEST ENTRY'
+                                                ? 'Update Contest Entry' 
+                                                : 'Edit Contest Entry'
                                             }
                                         </h3>
                                     }

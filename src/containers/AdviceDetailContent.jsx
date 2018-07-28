@@ -770,6 +770,72 @@ export const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle,
     );
 }
 
+export const AdviceContestMetricsMobile = ({selectedAdvice, view, onPerformanceToggle, currentMetrics, simulatedMetrics, contestDropdown}) => {
+    return (
+        <Row>
+            <Col 
+                span={24} 
+                style={{
+                    display: 'flex', 
+                    justifyContent: 'flex-end', 
+                    top: '-40px', 
+                    position:'absolute', 
+                }}>
+                {contestDropdown && contestDropdown()}
+            </Col>
+            
+            <Col>          
+                <div style={{display: 'flex', justifyContent: 'center', margin: '0 0 20px 0'}}>
+                    <Media 
+                        query="(max-width: 600px)"
+                        render={() => 
+                            <SegmentedControl
+                                style={{width: '50%'}}
+                                values={['Active', 'Historical']}
+                                onChange={onPerformanceToggle}
+                                selectedIndex={view === true ? 0 : 1}
+                            />
+                        }
+                    />
+                    <Media 
+                        query="(min-width: 601px)"
+                        render={() => 
+                            <RadioGroup size="small" onChange={onPerformanceToggle} defaultValue="0">
+                                <RadioButton value="0">Active</RadioButton>
+                                <RadioButton value="1">Historical</RadioButton>
+                            </RadioGroup>
+                        }
+                    />
+                </div>
+
+                {view ?
+                    <MetricContainerMobile 
+                        header={
+                            <MetricHeader 
+                                rank={_.get(selectedAdvice, 'latestRank.rating.current.rank', null)}
+                                header='Active Performance'
+                                score={(_.get(selectedAdvice, 'latestRank.rating.current.value', 0) || 0).toFixed(2)}
+                            />
+                        }
+                        metrics={currentMetrics} 
+                    />
+                :
+                    <MetricContainerMobile 
+                        metrics={simulatedMetrics} 
+                        header={
+                            <MetricHeader 
+                                rank={_.get(selectedAdvice, 'latestRank.rating.simulated.rank', null)}
+                                header='Historical Performance'
+                                score={(_.get(selectedAdvice, 'latestRank.rating.simulated.value', 0) || 0).toFixed(2)}
+                            />
+                        }
+                    />
+                }
+            </Col>
+        </Row>
+    );
+}
+
 export const MetricHeader = ({rank, header, score}) => {
     return (
         <Row >
@@ -833,6 +899,32 @@ export const MetricContainer = ({header, metrics}) => {
     );
 }
 
+export const MetricContainerMobile = ({header, metrics}) => {
+    return (
+        <Row>
+            <Col span={24} style={{marginBottom: '10px'}}>
+                {header}
+            </Col>
+            {
+                metrics.map((metric, index) => {
+                
+                    if (metric !== undefined) {
+                        return (
+                            <Col 
+                                key={index}
+                                span={8} 
+                                style={{...verticalBox, }}
+                            >
+                                <ContestMetricItemsMobile key={index} {...metric} />
+                            </Col>
+                        );
+                    }
+                })
+            }
+        </Row>
+    );
+}
+
 export const ContestMetricItems = ({metricValue, rank, label, tooltip, color}) => {
     const containerStyle = {
         marginBottom: '10px'
@@ -861,6 +953,60 @@ export const ContestMetricItems = ({metricValue, rank, label, tooltip, color}) =
                     <h5 
                             style={{
                                 fontSize: global.screen.width > 600 ? '18px' : '16px', 
+                                display: 'inline-block', 
+                                fontWeight: 400, 
+                                color: color
+                            }}
+                    >
+                        {metricValue}
+                    </h5>
+                    <Tooltip title={tooltip} placement="top">
+                        <h5 
+                                style={{
+                                    fontSize: global.screen.width > 600 ? '16px' : '13px', 
+                                    display: 'inline-block', 
+                                    fontWeight: 400
+                                }}
+                        >
+                            <span style={{backgroundColor: '#fff', color: primaryColor, marginRight: '4px'}}>{rank}</span>
+                            {label}
+                        </h5>
+                    </Tooltip>
+                    
+                </Col>
+            </Row>
+        </Col>
+    );
+}
+
+export const ContestMetricItemsMobile = ({metricValue, rank, label, tooltip, color}) => {
+    const containerStyle = {
+        marginBottom: '10px'
+    };
+    const metricValueStyle = {
+        fontSize: '15px', 
+        fontWeight: '700', 
+        color: primaryColor
+    };
+
+    return (
+        <Col span={24} style={containerStyle}>
+            <Row type="flex" justify="center" style={{position: 'relative'}}>
+                <Col 
+                    span={4} 
+                    style={{
+                        ...horizontalBox, 
+                        position: 'absolute',
+                        left: '5px',
+                        alignItems: 'flex-start', 
+                        justifyContent: 'flex-start'
+                    }}
+                >
+                </Col>
+                <Col span={20} style={{...verticalBox, width: 'fit-content'}}>
+                    <h5 
+                            style={{
+                                fontSize: global.screen.width > 600 ? '18px' : '18px', 
                                 display: 'inline-block', 
                                 fontWeight: 400, 
                                 color: color

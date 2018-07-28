@@ -22,7 +22,7 @@ export default class SearchStockHeader extends React.Component {
                 >
                     <Col 
                             span={24} 
-                            style={{...horizontalBox, padding: '5px', justifyContent: 'center'}}
+                            style={{...horizontalBox, padding: '8px', justifyContent: 'center'}}
                     >
                         <Icon 
                             style={{
@@ -61,7 +61,7 @@ export default class SearchStockHeader extends React.Component {
                                         right: '10px',
                                         fontSize: '12px',
                                         height: '30px',
-                                        width: '65px',
+                                        width: '75px',
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
@@ -70,12 +70,13 @@ export default class SearchStockHeader extends React.Component {
                                     type="primary" 
                                     loading={this.props.portfolioLoading}
                             >
-                                <Icon type="form" style={{fontSize: '18px'}}/>
+                                ADD
                                 <Badge 
                                     style={{
                                         backgroundColor: '#fff', 
                                         color: primaryColor, 
                                         fontSize: '14px', 
+                                        marginLeft:'5px'
                                     }} 
                                     count={this.props.selectedStocks.length}
                                 />
