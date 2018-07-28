@@ -5,7 +5,6 @@ import {StickyContainer, Sticky} from 'react-sticky';
 import {Row, Col, Button, Table, Tag, Icon, Select} from 'antd';
 import {Tabs} from 'antd-mobile';
 import {primaryColor, verticalBox, horizontalBox} from '../../../constants';
-// import {AdviceListItemMod} from '../../../components/AdviceListeItemMod';
 import {AdviceListItemMobile as AdviceListItemMod} from '../../ScreenAdviceMobile/AdviceListItem';
 import {scoringMetrics, faqs, howItWorksContents, prizes, requirements, prizeText, scoringText} from '../constants';
 import {processAdviceForLeaderboardListItem} from '../utils';
@@ -347,6 +346,7 @@ class ContestHome extends React.Component {
                 isTrending: false,
                 public: _.get(advice, 'public', false),
                 netValue: advice.netValue,
+                contest: advice.contest
             })
         });
 

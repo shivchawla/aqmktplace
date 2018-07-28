@@ -5,3 +5,8 @@
 .stock-row {
     background: 'yellow'
 }
+
+.selectedstocks-mobile {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}

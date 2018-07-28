@@ -118,8 +118,8 @@ export class HighChartNew extends React.Component {
     }
 
     initializeChart = () => {
-        const {series} = this.props;
-        this.chart = new HighChart['Chart']('chart-container', this.state.config);
+        const {series, chartId = "chart-container"} = this.props;
+        this.chart = new HighChart['Chart'](chartId, this.state.config);
         this.updateSeries(series);
     }
 
@@ -211,6 +211,8 @@ export class HighChartNew extends React.Component {
     }
 
     render() {
+        const {chartId = "chart-container"} = this.props;
+
         return(
             <Row 
                 style={{
@@ -219,7 +221,7 @@ export class HighChartNew extends React.Component {
                     margin: '0 auto',
                     ...this.props.chartContainerStyle
                 }} 
-                id="chart-container"
+                id={chartId}
             ></Row>
         );
     }

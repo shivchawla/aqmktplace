@@ -1,4 +1,11 @@
 @import url('https://fonts.googleapis.com/css?family=Lato:400,700,300|Montserrat:400,500|Nunito');
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+.ant-badge {
+  transform: scale(0.9, 0.9) !important;
+}
 
 html, body, #root {
   width: 100%;

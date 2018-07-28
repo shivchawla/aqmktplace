@@ -1,8 +1,10 @@
 import * as React from 'react';
 import Loadable from 'react-loadable';
+import Media from 'react-media';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import {Spin, Row, Col, Collapse, DatePicker, Radio, Icon, Select, Tooltip} from 'antd';
+import {SegmentedControl} from 'antd-mobile';
 import {metricsHeaderStyle, shadowBoxStyle, primaryColor, metricsLabelStyle, metricsValueStyle, metricColor, adviceApprovalPending, adviceApproved, adviceRejected, advicePublic, advicePrivate, horizontalBox, verticalBox} from '../constants';
 import {AqTag} from '../components/AqTag';
 import {WarningIcon} from '../components/WarningIcon'
@@ -701,7 +703,7 @@ const InvestmentObjItem = ({label, value, showTag = false, warning = false, reas
 
 export const AdviceDetailContent = withRouter(AdviceDetailContentImpl);
 
-const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle, currentMetrics, simulatedMetrics, contestDropdown}) => {
+export const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle, currentMetrics, simulatedMetrics, contestDropdown}) => {
     return (
         <Row>
 
@@ -713,15 +715,31 @@ const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle, curren
                     top: '-40px', 
                     position:'absolute', 
                 }}>
-                {contestDropdown()}
+                {contestDropdown && contestDropdown()}
             </Col>
             
             <Col>          
-                <div style={{textAlign: 'center', margin: '0 0 20px 0'}}>
-                    <RadioGroup size="small" onChange={onPerformanceToggle} defaultValue="0">
-                        <RadioButton value="0">Active</RadioButton>
-                        <RadioButton value="1">Historical</RadioButton>
-                    </RadioGroup>
+                <div style={{display: 'flex', justifyContent: 'center', margin: '0 0 20px 0'}}>
+                    <Media 
+                        query="(max-width: 600px)"
+                        render={() => 
+                            <SegmentedControl
+                                style={{width: '50%'}}
+                                values={['Active', 'Historical']}
+                                onChange={onPerformanceToggle}
+                                selectedIndex={view === true ? 0 : 1}
+                            />
+                        }
+                    />
+                    <Media 
+                        query="(min-width: 601px)"
+                        render={() => 
+                            <RadioGroup size="small" onChange={onPerformanceToggle} defaultValue="0">
+                                <RadioButton value="0">Active</RadioButton>
+                                <RadioButton value="1">Historical</RadioButton>
+                            </RadioGroup>
+                        }
+                    />
                 </div>
 
                 {view ?
@@ -752,23 +770,41 @@ const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle, curren
     );
 }
 
-const MetricHeader = ({rank, header, score}) => {
+export const MetricHeader = ({rank, header, score}) => {
     return (
         <Row >
             <Col span={24} style={verticalBox}>
-                <h3 style={{fontSize: '16px', fontWeight: 400}}>
-                    Score: <span style={{fontSize: '16px', fontWeight: 400}}>{score}</span>
+                <h3 style={{fontSize: global.screen.width > 600 ? '16px' : '14px', fontWeight: 400}}>
+                    Score: 
+                    <span 
+                            style={{
+                                fontSize: global.screen.width > 600 ? '16px' : '14px', 
+                                fontWeight: 400
+                            }}
+                    >   
+                        {score}
+                    </span>
                 </h3>
             </Col>
             <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
-                <h3 style={{marginLeft: '5px', fontWeight: 400, fontSize: '16px', marginBottom:'10px'}}><span style={{color: primaryColor, marginRight:'4px'}}>{rank}</span>{header}</h3>
+                <h3 
+                        style={{
+                            marginLeft: '5px', 
+                            fontWeight: 400, 
+                            fontSize: global.screen.width > 600 ? '16px' : '14px', 
+                            marginBottom:'10px'
+                        }}
+                >
+                    <span style={{color: primaryColor, marginRight:'4px'}}>{rank}</span>
+                    {header}
+                </h3>
             </Col>
             
         </Row>
     );
 }
 
-const MetricContainer = ({header, metrics}) => {
+export const MetricContainer = ({header, metrics}) => {
     return (
         <Row style={{padding: '10px'}}>
             <Col span={24} style={{marginBottom: '10px'}}>
@@ -797,7 +833,7 @@ const MetricContainer = ({header, metrics}) => {
     );
 }
 
-let ContestMetricItems = ({metricValue, rank, label, tooltip, color}) => {
+export const ContestMetricItems = ({metricValue, rank, label, tooltip, color}) => {
     const containerStyle = {
         marginBottom: '10px'
     };
@@ -822,9 +858,27 @@ let ContestMetricItems = ({metricValue, rank, label, tooltip, color}) => {
                 >
                 </Col>
                 <Col span={20} style={{...verticalBox, width: 'fit-content'}}>
-                    <h5 style={{fontSize: '18px', display: 'inline-block', fontWeight: 400, color: color}}>{metricValue}</h5>
+                    <h5 
+                            style={{
+                                fontSize: global.screen.width > 600 ? '18px' : '16px', 
+                                display: 'inline-block', 
+                                fontWeight: 400, 
+                                color: color
+                            }}
+                    >
+                        {metricValue}
+                    </h5>
                     <Tooltip title={tooltip} placement="top">
-                        <h5 style={{fontSize: '16px', display: 'inline-block', fontWeight: 400}}><span style={{backgroundColor: '#fff', color: primaryColor, marginRight: '4px'}}>{rank}</span>{label}</h5>
+                        <h5 
+                                style={{
+                                    fontSize: global.screen.width > 600 ? '16px' : '13px', 
+                                    display: 'inline-block', 
+                                    fontWeight: 400
+                                }}
+                        >
+                            <span style={{backgroundColor: '#fff', color: primaryColor, marginRight: '4px'}}>{rank}</span>
+                            {label}
+                        </h5>
                     </Tooltip>
                     
                 </Col>

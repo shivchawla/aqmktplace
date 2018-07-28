@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import {slide as HamburgerMenu} from 'react-burger-menu';
@@ -6,7 +7,7 @@ import {Layout, Menu, Icon} from 'antd';
 import {NavBar, Button as MobileButton} from 'antd-mobile';
 import {sidebarUrls} from './constants';
 import {Utils} from '../../utils';
-import {primaryColor, horizontalBox} from '../../constants';
+import {primaryColor, horizontalBox, loadingColor} from '../../constants';
 import logo from "../../assets/logo-advq-new.png";
 import * as style from './layoutStyle';
 
@@ -155,20 +156,31 @@ class AqMobileLayoutImpl extends React.Component {
 
     render() {
         return (
-            <Layout id="aq-layout-container">
-                {this.renderLeftSidebar()}
-                {/* <Header style={style.headerStyle}> */}
+            <React.Fragment>
+                <Loading
+                    show={this.props.loading}
+                    color={loadingColor}
+                    className="main-loader"
+                    showSpinner={false}
+                />
                 {
-                    !this.props.noHeader &&
-                    this.renderHeader()
-                }
-                {/* </Header> */}
-                <Layout id="menu-wrapper">
-                    <Layout style={this.props.style}>
-                        {this.props.children}
+                    !this.props.loading &&
+                    <Layout id="aq-layout-container">
+                        {this.renderLeftSidebar()}
+                        {/* <Header style={style.headerStyle}> */}
+                        {
+                            !this.props.noHeader &&
+                            this.renderHeader()
+                        }
+                        {/* </Header> */}
+                        <Layout id="menu-wrapper">
+                            <Layout style={{backgroundColor: '#fff', ...this.props.style}}>
+                                {this.props.children}
+                            </Layout>
+                        </Layout>
                     </Layout>
-                </Layout>
-            </Layout>
+                }
+            </React.Fragment>
         );
     }
 }

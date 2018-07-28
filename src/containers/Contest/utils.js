@@ -68,3 +68,36 @@ export const formatMetric = (metric, type) => {
         return metric.toFixed(2);
     }
 }
+
+export const contestMetrics = [
+    {
+        metricValue: 0.6,
+        rank: 10,
+        label: 'Max Loss'
+    },
+    {
+        metricValue: 0.6,
+        rank: 10,
+        label: 'Max Loss'
+    },
+    {
+        metricValue: 0.6,
+        rank: 10,
+        label: 'Max Loss'
+    },
+    {
+        metricValue: 0.6,
+        rank: 10,
+        label: 'Max Loss'
+    },
+    {
+        metricValue: 0.6,
+        rank: 10,
+        label: 'Max Loss'
+    },
+    {
+        metricValue: 0.6,
+        rank: 10,
+        label: 'Max Loss'
+    }
+];

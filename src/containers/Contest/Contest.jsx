@@ -3,6 +3,7 @@ import Media from 'react-media';
 import {Route, Switch} from 'react-router-dom';
 import ContestHome from './ContestHome';
 import LeaderBoard from './LeaderBoard';
+import AdviceDetailMobile from '../AdviceDetailMobile/AdviceDetailMobile';
 import HowToCreateAdvice from './HowToCreateAdvice';
 import CreateAdvice from './CreateAdvice/CreateAdvice';
 import UpdateAdvice from './CreateAdvice/UpdateAdvice';
@@ -24,6 +25,31 @@ export default class Contest extends React.Component {
                                 exact={true} 
                                 path={`${this.props.match.url}`} 
                                 render={props => <ContestHomeMobile {...props}/>} 
+                            />
+                            <Route 
+                                exact={true} 
+                                path={`${this.props.match.url}/createentry`} 
+                                render={props => <HowToCreateAdvice {...props}/>} 
+                            />
+                            <Route 
+                                exact={true} 
+                                path={`${this.props.match.url}/createentry/edit`} 
+                                render={props => <CreateAdvice {...props}/>} 
+                            />
+                            <Route
+                                exact={true} 
+                                path={`${this.props.match.url}/updateentry/:id`}
+                                render={props => <UpdateAdvice {...props}/>} 
+                            />
+                            <Route 
+                                exact={true}
+                                path={`${this.props.match.url}/entry/:id`}
+                                render={props => <AdviceDetailMobile {...props}/>} 
+                            />
+                            <Route
+                                exact={true}
+                                path={`${this.props.match.url}/leaderboard`}
+                                render={props => <LeaderBoard {...props}/>} 
                             />
                             <Route component={PageNotFound} />
                         </Switch>
