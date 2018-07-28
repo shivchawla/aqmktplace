@@ -406,7 +406,6 @@ class ContestHome extends React.Component {
             <Tabs 
                     tabs={Utils.isLoggedIn() ? tabs : tabs.slice(0 , tabs.length - 1)}
                     renderTab={this.renderTab}
-                    initialPage={5}
             >
                 {this.renderHowItWorks()}
                 {this.renderPrizeList()}
