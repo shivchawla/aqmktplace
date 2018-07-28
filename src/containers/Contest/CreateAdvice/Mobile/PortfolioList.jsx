@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {Motion, spring} from 'react-motion';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {withRouter} from 'react-router';
-import {Row, Col, Modal, Spin, Select, Icon, Checkbox} from 'antd';
+import {Row, Col, Modal, Spin, Select, Icon, Checkbox, Button} from 'antd';
 import {UpdatePosition} from './UpdatePosition';
 import {SegmentedControl} from 'antd-mobile';
 import {metricColor, primaryColor, horizontalBox, verticalBox} from '../../../../constants';
@@ -266,7 +266,6 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     // marginTop: '20px',
                     borderRadius: '2px'
                 }}
-                onClick={() => onClick(position)}
         >
             <Col span={24}>
                 {
@@ -283,20 +282,20 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                             checked={checked}
                         />
                     </Col>
-                    <Col span={20}>
+                    <Col span={19}>
                         <h3 style={{color: primaryColor, fontSize: '16px'}}>{symbol}</h3>
                     </Col>
-                    {/* <Col span={2}>
-                        <Icon 
-                                onClick={() => onClick(position)}
-                                style={{fontSize: '20px'}} 
-                                type="edit" 
-                        />
-                    </Col> */}
+                    <Col span={3}>
+                        <Button
+                            size="small" 
+                            onClick={() => onClick(position)}
+                            style={{fontSize: '14px'}} 
+                        >EDIT</Button>
+                    </Col>
                 </Row>
             </Col>
             <Col span={24}>
-                <Row type="flex" align="middle" justify="space-between" style={{padding: '0 20px'}}>
+                <Row type="flex" align="bottom" justify="space-between" style={{padding: '0 20px'}}>
                     <Col span={6}>
                         <MetricItem 
                             label="Num. of Shares"

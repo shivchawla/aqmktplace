@@ -439,6 +439,10 @@ export default class LeaderBoard extends React.Component {
         this.setState({showActivePerformance: e.target.value});
     }
 
+    onPerformanceToggleMobile = (value) => {
+        this.setState({showActivePerformance: value == "Active" ? true : false});
+    }
+
     renderPageContent() {
         return (
             <Row gutter={0} style={{padding: '10px 20px'}}>
@@ -476,7 +480,7 @@ export default class LeaderBoard extends React.Component {
         this.getActiveContests();
     }
 
-    renderContestDetailMetrics = () => {
+    renderContestDetailMetrics = (mobile=false) => {
         const {advices = [], selectedAdviceId = null} = this.state;
         const selectedAdvice = advices.filter(advice => advice.adviceId === selectedAdviceId)[0];
         const advisorName = selectedAdvice !== undefined ? selectedAdvice.advisorName: '';
@@ -493,8 +497,6 @@ export default class LeaderBoard extends React.Component {
         const currentMetrics = this.processMetricsForSelectedAdvice('current');
         const simulatedMetrics = this.processMetricsForSelectedAdvice('simulated');
 
-
-
         return (
             <ContestDetailMetrics 
                 entryDetail={{
@@ -504,13 +506,18 @@ export default class LeaderBoard extends React.Component {
                     currentMetrics, 
                     simulatedMetrics
                 }}
-                onPerformanceToggle={this.onPerformanceToggle}
+                onPerformanceToggle={mobile ? this.onPerformanceToggleMobile : this.onPerformanceToggle}
                 showActivePerformance={this.state.showActivePerformance}
                 history={this.props.history}
                 renderMetricsHeader={this.renderMetricsHeader}
                 selectedAdviceId={this.state.selectedAdviceId}
             />
         );
+        //onPerformanceToggle={mobile ? this.onPerformanceToggleMobile : this.onPerformanceToggle}
+    }
+
+    renderContestDetailMetricsMobile = () => {
+        return this.renderContestDetailMetrics(true);
     }
 
     render() {
@@ -521,7 +528,7 @@ export default class LeaderBoard extends React.Component {
                     render={() =>
                         <LeaderboardMobile 
                             leaders={this.state.advices} 
-                            renderContestDetail={this.renderContestDetailMetrics}
+                            renderContestDetail={this.renderContestDetailMetricsMobile}
                             onLeaderItemClick={this.handleAdviceItemClicked} 
                             renderPagination={this.renderPaginationMobile}
                             loading={this.state.loading}
@@ -591,7 +598,7 @@ const ContestDetailMetrics = ({entryDetail, onPerformanceToggle, showActivePerfo
                         <SegmentedControl 
                             style={{width: '60%'}}
                             values={['Active', 'Historical']}
-                            onChange={onPerformanceToggle}
+                            onValueChange={onPerformanceToggle}
                             selectedIndex={showActivePerformance === true ? 0 : 1}
                         />
                     )}
