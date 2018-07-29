@@ -9,6 +9,7 @@ import {SignupMeta} from '../metas';
 import logo from "../assets/logo-advq-new.png";
 import '../css/register.css';
 import AppLayout from './AppLayout';
+import ContactUs from '../components/ContactUs';
 
 const {requestUrl} = require('../localConfig');
 
@@ -21,7 +22,8 @@ class Signup extends Component {
     super();
     this.state = {
       'loading': false,
-      'error': undefined
+      'error': undefined,
+      showContactUs: false
     };
     this.handleSubmit = (e) => {
       e.preventDefault();
@@ -169,9 +171,14 @@ class Signup extends Component {
             </FormItem>
             <p style={{'color':'#cc6666',
               'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
+            <div style={{fontSize: '16px', fontWeight:type=='desktop' ? 300 : 400, marginTop:type=='desktop' ? '20px' : '0px', textAlign:'center', color:'#cc6666', cursor:'pointer'}} onClick={this.toggleContactUsModal}>Can't create an AdviceQube account?</div>  
           </React.Fragment>
         );
       }
+  }
+
+  toggleContactUsModal = () => {
+    this.setState({showContactUs: !this.state.showContactUs});
   }
 
   renderMobile = () => {
@@ -181,13 +188,14 @@ class Signup extends Component {
     return (
 	  	<div 
 	  		style={{
-				height: 'calc(100vh - 64px)', 
+				//height: 'calc(100vh - 64px)', 
 				width: '100%', 
 				background: '#fafafaf',
 				minHeight: '500px', 
-				display: 'flex'
+				display: 'block'
 			}}
 		>
+      <ContactUs title="Problem with sign-up" visible={this.state.showContactUs} onClose={this.toggleContactUsModal}/>
 			<Row 
 					className="card" 
 					style={{
@@ -219,26 +227,26 @@ class Signup extends Component {
 						Expert-Sourced Investment Portfolio
 					</p>
 				</Col>
-				<Col span={24} style={{marginTop: '15%'}}>
+				<Col span={24} style={{marginTop: '20px'}}>
 					<h3 style={{fontSize: '32px', color: primaryColor}}>Register</h3>
 				</Col>
 				<Col span={24}>
 					<Form onSubmit={this.handleSubmit} style={{width: '100%'}}>
-						<FormItem className="signup-form-item" style={{marginBottom: '10px', marginTop: '20px'}}>
+						<FormItem className="signup-form-item" style={{marginBottom: '5px', marginTop: '20px'}}>
 							{getFieldDecorator('firstName', {
 							rules: [{ required: true, message: 'Please input your firstName!', whitespace: true }],
 							})(
 							<Input placeholder="First Name" style={{height: '40px'}} />
 							)}
 						</FormItem>
-						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+						<FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
 							{getFieldDecorator('lastName', {
 							rules: [{ required: true, message: 'Please input your lastName!', whitespace: true }],
 							})(
 							<Input placeholder="Last Name" style={{height: '40px', marginTop: '5px'}} />
 							)}
 						</FormItem>
-						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+						<FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
 							{getFieldDecorator('email', {
 							rules: [{
 								type: 'email', message: 'Please input a valid E-mail!',
@@ -253,7 +261,7 @@ class Signup extends Component {
               />
 							)}
 						</FormItem>
-						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+						<FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
 							{getFieldDecorator('password', {
 							rules: [{
 								required: true, message: 'Please input your password!',
@@ -271,7 +279,7 @@ class Signup extends Component {
               />
 							)}
 						</FormItem>
-						<FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+						<FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
 							{getFieldDecorator('confirm', {
 							rules: [{
 								required: true, message: 'Please confirm your password!',
@@ -291,6 +299,8 @@ class Signup extends Component {
 					</Form>
 				</Col>
 			</Row>
+        
+        
       </div>
     );
   }
@@ -300,8 +310,12 @@ class Signup extends Component {
     const { getFieldDecorator } = this.props.form;
 
     return (
-      <div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
+      <div>
+      <div style={{height: 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
         'minHeight': '500px', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'}}>
+        
+        <ContactUs title="Problem with sign-up" visible={this.state.showContactUs} onClose={this.toggleContactUsModal}/>
+
         <div className="card" style={{'padding': '20px', 'background': 'white',
           'borderRadius': '2px', 'textAlign': 'center', 'minWidth': '340px', width: '390px'}}>
           <img alt="" style={{'height': '60px', 'width': 'auto'}} src={logo}/>
@@ -316,21 +330,21 @@ class Signup extends Component {
             Expert-Sourced Investment Portfolio
           </p>
           <Form onSubmit={this.handleSubmit}>
-            <FormItem className="signup-form-item" style={{marginBottom: '10px', marginTop: '20px'}}>
+            <FormItem className="signup-form-item" style={{marginBottom: '5px', marginTop: '20px'}}>
               {getFieldDecorator('firstName', {
                 rules: [{ required: true, message: 'Please input your firstName!', whitespace: true }],
               })(
                 <Input placeholder="First Name"/>
               )}
             </FormItem>
-            <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+            <FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
               {getFieldDecorator('lastName', {
                 rules: [{ required: true, message: 'Please input your lastName!', whitespace: true }],
               })(
                 <Input placeholder="Last Name"/>
               )}
             </FormItem>
-            <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+            <FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
               {getFieldDecorator('email', {
                 rules: [{
                   type: 'email', message: 'Please input a valid E-mail!',
@@ -341,7 +355,7 @@ class Signup extends Component {
                 <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-Mail"/>
               )}
             </FormItem>
-            <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+            <FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
               {getFieldDecorator('password', {
                 rules: [{
                   required: true, message: 'Please input your password!',
@@ -354,7 +368,7 @@ class Signup extends Component {
                 <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password"/>
               )}
             </FormItem>
-            <FormItem className="signup-form-item" style={{marginBottom: '10px'}}>
+            <FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
               {getFieldDecorator('confirm', {
                 rules: [{
                   required: true, message: 'Please confirm your password!',
@@ -368,6 +382,7 @@ class Signup extends Component {
             {this.getRegisterButtonDiv()}
           </Form>
         </div>
+      </div>
       </div>
     );
   }
