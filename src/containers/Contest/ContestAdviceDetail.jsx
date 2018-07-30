@@ -344,7 +344,8 @@ class AdviceDetailImpl extends React.Component {
 
     processPerformanceData = performanceData => {
         return performanceData.map(item => {
-            return ([moment(item.date, 'YYYY-MM-DD').valueOf(), Number(item.netValue.toFixed(2))])
+            const netValue = _.get(item, 'netValue', 0);
+            return ([moment(item.date, 'YYYY-MM-DD').valueOf(), Number(netValue.toFixed(2))])
         })
     }
 
@@ -447,6 +448,7 @@ class AdviceDetailImpl extends React.Component {
             const adviceActive = _.get(adviceContestResponse.data, 'active', false);
             const withdrawn = _.get(adviceContestResponse.data, 'withDrawn', false);
             const prohibited = _.get(adviceContestResponse.data, 'prohibited', false);
+            console.log('Advice Active', adviceActive);
             this.setState({
                 adviceDetail: {
                     ...this.state.adviceDetail, 

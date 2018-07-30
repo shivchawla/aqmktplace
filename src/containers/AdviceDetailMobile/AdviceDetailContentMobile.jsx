@@ -472,7 +472,7 @@ class AdviceDetailContentImpl extends React.Component {
                             <SegmentedControl 
                                 onValueChange={this.props.handlePerformanceToggleChange}
                                 values={['Active', 'Historical']} 
-                                selectedIndex={this.props.performanceType === 'Simulated' ? 1 : 0}
+                                selectedIndex={this.props.performanceType === 'Historical' ? 1 : 0}
                             />
                         }
                     </Col>

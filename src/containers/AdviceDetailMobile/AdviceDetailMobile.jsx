@@ -129,7 +129,7 @@ class AdviceDetailImpl extends React.Component {
                 current: {},
                 simulated: {}
             },
-            performanceType: 'Simulated',
+            performanceType: 'Historical',
             tickers: [],
             isDialogVisible: false,
             isUpdateDialogVisible: false,
@@ -1339,7 +1339,7 @@ class AdviceDetailImpl extends React.Component {
             maxLoss = 0, 
             nstocks = 0, 
             period = 0
-        } = value === 'Realized' ? this.state.performance.current : this.state.performance.simulated;
+        } = value === 'Active' ? this.state.performance.current : this.state.performance.simulated;
         this.setState({
             metrics: {
                 ...this.state.metrics,
@@ -1348,7 +1348,7 @@ class AdviceDetailImpl extends React.Component {
                 volatility,
                 maxLoss,
             },
-            performanceType: value === 'Realized' ? 'Current' : 'Simulated'
+            performanceType: value === 'Active' ? 'Active' : 'Historical'
         })
     }
 

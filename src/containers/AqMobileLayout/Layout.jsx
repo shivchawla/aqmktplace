@@ -23,8 +23,6 @@ class AqMobileLayoutImpl extends React.Component {
     }
 
     renderHeader = () => {
-        console.log(this.props.previousPageUrl);
-
         return (
             <NavBar
                 mode="light"
