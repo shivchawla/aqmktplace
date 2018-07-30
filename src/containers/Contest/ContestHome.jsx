@@ -154,7 +154,7 @@ class ContestHome extends React.Component {
                                 }}
                                 onClick={() => this.props.history.push('/home')}
                         >
-                            <img src={logo} style={{height: '40px', marginTop: '-10px'}}/>
+                            {/* <img src={logo} style={{height: '40px', marginTop: '-10px'}}/> */}
                             {/* <h1 onClick={() => this.props.history.push('/home')} 
                                 style={{...headerColor, cursor: 'pointer', marginLeft: '10px', marginTop: '-5px'}}>
                                 <span style={{...biggerFont, color:'#fff'}}>A</span>
@@ -511,7 +511,6 @@ class ContestHome extends React.Component {
     render() {
         return (
             <AppLayout
-                noHeader
                 content = {
                     <Row style={{height: this.props.windowHeight + 100}}>
                         <ContestHomeMeta />
@@ -521,8 +520,7 @@ class ContestHome extends React.Component {
                     </Row>
                 }
                 loading={this.state.loading}
-            >
-            </AppLayout>
+           />
         );
     }
 }

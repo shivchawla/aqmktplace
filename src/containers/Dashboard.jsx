@@ -34,7 +34,7 @@ class Dashboard extends React.Component {
         const page = e.keyPath[1];
         const section = e.keyPath[0];
         if (page === undefined && section === 'createPortfolio') {
-            this.props.history.push('/dashboard/createportfolio');
+            this.props.history.push('/contest/createentry');
         } else if (page === 'account') {
             if (section === 'signOut') {
                 Utils.logoutUser();
@@ -104,7 +104,7 @@ class Dashboard extends React.Component {
     render() {
         const investorTitle = <span style={subMenuLabelStyle}><Icon type="shopping-cart" />Investor Dashboard</span>;
         const advisorTitle = <span style={subMenuLabelStyle}><Icon type="rocket" />Contest Dashboard</span>;
-        const createPortfolioTitle = <span style={subMenuLabelStyle}><Icon type="plus-square-o" />Create Portfolio</span>;
+        const createPortfolioTitle = <span style={subMenuLabelStyle}><Icon type="plus-square-o" />Create Entry</span>;
         const accountTitle = <span style={subMenuLabelStyle}><Icon type="user" />Account</span>;
 
         return(

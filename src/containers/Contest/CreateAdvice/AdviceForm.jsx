@@ -17,7 +17,7 @@ import AppLayout from '../../../containers/AppLayout';
 import {AqMobileLayout} from '../../AqMobileLayout/Layout';
 import {benchmarks} from '../../../constants/benchmarks';
 import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox} from '../../../constants';
-import {CreateAdviceCrumb} from '../../../constants/breadcrumbs';
+import {CreateAdviceCrumb, UpdateAdviceCrumb} from '../../../constants/breadcrumbs';
 import {getBreadCrumbArray, fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
 import { MetricItem } from '../../../components/MetricItem';
 import enUS from 'antd-mobile/lib/locale-provider/en_US';
@@ -772,6 +772,15 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     renderPageContestDesktop = () => {
+        const breadCrumbs = this.props.isUpdate
+                ? getBreadCrumbArray(UpdateAdviceCrumb, [
+                    {name: this.state.name, url: `/contest/entry/${this.props.adviceId}`},
+                    {name: 'Update Advice'}
+                ])
+                : getBreadCrumbArray(UpdateAdviceCrumb, [
+                    {name: 'Create Advice'}
+                ]);
+
         return (
             <Row className='aq-page-container'>
                 {this.renderAdviceErrorDialog()}
@@ -782,6 +791,20 @@ class ContestAdviceFormImpl extends React.Component {
                         {this.props.isUpdate ? 'Update Contest Entry' : 'Create Contest Entry'}
                     </h3>
                 </Col> */}
+                <Col span={24} style={{padding: 0}}>
+                    <AqPageHeader 
+                        title={this.props.isUpdate ? "Update Advice" : "Create Advice"}
+                        showTitle={true}
+                        breadCrumbs={breadCrumbs}
+                    >
+                        <Col xl={0} md={24} sm={24} xs={24}>
+                            {
+                                this.state.preview &&
+                                this.renderActionButtons('small')
+                            }
+                        </Col>
+                    </AqPageHeader>
+                </Col>
                 <Col span={18} style={{...shadowBoxStyle, minHeight: '600px'}}>
                     <Row style={leftContainerStyle} type="flex" align="start">
                         <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
