@@ -1392,7 +1392,7 @@ class AdviceDetailImpl extends React.Component {
             this.state.notAuthorized
             ?   <ForbiddenAccess />
             :   <AqMobileLayout 
-                        innerPage={true} 
+                        // innerPage={true} 
                         previousPageUrl={contestOnly ? null : '/advice'}
                         customHeader={<h3 style={{fontSize: '16px'}}>{contestOnly ? "Contest Entry Detail" : "Advice Detail"}</h3>}
                 >
