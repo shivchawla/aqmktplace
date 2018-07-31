@@ -692,7 +692,8 @@ class AdviceDetailImpl extends React.Component {
         if (this.mounted) {
             try {
                 const realtimeData = JSON.parse(msg.data);
-                if (realtimeData.type === 'advice') {
+                const adviceId = _.get(realtimeData, 'adviceId', null);
+                if (realtimeData.type === 'advice' && this.props.match.params.id === adviceId) {
                     const netValue = _.get(realtimeData, 'output.summary.netValue', 0);
                     let positions = _.get(realtimeData, 'output.detail.positions', []);
                     const staticPositions = this.state.positions; // old positions from state
