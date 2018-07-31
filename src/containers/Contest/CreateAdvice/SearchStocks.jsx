@@ -2,7 +2,8 @@ import * as React from 'react';
 import Media from 'react-media';
 import {Motion, spring} from 'react-motion';
 import _  from 'lodash';
-import {Row, Col, Input, Icon, Badge, Button, Tag} from 'antd';
+import {sectorData} from '../../../constants/stockDetails';
+import {Row, Col, Input, Icon, Badge, Button, Tag, Checkbox} from 'antd';
 import {SearchBar, Tag as TagMobile} from 'antd-mobile';
 import {StockPerformance} from './StockPerformance';
 import {screenSize} from './constants';
@@ -12,7 +13,7 @@ import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../co
 import {fetchAjax, Utils} from '../../../utils';
 import '../css/searchStocks.css';
 
-
+const CheckboxGroup = Checkbox.Group;
 const {Search} = Input;
 const {requestUrl} = require('../../../localConfig');
 const textColor = '#757575';
@@ -36,9 +37,11 @@ export class SearchStocks extends React.Component {
     renderSearchStocksList = () => {
         return (
             <Row>
-                <Col span={24}>
+                <Col span={24} style={horizontalBox}>
                     <Search placeholder="Search Stocks" onChange={this.handleSearchInputChange}/>
+                    <Button shape="circle" icon="filter" />
                 </Col>
+                <SectorItems sectors={this.getSectors()}/>
                 {this.renderPagination()}
                 <Col span={24} style={{marginTop: '20px'}}>
                     {
@@ -322,6 +325,10 @@ export class SearchStocks extends React.Component {
         this.setState({selectedStocks});
     }
 
+    getSectors = () => {
+        return _.uniq(sectorData.map(item => item.Sector).filter(item => item.length > 0));
+    }
+
     componentWillMount() {
         this.fetchStocks('');
         if (this.props.isUpdate) {
@@ -493,10 +500,11 @@ export class SearchStocks extends React.Component {
                     query={`(min-width: ${screenSize.desktop})`}
                     render={() => (
                         <React.Fragment>
-                            <Col span={12} style={{padding: '20px'}}>
+                            <Col span={4}></Col>
+                            <Col span={10} style={{padding: '20px'}}>
                                 {this.renderSearchStocksList()}
                             </Col>
-                            <Col span={12} style={{padding: '20px'}}>
+                            <Col span={10} style={{padding: '20px'}}>
                                 {this.renderSelectedStocks()}
                                 <StockPerformance stock={this.state.selectedStock}/>
                             </Col>
@@ -616,7 +624,6 @@ export class SearchStocks extends React.Component {
                             selectedStocks={this.state.selectedStocks}
                             stockPerformanceOpen={this.state.stockPerformanceOpen}
                             toggleBottomSheet={this.props.toggleBottomSheet}
-                            stockPerformanceOpen={this.state.stockPerformanceOpen}
                             addSelectedStocksToPortfolio={this.addSelectedStocksToPortfolio}
                             portfolioLoading={this.state.portfolioLoading}
                         />
@@ -745,6 +752,14 @@ const AddIcon = ({checked = false, size = '20px'}) => {
     const color = checked ? metricColor.negative : primaryColor;
 
     return <Icon style={{fontSize: size, color}} type={type} />
+}
+
+const SectorItems = ({sectors = []}) => {
+    const options = sectors.map(sector => {
+        return {label: sector, value: sector};
+    });
+
+    return <CheckboxGroup options={options} />;
 }
 
 const topHeaderContainer = {
