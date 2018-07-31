@@ -806,12 +806,14 @@ class StockResearchImpl extends React.Component {
                     noFooter={this.props.openAsDialog}
                     noHeader={this.props.openAsDialog}
                     content={
-                        <React.Fragment>
+                        <Row>
                             <StockResearchMeta />
                             {this.renderCreateWatchListModal()}
                             {this.renderAimsquantRedirectModal()}
-                            {this.renderPageContent()}
-                        </React.Fragment>
+                            <Col span={24}>
+                                {this.renderPageContent()}
+                            </Col>
+                        </Row>
                     }>
                 </AppLayout>
         );
