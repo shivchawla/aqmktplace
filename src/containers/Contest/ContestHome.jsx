@@ -396,8 +396,11 @@ class ContestHome extends React.Component {
     renderNoActiveParticipants = () => {
         return (
             <Row style={{marginTop: '100px'}}>
-                <Col span={24} style={{textAlign: 'center'}}>
-                    <h3>There are no active participants in the contest yet.</h3>
+                <Col span={24} style={{...verticalBox, textAlign: 'center'}}>
+                    <h3 style={{color: 'transparent'}}>There are no active participants in the contest yet.</h3>
+                    <Button type="primary">
+                        SIGN UP
+                    </Button>
                 </Col>
             </Row>
         );
