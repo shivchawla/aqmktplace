@@ -324,9 +324,9 @@ export class SearchStocks extends React.Component {
 
     componentWillMount() {
         this.fetchStocks('');
-        if (this.props.isUpdate) {
-            this.initializeSelectedStocks();
-        }
+        // if (this.props.isUpdate) {
+        this.initializeSelectedStocks();
+        // }
         this.syncStockListWithPortfolio(this.props.portfolioPositions);
     }
 
@@ -588,7 +588,7 @@ export class SearchStocks extends React.Component {
                     style={{
                         width: global.screen.width, 
                         overflow: 'hidden', 
-                        height: global.screen.height,
+                        height: global.screen.height + 100,
                         position: 'relative'
                     }}
             >
