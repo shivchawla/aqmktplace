@@ -229,7 +229,9 @@ class Login extends Component {
   				</Col>
   			</Row>
 
-        <div style={{fontSize: '16px', textAlign:'center', color:'#cc6666'}} onClick={this.toggleContactUsModal}>Can't sign-in to your AdviceQube account?</div>
+        <div style={{fontSize: '16px', textAlign:'center', color: primaryColor}} onClick={this.toggleContactUsModal}>
+          Can't sign-in to your AdviceQube account?
+        </div>
   	    
       </div>
   	);
@@ -302,7 +304,9 @@ class Login extends Component {
   					{getLoginButtonDiv()}
   				</Form>
   			</div>
-        <div style={{fontSize: '16px', marginTop:'30px', textAlign:'center', fontWeight:300, color:'#cc6666', cursor:'pointer'}} onClick={this.toggleContactUsModal}>Can't sign-in to your AdviceQube account?</div>
+        <div style={{fontSize: '16px', marginTop:'30px', textAlign:'center', fontWeight:300, color: primaryColor, cursor:'pointer'}} onClick={this.toggleContactUsModal}>
+          Can't sign-in to your AdviceQube account?
+        </div>
 	    </div>
         
       </div>
