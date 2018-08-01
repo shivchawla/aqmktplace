@@ -23,13 +23,24 @@ class AqMobileLayoutImpl extends React.Component {
     }
 
     renderHeader = () => {
+        const {theme = 'light'} = this.props;
+        const navBarStyle = {
+            backgroundColor: theme === 'light' ? '#fff' : primaryColor,
+        };
+        const iconLightThemeColor = '#686868';
+
         return (
             <NavBar
                 mode="light"
                 icon={
                     <Icon 
                         type={this.props.innerPage ? "left" : "menu-unfold"} 
-                        style={{...style.sideBarMenuIconStyle, ...this.state.iconRotateStyle, ...this.props.menuIconStyle}}
+                        style={{
+                            ...style.sideBarMenuIconStyle, 
+                            ...this.state.iconRotateStyle, 
+                            ...this.props.menuIconStyle,
+                            color: theme === 'light' ? iconLightThemeColor : '#fff'
+                        }}
                         onClick = {
                             () => 
                                 this.props.innerPage 
@@ -46,17 +57,18 @@ class AqMobileLayoutImpl extends React.Component {
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
-                    borderBottom: '1px solid #E0E0E0',
+                    borderBottom: `1px solid ${theme === 'light' ? '#eaeaea' : primaryColor}`,
+                    ...navBarStyle,
                     ...this.props.navbarStyle
                 }}
             >
                 {
                     this.props.customHeader === undefined
                     ?   <div style={{...headerColor, cursor: 'pointer',display: 'inline-block'}}>
-                            <span style={{...biggerFont, color: primaryColor}}>A</span>
-                            <span style={{color: primaryColor}}>DVICE</span>
-                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                            <span style={{color: '#e06666'}}>UBE</span>
+                            <span style={{...biggerFont, color: theme === 'light' ? primaryColor : '#fff'}}>A</span>
+                            <span style={{color: theme === 'light' ? primaryColor : '#fff'}}>DVICE</span>
+                            <span style={{...biggerFont, color: theme === 'light' ? '#e06666' : '#fff'}}>Q</span>
+                            <span style={{color: theme === 'light' ? '#e06666' : '#fff'}}>UBE</span>
                         </div>
                     :   this.props.customHeader
                 }

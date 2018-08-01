@@ -5,6 +5,8 @@ import pulse from 'react-animations/lib/pulse';
 import Radium, {StyleRoot} from 'radium';
 import Modal from 'react-responsive-modal';
 import {Row, Col, Button, Form, Icon} from 'antd';
+import {Footer} from '../components/Footer';
+import {AqMobileLayout} from './AqMobileLayout/Layout';
 import adviceLogo from '../assets/AdviceLogo.svg';
 import adviceLogoMobile from '../assets/AdviceLogoMobile.svg';
 import portfolioLogoMobile from '../assets/PortfolioLogo.svg';
@@ -21,13 +23,13 @@ import realtime from '../assets/realtime.svg';
 import test from '../assets/test.svg';
 import track from '../assets/track.svg';
 import performance from '../assets/performance.svg';
-import CreatePortfolio from '../assets/CreatePortfolio-Home.svg';
 import EnterContest from '../assets/EnterContest2-Home.svg';
 import WinPrizes from '../assets/WinPrizes-Home.svg';
 import ExpertIdea from '../assets/ExpertIdea-Home.svg';
 import {HomeMeta} from '../metas';
 import '../css/home.css';
 import AppLayout from './AppLayout'
+import { verticalBox } from '../constants';
 
 const {youtubeVideoId} = require('../localConfig');
 
@@ -822,99 +824,79 @@ export class Home extends React.Component {
         );
     }
 
-    render() {
+    renderMobile = () => {
+        return (
+            <AqMobileLayout loading={this.state.loading}>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => this.renderVideoPlayerModalMobile()}
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => this.renderVideoPlayerModalMobile('tablet')}
+                />
+                <Col span={24} style={verticalBox}>
+                    <Row>
+                        <React.Fragment>
+                            {this.renderTopLeftSectionMobile()}
+                            {this.renderTopHeroImageMobile()}
+                            {this.renderActionButtonsMobile()}
+                        </React.Fragment>
+                    </Row>
+                    <Row className="lower-section" style={{marginTop: '30px', height:'100vh', minHeight: '600px'}}>
+                        {this.renderLowerSectionMobile()}
+                    </Row>
+                    <Row className="middle-section" style={{marginTop: '50px'}}>
+                        {this.renderMiddleSectionMobile()}
+                    </Row>
+                    <Row>
+                        <Footer mobile={true} />
+                    </Row>
+                </Col>
+            </AqMobileLayout>
+        );
+    }
+
+    renderDesktop = () => {
         return (
             <AppLayout 
                 loading={this.state.loading}
                 content={
-                    <StyleRoot>
-                        <Media 
-                            query="(max-width: 1199px)"
-                            render={() => (
-                                <React.Fragment>
-                                    <Media 
-                                        query="(max-width: 600px)"
-                                        render={() => this.renderVideoPlayerModalMobile()}
-                                    />
-                                    <Media 
-                                        query="(min-width: 601px)"
-                                        render={() => this.renderVideoPlayerModalMobile('tablet')}
-                                    />
-                                </React.Fragment>
-                            )}
-                        />
-                        <Media 
-                            query="(min-width: 1200px)"
-                            render={() => this.renderVidePlayerModalDesktop()}
-                        />
-                        {/* {this.renderVidePlayerModalDesktop()} */}
+                    <React.Fragment>
+                        {this.renderVidePlayerModalDesktop()}
                         <Col span={24} className='page-container'>
-                            <HomeMeta />
-                            <Media 
-                                query="(max-width: 1199px)"
-                                render={() => {
-                                    return (
-                                        <Row>
-                                            <React.Fragment>
-                                                {this.renderTopLeftSectionMobile()}
-                                                {/* {this.renderPlayVideoButtonMobile()} */}
-                                                {this.renderTopHeroImageMobile()}
-                                                {this.renderActionButtonsMobile()}
-                                            </React.Fragment>
-                                        </Row>
-                                    );
-                                }}
-                            />
-                            <Media
-                                query="(min-width: 1200px)"
-                                render={() => {
-                                    return (
-                                        <Row className="top-section">
-                                            <React.Fragment>
-                                                {this.renderTopLeftSectionDesktop()}
-                                                {this.renderTopHeroImageDesktop()}
-                                                {/* {this.renderPlayVideoButtonDesktop()} */}
-                                            </React.Fragment>
-                                        </Row>
-                                    );
-                                }}
-                            />
-                            
+                            <Row className="top-section">
+                                <React.Fragment>
+                                    {this.renderTopLeftSectionDesktop()}
+                                    {this.renderTopHeroImageDesktop()}
+                                </React.Fragment>
+                            </Row>
                             <Row className="lower-section" style={{marginTop: '30px', height:'100vh', minHeight: '600px'}}>
-                                <Media 
-                                    query="(max-width: 1199px)"
-                                    render={() => this.renderLowerSectionMobile()}
-                                />
-                                <Media 
-                                    query="(min-width: 1200px)"
-                                    render={() => this.renderLowerSectionDesktop()}
-                                />
+                                {this.renderLowerSectionDesktop()}
                             </Row>
-
                             <Row className="middle-section" style={{marginTop: '50px'}}>
-                                <Media 
-                                    query="(max-width: 1199px)"
-                                    render={() => this.renderMiddleSectionMobile()}
-                                />
-                                <Media 
-                                    query="(min-width: 1200px)"
-                                    render={() => this.renderMiddleSectionDesktop()}
-                                />
+                                {this.renderMiddleSectionDesktop()}
                             </Row>
-                            {/*<Row className="lower-section" style={{marginTop: '80px'}}>
-                                <Media 
-                                    query="(max-width: 1199px)"
-                                    render={() => this.renderLowerSectionMobile()}
-                                />
-                                <Media 
-                                    query="(min-width: 1200px)"
-                                    render={() => this.renderLowerSectionDesktop()}
-                                />
-                            </Row>*/}
                         </Col>
-                    </StyleRoot>
-                }>
-            </AppLayout>
+                    </React.Fragment>
+                }
+            />
+        );
+    }
+
+    render() {
+        return (
+            <StyleRoot>
+                <Media 
+                    query="(max-width: 1199px)"
+                    render={() => this.renderMobile()}
+                />
+                <Media 
+                    query="(min-width: 1200px)"
+                    render={() => this.renderDesktop()}
+                />
+                <HomeMeta />
+            </StyleRoot>
         );
     }
 }
@@ -1052,7 +1034,6 @@ const HowCard = props => {
             </div>
     );
 };
-
 
 const FeatureCard = props => {
     const {icon, header, content, iconStyle, small = false, containerStyle} = props;

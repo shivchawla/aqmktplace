@@ -10,6 +10,7 @@ import {scoringMetrics, faqs, howItWorksContents, prizes, requirements, prizeTex
 import {processAdviceForLeaderboardListItem} from '../utils';
 import {fetchAjax, Utils} from '../../../utils';
 import AppLayout from '../../../containers/AppLayout';
+import {AqMobileLayout} from '../../AqMobileLayout/Layout';
 import logo from "../../../assets/logo-advq-new.png";
 import contestFormula from "../../../assets/contestFormula2.png";
 import {ContestHomeMeta} from '../../../metas';
@@ -143,20 +144,6 @@ class ContestHome extends React.Component {
             <Col span={24} style={containerStyle}>
                 <Row style={{height: '100%'}}>
                     <Col span={24} style={{...verticalBox, height: '100%'}}>
-                        <div 
-                                style={{
-                                    display: 'flex', 
-                                    flexDirection: 'row', 
-                                    alignItems: 'center',
-                                    position: 'absolute',
-                                    left: '20px',
-                                    top: '20px',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => this.props.history.push('/home')}
-                        >
-                            <img src={logo} style={{height: '40px', marginTop: '-10px'}}/>
-                        </div>
                         <h1 
                                 style={{
                                     color: '#fff', 
@@ -551,19 +538,19 @@ class ContestHome extends React.Component {
 
     render() {
         return (
-            <AppLayout
-                noHeader
-                noFooter
-                content = {
-                    <Row style={{height: '100%', paddingBottom: '50px'}}>
-                        <ContestHomeMeta />
-                        {this.renderTopSection()}
-                        {this.renderTabsSection()}
-                    </Row>
-                }
+            <AqMobileLayout
                 loading={this.state.loading}
+                theme='dark'
+                navbarStyle={{
+                    backgroundColor: '#00b79c'
+                }}
             >
-            </AppLayout>
+                <Row style={{height: '100%', paddingBottom: '50px'}}>
+                    <ContestHomeMeta />
+                    {this.renderTopSection()}
+                    {this.renderTabsSection()}
+                </Row>
+            </AqMobileLayout>
         );
     }
 }

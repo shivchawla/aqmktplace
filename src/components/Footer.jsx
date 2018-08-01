@@ -175,7 +175,7 @@ class FooterImpl extends React.Component{
                     </div>
                 </Col>
                 
-                <Col span={24} style={aimsquantContainerStyle}>
+                <Col xl={24} style={aimsquantContainerStyle}>
                     <h3 style={{color: '#fff', fontSize: '12px'}}>
                         AimsQuant Private Limited
                     </h3>
