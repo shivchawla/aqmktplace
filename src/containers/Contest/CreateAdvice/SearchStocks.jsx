@@ -588,7 +588,7 @@ export class SearchStocks extends React.Component {
                     style={{
                         width: global.screen.width, 
                         overflow: 'hidden', 
-                        height: global.screen.height + 100,
+                        height: global.screen.width <= 600 ? global.screen.height : global.screen.height + 100,
                         position: 'relative'
                     }}
             >

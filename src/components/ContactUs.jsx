@@ -129,12 +129,9 @@ class ContactUs extends Component {
 				style={{
 					top: '10px'
 				}}
+				onCancel={this.toggleContactUsModal}
 		        footer={[
-					<Button 
-							onClick={() => {
-								this.toggleContactUsModal();
-							}}
-					>
+					<Button onClick={this.toggleContactUsModal}>
 						CANCEL
 					</Button>,
 					!this.state.requestProcessed 

@@ -133,7 +133,7 @@ class ContestHome extends React.Component {
     renderTopSection = () => {
         const containerStyle = {
             backgroundColor: '#00B79C',
-            height: '250px',
+            height: '180px',
         };
 
         const buttonStyle = {
@@ -156,7 +156,6 @@ class ContestHome extends React.Component {
                                     fontSize: '24px', 
                                     fontWeight: 400, 
                                     margin: 0, 
-                                    marginTop: '40px'
                                 }}
                         >
                             Investment Idea Contest

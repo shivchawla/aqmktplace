@@ -1,8 +1,9 @@
 import * as React from 'react';
 import Media from 'react-media';
-import {Layout, Menu, Row, Col, Badge} from 'antd';
+import {Layout, Menu, Row, Col, Badge, Button} from 'antd';
 import withRouter from 'react-router-dom/withRouter';
 import {Utils} from '../utils';
+import ContactUsModal from '../components/ContactUs';
 import {primaryColor, verticalBox, horizontalBox} from '../constants';
 import logo from "../assets/logo-advq-new.png";
 import {Footer as AqFooter} from '../components/Footer';
@@ -16,7 +17,12 @@ const {Header, Content, Footer} = Layout;
 class AppLayout extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {parentPath: '/', sideMenuOpen: true, isLoggedIn: false};
+        this.state = {
+            parentPath: '/', 
+            sideMenuOpen: true, 
+            isLoggedIn: false,
+            contactUsModalVisible: false
+        };
     }
 
     componentWillMount() {
@@ -85,6 +91,13 @@ class AppLayout extends React.Component {
                         <Menu.Item key="signup">Signup</Menu.Item>
                     }
                 </Menu>
+                <Button 
+                        onClick={this.toggleContactUsModal} 
+                        type="primary" 
+                        style={{marginTop: '15px'}}
+                >
+                    Ask a Question
+                </Button>
                 <React.Fragment>
                     {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
                     {/* <Button 
@@ -194,6 +207,10 @@ class AppLayout extends React.Component {
         );
     }      
 
+    toggleContactUsModal = () => {
+        this.setState({contactUsModalVisible: !this.state.contactUsModalVisible});
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -202,6 +219,11 @@ class AppLayout extends React.Component {
                     color={loadingColor}
                     className="main-loader"
                     showSpinner={false}
+                />
+                <ContactUsModal 
+                    title='Ask a Question'
+                    visible={this.state.contactUsModalVisible}
+                    onClose={this.toggleContactUsModal}
                 />
                 {
                     !this.props.loading &&
