@@ -44,9 +44,11 @@ class ContestAdviceFormImpl extends React.Component {
     constructor(props) {
         super(props);
         this.searchStockComponent = null;
+        console.log(JSON.parse(Utils.getFromLocalStorage('positions')));
+        const positions = JSON.parse(Utils.getFromLocalStorage('positions')).data || [];
         this.state = {
             adviceActive: false,
-            positions: [],
+            positions,
             benchmark: 'NIFTY_50',
             bottomSheetOpenStatus: false,
             stockSearchFilters: {
@@ -432,6 +434,7 @@ class ContestAdviceFormImpl extends React.Component {
     conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
         const positions = [...this.state.positions];
         this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
+            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             this.handleSubmitAdvice('validate')
             .then(() => resolve(true));
         });
@@ -446,6 +449,7 @@ class ContestAdviceFormImpl extends React.Component {
             }
         });
         this.setState({positions: this.updateAllWeights(positions)}, () => {
+            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             this.handleSubmitAdvice('validate')
         });
     }
@@ -475,6 +479,7 @@ class ContestAdviceFormImpl extends React.Component {
             targetPosition.totalValue = position.totalValue;
         }
         this.setState({positions: this.updateAllWeights(positions)}, () => {
+            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             this.handleSubmitAdvice();
         });
     }
@@ -585,6 +590,7 @@ class ContestAdviceFormImpl extends React.Component {
         }, 1000);
 
         this.setState({positions: _.cloneDeep(positions)}, () => {
+            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             validatePortfolio();
         });
     }

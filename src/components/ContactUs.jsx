@@ -8,12 +8,13 @@ const TextArea = Input.TextArea;
 const {requestUrl} = require('../localConfig');
 
 class ContactUs extends Component {
-  	constructor(props){
-	  	super();
-	  	this.state = {
-	  		contactUsModalvisible: false
-	  	};
-  	}
+	constructor(props) {
+		super(props);
+		this.state = {
+			requestProcessed: false,
+			message: ''
+		};
+	}
 
   	submitContactUsForm = e => {
       	e.preventDefault();
@@ -31,94 +32,126 @@ class ContactUs extends Component {
                   	}
               	})
               	.then(response => {
-              		message.success('Thanks for your message!');
-              		this.setState({contactUsModalvisible: !this.state.contactUsModalvisible});
+					// message.success('Thanks for your message!');
+					this.setState({requestProcessed: true, message: 'Thanks for your message. We will get back to you shortly'});  
               		this.props.form.resetFields();
               	})
               	.catch(error => {
-              		message.error('Sorry, Error occured while sending message');
+					this.setState({requestProcessed: true, message: 'Sorry, Error occured while sending message'});
+              		// message.error('Sorry, Error occured while sending message');
               	})
-              	.finally(() => {
-              		this.props.onClose();
-              	})
+              	// .finally(() => {
+              	// 	this.props.onClose();
+              	// })
           	}
       	})
   	}
 
-  	toggleContactUsModal = () => {
-  		this.props.onClose();
-  	}
+	renderProcessFinished = (message = this.state.message) => {
+		return (
+			<Row>
+				<Col span={24}>
+					<h3>{message}</h3>
+				</Col>
+			</Row>
+		);
+	}
 
+	renderForm = () => {
+		const {getFieldDecorator, getFieldsError} = this.props.form;
+		const title = this.props.title ? this.props.title : 'Feedback or Suggestion';
+
+		return (
+			<Row>
+				<Form onSubmit={this.submitContactUsForm}>
+					
+					<Col span={24}>
+						<h3 style={contactUsInputStyle}>Subject</h3>
+						<FormItem>
+							{
+								getFieldDecorator('emailSubject', {
+									initialValue: title,
+									rules: [{required: true, message: 'Please provide a valid subject'}]
+								})(
+									<Input placeholder='Subject' disabled/>
+								)
+							}
+						</FormItem>
+					</Col>
+
+					<Col span={24} style={{marginTop: '20px'}}>
+						<h3 style={contactUsInputStyle}>Email</h3>
+						<FormItem>
+							{
+								getFieldDecorator('email', {
+									initialValue: Utils.isLoggedIn() ? Utils.getLoggedInUserEmail() : '',
+									rules: [
+										{required: true, message: 'Please provide a valid email'},
+										{type: 'email', message: 'Please provide a valid email'}
+									]
+								})(
+									<Input placeholder='Email'/>
+								)
+							}
+						</FormItem>
+					</Col>
+					
+					<Col span={24} style={{marginTop: '20px'}}>
+						<h3 style={{...contactUsInputStyle}}>Message</h3>
+						<FormItem>
+							{
+								getFieldDecorator('emailDetail', {
+									rules: [{required: true, message: 'Please write a valid message'}]
+								})(
+									<TextArea style={{marginTop: '4px'}} placeholder="Write a message" rows={4}/>
+								)
+							}
+						</FormItem>
+					</Col>
+
+				</Form>
+			</Row>
+		);
+	}
+
+  	toggleContactUsModal = () => {
+		this.props.onClose();
+		this.setState({requestProcessed: false, message: ''});
+	}
+	  
 	render() {
-	    const {getFieldDecorator, getFieldsError} = this.props.form;
-	    const title = this.props.title ? this.props.title : 'Feedback or Suggestion';
+		const title = this.props.title ? this.props.title : 'Feedback or Suggestion';
+		
 	    return (
 	    	<Modal
 		        title={title}
 		        visible={this.props.visible}
-				onCancel={this.props.onClose}
 				style={{
 					top: '10px'
 				}}
 		        footer={[
-                    <Button onClick={this.toggleContactUsModal}>CANCEL</Button>,
-                    <Button 
-                            type="primary" 
-                            onClick={this.submitContactUsForm}
-                    >
-                        SEND
-                    </Button>
+					<Button 
+							onClick={() => {
+								this.toggleContactUsModal();
+							}}
+					>
+						CANCEL
+					</Button>,
+					!this.state.requestProcessed 
+					? 	<Button 
+								type="primary" 
+								onClick={this.submitContactUsForm}
+						>
+							SEND
+						</Button>
+					:	null
                 ]}
       		>
-	            <Row>
-	                <Form onSubmit={this.submitContactUsForm}>
-	                    
-	                    <Col span={24}>
-	                        <h3 style={contactUsInputStyle}>Subject</h3>
-	                        <FormItem>
-	                            {
-	                                getFieldDecorator('emailSubject', {
-	                                    initialValue: title,
-	                                    rules: [{required: true, message: 'Please provide a valid subject'}]
-	                                })(
-	                                    <Input placeholder='Subject' disabled/>
-	                                )
-	                            }
-	                        </FormItem>
-	                    </Col>
-
-	                    <Col span={24} style={{marginTop: '20px'}}>
-	                        <h3 style={contactUsInputStyle}>Email</h3>
-	                        <FormItem>
-	                            {
-	                                getFieldDecorator('email', {
-	                                    initialValue: Utils.isLoggedIn() ? Utils.getLoggedInUserEmail() : '',
-	                                    rules: [
-	                                        {required: true, message: 'Please provide a valid email'},
-	                                        {type: 'email', message: 'Please provide a valid email'}
-	                                    ]
-	                                })(
-	                                    <Input placeholder='Email'/>
-	                                )
-	                            }
-	                        </FormItem>
-	                    </Col>
-	                    
-	                    <Col span={24} style={{marginTop: '20px'}}>
-	                        <h3 style={{...contactUsInputStyle}}>Message</h3>
-	                        <FormItem>
-	                            {
-	                                getFieldDecorator('emailDetail', {
-	                                    rules: [{required: true, message: 'Please write a valid message'}]
-	                                })(
-	                                    <TextArea style={{marginTop: '4px'}} placeholder="Write a message" rows={4}/>
-	                                )
-	                            }
-	                        </FormItem>
-	                    </Col>
-
-	                </Form>
-	            </Row>
+	            {
+					this.state.requestProcessed
+					?	this.renderProcessFinished()
+					:	this.renderForm()
+				}
             </Modal>
 	    );
   	}
