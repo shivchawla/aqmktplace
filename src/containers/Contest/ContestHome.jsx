@@ -8,7 +8,7 @@ import {scoringMetrics, faqs, howItWorksContents, prizes, requirements, prizeTex
 import {processAdviceForLeaderboardListItem} from './utils';
 import {fetchAjax, Utils} from '../../utils';
 import AppLayout from '../../containers/AppLayout';
-import logo from "../../assets/logo-advq-new.png";
+import ContactUsModal from '../../components/ContactUs';
 import contestFormula from "../../assets/contestFormula2.png";
 import {ContestHomeMeta} from '../../metas';
 import Countdown from 'react-countdown-now';
@@ -29,7 +29,8 @@ class ContestHome extends React.Component {
             selectedContest: {},
             advices: [], // list of advices currently participating in the contest
             userEntries: [], // advices of the user inside contest,
-            selectedUserEntryPage: 0
+            selectedUserEntryPage: 0,
+            contactUsModalVisible: false
         }
     }
 
@@ -122,6 +123,10 @@ class ContestHome extends React.Component {
         );
     }
 
+    toggleContactUsModal = () => {
+        this.setState({contactUsModalVisible: !this.state.contactUsModalVisible});
+    }
+
     renderTopSection = () => {
         const containerStyle = {
             backgroundColor: '#00B79C',
@@ -142,28 +147,6 @@ class ContestHome extends React.Component {
             <Col span={24} style={containerStyle}>
                 <Row style={{height: '100%'}}>
                     <Col span={16} style={{...verticalBox, height: '100%'}}>
-                        <div 
-                                style={{
-                                    display: 'flex', 
-                                    flexDirection: 'row', 
-                                    alignItems: 'center',
-                                    position: 'absolute',
-                                    left: '20px',
-                                    top: '20px',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => this.props.history.push('/home')}
-                        >
-                            {/* <img src={logo} style={{height: '40px', marginTop: '-10px'}}/> */}
-                            {/* <h1 onClick={() => this.props.history.push('/home')} 
-                                style={{...headerColor, cursor: 'pointer', marginLeft: '10px', marginTop: '-5px'}}>
-                                <span style={{...biggerFont, color:'#fff'}}>A</span>
-                                <span style={{color: '#fff'}}>DVICE</span>
-                                <span style={{...biggerFont, color: '#fff'}}>Q</span>
-                                <span style={{color: '#fff'}}>UBE</span>
-
-                            </h1> */}
-                        </div>
                         <div style={{color: '#fff', fontSize: '40px', fontWeight: 300, marginTop:'50px'}}>Investment Idea Contest</div>
                         <div style={{color: '#fff', fontSize: '18px', fontWeight: 300, marginTop:'-10px'}}>Beat the market and win cash prizes every week</div>
   
@@ -174,9 +157,15 @@ class ContestHome extends React.Component {
                         >
                             Submit Entry
                         </Button>
+                        <span 
+                                style={{color: '#E0E0E0', fontSize: '14px', cursor: 'pointer'}}
+                                onClick={this.toggleContactUsModal}
+                        >
+                            Ask a Question
+                        </span>
 
                         {this.state.selectedContest &&
-                            <div style={{marginTop:'30px', fontSize:'16px', color:'#fff', fontWeight:300, textAlign:'center'}}>Submission ends in
+                            <div style={{marginTop:'10px', fontSize:'16px', color:'#fff', fontWeight:300, textAlign:'center'}}>Submission ends in
                                 <Countdown date = {new Date(this.state.selectedContest.startDate)} renderer={this.renderCountdown}/> 
                             </div>
                         }
@@ -314,7 +303,6 @@ class ContestHome extends React.Component {
             reject(err);
         });
     })
-
 
     processAdvices = (responseAdvices) => {
         const advices = [];
@@ -520,6 +508,11 @@ class ContestHome extends React.Component {
                         {this.renderTopSection()}
                         {this.renderTabsSection()}
                         {this.renderContestRanking()}
+                        <ContactUsModal 
+                            visible={this.state.contactUsModalVisible}
+                            onClose={this.toggleContactUsModal}
+                            title='Ask a Question'
+                        />
                     </Row>
                 }
                 loading={this.state.loading}

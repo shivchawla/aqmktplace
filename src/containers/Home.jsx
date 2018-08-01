@@ -7,6 +7,7 @@ import Modal from 'react-responsive-modal';
 import {Row, Col, Button, Form, Icon} from 'antd';
 import {Footer} from '../components/Footer';
 import {AqMobileLayout} from './AqMobileLayout/Layout';
+import ContactUsModal from '../components/ContactUs';
 import adviceLogo from '../assets/AdviceLogo.svg';
 import adviceLogoMobile from '../assets/AdviceLogoMobile.svg';
 import portfolioLogoMobile from '../assets/PortfolioLogo.svg';
@@ -39,7 +40,8 @@ export class Home extends React.Component {
         this.state = {
             selectedTabBar: 'advisor',
             loading: true,
-            youtubeModalVisible: false
+            youtubeModalVisible: false,
+            contactUsModalvisible: false
         }
     }
 
@@ -421,22 +423,42 @@ export class Home extends React.Component {
         );
     }
 
+    toggleContactUsModal = () => {
+        this.setState({contactUsModalVisible: !this.state.contactUsModalVisible});
+    }
+
     renderActionButtonsDesktop = () => {
         return (
             <Col span={24}>
-                <Button 
-                        className="signup-button"
-                        onClick={() => this.props.history.push('/contest')}
-                >
-                    ENTER CONTEST
-                </Button>
-                <Button 
-                        style={{marginLeft: '20px'}}
-                        className="action-buttons"
-                        onClick={() => this.props.history.push('/advice')}
-                >
-                    FIND INVESTMENT IDEAS
-                </Button>
+                <Row>
+                    <Col span={24}>
+                        <Button 
+                                className="signup-button"
+                                onClick={() => this.props.history.push('/contest')}
+                        >
+                            ENTER CONTEST
+                        </Button>
+                        <Button 
+                                style={{marginLeft: '20px'}}
+                                className="action-buttons"
+                                onClick={() => this.props.history.push('/advice')}
+                        >
+                            FIND INVESTMENT IDEAS
+                        </Button>
+                    </Col>
+                    <Col span={24} style={verticalBox}>
+                        <span 
+                                style={{
+                                    marginLeft: '-110px', 
+                                    marginTop: '10px',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={this.toggleContactUsModal}
+                        >
+                            Ask a Question
+                        </span>
+                    </Col>
+                </Row>
             </Col>
         );
     }
@@ -447,7 +469,7 @@ export class Home extends React.Component {
                 <Media 
                     query="(max-width: 600px)"
                     render={() => (
-                        <Col span={24} style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                        <Col span={24} style={verticalBox}>
                             <Button 
                                     className="signup-button-mobile"
                                     style={{marginTop: 0}}
@@ -461,6 +483,16 @@ export class Home extends React.Component {
                             >
                                 FIND INVESTMENT IDEAS
                             </Button>
+                            <span 
+                                    style={{
+                                        marginTop: '10px',
+                                        cursor: 'pointer',
+                                        fontSize: '16px'
+                                    }}
+                                    onClick={this.toggleContactUsModal}
+                            >
+                                Ask a Question
+                            </span>
                         </Col>
                     )}
                 />
@@ -896,6 +928,11 @@ export class Home extends React.Component {
                     render={() => this.renderDesktop()}
                 />
                 <HomeMeta />
+                <ContactUsModal 
+                    visible={this.state.contactUsModalVisible}
+                    onClose={this.toggleContactUsModal}
+                    title='Ask a Question'
+                />
             </StyleRoot>
         );
     }

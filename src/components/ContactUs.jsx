@@ -1,16 +1,11 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import {Row, Col, Modal, message, Form, Input, Button} from 'antd';
-import ReactDOM from 'react-dom';
 import {Utils} from '../utils';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 const {requestUrl} = require('../localConfig');
-
-function hasErrors(fieldsError) {
-	return Object.keys(fieldsError).some(field => fieldsError[field]);
-}
 
 class ContactUs extends Component {
   	constructor(props){
@@ -61,7 +56,10 @@ class ContactUs extends Component {
 	    	<Modal
 		        title={title}
 		        visible={this.props.visible}
-		        onCancel={this.props.onClose}
+				onCancel={this.props.onClose}
+				style={{
+					top: '10px'
+				}}
 		        footer={[
                     <Button onClick={this.toggleContactUsModal}>CANCEL</Button>,
                     <Button 
