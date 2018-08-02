@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import Media from 'react-media';
 import {Row, Col} from 'antd';
 import _ from 'lodash';
+import Impression from 'impression.js';
 import windowSize from 'react-window-size';
-import {Utils} from '../utils';
+import {Utils, sendErrorToBackend} from '../utils';
 import {primaryColor} from '../constants';
 import { Spin, Form, Icon, Input, Button, Modal } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
@@ -14,7 +15,7 @@ import '../css/login.css';
 import AppLayout from './AppLayout';
 import ContactUs from '../components/ContactUs';
 
-const {requestUrl} = require('../localConfig');
+const {requestUrl, sendErrorEmailsForLogin = false} = require('../localConfig');
 
 class Login extends Component {
 
@@ -31,6 +32,7 @@ class Login extends Component {
 
     this.handleSubmit = (e) => {
       e.preventDefault();
+      let errorToSend = null;
       this.props.form.validateFields((err, values) => {
         if (!err) {
           this.updateState({
@@ -65,18 +67,23 @@ class Login extends Component {
               }else{
                 this.updateState({
                   'loading': false,
-                  'error': "Unexpected error occured! Pleas try again."
+                  'error': "Unexpected error occured! Please try again."
                 });
               }
           })
           .catch((error) => {
             this.cancelLoginCall = undefined;
+            errorToSend = _.get(error, 'response.data', error);
             this.updateState({
               'loading': false,
-              'error': _.get(error, 'response.data', 'Error Occured')
+              'error': JSON.stringify(_.get(error, 'response.data', 'Error Occured'))
             });
-          });
+          })
+          .finally(() => {
+            sendErrorEmailsForLogin && sendErrorToBackend(errorToSend, values.userName)
+          })
         }
+        
       });
     }
 

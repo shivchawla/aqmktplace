@@ -6,13 +6,13 @@ import {Layout, Menu, Row, Col, Button, Icon} from 'antd';
 import Route from 'react-router/Route';
 import withRouter from 'react-router-dom/withRouter';
 import Switch from 'react-router-dom/Switch';
-import {Utils} from './utils';
+import {Utils, sendErrorToBackend} from './utils';
 import {primaryColor, horizontalBox} from './constants';
 import logo from "./assets/logo-advq-new.png";
 global.Promise = require('bluebird');
 
 const {Header, Content} = Layout;
-const {gaTrackingId} = require('./localConfig');
+const {gaTrackingId, sendErrorEmailsForApp = false} = require('./localConfig');
 
 const ScreenAdvices = Loadable({
     loader: () => import('./containers/ScreenAdvices'),
@@ -180,6 +180,14 @@ class App extends React.Component {
         if (this.props.location !== prevProps.location) { // Route changed
             this.fireTracking();
         }
+    }
+
+    componentWillMount() {
+        let userEmail = 'support@adviceqube.com';
+        if (Utils.isLoggedIn()) {
+            userEmail = Utils.getLoggedInUserEmail();
+        } 
+        sendErrorEmailsForApp && sendErrorToBackend(null, userEmail, 'App Intialized')
     }
 
     fireTracking = () => {
