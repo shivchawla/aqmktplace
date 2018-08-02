@@ -517,10 +517,25 @@ export class SearchStocks extends React.Component {
                     query={`(min-width: ${screenSize.desktop})`}
                     render={() => (
                         <React.Fragment>
-                            <Col span={4}>
+                            <Col 
+                                    span={4}
+                                    style={{
+                                        height: global.screen.height - 195,
+                                        overflow: 'hidden',
+                                        overflowY: 'scroll'
+                                    }}
+                            >
                                 <StockFilter onFilterChange={this.onFilterChange}/>
                             </Col>
-                            <Col span={10} style={{padding: '20px'}}>
+                            <Col 
+                                    span={10} 
+                                    style={{
+                                        padding: '20px',
+                                        height: global.screen.height - 195,
+                                        overflow: 'hidden',
+                                        overflowY: 'scroll'
+                                    }}
+                            >
                                 {this.renderSearchStocksList()}
                             </Col>
                             <Col span={10} style={{padding: '20px'}}>
@@ -615,7 +630,7 @@ export class SearchStocks extends React.Component {
                     style={{
                         width: global.screen.width, 
                         overflow: 'hidden', 
-                        height: global.screen.width <= 600 ? global.screen.height : global.screen.height + 100,
+                        height: global.screen.width <= 600 ? global.screen.height : global.screen.height - 100,
                         position: 'relative'
                     }}
             >

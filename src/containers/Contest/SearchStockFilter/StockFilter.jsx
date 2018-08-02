@@ -24,6 +24,7 @@ export default class StockFilter extends React.Component {
             const industries = uniqueSectorData.map(item => {
                 return {
                     industry: item.Industry,
+                    sector,
                     checked: false
                 }
             });
@@ -55,7 +56,6 @@ export default class StockFilter extends React.Component {
 
     renderIndustries = () => {
         const filterData = [...this.state.filterData];
-        const selectedSectorIndex = _.findIndex(filterData, item => item.sector === this.state.selectedSector);
         const selectedSectors = filterData.filter(item => item.checked === true);
         let industries = [];
         selectedSectors.map(sector => {
@@ -65,7 +65,6 @@ export default class StockFilter extends React.Component {
         return (
             <IndustryItemGroup 
                     industries={industries} 
-                    sector={this.state.selectedSector}
                     onChange={this.handleIndustryClick}
             />
         );
@@ -100,8 +99,6 @@ export default class StockFilter extends React.Component {
     handleIndustryClick = (industry, sector) => {
         const filterData = [...this.state.filterData];
         const targetSectorIndex = _.findIndex(filterData, item => item.sector === sector);
-        console.log(targetSectorIndex);
-        console.log(sector);
         if (targetSectorIndex !== -1) {
             const targetSector = filterData[targetSectorIndex];
             const targetIndustryIndex = _.findIndex(targetSector.industries, item => item.industry === industry);
@@ -150,9 +147,16 @@ const SectorItem = ({sector, onClick}) => {
             {sector.sector}
         </Checkbox>
     );
+
+    // const sectorPanelHeader = (
+    //     <Row>
+    //         <Col></Col>
+    //     </Row>
+    // )
+
 }
 
-const IndustryItemGroup = ({industries, sector, onChange}) => {
+const IndustryItemGroup = ({industries, onChange}) => {
     return (
         <Col span={24}>
             {
@@ -162,7 +166,7 @@ const IndustryItemGroup = ({industries, sector, onChange}) => {
                         checked={item.checked} 
                         text={item.industry}
                         onChange={onChange}
-                        sector={sector}
+                        sector={item.sector}
                     />
                 ))
             }
