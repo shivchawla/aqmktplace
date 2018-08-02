@@ -44,8 +44,12 @@ class ContestAdviceFormImpl extends React.Component {
     constructor(props) {
         super(props);
         this.searchStockComponent = null;
-        console.log(JSON.parse(Utils.getFromLocalStorage('positions')));
-        const positions = JSON.parse(Utils.getFromLocalStorage('positions')).data || [];
+        const savedPositions = Utils.getFromLocalStorage('positions');
+        // const positions = JSON.parse(Utils.getFromLocalStorage('positions')).data || [];
+        console.log(savedPositions);
+        const positions = savedPositions === undefined 
+                ?   []
+                :   JSON.parse(Utils.getFromLocalStorage('positions')).data
         this.state = {
             adviceActive: false,
             positions,
