@@ -157,13 +157,6 @@ class ContestHome extends React.Component {
                         >
                             Submit Entry
                         </Button>
-                        <span 
-                                style={{color: '#E0E0E0', fontSize: '14px', cursor: 'pointer'}}
-                                onClick={this.toggleContactUsModal}
-                        >
-                            Ask a Question
-                        </span>
-
                         {this.state.selectedContest &&
                             <div style={{marginTop:'10px', fontSize:'16px', color:'#fff', fontWeight:300, textAlign:'center'}}>Submission ends in
                                 <Countdown date = {new Date(this.state.selectedContest.startDate)} renderer={this.renderCountdown}/> 

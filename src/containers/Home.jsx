@@ -446,18 +446,6 @@ export class Home extends React.Component {
                             FIND INVESTMENT IDEAS
                         </Button>
                     </Col>
-                    <Col span={24} style={verticalBox}>
-                        <span 
-                                style={{
-                                    marginLeft: '-110px', 
-                                    marginTop: '10px',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={this.toggleContactUsModal}
-                        >
-                            Ask a Question
-                        </span>
-                    </Col>
                 </Row>
             </Col>
         );
