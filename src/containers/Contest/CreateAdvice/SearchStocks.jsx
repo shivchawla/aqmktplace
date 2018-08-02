@@ -7,6 +7,7 @@ import {Row, Col, Input, Icon, Badge, Button, Tag, Checkbox} from 'antd';
 import {SearchBar, Tag as TagMobile} from 'antd-mobile';
 import {StockPerformance} from './StockPerformance';
 import {screenSize} from './constants';
+import StockFilter from '../SearchStockFilter/StockFilter';
 import SearchStockHeader from './Mobile/SearchStockHeader';
 import SearchStockHeaderMobile from './Mobile/StockSearchHeaderMobile';
 import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../constants';
@@ -29,7 +30,11 @@ export class SearchStocks extends React.Component {
             selectedPage: 0,
             portfolioLoading: false,
             loadingStocks: false,
-            stockPerformanceOpen: false
+            stockPerformanceOpen: false,
+            filter: {
+                sector: '',
+                industry: ''
+            }
         };
         this.localStocks = []; // Used to get the list of all stocks obtained from N/W calls
     }
@@ -41,7 +46,7 @@ export class SearchStocks extends React.Component {
                     <Search placeholder="Search Stocks" onChange={this.handleSearchInputChange}/>
                     <Button shape="circle" icon="filter" />
                 </Col>
-                <SectorItems sectors={this.getSectors()}/>
+                {/* <SectorItems sectors={this.getSectors()}/> */}
                 {this.renderPagination()}
                 <Col span={24} style={{marginTop: '20px'}}>
                     {
@@ -96,8 +101,12 @@ export class SearchStocks extends React.Component {
         const skip = this.state.selectedPage * limit;
         const populate = true;
         const universe = _.get(this.props, 'filters.universe', null);
-        const sector = _.get(this.props, 'filters.sector', '');
-        const industry = _.get(this.props, 'filters.industry', '');
+        const sector = _.get(this.props, 'filters.sector', '').length === 0
+                ?   this.state.filter.sector
+                :   _.get(this.props, 'filters.sector', '');
+        const industry = _.get(this.props, 'filters.industry', '').length === 0
+                ?   this.state.filter.industry
+                :   _.get(this.props, 'filters.industry', '');
         const url = `${requestUrl}/stock?search=${searchQuery}&populate=${populate}&universe=${universe}&sector=${sector}&industry=${industry}&skip=${skip}&limit=${limit}`;
         this.setState({loadingStocks: true});
         fetchAjax(url, this.props.history, this.props.pageUrl)
@@ -325,10 +334,6 @@ export class SearchStocks extends React.Component {
         this.setState({selectedStocks});
     }
 
-    getSectors = () => {
-        return _.uniq(sectorData.map(item => item.Sector).filter(item => item.length > 0));
-    }
-
     componentWillMount() {
         this.fetchStocks('');
         if (this.props.isUpdate) {
@@ -454,6 +459,18 @@ export class SearchStocks extends React.Component {
         this.setState({stockPerformanceOpen: !this.state.stockPerformanceOpen});
     }
 
+    onFilterChange = filterData => {
+        const sectors = _.get(filterData, 'sectors', []);
+        const industries = _.get(filterData, 'industries', []);
+        this.setState({
+            filter: {
+                ...this.state.filter,
+                sector: _.join(sectors, ','),
+                industry: _.join(industries, ',')
+            }
+        }, () => this.fetchStocks());
+    }
+
     renderStockListDetails = () => {
         return (
             <React.Fragment>
@@ -500,7 +517,9 @@ export class SearchStocks extends React.Component {
                     query={`(min-width: ${screenSize.desktop})`}
                     render={() => (
                         <React.Fragment>
-                            <Col span={4}></Col>
+                            <Col span={4}>
+                                <StockFilter onFilterChange={this.onFilterChange}/>
+                            </Col>
                             <Col span={10} style={{padding: '20px'}}>
                                 {this.renderSearchStocksList()}
                             </Col>

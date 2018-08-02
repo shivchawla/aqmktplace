@@ -580,7 +580,7 @@ export const sectorData = [
       "Industry": "Auto Ancillaries"
     },
     {
-      "Sector": "Chemicalcals",
+      "Sector": "Chemicals",
       "Industry": "Organic Chemicals"
     },
     {
