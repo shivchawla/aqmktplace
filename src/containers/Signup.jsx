@@ -171,7 +171,9 @@ class Signup extends Component {
             </FormItem>
             <p style={{'color':'#cc6666',
               'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
-            <div style={{fontSize: '16px', fontWeight:type=='desktop' ? 300 : 400, marginTop:type=='desktop' ? '20px' : '0px', textAlign:'center', color:'#cc6666', cursor:'pointer'}} onClick={this.toggleContactUsModal}>Can't create an AdviceQube account?</div>  
+            <div style={{fontSize: '16px', fontWeight:type=='desktop' ? 300 : 400, marginTop:type=='desktop' ? '20px' : '0px', textAlign:'center', color: primaryColor, cursor:'pointer'}} onClick={this.toggleContactUsModal}>
+              Can't create an AdviceQube account?
+            </div>  
           </React.Fragment>
         );
       }

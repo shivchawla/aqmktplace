@@ -333,6 +333,14 @@ class AdviceDetailContentImpl extends React.Component {
                                     isNetValue={netValueMetricItem.isNetValue}
                                     dailyChange={netValueMetricItem.dailyChange || null}
                                     dailyChangePct={netValueMetricItem.dailyChangePct || null}
+                                    valueContainerStyle={{
+                                        boxSizing: 'border-box',
+                                        paddingLeft: '20%'
+                                    }}
+                                    labelContainerStyle={{
+                                        boxSizing: 'border-box',
+                                        paddingLeft: '20%'
+                                    }}
                                 />
                         </Spin>
                     </Col>

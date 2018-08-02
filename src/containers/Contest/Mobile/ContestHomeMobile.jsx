@@ -4,12 +4,14 @@ import windowSize from 'react-window-size';
 import {StickyContainer, Sticky} from 'react-sticky';
 import {Row, Col, Button, Table, Tag, Icon, Select} from 'antd';
 import {Tabs} from 'antd-mobile';
+import ContactUsModal from '../../../components/ContactUs';
 import {primaryColor, verticalBox, horizontalBox} from '../../../constants';
 import {AdviceListItemMobile as AdviceListItemMod} from '../../ScreenAdviceMobile/AdviceListItem';
 import {scoringMetrics, faqs, howItWorksContents, prizes, requirements, prizeText, scoringText} from '../constants';
 import {processAdviceForLeaderboardListItem} from '../utils';
 import {fetchAjax, Utils} from '../../../utils';
 import AppLayout from '../../../containers/AppLayout';
+import {AqMobileLayout} from '../../AqMobileLayout/Layout';
 import logo from "../../../assets/logo-advq-new.png";
 import contestFormula from "../../../assets/contestFormula2.png";
 import {ContestHomeMeta} from '../../../metas';
@@ -38,7 +40,8 @@ class ContestHome extends React.Component {
             selectedContest: {},
             advices: [], // list of advices currently participating in the contest
             userEntries: [], // advices of the user inside contest,
-            selectedUserEntryPage: 0
+            selectedUserEntryPage: 0,
+            contactUsModalVisible: false
         }
     }
 
@@ -123,10 +126,14 @@ class ContestHome extends React.Component {
         );
     }
 
+    toggleContactUsModal = () => {
+        this.setState({contactUsModalVisible: !this.state.contactUsModalVisible});
+    }
+
     renderTopSection = () => {
         const containerStyle = {
             backgroundColor: '#00B79C',
-            height: '250px',
+            height: '180px',
         };
 
         const buttonStyle = {
@@ -143,27 +150,12 @@ class ContestHome extends React.Component {
             <Col span={24} style={containerStyle}>
                 <Row style={{height: '100%'}}>
                     <Col span={24} style={{...verticalBox, height: '100%'}}>
-                        <div 
-                                style={{
-                                    display: 'flex', 
-                                    flexDirection: 'row', 
-                                    alignItems: 'center',
-                                    position: 'absolute',
-                                    left: '20px',
-                                    top: '20px',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => this.props.history.push('/home')}
-                        >
-                            <img src={logo} style={{height: '40px', marginTop: '-10px'}}/>
-                        </div>
                         <h1 
                                 style={{
                                     color: '#fff', 
                                     fontSize: '24px', 
                                     fontWeight: 400, 
                                     margin: 0, 
-                                    marginTop: '40px'
                                 }}
                         >
                             Investment Idea Contest
@@ -187,7 +179,17 @@ class ContestHome extends React.Component {
                         >
                             Submit Entry
                         </Button>
-
+                        <span 
+                                style={{
+                                    color: '#E0E0E0', 
+                                    fontSize: '16px', 
+                                    cursor: 'pointer',
+                                    marginTop: '10px'
+                                }}
+                                onClick={this.toggleContactUsModal}
+                        >
+                            Ask a Question
+                        </span>
                     </Col>
                 </Row>
             </Col>
@@ -551,19 +553,24 @@ class ContestHome extends React.Component {
 
     render() {
         return (
-            <AppLayout
-                noHeader
-                noFooter
-                content = {
-                    <Row style={{height: '100%', paddingBottom: '50px'}}>
-                        <ContestHomeMeta />
-                        {this.renderTopSection()}
-                        {this.renderTabsSection()}
-                    </Row>
-                }
+            <AqMobileLayout
                 loading={this.state.loading}
+                theme='dark'
+                navbarStyle={{
+                    backgroundColor: '#00b79c'
+                }}
             >
-            </AppLayout>
+                <Row style={{height: '100%', paddingBottom: '50px'}}>
+                    <ContestHomeMeta />
+                    {this.renderTopSection()}
+                    {this.renderTabsSection()}
+                    <ContactUsModal 
+                        visible={this.state.contactUsModalVisible}
+                        onClose={this.toggleContactUsModal}
+                        title='Ask a Question'
+                    />
+                </Row>
+            </AqMobileLayout>
         );
     }
 }
