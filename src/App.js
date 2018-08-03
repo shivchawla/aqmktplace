@@ -187,7 +187,24 @@ class App extends React.Component {
         if (Utils.isLoggedIn()) {
             userEmail = Utils.getLoggedInUserEmail();
         } 
+        sendErrorEmailsForApp && sendErrorToBackend(null, userEmail, 'App Intializing')
+    }
+
+    componentDidMount() {
+        this.fireTracking();
+        let userEmail = 'support@adviceqube.com';
+        if (Utils.isLoggedIn()) {
+            userEmail = Utils.getLoggedInUserEmail();
+        } 
         sendErrorEmailsForApp && sendErrorToBackend(null, userEmail, 'App Intialized')
+    }
+
+    componentDidCatch(error, info) {
+        let userEmail = 'support@adviceqube.com';
+        if (Utils.isLoggedIn()) {
+            userEmail = Utils.getLoggedInUserEmail();
+        }
+        sendErrorEmailsForApp && sendErrorToBackend(error, userEmail, 'App Error')
     }
 
     fireTracking = () => {

@@ -557,10 +557,10 @@ export const sendErrorToBackend = (errorToSend = '', email = '', subject = 'Logi
               mobile: md.mobile(),
               phone:  md.phone(),
 			  mobileOs: md.os(),
-			  error: errorToSend
+			  error: errorToSend,
+			  currentUrl: window.location.href
 		};
 	let stringifiedData = JSON.stringify(data);
-
 	axios({
 		url: feedbackUrl,
 		method: 'POST',

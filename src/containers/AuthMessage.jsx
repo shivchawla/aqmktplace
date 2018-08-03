@@ -34,7 +34,10 @@ class AuthMessageImpl extends Component {
             <p style={{'fontSize': '18px', 'marginTop': '20px'}}>We've sent an email to
               <span style={{'fontWeight': '700'}}> {this.params.get('email')}</span>.
             </p>
-            <p style={{'fontSize': '18px', 'marginTop': '10px'}}>Please follow the instructions in the email to activate your account.</p>
+            <p style={{'fontSize': '18px', 'marginTop': '10px'}}>
+              Please follow the instructions in the email to activate your account.
+              If you can't find the activation email check your spam folder
+            </p>
             <Link to='/login'>
               <Button type="primary" style={{'marginTop': '20px'}}>GO BACK</Button>
             </Link>
