@@ -29,12 +29,17 @@ export default class StockFilter extends React.Component {
                 }
             });
 
-            return {sector, industries, checked: false}
+            return {sector, industries, checked: -1}
         });
     }
 
     renderSectors = () => {
-        const data = this.state.filterData;
+        let data = this.state.filterData;
+        const sector = _.get(this.props, 'filters.sector', null);
+        const industry = _.get(this.props, 'filters.industry', null);
+        if (sector !== null && sector.length > 0) {
+            data = data.filter(item => item.sector === sector);
+        }
 
         return (
             <Col 
@@ -43,13 +48,38 @@ export default class StockFilter extends React.Component {
                         width: '100%',
                     }}
             >
-                {
-                    data.map((sector, index) => {
-                        return (
-                            <SectorItem key={index} sector={sector} onClick={this.handleSectorClick}/>
-                        )
-                    })
-                }
+                <Collapse defaultActiveKey={['1']} bordered={false}>
+                    {
+                        data.map((sector, index) => {
+                            const sectorPanelHeader = (
+                                <div style={horizontalBox}>
+                                    <Checkbox 
+                                            onClick={(e) => e.stopPropagation()}
+                                            checked={sector.checked === 1}
+                                            indeterminate = {sector.checked === 0}
+                                            onChange={() => this.handleSectorClick(sector)}
+                                            style={{marginRight: '5px'}}
+                                    />
+                                    <span style={{fontSize: '14px'}}>{sector.sector}</span>
+                                </div>
+                            )
+
+                            return (
+                                <Panel style={customPanelStyle} header={sectorPanelHeader} key={(index + 1).toString()}>
+                                    <Row>
+                                        <Col span={24}>
+                                            <SectorItem 
+                                                    key={index} 
+                                                    sector={sector} 
+                                                    onChange={this.handleIndustryClick}
+                                            />
+                                        </Col>
+                                    </Row>
+                                </Panel>
+                            )
+                        })
+                    }
+                </Collapse>
             </Col>
         );
     }
@@ -71,10 +101,10 @@ export default class StockFilter extends React.Component {
     }
 
     getIndividualSectorsAndIndustries = (filterData) => {
-        const selectedSectors = filterData.filter(item => item.checked === true);
+        const selectedSectors = filterData.filter(item => item.checked >= 0);
         const sectors = selectedSectors.map(item => item.sector);
         let industries = [];
-        selectedSectors.map(sector => {
+        filterData.map(sector => {
             const selectedIndustries = sector.industries.filter(item => item.checked === true);
             const industryNames = selectedIndustries.map(item => item.industry);
             industries = [...industries, ...industryNames];
@@ -90,20 +120,54 @@ export default class StockFilter extends React.Component {
         if(sectorIndex !== -1) {
             this.setState({selectedSector: sectorName});
             const targetSector = filterData[sectorIndex];
-            targetSector.checked = !targetSector.checked;
+            targetSector.checked = targetSector.checked === 0 // intermediate
+                    ? 1 // checked
+                    : targetSector.checked === 1 // checked
+                        ? -1 // un-checked
+                        : 1; // checked
+            // Update all the industries of that particular sector
+            targetSector.industries.map(item => {
+                item.checked = targetSector.checked === 1;
+            });
             this.setState({filterData});
             this.props.onFilterChange(this.getIndividualSectorsAndIndustries(filterData));
         }
     }
 
-    handleIndustryClick = (industry, sector) => {
+    // returns
+    // 0: if some of the industries are selected
+    // 1: if all of the industries are selected
+    // -1: if none of the industries are selected
+    checkForActiveIndustries = (sector) => {
+        const filterData = [...this.state.filterData];
+        const targetSectorIdx = _.findIndex(filterData, item => item.sector === sector);
+        if (targetSectorIdx !== -1) {
+            const targetSector = filterData[targetSectorIdx];
+            let activeIndustriesCount = 0;
+            targetSector.industries.map(item => {
+                item.checked === true && activeIndustriesCount++;
+            })
+            return activeIndustriesCount === 0
+                    ? -1
+                    : activeIndustriesCount < targetSector.industries.length
+                        ? 0
+                        : 1
+        } else {
+            return -1;
+        }
+    }
+
+    handleIndustryClick = (event, industry, sector) => {
+        const checked = event.target.checked;
         const filterData = [...this.state.filterData];
         const targetSectorIndex = _.findIndex(filterData, item => item.sector === sector);
         if (targetSectorIndex !== -1) {
             const targetSector = filterData[targetSectorIndex];
             const targetIndustryIndex = _.findIndex(targetSector.industries, item => item.industry === industry);
             if (targetIndustryIndex !== -1) {
-                targetSector.industries[targetIndustryIndex].checked = !targetSector.industries[targetIndustryIndex].checked;
+                targetSector.industries[targetIndustryIndex].checked = checked;
+                // setting the checkbox select status based on the number of industries selected for that sector
+                targetSector.checked = this.checkForActiveIndustries(sector);
                 this.setState({filterData});
                 this.props.onFilterChange(this.getIndividualSectorsAndIndustries(filterData));
             }
@@ -114,46 +178,29 @@ export default class StockFilter extends React.Component {
         return(
             <Row>
                 <Col span={24}>
-                    <Collapse bordered={false} defaultActiveKey={['1']}>
-                        <Panel header="Sectors" key="1">
-                            <Row>
-                                {this.renderSectors()}
-                            </Row>
-                        </Panel>
-                        {
-                            this.state.filterData.filter(item => item.checked === true).length > 0 &&
-                            <Panel header="Industries" key="2">
-                                <Row>
-                                    {this.renderIndustries()}
-                                </Row>
-                            </Panel>
-                        }
-                    </Collapse>
+                    <h3 
+                        style={{
+                            fontSize: '15px', 
+                            fontWeight: 700,
+                            margin: '10px 0px',
+                            marginLeft: '20px'
+                        }}
+                    >
+                        Filter Stocks
+                    </h3>
                 </Col>
+                {this.renderSectors()}
             </Row>
         );
     }
 }
 
-const SectorItem = ({sector, onClick}) => {
-    const borderColor = sector.checked ? primaryColor : 'transparent';
-
+const SectorItem = ({sector, onChange}) => {
     return (
-        <Checkbox 
-                checked={sector.checked}
-                onChange={() => onClick(sector)}
-                style={{width: '100%', margin: 0, marginLeft: '20px', marginBottom: '5px'}}
-        >
-            {sector.sector}
-        </Checkbox>
-    );
-
-    // const sectorPanelHeader = (
-    //     <Row>
-    //         <Col></Col>
-    //     </Row>
-    // )
-
+        <IndustryItemGroup 
+            industries={sector.industries} 
+            onChange={onChange} />
+        )
 }
 
 const IndustryItemGroup = ({industries, onChange}) => {
@@ -176,12 +223,25 @@ const IndustryItemGroup = ({industries, onChange}) => {
 
 const IndustryItem = ({checked, text, onChange, sector}) => {
     return (
-        <Checkbox 
-                checked={checked} 
-                onChange={() => onChange(text, sector)}
-                style={{margin: '0', marginLeft: '20px', marginBottom: '5px'}}
-        >
-            {text}
-        </Checkbox>
+        <Row>
+            <Col span={24}>
+                <Checkbox 
+                        checked={checked} 
+                        onChange={value => onChange(value, text, sector)}
+                        style={{margin: '0', marginLeft: '20px', marginBottom: '5px', fontSize: '13px'}}
+                >
+                    {text}
+                </Checkbox>
+            </Col>
+        </Row>
     );
 }
+
+const customPanelStyle = {
+    background: '#fff',
+    borderRadius: 4,
+    marginBottom: 5,
+    border: 0,
+    overflow: 'hidden',
+    borderBottom: '1px solid #eaeaea'
+  };

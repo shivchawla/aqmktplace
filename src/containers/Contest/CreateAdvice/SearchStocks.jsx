@@ -44,7 +44,7 @@ export class SearchStocks extends React.Component {
             <Row>
                 <Col span={24} style={horizontalBox}>
                     <Search placeholder="Search Stocks" onChange={this.handleSearchInputChange}/>
-                    <Button shape="circle" icon="filter" />
+                    {/* <Button shape="circle" icon="filter" /> */}
                 </Col>
                 {/* <SectorItems sectors={this.getSectors()}/> */}
                 {this.renderPagination()}
@@ -138,32 +138,42 @@ export class SearchStocks extends React.Component {
 
     renderStockList = () => {
         const {stocks = []} = this.state;
-        return stocks.map((stock, index) => 
-            <React.Fragment key={index}>
-                <Media 
-                    query={`(max-width: ${screenSize.mobile})`}
-                    render={() => (
-                        <StockListItemMobile 
-                            key={index} 
-                            {...stock} 
-                            onClick={this.handleStockListItemClick} 
-                            onAddIconClick={this.conditionallyAddItemToSelectedArray}
-                            selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
-                        />
-                    )}
-                />
-                <Media 
-                    query={`(min-width: ${screenSize.desktop})`}
-                    render={() => (
-                        <StockListItem 
-                            key={index} 
-                            {...stock} 
-                            onClick={this.handleStockListItemClick} 
-                            onAddIconClick={this.conditionallyAddItemToSelectedArray}
-                            selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
-                        />
-                    )}
-                />
+        return (
+            <React.Fragment>
+                {
+                    stocks.length === 0 &&
+                    <h3 style={{fontSize: '16px', textAlign: 'center'}}>No Stocks Found</h3>
+                }
+                {
+                    stocks.map((stock, index) => (
+                        <React.Fragment key={index}>
+                            <Media 
+                                query={`(max-width: ${screenSize.mobile})`}
+                                render={() => (
+                                    <StockListItemMobile 
+                                        key={index} 
+                                        {...stock} 
+                                        onClick={this.handleStockListItemClick} 
+                                        onAddIconClick={this.conditionallyAddItemToSelectedArray}
+                                        selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
+                                    />
+                                )}
+                            />
+                            <Media 
+                                query={`(min-width: ${screenSize.desktop})`}
+                                render={() => (
+                                    <StockListItem 
+                                        key={index} 
+                                        {...stock} 
+                                        onClick={this.handleStockListItemClick} 
+                                        onAddIconClick={this.conditionallyAddItemToSelectedArray}
+                                        selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
+                                    />
+                                )}
+                            />
+                        </React.Fragment>
+                    ))
+                }
             </React.Fragment>
         )
     }
@@ -471,6 +481,17 @@ export class SearchStocks extends React.Component {
         }, () => this.fetchStocks());
     }
 
+    shouldFiltersBeShown = () => {
+        if (this.props.benchmark === 'NIFTY_50' || this.props.benchmark === 'NIFTY_MIDCAP_50') {
+            return true;
+        } else {
+            if (this.props.filters.sector.length > 0 && this.props.filters.industry.length === 0) {
+                return true
+            }
+            return false;
+        }
+    }
+
     renderStockListDetails = () => {
         return (
             <React.Fragment>
@@ -517,15 +538,34 @@ export class SearchStocks extends React.Component {
                     query={`(min-width: ${screenSize.desktop})`}
                     render={() => (
                         <React.Fragment>
+                            {
+                                this.shouldFiltersBeShown() &&
+                                <Col 
+                                        span={4}
+                                        style={{
+                                            height: global.screen.height - 195,
+                                            overflow: 'hidden',
+                                            overflowY: 'scroll',
+                                            borderRight: '1px solid #eaeaea'
+                                        }}
+                                >
+                                    <StockFilter 
+                                        onFilterChange={this.onFilterChange}
+                                        filters={this.props.filters}
+                                    />
+                                </Col>
+                            }
                             <Col 
-                                    span={4}
+                                    span={10} 
                                     style={{
+                                        padding: '20px',
                                         height: global.screen.height - 195,
                                         overflow: 'hidden',
-                                        overflowY: 'scroll'
+                                        overflowY: 'scroll',
+                                        borderRight: '1px solid #eaeaea'
                                     }}
                             >
-                                <StockFilter onFilterChange={this.onFilterChange}/>
+                                {this.renderSearchStocksList()}
                             </Col>
                             <Col 
                                     span={10} 
@@ -533,12 +573,10 @@ export class SearchStocks extends React.Component {
                                         padding: '20px',
                                         height: global.screen.height - 195,
                                         overflow: 'hidden',
-                                        overflowY: 'scroll'
+                                        overflowY: 'scroll',
+                                        borderRight: '1px solid red'
                                     }}
                             >
-                                {this.renderSearchStocksList()}
-                            </Col>
-                            <Col span={10} style={{padding: '20px'}}>
                                 {this.renderSelectedStocks()}
                                 <StockPerformance stock={this.state.selectedStock}/>
                             </Col>

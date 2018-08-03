@@ -52,7 +52,7 @@ class ContestAdviceFormImpl extends React.Component {
             adviceActive: false,
             positions,
             benchmark: 'NIFTY_50',
-            bottomSheetOpenStatus: true,
+            bottomSheetOpenStatus: false,
             stockSearchFilters: {
                 industry: '',
                 sector: '',
@@ -397,6 +397,7 @@ class ContestAdviceFormImpl extends React.Component {
                                             history={this.props.history}
                                             pageUrl={this.props.match.url}
                                             isUpdate={this.props.isUpdate}
+                                            benchmark={this.state.benchmark}
                                         />
                                     </div>
                             }
@@ -425,6 +426,7 @@ class ContestAdviceFormImpl extends React.Component {
                                 history={this.props.history}
                                 pageUrl={this.props.match.url}
                                 isUpdate={this.props.isUpdate}
+                                benchmark={this.state.benchmark}
                             />
                         </SwipeableBottomSheet>
                     )}
