@@ -149,8 +149,6 @@ class Login extends Component {
 			<h3 style={{fontSize: '16px'}}>
             	Or <Link to="/signup">Register Now!</Link>
 			</h3>
-            <p style={{'color':'#cc6666',
-              'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
           </FormItem>
         );
       }
@@ -205,6 +203,14 @@ class Login extends Component {
   				</Col>
   				<Col span={24} style={{marginTop: '15%'}}>
   					<h3 style={{fontSize: '32px', color: primaryColor}}>Login</h3>
+            <p 
+                style={{
+                  'color':'#cc6666',
+                  'fontSize': '14px', 'marginTop': '5px', marginBottom: 0
+                }}
+            >
+              {this.state.error}
+            </p>
   				</Col>
   				<Col span={24}>
   					<Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
@@ -234,12 +240,10 @@ class Login extends Component {
   						{getLoginButtonDiv()}
   					</Form>
   				</Col>
-  			</Row>
-
-        <div style={{fontSize: '16px', textAlign:'center', color: primaryColor}} onClick={this.toggleContactUsModal}>
-          Can't sign-in to your AdviceQube account?
-        </div>
-  	    
+          <Col span={24} style={{fontSize: '16px', textAlign:'center', color: primaryColor}} onClick={this.toggleContactUsModal}>
+            Can't sign-in to your AdviceQube account?
+          </Col>
+  			</Row>  	    
       </div>
   	);
   }
