@@ -575,10 +575,10 @@ export const sendErrorToBackend = (errorToSend = '', email = '', subject = 'Logi
 		successCallback !== null && successCallback();
 	})
 	.catch(error => {
-		errorCallback !== null && successCallback();
+		errorCallback !== null && errorCallback();
 	})
 	.finally(() => {
-		finallyCallback !== null && successCallback();
+		finallyCallback !== null && finallyCallback();
 	})
 }
 
