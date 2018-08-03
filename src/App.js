@@ -13,6 +13,7 @@ global.Promise = require('bluebird');
 
 const {Header, Content} = Layout;
 const {gaTrackingId, sendErrorEmailsForApp = false} = require('./localConfig');
+const appLoadEmailSent = Utils.getFromLocalStorage('appLoadEmailSent') === undefined ? false : true;
 
 const ScreenAdvices = Loadable({
     loader: () => import('./containers/ScreenAdvices'),
@@ -187,7 +188,10 @@ class App extends React.Component {
         if (Utils.isLoggedIn()) {
             userEmail = Utils.getLoggedInUserEmail();
         } 
-        sendErrorEmailsForApp && sendErrorToBackend(null, userEmail, 'App Intializing')
+
+        !appLoadEmailSent
+        && sendErrorEmailsForApp 
+        && sendErrorToBackend(null, userEmail, 'App Intializing')
     }
 
     componentDidMount() {
@@ -196,7 +200,12 @@ class App extends React.Component {
         if (Utils.isLoggedIn()) {
             userEmail = Utils.getLoggedInUserEmail();
         } 
-        sendErrorEmailsForApp && sendErrorToBackend(null, userEmail, 'App Intialized')
+
+        !appLoadEmailSent
+        && sendErrorEmailsForApp 
+        && sendErrorToBackend(null, userEmail, 'App Intialized', null, null, () => {
+            Utils.localStorageSave('appLoadEmailSent', true);
+        });
     }
 
     componentDidCatch(error, info) {

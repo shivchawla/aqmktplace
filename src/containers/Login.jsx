@@ -16,6 +16,7 @@ import AppLayout from './AppLayout';
 import ContactUs from '../components/ContactUs';
 
 const {requestUrl, sendErrorEmailsForLogin = false} = require('../localConfig');
+const appLoginEmailSent = Utils.getFromLocalStorage('appLoginEmailSent') === undefined ? false : true;
 
 class Login extends Component {
 
@@ -80,7 +81,11 @@ class Login extends Component {
             });
           })
           .finally(() => {
-            sendErrorEmailsForLogin && sendErrorToBackend(errorToSend, values.userName)
+            // !appLoginEmailSent
+            sendErrorEmailsForLogin 
+            && sendErrorToBackend(errorToSend, values.userName, 'Login Detail', null, null, () => {
+                Utils.localStorageSave('appLoginEmailSent', true);
+            });
           })
         }
         
