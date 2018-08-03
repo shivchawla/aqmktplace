@@ -10,6 +10,8 @@ import {primaryColor} from '../constants';
 import logo from "../assets/logo-advq-new.png";
 import '../css/resetPassword.css';
 import AppLayout from './AppLayout';
+const URLSearchParamsPoly = require('url-search-params');
+
 
 const {requestUrl} = require('../localConfig');
 
@@ -26,7 +28,7 @@ class ResetPassword extends Component {
   	};
     this.handleSubmit = (e) => {
       e.preventDefault();
-      const queryParams = new URLSearchParams(this.props.location.search);
+      const queryParams = new URLSearchParamsPoly(this.props.location.search);
       this.props.form.validateFields((err, values) => {
         if (!err) {
           this.updateState({

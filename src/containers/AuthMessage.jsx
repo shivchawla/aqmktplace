@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {Button} from 'antd';
 import {withRouter, Link} from 'react-router-dom';
+const URLSearchParamsPoly = require('url-search-params');
 
 class AuthMessageImpl extends Component {
 
@@ -12,7 +13,7 @@ class AuthMessageImpl extends Component {
 
   	};
     if(props.location.search){
-      this.params = new URLSearchParams(props.location.search);
+      this.params = new URLSearchParamsPoly(props.location.search);
     } 
   }
 

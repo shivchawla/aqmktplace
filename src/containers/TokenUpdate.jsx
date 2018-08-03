@@ -5,6 +5,8 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router-dom';
 import axios from 'axios';
 import {loadingColor} from '../constants';
+const URLSearchParamsPoly = require('url-search-params');
+
 
 const {requestUrl} = require('../localConfig');
 
@@ -19,7 +21,7 @@ class TokenUpdateImpl extends Component {
       loading: true
   	};
     if(props.location.search){
-      const queryParams = new URLSearchParams(props.location.search);
+      const queryParams = new URLSearchParamsPoly(props.location.search);
       if (queryParams && queryParams.get('redirectUrl')){
         this.redirectUrl = decodeURIComponent(queryParams.get('redirectUrl'));
         if (!this.redirectUrl){
