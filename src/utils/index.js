@@ -1,11 +1,15 @@
 import moment from 'moment';
 import _ from 'lodash';
 import axios from 'axios';
+import Impression from 'impression.js';
 import {reactLocalStorage} from 'reactjs-localstorage';
 import {graphColors, metricColor} from '../constants';
 import {getStockData} from './requests';
 
 const {requestUrl, webSocketUrl} = require('../localConfig');
+const bowser = require('bowser/es5');
+var MobileDetect = require('mobile-detect'),
+    md = new MobileDetect(window.navigator.userAgent);
 
 export const dateFormat = 'Do MMMM YYYY';
 
@@ -542,6 +546,41 @@ export const getUnrealizedPnl = (unrealizedPnl, avgPrice) => {
 export const generateRandomString = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
+
+export const sendErrorToBackend = (errorToSend = '', email = '', subject = 'Login Detail', successCallback = null, errorCallback = null, finallyCallback = null) => {
+	const feedbackUrl = `${requestUrl}/user/sendFeedback`;
+	const browser = bowser.getParser(window.navigator.userAgent);
+	const impression = new Impression();
+	impression.userTechData = browser.parse();
+	let data = {
+			...(_.get(impression, 'userTechData.parsedResult', {})),
+              mobile: md.mobile(),
+              phone:  md.phone(),
+			  mobileOs: md.os(),
+			  error: errorToSend,
+			  currentUrl: window.location.href
+		};
+	let stringifiedData = JSON.stringify(data);
+	axios({
+		url: feedbackUrl,
+		method: 'POST',
+		data: {
+			"feedback": stringifiedData,
+			"subject": subject,
+			"to": "support@adviceqube.com",
+			"from": email
+		}
+	})
+	.then(response => {
+		successCallback !== null && successCallback();
+	})
+	.catch(error => {
+		errorCallback !== null && errorCallback();
+	})
+	.finally(() => {
+		finallyCallback !== null && finallyCallback();
+	})
+}
 
 Utils.openSocketConnection();
 setInterval(function(){Utils.openSocketConnection();}, 10000);

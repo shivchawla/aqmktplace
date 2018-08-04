@@ -785,10 +785,10 @@ class ContestAdviceFormImpl extends React.Component {
         const breadCrumbs = this.props.isUpdate
                 ? getBreadCrumbArray(UpdateAdviceCrumb, [
                     {name: this.state.name, url: `/contest/entry/${this.props.adviceId}`},
-                    {name: 'Update Advice'}
+                    {name: 'Update Entry'}
                 ])
                 : getBreadCrumbArray(UpdateAdviceCrumb, [
-                    {name: 'Create Advice'}
+                    {name: 'Create Entry'}
                 ]);
 
         return (
@@ -803,7 +803,7 @@ class ContestAdviceFormImpl extends React.Component {
                 </Col> */}
                 <Col span={24} style={{padding: 0}}>
                     <AqPageHeader 
-                        title={this.props.isUpdate ? "Update Advice" : "Create Advice"}
+                        title={this.props.isUpdate ? "Update Entry" : "Create Entry"}
                         showTitle={true}
                         breadCrumbs={breadCrumbs}
                     >

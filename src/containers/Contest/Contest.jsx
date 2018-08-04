@@ -9,10 +9,46 @@ import CreateAdvice from './CreateAdvice/CreateAdvice';
 import UpdateAdvice from './CreateAdvice/UpdateAdvice';
 import ContestAdviceDetail from './ContestAdviceDetail';
 import ContestHomeMobile from './Mobile/ContestHomeMobile';
-import PageNotFound from '../../containers/WorkInProgressPage';
+import PageNotFoundMobile from '../../containers/WorkInProgressPage';
+import PageNotFoundDesktop from  '../../components/PageNotFound';
 import ContestTnC from './ContestTnC';
 import {ContestHomeMeta} from '../../metas';
+import {sendErrorToBackend, Utils} from '../../utils';
+
+const {sendErrorEmailsForContest: sendErrorEmailsForApp = false} = require('../../localConfig');
+const appLoadEmailSent = Utils.getFromLocalStorage('appContestEmailSent') === undefined ? false : true;
+
 export default class Contest extends React.Component {
+    componentWillMount() {
+        let userEmail = 'support@adviceqube.com';
+        if (Utils.isLoggedIn()) {
+            userEmail = Utils.getLoggedInUserEmail();
+        }
+        !appLoadEmailSent
+        && sendErrorEmailsForApp 
+        && sendErrorToBackend(null, userEmail, 'Contest Page Intializing')
+    }
+
+    componentDidMount() {
+        let userEmail = 'support@adviceqube.com';
+        if (Utils.isLoggedIn()) {
+            userEmail = Utils.getLoggedInUserEmail();
+        }
+        !appLoadEmailSent
+        && sendErrorEmailsForApp 
+        && sendErrorToBackend(null, userEmail, 'Contest Page Intialized', null, null, () => {
+            Utils.localStorageSave('appContestEmailSent', true);
+        })
+    }
+
+    componentDidCatch(error, info) {
+        let userEmail = 'support@adviceqube.com';
+        if (Utils.isLoggedIn()) {
+            userEmail = Utils.getLoggedInUserEmail();
+        }
+        sendErrorEmailsForApp && sendErrorToBackend(error, userEmail, 'Contest Page Error')
+    }
+
     render() {
         return(
             <React.Fragment>
@@ -51,7 +87,7 @@ export default class Contest extends React.Component {
                                 path={`${this.props.match.url}/leaderboard`}
                                 render={props => <LeaderBoard {...props}/>} 
                             />
-                            <Route component={PageNotFound} />
+                            <Route component={PageNotFoundMobile} />
                         </Switch>
                     )}
                 />
@@ -98,7 +134,7 @@ export default class Contest extends React.Component {
                                 path={`${this.props.match.url}/rules`}
                                 render={props => <ContestTnC/>} 
                             />
-                            <Route component={PageNotFound} />
+                            <Route component={PageNotFoundDesktop} />
                         </Switch>
                     )}
                 />

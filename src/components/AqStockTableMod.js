@@ -227,6 +227,7 @@ export class AqStockTableMod extends React.Component {
     deleteItems = () => {
         let data = [...this.state.data];
         data = _.pull(data, ...this.state.selectedRows);
+        this.updateAllWeights(data);
         this.setState({data, selectedRows: []}, () => {
             this.props.onChange(data);
         });
