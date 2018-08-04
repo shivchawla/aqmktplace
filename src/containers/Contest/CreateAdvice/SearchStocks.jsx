@@ -31,6 +31,7 @@ export class SearchStocks extends React.Component {
             portfolioLoading: false,
             loadingStocks: false,
             stockPerformanceOpen: false,
+            stockFilterOpen: false,
             filter: {
                 sector: '',
                 industry: ''
@@ -61,17 +62,28 @@ export class SearchStocks extends React.Component {
     renderSearchStockListMobile = () => {
         return (
             <Row>
-                <Col span={24}>
-                    {/* <Search placeholder="Search Stocks" onChange={this.handleSearchInputChange}/> */}
+                <Col 
+                        span={24} 
+                        style={{
+                            ...horizontalBox,
+                            backgroundColor: '#efeff4'
+                        }}
+                >
                     <SearchBar 
+                        style={{width: '90%'}}
                         placeholder="Search Stocks"
                         onChange={value => this.handleSearchInputChange(value, 'mobile')}
                     />
+                    {
+                        this.shouldFiltersBeShown() &&
+                        <Icon type="filter" style={{fontSize: '25px'}} onClick={this.toggleStockFilterOpen}/>
+                    }
                 </Col>
                 {this.renderPaginationMobile()}
                 <Col 
                         span={24} 
                         style={{
+                            ...verticalBox,
                             padding: '0 15px'
                         }}
                 >
@@ -469,6 +481,10 @@ export class SearchStocks extends React.Component {
         this.setState({stockPerformanceOpen: !this.state.stockPerformanceOpen});
     }
 
+    toggleStockFilterOpen = () => {
+        this.setState({stockFilterOpen: !this.state.stockFilterOpen});
+    }
+
     onFilterChange = filterData => {
         const sectors = _.get(filterData, 'sectors', []);
         const industries = _.get(filterData, 'industries', []);
@@ -499,9 +515,9 @@ export class SearchStocks extends React.Component {
                     query={`(max-width: ${screenSize.mobile})`}
                     render={() => (
                         <Motion
-                                style={{
-                                    detailX: spring(this.state.stockPerformanceOpen ? 0 : 600),
-                                    listX: spring(this.state.stockPerformanceOpen ? -600 : 0)
+                                style={{ 
+                                    detailX: spring((this.state.stockPerformanceOpen || this.state.stockFilterOpen) ? 0 : 600),
+                                    listX: spring((this.state.stockPerformanceOpen || this.state.stockFilterOpen) ? -600 : 0)
                                 }}>
                             {
                                 ({detailX, listX}) => 
@@ -523,11 +539,24 @@ export class SearchStocks extends React.Component {
                                                 span={24} 
                                                 style={{
                                                     transform: `translate3d(${detailX}px, 0, 0)`,
-                                                    top: '85px',
+                                                    top: this.state.stockPerformanceOpen ? '85px' : '45px',
                                                     position: 'absolute'
                                                 }}
                                         >
-                                            <StockPerformance stock={this.state.selectedStock}/>
+                                            {
+                                                this.state.stockPerformanceOpen &&
+                                                <StockPerformance stock={this.state.selectedStock}/>
+                                            }
+                                            <div
+                                                    style={{
+                                                        display: this.state.stockFilterOpen ? 'block' : 'none'
+                                                    }}
+                                            >
+                                                <StockFilter 
+                                                    onFilterChange={this.onFilterChange}
+                                                    filters={this.props.filters}
+                                                />
+                                            </div>
                                         </Col>
                                     </React.Fragment>
                             }
@@ -556,7 +585,7 @@ export class SearchStocks extends React.Component {
                                 </Col>
                             }
                             <Col 
-                                    span={10} 
+                                    span={this.shouldFiltersBeShown() ? 10 : 12} 
                                     style={{
                                         padding: '20px',
                                         height: global.screen.height - 195,
@@ -568,13 +597,13 @@ export class SearchStocks extends React.Component {
                                 {this.renderSearchStocksList()}
                             </Col>
                             <Col 
-                                    span={10} 
+                                    span={this.shouldFiltersBeShown() ? 10 : 12}
                                     style={{
                                         padding: '20px',
                                         height: global.screen.height - 195,
                                         overflow: 'hidden',
                                         overflowY: 'scroll',
-                                        borderRight: '1px solid red'
+                                        borderRight: '1px solid #eaeaea'
                                     }}
                             >
                                 {this.renderSelectedStocks()}
@@ -618,6 +647,7 @@ export class SearchStocks extends React.Component {
         return (
             this.state.selectedStocks.length > 0 
             && !this.state.stockPerformanceOpen 
+            && !this.state.stockFilterOpen 
             && global.screen.width <= 600
             ?   <Col 
                         span={24}
@@ -664,45 +694,48 @@ export class SearchStocks extends React.Component {
 
     render() { 
         return (
-            <Row 
-                    style={{
-                        width: global.screen.width, 
-                        overflow: 'hidden', 
-                        height: global.screen.width <= 600 ? global.screen.height : global.screen.height - 100,
-                        position: 'relative'
-                    }}
-            >
-                <Media 
-                    query='(max-width: 600px)'
-                    render={() => 
-                        <SearchStockHeaderMobile 
+            <React.Fragment>
+                <Row 
+                        style={{
+                            width: global.screen.width, 
+                            overflow: 'hidden', 
+                            height: global.screen.width <= 600 ? global.screen.height : global.screen.height - 100,
+                            position: 'relative'
+                        }}
+                >
+                    <Media 
+                        query='(max-width: 600px)'
+                        render={() => 
+                            <SearchStockHeaderMobile 
+                                    filters={this.props.filters}
+                                    selectedStocks={this.state.selectedStocks}
+                                    stockPerformanceOpen={this.state.stockPerformanceOpen}
+                                    stockFilterOpen={this.state.stockFilterOpen}
+                                    toggleBottomSheet={this.props.toggleBottomSheet}
+                                    addSelectedStocksToPortfolio={this.addSelectedStocksToPortfolio}
+                                    portfolioLoading={this.state.portfolioLoading}
+                                    toggleStockPerformanceOpen={this.toggleStockPerformanceOpen}
+                                    toggleStockFilterOpen={this.toggleStockFilterOpen}
+                                    renderSelectedStocks={this.renderSelectedStocksMobile}
+                            />
+                        }
+                    />
+                    <Media 
+                        query='(min-width: 601px)'
+                        render={() => 
+                            <SearchStockHeader 
                                 filters={this.props.filters}
                                 selectedStocks={this.state.selectedStocks}
                                 stockPerformanceOpen={this.state.stockPerformanceOpen}
                                 toggleBottomSheet={this.props.toggleBottomSheet}
-                                stockPerformanceOpen={this.state.stockPerformanceOpen}
                                 addSelectedStocksToPortfolio={this.addSelectedStocksToPortfolio}
                                 portfolioLoading={this.state.portfolioLoading}
-                                toggleStockPerformanceOpen={this.toggleStockPerformanceOpen}
-                                renderSelectedStocks={this.renderSelectedStocksMobile}
-                        />
-                    }
-                />
-                <Media 
-                    query='(min-width: 601px)'
-                    render={() => 
-                        <SearchStockHeader 
-                            filters={this.props.filters}
-                            selectedStocks={this.state.selectedStocks}
-                            stockPerformanceOpen={this.state.stockPerformanceOpen}
-                            toggleBottomSheet={this.props.toggleBottomSheet}
-                            addSelectedStocksToPortfolio={this.addSelectedStocksToPortfolio}
-                            portfolioLoading={this.state.portfolioLoading}
-                        />
-                    }
-                />
-                {this.renderStockListDetails()}
-            </Row>
+                            />
+                        }
+                    />
+                    {this.renderStockListDetails()}
+                </Row>
+            </React.Fragment>
         );
     }
 }
@@ -716,6 +749,7 @@ const StockListItemMobile = props => {
         cursor: 'pointer',
         backgroundColor: '#fff',
         padding: '10px 0',
+        width: '100%'
     };
 
     const detailContainerStyle = {
@@ -826,17 +860,17 @@ const AddIcon = ({checked = false, size = '20px'}) => {
     return <Icon style={{fontSize: size, color}} type={type} />
 }
 
-const SectorItems = ({sectors = []}) => {
-    const options = sectors.map(sector => {
-        return {label: sector, value: sector};
-    });
-
-    return <CheckboxGroup options={options} />;
-}
-
 const topHeaderContainer = {
     ...horizontalBox,
     justifyContent: 'space-between',
     borderBottom: '1px solid lightgrey',
     padding: '0 20px'
+};
+
+const fabButtonStyle = {
+    width: '150px',
+    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
+    margin: '0 auto',
+    background: '#30B9AD',
+    color: '#fff'
 };

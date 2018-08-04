@@ -1,17 +1,20 @@
 import * as React from 'react';
+import Media from 'react-media';
 import _ from 'lodash';
 import {Checkbox, Row, Col, Collapse} from 'antd';
+import {Accordion, Checkbox as CheckboxMobile} from 'antd-mobile';
 import {horizontalBox, verticalBox, primaryColor, sectors} from '../../../constants';
 import {sectorData} from '../../../constants/stockDetails';
+import '../css/stockFilter.css';
 
 const Panel = Collapse.Panel;
+const MobilePanel = Accordion.Panel;
 
 export default class StockFilter extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             filterData: this.getSectors(),
-            selectedSector: null
         }
     }
 
@@ -40,15 +43,25 @@ export default class StockFilter extends React.Component {
         if (sector !== null && sector.length > 0) {
             data = data.filter(item => item.sector === sector);
         }
+        const mobileStyle = global.screen.width <= 600
+            ?   {
+                    height: global.screen.width > 600 ? '100%' : global.screen.height - 100,
+                    overflow: 'hidden',
+                    overflowY: 'scroll'
+                }
+            :   null;
+        const SelectedCollapse = global.screen.width <= 600 ? Accordion : Collapse;
+        const SelectedPanel = global.screen.width <= 600 ? MobilePanel : Panel;
 
         return (
             <Col 
                     span={24} 
                     style={{
                         width: '100%',
+                       ...mobileStyle
                     }}
             >
-                <Collapse defaultActiveKey={['1']} bordered={false}>
+                <SelectedCollapse defaultActiveKey={['1']} bordered={false}>
                     {
                         data.map((sector, index) => {
                             const sectorPanelHeader = (
@@ -65,7 +78,11 @@ export default class StockFilter extends React.Component {
                             )
 
                             return (
-                                <Panel style={customPanelStyle} header={sectorPanelHeader} key={(index + 1).toString()}>
+                                <SelectedPanel 
+                                        style={customPanelStyle} 
+                                        header={sectorPanelHeader} 
+                                        key={(index + 1).toString()}
+                                >
                                     <Row>
                                         <Col span={24}>
                                             <SectorItem 
@@ -75,11 +92,12 @@ export default class StockFilter extends React.Component {
                                             />
                                         </Col>
                                     </Row>
-                                </Panel>
+                                </SelectedPanel>
                             )
                         })
                     }
-                </Collapse>
+                </SelectedCollapse>
+                <Row style={{height: '100px'}}></Row>
             </Col>
         );
     }
@@ -118,7 +136,6 @@ export default class StockFilter extends React.Component {
         const filterData = [...this.state.filterData];
         const sectorIndex = _.findIndex(filterData, item => item.sector === sectorName);
         if(sectorIndex !== -1) {
-            this.setState({selectedSector: sectorName});
             const targetSector = filterData[sectorIndex];
             targetSector.checked = targetSector.checked === 0 // intermediate
                     ? 1 // checked
@@ -129,7 +146,7 @@ export default class StockFilter extends React.Component {
             targetSector.industries.map(item => {
                 item.checked = targetSector.checked === 1;
             });
-            this.setState({filterData});
+            this.setState({filterData: [...[], ...filterData]}, () => this.forceUpdate());
             this.props.onFilterChange(this.getIndividualSectorsAndIndustries(filterData));
         }
     }
@@ -168,27 +185,69 @@ export default class StockFilter extends React.Component {
                 targetSector.industries[targetIndustryIndex].checked = checked;
                 // setting the checkbox select status based on the number of industries selected for that sector
                 targetSector.checked = this.checkForActiveIndustries(sector);
-                this.setState({filterData});
+                this.setState({filterData}, () => this.forceUpdate());
                 this.props.onFilterChange(this.getIndividualSectorsAndIndustries(filterData));
             }
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextState.filterData, this.state.filterData) || !_.isEqual(nextProps.filters, this.props.filters)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    handleAllSectorsChange = value => {
+        const filterData = [...this.state.filterData];
+        filterData.map(item => {
+            item.checked = value ? 1 : -1;
+            item.industries.map(industryItem => {
+                industryItem.checked = value;
+            });
+        });
+        this.setState({filterData}, () => this.forceUpdate());
+        this.props.onFilterChange(this.getIndividualSectorsAndIndustries(filterData));
+    }
+
     render() {
+        console.log('Stock Filter Rendered');
         return(
             <Row>
-                <Col span={24}>
-                    <h3 
-                        style={{
-                            fontSize: '15px', 
-                            fontWeight: 700,
-                            margin: '10px 0px',
-                            marginLeft: '20px'
-                        }}
-                    >
-                        Filter Stocks
-                    </h3>
-                </Col>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => 
+                        <Col span={24} style={{...horizontalBox, height: '60px', marginLeft: '10px'}}>
+                            <CheckboxMobile 
+                                    style={{fontSize: '18px', fontWeight: 700}}
+                                    onChange={e => this.handleAllSectorsChange(e.target.checked)}
+                                    checked={
+                                        this.state.filterData.filter(item => item.checked === 1).length === this.state.filterData.length
+                                    }
+                            >
+                                Sectors
+                            </CheckboxMobile>
+                        </Col>
+                    }
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => 
+                        <Col span={24}>
+                            <h3 
+                                style={{
+                                    fontSize: '15px', 
+                                    fontWeight: 700,
+                                    margin: '10px 0px',
+                                    marginLeft: '20px'
+                                }}
+                            >
+                                Filter Stocks
+                            </h3>
+                        </Col>
+                    }
+                />
                 {this.renderSectors()}
             </Row>
         );
@@ -222,16 +281,23 @@ const IndustryItemGroup = ({industries, onChange}) => {
 }
 
 const IndustryItem = ({checked, text, onChange, sector}) => {
+    const SelectedCheckbox = global.screen.width <= 600 ? CheckboxMobile : Checkbox;
+
     return (
         <Row>
-            <Col span={24}>
-                <Checkbox 
+            <Col span={24} style={{marginBottom: '10px'}}>
+                <SelectedCheckbox 
                         checked={checked} 
                         onChange={value => onChange(value, text, sector)}
-                        style={{margin: '0', marginLeft: '20px', marginBottom: '5px', fontSize: '13px'}}
+                        style={{
+                            margin: '0', 
+                            marginLeft: '20px', 
+                            marginBottom: '5px', 
+                            fontSize: global.screen.width > 600 ? '13px' : '15px'
+                        }}
                 >
                     {text}
-                </Checkbox>
+                </SelectedCheckbox>
             </Col>
         </Row>
     );
@@ -243,5 +309,6 @@ const customPanelStyle = {
     marginBottom: 5,
     border: 0,
     overflow: 'hidden',
-    borderBottom: '1px solid #eaeaea'
+    borderBottom: '1px solid #eaeaea',
+    padding: global.screen.width <= 600 ? '0 10px' : null
   };
