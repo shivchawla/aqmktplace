@@ -82,6 +82,20 @@ class AuthMessageImpl extends Component {
           </React.Fragment>
         );
       }
+      else if (this.params.get('mode') === 'unsubscribe'){
+        const emailType = this.params.get('type') == "daily_performance_digest" ?
+            "Daily performance emails" : "Weekly performance emails"
+        return (
+          <React.Fragment>
+            <h2 style={{'fontSize': '24px', 'color': 'teal'}}>
+              You have successfully unsubscribed from {emailType}!!
+            </h2>
+            <Link to='/contest'>
+              <Button type="primary" style={{'marginTop': '20px'}}>GO BACK</Button>
+            </Link>
+          </React.Fragment>
+        );
+      }
     }
 
 
