@@ -41,14 +41,15 @@ export default class SearchStockHeader extends React.Component {
                                     transition: 'all 0.4s ease-in-out'
                                 }}
                         >
-                            {
+                            Add Stocks to your Portfolio
+                            {/* {
                                 this.props.stockPerformanceOpen 
                                 ? 'Stock Performance' 
                                 : 'Add Stocks to your Portfolio'
-                            }
+                            } */}
                         </h3>
                         {
-                            !this.props.stockPerformanceOpen &&
+                            // !this.props.stockPerformanceOpen &&
                             <React.Fragment>
                                 <span style={{fontSize: '14px', marginRight: '5px'}}>Universe: </span>
                                 {industry && 

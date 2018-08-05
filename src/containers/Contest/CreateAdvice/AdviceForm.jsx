@@ -397,6 +397,7 @@ class ContestAdviceFormImpl extends React.Component {
                                             history={this.props.history}
                                             pageUrl={this.props.match.url}
                                             isUpdate={this.props.isUpdate}
+                                            benchmark={this.state.benchmark}
                                         />
                                     </div>
                             }
@@ -425,6 +426,7 @@ class ContestAdviceFormImpl extends React.Component {
                                 history={this.props.history}
                                 pageUrl={this.props.match.url}
                                 isUpdate={this.props.isUpdate}
+                                benchmark={this.state.benchmark}
                             />
                         </SwipeableBottomSheet>
                     )}
