@@ -119,7 +119,7 @@ export class SearchStocks extends React.Component {
         const industry = _.get(this.props, 'filters.industry', '').length === 0
                 ?   this.state.filter.industry
                 :   _.get(this.props, 'filters.industry', '');
-        const url = `${requestUrl}/stock?search=${searchQuery}&populate=${populate}&universe=${universe}&sector=${sector}&industry=${industry}&skip=${skip}&limit=${limit}`;
+        const url = `${requestUrl}/stock?search=${encodeURIComponent(searchQuery)}&populate=${populate}&universe=${universe}&sector=${sector}&industry=${industry}&skip=${skip}&limit=${limit}`;
         this.setState({loadingStocks: true});
         fetchAjax(url, this.props.history, this.props.pageUrl)
         .then(({data: stockResponseData}) => {
@@ -486,15 +486,19 @@ export class SearchStocks extends React.Component {
     }
 
     onFilterChange = filterData => {
-        const sectors = _.get(filterData, 'sectors', []);
-        const industries = _.get(filterData, 'industries', []);
-        this.setState({
-            filter: {
-                ...this.state.filter,
-                sector: _.join(sectors, ','),
-                industry: _.join(industries, ',')
-            }
-        }, () => this.fetchStocks());
+        return new Promise(resolve => {
+            const sectors = _.get(filterData, 'sectors', []);
+            const industries = _.get(filterData, 'industries', []);
+            this.setState({
+                filter: {
+                    ...this.state.filter,
+                    sector: _.join(sectors.map(item => encodeURIComponent(item)), ','),
+                    industry: _.join(industries.map(item => encodeURIComponent(item)), ',')
+                },
+                selectedPage: 0
+            }, () => this.fetchStocks());
+            resolve(true);
+        });
     }
 
     shouldFiltersBeShown = () => {
