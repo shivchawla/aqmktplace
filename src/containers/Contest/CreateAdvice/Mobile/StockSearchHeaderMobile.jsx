@@ -33,11 +33,17 @@ export default class SearchStockHeader extends React.Component {
                                 position: 'absolute',
                                 left: '10px'
                             }} 
-                            type={this.props.stockPerformanceOpen ? "left" : "close-circle"}
+                            type={
+                                this.props.stockPerformanceOpen || this.props.stockFilterOpen
+                                    ? "left" 
+                                    : "close-circle"
+                            }
                             onClick={
-                                () => stockPerformanceOpen
+                                () => this.props.stockPerformanceOpen
                                 ? this.props.toggleStockPerformanceOpen()
-                                : this.props.toggleBottomSheet()
+                                : this.props.stockFilterOpen 
+                                    ? this.props.toggleStockFilterOpen()
+                                    : this.props.toggleBottomSheet()
                             }
                         />
                         <h3 
@@ -49,12 +55,15 @@ export default class SearchStockHeader extends React.Component {
                             {
                                 this.props.stockPerformanceOpen 
                                 ? 'Stock Performance' 
-                                : 'Add Stocks'
+                                : this.props.stockFilterOpen
+                                    ? 'Stock Filters'
+                                    : 'Add Stocks'
                             }
                         </h3>
                         {
                             this.props.selectedStocks.length > 0 &&
                             !this.props.stockPerformanceOpen &&
+                            !this.props.stockFilterOpen &&
                             <Button 
                                     style={{
                                         position: 'absolute', 

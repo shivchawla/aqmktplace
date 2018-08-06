@@ -12,6 +12,7 @@ import ContactUsModal from '../../components/ContactUs';
 import contestFormula from "../../assets/contestFormula2.png";
 import {ContestHomeMeta} from '../../metas';
 import Countdown from 'react-countdown-now';
+import moment from 'moment-timezone';
 import DateHelper from '../../utils/date';
 
 const TabPane = Tabs.TabPane;
@@ -144,6 +145,7 @@ class ContestHome extends React.Component {
         };
 
         return (
+
             <Col span={24} style={containerStyle}>
                 <Row style={{height: '100%'}}>
                     <Col span={16} style={{...verticalBox, height: '100%'}}>
@@ -159,7 +161,7 @@ class ContestHome extends React.Component {
                         </Button>
                         {this.state.selectedContest &&
                             <div style={{marginTop:'10px', fontSize:'16px', color:'#fff', fontWeight:300, textAlign:'center'}}>Submission ends in
-                                <Countdown date = {new Date(this.state.selectedContest.startDate)} renderer={this.renderCountdown}/> 
+                                <Countdown date = {moment.tz(new Date(this.state.selectedContest.startDate), "Asia/Kolkata").startOf('day').format()} renderer={this.renderCountdown}/> 
                             </div>
                         }
                     </Col>
