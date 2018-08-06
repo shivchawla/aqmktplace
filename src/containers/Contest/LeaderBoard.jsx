@@ -1,4 +1,5 @@
 import * as React from 'react';
+import moment from 'moment';
 import _ from 'lodash';
 import Media from 'react-media';
 import {Row, Col, Button, Select, Radio, Tooltip} from 'antd';
@@ -15,6 +16,7 @@ import {ContestHomeMeta} from '../../metas';
 const Option = Select.Option;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
+const dateFormat = 'YYYY-MM-DD';
 
 const {requestUrl} = require('../../localConfig');
 // const contestId = '5b49cbe8f464ce168007bb79'; // For testing purpose only, this should be removed
@@ -236,7 +238,9 @@ export default class LeaderBoard extends React.Component {
             let contests = _.get(response.data, 'contests', []).map(contest => {
                 return {
                     id: _.get(contest, '_id', null),
-                    name: _.get(contest, 'name', null)
+                    name: _.get(contest, 'name', null),
+                    startDate: _.get(contest, 'startDate', moment().format(dateFormat)),
+                    endDate: _.get(contest, 'endDate', moment().format(dateFormat))
                 };
             })
             this.setState({activeContests: contests});
@@ -451,7 +455,14 @@ export default class LeaderBoard extends React.Component {
                     <h3 style={{fontSize: '26px', color: primaryColor, marginBottom: '0px'}}>
                         Leaderboard
                     </h3>
-                    <h5 style={{fontSize: '14px', color: '#6F6F6F'}}>For {this.state.selectedContest.name}</h5>
+                    <div>
+                        <h5 style={{fontSize: '16px', color: '#6F6F6F'}}>
+                            For {this.state.selectedContest.name}
+                            <span style={{fontSize: '14px', marginLeft: '4px', fontWeight: 700}}>[{moment(this.state.selectedContest.startDate).format(dateFormat)}</span>
+                            <span style={{fontSize: '12px', margin: '0 3px'}}>to</span>
+                            <span style={{fontSize: '14px', fontWeight: 700}}>{moment(this.state.selectedContest.endDate).format(dateFormat)}]</span>
+                        </h5>
+                    </div>
                     <div style={{textAlign: 'end', marginTop: '-30px'}}>{this.renderContestDropdown()}</div>
                 </Col>
 
