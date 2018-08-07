@@ -119,16 +119,12 @@ export class AqStockTableMod extends React.Component {
         let target = newData.filter(item => item.key === key)[0];
         if (target) {
             const lastPrice = target['lastPrice'];
-            target[column] = value >= 0 ? value : 0;
-            value = value.length > 0 ? value : 0;
+            target[column] = value;
+            // target[column] = value >= 0 ? value : 0;
+            // value = value.length > 0 ? value : 0;
             const shares = this.calculateSharesFromTotalReturn(value, lastPrice);
             target['shares'] = shares;
             target['totalValue'] = Number((shares * lastPrice).toFixed(2));
-            // target['totalValue'] = value >= 0 ? Number((value * lastPrice).toFixed(2)) : 0;
-            // this.updateAllWeights(newData).then(data => {
-            //     this.setState({data});
-            //     this.props.onChange(data);
-            // });
             this.updateAllWeights(newData)
             this.setState({newData});
             this.props.onChange(newData);

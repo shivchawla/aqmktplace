@@ -3,11 +3,12 @@ import _ from 'lodash';
 import Media from 'react-media';
 import {Motion, spring} from 'react-motion';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
-import {Row, Col, Button, Modal, Spin, Select, Tooltip, Badge, Icon} from 'antd';
+import {Row, Col, Button, Modal, Spin, Select, Tooltip, Badge, Icon, Switch} from 'antd';
 import {SegmentedControl} from 'antd-mobile';
 import {metricColor, horizontalBox, primaryColor, verticalBox} from '../../../constants';
 import {generateColorData} from '../../../utils';
 import {AqStockTableMod} from '../../../components/AqStockTableMod';
+import AqSectorTable from '../../../components/AqSectorTable';
 import PortfolioList from './Mobile/PortfolioList';
 import {benchmarks} from '../../../constants/benchmarks';
 import MyChartNew from '../../MyChartNew';
@@ -31,7 +32,8 @@ export class Portfolio extends React.Component {
             pieChartSeries: [],
             metrics: {},
             performanceBottomSheetOpen: false,
-            performanceSheetView: 'Performance'
+            performanceSheetView: 'Performance',
+            showPortfolioByStock: false
         };
     }
 
@@ -238,6 +240,17 @@ export class Portfolio extends React.Component {
         );
     }
 
+    renderSectorTable = () => {
+        return (
+            <Col span={24} style={{marginTop: '20px'}}>
+                <AqSectorTable 
+                    data={this.props.data}
+                    onChange={this.props.onChange}
+                />
+            </Col>
+        );
+    }
+
     renderPortfolioList = () => {
         return (
             <PortfolioList 
@@ -267,6 +280,15 @@ export class Portfolio extends React.Component {
         );
     }
 
+    renderSectorPortfolio = () => {
+        return (
+            <Media 
+                query="(min-width: 601px)"
+                render={() => this.renderSectorTable()}
+            />
+        );
+    }
+
     renderActionButtonsDesktop = () => {
         return (
             <div style={{
@@ -276,6 +298,10 @@ export class Portfolio extends React.Component {
                     zIndex: 20
                 }}
             >
+                <Switch 
+                    checked={this.state.showPortfolioByStock}
+                    onChange={this.togglePortfolioView}
+                />
                 <Button
                         style={{
                             marginLeft: '20px'
@@ -296,7 +322,7 @@ export class Portfolio extends React.Component {
                                 type="primary" 
                                 icon="plus-circle-o"
                                 onClick={this.props.toggleBottomSheet}
-                                disabled={this.props.benchmark === null}
+                                disabled={this.props.benchmark === null || !this.state.showPortfolioByStock}
                         >
                             ADD STOCKS
                         </Button>
@@ -319,6 +345,10 @@ export class Portfolio extends React.Component {
         );
     }
 
+    togglePortfolioView = () => {
+        this.setState({showPortfolioByStock: !this.state.showPortfolioByStock});
+    }
+
     render() {
         return (
             <Row style={{display: 'block'}} type="flex">
@@ -329,7 +359,11 @@ export class Portfolio extends React.Component {
                     query={`(min-width: ${screenSize.desktop})`}
                     render={() => this.renderActionButtonsDesktop()}
                 />
-                {this.renderPortfolio()}
+                {
+                    this.state.showPortfolioByStock 
+                    ? this.renderPortfolio()
+                    : this.renderSectorPortfolio()
+                }
                 {
                     this.props.data.length === 0 &&
                     <Col span={24} style={{...verticalBox, marginTop: '40px'}}>

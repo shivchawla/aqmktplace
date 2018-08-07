@@ -10,7 +10,7 @@ export class EditableCell extends React.Component {
     }
 
     render() {
-        const {value, onChange, type, validationStatus, disabled = false, onEnter, width = '60px'} = this.props;
+        const {value, onChange, type, disabled = false, onEnter, width = '60px'} = this.props;
 
         return (
             <FormItem>
@@ -19,6 +19,7 @@ export class EditableCell extends React.Component {
                         value={value} 
                         onChange={e => onChange(e.target.value)} 
                         size="small"
+                        disabled={disabled}
                 />
             </FormItem>
         );
