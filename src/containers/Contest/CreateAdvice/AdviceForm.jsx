@@ -284,6 +284,7 @@ class ContestAdviceFormImpl extends React.Component {
             MAX_STOCK_EXPOSURE: 'Maximum Stock Exposure',
             MIN_POS_COUNT: 'Minimum Position Count',
             MAX_NET_VALUE: 'Maximum Net Value',
+            MIN_NET_VALUE: 'Minimum Net Value',
             MIN_SECTOR_COUNT: 'Minimum Sector Count',
             MAX_SECTOR_COUNT: 'Maximum Sector Count',
         };
@@ -465,7 +466,7 @@ class ContestAdviceFormImpl extends React.Component {
             item.effTotal = positionIndex !== -1 ? this.state.positions[positionIndex].effTotal : undefined;
             const total = item.effTotal !== undefined
                     ? item.effTotal
-                    : item.lastPrice > 10000 ? item.lastPrice : 10000
+                    : item.lastPrice > 50000 ? item.lastPrice : 50000
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
             item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);

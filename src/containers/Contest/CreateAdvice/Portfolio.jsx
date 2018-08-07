@@ -313,7 +313,9 @@ export class Portfolio extends React.Component {
                             size="small"
                     >
                         <Radio.Button value={true}>Stock</Radio.Button>
-                        <Radio.Button value={false}>Sector</Radio.Button>
+                        <Radio.Button value={false} disabled={this.props.data.length === 0}>
+                            Sector
+                        </Radio.Button>
                     </RadioGroup>
                 </div>
                 <div>

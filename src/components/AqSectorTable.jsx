@@ -16,6 +16,13 @@ export default class AqSectorTable extends React.Component {
                 width: 200
             },
             {
+                title: 'STOCKS #',
+                dataIndex: 'numStocks',
+                key: 'numStocks',
+                render: (text, record) => <span>{text}</span>,
+                width: 200
+            },
+            {
                 title: 'TARGET TOTAL',
                 dataIndex: 'targetTotal',
                 key: 'targetTotal',
@@ -147,6 +154,7 @@ export default class AqSectorTable extends React.Component {
         const sectorData = disableTargetTotalUpdate ? [...this.state.data] : [];
         const uniqueSectors = _.uniqBy(data, 'sector').map(item => item.sector);
         return uniqueSectors.map((sector, index) => {
+            const numStocks = data.filter(item => item.sector === sector).length;
             const totalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.totalValue));            
             const targetTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => Number(item.effTotal)));
             const individualTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.lastPrice))
@@ -157,6 +165,7 @@ export default class AqSectorTable extends React.Component {
                     total: totalValue,
                     weight: Number(((totalValue / this.getPortfolioTotalValue(data)) * 100).toFixed(2)),
                     key: sector,
+                    numStocks,
                     individualTotalValue
                 }
             } else {
@@ -166,6 +175,7 @@ export default class AqSectorTable extends React.Component {
                     total: totalValue,
                     weight: Number(((totalValue / this.getPortfolioTotalValue(data)) * 100).toFixed(2)),
                     key: sector,
+                    numStocks,
                     individualTotalValue
                 }
             }
