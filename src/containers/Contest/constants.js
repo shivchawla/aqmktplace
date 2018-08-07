@@ -72,7 +72,7 @@ export const faqs = [
     },
     {
         header: 'What’s the fine print?',
-        content: (<Fragment>Please check out <a href="http://localhost:3000/contest/rules"><span>Contest Rules</span></a> for complete details and legal policies</Fragment>)
+        content: (<Fragment>Please check out <a href="https://www.adviceqube.com/contest/rules"><span>Contest Rules</span></a> for complete details and legal policies</Fragment>)
 
     }
     
