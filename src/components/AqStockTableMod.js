@@ -106,7 +106,7 @@ export class AqStockTableMod extends React.Component {
             <EditableCell 
                     validationStatus={validationStatus}
                     type={type}
-                    value={Number(text).toFixed(2)}
+                    value={text}
                     onChange={value => {this.handleRowChange(value, record.key, column, type)}}
                     disabled={disabled}
                     width={120}

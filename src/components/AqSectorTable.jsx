@@ -134,7 +134,7 @@ export default class AqSectorTable extends React.Component {
 
         return {
             ...item,
-            effTotal,
+            effTotal: Number(effTotal.toFixed(2)),
             shares,
             totalValue
         }

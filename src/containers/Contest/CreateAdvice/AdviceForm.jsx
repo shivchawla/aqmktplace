@@ -45,13 +45,15 @@ class ContestAdviceFormImpl extends React.Component {
         super(props);
         this.searchStockComponent = null;
         const savedPositions = Utils.getFromLocalStorage('positions');
+        const savedBenchmark = Utils.getFromLocalStorage('benchmark');
+        const benchmark = savedBenchmark === undefined ? 'NIFTY_50' : JSON.parse(Utils.getFromLocalStorage('benchmark')).benchmark;
         const positions = savedPositions === undefined 
                 ?   []
-                :   JSON.parse(Utils.getFromLocalStorage('positions')).data
+                :   JSON.parse(Utils.getFromLocalStorage('positions')).data;
         this.state = {
             adviceActive: false,
             positions,
-            benchmark: 'NIFTY_50',
+            benchmark,
             bottomSheetOpenStatus: false,
             stockSearchFilters: {
                 industry: '',
@@ -144,6 +146,7 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     handleEmptyPortfolioBenchmarkChange = benchmark => {
+        Utils.localStorageSaveObject('benchmark', {benchmark});
         this.setState({benchmark}, () => {
             this.fetchBenchmarkConfig(benchmark);
         });
@@ -158,6 +161,7 @@ class ContestAdviceFormImpl extends React.Component {
             const sector = _.get(configData, 'sector', '');
             const industry = _.get(configData, 'industry', '');
             const universe = _.get(configData, 'universe', 'NIFTY_500');
+            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: []});
             this.setState({
                 stockSearchFilters: {
                     industry,
@@ -1097,7 +1101,8 @@ class ContestAdviceFormImpl extends React.Component {
         } else {
             Promise.all([
                 this.handleSubmitAdvice(),   
-                this.getActiveContestToParticipate()
+                this.getActiveContestToParticipate(),
+                this.getBenchmarkConfig(this.state.benchmark)
             ])
             .catch(err => {
                 this.setState({noActiveContests: true});
