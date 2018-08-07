@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Media from 'react-media';
 import {Motion, spring} from 'react-motion';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
-import {Row, Col, Button, Modal, Spin, Select, Tooltip, Badge, Icon, Switch} from 'antd';
+import {Row, Col, Button, Modal, Spin, Select, Tooltip, Radio, Icon, Switch} from 'antd';
 import {SegmentedControl} from 'antd-mobile';
 import {metricColor, horizontalBox, primaryColor, verticalBox} from '../../../constants';
 import {generateColorData} from '../../../utils';
@@ -17,6 +17,8 @@ import '../css/portfolioMobile.css';
 
 const Option = Select.Option;
 const screenSize = {mobile: '600px', desktop: '601px'};
+const RadioGroup = Radio.Group;
+
 export class Portfolio extends React.Component {
     constructor(props) {
         super(props);
@@ -33,7 +35,7 @@ export class Portfolio extends React.Component {
             metrics: {},
             performanceBottomSheetOpen: false,
             performanceSheetView: 'Performance',
-            showPortfolioByStock: false
+            showPortfolioByStock: true
         };
     }
 
@@ -292,42 +294,56 @@ export class Portfolio extends React.Component {
     renderActionButtonsDesktop = () => {
         return (
             <div style={{
+                    ...horizontalBox,
+                    justifyContent: 'space-between',
                     position: 'absolute', 
-                    right: '0px', 
+                    // right: '0px', 
+                    width: '93%',
                     top: '25px',
-                    zIndex: 20
+                    zIndex: 20,
+                    marginLeft: '60px'
                 }}
             >
-                <Switch 
-                    checked={this.state.showPortfolioByStock}
-                    onChange={this.togglePortfolioView}
-                />
-                <Button
-                        style={{
-                            marginLeft: '20px'
-                        }} 
-                        onClick={this.togglePerformanceModal} 
-                        type="secondary"
-                        // disabled={this.props.verifiedPositions.length < 1}
-                        disabled={this.props.data.length < 1}
-                        icon="area-chart"
-                >
-                    PERFORMANCE
-                </Button>
-                {
-                    this.props.data.length > 0 &&
-                    <Tooltip title="Search Stocks" placement="top">
-                        <Button 
-                                style={{marginLeft: '20px'}} 
-                                type="primary" 
-                                icon="plus-circle-o"
-                                onClick={this.props.toggleBottomSheet}
-                                disabled={this.props.benchmark === null || !this.state.showPortfolioByStock}
-                        >
-                            ADD STOCKS
-                        </Button>
-                    </Tooltip>
-                }
+                <div style={horizontalBox}>
+                    <h3>Portfolio View</h3>
+                    <RadioGroup 
+                            style={{marginLeft: '5px'}}
+                            onChange={this.togglePortfolioView} 
+                            value={this.state.showPortfolioByStock}
+                            size="small"
+                    >
+                        <Radio.Button value={true}>Stock</Radio.Button>
+                        <Radio.Button value={false}>Sector</Radio.Button>
+                    </RadioGroup>
+                </div>
+                <div>
+                    <Button
+                            style={{
+                                marginLeft: '20px'
+                            }} 
+                            onClick={this.togglePerformanceModal} 
+                            type="secondary"
+                            // disabled={this.props.verifiedPositions.length < 1}
+                            disabled={this.props.data.length < 1}
+                            icon="area-chart"
+                    >
+                        PERFORMANCE
+                    </Button>
+                    {
+                        this.props.data.length > 0 &&
+                        <Tooltip title="Search Stocks" placement="top">
+                            <Button 
+                                    style={{marginLeft: '20px'}} 
+                                    type="primary" 
+                                    icon="plus-circle-o"
+                                    onClick={this.props.toggleBottomSheet}
+                                    disabled={this.props.benchmark === null || !this.state.showPortfolioByStock}
+                            >
+                                ADD STOCKS
+                            </Button>
+                        </Tooltip>
+                    }
+                </div>
             </div>  
         );
     }

@@ -78,7 +78,7 @@ export default class AqSectorTable extends React.Component {
                 //     }
                 //     return item;
                 // })
-                return this.updateSectorWeights(nData)
+                return this.updateSectorWeights(data)
             })
             .then(data => {
                 this.setState({
