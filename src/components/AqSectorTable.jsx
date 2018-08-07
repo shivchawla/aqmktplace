@@ -58,50 +58,64 @@ export default class AqSectorTable extends React.Component {
 
     handleTargetTotalChange = (value, key, column, type = 'text') => {
         const newData = [...this.state.data];
-        const updateSector = _.debounce((sector, differenceRatio, positive) => {
-            this.props.onChange(this.updateStockPositions(sector, differenceRatio, positive));
-        }, 200);
 
         let target = newData.filter(item => item.key === key)[0];
         if (target !== undefined) {
             const targetTotal = value.length > 0 ? Number(value) : 0;
-            const oldTotal = target.targetTotal > 0 ? target.targetTotal : 1;
-            const difference = oldTotal > targetTotal ? oldTotal - targetTotal : targetTotal - oldTotal;
-            const differenceRatio = difference / oldTotal;
-            const stockData = this.updateStockPositions(target.sector, differenceRatio, targetTotal > oldTotal);
-            this.setState({
-                data: this.updateSectorWeights(this.processData(stockData)),    
-                stockData: stockData
-            });
-            this.props.onChange(stockData);
+            const oldTargetTotal = target.targetTotal > 0 ? target.targetTotal : 1;
+            let stockData = [];
+            target[column] = value;
+            this.setState({data: newData});
+            this.updateStockPositions(target.sector, targetTotal, oldTargetTotal)
+            .then(data => {
+                stockData = data;
+                return this.asyncProcessData(stockData, true);
+            })
+            .then(data => {
+                // const nData = data.map(item => {
+                //     if (item.sector === target.sector) {
+                //         item.targetTotal = value;
+                //     }
+                //     return item;
+                // })
+                return this.updateSectorWeights(nData)
+            })
+            .then(data => {
+                this.setState({
+                    data: data,    
+                    stockData: stockData
+                });
+                this.props.onChange(stockData);
+            })
+            .catch(err => console.log(err))
         }
     }
 
-    updateStockPositions = (sector, differenceRatio, positive = true) => {
+    updateStockPositions = (sector, targetTotal, oldTargetTotal) => {
         let stockData = [...this.state.stockData];
+        var numPositionsInSector = stockData.filter(item => item.sector === sector).length;
         // filter all stocks based on the selected sector
-        stockData = stockData.map(item => {
+        return Promise.map(stockData, item => {
             if (item.sector === sector) {
                 let effTotal = Number(item.effTotal);
-                const actualDiffernce = effTotal * differenceRatio;
-                effTotal = positive ? effTotal + actualDiffernce : effTotal - actualDiffernce;
+                effTotal = oldTargetTotal > 0 && effTotal > 0 ? effTotal * (targetTotal / oldTargetTotal) : targetTotal / numPositionsInSector;
                 return this.modifyPositionFromTargetTotal(item, effTotal);
             } else {
                 return item;
             }
         })
-        
-        return this.updateStockWeights(stockData);
+        .then(data => this.updateStockWeights(data))
+        .catch(err => console.log(err))
     }
 
-    updateStockWeights = (data) => {
-        return data.map(item => {
+    updateStockWeights = (data) => new Promise((resolve, reject) => {
+        resolve (data.map(item => {
             return {
                 ...item,
                 weight: Number(((item.totalValue / this.getPortfolioTotalValue(data) * 100)).toFixed(2))
             }
-        });
-    }
+        }));
+    })
 
     getStockDataTotalValue = data => {
         return _.sum(data.map(item => item.totalValue));
@@ -119,32 +133,48 @@ export default class AqSectorTable extends React.Component {
         }
     }
 
-    updateSectorWeights = data => {
+    updateSectorWeights = data => new Promise((resolve, reject) => {
         const totalPortfolioValue = _.sum(data.map(item => item.total));
-        return data.map(item => {
+        resolve (data.map(item => {
             return {
                 ...item,
                 weight: Number(((item.total / totalPortfolioValue) * 100).toFixed(2))
             }
-        })
-    }
+        }));
+    })
 
-    processData = data => {
+    processData = (data, disableTargetTotalUpdate = false) => {
+        const sectorData = disableTargetTotalUpdate ? [...this.state.data] : [];
         const uniqueSectors = _.uniqBy(data, 'sector').map(item => item.sector);
-        return uniqueSectors.map(sector => {
-            const totalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.totalValue));
+        return uniqueSectors.map((sector, index) => {
+            const totalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.totalValue));            
             const targetTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => Number(item.effTotal)));
             const individualTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.lastPrice))
-            return {
-                sector,
-                targetTotal: targetTotalValue,
-                total: totalValue,
-                weight: Number(((totalValue / this.getPortfolioTotalValue(data)) * 100).toFixed(2)),
-                key: Math.random().toString(36),
-                individualTotalValue
+            if (disableTargetTotalUpdate) {
+                return {
+                    targetTotal: sectorData.filter(item => item.sector === sector)[0].targetTotal,
+                    sector,
+                    total: totalValue,
+                    weight: Number(((totalValue / this.getPortfolioTotalValue(data)) * 100).toFixed(2)),
+                    key: sector,
+                    individualTotalValue
+                }
+            } else {
+                return {
+                    sector,
+                    targetTotal: Number(targetTotalValue.toFixed(2)),
+                    total: totalValue,
+                    weight: Number(((totalValue / this.getPortfolioTotalValue(data)) * 100).toFixed(2)),
+                    key: sector,
+                    individualTotalValue
+                }
             }
         })
     }
+
+    asyncProcessData = (data, disableTargetTotalUpdate = false) => new Promise((resolve, reject) => {
+        resolve (this.processData(data, disableTargetTotalUpdate));
+    })
 
     getPortfolioTotalValue = data => {
         return _.sum(data.map(item => item.totalValue));
