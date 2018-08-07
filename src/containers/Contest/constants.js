@@ -1,3 +1,5 @@
+import React, {Fragment} from 'react'
+
 import createPortfolio from '../../assets/CreatePortfolio.svg';
 import updateEntry from '../../assets/UpdateEntry.svg';
 import winPrize from '../../assets/WinPrizes.svg';
@@ -65,8 +67,12 @@ export const faqs = [
         content: 'No. Your entry is automatically rolled into next contest.'
     },
     {
+        header: 'When are winners declared?',
+        content: 'Each contest runs for period of one month from date of submisison end. The winners are decided at the end of the one month period'
+    },
+    {
         header: 'What’s the fine print?',
-        content: 'Please check out <a href="https://www.adviceqube.com/contest/rules"><span>Contest Rules</span></a> for complete details and legal policies'
+        content: (<Fragment>Please check out <a href="http://localhost:3000/contest/rules"><span>Contest Rules</span></a> for complete details and legal policies</Fragment>)
 
     }
     
