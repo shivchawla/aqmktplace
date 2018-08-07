@@ -424,7 +424,7 @@ class ContestHome extends React.Component {
                         {
                             this.state.advices.length > 0 
                             ? this.renderWinnerRankingList()
-                            : this.renderNoActiveParticipants()
+                            : !Utils.isLoggedIn() && this.renderNoActiveParticipants()
                         }
                     </Col>
                 </Row>

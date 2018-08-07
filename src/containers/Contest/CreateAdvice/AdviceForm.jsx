@@ -146,7 +146,7 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     handleEmptyPortfolioBenchmarkChange = benchmark => {
-        Utils.localStorageSaveObject('benchmark', {benchmark});
+        !this.props.isUpdate && Utils.localStorageSaveObject('benchmark', {benchmark});
         this.setState({benchmark}, () => {
             this.fetchBenchmarkConfig(benchmark);
         });
@@ -184,6 +184,7 @@ class ContestAdviceFormImpl extends React.Component {
 
     resetPortfolioWithNewBenchmark = () => {
         const benchmark = this.benchmark;
+        Utils.localStorageSaveObject('benchmark', {benchmark})
         this.setState({benchmark, openBenchmarkChangeModal: false}, () => {
             this.fetchBenchmarkConfig(benchmark);
         });
@@ -755,7 +756,7 @@ class ContestAdviceFormImpl extends React.Component {
         return (
             <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
                 <MetricItem 
-                    value={this.state.positions.length}
+                    value={this.state.positions.filter(item => item.shares > 0).length}
                     label="Number of positions"
                 />
                 <MetricItem 
