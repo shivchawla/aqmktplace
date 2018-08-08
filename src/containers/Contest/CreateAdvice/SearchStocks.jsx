@@ -421,15 +421,15 @@ export class SearchStocks extends React.Component {
                     }}
             >
                 <Row style={{width: '100%'}}>
-                    <Col span={2}>
+                    <Col span={4}>
                         <Button 
                             onClick={() => this.handlePagination('previous')} 
                             disabled={this.state.selectedPage === 0}
-                            shape="circle"
-                            icon="left"
-                        />
+                        >
+                            Prev
+                        </Button>
                     </Col>
-                    <Col span={20} style={{padding: '0 5px'}}>
+                    <Col span={16} style={{padding: '0 5px'}}>
                         {
                             this.state.loadingStocks 
                             ?   <Icon type="loading" style={{fontSize: '20px'}}/>
@@ -463,13 +463,13 @@ export class SearchStocks extends React.Component {
                                 </div>
                         }
                     </Col>
-                    <Col span={2}>
+                    <Col span={4}>
                         <Button
                             onClick={() => this.handlePagination('next')}  
                             disabled={this.state.stocks.length % 10 !== 0}
-                            shape="circle"
-                            icon="right"
-                        />
+                        >
+                            Next
+                        </Button>
                     </Col>
                 </Row>
             </Col>
@@ -544,7 +544,7 @@ export class SearchStocks extends React.Component {
                                                 }}
                                         >
                                             {this.renderSearchStockListMobile()}
-                                            <div style={{height: '100px'}}></div>
+                                            <div style={{height: '200px'}}></div>
                                         </Col>
                                         <Col 
                                                 span={24} 
