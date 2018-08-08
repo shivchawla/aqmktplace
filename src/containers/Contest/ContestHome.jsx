@@ -377,11 +377,14 @@ class ContestHome extends React.Component {
     }
 
     renderNoActiveParticipants = () => {
+        const buttonStyle = {
+            transform: Utils.isLoggedIn() ? 'scale(0, 0)' : 'scale(1, 1)'
+        }
         return (
             <Row style={{marginTop: '100px'}}>
                 <Col span={24} style={{...verticalBox, textAlign: 'center'}}>
                     <h3 style={{color: 'transparent'}}>There are no active participants in the contest yet.</h3>
-                    <Button type="primary">
+                    <Button type="primary" style={buttonStyle}>
                         SIGN UP
                     </Button>
                 </Col>
@@ -424,7 +427,7 @@ class ContestHome extends React.Component {
                         {
                             this.state.advices.length > 0 
                             ? this.renderWinnerRankingList()
-                            : !Utils.isLoggedIn() && this.renderNoActiveParticipants()
+                            : this.renderNoActiveParticipants()
                         }
                     </Col>
                 </Row>
