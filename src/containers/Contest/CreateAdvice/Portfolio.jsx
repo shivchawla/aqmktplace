@@ -10,6 +10,7 @@ import {generateColorData} from '../../../utils';
 import {AqStockTableMod} from '../../../components/AqStockTableMod';
 import AqSectorTable from '../../../components/AqSectorTable';
 import PortfolioList from './Mobile/PortfolioList';
+import PortfolioSectorList from './Mobile/PortfolioSectorList';
 import {benchmarks} from '../../../constants/benchmarks';
 import MyChartNew from '../../MyChartNew';
 import {HighChartNew} from '../../../components/HighChartNew';
@@ -263,6 +264,16 @@ export class Portfolio extends React.Component {
                 toggleBottomSheet={this.props.toggleBottomSheet}
                 updateSelectedPosition={this.props.updateIndividualPosition}
                 deletePositions={this.props.deletePositions}
+                portfolioStockViewMobile={this.props.portfolioStockViewMobile}
+            />
+        );
+    }
+
+    renderSectorPortfolioList = () => {
+        return (
+            <PortfolioSectorList 
+                onChange={this.props.onChange}
+                positions={this.props.data}
             />
         );
     }
@@ -284,10 +295,16 @@ export class Portfolio extends React.Component {
 
     renderSectorPortfolio = () => {
         return (
-            <Media 
-                query="(min-width: 601px)"
-                render={() => this.renderSectorTable()}
-            />
+            <React.Fragment>
+                <Media 
+                    query="(max-width: 600px)"
+                    render={() => this.renderSectorPortfolioList()}
+                />
+                <Media 
+                    query="(min-width: 601px)"
+                    render={() => this.renderSectorTable()}
+                />
+            </React.Fragment>
         );
     }
 
@@ -377,11 +394,18 @@ export class Portfolio extends React.Component {
                     query={`(min-width: ${screenSize.desktop})`}
                     render={() => this.renderActionButtonsDesktop()}
                 />
-                {
-                    this.state.showPortfolioByStock 
-                    ? this.renderPortfolio()
-                    : this.renderSectorPortfolio()
-                }
+                <Media 
+                    query='(max-width: 600px)'
+                    render={() => this.renderPortfolioList()}
+                />
+                <Media 
+                    query='(min-width: 601px)'
+                    render={() => (
+                        this.state.showPortfolioByStock 
+                        ? this.renderPortfolioTable()
+                        : this.renderSectorTable()
+                    )}
+                />
                 {
                     this.props.data.length === 0 &&
                     <Col span={24} style={{...verticalBox, marginTop: '40px'}}>
