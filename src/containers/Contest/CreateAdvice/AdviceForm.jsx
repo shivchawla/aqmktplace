@@ -45,13 +45,15 @@ class ContestAdviceFormImpl extends React.Component {
         super(props);
         this.searchStockComponent = null;
         const savedPositions = Utils.getFromLocalStorage('positions');
+        const savedBenchmark = Utils.getFromLocalStorage('benchmark');
+        const benchmark = savedBenchmark === undefined ? 'NIFTY_50' : JSON.parse(Utils.getFromLocalStorage('benchmark')).benchmark;
         const positions = savedPositions === undefined 
                 ?   []
-                :   JSON.parse(Utils.getFromLocalStorage('positions')).data
+                :   JSON.parse(Utils.getFromLocalStorage('positions')).data;
         this.state = {
             adviceActive: false,
             positions,
-            benchmark: 'NIFTY_50',
+            benchmark,
             bottomSheetOpenStatus: false,
             stockSearchFilters: {
                 industry: '',
@@ -144,6 +146,7 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     handleEmptyPortfolioBenchmarkChange = benchmark => {
+        !this.props.isUpdate && Utils.localStorageSaveObject('benchmark', {benchmark});
         this.setState({benchmark}, () => {
             this.fetchBenchmarkConfig(benchmark);
         });
@@ -158,6 +161,7 @@ class ContestAdviceFormImpl extends React.Component {
             const sector = _.get(configData, 'sector', '');
             const industry = _.get(configData, 'industry', '');
             const universe = _.get(configData, 'universe', 'NIFTY_500');
+            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: []});
             this.setState({
                 stockSearchFilters: {
                     industry,
@@ -180,6 +184,7 @@ class ContestAdviceFormImpl extends React.Component {
 
     resetPortfolioWithNewBenchmark = () => {
         const benchmark = this.benchmark;
+        Utils.localStorageSaveObject('benchmark', {benchmark})
         this.setState({benchmark, openBenchmarkChangeModal: false}, () => {
             this.fetchBenchmarkConfig(benchmark);
         });
@@ -284,6 +289,7 @@ class ContestAdviceFormImpl extends React.Component {
             MAX_STOCK_EXPOSURE: 'Maximum Stock Exposure',
             MIN_POS_COUNT: 'Minimum Position Count',
             MAX_NET_VALUE: 'Maximum Net Value',
+            MIN_NET_VALUE: 'Minimum Net Value',
             MIN_SECTOR_COUNT: 'Minimum Sector Count',
             MAX_SECTOR_COUNT: 'Maximum Sector Count',
         };
@@ -465,7 +471,7 @@ class ContestAdviceFormImpl extends React.Component {
             item.effTotal = positionIndex !== -1 ? this.state.positions[positionIndex].effTotal : undefined;
             const total = item.effTotal !== undefined
                     ? item.effTotal
-                    : item.lastPrice > 10000 ? item.lastPrice : 10000
+                    : item.lastPrice > 50000 ? item.lastPrice : 50000
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
             item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);
@@ -750,7 +756,7 @@ class ContestAdviceFormImpl extends React.Component {
         return (
             <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
                 <MetricItem 
-                    value={this.state.positions.length}
+                    value={this.state.positions.filter(item => item.shares > 0).length}
                     label="Number of positions"
                 />
                 <MetricItem 
@@ -1096,7 +1102,8 @@ class ContestAdviceFormImpl extends React.Component {
         } else {
             Promise.all([
                 this.handleSubmitAdvice(),   
-                this.getActiveContestToParticipate()
+                this.getActiveContestToParticipate(),
+                this.getBenchmarkConfig(this.state.benchmark)
             ])
             .catch(err => {
                 this.setState({noActiveContests: true});
