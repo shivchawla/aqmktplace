@@ -36,7 +36,6 @@ export class Portfolio extends React.Component {
             metrics: {},
             performanceBottomSheetOpen: false,
             performanceSheetView: 'Performance',
-            showPortfolioByStock: true
         };
     }
 
@@ -148,7 +147,7 @@ export class Portfolio extends React.Component {
 
     renderAdvicePerformanceBottomSheet = () => {
         return (
-            <Motion style={{x: spring(this.state.performanceBottomSheetOpen ? -145 : global.screen.height)}}>
+            <Motion style={{x: spring(this.state.performanceBottomSheetOpen ? -162 : global.screen.height)}}>
             {
                 ({x}) => (
                     <div
@@ -314,27 +313,12 @@ export class Portfolio extends React.Component {
                     ...horizontalBox,
                     justifyContent: 'space-between',
                     position: 'absolute', 
-                    // right: '0px', 
-                    width: '93%',
+                    right: '0px', 
                     top: '25px',
                     zIndex: 20,
                     marginLeft: '60px'
                 }}
             >
-                <div style={horizontalBox}>
-                    <h3>Portfolio View</h3>
-                    <RadioGroup 
-                            style={{marginLeft: '5px'}}
-                            onChange={this.togglePortfolioView} 
-                            value={this.state.showPortfolioByStock}
-                            size="small"
-                    >
-                        <Radio.Button value={true}>Stock</Radio.Button>
-                        <Radio.Button value={false} disabled={this.props.data.length === 0}>
-                            Sector
-                        </Radio.Button>
-                    </RadioGroup>
-                </div>
                 <div>
                     <Button
                             style={{
@@ -356,7 +340,7 @@ export class Portfolio extends React.Component {
                                     type="primary" 
                                     icon="plus-circle-o"
                                     onClick={this.props.toggleBottomSheet}
-                                    disabled={this.props.benchmark === null || !this.state.showPortfolioByStock}
+                                    disabled={this.props.benchmark === null || !this.props.showPortfolioByStock}
                             >
                                 ADD STOCKS
                             </Button>
@@ -380,10 +364,6 @@ export class Portfolio extends React.Component {
         );
     }
 
-    togglePortfolioView = () => {
-        this.setState({showPortfolioByStock: !this.state.showPortfolioByStock});
-    }
-
     render() {
         return (
             <Row style={{display: 'block'}} type="flex">
@@ -401,7 +381,7 @@ export class Portfolio extends React.Component {
                 <Media 
                     query='(min-width: 601px)'
                     render={() => (
-                        this.state.showPortfolioByStock 
+                        this.props.showPortfolioByStock 
                         ? this.renderPortfolioTable()
                         : this.renderSectorTable()
                     )}

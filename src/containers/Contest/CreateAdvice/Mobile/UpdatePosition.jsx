@@ -297,7 +297,7 @@ class UpdatePositionMobileImpl extends React.Component {
                 </Spin>
                 <Col 
                         span={24} 
-                        style={{position: 'absolute', left: 0, bottom: '20px', padding: '0 20px'}}
+                        style={{position: 'relative', top: '20px', padding: '0 20px'}}
                 >
                     <Row gutter={24}>
                         <Col span={24}>
