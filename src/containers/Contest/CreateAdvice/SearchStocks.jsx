@@ -137,6 +137,13 @@ export class SearchStocks extends React.Component {
         this.setState({selectedPage: 0}, () => this.fetchStocks('').then(() => resolve(true)));
     })
 
+    resetFilterFromParent = (sector, industry) => {
+        this.setState({filter: {
+            sector,
+            industry
+        }});
+    }
+
     pushStocksToLocalArray = (stocks = []) => {
         const localStocks = [...this.localStocks];
         stocks.map(stock => {

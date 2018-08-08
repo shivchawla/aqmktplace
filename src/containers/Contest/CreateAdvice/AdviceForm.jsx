@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Row, Col, Select, Button, Modal, Tag, Icon, Affix} from 'antd';
-import {Button as MobileButton, Picker, List, LocaleProvider} from 'antd-mobile';
+import {Button as MobileButton, Picker, List, LocaleProvider, SegmentedControl} from 'antd-mobile';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
@@ -44,6 +44,7 @@ class ContestAdviceFormImpl extends React.Component {
     constructor(props) {
         super(props);
         this.searchStockComponent = null;
+        this.searchStocks = null;
         const savedPositions = Utils.getFromLocalStorage('positions');
         const savedBenchmark = Utils.getFromLocalStorage('benchmark');
         const benchmark = savedBenchmark === undefined ? 'NIFTY_50' : JSON.parse(Utils.getFromLocalStorage('benchmark')).benchmark;
@@ -69,8 +70,13 @@ class ContestAdviceFormImpl extends React.Component {
             contestId: null,
             noActiveContests: false,
             notPresentInLatestContest: false,
-            name: ''
+            name: '',
+            portfolioStockViewMobile: true
         };
+    }
+
+    togglePortfolioStockViewMobile = () => {
+        this.setState({portfolioStockViewMobile: !this.state.portfolioStockViewMobile});
     }
 
     renderBenchmarkDropdown = () => {
@@ -162,6 +168,7 @@ class ContestAdviceFormImpl extends React.Component {
             const industry = _.get(configData, 'industry', '');
             const universe = _.get(configData, 'universe', 'NIFTY_500');
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: []});
+            this.searchStockComponent.resetFilterFromParent(sector, industry);
             this.setState({
                 stockSearchFilters: {
                     industry,
@@ -369,6 +376,7 @@ class ContestAdviceFormImpl extends React.Component {
                 updateIndividualPosition={this.updateIndividualPosition}
                 deletePositions={this.deletePositions}
                 renderPortfolioPieChart={this.renderPortfolioPieChart}
+                portfolioStockViewMobile={this.state.portfolioStockViewMobile}
             />
         )
     }
@@ -493,7 +501,7 @@ class ContestAdviceFormImpl extends React.Component {
             this.handleSubmitAdvice();
         });
     }
-
+    
     updateAllWeights = data => {
         const nData = this.calculateTotalReturnFromTargetTotal(data);
         const totalSummation = Number(this.getTotalValueSummation(nData).toFixed(2));
@@ -944,6 +952,13 @@ class ContestAdviceFormImpl extends React.Component {
                                 {this.renderValidationErrors('0px')}
                             </Col>
                         </Affix>
+                        <Col span={24} style={verticalBox}>
+                            <SegmentedControl 
+                                values={['Stock', 'Sector']} 
+                                onValueChange={this.togglePortfolioStockViewMobile}
+                                selectedIndex={this.state.portfolioStockViewMobile === true ? 0 : 1}
+                            />
+                        </Col>
                         <Col span={24}>
                             <Row 
                                     style={{padding: '0px', paddingLeft: '10px', paddingBottom: '5px'}} 

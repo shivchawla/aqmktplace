@@ -212,7 +212,6 @@ export default class StockFilter extends React.Component {
     }
 
     render() {
-        console.log('Stock Filter Rendered');
         return(
             <Row>
                 <Media 

@@ -16,13 +16,6 @@ export default class AqSectorTable extends React.Component {
                 width: 200
             },
             {
-                title: 'STOCKS #',
-                dataIndex: 'numStocks',
-                key: 'numStocks',
-                render: (text, record) => <span>{text}</span>,
-                width: 200
-            },
-            {
                 title: 'TARGET TOTAL',
                 dataIndex: 'targetTotal',
                 key: 'targetTotal',
@@ -33,14 +26,21 @@ export default class AqSectorTable extends React.Component {
                 title: 'TOTAL',
                 dataIndex: 'total',
                 key: 'total',
-                render: (text, record) => <span>{text.toFixed(2)}</span>,
+                render: (text, record) => <span>{Utils.formatMoneyValueMaxTwoDecimals(text)}</span>,
+                width: 200
+            },
+            {
+                title: 'STOCKS #',
+                dataIndex: 'numStocks',
+                key: 'numStocks',
+                render: (text, record) => <span>{text}</span>,
                 width: 200
             },
             {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
-                render: (text, record) => <span>{text}</span>,
+                render: (text, record) => <span>{text} %</span>,
                 width: 200
             },
         ];
@@ -116,10 +116,11 @@ export default class AqSectorTable extends React.Component {
     }
 
     updateStockWeights = (data) => new Promise((resolve, reject) => {
+        const totalPortfolioValue = this.getPortfolioTotalValue(data) === 0 ? 1 : this.getPortfolioTotalValue(data);
         resolve (data.map(item => {
             return {
                 ...item,
-                weight: Number(((item.totalValue / this.getPortfolioTotalValue(data) * 100)).toFixed(2))
+                weight: Number(((item.totalValue / totalPortfolioValue * 100)).toFixed(2))
             }
         }));
     })
@@ -141,7 +142,8 @@ export default class AqSectorTable extends React.Component {
     }
 
     updateSectorWeights = data => new Promise((resolve, reject) => {
-        const totalPortfolioValue = _.sum(data.map(item => item.total));
+        let totalPortfolioValue = _.sum(data.map(item => item.total));
+        totalPortfolioValue = totalPortfolioValue === 0 ? 1 : totalPortfolioValue;
         resolve (data.map(item => {
             return {
                 ...item,

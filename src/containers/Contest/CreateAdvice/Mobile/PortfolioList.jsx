@@ -5,6 +5,7 @@ import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {withRouter} from 'react-router';
 import {Row, Col, Modal, Spin, Select, Icon, Checkbox, Button} from 'antd';
 import {UpdatePosition} from './UpdatePosition';
+import {UpdateSector} from './UpdateSector';
 import {SegmentedControl} from 'antd-mobile';
 import {metricColor, primaryColor, horizontalBox, verticalBox} from '../../../../constants';
 import {benchmarks} from '../../../../constants/benchmarks';
@@ -32,6 +33,7 @@ class PortfolioListImpl extends React.Component {
             addPositionBottomSheetOpen: false,
             performanceBottomSheetOpen: false,
             selectedPosition: {},
+            selectedSector: {},
             updatePosition: false,
             toBeDeletedPositions: [],
             performanceSheetView: 'Performance',
@@ -97,11 +99,16 @@ class PortfolioListImpl extends React.Component {
         this.setState({addPositionBottomSheetOpen: !this.state.addPositionBottomSheetOpen});
     }
 
-
     handlePositionClick = position => {
         this.setState({selectedPosition: position, updatePosition: true}, () => {
             this.toggleBottomSheet();
         });
+    }
+
+    handleSectorClick = sector => {
+        this.setState({selectedSector: sector, updatePosition: true}, () => {
+            this.toggleBottomSheet();
+        })
     }
 
     renderPositions = () => {
@@ -118,6 +125,39 @@ class PortfolioListImpl extends React.Component {
                         bottomBorder={index !== positions.length - 1}
                         topBorder={index == 0}
                     />
+        })
+    }
+
+    renderSectors = () => {
+        const sectors = this.processDataForSectors(this.props.positions);
+
+        return sectors.map((sector, index) => {
+            return (
+                <SectorItem 
+                    key={index}
+                    item={sector}
+                    onClick={this.handleSectorClick}
+                />
+            );
+        })
+    }
+    
+    processDataForSectors = (data, disableTargetTotalUpdate = false) => {
+        const uniqueSectors = _.uniqBy(data, 'sector').map(item => item.sector);
+        return uniqueSectors.map((sector, index) => {
+            const numStocks = data.filter(item => item.sector === sector).length;
+            const totalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.totalValue));            
+            const targetTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => Number(item.effTotal)));
+            const individualTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.lastPrice))
+            return {
+                sector,
+                targetTotal: Number(targetTotalValue.toFixed(2)),
+                total: totalValue,
+                weight: Number(((totalValue / this.getTotalPortfolioValuation()) * 100).toFixed(2)),
+                key: sector,
+                numStocks,
+                individualTotalValue
+            }
         })
     }
 
@@ -150,7 +190,7 @@ class PortfolioListImpl extends React.Component {
 
     renderUpdatePositionBottomSheet = () => {
         return (
-            <Motion style={{x: spring(this.state.addPositionBottomSheetOpen ? -145 : global.screen.height)}}>
+            <Motion style={{x: spring(this.state.addPositionBottomSheetOpen ? -172 : global.screen.height)}}>
                 {
                     ({x}) => (
                         <div
@@ -162,21 +202,31 @@ class PortfolioListImpl extends React.Component {
                                     height: global.screen.height
                                 }}
                         >
-                            <UpdatePosition
-                                addPosition={this.addPosition} 
-                                updatePortfolioPosition={this.props.updatePosition}
-                                updatePosition={this.state.updatePosition}
-                                selectedPosition={this.state.selectedPosition}
-                                toggleBottomSheet={this.toggleBottomSheet}
-                                updateSelectedPosition={this.props.updateSelectedPosition}
-                            />
+                            {
+                                this.props.portfolioStockViewMobile
+                                ?   <UpdatePosition
+                                        addPosition={this.addPosition} 
+                                        updatePosition={this.state.updatePosition}
+                                        selectedPosition={this.state.selectedPosition}
+                                        toggleBottomSheet={this.toggleBottomSheet}
+                                        updateSelectedPosition={this.props.updateSelectedPosition}
+                                    />
+                                :   <UpdateSector
+                                        addPosition={this.addPosition} 
+                                        selectedSector={this.state.selectedSector}
+                                        toggleBottomSheet={this.toggleBottomSheet}
+                                        updateSelectedPosition={this.props.updateSelectedPosition}
+                                        positions={this.props.positions}
+                                        onChange={this.props.onChange}
+                                    />
+                            }
                         </div>
                     )
                 }
             </Motion>
         );
     }
-
+    
     render() {
         const {positions = []} = this.props;
 
@@ -246,7 +296,12 @@ class PortfolioListImpl extends React.Component {
                     </h3>
                 </Col>
                 <Col span={24} style={{marginTop: '10px'}}>
-                    {this.renderPositions()}
+                    {
+                        this.props.portfolioStockViewMobile 
+                        ?   this.renderPositions()
+                        :   this.renderSectors()
+
+                    }
                 </Col>
                 <Col span={24} style={{height: '60px'}}></Col>
             </Col>
@@ -344,6 +399,82 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     money
                 />  
             </Col> */}
+            <Col span={24} style={{marginTop: '12px'}}>
+                <div style={{height: '7px', backgroundColor: '#efeff4', marginTop: '5px'}}></div>
+            </Col>
+        </Row>
+    );
+}
+
+const SectorItem = ({item, onClick, takeDeleteAction, checked, bottomBorder, topBorder}) => {
+    const {
+        sector = '', 
+        numStocks = 0, 
+        lastPrice = 0,
+        weight = 0, 
+        total : totalValue = 0, 
+        key = 0, 
+        symbol, 
+        targetTotal = 0
+    } = item;
+
+    return (
+        <Row 
+                style={{
+                    borderRadius: '2px'
+                }}
+        >
+            <Col span={24}>
+                {
+                    topBorder &&
+                    <div style={{height: '7px', backgroundColor: '#efeff4'}}></div>
+                }
+            </Col>
+            <Col span={24} style={{marginTop: '10px'}}>
+                <Row type="flex" align="middle" style={{padding: '0 20px'}}>
+                    <Col span={21}>
+                        <h3 style={{color: primaryColor, fontSize: '16px'}}>{sector}</h3>
+                    </Col>
+                    <Col span={3}>
+                        <Button
+                            size="small" 
+                            onClick={() => onClick(item)}
+                            style={{fontSize: '14px'}} 
+                        >EDIT</Button>
+                    </Col>
+                </Row>
+            </Col>
+            <Col span={24}>
+                <Row type="flex" align="bottom" justify="space-between" style={{padding: '0 20px'}}>
+                    <Col span={6}>
+                        <MetricItem 
+                            label="Num. of Stocks"
+                            value={numStocks}
+                            labelStyle={metricLabelStyle}
+                            valueStyle={metricValueStyle}
+                            noNumeric={true}
+                        />
+                    </Col>
+                    <Col span={6}>
+                        <MetricItem 
+                            label="Total"
+                            value={Number(totalValue.toFixed(2))}
+                            labelStyle={metricLabelStyle}
+                            valueStyle={metricValueStyle}
+                            money
+                        />
+                    </Col>
+                    <Col span={6}>
+                        <MetricItem 
+                            label="Weight"
+                            value={`${weight} %`}
+                            noNumeric
+                            labelStyle={metricLabelStyle}
+                            valueStyle={metricValueStyle}
+                        />
+                    </Col>
+                </Row>
+            </Col>
             <Col span={24} style={{marginTop: '12px'}}>
                 <div style={{height: '7px', backgroundColor: '#efeff4', marginTop: '5px'}}></div>
             </Col>
