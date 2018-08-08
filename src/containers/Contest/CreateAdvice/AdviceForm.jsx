@@ -6,7 +6,7 @@ import {Motion, spring} from 'react-motion';
 import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Select, Button, Modal, Tag, Icon, Affix} from 'antd';
+import {Row, Col, Select, Button, Modal, Tag, Icon, Affix, Radio} from 'antd';
 import {Button as MobileButton, Picker, List, LocaleProvider, SegmentedControl} from 'antd-mobile';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
@@ -19,6 +19,7 @@ import {benchmarks} from '../../../constants/benchmarks';
 import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox} from '../../../constants';
 import {CreateAdviceCrumb, UpdateAdviceCrumb} from '../../../constants/breadcrumbs';
 import {getBreadCrumbArray, fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
+import {getNextWeekday} from '../../../utils/date';
 import { MetricItem } from '../../../components/MetricItem';
 import enUS from 'antd-mobile/lib/locale-provider/en_US';
 
@@ -26,6 +27,7 @@ const {Option} = Select;
 const textColor = '#595959';
 const dateFormat = 'YYYY-MM-DD';
 const {requestUrl} = require('../../../localConfig');
+const RadioGroup = Radio.Group;
 const defaultAdviceError = {
     message: '',
     errorCode: '',
@@ -71,7 +73,8 @@ class ContestAdviceFormImpl extends React.Component {
             noActiveContests: false,
             notPresentInLatestContest: false,
             name: '',
-            portfolioStockViewMobile: true
+            portfolioStockViewMobile: true,
+            showPortfolioByStock: true
         };
     }
 
@@ -89,7 +92,7 @@ class ContestAdviceFormImpl extends React.Component {
                 </Col>
                 <Col span={24}>
                     <Select
-                            disabled={this.props.isUpdate} 
+                            disabled={this.props.isUpdate || !this.state.showPortfolioByStock} 
                             style={dropdownStyle} 
                             value={this.state.benchmark} 
                             onChange={value => this.state.positions.length > 0 
@@ -137,6 +140,7 @@ class ContestAdviceFormImpl extends React.Component {
                                     : this.handleEmptyPortfolioBenchmarkChange(value[0])
                                 }
                         extra={this.state.benchmark}
+                        disabled={this.props.isUpdate}
                 >
                     <List.Item style={{paddingLeft: '0px', paddingRight: '0px'}} arrow="horizontal">
                         Benchmark
@@ -377,8 +381,29 @@ class ContestAdviceFormImpl extends React.Component {
                 deletePositions={this.deletePositions}
                 renderPortfolioPieChart={this.renderPortfolioPieChart}
                 portfolioStockViewMobile={this.state.portfolioStockViewMobile}
+                showPortfolioByStock= {this.state.showPortfolioByStock}
             />
         )
+    }
+
+    togglePortfolioViewDesktop = () => {
+        this.setState({showPortfolioByStock: !this.state.showPortfolioByStock});
+    }
+
+    renderPortfolioViewSelectorDesktop = () => {
+        return (
+            <RadioGroup 
+                    style={{marginLeft: '5px'}}
+                    onChange={this.togglePortfolioViewDesktop} 
+                    value={this.state.showPortfolioByStock}
+                    size="small"
+            >
+                <Radio.Button value={true}>Stock</Radio.Button>
+                <Radio.Button value={false} disabled={this.state.positions.length === 0}>
+                    Sector
+                </Radio.Button>
+            </RadioGroup>
+        );
     }
     
     toggleSearchStockBottomSheet = () => {
@@ -479,7 +504,7 @@ class ContestAdviceFormImpl extends React.Component {
             item.effTotal = positionIndex !== -1 ? this.state.positions[positionIndex].effTotal : undefined;
             const total = item.effTotal !== undefined
                     ? item.effTotal
-                    : item.lastPrice > 50000 ? item.lastPrice : 50000
+                    : item.lastPrice > 30000 ? item.lastPrice : 30000
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
             item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);
@@ -721,11 +746,16 @@ class ContestAdviceFormImpl extends React.Component {
                 });
     }
 
-    renderValidationErrors = (marginTop = '20px') => {
+    renderValidationErrors = (marginTop = '0') => {
         const errors = this.getPortfolioValidationErrors();
         return (
             <Tag 
-                    style={{marginTop, boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)'}} 
+                    style={{
+                        marginTop, 
+                        boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)',
+                        position: global.screen.width > 600 ? 'absolute' : 'relative',
+                        left: '0'
+                    }} 
                     color={errors.length > 0 ? metricColor.negative : metricColor.positive}
                     onClick={this.toggleAdviceErrorDialog}
             >
@@ -753,7 +783,7 @@ class ContestAdviceFormImpl extends React.Component {
             >
                 <Row>
                     <Col span={24}>
-                        <h3>Changing the Benchmark will reset your portfolio to empty. Are you sure you want to change the benchmark ?</h3>
+                        <h3>Changing the Benchmark will reset your portfolio. Are you sure you want to change the benchmark ?</h3>
                     </Col>
                 </Row>
             </Modal>
@@ -762,16 +792,21 @@ class ContestAdviceFormImpl extends React.Component {
 
     renderNetValue = () => {
         return (
-            <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
-                <MetricItem 
-                    value={this.state.positions.filter(item => item.shares > 0).length}
-                    label="Number of positions"
-                />
-                <MetricItem 
-                    value={this.getNetvalue()}
-                    label="Net Value"
-                    money
-                />
+            <div style={{...verticalBox, alignItems: 'flex-end'}}>
+                <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                    <MetricItem 
+                        value={this.state.positions.filter(item => item.shares > 0).length}
+                        label="Number of positions"
+                    />
+                    <MetricItem 
+                        value={this.getNetvalue()}
+                        label="Net Value"
+                        money
+                    />
+                </div>
+                <h3 style={{color: metricColor.neutral, fontSize: '12px', width: '290px'}}>
+                    * Changes to the portfolio after 12pm will be reflected on the next trading day
+                </h3>
             </div>
         );
     }
@@ -810,11 +845,6 @@ class ContestAdviceFormImpl extends React.Component {
                 {this.renderAdviceErrorDialog()}
                 {this.renderSearchStocksBottomSheet()}
                 {this.renderBenchmarkChangeWarningModal()}
-                {/* <Col span={24} style={{height: '40px', marginTop: '10px'}}>
-                    <h3 style={{fontSize: '22px'}}>
-                        {this.props.isUpdate ? 'Update Contest Entry' : 'Create Contest Entry'}
-                    </h3>
-                </Col> */}
                 <Col span={24} style={{padding: 0}}>
                     <AqPageHeader 
                         title={this.props.isUpdate ? "Update Entry" : "Create Entry"}
@@ -838,10 +868,20 @@ class ContestAdviceFormImpl extends React.Component {
                                 this.renderNetValue()
                             }
                         </Col>
-                        <Col span={24}>
+                        <Col span={24} style={{...horizontalBox, justifyContent: 'center', position: 'relative'}}>
                             {this.renderValidationErrors()}
+                            <div style={verticalBox}>
+                                <h3 style={{fontSize: '16px', marginBottom: '5px'}}>Portfolio View</h3>
+                                {this.renderPortfolioViewSelectorDesktop()}
+                            </div>
                         </Col>
                     </Row>
+                    {/* <Row>
+                        <Col span={24} style={verticalBox}>
+                            <h3 style={{fontSize: '16px', marginBottom: '5px'}}>Portfolio View</h3>
+                            {this.renderPortfolioViewSelectorDesktop()}
+                        </Col>
+                    </Row> */}
                     <Row style={{margin: '0 20px', marginBottom: '20px'}}>
                         <Col span={24}>
                             {this.renderPortfolio()}
@@ -945,7 +985,7 @@ class ContestAdviceFormImpl extends React.Component {
                                     style={{
                                         ...horizontalBox,
                                         height: '40px', 
-                                        marginTop: '10px',
+                                        // marginTop: '10px',
                                         justifyContent: 'center'
                                     }}
                             >
@@ -1056,7 +1096,8 @@ class ContestAdviceFormImpl extends React.Component {
     })
 
     getAdvicePortfolio = adviceId => new Promise((resolve, reject) => {
-        const advicePortfolioUrl = `${requestUrl}/advice/${adviceId}/portfolio`;
+        const nextWeekday = moment(getNextWeekday()).format(dateFormat);
+        const advicePortfolioUrl = `${requestUrl}/advice/${adviceId}/portfolio?date=${nextWeekday}`;
         fetchAjax(advicePortfolioUrl, this.props.history, this.props.match.url)
         .then(response => resolve(response.data))
         .catch(error => reject(error));
@@ -1108,6 +1149,7 @@ class ContestAdviceFormImpl extends React.Component {
 
     componentWillMount() {
         this.setState({loading: true});
+        global.screen.width <= 600 && openNotification('info', 'Info', 'Changes to the portfolio after 12pm will be reflected on the next trading day')
         if (this.props.isUpdate) {
             const adviceId = this.props.adviceId;
             this.getAdviceSummaryAndPortfolio(adviceId)
@@ -1206,7 +1248,8 @@ class ContestAdviceFormImpl extends React.Component {
 export default withRouter(ContestAdviceFormImpl);
 
 const leftContainerStyle = {
-    padding: '20px'
+    padding: '20px',
+    paddingBottom: '5px'
 };
 
 const labelTextStyle = {fontSize: '14px', color: textColor};

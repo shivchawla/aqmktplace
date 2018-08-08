@@ -190,7 +190,7 @@ class PortfolioListImpl extends React.Component {
 
     renderUpdatePositionBottomSheet = () => {
         return (
-            <Motion style={{x: spring(this.state.addPositionBottomSheetOpen ? -172 : global.screen.height)}}>
+            <Motion style={{x: spring(this.state.addPositionBottomSheetOpen ? -162 : global.screen.height)}}>
                 {
                     ({x}) => (
                         <div
@@ -241,7 +241,7 @@ class PortfolioListImpl extends React.Component {
                             background: '#fff',
                             borderBottom: '1px solid #DFDFDF',
                             height: '50px',
-                            marginTop: '-11px',
+                            // marginTop: '-11px',
                         }}
                 >
                     <div
@@ -399,7 +399,7 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     money
                 />  
             </Col> */}
-            <Col span={24} style={{marginTop: '12px'}}>
+            <Col span={24}>
                 <div style={{height: '7px', backgroundColor: '#efeff4', marginTop: '5px'}}></div>
             </Col>
         </Row>
@@ -475,7 +475,7 @@ const SectorItem = ({item, onClick, takeDeleteAction, checked, bottomBorder, top
                     </Col>
                 </Row>
             </Col>
-            <Col span={24} style={{marginTop: '12px'}}>
+            <Col span={24}>
                 <div style={{height: '7px', backgroundColor: '#efeff4', marginTop: '5px'}}></div>
             </Col>
         </Row>

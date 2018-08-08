@@ -169,9 +169,9 @@ export default class LeaderBoard extends React.Component {
                 <Button 
                     disabled={this.state.selectedPage === 0}
                     onClick={() => this.handlePagination('previous')}
-                    shape="circle"
-                    icon="left"
-                />
+                >
+                    Prev
+                </Button>
                 {/* {
                     this.state.loadingStocks &&
                     <Icon type="loading" style={{fontSize: '20px'}}/>
@@ -179,9 +179,9 @@ export default class LeaderBoard extends React.Component {
                 <Button
                     disabled={advicesDisplayed >= this.state.maxAdviceCount}
                     onClick={() => this.handlePagination('next')}
-                    icon="right"
-                    shape="circle"
-                />
+                >
+                    Next
+                </Button>
             </Col>
         );
     }
