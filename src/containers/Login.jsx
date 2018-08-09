@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Media from 'react-media';
 import {Row, Col} from 'antd';
 import _ from 'lodash';
-import Impression from 'impression.js';
+import GoogleLogin from 'react-google-login';
 import windowSize from 'react-window-size';
 import {Utils, sendErrorToBackend} from '../utils';
 import {primaryColor} from '../constants';
@@ -12,10 +12,11 @@ import axios from 'axios';
 import {LoginMeta} from '../metas';
 import logo from "../assets/logo-advq-new.png";
 import '../css/login.css';
+import {AqMobileLayout} from './AqMobileLayout/Layout';
 import AppLayout from './AppLayout';
 import ContactUs from '../components/ContactUs';
 
-const {requestUrl, sendErrorEmailsForLogin = false} = require('../localConfig');
+const {requestUrl, sendErrorEmailsForLogin = false, googleClientId} = require('../localConfig');
 const appLoginEmailSent = Utils.getFromLocalStorage('appLoginEmailSent') === undefined ? false : true;
 
 class Login extends Component {
@@ -119,6 +120,53 @@ class Login extends Component {
 
   toggleContactUsModal = () => {
       this.setState({showContactUs: !this.state.showContactUs});
+  }
+
+  responseGoogle =  (googleUser) => {
+    const accessToken = googleUser.getAuthResponse().id_token;
+    const googleLoginUrl = `${requestUrl}/user/login_google`;
+    let errorToSend = null;
+    axios({
+      method: 'POST',
+      url: googleLoginUrl,
+      data: {
+        accessToken
+      }
+    })
+    .then(response => {
+        if (response.data.token) {
+            // if (values.remember){
+            Utils.localStorageSaveObject(Utils.userInfoString, response.data);
+            // }
+            Utils.setLoggedInUserInfo(response.data);
+            Utils.localStorageSave('selectedPage', 1);
+            const redirectUrl = Utils.getRedirectAfterLoginUrl();
+            if (redirectUrl) {
+                this.props.history.push(redirectUrl);
+            } else {
+                this.props.history.push('/contest');
+            }
+        } else {
+            this.updateState({
+                'loading': false,
+                'error': "Unexpected error occured! Please try again."
+            });
+        }
+    })
+    .catch((error) => {
+        errorToSend = _.get(error, 'response.data', error);
+        this.updateState({
+            'loading': false,
+            'error': JSON.stringify(_.get(error, 'response.data', 'Error Occured'))
+        });
+    })
+    .finally(() => {
+        // !appLoginEmailSent
+        sendErrorEmailsForLogin 
+        && sendErrorToBackend(errorToSend, 'admin@adviceqube.com', 'Login Detail', null, null, () => {
+            Utils.localStorageSave('appLoginEmailSent', true);
+        });
+    })
   }
 
   renderMobile = () => {
@@ -289,6 +337,16 @@ class Login extends Component {
   		<div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
           'minHeight': '500px', 'display': 'flex', flexDirection: 'column', 'alignItems': 'center', 'justifyContent': 'center'}}>
           <LoginMeta />
+          <Button icon='google'>
+            <GoogleLogin
+                clientId={googleClientId}
+                buttonText="Login"
+                onSuccess={this.responseGoogle}
+                onFailure={this.responseGoogle}
+                buttonText="Login with Google"
+                className='google-login-button'
+            />
+          </Button>
   			<div className="card login-card" style={{'padding': '20px', 'background': 'white',
   			'borderRadius': '2px', 'textAlign': 'center', 'width': '390px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px'}}>
   				<img style={{'height': '60px', 'width': 'auto'}} src={logo}/>

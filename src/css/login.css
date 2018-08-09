@@ -5,3 +5,12 @@
 h1,  h2, h3, h4, h5 {
     margin: 0;
 }
+
+.google-login-button {
+    font-family: Lato, sans-serif;
+    border: none;
+    outline: none;
+    background-color: antiquewhite;
+    height: 65px;
+    font-size: 16px;
+}

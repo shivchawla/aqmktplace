@@ -6,7 +6,7 @@ import {Motion, spring} from 'react-motion';
 import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Select, Button, Modal, Tag, Icon, Affix, Radio} from 'antd';
+import {Row, Col, Select, Button, Modal, Tag, Icon, Affix, Radio, Spin} from 'antd';
 import {Button as MobileButton, Picker, List, LocaleProvider, SegmentedControl} from 'antd-mobile';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
@@ -16,7 +16,7 @@ import {AqPageHeader} from '../../../components/AqPageHeader';
 import AppLayout from '../../../containers/AppLayout';
 import {AqMobileLayout} from '../../AqMobileLayout/Layout';
 import {benchmarks} from '../../../constants/benchmarks';
-import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox} from '../../../constants';
+import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox, primaryColor} from '../../../constants';
 import {CreateAdviceCrumb, UpdateAdviceCrumb} from '../../../constants/breadcrumbs';
 import {getBreadCrumbArray, fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
 import {getNextWeekday} from '../../../utils/date';
@@ -74,7 +74,8 @@ class ContestAdviceFormImpl extends React.Component {
             notPresentInLatestContest: false,
             name: '',
             portfolioStockViewMobile: true,
-            showPortfolioByStock: true
+            showPortfolioByStock: true,
+            performanceMetrics: {},
         };
     }
 
@@ -240,7 +241,7 @@ class ContestAdviceFormImpl extends React.Component {
                     type === 'create' && this.toggleAdviceErrorDialog();
                 });
 
-                return null;
+                return this.getAdvicePortfolioPerformance();   
             } else {
                 this.setState({adviceError: defaultAdviceError});
                 adviceId = _.get(response.data, '_id', null);
@@ -258,25 +259,22 @@ class ContestAdviceFormImpl extends React.Component {
                 
                     return contestRequest;
                 }  
-                return null;              
+                return this.getAdvicePortfolioPerformance();              
             }
         })
         .then(response => {
-            if (response != null) {
+            console.log(response);
+            if (type != 'validate') {
                 const update = _.get(response, 'update', false);
-                // if (update) {
-                //     // openNotification('Success', 'Success', 'Advice Successfully Updated');
-                //     this.props.history.push(`/advice/${adviceId}`);
-                // } else {
-                //     // openNotification('Success', 'Contest Participation Successful', 'Successfully participated in contest');
-                //     this.props.history.push(`/advice/${adviceId}`);
-                // }
                 this.props.history.push(`/contest/entry/${adviceId}`);
+            } else {
+                const {portfolioPerformanceMetrics} = response;
+                this.setState({performanceMetrics: portfolioPerformanceMetrics});
             }
-            // this.props.history.push(`/advice/${adviceId}`);
-            // openNotification('Success', 'Success', 'Advice Successfully Updated');
+            
         })
         .catch(error => {
+            console.log(error);
             return handleCreateAjaxError(
                 error, 
                 this.props.history, 
@@ -552,6 +550,7 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     getAdvicePortfolioPerformance = selectedBenchmark => new Promise((resolve, reject) => {
+        console.log('Called');
         const performanceUrl = `${requestUrl}/performance`;
         const benchmark = this.state.benchmark;
         const requestObject = this.constructAdvicePerformanceRequestObject(benchmark);
@@ -804,9 +803,6 @@ class ContestAdviceFormImpl extends React.Component {
                         money
                     />
                 </div>
-                <h3 style={{color: metricColor.neutral, fontSize: '12px', width: '290px'}}>
-                    * Changes to the portfolio after 12pm will be reflected on the next trading day
-                </h3>
             </div>
         );
     }
@@ -822,8 +818,58 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     renderPortfolioPieChart = (chartId = "chart-container-desktop") => {
+        const  metricLabelStyle = {textAlign: 'center', fontSize: '12px'};
+        const metricValueStyle = {textAlign: 'center', fontSize: '14px'};
+        const metricContainerStyle={textAlign: 'center'};
+        const annualReturn = (_.get(this.state, 'performanceMetrics.returns.totalreturn') * 100).toFixed(2);
+        const volatility = (_.get(this.state, 'performanceMetrics.deviation.annualstandarddeviation', 0) * 100).toFixed(2);
+        const maxLoss = (_.get(this.state, 'performanceMetrics.drawdown.maxdrawdown', 0) * 100).toFixed(2);
+
         return (
-            <Col span={24} style={{...shadowBoxStyle, ...verticalBox, marginTop: '20px'}}>
+            <Col 
+                    span={24} 
+                    style={{
+                        ...shadowBoxStyle, 
+                        ...verticalBox, 
+                        marginTop: '20px',
+                        borderTop: `2px solid ${primaryColor}`
+                    }}
+            >
+                <Spin spinning={this.state.adviceSubmissionLoading}>
+                    <div 
+                            style={{
+                                ...horizontalBox, 
+                                justifyContent: 'space-between',
+                                width: '100%',
+                                marginTop: '10px'
+                            }}
+                    >
+                        <MetricItem 
+                            label="Annual Return"
+                            value={annualReturn}
+                            noNumeric
+                            labelStyle={metricLabelStyle}
+                            valueStyle={metricValueStyle}
+                            containerStyle={metricContainerStyle}
+                        />
+                        <MetricItem 
+                            label="Volatility"
+                            value={volatility}
+                            noNumeric
+                            labelStyle={metricLabelStyle}
+                            valueStyle={metricValueStyle}
+                            containerStyle={metricContainerStyle}
+                        />
+                        <MetricItem 
+                            label="Max Loss"
+                            value={maxLoss}
+                            noNumeric
+                            labelStyle={metricLabelStyle}
+                            valueStyle={metricValueStyle}
+                            containerStyle={metricContainerStyle}
+                        />
+                    </div>
+                </Spin>
                 <h3 style={{fontSize: '16px', marginTop: '10px'}}>Portfolio Composition</h3>
                 <PortfolioPieChart chartId={chartId} data={this.state.positions} />
             </Col>
@@ -1149,7 +1195,7 @@ class ContestAdviceFormImpl extends React.Component {
 
     componentWillMount() {
         this.setState({loading: true});
-        global.screen.width <= 600 && openNotification('info', 'Info', 'Changes to the portfolio after 12pm will be reflected on the next trading day')
+        openNotification('info', 'Info', 'Changes to the portfolio after 12pm will be reflected on the next trading day')
         if (this.props.isUpdate) {
             const adviceId = this.props.adviceId;
             this.getAdviceSummaryAndPortfolio(adviceId)

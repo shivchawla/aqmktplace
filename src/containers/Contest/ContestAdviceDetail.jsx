@@ -312,6 +312,13 @@ class AdviceDetailImpl extends React.Component {
         const truePerformance = this.processPerformanceData(_.get(performance, 'current.portfolioValues', []));
         getStockPerformance(benchmark, benchmarkRequestType)
         .then(benchmarkResponse => {
+            let oneYearOldDate = moment().subtract(1, 'y');
+            oneYearOldDate = oneYearOldDate.format('YYYY-MM-DD');
+            benchmarkResponse = benchmarkResponse.filter(item => {
+                const itemDate = moment(item[0]).format('YYYY-MM-DD');
+                return moment(itemDate).isSameOrAfter(oneYearOldDate);
+            });
+
             if (performance.simulated && simulatedPerformance.length > 0) {
                 tickers.push({
                     name: 'Historical Performance',

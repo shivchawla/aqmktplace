@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Media from 'react-media';
-import {Layout, Menu, Row, Col, Badge, Button} from 'antd';
+import {Layout, Menu, Row, Col, Badge, Button, Icon} from 'antd';
 import withRouter from 'react-router-dom/withRouter';
 import {Utils} from '../utils';
 import ContactUsModal from '../components/ContactUs';
@@ -11,6 +11,7 @@ import Loading from 'react-loading-bar';
 import {loadingColor} from '../constants';
 
 const SubMenu = Menu.SubMenu;
+const MenuItemGroup = Menu.ItemGroup;
 const {Header, Content, Footer} = Layout;
 
 
@@ -41,7 +42,8 @@ class AppLayout extends React.Component {
 
     onRouteChanged = location => {
         const locationArray = location.split('/');
-        const parentPath = locationArray.length > 0 ? locationArray[1] : '/'; 
+        locationArray.splice(0, 1);
+        const parentPath = locationArray.length > 0 ? locationArray[0] : '/'; 
         this.setState({parentPath});
     }
 
@@ -61,15 +63,29 @@ class AppLayout extends React.Component {
                         mode="horizontal"
                         onClick={this.handleNavMenuClick}
                         selectedKeys={[this.state.parentPath]}
-                >                       
-                    <Menu.Item 
+                        // selectedKeys={[this.state.parentPath, 'contest/leaderboard']}
+                >
+                    <SubMenu 
+                            key="contest"
+                            title={
+                                <div style={{...horizontalBox, color: '#595959'}}>
+                                    Contest
+                                    <div style={{marginTop: '-15px', fontSize: '10px', color:'red'}}>NEW</div>
+                                </div>
+                            }
+                    >
+                        <Menu.Item key="contest">Contest Home</Menu.Item>
+                        <Menu.Item key="contest/leaderboard">Leaderboard</Menu.Item>
+                        <Menu.Item key="contest/createentry">Create Entry</Menu.Item>
+                    </SubMenu>                       
+                    {/* <Menu.Item 
                             key="contest" 
                             style={{...horizontalBox, color: '#595959'}}
                     >
                         Contest
                         <div style={{marginTop: '-15px', fontSize: '10px', color:'red'}}>NEW</div>
                                 
-                    </Menu.Item>
+                    </Menu.Item> */}
 
                     {
                         Utils.isLoggedIn() &&
