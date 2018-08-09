@@ -241,7 +241,9 @@ class ContestAdviceFormImpl extends React.Component {
                     type === 'create' && this.toggleAdviceErrorDialog();
                 });
 
-                return this.getAdvicePortfolioPerformance();   
+                return this.state.positions.length === 0 ? 
+                    null
+                    : this.getAdvicePortfolioPerformance();   
             } else {
                 this.setState({adviceError: defaultAdviceError});
                 adviceId = _.get(response.data, '_id', null);
@@ -259,19 +261,21 @@ class ContestAdviceFormImpl extends React.Component {
                 
                     return contestRequest;
                 }  
-                return this.getAdvicePortfolioPerformance();              
+                return this.state.positions.length === 0 ? 
+                    null
+                    : this.getAdvicePortfolioPerformance();             
             }
         })
         .then(response => {
-            console.log(response);
-            if (type != 'validate') {
-                const update = _.get(response, 'update', false);
-                this.props.history.push(`/contest/entry/${adviceId}`);
-            } else {
-                const {portfolioPerformanceMetrics} = response;
-                this.setState({performanceMetrics: portfolioPerformanceMetrics});
+            if (response !== null) {
+                if (type != 'validate') {
+                    const update = _.get(response, 'update', false);
+                    this.props.history.push(`/contest/entry/${adviceId}`);
+                } else {
+                    const {portfolioPerformanceMetrics} = response;
+                    this.setState({performanceMetrics: portfolioPerformanceMetrics});
+                }    
             }
-            
         })
         .catch(error => {
             console.log(error);
@@ -846,7 +850,7 @@ class ContestAdviceFormImpl extends React.Component {
                     >
                         <MetricItem 
                             label="Annual Return"
-                            value={annualReturn}
+                            value={`${annualReturn} %`}
                             noNumeric
                             labelStyle={metricLabelStyle}
                             valueStyle={metricValueStyle}
@@ -854,7 +858,7 @@ class ContestAdviceFormImpl extends React.Component {
                         />
                         <MetricItem 
                             label="Volatility"
-                            value={volatility}
+                            value={`${volatility} %`}
                             noNumeric
                             labelStyle={metricLabelStyle}
                             valueStyle={metricValueStyle}
@@ -862,7 +866,7 @@ class ContestAdviceFormImpl extends React.Component {
                         />
                         <MetricItem 
                             label="Max Loss"
-                            value={maxLoss}
+                            value={`${maxLoss} %`}
                             noNumeric
                             labelStyle={metricLabelStyle}
                             valueStyle={metricValueStyle}

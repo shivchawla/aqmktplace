@@ -10,6 +10,7 @@ import { Spin, Form, Icon, Input, Button, Modal } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import axios from 'axios';
 import {LoginMeta} from '../metas';
+import {horizontalBox, verticalBox} from '../constants';
 import logo from "../assets/logo-advq-new.png";
 import '../css/login.css';
 import {AqMobileLayout} from './AqMobileLayout/Layout';
@@ -186,23 +187,25 @@ class Login extends Component {
         );
       } else{
         return (
-          <FormItem>
-            <Link className="login-form-forgot" to="/forgotPassword" style={{fontSize: '16px'}}>Forgot password</Link>
-            <Button 
-                type="primary" 
-                htmlType="submit" 
-                className="login-form-button"
-                style={{
-                  height: '40px',
-                  fontSize: '16px'
-                }}
-            >
-              LOG IN
-            </Button>
-			<h3 style={{fontSize: '16px'}}>
-            	Or <Link to="/signup">Register Now!</Link>
-			</h3>
-          </FormItem>
+            <div style={{...verticalBox, marginTop: '10px'}}>
+                <Button 
+                    type="primary" 
+                    className="login-form-button"
+                    style={{
+                    height: '40px',
+                    fontSize: '16px'
+                    }}
+                    onClick={this.handleSubmit}
+                >
+                LOG IN
+                </Button>
+                <div style={{...horizontalBox, width: '100%', justifyContent: 'space-between', marginTop: '10px'}}>
+                    <Link className="login-form-forgot" to="/forgotPassword" style={{fontSize: '16px'}}>Forgot password</Link>
+                    <h3 style={{fontSize: '16px'}}>
+                        <Link to="/signup">Create Account</Link>
+                    </h3>
+                </div>
+            </div>
         );
       }
     }
@@ -229,7 +232,8 @@ class Login extends Component {
   					display: 'flex', 
   					flexDirection: 'column', 
   					paddingTop: '20px',
-  					boxShadow: 'none',
+                    boxShadow: 'none',
+                    paddingBottom: 0
   				}}
   			>
   				<Col 
@@ -254,16 +258,45 @@ class Login extends Component {
   						Expert-Sourced Investment Portfolio
   					</p>
   				</Col>
-  				<Col span={24} style={{marginTop: '15%'}}>
-  					<h3 style={{fontSize: '32px', color: primaryColor}}>Login</h3>
-            <p 
-                style={{
-                  'color':'#cc6666',
-                  'fontSize': '14px', 'marginTop': '5px', marginBottom: 0
-                }}
-            >
-              {this.state.error}
-            </p>
+                  <Col 
+                        span={24} 
+                        style={{...verticalBox, marginTop: '15%'}}
+                    >
+                    <div style={{...horizontalBox, justifyContent: 'space-between', width: '100%'}}>
+                        <h3 
+                                style={{
+                                    fontSize: '32px', 
+                                    color: primaryColor,
+                                }}
+                        >
+                            Login
+                        </h3>
+                        <Button 
+                                icon='google' 
+                                style={{color: '#e2402b', borderColor: '#e2402b'}} 
+                                className='google-login-button-container'
+                        >
+                            <GoogleLogin
+                                clientId={googleClientId}
+                                buttonText="Login"
+                                onSuccess={this.responseGoogle}
+                                onFailure={this.responseGoogle}
+                                buttonText="Login with Google"
+                                className='google-login-button'
+                                style={{fontSize: '16px'}}
+                            >
+                                Login with Google
+                            </GoogleLogin>
+                        </Button>
+                    </div>
+                    <p 
+                        style={{
+                        'color':'#cc6666',
+                        'fontSize': '14px', 'marginTop': '5px', marginBottom: 0
+                        }}
+                    >
+                    {this.state.error}
+                    </p>
   				</Col>
   				<Col span={24}>
   					<Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
@@ -293,7 +326,7 @@ class Login extends Component {
   						{getLoginButtonDiv()}
   					</Form>
   				</Col>
-          <Col span={24} style={{fontSize: '16px', textAlign:'center', color: primaryColor}} onClick={this.toggleContactUsModal}>
+          <Col span={24} style={{fontSize: '16px', textAlign:'center', color: primaryColor, marginTop: '20px'}} onClick={this.toggleContactUsModal}>
             Can't sign-in to your AdviceQube account?
           </Col>
   			</Row>  	    
@@ -319,13 +352,30 @@ class Login extends Component {
       }else{
         return (
           <FormItem>
-            <Link className="login-form-forgot" to="/forgotPassword">Forgot password</Link>
-            <Button type="primary" htmlType="submit" className="login-form-button">
-              LOG IN
-            </Button>
-            Or <Link to="/signup">Register Now!</Link>
-            <p style={{'color':'#cc6666',
-              'fontSize': '14px', 'marginTop': '15px'}}>{this.state.error}</p>
+            <div style={verticalBox}>
+                <div style={{...verticalBox, justifyContent: 'center', width: '100%'}}>
+                    <Button 
+                            type="primary" 
+                            htmlType="submit" 
+                            className="login-form-button"
+                    >
+                        LOG IN
+                    </Button>
+                </div>
+                <div style={{...horizontalBox, justifyContent: 'space-between', width: '100%'}}>
+                    <Link className="login-form-forgot" to="/forgotPassword">Forgot password</Link>
+                    <Link to="/signup">Create Account</Link>
+                </div>
+                <p 
+                        style={{
+                            'color':'#cc6666',
+                            'fontSize': '14px', 
+                            margin: 0
+                        }}
+                >
+                    {this.state.error}
+                </p>
+            </div>
           </FormItem>
         );
       }
@@ -337,16 +387,6 @@ class Login extends Component {
   		<div style={{'height': 'calc(100vh - 64px)', 'width': '100%', 'background': '#fafafaf',
           'minHeight': '500px', 'display': 'flex', flexDirection: 'column', 'alignItems': 'center', 'justifyContent': 'center'}}>
           <LoginMeta />
-          <Button icon='google'>
-            <GoogleLogin
-                clientId={googleClientId}
-                buttonText="Login"
-                onSuccess={this.responseGoogle}
-                onFailure={this.responseGoogle}
-                buttonText="Login with Google"
-                className='google-login-button'
-            />
-          </Button>
   			<div className="card login-card" style={{'padding': '20px', 'background': 'white',
   			'borderRadius': '2px', 'textAlign': 'center', 'width': '390px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px'}}>
   				<img style={{'height': '60px', 'width': 'auto'}} src={logo}/>
@@ -360,6 +400,20 @@ class Login extends Component {
   					'fontSize': '15px', 'margin': '0px'}}>
   					Expert-Sourced Investment Portfolio
   				</p>
+                <Button 
+                        icon='google' 
+                        style={{color: '#e2402b', marginTop: '10px'}} 
+                        className='google-login-button-container'
+                >
+                    <GoogleLogin
+                        clientId={googleClientId}
+                        buttonText="Login"
+                        onSuccess={this.responseGoogle}
+                        onFailure={this.responseGoogle}
+                        buttonText="Login with Google"
+                        className='google-login-button'
+                    />
+                </Button>
   				<Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
   					<FormItem>
   					{getFieldDecorator('userName', {

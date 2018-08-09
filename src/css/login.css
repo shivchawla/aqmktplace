@@ -10,7 +10,22 @@ h1,  h2, h3, h4, h5 {
     font-family: Lato, sans-serif;
     border: none;
     outline: none;
-    background-color: antiquewhite;
-    height: 65px;
-    font-size: 16px;
+    font-size: 14px;
+    background-color: transparent;
+    cursor: pointer;
+    color: #e2402b;
+}
+
+.google-login-button-container {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-color: transparent;
+}
+
+.google-login-button-container:hover {
+    border-color: #e2402b;
+    background-color: '#fff';
+}
+
+.ant-form-item {
+    margin-bottom: 10px;
 }
