@@ -822,12 +822,15 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     renderPortfolioPieChart = (chartId = "chart-container-desktop") => {
-        const  metricLabelStyle = {textAlign: 'center', fontSize: '12px'};
+        const getColor = value => {
+            return value >= 0 ? metricColor.positive : metricColor.negative;
+        };
+        const metricLabelStyle = {textAlign: 'center', fontSize: '12px'};
         const metricValueStyle = {textAlign: 'center', fontSize: '14px'};
         const metricContainerStyle={textAlign: 'center'};
-        const annualReturn = (_.get(this.state, 'performanceMetrics.returns.totalreturn') * 100).toFixed(2);
-        const volatility = (_.get(this.state, 'performanceMetrics.deviation.annualstandarddeviation', 0) * 100).toFixed(2);
-        const maxLoss = (_.get(this.state, 'performanceMetrics.drawdown.maxdrawdown', 0) * 100).toFixed(2);
+        const annualReturn = Number((_.get(this.state, 'performanceMetrics.returns.totalreturn') * 100).toFixed(2));
+        const volatility = Number((_.get(this.state, 'performanceMetrics.deviation.annualstandarddeviation', 0) * 100).toFixed(2));
+        const maxLoss = Number((_.get(this.state, 'performanceMetrics.drawdown.maxdrawdown', 0) * 100).toFixed(2));
 
         return (
             <Col 
@@ -853,24 +856,27 @@ class ContestAdviceFormImpl extends React.Component {
                             value={`${annualReturn} %`}
                             noNumeric
                             labelStyle={metricLabelStyle}
-                            valueStyle={metricValueStyle}
+                            valueStyle={{...metricValueStyle}}
                             containerStyle={metricContainerStyle}
+                            color
                         />
                         <MetricItem 
                             label="Volatility"
                             value={`${volatility} %`}
                             noNumeric
                             labelStyle={metricLabelStyle}
-                            valueStyle={metricValueStyle}
+                            valueStyle={{...metricValueStyle}}
                             containerStyle={metricContainerStyle}
+                            color
                         />
                         <MetricItem 
                             label="Max Loss"
                             value={`${maxLoss} %`}
                             noNumeric
                             labelStyle={metricLabelStyle}
-                            valueStyle={metricValueStyle}
+                            valueStyle={{...metricValueStyle}}
                             containerStyle={metricContainerStyle}
+                            color
                         />
                     </div>
                 </Spin>

@@ -127,6 +127,9 @@ class Login extends Component {
     const accessToken = googleUser.getAuthResponse().id_token;
     const googleLoginUrl = `${requestUrl}/user/login_google`;
     let errorToSend = null;
+    this.updateState({
+      loading: true
+    });
     axios({
       method: 'POST',
       url: googleLoginUrl,
@@ -211,126 +214,110 @@ class Login extends Component {
     }
 
   	return (
-  		<div 
-  			style={{
-  				height: 'calc(100vh - 64px)', 
-  				width: '100%', 
-  				minHeight: '500px', 
-  				display: 'flex', 
-  				flexDirection: 'column', 
-  			}}
-  		> 
-  			<LoginMeta />
-        <ContactUs title="Issues with sign-in" visible={this.state.showContactUs} onClose={this.toggleContactUsModal}/>
-  			<Row 
-  				className="card login-card" 
-  				style={{
-  					padding: '20px', 
-  					background: '#fff',
-  					borderRadius: '2px', 
-  					width: this.props.windowWidth > 450 ? '390px' : '100%', 
-  					display: 'flex', 
-  					flexDirection: 'column', 
-  					paddingTop: '20px',
+      <AqMobileLayout>
+        <LoginMeta />
+        <ContactUs 
+            title="Issues with sign-in" 
+            visible={this.state.showContactUs} 
+            onClose={this.toggleContactUsModal}
+        />
+        <Row 
+            className="card login-card" 
+            style={{
+            padding: '20px', 
+            background: '#fff',
+            borderRadius: '2px', 
+            width: this.props.windowWidth > 450 ? '390px' : '100%', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            paddingTop: '20px',
                     boxShadow: 'none',
                     paddingBottom: 0
-  				}}
-  			>
-  				<Col 
-  						span={24} 
-  						style={{
-  							display: 'flex', 
-  							flexDirection: 'row', 
-              }}
-              onClick={() => this.props.history.push('/')}
-  				>
-  					<img src={logo} style={{height: '40px'}}/>
-  					<div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-  						<span style={{...biggerFont, color:primaryColor}}>A</span>
-  						<span style={{color: primaryColor}}>DVICE</span>
-  						<span style={{...biggerFont, color: '#e06666'}}>Q</span>
-  						<span style={{color: '#e06666'}}>UBE</span>
-  					</div>
-  				</Col>
-  				<Col span={24}>
-  					<p style={{'color': '#37474F', 'fontStyle': 'italic',
-  						'fontSize': '15px', 'margin': '0px', marginTop: '10px'}}>
-  						Expert-Sourced Investment Portfolio
-  					</p>
-  				</Col>
-                  <Col 
-                        span={24} 
-                        style={{...verticalBox, marginTop: '15%'}}
+            }}
+        >
+            
+            <Col 
+                span={24} 
+                style={{...verticalBox, marginTop: '15%'}}
+            >
+                <div style={{...horizontalBox, justifyContent: 'space-between', width: '100%'}}>
+                    <h3 
+                            style={{
+                                fontSize: '32px', 
+                                color: primaryColor,
+                            }}
                     >
-                    <div style={{...horizontalBox, justifyContent: 'space-between', width: '100%'}}>
-                        <h3 
-                                style={{
-                                    fontSize: '32px', 
-                                    color: primaryColor,
-                                }}
-                        >
-                            Login
-                        </h3>
-                        <Button 
-                                icon='google' 
-                                style={{color: '#e2402b', borderColor: '#e2402b'}} 
-                                className='google-login-button-container'
-                        >
-                            <GoogleLogin
-                                clientId={googleClientId}
-                                buttonText="Login"
-                                onSuccess={this.responseGoogle}
-                                onFailure={this.responseGoogle}
-                                buttonText="Login with Google"
-                                className='google-login-button'
-                                style={{fontSize: '16px'}}
-                            >
-                                Login with Google
-                            </GoogleLogin>
-                        </Button>
-                    </div>
-                    <p 
-                        style={{
-                        'color':'#cc6666',
-                        'fontSize': '14px', 'marginTop': '5px', marginBottom: 0
-                        }}
+                        Login
+                    </h3>
+                    <Button 
+                            icon='google' 
+                            style={{color: '#e2402b', borderColor: '#e2402b'}} 
+                            className='google-login-button-container'
                     >
+                        <GoogleLogin
+                            clientId={googleClientId}
+                            buttonText="Login"
+                            onSuccess={this.responseGoogle}
+                            onFailure={this.responseGoogle}
+                            buttonText="Login with Google"
+                            className='google-login-button'
+                            style={{fontSize: '16px'}}
+                        >
+                            Login with Google
+                        </GoogleLogin>
+                    </Button>
+                </div>
+                <p 
+                    style={{
+                    'color':'#cc6666',
+                    'fontSize': '14px', 'marginTop': '5px', marginBottom: 0
+                    }}
+                >
                     {this.state.error}
-                    </p>
-  				</Col>
-  				<Col span={24}>
-  					<Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
-  						<FormItem>
-  						{getFieldDecorator('userName', {
-  							rules: [{ required: true, message: 'Please input your email!'},{type:'email', message:'Please input a valid email'}],
-  						})(
-                <Input 
-                    style={{height: '40px'}}
-                    prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                    placeholder="E-mail"
-                />
-  						)}
-  						</FormItem>
-  						<FormItem>
-  						{getFieldDecorator('password', {
-  							rules: [{ required: true, message: 'Please input your Password!'}],
-  						})(
-                <Input
-                    style={{height: '40px'}} 
-                    prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                    type="password" 
-                    placeholder="Password" 
-                />
-  						)}
-  						</FormItem>
-  						{getLoginButtonDiv()}
-  					</Form>
-  				</Col>
-          <Col span={24} style={{fontSize: '16px', textAlign:'center', color: primaryColor, marginTop: '20px'}} onClick={this.toggleContactUsModal}>
-            Can't sign-in to your AdviceQube account?
-          </Col>
-  			</Row>  	    
-      </div>
+                </p>
+            </Col>
+            <Col span={24}>
+                <Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
+                    <FormItem>
+                        {getFieldDecorator('userName', {
+                        rules: [{ required: true, message: 'Please input your email!'},{type:'email', message:'Please input a valid email'}],
+                        })(
+                            <Input 
+                                style={{height: '40px'}}
+                                prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                                placeholder="E-mail"
+                            />
+                        )}
+                    </FormItem>
+                    <FormItem>
+                        {getFieldDecorator('password', {
+                        rules: [{ required: true, message: 'Please input your Password!'}],
+                        })(
+                        <Input
+                            style={{height: '40px'}} 
+                            prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                            type="password" 
+                            placeholder="Password" 
+                        />
+                        )}
+                    </FormItem>
+                    {getLoginButtonDiv()}
+                </Form>
+            </Col>
+            <Col 
+                    span={24} 
+                    style={{
+                        fontSize: '16px', 
+                        textAlign:'center', 
+                        color: primaryColor, 
+                        marginTop: '20px'
+                    }} 
+                    onClick={this.toggleContactUsModal}
+            >
+                Can't sign-in to your AdviceQube account?
+            </Col>
+        </Row>  	    
+      </AqMobileLayout>
   	);
   }
 

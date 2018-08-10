@@ -180,6 +180,9 @@ export class Utils{
 		this.localStorageSave('selectedPage', 1);
 		this.localStorageSave('selectedTab', 'all');
 		this.localStorageSave('redirectToUrlFromLogin', '/contest');
+		this.localStorageSave('selectedAdviceId', null);
+		this.localStorageSave('contestId', null);
+		this.localStorageSave('contestSelectedPage', 0);
 		this.setLoggedInUserInfo({});
 	}
 
@@ -198,6 +201,10 @@ export class Utils{
 	static getObjectFromLocalStorage(key){
 		return reactLocalStorage.getObject(key);
 	}	
+
+	static clearLocalStorage() {
+		return reactLocalStorage.clear();
+	}
 
 	static isLoggedIn() {
 		if (this.loggedInUserinfo && this.loggedInUserinfo['token']) {
@@ -500,6 +507,10 @@ export class Utils{
 
 	static checkToken(token) {
 		return token && token !== undefined && token!== null && token.length > 0;
+	}
+
+	static isNull(value) {
+		return value === null && value === 'null';
 	}
 }
 

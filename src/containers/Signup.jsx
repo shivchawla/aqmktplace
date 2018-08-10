@@ -9,6 +9,7 @@ import {SignupMeta} from '../metas';
 import logo from "../assets/logo-advq-new.png";
 import '../css/register.css';
 import AppLayout from './AppLayout';
+import {AqMobileLayout} from './AqMobileLayout/Layout';
 import ContactUs from '../components/ContactUs';
 
 const {requestUrl} = require('../localConfig');
@@ -198,37 +199,9 @@ class Signup extends Component {
 			}}
 		>
       <ContactUs title="Problem with sign-up" visible={this.state.showContactUs} onClose={this.toggleContactUsModal}/>
-			<Row 
-					className="card" 
-					style={{
-						padding: '20px', 
-						background: 'white',
-						borderRadius: '2px', 
-						boxShadow: 'none'
-					}}
-			>
-				<Col 
-						span={24} 
-						style={{
-							display: 'flex', 
-							flexDirection: 'row', 
-            }}
-            onClick={() => this.props.history.push('/')}
-				>
-					<img src={logo} style={{height: '40px'}}/>
-					<div style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-						<span style={{...biggerFont, color: primaryColor}}>A</span>
-						<span style={{color: primaryColor}}>DVICE</span>
-						<span style={{...biggerFont, color: '#e06666'}}>Q</span>
-						<span style={{color: '#e06666'}}>UBE</span>
-					</div>
-				</Col>
-				<Col span={24}>
-					<p style={{'color': '#37474F', 'fontStyle': 'italic',
-						'fontSize': '15px', 'margin': '0px', marginTop: '10px'}}>
-						Expert-Sourced Investment Portfolio
-					</p>
-				</Col>
+            <AqMobileLayout
+                    style={{padding: '20px'}}
+            >
 				<Col span={24} style={{marginTop: '20px'}}>
 					<h3 style={{fontSize: '32px', color: primaryColor}}>Register</h3>
 				</Col>
@@ -236,73 +209,71 @@ class Signup extends Component {
 					<Form onSubmit={this.handleSubmit} style={{width: '100%'}}>
 						<FormItem className="signup-form-item" style={{marginBottom: '5px', marginTop: '20px'}}>
 							{getFieldDecorator('firstName', {
-							rules: [{ required: true, message: 'Please input your firstName!', whitespace: true }],
+							    rules: [{ required: true, message: 'Please input your firstName!', whitespace: true }],
 							})(
-							<Input placeholder="First Name" style={{height: '40px'}} />
+							    <Input placeholder="First Name" style={{height: '40px'}} />
 							)}
 						</FormItem>
 						<FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
 							{getFieldDecorator('lastName', {
-							rules: [{ required: true, message: 'Please input your lastName!', whitespace: true }],
+							    rules: [{ required: true, message: 'Please input your lastName!', whitespace: true }],
 							})(
-							<Input placeholder="Last Name" style={{height: '40px', marginTop: '5px'}} />
+							    <Input placeholder="Last Name" style={{height: '40px', marginTop: '5px'}} />
 							)}
 						</FormItem>
 						<FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
 							{getFieldDecorator('email', {
-							rules: [{
-								type: 'email', message: 'Please input a valid E-mail!',
-							}, {
-								required: true, message: 'Please input your E-mail!',
-							}],
+                                rules: [{
+                                    type: 'email', message: 'Please input a valid E-mail!',
+                                }, {
+                                    required: true, message: 'Please input your E-mail!',
+                                }],
 							})(
-              <Input 
-                  prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                  placeholder="E-Mail"
-                  style={{height: '40px', marginTop: '5px'}}
-              />
+                                <Input 
+                                            prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                                            placeholder="E-Mail"
+                                            style={{height: '40px', marginTop: '5px'}}
+                                />
 							)}
 						</FormItem>
 						<FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
 							{getFieldDecorator('password', {
-							rules: [{
-								required: true, message: 'Please input your password!',
-							},{
-								min: 8, message: 'Password must be minimum 8 character long.',
-							}, {
-								validator: this.validateToNextPassword,
-							}],
+                                rules: [{
+                                    required: true, message: 'Please input your password!',
+                                },{
+                                    min: 8, message: 'Password must be minimum 8 character long.',
+                                }, {
+                                    validator: this.validateToNextPassword,
+                                }],
 							})(
-              <Input 
-                  prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                  type="password" 
-                  placeholder="Password"
-                  style={{height: '40px', marginTop: '5px'}}
-              />
+                                <Input 
+                                    prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                                    type="password" 
+                                    placeholder="Password"
+                                    style={{height: '40px', marginTop: '5px'}}
+                                />
 							)}
 						</FormItem>
 						<FormItem className="signup-form-item" style={{marginBottom: '5px'}}>
 							{getFieldDecorator('confirm', {
-							rules: [{
-								required: true, message: 'Please confirm your password!',
-							}, {
-								validator: this.compareToFirstPassword,
-							}],
+                                rules: [{
+                                    required: true, message: 'Please confirm your password!',
+                                }, {
+                                    validator: this.compareToFirstPassword,
+                                }],
 							})(
-              <Input 
-                  prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                  type="password" onBlur={this.handleConfirmBlur} 
-                  placeholder="Confirm Password"
-                  style={{height: '40px', marginTop: '5px'}}
-              />
+                                <Input 
+                                    prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                                    type="password" onBlur={this.handleConfirmBlur} 
+                                    placeholder="Confirm Password"
+                                    style={{height: '40px', marginTop: '5px'}}
+                                />
 							)}
 						</FormItem>
 						{this.getRegisterButtonDiv('mobile')}
 					</Form>
 				</Col>
-			</Row>
-        
-        
+			</AqMobileLayout>        
       </div>
     );
   }
