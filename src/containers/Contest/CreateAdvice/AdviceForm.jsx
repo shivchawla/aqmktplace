@@ -12,6 +12,8 @@ import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
+import LoginModal from '../../../containers/LoginModal';
+import LoaderModal from '../../../components/LoaderModal';
 import {AqPageHeader} from '../../../components/AqPageHeader';
 import AppLayout from '../../../containers/AppLayout';
 import {AqMobileLayout} from '../../AqMobileLayout/Layout';
@@ -66,6 +68,7 @@ class ContestAdviceFormImpl extends React.Component {
             adviceError: defaultAdviceError,
             showAdviceErrorDialog: false,
             adviceSubmissionLoading: false,
+            adviceCreationLoading: false,
             highStockSeries: [],
             openBenchmarkChangeModal: false,
             loading: false,
@@ -76,7 +79,12 @@ class ContestAdviceFormImpl extends React.Component {
             portfolioStockViewMobile: true,
             showPortfolioByStock: true,
             performanceMetrics: {},
+            loginModalVisible: false
         };
+    }
+
+    toggleLoginModal = () => {
+        this.setState({loginModalVisible: !this.state.loginModalVisible});
     }
 
     togglePortfolioStockViewMobile = () => {
@@ -203,10 +211,14 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     handleSubmitAdvice = (type='validate') => new Promise((resolve, reject) => {
+        if (type !== 'validate' && !Utils.isLoggedIn()) {
+            this.toggleLoginModal();
+            return;
+        }
         const adviceUrl = type === 'validate' ? `${requestUrl}/advice/validate` : `${requestUrl}/advice/create`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
         let adviceId = null;
-        this.setState({adviceSubmissionLoading: true});
+        this.setState({adviceSubmissionLoading: true, adviceCreationLoading: type !== 'validate'});
         axios({
             url: type === 'validate' 
                     ? adviceUrl 
@@ -281,7 +293,7 @@ class ContestAdviceFormImpl extends React.Component {
             )
         })
         .finally(() => {
-            this.setState({adviceSubmissionLoading: false});
+            this.setState({adviceSubmissionLoading: false, adviceCreationLoading: false});
             resolve(true);
         })
     })
@@ -548,7 +560,6 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     getAdvicePortfolioPerformance = selectedBenchmark => new Promise((resolve, reject) => {
-        console.log('Called');
         const performanceUrl = `${requestUrl}/performance`;
         const benchmark = this.state.benchmark;
         const requestObject = this.constructAdvicePerformanceRequestObject(benchmark);
@@ -1124,6 +1135,7 @@ class ContestAdviceFormImpl extends React.Component {
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 sector: _.get(position, 'security.detail.Sector', null),
+                name: _.get(position, 'security.detail.Nse_Name', ''),
                 ticker: symbol,
                 symbol,
                 effTotal: total,
@@ -1245,6 +1257,17 @@ class ContestAdviceFormImpl extends React.Component {
     render() {
         return (
             <React.Fragment>
+                <LoginModal 
+                    visible={this.state.loginModalVisible}
+                    toggleModal={this.toggleLoginModal}
+                    createEntry={() => this.handleSubmitAdvice('create')}
+                />
+                <LoaderModal 
+                    text={
+                        this.props.isUpdate ? 'Updating Entry' : 'Creating Entry'
+                    }
+                    visible={this.state.adviceCreationLoading}
+                />
                 <Media 
                     query="(max-width: 600px)"
                     render={() => 
