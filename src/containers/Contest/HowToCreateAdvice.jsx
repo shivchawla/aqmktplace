@@ -98,12 +98,8 @@ class HowToCreateAdvice extends React.Component {
     }
 
     componentDidMount() {
-        if (!Utils.isLoggedIn()) {
-            Utils.goToLoginPage(this.props.history, this.props.match.url, true);
-        } else {
-            if (this.props.isUpdate) {
-                this.getAdvice(this.props.adviceId);
-            }
+        if (this.props.isUpdate) {
+            this.getAdvice(this.props.adviceId);
         }
     }
 
