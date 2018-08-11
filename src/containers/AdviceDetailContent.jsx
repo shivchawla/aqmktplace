@@ -18,6 +18,7 @@ import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
 import medalIcon from '../assets/award.svg';
 import {Utils} from '../utils';
 import '../css/adviceDetail.css';
+import { HighChartBar } from '../components/HighChartBar';
 
 const MyChartNew = Loadable({
     loader: () => import('./MyChartNew'),
@@ -664,6 +665,22 @@ class AdviceDetailContentImpl extends React.Component {
                         <Row className="row-container">
                             <Spin spinning={this.props.loading}>
                                 <MyChartNew series={tickers} chartId="advice-detail-chart"/>
+                            </Spin>
+                        </Row>
+                    </Panel>
+                    <Panel
+                            key="4"
+                            style={customPanelStyle}
+                            header={<h3 style={metricsHeaderStyle}>Performance</h3>}
+                        >
+                        <Row className="row-container">
+                            <Spin spinning={this.props.loading}>
+                                <HighChartBar 
+                                    dollarSeries={this.props.simulatedStaticPerformance}
+                                    percentageSeries={this.props.currentStaticPerformance}
+                                    ragiogroupLabels = {['Historical', 'True']}
+                                    categories={['Jan', 'Feb', 'Mar']}
+                                />
                             </Spin>
                         </Row>
                     </Panel>

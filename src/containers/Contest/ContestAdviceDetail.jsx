@@ -16,7 +16,7 @@ import {MetricItem} from '../../components/MetricItem';
 import {AqPageHeader} from '../../components/AqPageHeader';
 import {ContestAdviceDetailCrumb} from '../../constants/breadcrumbs';
 import {AdviceDetailMeta} from '../../metas';
-import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance, openNotification, handleCreateAjaxError} from '../../utils';
+import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance, openNotification, handleCreateAjaxError, getStockStaticPerformance} from '../../utils';
 import {benchmarks as benchmarkArray} from '../../constants/benchmarks';
 import '../../css/adviceDetail.css';
 import AppLayout from '../../containers/AppLayout';
@@ -166,6 +166,10 @@ class AdviceDetailImpl extends React.Component {
             withdrawModalVisible: false,
             prohibitModalVisible: false,
             participatedContests: [],
+            simulatedStaticPerformance: [], // stores the data of the static performance for a particular field eg: totalReturn or volatility
+            currentStaticPerformance: [], // stores the data of the static performance for a particular field eg: totalReturn or volatility
+            currentStaticPortfolioPerformance: {}, // stores performance object for the current static performance of the portfolio
+            simulatedStaticPortfolioPerformance: {} // stores performance object for the simulated static performance of the portfolio
         };
 
         this.performanceSummary = {};
@@ -307,11 +311,19 @@ class AdviceDetailImpl extends React.Component {
 
     getAdvicePerformance = (performance, benchmark = 'NIFTY_50') => new Promise((resolve, reject) => {
         const tickers = [...this.state.tickers];
+        const currentPortfolioPerformance = _.get(performance, 'current.metrics.portfolioPerformance', {});
+        const simulatedPortfolioPerformance = _.get(performance, 'simulated.metrics.portfolioPerformance', {});
         const benchmarkRequestType = _.indexOf(benchmarkArray, benchmark) === -1 ? 'detail' : 'detail_benchmark';
         const simulatedPerformance = this.processPerformanceData(_.get(performance, 'simulated.portfolioValues', []));
         const truePerformance = this.processPerformanceData(_.get(performance, 'current.portfolioValues', []));
-        getStockPerformance(benchmark, benchmarkRequestType)
-        .then(benchmarkResponse => {
+        Promise.all([
+            getStockPerformance(benchmark, benchmarkRequestType),
+            getStockStaticPerformance(benchmark, benchmarkRequestType)
+        ])
+        .then(([benchmarkResponse, benchmarkStaticPerformance]) => {
+            const benchmarkPerformanceMonthly = _.get(benchmarkStaticPerformance, 'monthly', {});
+            const simulatedStaticMonthlyPerformance = this.processStaticPerformance(_.get(simulatedPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly);
+            const currentStaticMonthlyPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly);    
             let oneYearOldDate = moment().subtract(1, 'y');
             oneYearOldDate = oneYearOldDate.format('YYYY-MM-DD');
             benchmarkResponse = benchmarkResponse.filter(item => {
@@ -341,13 +353,62 @@ class AdviceDetailImpl extends React.Component {
                 color: benchmarkColor,
                 data: benchmarkResponse
             });
-            this.setState({tickers});
+            this.setState({
+                tickers,
+                simulatedStaticPerformance: simulatedStaticMonthlyPerformance,
+                currentStaticPerformance: currentStaticMonthlyPerformance,
+                currentStaticPortfolioPerformance: currentPortfolioPerformance,
+                simulatedStaticPortfolioPerformance: simulatedPortfolioPerformance
+            });
             resolve(true);
         })
         .catch(error => {
             reject(error);
         });
     })
+
+    processStaticPerformance = (performance, benchmarkPerformance, field = 'totalreturn') => {
+        let performanceKeys = Object.keys(performance);
+        let benchmarkPerformanceKeys = Object.keys(benchmarkPerformance);
+        const dateOneyYearBack = moment().subtract(1, 'y').subtract(1, 'M');
+        benchmarkPerformanceKeys = benchmarkPerformanceKeys.filter(item => 
+            moment(item, 'YYYY_M').isSameOrAfter(dateOneyYearBack)
+        );
+        benchmarkPerformanceKeys = benchmarkPerformanceKeys.map(key => moment(key, 'YYYY_M'));
+        benchmarkPerformanceKeys = benchmarkPerformanceKeys.sort((a, b) => {return moment(a).isBefore(b) ?-1:1});
+
+        performanceKeys = performanceKeys.map(key => moment(key, 'YYYY_M'));
+        performanceKeys = performanceKeys.sort((a, b) => {return moment(a).isBefore(b) ?-1:1});
+        const currentData = [];
+        const benchmarkData = []
+
+        performanceKeys.map(key => {
+            const totalReturn = (_.get(performance, `${[moment(key).format('YYYY_M')]}.returns.${field}`, 0) || 0);
+            const totalReturnPercentage = Number((totalReturn * 100).toFixed(2));
+            currentData.push(totalReturnPercentage);
+        });
+        performanceKeys.map(key => {
+            const totalReturn = (_.get(benchmarkPerformance, `${[moment(key).format('YYYY_M')]}.returns.${field}`, 0) || 0);
+            const totalReturnPercentage = Number((totalReturn * 100).toFixed(2));
+            benchmarkData.push(totalReturnPercentage)
+        });
+
+        return [{
+            name: 'Current Static Performance',
+            data: currentData
+        }, { 
+            name: 'Benchmark Static Performance',
+            data: benchmarkData
+        }
+        // , {
+        //     name: 'Year 2000',
+        //     data: [814, 841]
+        // }, {
+        //     name: 'Year 2016',
+        //     data: [1216, 1001]
+        // }   
+    ];
+    }
 
     processPerformanceData = performanceData => {
         return performanceData.map(item => {
@@ -467,6 +528,7 @@ class AdviceDetailImpl extends React.Component {
             });
         })
         .catch(error => {
+            console.log(error);
             this.setState({
                 positions: [],
                 series: []
@@ -1518,6 +1580,8 @@ class AdviceDetailImpl extends React.Component {
                                 performanceType={this.state.performanceType}
                                 loading={false}
                                 participatedContests={this.state.participatedContests}
+                                currentStaticPerformance={this.state.currentStaticPerformance}
+                                simulatedStaticPerformance={this.state.simulatedStaticPerformance}
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}

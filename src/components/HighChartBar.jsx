@@ -1,4 +1,5 @@
 import * as React from 'react';
+import _ from 'lodash';
 import {Col, Row, Radio} from 'antd';
 import HighChart from 'highcharts';
 import {Utils} from '../utils';
@@ -12,7 +13,7 @@ export class HighChartBar extends React.Component {
         super(props);
         this.dollarChart = null;
         this.percentageChart = null;
-        const {legendEnabled = true} = props; 
+        const {legendEnabled = false} = props; 
         this.state = {
             config: {
                 chart: {
@@ -43,8 +44,8 @@ export class HighChartBar extends React.Component {
                     title: {
                         enabled: true,
                         name: 'Stock'
-                    }
-                    // categories: props.categories || null
+                    },
+                    categories: props.categories || null
                 },
                 title: {
                     style: {
@@ -52,30 +53,32 @@ export class HighChartBar extends React.Component {
                     }
                 },
                 legend: {
-                    layout: 'vertical',
-                    align: 'right',
-                    itemDistance: '30px',
-                    itemStyle: {
-                        color: '#444',
-                        fontSize:'10px',
-                        fontWeight: '400',
-                        width: '200'
-                    },
-                    labelFormatter: function() {
-                        return `<h3>${this.name} - <span style="color: #353535">${Utils.formatMoneyValueMaxTwoDecimals(this.yData[0])}</span></h3>`;
-                    },
-                    x: -20,
-                    itemWidth: 100,
-                    verticalAlign: 'middle',
-                    itemMarginBottom:10,
-                    useHTML: true
+                    enabled: true,
+                    // layout: 'vertical',
+                    // align: 'right',
+                    // itemDistance: '30px',
+                    // itemStyle: {
+                    //     color: '#444',
+                    //     fontSize:'10px',
+                    //     fontWeight: '400',
+                    //     width: '200'
+                    // },
+                    // labelFormatter: function() {
+                    //     return `<h3>${this.name} - <span style="color: #353535">${Utils.formatMoneyValueMaxTwoDecimals(this.yData[0])}</span></h3>`;
+                    // },
+                    // x: -20,
+                    // itemWidth: 100,
+                    // verticalAlign: 'middle',
+                    // itemMarginBottom:10,
+                    // useHTML: true
                 },
                 credits: {
-                    //enabled: false
+                    enabled: false
                 },
                 tooltip: {
                     enabled: true
                 },
+                colors: [ "#0375b4", "#cc6666", "#6e2667", "#FFAA1D","#007849","#fc4a1a"],
                 series: []
             },
             dollarVisible: true,
@@ -186,8 +189,16 @@ export class HighChartBar extends React.Component {
                             style={{marginRight: '10px'}} 
                             onChange={this.handleRadioGroupChange}
                     >
-                        <RadioButton value="dollarPerformance" style={{fontSize: '18px'}}>&#x20b9;</RadioButton>
-                        <RadioButton value="percentagePerformance" style={{fontSize: '18px'}}>%</RadioButton>
+                        <RadioButton 
+                                value="dollarPerformance" 
+                        >
+                            {_.get(this.props, 'ragiogroupLabels[0]', '&#x20b9;')}
+                        </RadioButton>
+                        <RadioButton 
+                                value="percentagePerformance" 
+                        >
+                            {_.get(this.props, 'ragiogroupLabels[1]', '%')}
+                        </RadioButton>
                     </RadioGroup>
                 </Col>
                 <Col span={24} style={{textAlign: 'center', ...chartDollarStyle}} id='bar-chart-dollar'></Col>
