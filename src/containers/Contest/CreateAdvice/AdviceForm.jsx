@@ -203,7 +203,7 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     handleSubmitAdvice = (type='validate') => new Promise((resolve, reject) => {
-        const adviceUrl = `${requestUrl}/advice`;
+        const adviceUrl = type === 'validate' ? `${requestUrl}/advice/validate` : `${requestUrl}/advice/create`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
         let adviceId = null;
         this.setState({adviceSubmissionLoading: true});
@@ -211,21 +211,15 @@ class ContestAdviceFormImpl extends React.Component {
             url: type === 'validate' 
                     ? adviceUrl 
                     : this.props.isUpdate 
-                            ? `${adviceUrl}/${this.props.adviceId}` 
+                            ? `${requestUrl}/advice/${this.props.adviceId}` 
                             : adviceUrl,
-            // url: adviceUrl,
             method: type === 'validate' 
                     ? 'POST' 
                     : this.props.isUpdate 
                             ? 'PATCH' 
                             : 'POST',
-            // method: 'POST',
-            data: type === 'validate' 
-                    ? requestObject 
-                    : this.props.isUpdate 
-                            ? requestObject.advice 
-                            : requestObject,
-            headers: Utils.getAuthTokenHeader()
+            data: requestObject,
+            headers: type === 'validate' ? null : Utils.getAuthTokenHeader()
         })
         .then(response => {
             const {data} = response;
@@ -648,54 +642,51 @@ class ContestAdviceFormImpl extends React.Component {
     /**
      *  Constructs the request payload for the create advice network call
      */
-    constructCreateAdviceRequestObject = (type='validate') => {
+    constructCreateAdviceRequestObject = () => {
         const startDate = moment().format(dateFormat);
         const endDate = moment(startDate).add(500, 'year').format(dateFormat); // Adding 500 years to the end date
         const name = `${this.state.benchmark} ${this.state.stockSearchFilters.sector} ${this.state.stockSearchFilters.universe}`;
         
         const requestObject = {
-            advice: {
+            name,
+            portfolio: {
                 name,
-                portfolio: {
-                    name,
-                    detail: {
-                        startDate,
-                        endDate,
-                        positions: this.getPortfolioPositions(),
-                        cash: 0
-                    },
-                    benchmark: {
-                        ticker: this.state.benchmark,
-                        securityType: 'EQ',
-                        country: 'IN',
-                        exchange: 'NSE'
-                    },
+                detail: {
+                    startDate,
+                    endDate,
+                    positions: this.getPortfolioPositions(),
+                    cash: 0
                 },
-                rebalance: 'Daily',
-                maxNotional: 1000000,
-                investmentObjective: {
-                    goal: {
-                        field: 'goalField',
-                        investorType: 'Contest Investors',
-                        suitability: 'Suitability'
-                    },
-                    sectors: {
-                        detail: ['Tech']
-                    },
-                    portfolioValuation: {
-                        field: 'Blend'
-                    },
-                    capitalization: {
-                        field: 'Small Cap'
-                    },
-                    userText: {
-                        detail: 'investmentObjUserText'
-                    }
+                benchmark: {
+                    ticker: this.state.benchmark,
+                    securityType: 'EQ',
+                    country: 'IN',
+                    exchange: 'NSE'
                 },
-                public: true,
-                contestOnly: true
             },
-            action: type
+            rebalance: 'Daily',
+            maxNotional: 1000000,
+            investmentObjective: {
+                goal: {
+                    field: 'goalField',
+                    investorType: 'Contest Investors',
+                    suitability: 'Suitability'
+                },
+                sectors: {
+                    detail: ['Tech']
+                },
+                portfolioValuation: {
+                    field: 'Blend'
+                },
+                capitalization: {
+                    field: 'Small Cap'
+                },
+                userText: {
+                    detail: 'investmentObjUserText'
+                }
+            },
+            public: true,
+            contestOnly: true
         }
 
         return requestObject;
