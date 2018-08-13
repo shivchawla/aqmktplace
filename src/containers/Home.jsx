@@ -351,7 +351,7 @@ export class Home extends React.Component {
                     </Col>
                     <Col span={24}>
                         <h5 style={{fontWeight:300}} className="hero-description-text">
-                            <i>Best Investment Ideas</i><br></br>Let the experts help you build the portfolio you desire
+                            <i>Investing In Your Ideas</i><br></br>Investment portfolio powered by the best investment ideas
                         </h5>
                     </Col>
                     {this.renderActionButtonsDesktop()}
@@ -378,7 +378,7 @@ export class Home extends React.Component {
                                 </Col>
                                 <Col span={24}>
                                     <h5 className="hero-description-text-mobile" style={{textAlign: 'center'}}>
-                                        Let the experts help you build the portfolio you desire
+                                        Investment portfolio powered by the best investment ideas
                                     </h5>
                                 </Col>
                             </Row>
