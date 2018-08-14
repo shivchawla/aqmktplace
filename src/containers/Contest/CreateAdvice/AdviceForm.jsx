@@ -901,6 +901,8 @@ class ContestAdviceFormImpl extends React.Component {
             positions,
             portfolioMaxNetValue: maxNetValue,
             portfolioNetValue: Number(newNetValue)
+        }, () => {
+            this.handleSubmitAdvice()
         });
     }
 

@@ -20,6 +20,9 @@ const defaultStockData = {
     effTotal: 0
 };
 
+const maxStockTargetTotal = 50000;
+const maxSectorTargetTotal = 180000;
+
 class UpdatePositionMobileImpl extends React.Component {
     constructor(props) {
         super(props);
@@ -126,15 +129,34 @@ class UpdatePositionMobileImpl extends React.Component {
         this.setState({toggleEdit: !this.state.toggleEdit});
     }
 
-    handleTargetTotalChange = value => {
+    handleTargetTotalChange = inputValue => {
+        const value = Number(inputValue);
+        const positionsInSector = this.props.positions.filter(item => item.sector === this.state.stockData.sector);
+        const nPositionsInSector = positionsInSector.length;
+        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, (nPositionsInSector * maxStockTargetTotal)])]);
+        const maxAllowance = maxSectorExposure - _.sum(positionsInSector.map(item => item.effTotal));
+        const maxValueAllowed = _.min([maxStockTargetTotal, (this.state.stockData.effTotal + maxAllowance)]);
+        const totalValue = this.state.stockData.lastPrice * this.calculateSharesFromTargetTotal(value);
+        const weight = Number(((totalValue / (this.getNetASsetValue() + totalValue)) * 100).toFixed(2));
+
         this.setState({
             stockData: {
                 ...this.state.stockData,
-                effTotal: value,
+                effTotal: value > maxValueAllowed 
+                        ? maxValueAllowed 
+                        : value < 0 
+                            ? 0
+                            : value,
                 shares: this.calculateSharesFromTargetTotal(value),
-                totalValue: this.state.stockData.lastPrice * this.calculateSharesFromTargetTotal(value)
+                totalValue,
+                weight
             }
         })
+    }
+
+    getNetASsetValue = () => {
+        const otherPositions = this.props.positions.filter(position => position.symbol !== this.state.stockData.symbol);
+        return _.sum(otherPositions.map(position => position.totalValue))
     }
 
     calculateSharesFromTargetTotal = targetTotal => {
@@ -181,10 +203,10 @@ class UpdatePositionMobileImpl extends React.Component {
     }
 
     render() {
-        const {symbol, name, shares, lastPrice, totalValue, targetTotal} = this.state.stockData;
+        const {symbol, name, shares, lastPrice, totalValue, targetTotal, weight} = this.state.stockData;
 
         return (
-            <Row style={{height: '100%', position: 'relative'}}>
+            <Row style={{height: '100%', position: 'relative', padding: '0 10px'}}>
                 <div 
                         span={24} 
                         style={{
@@ -243,7 +265,7 @@ class UpdatePositionMobileImpl extends React.Component {
                     </Col>
                 }
                 <Spin spinning={this.state.loadingStockDetails}>
-                    <Col span={24} style={{marginTop: '20px', padding: '0 10px'}}>
+                    <Col span={24} style={{marginTop: '20px', padding: '0 20px'}}>
                         <Row>
                             <Col span={24}>
                                 <StockDetailComponent label="Symbol" value={symbol} />
@@ -256,8 +278,9 @@ class UpdatePositionMobileImpl extends React.Component {
                                     <Col span={8}>
                                         <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Target Total</h3>
                                     </Col>
-                                    <Col span={16} style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                                    <Col offset={4} span={12} style={{...horizontalBox, justifyContent: 'flex-end'}}>
                                         <div style={horizontalBox}>
+                                            <Icon style={{fontSize: '22px'}} type={"minus-circle-o"} onClick={() => this.handleTargetTotalChange(this.state.stockData.effTotal - 1000)}/>
                                             <InputItem 
                                                 type="number"
                                                 value={this.state.stockData.effTotal} 
@@ -265,11 +288,7 @@ class UpdatePositionMobileImpl extends React.Component {
                                                 style={{paddingLeft: '0px'}}
                                                 ref={el => this.sharesTextInput = el}
                                             />
-                                            <Icon 
-                                                onClick={this.toggleSharesInput} 
-                                                type="check-circle-o" 
-                                                style={{fontSize: '20px', marginLeft: '20px'}}
-                                            />
+                                            <Icon style={{fontSize: '22px'}} type={"plus-circle-o"} onClick={() => this.handleTargetTotalChange(this.state.stockData.effTotal + 1000)}/>
                                         </div>
                                     </Col>
                                 </Row>
@@ -290,6 +309,12 @@ class UpdatePositionMobileImpl extends React.Component {
                                 <StockDetailComponent 
                                     label="Shares" 
                                     value={shares} 
+                                />
+                            </Col>
+                            <Col span={24}>
+                                <StockDetailComponent 
+                                    label="Weight" 
+                                    value={`${weight} %`} 
                                 />
                             </Col>
                         </Row>

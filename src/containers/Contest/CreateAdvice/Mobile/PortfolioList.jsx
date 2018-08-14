@@ -210,6 +210,7 @@ class PortfolioListImpl extends React.Component {
                                         selectedPosition={this.state.selectedPosition}
                                         toggleBottomSheet={this.toggleBottomSheet}
                                         updateSelectedPosition={this.props.updateSelectedPosition}
+                                        positions={this.props.positions}
                                     />
                                 :   <UpdateSector
                                         addPosition={this.addPosition} 

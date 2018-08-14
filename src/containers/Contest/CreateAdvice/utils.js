@@ -1,10 +1,9 @@
 import _ from 'lodash';
 
-export const handleSectorTargetTotalChange = (sectorData, newNav, oldNav, sector, stocks) => {
-    const newData = [...sectorData];
+export const handleSectorTargetTotalChange = (newNav, oldNav, sector, stocks) => {
+    console.log('Called');
     let positions = [...stocks];
     let count = 0;
-    let target = newData.filter(item => item.key === sector)[0];
     let stockData = [...stocks];
     let cNav = newNav - oldNav;
     while(Math.abs(cNav) > 5) {
@@ -19,6 +18,7 @@ export const handleSectorTargetTotalChange = (sectorData, newNav, oldNav, sector
         cNav = newNav - _.sum(stockData.filter(item => item.sector === sector).map(item => item.effTotal));
         count++;
     }
+    console.log(stockData);
 
     return stockData;
 }
@@ -56,3 +56,47 @@ export const updateSectorStockWeights = (data) =>  {
 export const getSectorPortfolioTotalValue = data => {
     return _.sum(data.map(item => item.totalValue));
 }
+
+
+export const processSectorStockData = (data, defaultData, disableTargetTotalUpdate = false) => {
+    const sectorData = disableTargetTotalUpdate ? [...defaultData] : [];
+    const uniqueSectors = _.uniqBy(data, 'sector').map(item => item.sector);
+    return uniqueSectors.map((sector, index) => {
+        const numStocks = data.filter(item => item.sector === sector).length;
+        const totalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.totalValue));            
+        const targetTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => Number(item.effTotal)));
+        const individualTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.lastPrice))
+        if (disableTargetTotalUpdate) {
+            return {
+                targetTotal: sectorData.filter(item => item.sector === sector)[0].targetTotal,
+                sector,
+                total: totalValue,
+                weight: Number(((totalValue / getSectorPortfolioTotalValue(data)) * 100).toFixed(2)),
+                key: sector,
+                numStocks,
+                individualTotalValue
+            }
+        } else {
+            return {
+                sector,
+                targetTotal: Number(targetTotalValue.toFixed(2)),
+                total: totalValue,
+                weight: Number(((totalValue / getSectorPortfolioTotalValue(data)) * 100).toFixed(2)),
+                key: sector,
+                numStocks,
+                individualTotalValue
+            }
+        }
+    })
+}
+
+export const updateSectorWeights = data => new Promise((resolve, reject) => {
+    let totalPortfolioValue = _.sum(data.map(item => item.total));
+    totalPortfolioValue = totalPortfolioValue === 0 ? 1 : totalPortfolioValue;
+    resolve (data.map(item => {
+        return {
+            ...item,
+            weight: Number(((item.total / totalPortfolioValue) * 100).toFixed(2))
+        }
+    }));
+})

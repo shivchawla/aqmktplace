@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {Table, Button, Row, Col, Tooltip} from 'antd';
 import SliderInput from '../components/AqSliderInput';
 import {Utils} from '../utils';
-import {handleSectorTargetTotalChange} from '../containers/Contest/CreateAdvice/utils';
+import {handleSectorTargetTotalChange, processSectorStockData, updateSectorWeights} from '../containers/Contest/CreateAdvice/utils';
 
 const maxStockTargetTotal = 50000;
 const maxSectorTargetTotal = 180000;
@@ -50,7 +50,7 @@ export default class AqSectorTable extends React.Component {
         ];
         this.state = {
             selectedRows: [],
-            data: this.processData(this.props.data),
+            data: processSectorStockData(this.props.data, this.props.data),
             stockData: this.props.data
         };
     }
@@ -80,27 +80,9 @@ export default class AqSectorTable extends React.Component {
             const oldNav = target.targetTotal;
             target[column] = newNav;
             this.setState({data: newData});
-            let stockData = handleSectorTargetTotalChange(this.state.data, newNav, oldNav, key, this.state.stockData);
-            // let stockData = [...this.state.stockData];
-            // const newNav = Number(value);
-            // const oldNav = target.targetTotal;
-            // let cNav = newNav - oldNav;
-            // while(Math.abs(cNav) > 5) {
-            //     const positionsToChange = positions.filter(item => item.sector === key).filter(position => {
-            //         if (cNav > 0) { return  position.effTotal < 50000}
-            //         else { return position.effTotal >= 0 }
-            //     });
-            //     if (count > 5) {return};
-            //     const nStocks = positionsToChange.length;
-            //     const sNav = cNav / nStocks;
-            //     target[column] = newNav;
-            //     this.setState({data: newData});
-            //     stockData = this.updateStockPositions(positions, positionsToChange, sNav);
-            //     cNav = newNav - _.sum(stockData.filter(item => item.sector === key).map(item => item.effTotal));
-            //     count++;
-            // }
+            let stockData = handleSectorTargetTotalChange(newNav, oldNav, key, this.state.stockData);
             this.asyncProcessData(stockData, true)
-            .then(data => this.updateSectorWeights(data))
+            .then(data => updateSectorWeights(data))
             .then(data => {
                 this.setState({
                     data: data,    
@@ -112,100 +94,9 @@ export default class AqSectorTable extends React.Component {
         }
     }
 
-    updateStockPositions = (positions, positionsToChange, sNav) => {
-        let nPositions =  positions.map(position => {
-            const shouldModifyPosition = _.findIndex(positionsToChange, item => item.symbol === position.symbol) > -1;
-            const targetTotal = _.max([0, _.min([50000, (position.effTotal + sNav)])]);
-            const lastPrice = _.get(position, 'lastPrice', 1);
-            const nShares = Math.floor(targetTotal / lastPrice);
-            const totalValue = Number((lastPrice * nShares).toFixed(2));
-            if (shouldModifyPosition) {
-                position.effTotal = targetTotal;
-                position.shares = nShares;
-                position.totalValue = totalValue;
-            }
-
-            return position;
-        });
-        return this.updateStockWeights(nPositions);
-    }
-
-    updateStockWeights = (data) =>  {
-        const totalPortfolioValue = this.getPortfolioTotalValue(data) === 0 ? 1 : this.getPortfolioTotalValue(data);
-        return data.map(item => {
-            return {
-                ...item,
-                weight: Number(((item.totalValue / totalPortfolioValue * 100)).toFixed(2))
-            }
-        });
-    }
-
-    getStockDataTotalValue = data => {
-        return _.sum(data.map(item => item.totalValue));
-    }
-
-    modifyPositionFromTargetTotal = (item, effTotal) => {
-        const shares = Math.floor(effTotal / item.lastPrice);
-        const totalValue = shares * item.lastPrice;
-
-        return {
-            ...item,
-            effTotal: Number(effTotal.toFixed(2)),
-            shares,
-            totalValue
-        }
-    }
-
-    updateSectorWeights = data => new Promise((resolve, reject) => {
-        let totalPortfolioValue = _.sum(data.map(item => item.total));
-        totalPortfolioValue = totalPortfolioValue === 0 ? 1 : totalPortfolioValue;
-        resolve (data.map(item => {
-            return {
-                ...item,
-                weight: Number(((item.total / totalPortfolioValue) * 100).toFixed(2))
-            }
-        }));
-    })
-
-    processData = (data, disableTargetTotalUpdate = false) => {
-        const sectorData = disableTargetTotalUpdate ? [...this.state.data] : [];
-        const uniqueSectors = _.uniqBy(data, 'sector').map(item => item.sector);
-        return uniqueSectors.map((sector, index) => {
-            const numStocks = data.filter(item => item.sector === sector).length;
-            const totalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.totalValue));            
-            const targetTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => Number(item.effTotal)));
-            const individualTotalValue = _.sum(data.filter(item => item.sector === sector).map(item => item.lastPrice))
-            if (disableTargetTotalUpdate) {
-                return {
-                    targetTotal: sectorData.filter(item => item.sector === sector)[0].targetTotal,
-                    sector,
-                    total: totalValue,
-                    weight: Number(((totalValue / this.getPortfolioTotalValue(data)) * 100).toFixed(2)),
-                    key: sector,
-                    numStocks,
-                    individualTotalValue
-                }
-            } else {
-                return {
-                    sector,
-                    targetTotal: Number(targetTotalValue.toFixed(2)),
-                    total: totalValue,
-                    weight: Number(((totalValue / this.getPortfolioTotalValue(data)) * 100).toFixed(2)),
-                    key: sector,
-                    numStocks,
-                    individualTotalValue
-                }
-            }
-        })
-    }
-
     asyncProcessData = (data, disableTargetTotalUpdate = false) => new Promise((resolve, reject) => {
-        resolve (this.processData(data, disableTargetTotalUpdate));
+        resolve (processSectorStockData(data, this.state.data, disableTargetTotalUpdate));
     })
-
-    getPortfolioTotalValue = data => {
-        return _.sum(data.map(item => item.totalValue));
-    }
 
     render() {
         return (
