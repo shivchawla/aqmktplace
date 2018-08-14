@@ -870,43 +870,100 @@ class ContestAdviceFormImpl extends React.Component {
 
     handleNetValueChange = newNetValue => {
         let positions = [...this.state.positions];
-        const uniqueSectors = _.uniqBy(positions, 'sector');
+        let sectorData = this.processPositionToSectors(positions);
+        const maxNetValue = this.getMaxNetValueLimit(sectorData);
         let oldNav = this.state.portfolioNetValue;
         let newNav = Number(newNetValue);
-        const positionCount = positions.length;
-        const sectorCount = this.getSectorCountFromPositions();
-        let cNav = newNav - oldNav;
-        const sectorChangeNav = cNav / uniqueSectors.length;
-        console.log('sectorChangeNav', sectorChangeNav);
         let count = 0;
+        let cNav = newNav - oldNav;
         while(Math.abs(cNav) > 5) {
-            if (count > 10) {
-                break;
+            // if (count > 10) { break; }
+            if (cNav > 0) {
+                const sectorsWithPositiveAllowance = this.getSectorsWithPositiveAllowance(sectorData);
+                sectorsWithPositiveAllowance.map(sector => {
+                    const sectorNavChange = Math.min((cNav / sectorsWithPositiveAllowance.length), this.getSectorAllowance(sector));
+                    positions = this.updatePositionsWithNewNav(sector, positions, sectorNavChange, cNav);
+                });
+            } else {
+                const sectorsWithPositiveExposure = this.getSectorsWithPositiveExposure(sectorData);
+                sectorsWithPositiveExposure.map(sector => {
+                    const sectorNavChange = Math.max((cNav / sectorsWithPositiveExposure.length), -1*this.getSectorExposure(sector));
+                    positions = this.updatePositionsWithNewNav(sector, positions, sectorNavChange, cNav);
+                });
             }
+
+            const currentNav = this.getCurrentNav(positions);
+            cNav = newNav - currentNav;
             count++;
-            let positionsToChange = positions.filter(position => {
-                if (cNav > 0) { return position.effTotal < 50000 }
-                else { return position.effTotal >= 0 }
-            });
-            let nStocks = positionsToChange.length;
-            let sNav = cNav / nStocks;
-            positions = this.updatePositionsWithStockChange(sectorChangeNav, positions, positionsToChange);
-            // console.log(positions);
-            cNav = newNav - this.getNetvalue(positions);
-            console.log('New Nav', newNav);
-            console.log('cNav', cNav);
         }
         positions = this.updateAllWeights(positions);
-        const portfolioMaxNetValue = _.min([(maxStockTargetTotal * positionCount), (maxSectorTargetTotal * sectorCount)]);
         this.setState({
             positions,
-            portfolioMaxNetValue,
+            portfolioMaxNetValue: maxNetValue,
             portfolioNetValue: Number(newNetValue)
         });
     }
 
+    getCurrentNav = positions => {
+        return _.sum(positions.map(position => position.effTotal));
+    }
+
+    updatePositionsWithNewNav = (sector, positions, sectorNavChange) => {
+        console.log('Sector Allowance', sector.sector, sectorNavChange);
+        //const sectorNav = _.min([allowedSectorNavChange, sector.positions.length * maxStockTargetTotal, maxSectorTargetTotal]);
+        //let sNav = sectorNav / Math.max(sector.positions.length, 1);
+        console.log('sectorNavChange', sectorNavChange);
+        let positionsToChange = sector.positions.filter(position => {
+            if (sectorNavChange > 0) { return position.effTotal < 50000 }
+            else { return position.effTotal > 0 }
+        });
+        let nStocks = positionsToChange.length;
+
+        let sNav = sectorNavChange / Math.max(nStocks, 1);
+        // let sNav = allowedSectorNavChange / Math.max(sector.positions.length, 1);
+        console.log('sNav', sNav);
+        return positions.map(position => {
+            const shouldModifyPosition = position.sector === sector.sector;
+            const currentStockExposure = position.effTotal;
+            console.log('Current Stock Exposure', currentStockExposure);
+            let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), maxStockTargetTotal]), 0]);
+            console.log('Updated Stock exposure', updatedStockExposure);
+            // let targetTotal = position.effTotal + sNav;
+            let lastPrice = position.lastPrice;
+            let nShares = Math.floor(updatedStockExposure / lastPrice);
+            let totalValue = Number((nShares * lastPrice).toFixed(2));
+            if (shouldModifyPosition) {
+                position.effTotal = updatedStockExposure;
+                position.shares = nShares;
+                position.totalValue = totalValue;
+            }
+
+            return position;
+        })
+    }
+
+    getSectorsWithPositiveAllowance = sectors => {
+        return sectors.filter(sector => this.getSectorAllowance(sector) > 0);
+    }
+
+    getSectorsWithPositiveExposure = sectors => {
+        return sectors.filter(sector => this.getSectorExposure(sector) > 0);
+    }
+
+    getSectorExposure = sector => {
+        return _.sum(sector.positions.map(position => position.effTotal));
+    }
+
+    getSectorAllowance = sector => {
+        const currentSectorNav = _.sum(sector.positions.map(position => position.effTotal));
+        console.log('current sector nav', currentSectorNav);
+        const sectorAllowance = Math.min((sector.positions.length * maxStockTargetTotal), maxSectorTargetTotal) - currentSectorNav;
+
+        return sectorAllowance;
+    }
+
     processPositionToSectors = positions => {
-        const uniqueSectors = _.uniq(positions, 'sector');
+        const uniqueSectors = _.uniqBy(positions, 'sector').map(position => position.sector);
 
         return uniqueSectors.map(sector => {
             const sectorPositions = positions.filter(position => position.sector === sector);
@@ -921,6 +978,7 @@ class ContestAdviceFormImpl extends React.Component {
             const nPositions = sector.positions.length;
             maxNetValue += Math.min(nPositions * maxStockTargetTotal, maxSectorTargetTotal);
         });
+        console.log(maxNetValue);
 
         return maxNetValue;
     }
@@ -1352,12 +1410,12 @@ class ContestAdviceFormImpl extends React.Component {
 
     // Initialze portfolioNetvalue
     initializeNetValue = () => {
+        let sectorData = this.processPositionToSectors(this.state.positions);
+        const maxNetValue = this.getMaxNetValueLimit(sectorData);
+
         this.setState({
             portfolioNetValue: this.getNetvalue(this.state.positions),
-            portfolioMaxNetValue: _.min([
-                (this.state.positions.length * maxStockTargetTotal),
-                (this.getSectorCountFromPositions() * maxSectorTargetTotal)
-            ])
+            portfolioMaxNetValue: maxNetValue
         });
     }
 

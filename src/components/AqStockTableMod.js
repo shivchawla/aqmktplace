@@ -192,7 +192,6 @@ export class AqStockTableMod extends React.Component {
     // }
 
     render() {
-        console.log('Rendered Stock Table');
         return (
             <Col span={24}>
                 <Row style={{marginBottom: '20px'}}>

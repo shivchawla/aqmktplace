@@ -3,6 +3,7 @@ import _ from 'lodash';
 import {Table, Button, Row, Col, Tooltip} from 'antd';
 import SliderInput from '../components/AqSliderInput';
 import {Utils} from '../utils';
+import {handleSectorTargetTotalChange} from '../containers/Contest/CreateAdvice/utils';
 
 const maxStockTargetTotal = 50000;
 const maxSectorTargetTotal = 180000;
@@ -72,37 +73,32 @@ export default class AqSectorTable extends React.Component {
     handleTargetTotalChange = (value, key, column) => {
         const newData = [...this.state.data];
         let positions = [...this.state.stockData];
-        console.log('Sector Positions', positions);
         let count = 0;
         let target = newData.filter(item => item.key === key)[0];
         if (target !== undefined) {
-            let stockData = [...this.state.stockData];
             const newNav = Number(value);
-            console.log(target);
             const oldNav = target.targetTotal;
-            console.log('newNav', newNav);
-            console.log('oldNav', oldNav);
-            let cNav = newNav - oldNav;
-            while(Math.abs(cNav) > 5) {
-                const positionsToChange = positions.filter(item => item.sector === key).filter(position => {
-                    if (cNav > 0) { return  position.effTotal < 50000}
-                    else { return position.effTotal >= 0 }
-                });
-                if (count > 5) {return};
-                console.log('Positons to change', positionsToChange);
-                const nStocks = positionsToChange.length;
-                const sNav = cNav / nStocks;
-                console.log('cNav', cNav);
-                target[column] = newNav;
-                this.setState({data: newData});
-                console.log(sNav);
-                stockData = this.updateStockPositions(positions, positionsToChange, sNav);
-                console.log(stockData);
-                console.log('newNav', newNav);
-                cNav = newNav - _.sum(stockData.filter(item => item.sector === key).map(item => item.effTotal));
-                console.log('cNav', cNav);
-                count++;
-            }
+            target[column] = newNav;
+            this.setState({data: newData});
+            let stockData = handleSectorTargetTotalChange(this.state.data, newNav, oldNav, key, this.state.stockData);
+            // let stockData = [...this.state.stockData];
+            // const newNav = Number(value);
+            // const oldNav = target.targetTotal;
+            // let cNav = newNav - oldNav;
+            // while(Math.abs(cNav) > 5) {
+            //     const positionsToChange = positions.filter(item => item.sector === key).filter(position => {
+            //         if (cNav > 0) { return  position.effTotal < 50000}
+            //         else { return position.effTotal >= 0 }
+            //     });
+            //     if (count > 5) {return};
+            //     const nStocks = positionsToChange.length;
+            //     const sNav = cNav / nStocks;
+            //     target[column] = newNav;
+            //     this.setState({data: newData});
+            //     stockData = this.updateStockPositions(positions, positionsToChange, sNav);
+            //     cNav = newNav - _.sum(stockData.filter(item => item.sector === key).map(item => item.effTotal));
+            //     count++;
+            // }
             this.asyncProcessData(stockData, true)
             .then(data => this.updateSectorWeights(data))
             .then(data => {
@@ -117,7 +113,6 @@ export default class AqSectorTable extends React.Component {
     }
 
     updateStockPositions = (positions, positionsToChange, sNav) => {
-        console.log(positions);
         let nPositions =  positions.map(position => {
             const shouldModifyPosition = _.findIndex(positionsToChange, item => item.symbol === position.symbol) > -1;
             const targetTotal = _.max([0, _.min([50000, (position.effTotal + sNav)])]);
