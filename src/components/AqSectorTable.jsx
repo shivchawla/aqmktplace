@@ -1,8 +1,11 @@
 import * as React from 'react';
 import _ from 'lodash';
 import {Table, Button, Row, Col, Tooltip} from 'antd';
-import {EditableCell} from './AqEditableCell';
+import SliderInput from '../components/AqSliderInput';
 import {Utils} from '../utils';
+
+const maxStockTargetTotal = 50000;
+const maxSectorTargetTotal = 180000;
 
 export default class AqSectorTable extends React.Component {
     constructor(props) {
@@ -13,35 +16,35 @@ export default class AqSectorTable extends React.Component {
                 dataIndex: 'sector',
                 key: 'sector',
                 render: (text, record) => <span>{text}</span>,
-                width: 200
+                width: 130
             },
             {
                 title: 'TARGET TOTAL',
                 dataIndex: 'targetTotal',
                 key: 'targetTotal',
-                render: (text, record) => this.renderColumns(text, record, 'targetTotal', 'number'),
-                width: 200
+                render: (text, record) => this.renderSliderColumns(text, record, 'targetTotal', 'number'),
+                width: 300
             },
             {
                 title: 'TOTAL',
                 dataIndex: 'total',
                 key: 'total',
                 render: (text, record) => <span>{Utils.formatMoneyValueMaxTwoDecimals(text)}</span>,
-                width: 200
+                width: 150
             },
             {
                 title: 'STOCKS #',
                 dataIndex: 'numStocks',
                 key: 'numStocks',
                 render: (text, record) => <span>{text}</span>,
-                width: 200
+                width: 80
             },
             {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
                 render: (text, record) => <span>{text} %</span>,
-                width: 200
+                width: 80
             },
         ];
         this.state = {
@@ -51,42 +54,57 @@ export default class AqSectorTable extends React.Component {
         };
     }
 
-    renderColumns = (text, record, column, type, disabled = false) => {
+    renderSliderColumns = (text, record, column, type, disabled = false) => {
+        const nPositionsInSector = this.state.stockData.filter(item => item.sector === record.sector).length;
+        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, (nPositionsInSector * maxStockTargetTotal)])]);
+        
         return (
-            <EditableCell 
-                    type={type}
-                    value={text}
-                    onChange={value => {this.handleTargetTotalChange(value, record.key, column, type)}}
-                    disabled={disabled}
-                    width={120}
+            <SliderInput 
+                value={text}
+                onChange={value => {this.handleTargetTotalChange(value, record.key, column, type)}}
+                min={0}
+                max={maxSectorExposure}
+                inputWidth='70px'
             />
         );
     }
 
-    handleTargetTotalChange = (value, key, column, type = 'text') => {
+    handleTargetTotalChange = (value, key, column) => {
         const newData = [...this.state.data];
-
+        let positions = [...this.state.stockData];
+        console.log('Sector Positions', positions);
+        let count = 0;
         let target = newData.filter(item => item.key === key)[0];
         if (target !== undefined) {
-            const targetTotal = value.length > 0 ? Number(value) : 0;
-            const oldTargetTotal = target.targetTotal > 0 ? target.targetTotal : 1;
-            let stockData = [];
-            target[column] = value;
-            this.setState({data: newData});
-            this.updateStockPositions(target.sector, targetTotal, oldTargetTotal)
-            .then(data => {
-                stockData = data;
-                return this.asyncProcessData(stockData, true);
-            })
-            .then(data => {
-                // const nData = data.map(item => {
-                //     if (item.sector === target.sector) {
-                //         item.targetTotal = value;
-                //     }
-                //     return item;
-                // })
-                return this.updateSectorWeights(data)
-            })
+            let stockData = [...this.state.stockData];
+            const newNav = Number(value);
+            console.log(target);
+            const oldNav = target.targetTotal;
+            console.log('newNav', newNav);
+            console.log('oldNav', oldNav);
+            let cNav = newNav - oldNav;
+            while(Math.abs(cNav) > 5) {
+                const positionsToChange = positions.filter(item => item.sector === key).filter(position => {
+                    if (cNav > 0) { return  position.effTotal < 50000}
+                    else { return position.effTotal >= 0 }
+                });
+                if (count > 5) {return};
+                console.log('Positons to change', positionsToChange);
+                const nStocks = positionsToChange.length;
+                const sNav = cNav / nStocks;
+                console.log('cNav', cNav);
+                target[column] = newNav;
+                this.setState({data: newData});
+                console.log(sNav);
+                stockData = this.updateStockPositions(positions, positionsToChange, sNav);
+                console.log(stockData);
+                console.log('newNav', newNav);
+                cNav = newNav - _.sum(stockData.filter(item => item.sector === key).map(item => item.effTotal));
+                console.log('cNav', cNav);
+                count++;
+            }
+            this.asyncProcessData(stockData, true)
+            .then(data => this.updateSectorWeights(data))
             .then(data => {
                 this.setState({
                     data: data,    
@@ -98,32 +116,34 @@ export default class AqSectorTable extends React.Component {
         }
     }
 
-    updateStockPositions = (sector, targetTotal, oldTargetTotal) => {
-        let stockData = [...this.state.stockData];
-        var numPositionsInSector = stockData.filter(item => item.sector === sector).length;
-        // filter all stocks based on the selected sector
-        return Promise.map(stockData, item => {
-            if (item.sector === sector) {
-                let effTotal = Number(item.effTotal);
-                effTotal = oldTargetTotal > 0 && effTotal > 0 ? effTotal * (targetTotal / oldTargetTotal) : targetTotal / numPositionsInSector;
-                return this.modifyPositionFromTargetTotal(item, effTotal);
-            } else {
-                return item;
+    updateStockPositions = (positions, positionsToChange, sNav) => {
+        console.log(positions);
+        let nPositions =  positions.map(position => {
+            const shouldModifyPosition = _.findIndex(positionsToChange, item => item.symbol === position.symbol) > -1;
+            const targetTotal = _.max([0, _.min([50000, (position.effTotal + sNav)])]);
+            const lastPrice = _.get(position, 'lastPrice', 1);
+            const nShares = Math.floor(targetTotal / lastPrice);
+            const totalValue = Number((lastPrice * nShares).toFixed(2));
+            if (shouldModifyPosition) {
+                position.effTotal = targetTotal;
+                position.shares = nShares;
+                position.totalValue = totalValue;
             }
-        })
-        .then(data => this.updateStockWeights(data))
-        .catch(err => console.log(err))
+
+            return position;
+        });
+        return this.updateStockWeights(nPositions);
     }
 
-    updateStockWeights = (data) => new Promise((resolve, reject) => {
+    updateStockWeights = (data) =>  {
         const totalPortfolioValue = this.getPortfolioTotalValue(data) === 0 ? 1 : this.getPortfolioTotalValue(data);
-        resolve (data.map(item => {
+        return data.map(item => {
             return {
                 ...item,
                 weight: Number(((item.totalValue / totalPortfolioValue * 100)).toFixed(2))
             }
-        }));
-    })
+        });
+    }
 
     getStockDataTotalValue = data => {
         return _.sum(data.map(item => item.totalValue));

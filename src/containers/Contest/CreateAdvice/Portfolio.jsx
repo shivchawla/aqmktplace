@@ -220,13 +220,13 @@ export class Portfolio extends React.Component {
         );
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (!_.isEqual(nextProps, this.props) || (!_.isEqual(nextState, this.state))) {
-            return true;
-        }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (!_.isEqual(nextProps, this.props) || (!_.isEqual(nextState, this.state))) {
+    //         return true;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     renderPortfolioTable = () => {
         return (

@@ -13,6 +13,7 @@ import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
 import LoginModal from '../../../containers/LoginModal';
+import SliderInput from '../../../components/AqSliderInput';
 import LoaderModal from '../../../components/LoaderModal';
 import {AqPageHeader} from '../../../components/AqPageHeader';
 import AppLayout from '../../../containers/AppLayout';
@@ -42,6 +43,8 @@ const defaultAdviceError = {
         MAX_SECTOR_EXPOSURE: {valid: true}
     }
 };
+const maxStockTargetTotal = 50000;
+const maxSectorTargetTotal = 180000;
 this.benchmark = 'NIFTY_50';
 
 class ContestAdviceFormImpl extends React.Component {
@@ -79,8 +82,19 @@ class ContestAdviceFormImpl extends React.Component {
             portfolioStockViewMobile: true,
             showPortfolioByStock: true,
             performanceMetrics: {},
-            loginModalVisible: false
+            loginModalVisible: false,
+            portfolioNetValue: 0,
+            portfolioMaxNetValue: 1000000
         };
+    }
+
+    updatePositions = (positions = [], callback = undefined) => {
+        this.setState({
+            positions,
+            portfolioNetValue: this.getNetvalue(positions)
+        }, () => {
+            callback && callback();
+        });
     }
 
     toggleLoginModal = () => {
@@ -484,11 +498,16 @@ class ContestAdviceFormImpl extends React.Component {
 
     conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
         const positions = [...this.state.positions];
-        this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
+        this.updatePositions(this.updateAllWeights(selectedPositions), () => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             this.handleSubmitAdvice('validate')
             .then(() => resolve(true));
-        });
+        })
+        // this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
+        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+        //     this.handleSubmitAdvice('validate')
+        //     .then(() => resolve(true));
+        // });
     })
 
     deletePositions = toBeDeletedPositions => {
@@ -499,10 +518,14 @@ class ContestAdviceFormImpl extends React.Component {
                 positions.splice(positionIndex, 1);
             }
         });
-        this.setState({positions: this.updateAllWeights(positions)}, () => {
+        this.updatePositions(this.updateAllWeights(positions), () => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-            this.handleSubmitAdvice('validate')
-        });
+            this.handleSubmitAdvice('validate');
+        })
+        // this.setState({positions: this.updateAllWeights(positions)}, () => {
+        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+        //     this.handleSubmitAdvice('validate')
+        // });
     }
 
     calculateTotalReturnFromTargetTotal = data => {
@@ -512,13 +535,28 @@ class ContestAdviceFormImpl extends React.Component {
             item.effTotal = positionIndex !== -1 ? this.state.positions[positionIndex].effTotal : undefined;
             const total = item.effTotal !== undefined
                     ? item.effTotal
-                    : item.lastPrice > 30000 ? item.lastPrice : 30000
+                    : this.getEffTotal(item, data);
+            console.log(total);
+                    // : item.lastPrice > 30000 ? item.lastPrice : 30000
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
             item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);
 
             return item;
         })
+    }
+
+    getEffTotal = (stock, data) => {
+        const newPositions = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal === undefined);
+        const newPositionsLength = newPositions.length;
+        console.log(newPositions);
+        const positionsInSector = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal);
+        const nPositionsInSector = positionsInSector.length;
+        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, ((nPositionsInSector + newPositionsLength)* maxStockTargetTotal)])]);
+        const maxAllowance = maxSectorExposure - _.sum(positionsInSector.filter(item => item.effTotal != undefined).map(item => item.effTotal));
+        console.log('max', maxAllowance);
+        console.log(_.min([30000, (maxAllowance / _.min(newPositions.length, 1))]));
+        return _.min([30000, (maxAllowance / _.max([newPositions.length, 1]))]);
     }
 
     updateIndividualPosition = position => {
@@ -529,10 +567,14 @@ class ContestAdviceFormImpl extends React.Component {
             targetPosition.effTotal = position.effTotal;
             targetPosition.totalValue = position.totalValue;
         }
-        this.setState({positions: this.updateAllWeights(positions)}, () => {
+        this.updatePositions(this.updateAllWeights(positions), () => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             this.handleSubmitAdvice();
-        });
+        })
+        // this.setState({positions: this.updateAllWeights(positions)}, () => {
+        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+        //     this.handleSubmitAdvice();
+        // });
     }
     
     updateAllWeights = data => {
@@ -639,11 +681,14 @@ class ContestAdviceFormImpl extends React.Component {
         const validatePortfolio = _.debounce(() => {
             this.validatePortfolio();
         }, 1000);
-
-        this.setState({positions: _.cloneDeep(positions)}, () => {
+        this.updatePositions(_.cloneDeep(positions), () => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             validatePortfolio();
-        });
+        })
+        // this.setState({positions: _.cloneDeep(positions)}, () => {
+        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+        //     validatePortfolio();
+        // });
     }
 
     validatePortfolio = () => {
@@ -803,14 +848,114 @@ class ContestAdviceFormImpl extends React.Component {
                         value={this.state.positions.filter(item => item.shares > 0).length}
                         label="Number of positions"
                     />
-                    <MetricItem 
-                        value={this.getNetvalue()}
+                    {/* <MetricItem 
+                        value={this.state.portfolioNetValue}
                         label="Net Value"
                         money
+                    /> */}
+                    <SliderInput 
+                        disabled={!this.state.showPortfolioByStock}
+                        sliderSpan={24}
+                        inputSpan={24}
+                        value={this.state.portfolioNetValue}
+                        onChange={this.handleNetValueChange}
+                        min={0}
+                        max={this.state.portfolioMaxNetValue}
+                        inputWidth='70px'
                     />
                 </div>
             </div>
         );
+    }
+
+    handleNetValueChange = newNetValue => {
+        let positions = [...this.state.positions];
+        const uniqueSectors = _.uniqBy(positions, 'sector');
+        let oldNav = this.state.portfolioNetValue;
+        let newNav = Number(newNetValue);
+        const positionCount = positions.length;
+        const sectorCount = this.getSectorCountFromPositions();
+        let cNav = newNav - oldNav;
+        const sectorChangeNav = cNav / uniqueSectors.length;
+        console.log('sectorChangeNav', sectorChangeNav);
+        let count = 0;
+        while(Math.abs(cNav) > 5) {
+            if (count > 10) {
+                break;
+            }
+            count++;
+            let positionsToChange = positions.filter(position => {
+                if (cNav > 0) { return position.effTotal < 50000 }
+                else { return position.effTotal >= 0 }
+            });
+            let nStocks = positionsToChange.length;
+            let sNav = cNav / nStocks;
+            positions = this.updatePositionsWithStockChange(sectorChangeNav, positions, positionsToChange);
+            // console.log(positions);
+            cNav = newNav - this.getNetvalue(positions);
+            console.log('New Nav', newNav);
+            console.log('cNav', cNav);
+        }
+        positions = this.updateAllWeights(positions);
+        const portfolioMaxNetValue = _.min([(maxStockTargetTotal * positionCount), (maxSectorTargetTotal * sectorCount)]);
+        this.setState({
+            positions,
+            portfolioMaxNetValue,
+            portfolioNetValue: Number(newNetValue)
+        });
+    }
+
+    processPositionToSectors = positions => {
+        const uniqueSectors = _.uniq(positions, 'sector');
+
+        return uniqueSectors.map(sector => {
+            const sectorPositions = positions.filter(position => position.sector === sector);
+
+            return {sector, positions: sectorPositions};
+        });
+    }
+
+    getMaxNetValueLimit = sectors => {
+        let maxNetValue = 0;
+        sectors.map(sector => {
+            const nPositions = sector.positions.length;
+            maxNetValue += Math.min(nPositions * maxStockTargetTotal, maxSectorTargetTotal);
+        });
+
+        return maxNetValue;
+    }
+
+    updatePositionsWithStockChange = (sectorChangeNav, currentPositions, positionsToChange) => {
+        // console.log('Positons to change', positionsToChange);
+        // console.log('Current Positons', currentPositions);
+
+
+        return currentPositions.map(position => {
+            const numStocksinSector = currentPositions.filter(item => item.sector === position.sector).length;
+            const sNav = sectorChangeNav / numStocksinSector;
+            const shouldModifyPosition = _.findIndex(positionsToChange, item => item.symbol === position.symbol) > -1;
+            let currentStockExposure = _.get(position, 'effTotal', 0);
+            const lastPrice = _.get(position, 'lastPrice', 0);
+            let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), maxStockTargetTotal]), 0]);
+            const nShares = Math.floor(updatedStockExposure / lastPrice);
+            const totalValue = Number((lastPrice * nShares).toFixed(2));
+
+            if(shouldModifyPosition) {
+                // const nPosition = position;
+                // console.log('Positions will be modified', position);
+                // console.log('Update Stock Exposure', updatedStockExposure);
+                position.shares = nShares;
+                position.totalValue = totalValue;
+                position.effTotal = updatedStockExposure;
+                return position;
+            } else {
+                return position;
+            }
+        });
+    }
+
+    getSectorCountFromPositions = (positions = this.state.positions) => {
+        return _.uniqBy(positions, 'sector').length;
     }
 
     renderNoActiveContestsScreen = () => {
@@ -1110,7 +1255,7 @@ class ContestAdviceFormImpl extends React.Component {
             this.setState({
                 name,
                 benchmark,
-                positions: this.processPositions(positions)
+                positions: this.updatePositions(this.processPositions(positions))
             });
         })
         .then(() => {
@@ -1180,11 +1325,10 @@ class ContestAdviceFormImpl extends React.Component {
         })
     })
 
-    getNetvalue = () => {
-        const {positions = []} = this.state;
+    getNetvalue = (positions, field = 'effTotal') => {
         let totalValue = 0;
         positions.map(position => {
-            totalValue += position.totalValue;
+            totalValue += position[field];
         });
 
         return totalValue;
@@ -1206,6 +1350,17 @@ class ContestAdviceFormImpl extends React.Component {
         .catch(err => reject(err));
     })
 
+    // Initialze portfolioNetvalue
+    initializeNetValue = () => {
+        this.setState({
+            portfolioNetValue: this.getNetvalue(this.state.positions),
+            portfolioMaxNetValue: _.min([
+                (this.state.positions.length * maxStockTargetTotal),
+                (this.getSectorCountFromPositions() * maxSectorTargetTotal)
+            ])
+        });
+    }
+
     componentWillMount() {
         this.setState({loading: true});
         openNotification('info', 'Info', 'Changes to the portfolio after 12pm will be reflected on the next trading day')
@@ -1216,6 +1371,7 @@ class ContestAdviceFormImpl extends React.Component {
                 this.setState({loading: false});
             })
         } else {
+            this.initializeNetValue();
             Promise.all([
                 this.handleSubmitAdvice(),   
                 this.getActiveContestToParticipate(),
@@ -1231,13 +1387,13 @@ class ContestAdviceFormImpl extends React.Component {
         
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
-            return true;
-        }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+    //         return true;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     renderPageContent = () => {
         return (
