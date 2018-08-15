@@ -62,7 +62,9 @@ export default class AqSectorTable extends React.Component {
                 onChange={value => {this.handleTargetTotalChange(value, record.key, column, type)}}
                 min={0}
                 max={maxSectorExposure}
-                inputWidth='70px'
+                inputWidth='80%'
+                hideValue
+                stepSize={5000}
             />
         );
     }

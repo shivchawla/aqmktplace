@@ -192,22 +192,13 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     fetchBenchmarkConfig = benchmark => {
-        const confgUrl = `${requestUrl}/config?type=contest&benchmark=${benchmark}`;
         this.setState({loadingBenchmarkConfig: true});
-        fetchAjax(confgUrl, this.props.history, this.props.match.url)
-        .then(configResponse => {
-            const configData = configResponse.data;
-            const sector = _.get(configData, 'sector', '');
-            const industry = _.get(configData, 'industry', '');
-            const universe = _.get(configData, 'universe', 'NIFTY_500');
+        const positions = [];
+        this.getBenchmarkConfig(benchmark, positions)
+        .then(() => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: []});
-            this.searchStockComponent.resetFilterFromParent(sector, industry);
+            this.searchStockComponent.resetFilterFromParent(this.state.stockSearchFilters.sector, this.state.stockSearchFilters.industry);
             this.setState({
-                stockSearchFilters: {
-                    industry,
-                    sector,
-                    universe
-                },
                 positions: []
             }, () => {
                 this.searchStockComponent.resetSearchFilters()
@@ -216,6 +207,7 @@ class ContestAdviceFormImpl extends React.Component {
                 })
             });
         })
+        .catch(err => console.log(err))
         .finally(() => {
             this.setState({loadingBenchmarkConfig: false});
             openNotification('info', 'Configurations Loaded', `New Configurations loaded for Benchmark: ${benchmark}`);
@@ -872,7 +864,7 @@ class ContestAdviceFormImpl extends React.Component {
                         onChange={this.handleNetValueChange}
                         min={0}
                         max={this.state.portfolioMaxNetValue}
-                        inputWidth='70px'
+                        inputWidth='100%'
                     />
                 </div>
             </div>

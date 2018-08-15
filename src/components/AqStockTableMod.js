@@ -87,8 +87,9 @@ export class AqStockTableMod extends React.Component {
             <SliderInput 
                 value={Number(text)}
                 onChange={value => {this.handleRowChange(value, record.key, column, type)}}
-                inputWidth='80px'
+                inputWidth='80%'
                 max={_.min([this.props.maxStockTargetTotal, (record.effTotal + maxAllowance)])}
+                hideValue
             />
         );
     }

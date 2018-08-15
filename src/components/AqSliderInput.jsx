@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Row, Col, Slider, InputNumber, Input} from 'antd'; 
+import {Row, Col, Slider, InputNumber, Input, Icon} from 'antd'; 
 import {primaryColor, horizontalBox} from '../constants';
 
 export default class SliderInput extends React.Component {
@@ -19,11 +19,19 @@ export default class SliderInput extends React.Component {
     }
 
     render() {
-        const {min = 0, max = 50000, inputWidth = '65px', sliderSpan = 16, inputSpan = 8, disabled=false} = this.props;
+        const {
+            min = 0, 
+            max = 50000, 
+            inputWidth = '65px', 
+            sliderSpan = 16, 
+            inputSpan = 8, 
+            disabled=false,
+            stepSize = 1000
+    } = this.props;
 
         return (
             <Row style={this.props.style}>
-                <Col span={sliderSpan}>
+                {/* <Col span={sliderSpan}>
                     <Slider 
                         disabled = {disabled}
                         min={min} 
@@ -33,21 +41,51 @@ export default class SliderInput extends React.Component {
                         value={this.state.sliderValue} 
                         step={500}
                     />
-                </Col>
-                <Col span={inputSpan} style={{textAlign: 'right', paddingRight: '10px'}}>
-                    {/* <InputNumber
+                </Col> */}
+                <Col span={24} style={{...horizontalBox, textAlign: 'right', paddingRight: '10px'}}>
+                    <Icon 
+                        style={{fontSize: '22px', cursor: 'pointer'}} 
+                        type={"minus-circle-o"} 
+                        onClick={() => {
+                            const value = this.props.value - stepSize;
+                            const nValue = value > max
+                                ? max
+                                : value < 0
+                                    ? 0
+                                    : value
+                            this.props.onChange(nValue)
+                        }}
+                    />
+                    <InputNumber
                         min={min}
                         max={max}
-                        style={{width: inputWidth, marginLeft: '5px', color: primaryColor}}
+                        style={{width: inputWidth, marginLeft: '5px', color: primaryColor, margin: '0 10px'}}
                         value={this.props.value}
                         step={500}
                         onChange={value => { 
-                            console.log(typeof value);
+                            const nValue = value > max
+                                ? max
+                                : value < 0
+                                    ? 0
+                                    : value
                             if (typeof value === 'number') {
-                                this.props.onChange(value);
+                                this.props.onChange(nValue);
                             }
                         }}
-                    /> */}
+                    />
+                    <Icon 
+                        style={{fontSize: '22px', cursor: 'pointer'}} 
+                        type={"plus-circle-o"} 
+                        onClick={() => {
+                            const value = this.props.value + stepSize
+                            const nValue = value > max
+                                ? max
+                                : value < 0
+                                    ? 0
+                                    : value
+                            this.props.onChange(nValue)
+                        }}
+                    />
                     {
                         !this.props.hideValue &&
                         <h3>{Math.round(this.props.value)}</h3>
