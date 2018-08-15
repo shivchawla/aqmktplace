@@ -1,34 +1,9 @@
 import * as React from 'react';
-import moment from 'moment';
-import axios from 'axios';
 import _ from 'lodash';
-import {Table, Button, Row, Col, Tooltip} from 'antd';
-import {AutoCompleteEditableCell} from './AutoCompleteEditableCell';
-import {EditableCell} from './AqEditableCell';
-import {getStockData} from '../utils';
+import {Table, Button, Row, Col, Tooltip, Slider, InputNumber} from 'antd';
+import SliderInput from '../components/AqSliderInput';
+import {verticalBox, nameEllipsisStyle, primaryColor} from '../constants';
 import {Utils} from '../utils';
-
-const {aimsquantToken, requestUrl} = require('../localConfig.js');
-
-const emptyPositions = (n) => {
-    const data = [];
-    const rows = n || 5;
-    for(let i=0; i < rows; i++) {
-        data.push({
-            symbol: '',
-            key: Math.random().toString(36),
-            shares: 0,
-            lastPrice: 0,
-            totalValue: 0,
-            tickerValidationStatus: "warning",
-            sharesValidationStatus: "success",
-            sharesDisabledStatus: true,
-            priceHistory: [],
-            weight: 0,
-        });
-    }
-    return data;
-};
 
 export class AqStockTableMod extends React.Component {
     constructor(props) {
@@ -38,14 +13,27 @@ export class AqStockTableMod extends React.Component {
                 title: 'SYMBOL',
                 dataIndex: 'symbol',
                 key: 'symbol',
-                render: (text, record) => this.renderAutoCompleteColumn(text, record, 'symbol', 'text', record.tickerValidationStatus),
+                render: (text, record) => (
+                    <div 
+                        style={{...verticalBox, alignItems: 'flex-start'}}
+                    >
+                        <span style={{fontSize: '14px'}}>
+                            {text}
+                        </span>
+                        <span 
+                                style={{...nameEllipsisStyle, fontSize: '12px', color: '#444', width: '200px'}}
+                        >
+                            {_.get(record, 'name', '')}
+                        </span>
+                    </div>
+                ),
                 width: 200
             },
             {
-                title: 'TARGET TOTAL',
+                title: '  TARGET TOTAL',
                 dataIndex: 'effTotal',
                 key: 'effTotal',
-                render: (text, record) => this.renderColumns(
+                render: (text, record) => this.renderSliderColumns(
                         text, 
                         record, 
                         'effTotal', 
@@ -53,14 +41,14 @@ export class AqStockTableMod extends React.Component {
                         record.sharesValidationStatus,
                         record.sharesDisabledStatus
                     ),
-                width: 150,
+                width: 200,
             },
             {
                 title: 'SHARES',
                 dataIndex: 'shares',
                 key: 'shares',
                 render: val => <span>{val}</span>,
-                width: 150,
+                width: 170,
             },
             {
                 title: 'PRICE',
@@ -80,7 +68,7 @@ export class AqStockTableMod extends React.Component {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
-                width: 150,
+                width: 120,
                 render: val => <span>{Utils.formatMoneyValueMaxTwoDecimals(val)}%</span>
             }
         ];
@@ -90,26 +78,27 @@ export class AqStockTableMod extends React.Component {
         };
     }
 
-    renderAutoCompleteColumn = (text, record, column, type, validationStatus, disabled = false) => {
+    renderSliderColumns = (text, record, column, type) => {
+        const value = Number(text);
+        const positionsInSector = this.state.data.filter(item => item.sector === record.sector);
+        const nPositionsInSector = positionsInSector.length;
+        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
+        const maxAllowance = maxSectorExposure - _.sum(positionsInSector.map(item => item.effTotal));
+        let maxAllowedStockExposure = _.min([this.props.maxStockTargetTotal, (record.effTotal + maxAllowance)]);
+        if (this.props.isUpdate) {
+            if (value > this.props.maxStockTargetTotal && value < this.props.maxStockTargetTotalHard) {
+                maxAllowedStockExposure = value;
+            } else {
+                maxAllowedStockExposure = this.props.maxStockTargetTotal;
+            }
+        }
         return (
-            <AutoCompleteEditableCell 
-                    onSelect={value => {this.handlePressEnter(value, record.key, column)}}
-                    handleAutoCompleteChange={value => this.handleAutoCompleteChange(value, record.key, column)}
-                    value={text}
-                    stockSearchFilters={this.props.stockSearchFilters}
-            />
-        );
-    }
-
-    renderColumns = (text, record, column, type, validationStatus, disabled = false) => {
-        return (
-            <EditableCell 
-                    validationStatus={validationStatus}
-                    type={type}
-                    value={text}
-                    onChange={value => {this.handleRowChange(value, record.key, column, type)}}
-                    disabled={disabled}
-                    width={120}
+            <SliderInput 
+                value={value}
+                onChange={value => {this.handleRowChange(value, record.key, column, type)}}
+                inputWidth='80%'
+                max={maxAllowedStockExposure}
+                hideValue
             />
         );
     }
@@ -120,14 +109,11 @@ export class AqStockTableMod extends React.Component {
         if (target) {
             const lastPrice = target['lastPrice'];
             target[column] = value;
-            // target[column] = value >= 0 ? value : 0;
-            // value = value.length > 0 ? value : 0;
             const shares = this.calculateSharesFromTotalReturn(value, lastPrice);
             target['shares'] = shares;
             target['totalValue'] = Number((shares * lastPrice).toFixed(2));
             this.updateAllWeights(newData)
-            this.setState({newData});
-            this.props.onChange(newData);
+            this.setState({newData}, () => this.props.onChange(newData));
         }
     }
 
@@ -143,69 +129,6 @@ export class AqStockTableMod extends React.Component {
             return item;
         }));
     })
-
-    handlePressEnter = (value, key, column) => {
-        const newData = [...this.state.data];
-        let target = newData.filter(item => item.key === key)[0];
-        if (target) {
-            target[column] = value;
-            if(column === 'symbol') {
-                this.asyncGetTarget(value)
-                .then(response => {
-                    target = Object.assign(target, response);
-                    target['totalValue'] = target['shares'] * response.lastPrice;
-                    this.updateAllWeights(newData);
-                    this.setState({data: newData});
-                    if (target['shares'] > 0) {
-                        this.props.onChange(newData);
-                    }        
-                });
-            }
-        }
-    }
-    
-    handleAutoCompleteChange = (value, key, column) => {
-        const newData = [...this.state.data];
-        let target = newData.filter(item => item.key === key)[0];
-        if (target) {
-            if (value.length < 1) {
-                target[column] = value;
-                target['shares'] = 0;
-                target['lastPrice'] = 0;
-                target['totalValue'] = 0;
-                target['weight'] = 0;
-                this.updateAllWeights(newData);
-            }
-            this.setState({data: newData});
-            this.props.onChange(newData);
-        }
-    }
-
-    asyncGetTarget = (ticker) => {
-        const target = {};
-        return new Promise((resolve, reject) => {
-            getStockData(ticker, 'latestDetail')
-            .then(response => {
-                // console.log(response.data);
-                const name = _.get(response.data, 'security.detail.Nse_Name', '');
-                const sector = _.get(response.data, 'security.detail.Sector', '');
-                const lastPrice = _.get(response.data, 'latestDetailRT.current', 0.0) || 
-                                    _.get(response.data, 'latestDetail.values.Close', 0.0);
-                target['name'] = name;
-                target['sector'] = sector;
-                target['lastPrice'] = lastPrice;
-                target['tickerValidationStatus'] = 'success';
-                target['sharesDisabledStatus'] = false;
-                target['ticker'] = ticker;
-            })
-            .catch(error => {
-                target['tickerValidationStatus'] = 'error';
-            })
-            .finally(() => {
-                resolve(target);
-            });
-        });
-    }
 
     getRowSelection = () => {
         return {
@@ -261,10 +184,10 @@ export class AqStockTableMod extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         let data = [];
-        if (this.props.data !== nextProps.data) {
+        // if (this.props.data !== nextProps.data) {
             data = nextProps.data;
             this.setState({data});
-        } 
+        // } 
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -273,15 +196,6 @@ export class AqStockTableMod extends React.Component {
         } 
         return false;
     }
-
-    // componentWillMount() {
-    //     if (!this.props.isUpdate) {
-    //         const data = emptyPositions();
-    //         this.setState({data});
-    //     } else {
-    //         this.setState({data: emptyPositions(1).concat(this.props.data)});
-    //     }
-    // }
 
     render() {
         return (
@@ -298,18 +212,6 @@ export class AqStockTableMod extends React.Component {
                                 onClick={this.deleteItems}
                         />
                     </Tooltip>
-                    {/* <Tooltip
-                            title="Add Positions"
-                            placement="top"
-                    >
-                        <Button
-                                icon="plus" size="large" 
-                                type="primary" 
-                                onClick={this.addItem}
-                                style={{marginLeft: '20px', width: '40px'}}
-                                disabled={this.props.benchmark === null}
-                        />
-                    </Tooltip> */}
                 </Row>
                 <Table 
                         rowSelection={this.getRowSelection()} 
@@ -323,3 +225,4 @@ export class AqStockTableMod extends React.Component {
         );
     }
 }
+

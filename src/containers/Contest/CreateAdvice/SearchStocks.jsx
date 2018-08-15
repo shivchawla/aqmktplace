@@ -293,6 +293,7 @@ export class SearchStocks extends React.Component {
 
     addSelectedStocksToPortfolio = () => {
         let localStocks = [...this.localStocks];
+        console.log(localStocks);
         localStocks = localStocks.filter(stock => stock.checked === true);
         const positions = localStocks.map(stock => {
             return {
@@ -306,12 +307,8 @@ export class SearchStocks extends React.Component {
                 totalValue: stock.current,
             };
         });
-        // this.setState({portfolioLoading: true});
         this.props.addPositions(positions)
-        // .then(() => {
         this.props.toggleBottomSheet();
-            // this.setState({portfolioLoading: false});
-        // })
     }
 
     componentWillReceiveProps(nextProps) {

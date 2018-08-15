@@ -220,13 +220,13 @@ export class Portfolio extends React.Component {
         );
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (!_.isEqual(nextProps, this.props) || (!_.isEqual(nextState, this.state))) {
-            return true;
-        }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (!_.isEqual(nextProps, this.props) || (!_.isEqual(nextState, this.state))) {
+    //         return true;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     renderPortfolioTable = () => {
         return (
@@ -237,6 +237,10 @@ export class Portfolio extends React.Component {
                     isUpdate={this.props.isUpdate}
                     benchmark={this.props.benchmark}
                     stockSearchFilters={this.props.stockSearchFilters}
+                    maxSectorTargetTotal={this.props.maxSectorTargetTotal}
+                    maxStockTargetTotal={this.props.maxStockTargetTotal}
+                    maxSectorTargetTotalHard={this.props.maxSectorTargetTotalHard}
+                    maxStockTargetTotalHard={this.props.maxStockTargetTotalHard}
                 />
             </Col>
         );
@@ -248,6 +252,11 @@ export class Portfolio extends React.Component {
                 <AqSectorTable 
                     data={this.props.data}
                     onChange={this.props.onChange}
+                    maxSectorTargetTotal={this.props.maxSectorTargetTotal}
+                    maxStockTargetTotal={this.props.maxStockTargetTotal}
+                    maxSectorTargetTotalHard={this.props.maxSectorTargetTotalHard}
+                    maxStockTargetTotalHard={this.props.maxStockTargetTotalHard}
+                    isUpdate={this.props.isUpdate}
                 />
             </Col>
         );
@@ -264,6 +273,10 @@ export class Portfolio extends React.Component {
                 updateSelectedPosition={this.props.updateIndividualPosition}
                 deletePositions={this.props.deletePositions}
                 portfolioStockViewMobile={this.props.portfolioStockViewMobile}
+                maxSectorTargetTotal={this.props.maxSectorTargetTotal}
+                maxStockTargetTotal={this.props.maxStockTargetTotal}
+                maxSectorTargetTotalHard={this.props.maxSectorTargetTotalHard}
+                maxStockTargetTotalHard={this.props.maxStockTargetTotalHard}
             />
         );
     }
