@@ -404,6 +404,9 @@ class ContestAdviceFormImpl extends React.Component {
                 showPortfolioByStock= {this.state.showPortfolioByStock}
                 maxSectorTargetTotal={this.state.maxSectorTargetTotalSoft}
                 maxStockTargetTotal={this.state.maxStockTargetTotalSoft}
+                maxSectorTargetTotalHard={this.state.maxSectorTargetTotalHard}
+                maxStockTargetTotalHard={this.state.maxStockTargetTotalHard}
+                isUpdate={this.props.isUpdate}
             />
         )
     }
@@ -536,7 +539,6 @@ class ContestAdviceFormImpl extends React.Component {
             const total = item.effTotal !== undefined
                     ? item.effTotal
                     : this.getEffTotal(item, data);
-            console.log(total);
                     // : item.lastPrice > 30000 ? item.lastPrice : 30000
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
@@ -930,15 +932,12 @@ class ContestAdviceFormImpl extends React.Component {
         return positions.map(position => {
             const shouldModifyPosition = position.sector === sector.sector;
             const currentStockExposure = position.effTotal;
-            console.log('Current Stock Exposure', currentStockExposure);
             let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), this.state.maxStockTargetTotalSoft]), 0]);
-            console.log('Updated Stock exposure', updatedStockExposure);
-            // let targetTotal = position.effTotal + sNav;
             let lastPrice = position.lastPrice;
             let nShares = Math.floor(updatedStockExposure / lastPrice);
             let totalValue = Number((nShares * lastPrice).toFixed(2));
             if (shouldModifyPosition) {
-                position.effTotal = updatedStockExposure;
+                position.effTotal = Number(updatedStockExposure.toFixed(2));
                 position.shares = nShares;
                 position.totalValue = totalValue;
             }
@@ -1293,10 +1292,10 @@ class ContestAdviceFormImpl extends React.Component {
             const sector = _.get(configData, 'sector', '');
             const industry = _.get(configData, 'industry', '');
             const universe = _.get(configData, 'universe', 'NIFTY_500');
-            const maxStockExposureSoft = _.get(configData, 'portfolio.MAX_STOCK_EXPOSURE.SOFT', 0);
-            const maxStockExposureHard = _.get(configData, 'portfolio.MAX_STOCK_EXPOSURE.HARD', 0);
-            const maxSectorExposureSoft = _.get(configData, 'portfolio.MAX_SECTOR_EXPOSURE.SOFT', 0);
-            const maxSectorExposureHard = _.get(configData, 'portfolio.MAX_SECTOR_EXPOSURE.HARD', 0);
+            const maxStockExposureSoft = _.get(configData, 'portfolio.MAX_STOCK_EXPOSURE.SOFT', 50000);
+            const maxStockExposureHard = _.get(configData, 'portfolio.MAX_STOCK_EXPOSURE.HARD', 60000);
+            const maxSectorExposureSoft = _.get(configData, 'portfolio.MAX_SECTOR_EXPOSURE.SOFT', 18000000000);
+            const maxSectorExposureHard = _.get(configData, 'portfolio.MAX_SECTOR_EXPOSURE.HARD', 21000000000);
             const maxNetValue = this.getMaxNetValueLimit(sectorData, maxStockExposureSoft, maxSectorExposureSoft);
             this.setState({
                 stockSearchFilters: {
@@ -1324,11 +1323,15 @@ class ContestAdviceFormImpl extends React.Component {
         .then(([adviceSummary, advicePortfolio]) => {
             benchmark = _.get(adviceSummary, 'portfolio.benchmark.ticker');
             const name = _.get(adviceSummary, 'name', '');
-            const positions = _.get(advicePortfolio, 'detail.positions', []);
+            const positions = this.processPositions(_.get(advicePortfolio, 'detail.positions', []));
+            let sectorData = this.processPositionToSectors(positions);
+            const maxNetValue = this.getMaxNetValueLimit(sectorData);
             this.setState({
                 name,
                 benchmark,
-                positions: this.updatePositions(this.processPositions(positions))
+                positions,
+                portfolioNetValue: this.getNetvalue(positions),
+                portfolioMaxNetValue: maxNetValue
             });
         })
         .then(() => {
@@ -1404,7 +1407,7 @@ class ContestAdviceFormImpl extends React.Component {
             totalValue += position[field];
         });
 
-        return totalValue;
+        return Number(totalValue.toFixed(2));
     }
 
     getActiveContestToParticipate = () => new Promise((resolve, reject) => {
@@ -1460,13 +1463,13 @@ class ContestAdviceFormImpl extends React.Component {
         
     }
 
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
-    //         return true;
-    //     }
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            return true;
+        }
 
-    //     return false;
-    // }
+        return false;
+    }
 
     renderPageContent = () => {
         return (

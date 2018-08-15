@@ -239,6 +239,8 @@ export class Portfolio extends React.Component {
                     stockSearchFilters={this.props.stockSearchFilters}
                     maxSectorTargetTotal={this.props.maxSectorTargetTotal}
                     maxStockTargetTotal={this.props.maxStockTargetTotal}
+                    maxSectorTargetTotalHard={this.props.maxSectorTargetTotalHard}
+                    maxStockTargetTotalHard={this.props.maxStockTargetTotalHard}
                 />
             </Col>
         );
@@ -252,6 +254,9 @@ export class Portfolio extends React.Component {
                     onChange={this.props.onChange}
                     maxSectorTargetTotal={this.props.maxSectorTargetTotal}
                     maxStockTargetTotal={this.props.maxStockTargetTotal}
+                    maxSectorTargetTotalHard={this.props.maxSectorTargetTotalHard}
+                    maxStockTargetTotalHard={this.props.maxStockTargetTotalHard}
+                    isUpdate={this.props.isUpdate}
                 />
             </Col>
         );
@@ -270,6 +275,8 @@ export class Portfolio extends React.Component {
                 portfolioStockViewMobile={this.props.portfolioStockViewMobile}
                 maxSectorTargetTotal={this.props.maxSectorTargetTotal}
                 maxStockTargetTotal={this.props.maxStockTargetTotal}
+                maxSectorTargetTotalHard={this.props.maxSectorTargetTotalHard}
+                maxStockTargetTotalHard={this.props.maxStockTargetTotalHard}
             />
         );
     }

@@ -53,12 +53,20 @@ export default class AqSectorTable extends React.Component {
     }
 
     renderSliderColumns = (text, record, column, type, disabled = false) => {
+        const value = Number(text);
         const nPositionsInSector = this.state.stockData.filter(item => item.sector === record.sector).length;
-        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
+        let maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
+        if (this.props.isUpdate) {
+            if (value > this.props.maxSectorTargetTotal && value < this.props.maxSectorTargetTotalHard) {
+                maxSectorExposure = value;
+            } else {
+                maxSectorExposure = this.props.maxSectorTargetTotal;
+            }
+        }
         
         return (
             <SliderInput 
-                value={text}
+                value={value}
                 onChange={value => {this.handleTargetTotalChange(value, record.key, column, type)}}
                 min={0}
                 max={maxSectorExposure}

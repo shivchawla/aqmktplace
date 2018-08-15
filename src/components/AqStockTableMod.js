@@ -79,16 +79,25 @@ export class AqStockTableMod extends React.Component {
     }
 
     renderSliderColumns = (text, record, column, type) => {
+        const value = Number(text);
         const positionsInSector = this.state.data.filter(item => item.sector === record.sector);
         const nPositionsInSector = positionsInSector.length;
         const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
         const maxAllowance = maxSectorExposure - _.sum(positionsInSector.map(item => item.effTotal));
+        let maxAllowedStockExposure = _.min([this.props.maxStockTargetTotal, (record.effTotal + maxAllowance)]);
+        if (this.props.isUpdate) {
+            if (value > this.props.maxStockTargetTotal && value < this.props.maxStockTargetTotalHard) {
+                maxAllowedStockExposure = value;
+            } else {
+                maxAllowedStockExposure = this.props.maxStockTargetTotal;
+            }
+        }
         return (
             <SliderInput 
-                value={Number(text)}
+                value={value}
                 onChange={value => {this.handleRowChange(value, record.key, column, type)}}
                 inputWidth='80%'
-                max={_.min([this.props.maxStockTargetTotal, (record.effTotal + maxAllowance)])}
+                max={maxAllowedStockExposure}
                 hideValue
             />
         );
@@ -181,12 +190,12 @@ export class AqStockTableMod extends React.Component {
         // } 
     }
 
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     if (this.state !== nextState || this.props !== nextProps) {
-    //         return true;
-    //     } 
-    //     return false;
-    // }
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.state !== nextState || this.props !== nextProps) {
+            return true;
+        } 
+        return false;
+    }
 
     render() {
         return (
