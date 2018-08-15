@@ -30,7 +30,7 @@ export class AqStockTableMod extends React.Component {
                 width: 200
             },
             {
-                title: 'TARGET TOTAL',
+                title: '  TARGET TOTAL',
                 dataIndex: 'effTotal',
                 key: 'effTotal',
                 render: (text, record) => this.renderSliderColumns(
@@ -41,14 +41,14 @@ export class AqStockTableMod extends React.Component {
                         record.sharesValidationStatus,
                         record.sharesDisabledStatus
                     ),
-                width: 340,
+                width: 200,
             },
             {
                 title: 'SHARES',
                 dataIndex: 'shares',
                 key: 'shares',
                 render: val => <span>{val}</span>,
-                width: 120,
+                width: 170,
             },
             {
                 title: 'PRICE',
@@ -68,7 +68,7 @@ export class AqStockTableMod extends React.Component {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
-                width: 80,
+                width: 120,
                 render: val => <span>{Utils.formatMoneyValueMaxTwoDecimals(val)}%</span>
             }
         ];

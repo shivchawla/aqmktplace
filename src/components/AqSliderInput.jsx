@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {Row, Col, Slider, InputNumber, Input, Icon} from 'antd'; 
 import {primaryColor, horizontalBox} from '../constants';
+import NumericInput from 'react-numeric-input';
+import _ from 'lodash';
 
 export default class SliderInput extends React.Component {
     constructor(props) {
@@ -18,11 +20,24 @@ export default class SliderInput extends React.Component {
         this.setState({sliderValue: nextProps.value});
     }
 
+    handleValueChange = _.debounce(value => {  
+        const nValue = value > this.props.max
+            ? this.props.max
+            : value < 0
+                ? 0
+                : value
+        if (typeof value === 'number') {
+            console.log(nValue);
+            this.props.onChange(nValue);
+            
+        }
+    }, 200);
+
     render() {
         const {
             min = 0, 
             max = 50000, 
-            inputWidth = '65px', 
+            inputWidth = '25px', 
             sliderSpan = 16, 
             inputSpan = 8, 
             disabled=false,
@@ -43,8 +58,8 @@ export default class SliderInput extends React.Component {
                     />
                 </Col> */}
                 <Col span={24} style={{...horizontalBox, textAlign: 'right', paddingRight: '10px'}}>
-                    <Icon 
-                        style={{fontSize: '22px', cursor: 'pointer'}} 
+                    {/*<Icon 
+                        style={{fontSize: '16px', cursor: 'pointer'}} 
                         type={"minus-circle-o"} 
                         onClick={() => {
                             const value = this.props.value - stepSize;
@@ -55,26 +70,19 @@ export default class SliderInput extends React.Component {
                                     : value
                             this.props.onChange(nValue)
                         }}
-                    />
-                    <InputNumber
+                    />*/}
+                    <NumericInput
                         min={min}
                         max={max}
-                        style={{width: inputWidth, marginLeft: '5px', color: primaryColor, margin: '0 10px'}}
-                        value={this.props.value}
-                        step={500}
-                        onChange={value => { 
-                            const nValue = value > max
-                                ? max
-                                : value < 0
-                                    ? 0
-                                    : value
-                            if (typeof value === 'number') {
-                                this.props.onChange(nValue);
-                            }
+                        style={{
+                            input: {height:'28px', width: '100px', fontFamily:'Lato'}
                         }}
+                        value={this.props.value}
+                        step={stepSize}
+                        onChange={this.handleValueChange} 
                     />
-                    <Icon 
-                        style={{fontSize: '22px', cursor: 'pointer'}} 
+                    {/*<Icon 
+                        style={{fontSize: '16px', cursor: 'pointer'}} 
                         type={"plus-circle-o"} 
                         onClick={() => {
                             const value = this.props.value + stepSize
@@ -85,15 +93,15 @@ export default class SliderInput extends React.Component {
                                     : value
                             this.props.onChange(nValue)
                         }}
-                    />
+                    />*/}
                     {
                         !this.props.hideValue &&
                         <h3>{Math.round(this.props.value)}</h3>
                     }
                 </Col>
-                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginRight: '10px'}}>
-                    <h3 style={{fontSize: '14px', fontWeight: 700}}>Min: {min}</h3>
-                    <h3 style={{fontSize: '14px', fontWeight: 700}}>Max: {max.toFixed(2)}</h3>
+                <Col span={24} style={{...horizontalBox, marginRight: '10px'}}>
+                    {/*<h3 style={{fontSize: '14px', fontWeight: 700}}>Min: {min}</h3>*/}
+                    <h3 style={{fontSize: '10px', fontWeight: 700}}>Max: {max.toFixed(2)}</h3>
                 </Col>
             </Row>
         );

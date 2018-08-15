@@ -281,7 +281,7 @@ class UpdatePositionMobileImpl extends React.Component {
                                     <Col span={11}>
                                         <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Target Total</h3>
                                         <div style={{...horizontalBox, justifyContent: 'space-between'}}>
-                                            <h3 style={{fontSize: '12px'}}>Min: 0</h3>
+                                            {/*<h3 style={{fontSize: '12px'}}>Min: 0</h3>*/}
                                             <h3 style={{fontSize: '12px'}}>Max: {this.getMaxStockValueAllowed()}</h3>
                                         </div>
                                     </Col>

@@ -296,7 +296,7 @@ class ContestAdviceFormImpl extends React.Component {
             }
         })
         .catch(error => {
-            console.log(error);
+            //console.log(error);
             return handleCreateAjaxError(
                 error, 
                 this.props.history, 
@@ -551,13 +551,10 @@ class ContestAdviceFormImpl extends React.Component {
     getEffTotal = (stock, data) => {
         const newPositions = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal === undefined);
         const newPositionsLength = newPositions.length;
-        console.log(newPositions);
         const positionsInSector = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal);
         const nPositionsInSector = positionsInSector.length;
         const maxSectorExposure = _.max([0, _.min([this.state.maxSectorTargetTotalSoft, ((nPositionsInSector + newPositionsLength)* this.state.maxStockTargetTotalSoft)])]);
         const maxAllowance = maxSectorExposure - _.sum(positionsInSector.filter(item => item.effTotal != undefined).map(item => item.effTotal));
-        console.log('max', maxAllowance);
-        console.log(_.min([30000, (maxAllowance / _.min(newPositions.length, 1))]));
         return _.min([30000, (maxAllowance / _.max([newPositions.length, 1]))]);
     }
 
@@ -680,13 +677,15 @@ class ContestAdviceFormImpl extends React.Component {
         Passed as a prop to AqStockTableMod
     */
     onChange = positions => {
-        const validatePortfolio = _.debounce(() => {
-            this.validatePortfolio();
-        }, 1000);
-        this.updatePositions(_.cloneDeep(positions), () => {
-            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-            validatePortfolio();
-        })
+        new Promise(resolve => {
+            const validatePortfolio = _.debounce(() => {
+                this.validatePortfolio();
+            }, 1000);
+            this.updatePositions(_.cloneDeep(positions), () => {
+                !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+                validatePortfolio();
+            })
+        });
         // this.setState({positions: _.cloneDeep(positions)}, () => {
         //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
         //     validatePortfolio();
@@ -856,7 +855,7 @@ class ContestAdviceFormImpl extends React.Component {
                         label="Net Value"
                         money
                     />
-                    <SliderInput 
+                    {/*<SliderInput 
                         style={{width: '100%'}}
                         disabled={!this.state.showPortfolioByStock}
                         sliderSpan={24}
@@ -867,7 +866,7 @@ class ContestAdviceFormImpl extends React.Component {
                         min={0}
                         max={this.state.portfolioMaxNetValue}
                         inputWidth='100%'
-                    />
+                    />*/}
                 </div>
             </div>
         );
@@ -916,10 +915,9 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     updatePositionsWithNewNav = (sector, positions, sectorNavChange) => {
-        console.log('Sector Allowance', sector.sector, sectorNavChange);
         //const sectorNav = _.min([allowedSectorNavChange, sector.positions.length * maxStockTargetTotal, maxSectorTargetTotal]);
         //let sNav = sectorNav / Math.max(sector.positions.length, 1);
-        console.log('sectorNavChange', sectorNavChange);
+        //console.log('sectorNavChange', sectorNavChange);
         let positionsToChange = sector.positions.filter(position => {
             if (sectorNavChange > 0) { return position.effTotal < 50000 }
             else { return position.effTotal > 0 }
@@ -928,7 +926,6 @@ class ContestAdviceFormImpl extends React.Component {
 
         let sNav = sectorNavChange / Math.max(nStocks, 1);
         // let sNav = allowedSectorNavChange / Math.max(sector.positions.length, 1);
-        console.log('sNav', sNav);
         return positions.map(position => {
             const shouldModifyPosition = position.sector === sector.sector;
             const currentStockExposure = position.effTotal;
@@ -960,7 +957,6 @@ class ContestAdviceFormImpl extends React.Component {
 
     getSectorAllowance = sector => {
         const currentSectorNav = _.sum(sector.positions.map(position => position.effTotal));
-        console.log('current sector nav', currentSectorNav);
         const sectorAllowance = Math.min((sector.positions.length * this.state.maxStockTargetTotalSoft), this.state.maxSectorTargetTotalSoft) - currentSectorNav;
 
         return sectorAllowance;
@@ -1401,7 +1397,7 @@ class ContestAdviceFormImpl extends React.Component {
         })
     })
 
-    getNetvalue = (positions, field = 'effTotal') => {
+    getNetvalue = (positions, field = 'totalValue') => {
         let totalValue = 0;
         positions.map(position => {
             totalValue += position[field];

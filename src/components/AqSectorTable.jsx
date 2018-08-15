@@ -14,14 +14,14 @@ export default class AqSectorTable extends React.Component {
                 dataIndex: 'sector',
                 key: 'sector',
                 render: (text, record) => <span>{text}</span>,
-                width: 130
+                width: 170
             },
             {
                 title: 'TARGET TOTAL',
                 dataIndex: 'targetTotal',
                 key: 'targetTotal',
                 render: (text, record) => this.renderSliderColumns(text, record, 'targetTotal', 'number'),
-                width: 300
+                width: 170
             },
             {
                 title: 'TOTAL',
@@ -35,14 +35,14 @@ export default class AqSectorTable extends React.Component {
                 dataIndex: 'numStocks',
                 key: 'numStocks',
                 render: (text, record) => <span>{text}</span>,
-                width: 80
+                width: 120
             },
             {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
                 render: (text, record) => <span>{text} %</span>,
-                width: 80
+                width: 120
             },
         ];
         this.state = {
