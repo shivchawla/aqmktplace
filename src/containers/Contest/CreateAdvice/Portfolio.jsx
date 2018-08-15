@@ -237,6 +237,8 @@ export class Portfolio extends React.Component {
                     isUpdate={this.props.isUpdate}
                     benchmark={this.props.benchmark}
                     stockSearchFilters={this.props.stockSearchFilters}
+                    maxSectorTargetTotal={this.props.maxSectorTargetTotal}
+                    maxStockTargetTotal={this.props.maxStockTargetTotal}
                 />
             </Col>
         );
@@ -248,6 +250,8 @@ export class Portfolio extends React.Component {
                 <AqSectorTable 
                     data={this.props.data}
                     onChange={this.props.onChange}
+                    maxSectorTargetTotal={this.props.maxSectorTargetTotal}
+                    maxStockTargetTotal={this.props.maxStockTargetTotal}
                 />
             </Col>
         );
@@ -264,6 +268,8 @@ export class Portfolio extends React.Component {
                 updateSelectedPosition={this.props.updateIndividualPosition}
                 deletePositions={this.props.deletePositions}
                 portfolioStockViewMobile={this.props.portfolioStockViewMobile}
+                maxSectorTargetTotal={this.props.maxSectorTargetTotal}
+                maxStockTargetTotal={this.props.maxStockTargetTotal}
             />
         );
     }

@@ -43,8 +43,7 @@ const defaultAdviceError = {
         MAX_SECTOR_EXPOSURE: {valid: true}
     }
 };
-const maxStockTargetTotal = 50000;
-const maxSectorTargetTotal = 180000;
+
 this.benchmark = 'NIFTY_50';
 
 class ContestAdviceFormImpl extends React.Component {
@@ -84,14 +83,21 @@ class ContestAdviceFormImpl extends React.Component {
             performanceMetrics: {},
             loginModalVisible: false,
             portfolioNetValue: 0,
-            portfolioMaxNetValue: 1000000
+            portfolioMaxNetValue: 1000000,
+            maxStockTargetTotalHard: 0,
+            maxSectorTargetTotalHard: 0,
+            maxStockTargetTotalSoft: 0,
+            maxSectorTargetTotalSoft: 0,
         };
     }
 
     updatePositions = (positions = [], callback = undefined) => {
+        let sectorData = this.processPositionToSectors(positions);
+        const maxNetValue = this.getMaxNetValueLimit(sectorData);
         this.setState({
             positions,
-            portfolioNetValue: this.getNetvalue(positions)
+            portfolioNetValue: this.getNetvalue(positions),
+            portfolioMaxNetValue: maxNetValue
         }, () => {
             callback && callback();
         });
@@ -404,6 +410,8 @@ class ContestAdviceFormImpl extends React.Component {
                 renderPortfolioPieChart={this.renderPortfolioPieChart}
                 portfolioStockViewMobile={this.state.portfolioStockViewMobile}
                 showPortfolioByStock= {this.state.showPortfolioByStock}
+                maxSectorTargetTotal={this.state.maxSectorTargetTotalSoft}
+                maxStockTargetTotal={this.state.maxStockTargetTotalSoft}
             />
         )
     }
@@ -552,7 +560,7 @@ class ContestAdviceFormImpl extends React.Component {
         console.log(newPositions);
         const positionsInSector = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal);
         const nPositionsInSector = positionsInSector.length;
-        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, ((nPositionsInSector + newPositionsLength)* maxStockTargetTotal)])]);
+        const maxSectorExposure = _.max([0, _.min([this.state.maxSectorTargetTotalSoft, ((nPositionsInSector + newPositionsLength)* this.state.maxStockTargetTotalSoft)])]);
         const maxAllowance = maxSectorExposure - _.sum(positionsInSector.filter(item => item.effTotal != undefined).map(item => item.effTotal));
         console.log('max', maxAllowance);
         console.log(_.min([30000, (maxAllowance / _.min(newPositions.length, 1))]));
@@ -842,22 +850,25 @@ class ContestAdviceFormImpl extends React.Component {
 
     renderNetValue = () => {
         return (
-            <div style={{...verticalBox, alignItems: 'flex-end'}}>
-                <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
+            <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                <MetricItem 
+                    value={this.state.positions.filter(item => item.shares > 0).length}
+                    label="Number of positions"
+                    style={{width: '50%'}}
+                />
+                <div style={{...verticalBox, alignItems: 'flex-start'}}>
                     <MetricItem 
-                        value={this.state.positions.filter(item => item.shares > 0).length}
-                        label="Number of positions"
-                    />
-                    {/* <MetricItem 
                         value={this.state.portfolioNetValue}
                         label="Net Value"
                         money
-                    /> */}
+                    />
                     <SliderInput 
+                        style={{width: '100%'}}
                         disabled={!this.state.showPortfolioByStock}
                         sliderSpan={24}
                         inputSpan={24}
                         value={this.state.portfolioNetValue}
+                        hideValue={true}
                         onChange={this.handleNetValueChange}
                         min={0}
                         max={this.state.portfolioMaxNetValue}
@@ -928,7 +939,7 @@ class ContestAdviceFormImpl extends React.Component {
             const shouldModifyPosition = position.sector === sector.sector;
             const currentStockExposure = position.effTotal;
             console.log('Current Stock Exposure', currentStockExposure);
-            let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), maxStockTargetTotal]), 0]);
+            let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), this.state.maxStockTargetTotalSoft]), 0]);
             console.log('Updated Stock exposure', updatedStockExposure);
             // let targetTotal = position.effTotal + sNav;
             let lastPrice = position.lastPrice;
@@ -959,7 +970,7 @@ class ContestAdviceFormImpl extends React.Component {
     getSectorAllowance = sector => {
         const currentSectorNav = _.sum(sector.positions.map(position => position.effTotal));
         console.log('current sector nav', currentSectorNav);
-        const sectorAllowance = Math.min((sector.positions.length * maxStockTargetTotal), maxSectorTargetTotal) - currentSectorNav;
+        const sectorAllowance = Math.min((sector.positions.length * this.state.maxStockTargetTotalSoft), this.state.maxSectorTargetTotalSoft) - currentSectorNav;
 
         return sectorAllowance;
     }
@@ -974,13 +985,12 @@ class ContestAdviceFormImpl extends React.Component {
         });
     }
 
-    getMaxNetValueLimit = sectors => {
+    getMaxNetValueLimit = (sectors, maxStockTargetTotal = this.state.maxStockTargetTotalSoft, maxSectorTargetTotal = this.state.maxSectorTargetTotalSoft) => {
         let maxNetValue = 0;
         sectors.map(sector => {
             const nPositions = sector.positions.length;
             maxNetValue += Math.min(nPositions * maxStockTargetTotal, maxSectorTargetTotal);
         });
-        console.log(maxNetValue);
 
         return maxNetValue;
     }
@@ -996,7 +1006,7 @@ class ContestAdviceFormImpl extends React.Component {
             const shouldModifyPosition = _.findIndex(positionsToChange, item => item.symbol === position.symbol) > -1;
             let currentStockExposure = _.get(position, 'effTotal', 0);
             const lastPrice = _.get(position, 'lastPrice', 0);
-            let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), maxStockTargetTotal]), 0]);
+            let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), this.state.maxStockTargetTotalSoft]), 0]);
             const nShares = Math.floor(updatedStockExposure / lastPrice);
             const totalValue = Number((lastPrice * nShares).toFixed(2));
 
@@ -1282,7 +1292,8 @@ class ContestAdviceFormImpl extends React.Component {
         );
     }
 
-    getBenchmarkConfig = benchmark => new Promise((resolve, reject) => {
+    getBenchmarkConfig = (benchmark, positions = [...this.state.positions]) => new Promise((resolve, reject) => {
+        let sectorData = this.processPositionToSectors(positions);
         const confgUrl = `${requestUrl}/config?type=contest&benchmark=${benchmark}`;
         fetchAjax(confgUrl, this.props.history, this.props.match.url)
         .then(configResponse => {
@@ -1290,12 +1301,22 @@ class ContestAdviceFormImpl extends React.Component {
             const sector = _.get(configData, 'sector', '');
             const industry = _.get(configData, 'industry', '');
             const universe = _.get(configData, 'universe', 'NIFTY_500');
+            const maxStockExposureSoft = _.get(configData, 'portfolio.MAX_STOCK_EXPOSURE.SOFT', 0);
+            const maxStockExposureHard = _.get(configData, 'portfolio.MAX_STOCK_EXPOSURE.HARD', 0);
+            const maxSectorExposureSoft = _.get(configData, 'portfolio.MAX_SECTOR_EXPOSURE.SOFT', 0);
+            const maxSectorExposureHard = _.get(configData, 'portfolio.MAX_SECTOR_EXPOSURE.HARD', 0);
+            const maxNetValue = this.getMaxNetValueLimit(sectorData, maxStockExposureSoft, maxSectorExposureSoft);
             this.setState({
                 stockSearchFilters: {
                     industry,
                     sector,
                     universe
-                }
+                },
+                maxStockTargetTotalHard: maxStockExposureHard,
+                maxSectorTargetTotalHard: maxSectorExposureHard,
+                maxStockTargetTotalSoft: maxStockExposureSoft,
+                maxSectorTargetTotalSoft: maxSectorExposureSoft,
+                portfolioMaxNetValue: maxNetValue
             }, () => {resolve(true)})
         })
         .catch(error => reject(error));

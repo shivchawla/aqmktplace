@@ -5,9 +5,6 @@ import SliderInput from '../components/AqSliderInput';
 import {verticalBox, nameEllipsisStyle, primaryColor} from '../constants';
 import {Utils} from '../utils';
 
-const maxStockTargetTotal = 50000;
-const maxSectorTargetTotal = 180000;
-
 export class AqStockTableMod extends React.Component {
     constructor(props) {
         super(props);
@@ -84,14 +81,14 @@ export class AqStockTableMod extends React.Component {
     renderSliderColumns = (text, record, column, type) => {
         const positionsInSector = this.state.data.filter(item => item.sector === record.sector);
         const nPositionsInSector = positionsInSector.length;
-        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, (nPositionsInSector * maxStockTargetTotal)])]);
+        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
         const maxAllowance = maxSectorExposure - _.sum(positionsInSector.map(item => item.effTotal));
         return (
             <SliderInput 
                 value={Number(text)}
                 onChange={value => {this.handleRowChange(value, record.key, column, type)}}
                 inputWidth='80px'
-                max={_.min([maxStockTargetTotal, (record.effTotal + maxAllowance)])}
+                max={_.min([this.props.maxStockTargetTotal, (record.effTotal + maxAllowance)])}
             />
         );
     }
@@ -106,8 +103,7 @@ export class AqStockTableMod extends React.Component {
             target['shares'] = shares;
             target['totalValue'] = Number((shares * lastPrice).toFixed(2));
             this.updateAllWeights(newData)
-            this.setState({newData});
-            this.props.onChange(newData);
+            this.setState({newData}, () => this.props.onChange(newData));
         }
     }
 

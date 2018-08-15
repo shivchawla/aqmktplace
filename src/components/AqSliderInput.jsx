@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Row, Col, Slider, InputNumber, Input} from 'antd'; 
-import {primaryColor} from '../constants';
+import {primaryColor, horizontalBox} from '../constants';
 
 export default class SliderInput extends React.Component {
     constructor(props) {
@@ -19,10 +19,10 @@ export default class SliderInput extends React.Component {
     }
 
     render() {
-        const {min = 0, max = 50000, inputWidth = '65px', sliderSpan = 14, inputSpan = 10, disabled=false} = this.props;
+        const {min = 0, max = 50000, inputWidth = '65px', sliderSpan = 16, inputSpan = 8, disabled=false} = this.props;
 
         return (
-            <Row>
+            <Row style={this.props.style}>
                 <Col span={sliderSpan}>
                     <Slider 
                         disabled = {disabled}
@@ -34,7 +34,7 @@ export default class SliderInput extends React.Component {
                         step={500}
                     />
                 </Col>
-                <Col span={inputSpan}>
+                <Col span={inputSpan} style={{textAlign: 'right', paddingRight: '10px'}}>
                     {/* <InputNumber
                         min={min}
                         max={max}
@@ -48,7 +48,14 @@ export default class SliderInput extends React.Component {
                             }
                         }}
                     /> */}
-                    <h3>{Math.round(this.props.value)}</h3>
+                    {
+                        !this.props.hideValue &&
+                        <h3>{Math.round(this.props.value)}</h3>
+                    }
+                </Col>
+                <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginRight: '10px'}}>
+                    <h3 style={{fontSize: '14px', fontWeight: 700}}>Min: {min}</h3>
+                    <h3 style={{fontSize: '14px', fontWeight: 700}}>Max: {max.toFixed(2)}</h3>
                 </Col>
             </Row>
         );

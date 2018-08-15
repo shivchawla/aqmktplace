@@ -4,7 +4,7 @@ import {withRouter} from 'react-router';
 import {Row, Col, Spin, AutoComplete, Input, Icon} from 'antd';
 import {Button as MobileButton, InputItem} from 'antd-mobile';
 import {fetchAjax, getStockData, Utils, openNotification} from '../../../../utils';
-import {horizontalBox, primaryColor} from '../../../../constants';
+import {horizontalBox, primaryColor, verticalBox} from '../../../../constants';
 import {handleSectorTargetTotalChange, processSectorStockData, updateSectorWeights} from '../utils';
 import SliderInput from './Slider';
 const {requestUrl} = require('../../../../localConfig');
@@ -17,8 +17,6 @@ const defaultStockData = {
     total: 0,
     weight: 0,
 };
-const maxStockTargetTotal = 50000;
-const maxSectorTargetTotal = 180000;
 
 class UpdateSectorMobileImpl extends React.Component {
     constructor(props) {
@@ -45,11 +43,9 @@ class UpdateSectorMobileImpl extends React.Component {
 
     handleTargetTotalChange = inputValue => {
         const value = Number(inputValue);
-        const nPositionsInSector = this.props.positions.filter(item => item.sector === this.state.stockData.sector).length;
-        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, (nPositionsInSector * maxStockTargetTotal)])]);
         const oldNav = _.get(this.state, 'stockData.targetTotal', 0);
-        const newNav = Number(value) > maxSectorExposure 
-                ? maxSectorExposure 
+        const newNav = Number(value) > this.getMaxSectorExposure() 
+                ? this.getMaxSectorExposure() 
                 : Number(value) < 0 
                     ? 0
                     : Number(value);
@@ -63,6 +59,12 @@ class UpdateSectorMobileImpl extends React.Component {
                 weight: Number(((sectorTotal / portfolioTotalValue) * 100).toFixed(2))
             }
         });
+    }
+
+    getMaxSectorExposure = () => {
+        const nPositionsInSector = this.props.positions.filter(item => item.sector === this.state.stockData.sector).length;
+        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
+        return maxSectorExposure;
     }
 
     calculateEffectiveTotal = (oldTargetTotal, currentTargetTotal) => {
@@ -80,34 +82,6 @@ class UpdateSectorMobileImpl extends React.Component {
             sectorTotal: _.sum(stockData.filter(position => position.sector === sector).map(position => position.totalValue)),
             portfolioTotal: _.sum(stockData.map(position => position.totalValue))
         };
-    }
-
-    asyncProcessData = (data, disableTargetTotalUpdate = false) => new Promise((resolve, reject) => {
-        resolve (processSectorStockData(data, this.state.data, disableTargetTotalUpdate));
-    })
-
-    updateStockWeights = (data) => new Promise((resolve, reject) => {
-        let totalPortfolioValue = _.sum(data.map(item => item.totalValue));
-        totalPortfolioValue = totalPortfolioValue === 0 ? 1 : totalPortfolioValue;
-
-        resolve (data.map(item => {
-            return {
-                ...item,
-                weight: Number(((item.totalValue / totalPortfolioValue * 100)).toFixed(2))
-            }
-        }));
-    })
-
-    modifyPositionFromTargetTotal = (item, effTotal) => {
-        const shares = Math.floor(effTotal / item.lastPrice);
-        const totalValue = shares * item.lastPrice;
-
-        return {
-            ...item,
-            effTotal: Number(effTotal.toFixed(2)),
-            shares,
-            totalValue
-        }
     }
 
     clearPageDetails = callback => {
@@ -138,7 +112,7 @@ class UpdateSectorMobileImpl extends React.Component {
     render() {
         const {sector, numStocks, targetTotal, total, weight} = this.state.stockData;
         const nPositionsInSector = this.state.positions.filter(item => item.sector === sector).length;
-        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, (nPositionsInSector * maxStockTargetTotal)])]);
+        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
 
         return (
             <Row style={{height: '100%', position: 'relative', padding: '0 10px'}}>
@@ -182,10 +156,14 @@ class UpdateSectorMobileImpl extends React.Component {
                         </Col>
                         <Col span={24}>
                             <Row type="flex" align="middle" style={{marginBottom: '20px'}}>
-                                <Col span={8}>
+                                <Col span={11}>
                                     <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Target Total</h3>
+                                    <div style={{...horizontalBox, justifyContent: 'space-between'}}>
+                                        <h3 style={{fontSize: '12px'}}>Min: 0</h3>
+                                        <h3 style={{fontSize: '12px'}}>Max: {this.getMaxSectorExposure()}</h3>
+                                    </div>
                                 </Col>
-                                <Col span={12} offset={4} style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                                <Col offset={1} span={12} style={{...horizontalBox, justifyContent: 'flex-end'}}>
                                     <div style={horizontalBox}>
                                         <Icon style={{fontSize: '22px'}} type={"minus-circle-o"} onClick={() => this.handleTargetTotalChange(targetTotal - 5000)}/>
                                         <InputItem 
@@ -239,7 +217,7 @@ export const UpdateSector = withRouter(UpdateSectorMobileImpl);
 const StockDetailComponent = ({label, value, valueStyle, labelStyle}) => {
     return (
         <Row type="flex" align="middle" style={{marginBottom: '20px'}}>
-            <Col span={8}>
+            <Col span={8} style={{...verticalBox, alignItems: 'flex=end'}}>
                 <h3 style={{fontSize: '16px', color: '#4A4A4A', ...labelStyle}}>{label}</h3>
             </Col>
             <Col span={16} style={{...horizontalBox, justifyContent: 'flex-end'}}>

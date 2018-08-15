@@ -18,7 +18,6 @@ export const handleSectorTargetTotalChange = (newNav, oldNav, sector, stocks) =>
         cNav = newNav - _.sum(stockData.filter(item => item.sector === sector).map(item => item.effTotal));
         count++;
     }
-    console.log(stockData);
 
     return stockData;
 }

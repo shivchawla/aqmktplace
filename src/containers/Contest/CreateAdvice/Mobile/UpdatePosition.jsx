@@ -20,8 +20,6 @@ const defaultStockData = {
     effTotal: 0
 };
 
-const maxStockTargetTotal = 50000;
-const maxSectorTargetTotal = 180000;
 
 class UpdatePositionMobileImpl extends React.Component {
     constructor(props) {
@@ -130,28 +128,33 @@ class UpdatePositionMobileImpl extends React.Component {
     }
 
     handleTargetTotalChange = inputValue => {
-        const value = Number(inputValue);
-        const positionsInSector = this.props.positions.filter(item => item.sector === this.state.stockData.sector);
-        const nPositionsInSector = positionsInSector.length;
-        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, (nPositionsInSector * maxStockTargetTotal)])]);
-        const maxAllowance = maxSectorExposure - _.sum(positionsInSector.map(item => item.effTotal));
-        const maxValueAllowed = _.min([maxStockTargetTotal, (this.state.stockData.effTotal + maxAllowance)]);
+        let value = Number(inputValue);
+        value = value > this.getMaxStockValueAllowed() 
+                ? this.getMaxStockValueAllowed() 
+                : value < 0 
+                    ? 0
+                    : value
         const totalValue = this.state.stockData.lastPrice * this.calculateSharesFromTargetTotal(value);
         const weight = Number(((totalValue / (this.getNetASsetValue() + totalValue)) * 100).toFixed(2));
-
         this.setState({
             stockData: {
                 ...this.state.stockData,
-                effTotal: value > maxValueAllowed 
-                        ? maxValueAllowed 
-                        : value < 0 
-                            ? 0
-                            : value,
+                effTotal: value,
                 shares: this.calculateSharesFromTargetTotal(value),
                 totalValue,
                 weight
             }
         })
+    }
+
+    getMaxStockValueAllowed = () => {
+        const positionsInSector = this.props.positions.filter(item => item.sector === this.state.stockData.sector);
+        const nPositionsInSector = positionsInSector.length;
+        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
+        const maxAllowance = maxSectorExposure - _.sum(positionsInSector.map(item => item.effTotal));
+        const maxValueAllowed = _.min([this.props.maxStockTargetTotal, (this.state.stockData.effTotal + maxAllowance)]);
+
+        return maxValueAllowed;
     }
 
     getNetASsetValue = () => {
@@ -275,10 +278,14 @@ class UpdatePositionMobileImpl extends React.Component {
                             </Col>
                             <Col span={24}>
                                 <Row type="flex" align="middle" style={{marginBottom: '20px'}}>
-                                    <Col span={8}>
+                                    <Col span={11}>
                                         <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Target Total</h3>
+                                        <div style={{...horizontalBox, justifyContent: 'space-between'}}>
+                                            <h3 style={{fontSize: '12px'}}>Min: 0</h3>
+                                            <h3 style={{fontSize: '12px'}}>Max: {this.getMaxStockValueAllowed()}</h3>
+                                        </div>
                                     </Col>
-                                    <Col offset={4} span={12} style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                                    <Col offset={1} span={12} style={{...horizontalBox, justifyContent: 'flex-end'}}>
                                         <div style={horizontalBox}>
                                             <Icon style={{fontSize: '22px'}} type={"minus-circle-o"} onClick={() => this.handleTargetTotalChange(this.state.stockData.effTotal - 1000)}/>
                                             <InputItem 

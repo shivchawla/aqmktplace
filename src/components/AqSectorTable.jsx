@@ -5,9 +5,6 @@ import SliderInput from '../components/AqSliderInput';
 import {Utils} from '../utils';
 import {handleSectorTargetTotalChange, processSectorStockData, updateSectorWeights} from '../containers/Contest/CreateAdvice/utils';
 
-const maxStockTargetTotal = 50000;
-const maxSectorTargetTotal = 180000;
-
 export default class AqSectorTable extends React.Component {
     constructor(props) {
         super(props);
@@ -57,7 +54,7 @@ export default class AqSectorTable extends React.Component {
 
     renderSliderColumns = (text, record, column, type, disabled = false) => {
         const nPositionsInSector = this.state.stockData.filter(item => item.sector === record.sector).length;
-        const maxSectorExposure = _.max([0, _.min([maxSectorTargetTotal, (nPositionsInSector * maxStockTargetTotal)])]);
+        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
         
         return (
             <SliderInput 
