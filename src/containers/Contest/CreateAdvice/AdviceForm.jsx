@@ -12,6 +12,9 @@ import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
+import LoginModal from '../../../containers/LoginModal';
+import SliderInput from '../../../components/AqSliderInput';
+import LoaderModal from '../../../components/LoaderModal';
 import {AqPageHeader} from '../../../components/AqPageHeader';
 import AppLayout from '../../../containers/AppLayout';
 import {AqMobileLayout} from '../../AqMobileLayout/Layout';
@@ -40,6 +43,7 @@ const defaultAdviceError = {
         MAX_SECTOR_EXPOSURE: {valid: true}
     }
 };
+
 this.benchmark = 'NIFTY_50';
 
 class ContestAdviceFormImpl extends React.Component {
@@ -66,6 +70,7 @@ class ContestAdviceFormImpl extends React.Component {
             adviceError: defaultAdviceError,
             showAdviceErrorDialog: false,
             adviceSubmissionLoading: false,
+            adviceCreationLoading: false,
             highStockSeries: [],
             openBenchmarkChangeModal: false,
             loading: false,
@@ -76,7 +81,30 @@ class ContestAdviceFormImpl extends React.Component {
             portfolioStockViewMobile: true,
             showPortfolioByStock: true,
             performanceMetrics: {},
+            loginModalVisible: false,
+            portfolioNetValue: 0,
+            portfolioMaxNetValue: 1000000,
+            maxStockTargetTotalHard: 0,
+            maxSectorTargetTotalHard: 0,
+            maxStockTargetTotalSoft: 0,
+            maxSectorTargetTotalSoft: 0,
         };
+    }
+
+    updatePositions = (positions = [], callback = undefined) => {
+        let sectorData = this.processPositionToSectors(positions);
+        const maxNetValue = this.getMaxNetValueLimit(sectorData);
+        this.setState({
+            positions,
+            portfolioNetValue: this.getNetvalue(positions),
+            portfolioMaxNetValue: maxNetValue
+        }, () => {
+            callback && callback();
+        });
+    }
+
+    toggleLoginModal = () => {
+        this.setState({loginModalVisible: !this.state.loginModalVisible});
     }
 
     togglePortfolioStockViewMobile = () => {
@@ -164,22 +192,13 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     fetchBenchmarkConfig = benchmark => {
-        const confgUrl = `${requestUrl}/config?type=contest&benchmark=${benchmark}`;
         this.setState({loadingBenchmarkConfig: true});
-        fetchAjax(confgUrl, this.props.history, this.props.match.url)
-        .then(configResponse => {
-            const configData = configResponse.data;
-            const sector = _.get(configData, 'sector', '');
-            const industry = _.get(configData, 'industry', '');
-            const universe = _.get(configData, 'universe', 'NIFTY_500');
+        const positions = [];
+        this.getBenchmarkConfig(benchmark, positions)
+        .then(() => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: []});
-            this.searchStockComponent.resetFilterFromParent(sector, industry);
+            this.searchStockComponent.resetFilterFromParent(this.state.stockSearchFilters.sector, this.state.stockSearchFilters.industry);
             this.setState({
-                stockSearchFilters: {
-                    industry,
-                    sector,
-                    universe
-                },
                 positions: []
             }, () => {
                 this.searchStockComponent.resetSearchFilters()
@@ -188,6 +207,7 @@ class ContestAdviceFormImpl extends React.Component {
                 })
             });
         })
+        .catch(err => console.log(err))
         .finally(() => {
             this.setState({loadingBenchmarkConfig: false});
             openNotification('info', 'Configurations Loaded', `New Configurations loaded for Benchmark: ${benchmark}`);
@@ -203,29 +223,27 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     handleSubmitAdvice = (type='validate') => new Promise((resolve, reject) => {
-        const adviceUrl = `${requestUrl}/advice`;
+        if (type !== 'validate' && !Utils.isLoggedIn()) {
+            this.toggleLoginModal();
+            return;
+        }
+        const adviceUrl = type === 'validate' ? `${requestUrl}/advice/validate` : `${requestUrl}/advice/create`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
         let adviceId = null;
-        this.setState({adviceSubmissionLoading: true});
+        this.setState({adviceSubmissionLoading: true, adviceCreationLoading: type !== 'validate'});
         axios({
             url: type === 'validate' 
                     ? adviceUrl 
                     : this.props.isUpdate 
-                            ? `${adviceUrl}/${this.props.adviceId}` 
+                            ? `${requestUrl}/advice/${this.props.adviceId}` 
                             : adviceUrl,
-            // url: adviceUrl,
             method: type === 'validate' 
                     ? 'POST' 
                     : this.props.isUpdate 
                             ? 'PATCH' 
                             : 'POST',
-            // method: 'POST',
-            data: type === 'validate' 
-                    ? requestObject 
-                    : this.props.isUpdate 
-                            ? requestObject.advice 
-                            : requestObject,
-            headers: Utils.getAuthTokenHeader()
+            data: requestObject,
+            headers: type === 'validate' ? null : Utils.getAuthTokenHeader()
         })
         .then(response => {
             const {data} = response;
@@ -278,7 +296,7 @@ class ContestAdviceFormImpl extends React.Component {
             }
         })
         .catch(error => {
-            console.log(error);
+            //console.log(error);
             return handleCreateAjaxError(
                 error, 
                 this.props.history, 
@@ -287,7 +305,7 @@ class ContestAdviceFormImpl extends React.Component {
             )
         })
         .finally(() => {
-            this.setState({adviceSubmissionLoading: false});
+            this.setState({adviceSubmissionLoading: false, adviceCreationLoading: false});
             resolve(true);
         })
     })
@@ -384,6 +402,11 @@ class ContestAdviceFormImpl extends React.Component {
                 renderPortfolioPieChart={this.renderPortfolioPieChart}
                 portfolioStockViewMobile={this.state.portfolioStockViewMobile}
                 showPortfolioByStock= {this.state.showPortfolioByStock}
+                maxSectorTargetTotal={this.state.maxSectorTargetTotalSoft}
+                maxStockTargetTotal={this.state.maxStockTargetTotalSoft}
+                maxSectorTargetTotalHard={this.state.maxSectorTargetTotalHard}
+                maxStockTargetTotalHard={this.state.maxStockTargetTotalHard}
+                isUpdate={this.props.isUpdate}
             />
         )
     }
@@ -478,11 +501,16 @@ class ContestAdviceFormImpl extends React.Component {
 
     conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
         const positions = [...this.state.positions];
-        this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
+        this.updatePositions(this.updateAllWeights(selectedPositions), () => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             this.handleSubmitAdvice('validate')
             .then(() => resolve(true));
-        });
+        })
+        // this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
+        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+        //     this.handleSubmitAdvice('validate')
+        //     .then(() => resolve(true));
+        // });
     })
 
     deletePositions = toBeDeletedPositions => {
@@ -493,10 +521,14 @@ class ContestAdviceFormImpl extends React.Component {
                 positions.splice(positionIndex, 1);
             }
         });
-        this.setState({positions: this.updateAllWeights(positions)}, () => {
+        this.updatePositions(this.updateAllWeights(positions), () => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-            this.handleSubmitAdvice('validate')
-        });
+            this.handleSubmitAdvice('validate');
+        })
+        // this.setState({positions: this.updateAllWeights(positions)}, () => {
+        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+        //     this.handleSubmitAdvice('validate')
+        // });
     }
 
     calculateTotalReturnFromTargetTotal = data => {
@@ -506,13 +538,24 @@ class ContestAdviceFormImpl extends React.Component {
             item.effTotal = positionIndex !== -1 ? this.state.positions[positionIndex].effTotal : undefined;
             const total = item.effTotal !== undefined
                     ? item.effTotal
-                    : item.lastPrice > 30000 ? item.lastPrice : 30000
+                    : this.getEffTotal(item, data);
+                    // : item.lastPrice > 30000 ? item.lastPrice : 30000
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
             item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);
 
             return item;
         })
+    }
+
+    getEffTotal = (stock, data) => {
+        const newPositions = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal === undefined);
+        const newPositionsLength = newPositions.length;
+        const positionsInSector = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal);
+        const nPositionsInSector = positionsInSector.length;
+        const maxSectorExposure = _.max([0, _.min([this.state.maxSectorTargetTotalSoft, ((nPositionsInSector + newPositionsLength)* this.state.maxStockTargetTotalSoft)])]);
+        const maxAllowance = maxSectorExposure - _.sum(positionsInSector.filter(item => item.effTotal != undefined).map(item => item.effTotal));
+        return _.min([30000, (maxAllowance / _.max([newPositions.length, 1]))]);
     }
 
     updateIndividualPosition = position => {
@@ -523,10 +566,14 @@ class ContestAdviceFormImpl extends React.Component {
             targetPosition.effTotal = position.effTotal;
             targetPosition.totalValue = position.totalValue;
         }
-        this.setState({positions: this.updateAllWeights(positions)}, () => {
+        this.updatePositions(this.updateAllWeights(positions), () => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
             this.handleSubmitAdvice();
-        });
+        })
+        // this.setState({positions: this.updateAllWeights(positions)}, () => {
+        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+        //     this.handleSubmitAdvice();
+        // });
     }
     
     updateAllWeights = data => {
@@ -554,7 +601,6 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     getAdvicePortfolioPerformance = selectedBenchmark => new Promise((resolve, reject) => {
-        console.log('Called');
         const performanceUrl = `${requestUrl}/performance`;
         const benchmark = this.state.benchmark;
         const requestObject = this.constructAdvicePerformanceRequestObject(benchmark);
@@ -631,14 +677,19 @@ class ContestAdviceFormImpl extends React.Component {
         Passed as a prop to AqStockTableMod
     */
     onChange = positions => {
-        const validatePortfolio = _.debounce(() => {
-            this.validatePortfolio();
-        }, 1000);
-
-        this.setState({positions: _.cloneDeep(positions)}, () => {
-            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-            validatePortfolio();
+        new Promise(resolve => {
+            const validatePortfolio = _.debounce(() => {
+                this.validatePortfolio();
+            }, 1000);
+            this.updatePositions(_.cloneDeep(positions), () => {
+                !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+                validatePortfolio();
+            })
         });
+        // this.setState({positions: _.cloneDeep(positions)}, () => {
+        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+        //     validatePortfolio();
+        // });
     }
 
     validatePortfolio = () => {
@@ -648,54 +699,51 @@ class ContestAdviceFormImpl extends React.Component {
     /**
      *  Constructs the request payload for the create advice network call
      */
-    constructCreateAdviceRequestObject = (type='validate') => {
+    constructCreateAdviceRequestObject = () => {
         const startDate = moment().format(dateFormat);
         const endDate = moment(startDate).add(500, 'year').format(dateFormat); // Adding 500 years to the end date
         const name = `${this.state.benchmark} ${this.state.stockSearchFilters.sector} ${this.state.stockSearchFilters.universe}`;
         
         const requestObject = {
-            advice: {
+            name,
+            portfolio: {
                 name,
-                portfolio: {
-                    name,
-                    detail: {
-                        startDate,
-                        endDate,
-                        positions: this.getPortfolioPositions(),
-                        cash: 0
-                    },
-                    benchmark: {
-                        ticker: this.state.benchmark,
-                        securityType: 'EQ',
-                        country: 'IN',
-                        exchange: 'NSE'
-                    },
+                detail: {
+                    startDate,
+                    endDate,
+                    positions: this.getPortfolioPositions(),
+                    cash: 0
                 },
-                rebalance: 'Daily',
-                maxNotional: 1000000,
-                investmentObjective: {
-                    goal: {
-                        field: 'goalField',
-                        investorType: 'Contest Investors',
-                        suitability: 'Suitability'
-                    },
-                    sectors: {
-                        detail: ['Tech']
-                    },
-                    portfolioValuation: {
-                        field: 'Blend'
-                    },
-                    capitalization: {
-                        field: 'Small Cap'
-                    },
-                    userText: {
-                        detail: 'investmentObjUserText'
-                    }
+                benchmark: {
+                    ticker: this.state.benchmark,
+                    securityType: 'EQ',
+                    country: 'IN',
+                    exchange: 'NSE'
                 },
-                public: true,
-                contestOnly: true
             },
-            action: type
+            rebalance: 'Daily',
+            maxNotional: 1000000,
+            investmentObjective: {
+                goal: {
+                    field: 'goalField',
+                    investorType: 'Contest Investors',
+                    suitability: 'Suitability'
+                },
+                sectors: {
+                    detail: ['Tech']
+                },
+                portfolioValuation: {
+                    field: 'Blend'
+                },
+                capitalization: {
+                    field: 'Small Cap'
+                },
+                userText: {
+                    detail: 'investmentObjUserText'
+                }
+            },
+            public: true,
+            contestOnly: true
         }
 
         return requestObject;
@@ -795,20 +843,176 @@ class ContestAdviceFormImpl extends React.Component {
 
     renderNetValue = () => {
         return (
-            <div style={{...verticalBox, alignItems: 'flex-end'}}>
-                <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
+            <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                <MetricItem 
+                    value={this.state.positions.filter(item => item.shares > 0).length}
+                    label="Number of positions"
+                    style={{width: '50%'}}
+                />
+                <div style={{...verticalBox, alignItems: 'flex-start'}}>
                     <MetricItem 
-                        value={this.state.positions.filter(item => item.shares > 0).length}
-                        label="Number of positions"
-                    />
-                    <MetricItem 
-                        value={this.getNetvalue()}
+                        value={this.state.portfolioNetValue}
                         label="Net Value"
                         money
                     />
+                    {/*<SliderInput 
+                        style={{width: '100%'}}
+                        disabled={!this.state.showPortfolioByStock}
+                        sliderSpan={24}
+                        inputSpan={24}
+                        value={this.state.portfolioNetValue}
+                        hideValue={true}
+                        onChange={this.handleNetValueChange}
+                        min={0}
+                        max={this.state.portfolioMaxNetValue}
+                        inputWidth='100%'
+                    />*/}
                 </div>
             </div>
         );
+    }
+
+    handleNetValueChange = newNetValue => {
+        let positions = [...this.state.positions];
+        let sectorData = this.processPositionToSectors(positions);
+        const maxNetValue = this.getMaxNetValueLimit(sectorData);
+        let oldNav = this.state.portfolioNetValue;
+        let newNav = Number(newNetValue);
+        let count = 0;
+        let cNav = newNav - oldNav;
+        while(Math.abs(cNav) > 5) {
+            // if (count > 10) { break; }
+            if (cNav > 0) {
+                const sectorsWithPositiveAllowance = this.getSectorsWithPositiveAllowance(sectorData);
+                sectorsWithPositiveAllowance.map(sector => {
+                    const sectorNavChange = Math.min((cNav / sectorsWithPositiveAllowance.length), this.getSectorAllowance(sector));
+                    positions = this.updatePositionsWithNewNav(sector, positions, sectorNavChange, cNav);
+                });
+            } else {
+                const sectorsWithPositiveExposure = this.getSectorsWithPositiveExposure(sectorData);
+                sectorsWithPositiveExposure.map(sector => {
+                    const sectorNavChange = Math.max((cNav / sectorsWithPositiveExposure.length), -1*this.getSectorExposure(sector));
+                    positions = this.updatePositionsWithNewNav(sector, positions, sectorNavChange, cNav);
+                });
+            }
+
+            const currentNav = this.getCurrentNav(positions);
+            cNav = newNav - currentNav;
+            count++;
+        }
+        positions = this.updateAllWeights(positions);
+        this.setState({
+            positions,
+            portfolioMaxNetValue: maxNetValue,
+            portfolioNetValue: Number(newNetValue)
+        }, () => {
+            this.handleSubmitAdvice()
+        });
+    }
+
+    getCurrentNav = positions => {
+        return _.sum(positions.map(position => position.effTotal));
+    }
+
+    updatePositionsWithNewNav = (sector, positions, sectorNavChange) => {
+        //const sectorNav = _.min([allowedSectorNavChange, sector.positions.length * maxStockTargetTotal, maxSectorTargetTotal]);
+        //let sNav = sectorNav / Math.max(sector.positions.length, 1);
+        //console.log('sectorNavChange', sectorNavChange);
+        let positionsToChange = sector.positions.filter(position => {
+            if (sectorNavChange > 0) { return position.effTotal < 50000 }
+            else { return position.effTotal > 0 }
+        });
+        let nStocks = positionsToChange.length;
+
+        let sNav = sectorNavChange / Math.max(nStocks, 1);
+        // let sNav = allowedSectorNavChange / Math.max(sector.positions.length, 1);
+        return positions.map(position => {
+            const shouldModifyPosition = position.sector === sector.sector;
+            const currentStockExposure = position.effTotal;
+            let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), this.state.maxStockTargetTotalSoft]), 0]);
+            let lastPrice = position.lastPrice;
+            let nShares = Math.floor(updatedStockExposure / lastPrice);
+            let totalValue = Number((nShares * lastPrice).toFixed(2));
+            if (shouldModifyPosition) {
+                position.effTotal = Number(updatedStockExposure.toFixed(2));
+                position.shares = nShares;
+                position.totalValue = totalValue;
+            }
+
+            return position;
+        })
+    }
+
+    getSectorsWithPositiveAllowance = sectors => {
+        return sectors.filter(sector => this.getSectorAllowance(sector) > 0);
+    }
+
+    getSectorsWithPositiveExposure = sectors => {
+        return sectors.filter(sector => this.getSectorExposure(sector) > 0);
+    }
+
+    getSectorExposure = sector => {
+        return _.sum(sector.positions.map(position => position.effTotal));
+    }
+
+    getSectorAllowance = sector => {
+        const currentSectorNav = _.sum(sector.positions.map(position => position.effTotal));
+        const sectorAllowance = Math.min((sector.positions.length * this.state.maxStockTargetTotalSoft), this.state.maxSectorTargetTotalSoft) - currentSectorNav;
+
+        return sectorAllowance;
+    }
+
+    processPositionToSectors = positions => {
+        const uniqueSectors = _.uniqBy(positions, 'sector').map(position => position.sector);
+
+        return uniqueSectors.map(sector => {
+            const sectorPositions = positions.filter(position => position.sector === sector);
+
+            return {sector, positions: sectorPositions};
+        });
+    }
+
+    getMaxNetValueLimit = (sectors, maxStockTargetTotal = this.state.maxStockTargetTotalSoft, maxSectorTargetTotal = this.state.maxSectorTargetTotalSoft) => {
+        let maxNetValue = 0;
+        sectors.map(sector => {
+            const nPositions = sector.positions.length;
+            maxNetValue += Math.min(nPositions * maxStockTargetTotal, maxSectorTargetTotal);
+        });
+
+        return maxNetValue;
+    }
+
+    updatePositionsWithStockChange = (sectorChangeNav, currentPositions, positionsToChange) => {
+        // console.log('Positons to change', positionsToChange);
+        // console.log('Current Positons', currentPositions);
+
+
+        return currentPositions.map(position => {
+            const numStocksinSector = currentPositions.filter(item => item.sector === position.sector).length;
+            const sNav = sectorChangeNav / numStocksinSector;
+            const shouldModifyPosition = _.findIndex(positionsToChange, item => item.symbol === position.symbol) > -1;
+            let currentStockExposure = _.get(position, 'effTotal', 0);
+            const lastPrice = _.get(position, 'lastPrice', 0);
+            let updatedStockExposure = _.max([_.min([(currentStockExposure + sNav), this.state.maxStockTargetTotalSoft]), 0]);
+            const nShares = Math.floor(updatedStockExposure / lastPrice);
+            const totalValue = Number((lastPrice * nShares).toFixed(2));
+
+            if(shouldModifyPosition) {
+                // const nPosition = position;
+                // console.log('Positions will be modified', position);
+                // console.log('Update Stock Exposure', updatedStockExposure);
+                position.shares = nShares;
+                position.totalValue = totalValue;
+                position.effTotal = updatedStockExposure;
+                return position;
+            } else {
+                return position;
+            }
+        });
+    }
+
+    getSectorCountFromPositions = (positions = this.state.positions) => {
+        return _.uniqBy(positions, 'sector').length;
     }
 
     renderNoActiveContestsScreen = () => {
@@ -1075,7 +1279,8 @@ class ContestAdviceFormImpl extends React.Component {
         );
     }
 
-    getBenchmarkConfig = benchmark => new Promise((resolve, reject) => {
+    getBenchmarkConfig = (benchmark, positions = [...this.state.positions]) => new Promise((resolve, reject) => {
+        let sectorData = this.processPositionToSectors(positions);
         const confgUrl = `${requestUrl}/config?type=contest&benchmark=${benchmark}`;
         fetchAjax(confgUrl, this.props.history, this.props.match.url)
         .then(configResponse => {
@@ -1083,12 +1288,22 @@ class ContestAdviceFormImpl extends React.Component {
             const sector = _.get(configData, 'sector', '');
             const industry = _.get(configData, 'industry', '');
             const universe = _.get(configData, 'universe', 'NIFTY_500');
+            const maxStockExposureSoft = _.get(configData, 'portfolio.MAX_STOCK_EXPOSURE.SOFT', 50000);
+            const maxStockExposureHard = _.get(configData, 'portfolio.MAX_STOCK_EXPOSURE.HARD', 60000);
+            const maxSectorExposureSoft = _.get(configData, 'portfolio.MAX_SECTOR_EXPOSURE.SOFT', 18000000000);
+            const maxSectorExposureHard = _.get(configData, 'portfolio.MAX_SECTOR_EXPOSURE.HARD', 21000000000);
+            const maxNetValue = this.getMaxNetValueLimit(sectorData, maxStockExposureSoft, maxSectorExposureSoft);
             this.setState({
                 stockSearchFilters: {
                     industry,
                     sector,
                     universe
-                }
+                },
+                maxStockTargetTotalHard: maxStockExposureHard,
+                maxSectorTargetTotalHard: maxSectorExposureHard,
+                maxStockTargetTotalSoft: maxStockExposureSoft,
+                maxSectorTargetTotalSoft: maxSectorExposureSoft,
+                portfolioMaxNetValue: maxNetValue
             }, () => {resolve(true)})
         })
         .catch(error => reject(error));
@@ -1104,11 +1319,15 @@ class ContestAdviceFormImpl extends React.Component {
         .then(([adviceSummary, advicePortfolio]) => {
             benchmark = _.get(adviceSummary, 'portfolio.benchmark.ticker');
             const name = _.get(adviceSummary, 'name', '');
-            const positions = _.get(advicePortfolio, 'detail.positions', []);
+            const positions = this.processPositions(_.get(advicePortfolio, 'detail.positions', []));
+            let sectorData = this.processPositionToSectors(positions);
+            const maxNetValue = this.getMaxNetValueLimit(sectorData);
             this.setState({
                 name,
                 benchmark,
-                positions: this.processPositions(positions)
+                positions,
+                portfolioNetValue: this.getNetvalue(positions),
+                portfolioMaxNetValue: maxNetValue
             });
         })
         .then(() => {
@@ -1133,6 +1352,7 @@ class ContestAdviceFormImpl extends React.Component {
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 sector: _.get(position, 'security.detail.Sector', null),
+                name: _.get(position, 'security.detail.Nse_Name', ''),
                 ticker: symbol,
                 symbol,
                 effTotal: total,
@@ -1177,14 +1397,13 @@ class ContestAdviceFormImpl extends React.Component {
         })
     })
 
-    getNetvalue = () => {
-        const {positions = []} = this.state;
+    getNetvalue = (positions, field = 'totalValue') => {
         let totalValue = 0;
         positions.map(position => {
-            totalValue += position.totalValue;
+            totalValue += position[field];
         });
 
-        return totalValue;
+        return Number(totalValue.toFixed(2));
     }
 
     getActiveContestToParticipate = () => new Promise((resolve, reject) => {
@@ -1203,6 +1422,17 @@ class ContestAdviceFormImpl extends React.Component {
         .catch(err => reject(err));
     })
 
+    // Initialze portfolioNetvalue
+    initializeNetValue = () => {
+        let sectorData = this.processPositionToSectors(this.state.positions);
+        const maxNetValue = this.getMaxNetValueLimit(sectorData);
+
+        this.setState({
+            portfolioNetValue: this.getNetvalue(this.state.positions),
+            portfolioMaxNetValue: maxNetValue
+        });
+    }
+
     componentWillMount() {
         this.setState({loading: true});
         openNotification('info', 'Info', 'Changes to the portfolio after 12pm will be reflected on the next trading day')
@@ -1213,6 +1443,7 @@ class ContestAdviceFormImpl extends React.Component {
                 this.setState({loading: false});
             })
         } else {
+            this.initializeNetValue();
             Promise.all([
                 this.handleSubmitAdvice(),   
                 this.getActiveContestToParticipate(),
@@ -1254,6 +1485,17 @@ class ContestAdviceFormImpl extends React.Component {
     render() {
         return (
             <React.Fragment>
+                <LoginModal 
+                    visible={this.state.loginModalVisible}
+                    toggleModal={this.toggleLoginModal}
+                    createEntry={() => this.handleSubmitAdvice('create')}
+                />
+                <LoaderModal 
+                    text={
+                        this.props.isUpdate ? 'Updating Entry' : 'Creating Entry'
+                    }
+                    visible={this.state.adviceCreationLoading}
+                />
                 <Media 
                     query="(max-width: 600px)"
                     render={() => 

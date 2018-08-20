@@ -4,9 +4,9 @@ import {withRouter} from 'react-router';
 import {Row, Col, Spin, AutoComplete, Input, Icon} from 'antd';
 import {Button as MobileButton, InputItem} from 'antd-mobile';
 import {fetchAjax, getStockData, Utils, openNotification} from '../../../../utils';
-import {horizontalBox, primaryColor} from '../../../../constants';
-import { Item } from '../../../../../node_modules/antd-mobile/lib/tab-bar';
-
+import {horizontalBox, primaryColor, verticalBox} from '../../../../constants';
+import {handleSectorTargetTotalChange, processSectorStockData, updateSectorWeights} from '../utils';
+import SliderInput from './Slider';
 const {requestUrl} = require('../../../../localConfig');
 const AutocompleteOption = AutoComplete.Option;
 const spinIcon = <Icon type="loading" style={{ fontSize: 16, marginRight: '5px' }} spin />;
@@ -41,72 +41,47 @@ class UpdateSectorMobileImpl extends React.Component {
         });
     }
 
-    handleTargetTotalChange = value => {
-        const oldTotal = _.get(this.state, 'stockData.targetTotal', 0);
-        const totalPortfolioNetValue = _.sum(this.state.positions.map(position => position.totalValue));
-        this.calculateEffectiveTotal(Number(oldTotal), Number(value))
-        .then(({sectorTotal, portfolioTotal}) => {
-            const portfolioTotalValue = portfolioTotal === 0 ? 1 : portfolioTotal;
-            this.setState({
-                stockData: {
-                    ...this.state.stockData,
-                    targetTotal: value,
-                    total: sectorTotal,
-                    weight: Number(((sectorTotal / portfolioTotalValue) * 100).toFixed(2))
-                }
-            })
+    handleTargetTotalChange = inputValue => {
+        const value = Number(inputValue);
+        const oldNav = _.get(this.state, 'stockData.targetTotal', 0);
+        const newNav = Number(value) > this.getMaxSectorExposure() 
+                ? this.getMaxSectorExposure() 
+                : Number(value) < 0 
+                    ? 0
+                    : Number(value);
+        const {sectorTotal, portfolioTotal} = this.calculateEffectiveTotal(Number(oldNav), newNav);
+        const portfolioTotalValue = portfolioTotal === 0 ? 1 : portfolioTotal;
+        this.setState({
+            stockData: {
+                ...this.state.stockData,
+                targetTotal: newNav,
+                total: sectorTotal,
+                weight: Number(((sectorTotal / portfolioTotalValue) * 100).toFixed(2))
+            }
         });
     }
 
-    calculateEffectiveTotal = (oldTargetTotal, currentTargetTotal) => {
-        const {positions = []} = this.state;
-        const sector = _.get(this.state, 'stockData.sector', '');
-        // Positions that belongs to the required sector
-        const requiredPositions = positions.filter(position => position.sector === sector);
-        return Promise.map(positions, position => {
-            if (position.sector === sector) {
-                const effTotal = oldTargetTotal > 0 && position.effTotal > 0
-                    ? position.effTotal * (currentTargetTotal / oldTargetTotal)
-                    : currentTargetTotal / requiredPositions.length;
-
-                return this.modifyPositionFromTargetTotal(position, effTotal);
-            } else {
-                return position;
-            }            
-        })
-        .then(positions => this.updateStockWeights(positions))
-        .then(positions => {
-            this.setState({positions});
-            return {
-                sectorTotal: _.sum(positions.filter(position => position.sector === sector).map(position => position.totalValue)),
-                portfolioTotal: _.sum(positions.map(position => position.totalValue))
-            };
-        })
-        .catch(err => console.log(err))
+    getMaxSectorExposure = () => {
+        const nPositionsInSector = this.props.positions.filter(item => item.sector === this.state.stockData.sector).length;
+        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
+        return maxSectorExposure;
     }
 
-    updateStockWeights = (data) => new Promise((resolve, reject) => {
-        let totalPortfolioValue = _.sum(data.map(item => item.totalValue));
-        totalPortfolioValue = totalPortfolioValue === 0 ? 1 : totalPortfolioValue;
-
-        resolve (data.map(item => {
-            return {
-                ...item,
-                weight: Number(((item.totalValue / totalPortfolioValue * 100)).toFixed(2))
-            }
-        }));
-    })
-
-    modifyPositionFromTargetTotal = (item, effTotal) => {
-        const shares = Math.floor(effTotal / item.lastPrice);
-        const totalValue = shares * item.lastPrice;
+    calculateEffectiveTotal = (oldTargetTotal, currentTargetTotal) => {
+        const positions = [...this.state.positions];
+        const sector = _.get(this.state, 'stockData.sector', '');
+        let stockData = [];
+        try {
+            stockData = handleSectorTargetTotalChange(currentTargetTotal, oldTargetTotal, sector, positions) || [];
+        } catch(err) {
+            console.log(err);
+        }
+        this.setState({positions: stockData});
 
         return {
-            ...item,
-            effTotal: Number(effTotal.toFixed(2)),
-            shares,
-            totalValue
-        }
+            sectorTotal: _.sum(stockData.filter(position => position.sector === sector).map(position => position.totalValue)),
+            portfolioTotal: _.sum(stockData.map(position => position.totalValue))
+        };
     }
 
     clearPageDetails = callback => {
@@ -136,9 +111,11 @@ class UpdateSectorMobileImpl extends React.Component {
 
     render() {
         const {sector, numStocks, targetTotal, total, weight} = this.state.stockData;
+        const nPositionsInSector = this.state.positions.filter(item => item.sector === sector).length;
+        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
 
         return (
-            <Row style={{height: '100%', position: 'relative'}}>
+            <Row style={{height: '100%', position: 'relative', padding: '0 10px'}}>
                 <div 
                         span={24} 
                         style={{
@@ -169,7 +146,7 @@ class UpdateSectorMobileImpl extends React.Component {
                         Update Sector
                     </h3>
                 </div>
-                <Col span={24} style={{marginTop: '20px', padding: '0 10px'}}>
+                <Col span={24} style={{marginTop: '20px', padding: '0 20px'}}>
                     <Row>
                         <Col span={24}>
                             <StockDetailComponent label="Sector" value={sector} />
@@ -179,11 +156,16 @@ class UpdateSectorMobileImpl extends React.Component {
                         </Col>
                         <Col span={24}>
                             <Row type="flex" align="middle" style={{marginBottom: '20px'}}>
-                                <Col span={8}>
+                                <Col span={11}>
                                     <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Target Total</h3>
+                                    <div style={{...horizontalBox, justifyContent: 'space-between'}}>
+                                        {/*<h3 style={{fontSize: '12px'}}>Min: 0</h3>*/}
+                                        <h3 style={{fontSize: '12px'}}>Max: {this.getMaxSectorExposure()}</h3>
+                                    </div>
                                 </Col>
-                                <Col span={16} style={{...horizontalBox, justifyContent: 'flex-end'}}>
+                                <Col offset={1} span={12} style={{...horizontalBox, justifyContent: 'flex-end'}}>
                                     <div style={horizontalBox}>
+                                        <Icon style={{fontSize: '22px'}} type={"minus-circle-o"} onClick={() => this.handleTargetTotalChange(targetTotal - 5000)}/>
                                         <InputItem 
                                             type="number"
                                             value={targetTotal} 
@@ -191,6 +173,7 @@ class UpdateSectorMobileImpl extends React.Component {
                                             style={{paddingLeft: '0px'}}
                                             ref={el => this.sharesTextInput = el}
                                         />
+                                        <Icon style={{fontSize: '22px'}} type={"plus-circle-o"} onClick={() => this.handleTargetTotalChange(targetTotal + 5000)}/>
                                     </div>
                                 </Col>
                             </Row>
@@ -234,7 +217,7 @@ export const UpdateSector = withRouter(UpdateSectorMobileImpl);
 const StockDetailComponent = ({label, value, valueStyle, labelStyle}) => {
     return (
         <Row type="flex" align="middle" style={{marginBottom: '20px'}}>
-            <Col span={8}>
+            <Col span={8} style={{...verticalBox, alignItems: 'flex=end'}}>
                 <h3 style={{fontSize: '16px', color: '#4A4A4A', ...labelStyle}}>{label}</h3>
             </Col>
             <Col span={16} style={{...horizontalBox, justifyContent: 'flex-end'}}>

@@ -46,6 +46,7 @@
     "react-loading-bar": "0.0.7",
     "react-media": "^1.8.0",
     "react-motion": "0.5.2",
+    "react-numeric-input": "^2.2.3",
     "react-quill": "1.2.7",
     "react-responsive-modal": "^3.0.3",
     "react-router": "4.2.0",

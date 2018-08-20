@@ -210,6 +210,9 @@ class PortfolioListImpl extends React.Component {
                                         selectedPosition={this.state.selectedPosition}
                                         toggleBottomSheet={this.toggleBottomSheet}
                                         updateSelectedPosition={this.props.updateSelectedPosition}
+                                        positions={this.props.positions}
+                                        maxSectorTargetTotal={this.props.maxSectorTargetTotal}
+                                        maxStockTargetTotal={this.props.maxStockTargetTotal}
                                     />
                                 :   <UpdateSector
                                         addPosition={this.addPosition} 
@@ -218,6 +221,8 @@ class PortfolioListImpl extends React.Component {
                                         updateSelectedPosition={this.props.updateSelectedPosition}
                                         positions={this.props.positions}
                                         onChange={this.props.onChange}
+                                        maxSectorTargetTotal={this.props.maxSectorTargetTotal}
+                                        maxStockTargetTotal={this.props.maxStockTargetTotal}
                                     />
                             }
                         </div>
