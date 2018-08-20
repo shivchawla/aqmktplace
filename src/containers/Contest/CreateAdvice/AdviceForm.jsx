@@ -243,7 +243,7 @@ class ContestAdviceFormImpl extends React.Component {
                             ? 'PATCH' 
                             : 'POST',
             data: requestObject,
-            headers: type === 'validate' ? null : Utils.getAuthTokenHeader()
+            headers: (type === 'validate' && !this.props.isUpdate) ? null : Utils.getAuthTokenHeader()
         })
         .then(response => {
             const {data} = response;
