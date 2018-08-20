@@ -227,7 +227,10 @@ class ContestAdviceFormImpl extends React.Component {
             this.toggleLoginModal();
             return;
         }
-        const adviceUrl = type === 'validate' ? `${requestUrl}/advice/validate` : `${requestUrl}/advice/create`;
+        const validateUpdateUrl = `${requestUrl}/advice/validate?operation=update&adviceId=${this.props.adviceId}`;
+        const validateCreateUrl = `${requestUrl}/advice/validate_default`;
+        const validateUrl = this.props.isUpdate ? validateUpdateUrl : validateCreateUrl;
+        const adviceUrl = type === 'validate' ? validateUrl : `${requestUrl}/advice/create`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
         let adviceId = null;
         this.setState({adviceSubmissionLoading: true, adviceCreationLoading: type !== 'validate'});
