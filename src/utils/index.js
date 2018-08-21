@@ -64,6 +64,16 @@ export const getStockStaticPerformance = (tickerName, detailType='detail', field
 	})
 }
 
+export const getStockRollingPerformance = (tickerName, detailType='detail', field='rollingPerformance') => {
+	return new Promise((resolve, reject) => {
+		getStockData(tickerName, field, detailType)
+		.then(performance => {
+			const data = _.get(performance, 'data.rollingPerformance.detail', {});
+			resolve(data);
+		})
+		.catch(err => reject(err));
+	})
+}
 export const convertToPercentage = value => {
     return Number((100 * value).toFixed(2));
 }

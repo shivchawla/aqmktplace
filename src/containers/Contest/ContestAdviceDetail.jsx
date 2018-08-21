@@ -5,7 +5,7 @@ import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
-import {Row, Col, Tabs, Button, Modal, message, Input, Select} from 'antd';
+import {Row, Col, Tabs, Button, Modal, message, Input, Radio} from 'antd';
 import {currentPerformanceColor, simulatedPerformanceColor, loadingColor, shadowBoxStyle, benchmarkColor, primaryColor, buttonStyle} from '../../constants';
 import UpdateAdvice from '../../containers/UpdateAdvice';
 import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
@@ -16,7 +16,7 @@ import {MetricItem} from '../../components/MetricItem';
 import {AqPageHeader} from '../../components/AqPageHeader';
 import {ContestAdviceDetailCrumb} from '../../constants/breadcrumbs';
 import {AdviceDetailMeta} from '../../metas';
-import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance, openNotification, handleCreateAjaxError, getStockStaticPerformance} from '../../utils';
+import {Utils, getBreadCrumbArray,fetchAjax, getStockPerformance, openNotification, handleCreateAjaxError, getStockStaticPerformance, getStockRollingPerformance} from '../../utils';
 import {benchmarks as benchmarkArray} from '../../constants/benchmarks';
 import '../../css/adviceDetail.css';
 import AppLayout from '../../containers/AppLayout';
@@ -27,6 +27,7 @@ const StockResearchModal = Loadable({
 });
 const TabPane = Tabs.TabPane;
 const {TextArea} = Input;
+const RadioGroup = Radio.Group;
 
 const {requestUrl} = require('../../localConfig.js');
 const DateHelper = require('../../utils/date');
@@ -166,10 +167,16 @@ class AdviceDetailImpl extends React.Component {
             withdrawModalVisible: false,
             prohibitModalVisible: false,
             participatedContests: [],
+            benchmarkPerformanceMonthly: [], // Stores the static performance of the benchmark
             simulatedStaticPerformance: [], // stores the data of the static performance for a particular field eg: totalReturn or volatility
             currentStaticPerformance: [], // stores the data of the static performance for a particular field eg: totalReturn or volatility
             currentStaticPortfolioPerformance: {}, // stores performance object for the current static performance of the portfolio
-            simulatedStaticPortfolioPerformance: {} // stores performance object for the simulated static performance of the portfolio
+            simulatedStaticPortfolioPerformance: {}, // stores performance object for the simulated static performance of the portfolio
+            selectedPerformanceMetrics: 'returns.totalreturn', // stores the selected key for rendering static performance
+            selectedRollingPerformanceMetric: 'returns.totalreturn', // stores the selected key for rendering rolling performance
+            currentRollingPerformance: {},
+            simulatedRollingPerformance: {},
+            benchmarkRollingPerformance: {}
         };
 
         this.performanceSummary = {};
@@ -216,9 +223,9 @@ class AdviceDetailImpl extends React.Component {
             netValue = 0,
             stocks = 0,
             approvalStatus = 'pending',
-            rebalance = ''
+            rebalance = '',
         } = response.data;
-        
+        const benchmark = _.get(portfolio, 'benchmark.ticker', 'NIFTY_50');
         this.performanceSummary = performanceSummary;
         const currentPerformance = _.get(performanceSummary, 'current', {}) || {};
         const simulatedPerformance = _.get(performanceSummary, 'simulated', {}) || {};
@@ -235,6 +242,7 @@ class AdviceDetailImpl extends React.Component {
             adviceResponse: response.data,
             adviceDetail: {
                 ...this.state.adviceDetail,
+                benchmark,
                 name,
                 description,
                 heading,
@@ -308,7 +316,7 @@ class AdviceDetailImpl extends React.Component {
             portfolio: response.data.portfolio
         });
     }
-
+    
     getAdvicePerformance = (performance, benchmark = 'NIFTY_50') => new Promise((resolve, reject) => {
         const tickers = [...this.state.tickers];
         const currentPortfolioPerformance = _.get(performance, 'current.metrics.portfolioPerformance', {});
@@ -318,12 +326,15 @@ class AdviceDetailImpl extends React.Component {
         const truePerformance = this.processPerformanceData(_.get(performance, 'current.portfolioValues', []));
         Promise.all([
             getStockPerformance(benchmark, benchmarkRequestType),
-            getStockStaticPerformance(benchmark, benchmarkRequestType)
+            getStockStaticPerformance(benchmark, benchmarkRequestType),
+            getStockRollingPerformance(benchmark, benchmarkRequestType)
         ])
-        .then(([benchmarkResponse, benchmarkStaticPerformance]) => {
+        .then(([benchmarkResponse, benchmarkStaticPerformance, benchmarkRollingPerformance]) => {
             const benchmarkPerformanceMonthly = _.get(benchmarkStaticPerformance, 'monthly', {});
             const simulatedStaticMonthlyPerformance = this.processStaticPerformance(_.get(simulatedPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly);
-            const currentStaticMonthlyPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly);    
+            const currentStaticMonthlyPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly, 'returns.totalreturn', 'True');    
+            const currentRollingPerformance = this.processRollingPerformance(_.get(currentPortfolioPerformance, 'rolling', {}), benchmarkRollingPerformance, 'returns.totalreturn', 'True');
+            const simulatedRollingPerformance = this.processRollingPerformance(_.get(simulatedPortfolioPerformance, 'rolling', {}), benchmarkRollingPerformance);
             let oneYearOldDate = moment().subtract(1, 'y');
             oneYearOldDate = oneYearOldDate.format('YYYY-MM-DD');
             benchmarkResponse = benchmarkResponse.filter(item => {
@@ -358,7 +369,11 @@ class AdviceDetailImpl extends React.Component {
                 simulatedStaticPerformance: simulatedStaticMonthlyPerformance,
                 currentStaticPerformance: currentStaticMonthlyPerformance,
                 currentStaticPortfolioPerformance: currentPortfolioPerformance,
-                simulatedStaticPortfolioPerformance: simulatedPortfolioPerformance
+                simulatedStaticPortfolioPerformance: simulatedPortfolioPerformance,
+                benchmarkPerformanceMonthly,
+                benchmarkRollingPerformance,
+                currentRollingPerformance,
+                simulatedRollingPerformance
             });
             resolve(true);
         })
@@ -367,7 +382,7 @@ class AdviceDetailImpl extends React.Component {
         });
     })
 
-    processStaticPerformance = (performance, benchmarkPerformance, field = 'totalreturn') => {
+    processStaticPerformance = (performance, benchmarkPerformance, field = 'returns.totalreturn', type='Historical') => {
         let performanceKeys = Object.keys(performance);
         let benchmarkPerformanceKeys = Object.keys(benchmarkPerformance);
         const dateOneyYearBack = moment().subtract(1, 'y').subtract(1, 'M');
@@ -380,34 +395,72 @@ class AdviceDetailImpl extends React.Component {
         performanceKeys = performanceKeys.map(key => moment(key, 'YYYY_M'));
         performanceKeys = performanceKeys.sort((a, b) => {return moment(a).isBefore(b) ?-1:1});
         const currentData = [];
-        const benchmarkData = []
+        const benchmarkData = [];
+        const benchmarkTimelineData = [];
+        const currentTimelineData = [];
 
         performanceKeys.map(key => {
-            const totalReturn = (_.get(performance, `${[moment(key).format('YYYY_M')]}.returns.${field}`, 0) || 0);
-            const totalReturnPercentage = Number((totalReturn * 100).toFixed(2));
-            currentData.push(totalReturnPercentage);
+            let metricValue = (_.get(performance, `${[moment(key).format('YYYY_M')]}.${field}`, 0) || 0);
+            if (field === 'returns.monthlyreturn') {
+                const annualreturn = (_.get(performance, `${[moment(key).format('YYYY_M')]}.returns.annualreturn`, 0) || 0);
+                metricValue = Math.exp(Math.log(1 + annualreturn) / 12) - 1;
+            }
+            const metricValuePercentage = Number((metricValue * 100).toFixed(2));
+            currentData.push(metricValuePercentage);
+            currentTimelineData.push({
+                timeline: key,
+                value: metricValuePercentage
+            });
         });
         performanceKeys.map(key => {
-            const totalReturn = (_.get(benchmarkPerformance, `${[moment(key).format('YYYY_M')]}.returns.${field}`, 0) || 0);
-            const totalReturnPercentage = Number((totalReturn * 100).toFixed(2));
-            benchmarkData.push(totalReturnPercentage)
+            let metricValue = (_.get(benchmarkPerformance, `${[moment(key).format('YYYY_M')]}.${field}`, 0) || 0);
+            if (field === 'returns.monthlyreturn') {
+                const annualreturn = (_.get(benchmarkPerformance, `${[moment(key).format('YYYY_M')]}.returns.annualreturn`, 0) || 0);
+                metricValue = Math.exp(Math.log(1 + annualreturn) / 12) - 1;
+            }
+            const metricValuePercentage = Number((metricValue * 100).toFixed(2));
+            benchmarkData.push({metricValuePercentage});
+            benchmarkTimelineData.push({
+                timeline: key,
+                value: metricValuePercentage
+            });
         });
 
         return [{
-            name: 'Current Static Performance',
-            data: currentData
+            name: `Portfolio Performance (${type})`,
+            data: currentData,
+            timelineData: currentTimelineData
         }, { 
-            name: 'Benchmark Static Performance',
-            data: benchmarkData
-        }
-        // , {
-        //     name: 'Year 2000',
-        //     data: [814, 841]
-        // }, {
-        //     name: 'Year 2016',
-        //     data: [1216, 1001]
-        // }   
-    ];
+            name: `Benchmark Performance - ${this.state.adviceDetail.benchmark} (${type})`,
+            data: benchmarkData,
+            timelineData: benchmarkTimelineData
+        }  
+        ];
+    }
+
+    processRollingPerformance = (performance, benchmarkPerformance, field = 'returns.totalreturn', type='Historical') => {
+        // let performanceKeys = Object.keys(performance);
+        const timelineData = [];
+        const benchmarkTimelineData = [];
+        const timelines = ['mtd', 'ytd', '1y', '2y', '5y', '10y'];
+        timelines.map(key => {
+            const metricValue = _.get(performance, `[${key}].${field}`, 0);
+            const metricPercentage = Number((metricValue * 100).toFixed(2));
+            const benchmarkMetricvalue = _.get(benchmarkPerformance, `[${key}].${field}`, 0);
+            const benchmarkMetricPercentage = Number((benchmarkMetricvalue * 100).toFixed(2));
+            timelineData.push(metricPercentage);
+            benchmarkTimelineData.push(benchmarkMetricPercentage);
+        });
+        return [
+            {
+                name: `Portfolio Performance (${type})`,
+                data: timelineData
+            },
+            {
+                name: `Benchmark Performance - ${this.state.adviceDetail.benchmark} (${type})`,
+                data: benchmarkTimelineData
+            }
+        ];
     }
 
     processPerformanceData = performanceData => {
@@ -486,6 +539,7 @@ class AdviceDetailImpl extends React.Component {
         const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
         const adviceContestUrl = `${requestUrl}/contest/entry/${adviceId}`;
         const adviceAllContestUrl = `${requestUrl}/contest/entry/all/${adviceId}`;
+        let benchmark = '';
         this.setState({loading: true});
         return Promise.all([
             fetchAjax(adviceSummaryUrl, this.props.history, this.props.match.url),
@@ -494,7 +548,7 @@ class AdviceDetailImpl extends React.Component {
         ]) 
         // .then(([adviceSummaryResponse, advicePerformanceResponse, adviceContestResponse]) => {
         .then(([adviceSummaryResponse, advicePerformanceResponse]) => {
-            const benchmark = _.get(adviceSummaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
+            benchmark = _.get(adviceSummaryResponse.data, 'portfolio.benchmark.ticker', 'NIFTY_50');
             const contestOnly = _.get(adviceSummaryResponse.data, 'contestOnly', false);
             this.getAdviceSummary(adviceSummaryResponse);
             const advicePortfolioUrl = `${adviceSummaryUrl}/portfolio?date=${startDate}`;
@@ -516,19 +570,18 @@ class AdviceDetailImpl extends React.Component {
             const adviceActive = _.get(adviceContestResponse.data, 'active', false);
             const withdrawn = _.get(adviceContestResponse.data, 'withDrawn', false);
             const prohibited = _.get(adviceContestResponse.data, 'prohibited', false);
-            console.log('Advice Active', adviceActive);
             this.setState({
                 adviceDetail: {
                     ...this.state.adviceDetail, 
                     active: adviceActive,
                     withdrawn,
-                    prohibited
+                    prohibited,
+                    benchmark
                 },
                 participatedContests: participatedContests,
             });
         })
         .catch(error => {
-            console.log(error);
             this.setState({
                 positions: [],
                 series: []
@@ -1543,6 +1596,63 @@ class AdviceDetailImpl extends React.Component {
         })
     }
 
+    handleStaticPerformanceSelectorChange = e => {
+        const selectedMetric = e.target.value;
+        const currentPortfolioPerformance = this.state.currentStaticPortfolioPerformance;
+        const simulatedPortfolioPerformance = this.state.simulatedStaticPortfolioPerformance;
+        const benchmarkPerformanceMonthly = this.state.benchmarkPerformanceMonthly;
+        const currentStaticPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly, selectedMetric, 'True');
+        const simulatedStaticPerformance = this.processStaticPerformance(_.get(simulatedPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly, selectedMetric, 'Historical');
+        this.setState({
+            selectedPerformanceMetrics: selectedMetric,
+            simulatedStaticPerformance,
+            currentStaticPerformance
+        });
+    }
+
+    renderStaticPerformanceSelectorRadioGroup = () => {
+        return (
+            <RadioGroup 
+                    onChange={this.handleStaticPerformanceSelectorChange} 
+                    value={this.state.selectedPerformanceMetrics}
+            >
+                <Radio value={'returns.totalreturn'}>Total Return</Radio>
+                <Radio value={'returns.monthlyreturn'}>Monthly Return</Radio>
+                <Radio value={'returns.annualreturn'}>Annual Return</Radio>
+                <Radio value={'deviation.annualstandarddeviation'}>Volatility</Radio>
+                <Radio value={'drawdown.maxdrawdown'}>Max Loss</Radio>
+            </RadioGroup>
+        );
+    }
+
+    handleRollingPerformanceSelectorChange = e => {
+        const selectedMetric = e.target.value;
+        const currentPortfolioPerformance = this.state.currentStaticPortfolioPerformance;
+        const simulatedPortfolioPerformance = this.state.simulatedStaticPortfolioPerformance;
+        const benchmarkRollingPerformance = this.state.benchmarkRollingPerformance;
+        const currentRollingPerformance = this.processRollingPerformance(_.get(currentPortfolioPerformance, 'rolling', {}), benchmarkRollingPerformance, selectedMetric, 'True');
+        const simulatedRollingPerformance = this.processRollingPerformance(_.get(simulatedPortfolioPerformance, 'rolling', {}), benchmarkRollingPerformance, selectedMetric, 'Historical');
+        this.setState({
+            selectedRollingPerformanceMetric: selectedMetric,
+            currentRollingPerformance,
+            simulatedRollingPerformance
+        });
+    }
+
+    renderRollingPerformanceSelectorRadioGroup = () => {
+        return (
+            <RadioGroup 
+                    onChange={this.handleRollingPerformanceSelectorChange} 
+                    value={this.state.selectedRollingPerformanceMetric}
+            >
+                <Radio value={'returns.totalreturn'}>Total Return</Radio>
+                <Radio value={'returns.annualreturn'}>Annual Return</Radio>
+                <Radio value={'deviation.annualstandarddeviation'}>Volatility</Radio>
+                <Radio value={'drawdown.maxdrawdown'}>Max Loss</Radio>
+            </RadioGroup>
+        );
+    }
+
     renderPageContent = () => {
         const {name, heading, description, advisor, updatedDate} = this.state.adviceDetail;
         const {annualReturn, totalReturns, averageReturns, dailyReturns} = this.state.metrics;
@@ -1582,6 +1692,10 @@ class AdviceDetailImpl extends React.Component {
                                 participatedContests={this.state.participatedContests}
                                 currentStaticPerformance={this.state.currentStaticPerformance}
                                 simulatedStaticPerformance={this.state.simulatedStaticPerformance}
+                                renderStaticPerformanceSelector={this.renderStaticPerformanceSelectorRadioGroup}
+                                renderRollingPerformanceSelector={this.renderRollingPerformanceSelectorRadioGroup}
+                                currentRollingPerformance={this.state.currentRollingPerformance}
+                                simulatedRollingPerformance={this.state.simulatedRollingPerformance}
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}
