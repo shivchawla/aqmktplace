@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
 export const handleSectorTargetTotalChange = (newNav, oldNav, sector, stocks) => {
-    console.log('Called');
     let positions = [...stocks];
     let count = 0;
     let stockData = [...stocks];
@@ -11,7 +10,6 @@ export const handleSectorTargetTotalChange = (newNav, oldNav, sector, stocks) =>
             if (cNav > 0) { return  position.effTotal < 50000}
             else { return position.effTotal >= 0 }
         });
-        if (count > 5) {return};
         const nStocks = positionsToChange.length;
         const sNav = cNav / nStocks;
         stockData = updateSectorStockPositions(positions, positionsToChange, sNav);

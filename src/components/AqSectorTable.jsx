@@ -87,7 +87,7 @@ export default class AqSectorTable extends React.Component {
             const oldNav = target.targetTotal;
             target[column] = newNav;
             this.setState({data: newData});
-            let stockData = handleSectorTargetTotalChange(newNav, oldNav, key, this.state.stockData);
+            let stockData = handleSectorTargetTotalChange(newNav, oldNav, key, positions);
             this.asyncProcessData(stockData, true)
             .then(data => updateSectorWeights(data))
             .then(data => {
