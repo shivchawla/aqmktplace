@@ -670,6 +670,28 @@ class AdviceDetailContentImpl extends React.Component {
                         </Row>
                     </Panel>
                     <Panel
+                            key="6"
+                            style={customPanelStyle}
+                            header={<h3 style={metricsHeaderStyle}>Rolling Performance</h3>}
+                        >
+                        <Row className="row-container">
+                            <Col span={24}>
+                                {this.props.renderRollingPerformanceSelector()}
+                            </Col>
+                            <Col span={24}>
+                                <Spin spinning={this.props.loading}>
+                                    <HighChartBar 
+                                        id='rollingPerformance'
+                                        dollarSeries={this.props.simulatedRollingPerformance}
+                                        percentageSeries={this.props.currentRollingPerformance}
+                                        radiogroupLabels = {['Historical', 'True']}
+                                        categories={['WTD', '1WK', 'MTD', '1M', 'YTD', 'INCEPTION']}
+                                    />
+                                </Spin>
+                            </Col>
+                        </Row>
+                    </Panel>
+                    <Panel
                             key="4"
                             style={customPanelStyle}
                             header={<h3 style={metricsHeaderStyle}>Static Performance</h3>}
@@ -687,28 +709,6 @@ class AdviceDetailContentImpl extends React.Component {
                                         radiogroupLabels = {['Historical', 'True']}
                                         categories={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Yo']}
                                         updateTimeline={true}
-                                    />
-                                </Spin>
-                            </Col>
-                        </Row>
-                    </Panel>
-                    <Panel
-                            key="6"
-                            style={customPanelStyle}
-                            header={<h3 style={metricsHeaderStyle}>Rolling Performance</h3>}
-                        >
-                        <Row className="row-container">
-                            <Col span={24}>
-                                {this.props.renderRollingPerformanceSelector()}
-                            </Col>
-                            <Col span={24}>
-                                <Spin spinning={this.props.loading}>
-                                    <HighChartBar 
-                                        id='rollingPerformance'
-                                        dollarSeries={this.props.simulatedRollingPerformance}
-                                        percentageSeries={this.props.currentRollingPerformance}
-                                        radiogroupLabels = {['Historical', 'True']}
-                                        categories={['MTD', 'YTD', '1Y', '2Y', '5Y', '10Y']}
                                     />
                                 </Spin>
                             </Col>
@@ -769,6 +769,7 @@ export const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle,
                     justifyContent: 'flex-end', 
                     top: '-40px', 
                     position:'absolute', 
+                    paddingRight: '20px'
                 }}>
                 {contestDropdown && contestDropdown()}
             </Col>

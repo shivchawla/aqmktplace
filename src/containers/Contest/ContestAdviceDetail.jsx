@@ -176,7 +176,8 @@ class AdviceDetailImpl extends React.Component {
             selectedRollingPerformanceMetric: 'returns.totalreturn', // stores the selected key for rendering rolling performance
             currentRollingPerformance: {},
             simulatedRollingPerformance: {},
-            benchmarkRollingPerformance: {}
+            benchmarkRollingCurrentPerformance: {},
+            benchmarkRollingSimulatedPerformance: {}
         };
 
         this.performanceSummary = {};
@@ -326,15 +327,19 @@ class AdviceDetailImpl extends React.Component {
         const truePerformance = this.processPerformanceData(_.get(performance, 'current.portfolioValues', []));
         Promise.all([
             getStockPerformance(benchmark, benchmarkRequestType),
-            getStockStaticPerformance(benchmark, benchmarkRequestType),
-            getStockRollingPerformance(benchmark, benchmarkRequestType)
+            // getStockStaticPerformance(benchmark, benchmarkRequestType),
+            // getStockRollingPerformance(benchmark, benchmarkRequestType)
         ])
-        .then(([benchmarkResponse, benchmarkStaticPerformance, benchmarkRollingPerformance]) => {
+        .then(([benchmarkResponse, benchmarkStaticPerformance]) => {
+            const benchmarkCurrentStaticPerformance = _.get(currentPortfolioPerformance, 'static_benchmark.monthly', {});    
+            const benchmarkSimulatedStaticPerformance = _.get(simulatedPortfolioPerformance, 'static_benchmark.monthly', {});    
+            const benchmarkRollingCurrentPerformance = _.get(currentPortfolioPerformance, 'rolling_benchmark', {});
+            const benchmarkRollingSimulatedPerformance = _.get(simulatedPerformance, 'rolling_benchmark', {});
             const benchmarkPerformanceMonthly = _.get(benchmarkStaticPerformance, 'monthly', {});
-            const simulatedStaticMonthlyPerformance = this.processStaticPerformance(_.get(simulatedPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly);
-            const currentStaticMonthlyPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly, 'returns.totalreturn', 'True');    
-            const currentRollingPerformance = this.processRollingPerformance(_.get(currentPortfolioPerformance, 'rolling', {}), benchmarkRollingPerformance, 'returns.totalreturn', 'True');
-            const simulatedRollingPerformance = this.processRollingPerformance(_.get(simulatedPortfolioPerformance, 'rolling', {}), benchmarkRollingPerformance);
+            const simulatedStaticMonthlyPerformance = this.processStaticPerformance(_.get(simulatedPortfolioPerformance, 'static.monthly', {}), benchmarkSimulatedStaticPerformance);
+            const currentStaticMonthlyPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkCurrentStaticPerformance, 'returns.totalreturn', 'True');    
+            const currentRollingPerformance = this.processRollingPerformance(_.get(currentPortfolioPerformance, 'rolling', {}), benchmarkRollingCurrentPerformance, 'returns.totalreturn', 'True');
+            const simulatedRollingPerformance = this.processRollingPerformance(_.get(simulatedPortfolioPerformance, 'rolling', {}), benchmarkRollingSimulatedPerformance);
             let oneYearOldDate = moment().subtract(1, 'y');
             oneYearOldDate = oneYearOldDate.format('YYYY-MM-DD');
             benchmarkResponse = benchmarkResponse.filter(item => {
@@ -371,7 +376,8 @@ class AdviceDetailImpl extends React.Component {
                 currentStaticPortfolioPerformance: currentPortfolioPerformance,
                 simulatedStaticPortfolioPerformance: simulatedPortfolioPerformance,
                 benchmarkPerformanceMonthly,
-                benchmarkRollingPerformance,
+                benchmarkRollingCurrentPerformance,
+                benchmarkRollingSimulatedPerformance,
                 currentRollingPerformance,
                 simulatedRollingPerformance
             });
@@ -427,11 +433,11 @@ class AdviceDetailImpl extends React.Component {
         });
 
         return [{
-            name: `Portfolio Performance (${type})`,
+            name: `Portfolio (${type})`,
             data: currentData,
             timelineData: currentTimelineData
         }, { 
-            name: `Benchmark Performance - ${this.state.adviceDetail.benchmark} (${type})`,
+            name: `${this.state.adviceDetail.benchmark} (${type})`,
             data: benchmarkData,
             timelineData: benchmarkTimelineData
         }  
@@ -442,7 +448,8 @@ class AdviceDetailImpl extends React.Component {
         // let performanceKeys = Object.keys(performance);
         const timelineData = [];
         const benchmarkTimelineData = [];
-        const timelines = ['mtd', 'ytd', '1y', '2y', '5y', '10y'];
+        const timelines = ['wtd', '1wk', 'mtd', '1m', 'ytd', 'inception'];
+        // const timelines = ['wtd', '1wk', 'mtd', '1m', 'ytd', '1y', '2y', '5y', '10y'];
         timelines.map(key => {
             const metricValue = _.get(performance, `[${key}].${field}`, 0);
             const metricPercentage = Number((metricValue * 100).toFixed(2));
@@ -453,11 +460,11 @@ class AdviceDetailImpl extends React.Component {
         });
         return [
             {
-                name: `Portfolio Performance (${type})`,
+                name: `Portfolio (${type})`,
                 data: timelineData
             },
             {
-                name: `Benchmark Performance - ${this.state.adviceDetail.benchmark} (${type})`,
+                name: `${this.state.adviceDetail.benchmark} (${type})`,
                 data: benchmarkTimelineData
             }
         ];
@@ -1617,8 +1624,8 @@ class AdviceDetailImpl extends React.Component {
                     value={this.state.selectedPerformanceMetrics}
             >
                 <Radio value={'returns.totalreturn'}>Total Return</Radio>
-                <Radio value={'returns.monthlyreturn'}>Monthly Return</Radio>
-                <Radio value={'returns.annualreturn'}>Annual Return</Radio>
+                {/* <Radio value={'returns.monthlyreturn'}>Monthly Return</Radio>
+                <Radio value={'returns.annualreturn'}>Annual Return</Radio> */}
                 <Radio value={'deviation.annualstandarddeviation'}>Volatility</Radio>
                 <Radio value={'drawdown.maxdrawdown'}>Max Loss</Radio>
             </RadioGroup>
@@ -1629,9 +1636,10 @@ class AdviceDetailImpl extends React.Component {
         const selectedMetric = e.target.value;
         const currentPortfolioPerformance = this.state.currentStaticPortfolioPerformance;
         const simulatedPortfolioPerformance = this.state.simulatedStaticPortfolioPerformance;
-        const benchmarkRollingPerformance = this.state.benchmarkRollingPerformance;
-        const currentRollingPerformance = this.processRollingPerformance(_.get(currentPortfolioPerformance, 'rolling', {}), benchmarkRollingPerformance, selectedMetric, 'True');
-        const simulatedRollingPerformance = this.processRollingPerformance(_.get(simulatedPortfolioPerformance, 'rolling', {}), benchmarkRollingPerformance, selectedMetric, 'Historical');
+        const benchmarkRollingCurrentPerformance = this.state.benchmarkRollingCurrentPerformance;
+        const benchmarkRollingSimulatedPerformance = this.state.benchmarkRollingSimulatedPerformance;
+        const currentRollingPerformance = this.processRollingPerformance(_.get(currentPortfolioPerformance, 'rolling', {}), benchmarkRollingCurrentPerformance, selectedMetric, 'True');
+        const simulatedRollingPerformance = this.processRollingPerformance(_.get(simulatedPortfolioPerformance, 'rolling', {}), benchmarkRollingSimulatedPerformance, selectedMetric, 'Historical');
         this.setState({
             selectedRollingPerformanceMetric: selectedMetric,
             currentRollingPerformance,
@@ -1646,7 +1654,7 @@ class AdviceDetailImpl extends React.Component {
                     value={this.state.selectedRollingPerformanceMetric}
             >
                 <Radio value={'returns.totalreturn'}>Total Return</Radio>
-                <Radio value={'returns.annualreturn'}>Annual Return</Radio>
+                {/* <Radio value={'returns.annualreturn'}>Annual Return</Radio> */}
                 <Radio value={'deviation.annualstandarddeviation'}>Volatility</Radio>
                 <Radio value={'drawdown.maxdrawdown'}>Max Loss</Radio>
             </RadioGroup>

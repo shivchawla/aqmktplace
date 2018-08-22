@@ -17,7 +17,7 @@ export class AqStockTableMod extends React.Component {
                     <div 
                         style={{...verticalBox, alignItems: 'flex-start'}}
                     >
-                        <span style={{fontSize: '14px'}}>
+                        <span style={{fontSize: '14px', fontWeight: 700}}>
                             {text}
                         </span>
                         <span 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ReactDOM from 'react-dom';
 import Media from 'react-media';
 import YouTube from 'react-youtube';
 import pulse from 'react-animations/lib/pulse';
@@ -42,7 +43,8 @@ export class Home extends React.Component {
             loading: true,
             youtubeModalVisible: false,
             contactUsModalvisible: false
-        }
+        };
+        this.howItWorks = null;
     }
 
     componentDidMount = () => {
@@ -163,9 +165,10 @@ export class Home extends React.Component {
                 </Col>
                 <Col span={12} className="tab-content-button-container">
                     <Button 
-                        className="home-action-buttons"
-                        onClick={() => this.props.history.push('/advice')} >
-                        FIND INVESTMENT IDEAS
+                            className="home-action-buttons"
+                            // onClick={() => this.props.history.push('/advice')} s
+                    >
+                        HOW IT WORKS
                     </Button>
                 </Col>
             </div>
@@ -441,9 +444,14 @@ export class Home extends React.Component {
                         <Button 
                                 style={{marginLeft: '20px'}}
                                 className="action-buttons"
-                                onClick={() => this.props.history.push('/advice')}
+                                onClick={() => {
+                                    const domNode = ReactDOM.findDOMNode(this.howItWorks);
+                                    if (domNode) {
+                                        domNode.scrollIntoView();
+                                    }
+                                }}
                         >
-                            FIND INVESTMENT IDEAS
+                            HOW IT WORKS
                         </Button>
                     </Col>
                 </Row>
@@ -467,9 +475,14 @@ export class Home extends React.Component {
                             </Button>
                             <Button 
                                     className="create-advice-button-mobile"
-                                    onClick={() => this.props.history.push('/advice')}
+                                    onClick={() => {
+                                        const domNode = ReactDOM.findDOMNode(this.howItWorks);
+                                        if (domNode) {
+                                            domNode.scrollIntoView();
+                                        }
+                                    }}
                             >
-                                FIND INVESTMENT IDEAS
+                                HOW IT WORKS
                             </Button>
                             <span 
                                     style={{
@@ -627,11 +640,11 @@ export class Home extends React.Component {
                                 text='Expert' 
                                 isSelected={this.state.selectedTabBar === 'advisor' ? true : false} 
                         />
-                        <TabBarElement 
+                        {/* <TabBarElement 
                                 onClick={() => this.handleTabBarClick('investor')} 
                                 text='Investor' 
                                 isSelected={this.state.selectedTabBar === 'investor' ? true : false} 
-                        />
+                        /> */}
                     </Col>
                     {
                         this.state.selectedTabBar === 'advisor' 
@@ -661,11 +674,11 @@ export class Home extends React.Component {
                                 text='Expert' 
                                 isSelected={this.state.selectedTabBar === 'advisor' ? true : false} 
                         />
-                        <TabBarElement 
+                        {/* <TabBarElement 
                                 onClick={() => this.handleTabBarClick('investor')} 
                                 text='Investor' 
                                 isSelected={this.state.selectedTabBar === 'investor' ? true : false} 
-                        />
+                        /> */}
                     </Col>
                     {
                         this.state.selectedTabBar === 'advisor' 
@@ -863,7 +876,11 @@ export class Home extends React.Component {
                             {this.renderActionButtonsMobile()}
                         </React.Fragment>
                     </Row>
-                    <Row className="lower-section" style={{marginTop: '30px', height:'100vh', minHeight: '600px'}}>
+                    <Row 
+                            className="lower-section" 
+                            style={{marginTop: '30px', height:'100vh', minHeight: '600px'}}
+                            ref={el => this.howItWorks = el}
+                    >
                         {this.renderLowerSectionMobile()}
                     </Row>
                     <Row className="middle-section" style={{marginTop: '50px'}}>
@@ -891,7 +908,11 @@ export class Home extends React.Component {
                                     {this.renderTopHeroImageDesktop()}
                                 </React.Fragment>
                             </Row>
-                            <Row className="lower-section" style={{marginTop: '30px', height:'100vh', minHeight: '600px'}}>
+                            <Row 
+                                    ref={el => this.howItWorks = el}
+                                    className="lower-section" 
+                                    style={{marginTop: '30px', height:'100vh', minHeight: '600px'}}
+                            >
                                 {this.renderLowerSectionDesktop()}
                             </Row>
                             <Row className="middle-section" style={{marginTop: '50px'}}>

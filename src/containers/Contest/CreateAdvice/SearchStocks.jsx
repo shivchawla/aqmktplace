@@ -2,7 +2,7 @@ import * as React from 'react';
 import Media from 'react-media';
 import {Motion, spring} from 'react-motion';
 import _  from 'lodash';
-import {sectorData} from '../../../constants/stockDetails';
+import ReactDOM from 'react-dom';
 import {Row, Col, Input, Icon, Badge, Button, Tag, Checkbox} from 'antd';
 import {SearchBar, Tag as TagMobile} from 'antd-mobile';
 import {StockPerformance} from './StockPerformance';
@@ -38,6 +38,7 @@ export class SearchStocks extends React.Component {
             }
         };
         this.localStocks = []; // Used to get the list of all stocks obtained from N/W calls
+        this.stockListComponent = null;
     }
 
     renderSearchStocksList = () => {
@@ -48,13 +49,17 @@ export class SearchStocks extends React.Component {
                     {/* <Button shape="circle" icon="filter" /> */}
                 </Col>
                 {/* <SectorItems sectors={this.getSectors()}/> */}
-                {this.renderPagination()}
-                <Col span={24} style={{marginTop: '20px'}}>
+                <Col 
+                        span={24} 
+                        style={{marginTop: '20px', marginBottom: '20px'}}
+                        ref={el => this.stockListComponent = el}
+                >
                     {
-                        !this.state.loadingStocks &&
+                        // !this.state.loadingStocks &&
                         this.renderStockList()
                     }
                 </Col>
+                {this.renderPagination()}
             </Row>
         );
     }
@@ -79,7 +84,7 @@ export class SearchStocks extends React.Component {
                         <Icon type="filter" style={{fontSize: '25px'}} onClick={this.toggleStockFilterOpen}/>
                     }
                 </Col>
-                {this.renderPaginationMobile()}
+                {this.renderBenchmarkDetailMobile()}
                 <Col 
                         span={24} 
                         style={{
@@ -88,13 +93,11 @@ export class SearchStocks extends React.Component {
                         }}
                 >
                     {
-                        !this.state.loadingStocks &&
                         this.renderStockList()
                     }
                 </Col>
                 {
-                    !this.state.loadingStocks 
-                    && this.state.stocks.length >= 8 
+                    this.state.stocks.length >= 8 
                     && this.renderPaginationMobile(true)
                 }
             </Row>
@@ -110,6 +113,7 @@ export class SearchStocks extends React.Component {
 
     fetchStocks = (searchQuery = this.state.searchInput) => new Promise(resolve => {
         const limit = 10;
+        const stocks = [...this.state.stocks];
         const skip = this.state.selectedPage * limit;
         const populate = true;
         const universe = _.get(this.props, 'filters.universe', null);
@@ -123,9 +127,9 @@ export class SearchStocks extends React.Component {
         this.setState({loadingStocks: true});
         fetchAjax(url, this.props.history, this.props.pageUrl)
         .then(({data: stockResponseData}) => {
-            const stocks = this.processStockList(stockResponseData);
-            this.setState({stocks});
-            this.pushStocksToLocalArray(stocks);
+            const processedStocks = this.processStockList(stockResponseData);
+            this.setState({stocks: [...stocks, ...processedStocks]});
+            this.pushStocksToLocalArray(processedStocks);
             resolve(true);
         })
         .finally(() => {
@@ -149,7 +153,9 @@ export class SearchStocks extends React.Component {
         stocks.map(stock => {
             const stockIndex = _.findIndex(localStocks, localStock => localStock.symbol === stock.symbol);
             if (stockIndex === -1) {
-                localStocks.push(stock)
+                localStocks.push(stock);
+            } else {
+                localStocks[stockIndex] = stock;
             }
         });
         this.localStocks = localStocks;
@@ -157,43 +163,52 @@ export class SearchStocks extends React.Component {
 
     renderStockList = () => {
         const {stocks = []} = this.state;
+        const selectedStock = _.get(this.state, 'selectedStock.symbol', '');
+        console.log('Stocks ',stocks);
+
         return (
-            <React.Fragment>
-                {
-                    stocks.length === 0 &&
-                    <h3 style={{fontSize: '16px', textAlign: 'center'}}>No Stocks Found</h3>
-                }
-                {
-                    stocks.map((stock, index) => (
-                        <React.Fragment key={index}>
-                            <Media 
-                                query={`(max-width: ${screenSize.mobile})`}
-                                render={() => (
-                                    <StockListItemMobile 
-                                        key={index} 
-                                        {...stock} 
-                                        onClick={this.handleStockListItemClick} 
-                                        onAddIconClick={this.conditionallyAddItemToSelectedArray}
-                                        selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
-                                    />
-                                )}
-                            />
-                            <Media 
-                                query={`(min-width: ${screenSize.desktop})`}
-                                render={() => (
-                                    <StockListItem 
-                                        key={index} 
-                                        {...stock} 
-                                        onClick={this.handleStockListItemClick} 
-                                        onAddIconClick={this.conditionallyAddItemToSelectedArray}
-                                        selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
-                                    />
-                                )}
-                            />
-                        </React.Fragment>
-                    ))
-                }
-            </React.Fragment>
+            <StockListComponent 
+                stocks={stocks}
+                selectedStock={selectedStock}
+                handleStockListItemClick={this.handleStockListItemClick}
+                conditionallyAddItemToSelectedArray={this.conditionallyAddItemToSelectedArray}
+            />
+            // <React.Fragment>
+            //     {
+            //         stocks.length === 0 &&
+            //         <h3 style={{fontSize: '16px', textAlign: 'center'}}>No Stocks Found</h3>
+            //     }
+            //     {
+            //         stocks.map((stock, index) => (
+            //             <React.Fragment key={index}>
+            //                 <Media 
+            //                     query={`(max-width: ${screenSize.mobile})`}
+            //                     render={() => (
+            //                         <StockListItemMobile 
+            //                             key={index} 
+            //                             {...stock} 
+            //                             onClick={this.handleStockListItemClick} 
+            //                             onAddIconClick={this.conditionallyAddItemToSelectedArray}
+            //                             selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
+            //                         />
+            //                     )}
+            //                 />
+            //                 <Media 
+            //                     query={`(min-width: ${screenSize.desktop})`}
+            //                     render={() => (
+            //                         <StockListItem 
+            //                             key={index} 
+            //                             {...stock} 
+            //                             onClick={this.handleStockListItemClick} 
+            //                             onAddIconClick={this.conditionallyAddItemToSelectedArray}
+            //                             selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
+            //                         />
+            //                     )}
+            //                 />
+            //             </React.Fragment>
+            //         ))
+            //     }
+            // </React.Fragment>
         )
     }
 
@@ -262,7 +277,8 @@ export class SearchStocks extends React.Component {
     conditionallyAddItemToSelectedArray = (symbol, addToPortfolio = false) => {
         const selectedStocks = [...this.state.selectedStocks];
         const localStocks = [...this.localStocks];
-        const stocks = [...this.state.stocks];
+        // const stocks = [...this.state.stocks];
+        const stocks = _.map(this.state.stocks, _.clone);
         const selectedStockIndex = selectedStocks.indexOf(symbol);
         const targetStock = stocks.filter(stock => stock.symbol === symbol)[0];
         const targetLocalStock = localStocks.filter(stock => stock.symbol === symbol)[0];
@@ -276,6 +292,7 @@ export class SearchStocks extends React.Component {
                 targetStock.checked = false;
                 targetLocalStock.checked = false;
             }
+            console.log(this.state.stocks);
             this.setState({selectedStocks, stocks});
             this.localStocks = localStocks;
         } else {
@@ -293,7 +310,6 @@ export class SearchStocks extends React.Component {
 
     addSelectedStocksToPortfolio = () => {
         let localStocks = [...this.localStocks];
-        console.log(localStocks);
         localStocks = localStocks.filter(stock => stock.checked === true);
         const positions = localStocks.map(stock => {
             return {
@@ -380,8 +396,11 @@ export class SearchStocks extends React.Component {
 
     renderPagination = () => {
         return (
-            <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginTop: '10px'}}>
-                <Button 
+            <Col 
+                    span={24} 
+                    style={{...horizontalBox, justifyContent: 'center', marginTop: '10px'}}
+            >
+                {/* <Button 
                         onClick={() => this.handlePagination('previous')} 
                         disabled={this.state.selectedPage === 0}
                 >
@@ -390,91 +409,96 @@ export class SearchStocks extends React.Component {
                 {
                     this.state.loadingStocks &&
                     <Icon type="loading" style={{fontSize: '20px'}}/>
-                }
+                } */}
                 <Button
                         onClick={() => this.handlePagination('next')}  
                         disabled={this.state.stocks.length % 10 !== 0}
+                        loading={this.state.loadingStocks}
+                        type="primary"
                 >
-                    Next
+                    MORE
                 </Button>
             </Col>
         );
     }
 
     renderPaginationMobile = (hideBenchmarkConfig = false) => {
+        return (
+            <Col 
+                    span={24} 
+                    style={{
+                        ...horizontalBox, 
+                        justifyContent: 'center', 
+                        marginTop: '10px',
+                        padding: '0 15px'
+                    }}
+            >
+                <Button
+                    onClick={() => this.handlePagination('next')}  
+                    disabled={this.state.stocks.length % 10 !== 0}
+                    type="primary"
+                    loading={this.state.loadingStocks}
+                >
+                    MORE
+                </Button>
+            </Col>
+        );
+    }
+
+    renderBenchmarkDetailMobile = (hideBenchmarkConfig = false) => {
         const universe = _.get(this.props, 'filters.universe', null);
         const sector = _.get(this.props, 'filters.sector', null);
         const industry = _.get(this.props, 'filters.industry', null);
-        const toggleIconColor = this.state.selectedStocks.length === 0 ? textColor : primaryColor;
 
         return (
             <Col 
                     span={24} 
                     style={{
                         ...horizontalBox, 
-                        justifyContent: 'space-between', 
+                        justifyContent: 'center', 
                         marginTop: '10px',
                         padding: '0 15px'
                     }}
             >
-                <Row style={{width: '100%'}}>
-                    <Col span={4}>
-                        <Button 
-                            onClick={() => this.handlePagination('previous')} 
-                            disabled={this.state.selectedPage === 0}
+                {
+                    this.state.loadingStocks 
+                    ?   <Icon type="loading" style={{fontSize: '20px'}}/>
+                    :   !hideBenchmarkConfig &&
+                        <div 
+                                style={{
+                                    ...horizontalBox, 
+                                    alignItems: 'center',
+                                    marginLeft: '10px',
+                                    marginTop: '5px',
+                                    marginBottom: '10px',
+                                    justifyContent: 'center'
+                                }}
                         >
-                            Prev
-                        </Button>
-                    </Col>
-                    <Col span={16} style={{padding: '0 5px'}}>
-                        {
-                            this.state.loadingStocks 
-                            ?   <Icon type="loading" style={{fontSize: '20px'}}/>
-                            :   !hideBenchmarkConfig &&
-                                <div 
-                                        style={{
-                                            ...horizontalBox, 
-                                            alignItems: 'center',
-                                            marginLeft: '10px',
-                                            marginTop: '5px',
-                                            marginBottom: '10px',
-                                            justifyContent: 'center'
-                                        }}
-                                >
-                                    {
-                                        !this.props.stockPerformanceOpen &&
-                                        <React.Fragment>
-                                            {industry && 
-                                                <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
-                                            }
-
-                                            {sector && 
-                                                <Tag style={{fontSize: '14px'}}>{sector}</Tag>
-                                            }
-                                            
-                                            {universe && 
-                                                <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
-                                            }
-                                        </React.Fragment>
+                            {
+                                !this.props.stockPerformanceOpen &&
+                                <React.Fragment>
+                                    {industry && 
+                                        <Tag style={{fontSize: '14px'}}>{industry}</Tag>  
                                     }
-                                </div>
-                        }
-                    </Col>
-                    <Col span={4}>
-                        <Button
-                            onClick={() => this.handlePagination('next')}  
-                            disabled={this.state.stocks.length % 10 !== 0}
-                        >
-                            Next
-                        </Button>
-                    </Col>
-                </Row>
+
+                                    {sector && 
+                                        <Tag style={{fontSize: '14px'}}>{sector}</Tag>
+                                    }
+                                    
+                                    {universe && 
+                                        <Tag style={{fontSize: '14px', color: 'green'}}>{universe}</Tag>
+                                    }
+                                </React.Fragment>
+                            }
+                        </div>
+                }
             </Col>
         );
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            console.log('StockComponent Updated');
             return true;
         }
 
@@ -745,6 +769,61 @@ export class SearchStocks extends React.Component {
                 </Row>
             </React.Fragment>
         );
+    }
+}
+
+class StockListComponent extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log(nextProps.stocks);
+        console.log(this.props.stocks);
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            console.log('StockList Updated');
+            return true;
+        }
+
+        return false;
+    }
+
+    render() {
+        const {stocks = []} = this.props;
+        return (
+            <React.Fragment>
+                {
+                    stocks.length === 0 &&
+                    <h3 style={{fontSize: '16px', textAlign: 'center'}}>No Stocks Found</h3>
+                }
+                {
+                    stocks.map((stock, index) => (
+                        <React.Fragment key={index}>
+                            <Media 
+                                query={`(max-width: ${screenSize.mobile})`}
+                                render={() => (
+                                    <StockListItemMobile 
+                                        key={index} 
+                                        {...stock} 
+                                        onClick={this.props.handleStockListItemClick} 
+                                        onAddIconClick={this.props.conditionallyAddItemToSelectedArray}
+                                        selected={stock.symbol === this.props.selectedStock}
+                                    />
+                                )}
+                            />
+                            <Media 
+                                query={`(min-width: ${screenSize.desktop})`}
+                                render={() => (
+                                    <StockListItem 
+                                        key={index} 
+                                        {...stock} 
+                                        onClick={this.props.handleStockListItemClick} 
+                                        onAddIconClick={this.props.conditionallyAddItemToSelectedArray}
+                                        selected={stock.symbol === this.props.selectedStock}
+                                    />
+                                )}
+                            />
+                        </React.Fragment>
+                    ))
+                }
+            </React.Fragment>
+        )
     }
 }
 
