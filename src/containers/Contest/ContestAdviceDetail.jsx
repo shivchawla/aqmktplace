@@ -176,7 +176,9 @@ class AdviceDetailImpl extends React.Component {
             currentRollingPerformance: {},
             simulatedRollingPerformance: {},
             benchmarkRollingCurrentPerformance: {},
-            benchmarkRollingSimulatedPerformance: {}
+            benchmarkRollingSimulatedPerformance: {},
+            trueRollingPerformanceCategories: [],
+            simulatedRollingPerformanceCategories: []
         };
 
         this.performanceSummary = {};
@@ -444,11 +446,17 @@ class AdviceDetailImpl extends React.Component {
     }
 
     processRollingPerformance = (performance, benchmarkPerformance, field = 'returns.totalreturn', type='Historical') => {
-        // let performanceKeys = Object.keys(performance);
+        let performanceKeys = Object.keys(performance);
         const timelineData = [];
         const benchmarkTimelineData = [];
-        const timelines = ['wtd', '1wk', 'mtd', '1m', 'ytd', 'inception'];
-        // const timelines = ['wtd', '1wk', 'mtd', '1m', 'ytd', '1y', '2y', '5y', '10y'];
+        let timelines = ['wtd', '1wk', 'mtd', '1m', '2m', '3m', '6m', 'ytd', '1y', 'inception']
+        // const timelines = type === 'Historical' 
+        //     ? ['mtd', '1m', '2m', '3m', '6m', 'ytd', '1y', 'inception']
+        //     : ['wtd', '1wk', 'mtd', '1m', 'ytd', 'inception'];
+        timelines = timelines.filter(timelineItem => {
+            const timelineIndex = performanceKeys.indexOf(timelineItem);
+            return timelineIndex >= 0;
+        });
         timelines.map(key => {
             const metricValue = _.get(performance, `[${key}].${field}`, 0);
             const metricPercentage = Number((metricValue * 100).toFixed(2));
@@ -457,6 +465,12 @@ class AdviceDetailImpl extends React.Component {
             timelineData.push(metricPercentage);
             benchmarkTimelineData.push(benchmarkMetricPercentage);
         });
+        this.setState({
+            [type === 'Historical' 
+                ? 'simulatedRollingPerformanceCategories' 
+                : 'trueRollingPerformanceCategories'
+            ]: timelines.map(item => item.toUpperCase())
+        })
         return [
             {
                 name: `Portfolio (${type})`,
@@ -1704,6 +1718,8 @@ class AdviceDetailImpl extends React.Component {
                                 renderRollingPerformanceSelector={this.renderRollingPerformanceSelectorRadioGroup}
                                 currentRollingPerformance={this.state.currentRollingPerformance}
                                 simulatedRollingPerformance={this.state.simulatedRollingPerformance}
+                                trueRollingPerformanceCategories={this.state.trueRollingPerformanceCategories}
+                                simulatedRollingPerformanceCategories={this.state.simulatedRollingPerformanceCategories}
                         />
                         <Col xl={6} md={0} sm={0} xs={0}>
                             {this.renderActionButtons()}

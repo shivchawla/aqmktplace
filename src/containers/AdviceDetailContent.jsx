@@ -685,7 +685,8 @@ class AdviceDetailContentImpl extends React.Component {
                                         dollarSeries={this.props.simulatedRollingPerformance}
                                         percentageSeries={this.props.currentRollingPerformance}
                                         radiogroupLabels = {['Historical', 'True']}
-                                        categories={['WTD', '1WK', 'MTD', '1M', 'YTD', 'INCEPTION']}
+                                        dollarCategories={this.props.simulatedRollingPerformanceCategories}
+                                        percentageCategories={this.props.trueRollingPerformanceCategories}
                                     />
                                 </Spin>
                             </Col>

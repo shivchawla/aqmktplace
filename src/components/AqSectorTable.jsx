@@ -102,6 +102,22 @@ export default class AqSectorTable extends React.Component {
         resolve (processSectorStockData(data, this.state.data, disableTargetTotalUpdate));
     })
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.shouldUpdate) {
+            this.setState({
+                data: processSectorStockData(nextProps.data, nextProps.data),
+                stockData: nextProps.data
+            })
+        }
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.state !== nextState || this.props !== nextProps) {
+            return true;
+        } 
+        return false;
+    }
+
     render() {
         return (
             <Col span={24} style={{marginTop: '55px'}}>

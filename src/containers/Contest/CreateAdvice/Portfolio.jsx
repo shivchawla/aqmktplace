@@ -241,6 +241,7 @@ export class Portfolio extends React.Component {
                     maxStockTargetTotal={this.props.maxStockTargetTotal}
                     maxSectorTargetTotalHard={this.props.maxSectorTargetTotalHard}
                     maxStockTargetTotalHard={this.props.maxStockTargetTotalHard}
+                    shouldUpdate={this.props.shouldUpdateStockTable}
                 />
             </Col>
         );
@@ -257,6 +258,7 @@ export class Portfolio extends React.Component {
                     maxSectorTargetTotalHard={this.props.maxSectorTargetTotalHard}
                     maxStockTargetTotalHard={this.props.maxStockTargetTotalHard}
                     isUpdate={this.props.isUpdate}
+                    shouldUpdate={this.props.shouldUpdateSectorkTable}
                 />
             </Col>
         );

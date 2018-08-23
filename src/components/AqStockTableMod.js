@@ -201,10 +201,11 @@ export class AqStockTableMod extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         let data = [];
-        // if (this.props.data !== nextProps.data) {
+        if (nextProps.shouldUpdate) {
+            console.log('2 way data binding on');
             data = nextProps.data;
             this.setState({data});
-        // } 
+        } 
     }
 
     shouldComponentUpdate(nextProps, nextState) {

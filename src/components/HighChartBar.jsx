@@ -49,7 +49,7 @@ export class HighChartBar extends React.Component {
                         name: 'Stock',
                         text: null
                     },
-                    categories: props.categories || null
+                    categories: props.dollarCategories ? props.dollarCategories : props.categories || null
                 },
                 title: {
                     style: {
@@ -137,7 +137,9 @@ export class HighChartBar extends React.Component {
             this.props.updateTimeline && this.dollarChart.update({
                 xAxis: {
                     gridLineColor: 'transparent',
-                    categories: series[0].timelineData.map(item => item.timeline.format('MMM YY'))
+                    categories: this.props.dollarCategories 
+                            ? this.props.dollarCategories 
+                            : series[0].timelineData.map(item => item.timeline.format('MMM YY'))
                 },
                 colors: [simulatedPerformanceColor, benchmarkColor],
             })
@@ -159,7 +161,9 @@ export class HighChartBar extends React.Component {
             this.props.updateTimeline && this.percentageChart.update({
                 xAxis: {
                     gridLineColor: 'transparent',
-                    categories: series[0].timelineData.map(item => item.timeline.format('MMM YY'))
+                    categories: this.props.percentageCategories 
+                            ? this.props.percentageCategories 
+                            : series[0].timelineData.map(item => item.timeline.format('MMM YY'))
                 },
                 colors: [currentPerformanceColor, benchmarkColor],
             })
@@ -179,7 +183,26 @@ export class HighChartBar extends React.Component {
     }
 
     handleRadioGroupChange = e => {
-        this.setState({dollarVisible: e.target.value === 'dollarPerformance' ? true : false});
+        this.setState({
+            dollarVisible: e.target.value === 'dollarPerformance' ? true : false,
+        });
+        if (this.props.dollarCategories) {
+            if (e.target.value === 'dollarPerformance') {
+                this.dollarChart.update({
+                    xAxis: {
+                        gridLineColor: 'transparent',
+                        categories: this.props.dollarCategories
+                    }
+                });
+            } else {
+                this.percentageChart.update({
+                    xAxis: {
+                        gridLineColor: 'transparent',
+                        categories: this.props.percentageCategories
+                    }
+                });
+            }
+        }
     }
 
     render() {
@@ -209,8 +232,22 @@ export class HighChartBar extends React.Component {
                         </RadioButton>
                     </RadioGroup>
                 </Col>
-                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle}} id={`${highChartId}-bar-chart-dollar`}></Col>
-                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle}} id={`${highChartId}-bar-chart-percentage`}></Col>
+                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle}} id={`${highChartId}-bar-chart-dollar`}>
+                    {
+                        _.get(this.props, 'dollarSeries.data', []).length === 0 &&
+                        <h3 style={{fontSize: '14px', color: '#444'}}>
+                            No Data
+                        </h3>
+                    }
+                </Col>
+                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle}} id={`${highChartId}-bar-chart-percentage`}>
+                    {
+                        _.get(this.props, 'percentageSeries.data', []).length === 0 &&
+                        <h3 style={{fontSize: '14px', color: '#444'}}>
+                            No Data
+                        </h3>
+                    }
+                </Col>
             </Row>
         );
     }

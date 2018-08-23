@@ -88,6 +88,8 @@ class ContestAdviceFormImpl extends React.Component {
             maxSectorTargetTotalHard: 0,
             maxStockTargetTotalSoft: 0,
             maxSectorTargetTotalSoft: 0,
+            shouldUpdateStockTable: true,
+            shouldUpdateSectorTable: true,
         };
     }
 
@@ -410,6 +412,8 @@ class ContestAdviceFormImpl extends React.Component {
                 maxSectorTargetTotalHard={this.state.maxSectorTargetTotalHard}
                 maxStockTargetTotalHard={this.state.maxStockTargetTotalHard}
                 isUpdate={this.props.isUpdate}
+                shouldUpdateStockTable={this.state.shouldUpdateStockTable}
+                shouldUpdateSectorkTable={this.state.shouldUpdateSectorTable}
             />
         )
     }
@@ -1443,7 +1447,11 @@ class ContestAdviceFormImpl extends React.Component {
             const adviceId = this.props.adviceId;
             this.getAdviceSummaryAndPortfolio(adviceId)
             .finally(() => {
-                this.setState({loading: false});
+                this.setState({
+                    loading: false, 
+                    shouldUpdateStockTable: false, 
+                    shouldUpdateSectorkTable: false
+                });
             })
         } else {
             this.initializeNetValue();
@@ -1456,7 +1464,11 @@ class ContestAdviceFormImpl extends React.Component {
                 this.setState({noActiveContests: true});
             })
             .finally(() => {
-                this.setState({loading: false});
+                this.setState({
+                    loading: false, 
+                    shouldUpdateStockTable: false, 
+                    shouldUpdateSectorkTable: false
+                });
             })
         }
         
