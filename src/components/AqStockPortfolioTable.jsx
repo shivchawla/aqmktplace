@@ -84,7 +84,7 @@ export class AqStockPortfolioTable extends React.Component {
                                 style={{fontSize: '14px'}}
                         >
                             {Utils.formatMoneyValueMaxTwoDecimals(text)}
-                            <span style={{fontSize: '12px', color}}>
+                            <span style={{fontSize: '14px', color}}>
                                 &nbsp;| {`${record.unrealizedPnlPct} %` || '-'}
                             </span>
                         </h3>

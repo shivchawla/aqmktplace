@@ -4,6 +4,8 @@ import {primaryColor, horizontalBox} from '../constants';
 import NumericInput from 'react-numeric-input';
 import _ from 'lodash';
 
+let timeout = null;
+
 export default class SliderInput extends React.Component {
     constructor(props) {
         super(props);
@@ -20,18 +22,32 @@ export default class SliderInput extends React.Component {
         this.setState({sliderValue: nextProps.value});
     }
 
-    handleValueChange = _.debounce(value => {  
+    // handleValueChange = _.debounce(value => {  
+    //     const nValue = value > this.props.max
+    //         ? this.props.max
+    //         : value < 0
+    //             ? 0
+    //             : value
+    //     if (typeof value === 'number') {
+    //         // this.props.onChange(nValue);
+            
+    //     }
+    // }, 200);
+
+    handleValueChange = value => {  
         const nValue = value > this.props.max
             ? this.props.max
             : value < 0
                 ? 0
-                : value
+                : value;
+        clearTimeout(timeout);
         if (typeof value === 'number') {
-            console.log(nValue);
-            this.props.onChange(nValue);
-            
+            timeout = setTimeout(() => {
+                console.log('Called');
+                this.props.onChange(nValue);
+            }, 500);
         }
-    }, 200);
+    }
 
     render() {
         const {
