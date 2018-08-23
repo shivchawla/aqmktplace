@@ -743,40 +743,51 @@ const ContestDetailMetrics = ({entryDetail, onPerformanceToggle, showActivePerfo
     );
 }
 
-let LeaderItem = ({leaderItem, onClick, selected}) => {
-    const containerStyle = {
-        borderBottom: '1px solid #eaeaea',
-        cursor: 'pointer',
-        paddingBottom: '10px',
-        paddingTop: '15px',
-        marginTop: '0px',
-        backgroundColor: selected ? '#e6f5f3' : '#fff'
-    };
-    const adviceId = _.get(leaderItem, 'adviceId', null);
-    const metricStyle = {paddingLeft: '10px', fontSize: '14px'};
+class LeaderItem extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            return true;
+        }
 
-    const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
-    const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct")
+        return false;
+    }
+    
+    render() {
+        const {leaderItem, onClick, selected} = this.props;
+        const containerStyle = {
+            borderBottom: '1px solid #eaeaea',
+            cursor: 'pointer',
+            paddingBottom: '10px',
+            paddingTop: '15px',
+            marginTop: '0px',
+            backgroundColor: selected ? '#e6f5f3' : '#fff'
+        };
+        const adviceId = _.get(leaderItem, 'adviceId', null);
+        const metricStyle = {paddingLeft: '10px', fontSize: '14px'};
 
-    return (
-        <Row className='leader-item' style={containerStyle} onClick={() => onClick(adviceId)} >
-            <Col span={4}>
-                <h3 style={{...metricStyle, margin: 0}}>{leaderItem.rank} .</h3>
-            </Col>
-            <Col span={6}>
-                <h5 style={{...metricStyle, margin: 0}}>{leaderItem.advisorName}</h5>
-            </Col>
-            <Col span={5}>
-                <h3 style={metricStyle}>{annualReturn}</h3>
-            </Col>
-            <Col span={5}>
-                <h3 style={metricStyle}>{volatility}</h3>
-            </Col>
-            <Col span={4}>
-                <h3 style={metricStyle}>{(leaderItem.metrics.current.score).toFixed(2)} / 100</h3>
-            </Col>
-        </Row>
-    );
+        const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
+        const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct")
+
+        return (
+            <Row className='leader-item' style={containerStyle} onClick={() => onClick(adviceId)} >
+                <Col span={4}>
+                    <h3 style={{...metricStyle, margin: 0}}>{leaderItem.rank} .</h3>
+                </Col>
+                <Col span={6}>
+                    <h5 style={{...metricStyle, margin: 0}}>{leaderItem.advisorName}</h5>
+                </Col>
+                <Col span={5}>
+                    <h3 style={metricStyle}>{annualReturn}</h3>
+                </Col>
+                <Col span={5}>
+                    <h3 style={metricStyle}>{volatility}</h3>
+                </Col>
+                <Col span={4}>
+                    <h3 style={metricStyle}>{(leaderItem.metrics.current.score).toFixed(2)} / 100</h3>
+                </Col>
+            </Row>
+        );
+    }
 };
 
 const MetricContainer = ({header, metrics}) => {
