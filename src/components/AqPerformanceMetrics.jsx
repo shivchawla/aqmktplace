@@ -11,12 +11,16 @@ export class AqPerformanceMetrics extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            metrics: []
+            metrics: [],
+            selectedTimeline: this.getPerformanceTimeline(props)[0]
         };
     }
 
     handleRadioSelection = e => {
-        this.setState({metrics: this.getMetrics(e.target.value)});
+        this.setState({
+            metrics: this.getMetrics(e.target.value),
+            selectedTimeline: e.target.value
+        });
     }
 
     /*
@@ -26,7 +30,7 @@ export class AqPerformanceMetrics extends React.Component {
         return (
             <RadioGroup 
                     onChange={this.handleRadioSelection} 
-                    defaultValue={performanceMetricsTimeline[0]}
+                    defaultValue={this.state.selectedTimeline}
                     size="small"
                     style={{fontSize: '12px', height: '22px'}}
             >
@@ -122,9 +126,9 @@ export class AqPerformanceMetrics extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         const performanceTimeline = this.getPerformanceTimeline();
-        if (!_.isEqual(nextProps, this.props)) {
-            this.setState({metrics: this.getMetrics(performanceTimeline[0])});
-        }
+        // if (!_.isEqual(nextProps, this.props)) {
+            this.setState({metrics: this.getMetrics(this.state.selectedTimeline)});
+        // }
     }
 
     /*
