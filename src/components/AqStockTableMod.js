@@ -79,22 +79,28 @@ export class AqStockTableMod extends React.Component {
     }
 
     renderSliderColumns = (text, record, column, type) => {
-        const value = Number(text);
+        const targetTotal = Number(text);
         const positionsInSector = this.state.data.filter(item => item.sector === record.sector);
         const nPositionsInSector = positionsInSector.length;
-        const maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
-        const maxAllowance = maxSectorExposure - _.sum(positionsInSector.map(item => item.effTotal));
+        let maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
+        const sectorExposure = _.sum(positionsInSector.map(item => item.effTotal));
+        if (this.props.isUpdate) {
+            if (sectorExposure > this.props.maxSectorTargetTotal 
+                && sectorExposure < this.props.maxSectorTargetTotalHard
+            ) {
+                maxSectorExposure = sectorExposure;
+            }
+        }
+        const maxAllowance = maxSectorExposure - sectorExposure;
         let maxAllowedStockExposure = _.min([this.props.maxStockTargetTotal, (record.effTotal + maxAllowance)]);
         if (this.props.isUpdate) {
-            if (value > this.props.maxStockTargetTotal && value < this.props.maxStockTargetTotalHard) {
-                maxAllowedStockExposure = value;
-            } else {
-                maxAllowedStockExposure = this.props.maxStockTargetTotal;
-            }
+            if (targetTotal > this.props.maxStockTargetTotal && targetTotal < this.props.maxStockTargetTotalHard) {
+                maxAllowedStockExposure = targetTotal;
+            } 
         }
         return (
             <SliderInput 
-                value={value}
+                value={targetTotal}
                 onChange={value => {this.handleRowChange(value, record.key, column, type)}}
                 inputWidth='80%'
                 max={maxAllowedStockExposure}
