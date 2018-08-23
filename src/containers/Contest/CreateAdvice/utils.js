@@ -32,7 +32,7 @@ export const updateSectorStockPositions = (positions, positionsToChange, sNav) =
         const nShares = Math.floor(targetTotal / lastPrice);
         const totalValue = Number((lastPrice * nShares).toFixed(2));
         if (shouldModifyPosition) {
-            position.effTotal = targetTotal;
+            position.effTotal = Number(targetTotal.toFixed(2));
             position.shares = nShares;
             position.totalValue = totalValue;
         }
