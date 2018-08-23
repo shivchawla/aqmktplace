@@ -187,7 +187,6 @@ export class HighChartBar extends React.Component {
         const chartDollarStyle = this.state.dollarVisible ? {display: 'block'} : {display: 'none'};
         const {alignLegend = 'right', legendStyle = {}} = this.props;
         const highChartId = _.get(this.props, 'id', '');
-        console.log(highChartId);
 
         return (
             <Row style={{height: '320px'}}>

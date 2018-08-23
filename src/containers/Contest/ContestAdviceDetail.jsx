@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Loadable from 'react-loadable';
 import axios from 'axios';
-import Loading from 'react-loading-bar';
 import {withRouter} from 'react-router';
 import _ from 'lodash';
 import moment from 'moment';
@@ -12,7 +11,6 @@ import {AdviceDetailContent} from '../../containers/AdviceDetailContent';
 import {ApprovalItemView} from '../../components/ApprovalItemView';
 import {ApprovalItem} from '../../components/ApprovalItem';
 import ForbiddenAccess from '../../components/ForbiddenAccess';
-import {MetricItem} from '../../components/MetricItem';
 import {AqPageHeader} from '../../components/AqPageHeader';
 import {ContestAdviceDetailCrumb} from '../../constants/breadcrumbs';
 import {AdviceDetailMeta} from '../../metas';
@@ -167,7 +165,8 @@ class AdviceDetailImpl extends React.Component {
             withdrawModalVisible: false,
             prohibitModalVisible: false,
             participatedContests: [],
-            benchmarkPerformanceMonthly: [], // Stores the static performance of the benchmark
+            benchmarkCurrentStaticPerformance: {}, // Stores the current static performance of the benchmark
+            benchmarkSimulatedStaticPerformance: {}, // Stores the simulated static performance of the benchmark
             simulatedStaticPerformance: [], // stores the data of the static performance for a particular field eg: totalReturn or volatility
             currentStaticPerformance: [], // stores the data of the static performance for a particular field eg: totalReturn or volatility
             currentStaticPortfolioPerformance: {}, // stores performance object for the current static performance of the portfolio
@@ -330,12 +329,11 @@ class AdviceDetailImpl extends React.Component {
             // getStockStaticPerformance(benchmark, benchmarkRequestType),
             // getStockRollingPerformance(benchmark, benchmarkRequestType)
         ])
-        .then(([benchmarkResponse, benchmarkStaticPerformance]) => {
+        .then(([benchmarkResponse]) => {
             const benchmarkCurrentStaticPerformance = _.get(currentPortfolioPerformance, 'static_benchmark.monthly', {});    
             const benchmarkSimulatedStaticPerformance = _.get(simulatedPortfolioPerformance, 'static_benchmark.monthly', {});    
             const benchmarkRollingCurrentPerformance = _.get(currentPortfolioPerformance, 'rolling_benchmark', {});
-            const benchmarkRollingSimulatedPerformance = _.get(simulatedPerformance, 'rolling_benchmark', {});
-            const benchmarkPerformanceMonthly = _.get(benchmarkStaticPerformance, 'monthly', {});
+            const benchmarkRollingSimulatedPerformance = _.get(simulatedPortfolioPerformance, 'rolling_benchmark', {});
             const simulatedStaticMonthlyPerformance = this.processStaticPerformance(_.get(simulatedPortfolioPerformance, 'static.monthly', {}), benchmarkSimulatedStaticPerformance);
             const currentStaticMonthlyPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkCurrentStaticPerformance, 'returns.totalreturn', 'True');    
             const currentRollingPerformance = this.processRollingPerformance(_.get(currentPortfolioPerformance, 'rolling', {}), benchmarkRollingCurrentPerformance, 'returns.totalreturn', 'True');
@@ -375,7 +373,8 @@ class AdviceDetailImpl extends React.Component {
                 currentStaticPerformance: currentStaticMonthlyPerformance,
                 currentStaticPortfolioPerformance: currentPortfolioPerformance,
                 simulatedStaticPortfolioPerformance: simulatedPortfolioPerformance,
-                benchmarkPerformanceMonthly,
+                benchmarkCurrentStaticPerformance,
+                benchmarkSimulatedStaticPerformance,
                 benchmarkRollingCurrentPerformance,
                 benchmarkRollingSimulatedPerformance,
                 currentRollingPerformance,
@@ -1607,9 +1606,10 @@ class AdviceDetailImpl extends React.Component {
         const selectedMetric = e.target.value;
         const currentPortfolioPerformance = this.state.currentStaticPortfolioPerformance;
         const simulatedPortfolioPerformance = this.state.simulatedStaticPortfolioPerformance;
-        const benchmarkPerformanceMonthly = this.state.benchmarkPerformanceMonthly;
-        const currentStaticPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly, selectedMetric, 'True');
-        const simulatedStaticPerformance = this.processStaticPerformance(_.get(simulatedPortfolioPerformance, 'static.monthly', {}), benchmarkPerformanceMonthly, selectedMetric, 'Historical');
+        const benchmarkCurrentStaticPerformance = this.state.benchmarkCurrentStaticPerformance;
+        const benchmarkSimulatedStaticPerformance = this.state.benchmarkSimulatedStaticPerformance;
+        const currentStaticPerformance = this.processStaticPerformance(_.get(currentPortfolioPerformance, 'static.monthly', {}), benchmarkCurrentStaticPerformance, selectedMetric, 'True');
+        const simulatedStaticPerformance = this.processStaticPerformance(_.get(simulatedPortfolioPerformance, 'static.monthly', {}), benchmarkSimulatedStaticPerformance, selectedMetric, 'Historical');
         this.setState({
             selectedPerformanceMetrics: selectedMetric,
             simulatedStaticPerformance,

@@ -10,6 +10,7 @@ import {screenSize} from './constants';
 import StockFilter from '../SearchStockFilter/StockFilter';
 import SearchStockHeader from './Mobile/SearchStockHeader';
 import SearchStockHeaderMobile from './Mobile/StockSearchHeaderMobile';
+import StockList from './StockList';
 import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../constants';
 import {fetchAjax, Utils} from '../../../utils';
 import '../css/searchStocks.css';
@@ -17,7 +18,6 @@ import '../css/searchStocks.css';
 const CheckboxGroup = Checkbox.Group;
 const {Search} = Input;
 const {requestUrl} = require('../../../localConfig');
-const textColor = '#757575';
 
 export class SearchStocks extends React.Component {
     constructor(props) {
@@ -164,51 +164,14 @@ export class SearchStocks extends React.Component {
     renderStockList = () => {
         const {stocks = []} = this.state;
         const selectedStock = _.get(this.state, 'selectedStock.symbol', '');
-        console.log('Stocks ',stocks);
 
         return (
-            <StockListComponent 
+            <StockList 
                 stocks={stocks}
                 selectedStock={selectedStock}
                 handleStockListItemClick={this.handleStockListItemClick}
                 conditionallyAddItemToSelectedArray={this.conditionallyAddItemToSelectedArray}
             />
-            // <React.Fragment>
-            //     {
-            //         stocks.length === 0 &&
-            //         <h3 style={{fontSize: '16px', textAlign: 'center'}}>No Stocks Found</h3>
-            //     }
-            //     {
-            //         stocks.map((stock, index) => (
-            //             <React.Fragment key={index}>
-            //                 <Media 
-            //                     query={`(max-width: ${screenSize.mobile})`}
-            //                     render={() => (
-            //                         <StockListItemMobile 
-            //                             key={index} 
-            //                             {...stock} 
-            //                             onClick={this.handleStockListItemClick} 
-            //                             onAddIconClick={this.conditionallyAddItemToSelectedArray}
-            //                             selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
-            //                         />
-            //                     )}
-            //                 />
-            //                 <Media 
-            //                     query={`(min-width: ${screenSize.desktop})`}
-            //                     render={() => (
-            //                         <StockListItem 
-            //                             key={index} 
-            //                             {...stock} 
-            //                             onClick={this.handleStockListItemClick} 
-            //                             onAddIconClick={this.conditionallyAddItemToSelectedArray}
-            //                             selected={stock.symbol === _.get(this.state, 'selectedStock.symbol', '')}
-            //                         />
-            //                     )}
-            //                 />
-            //             </React.Fragment>
-            //         ))
-            //     }
-            // </React.Fragment>
         )
     }
 
@@ -275,12 +238,12 @@ export class SearchStocks extends React.Component {
     }
 
     conditionallyAddItemToSelectedArray = (symbol, addToPortfolio = false) => {
-        const selectedStocks = [...this.state.selectedStocks];
-        const localStocks = [...this.localStocks];
-        // const stocks = [...this.state.stocks];
-        const stocks = _.map(this.state.stocks, _.clone);
+        const selectedStocks = _.map([...this.state.selectedStocks], _.cloneDeep);
+        const localStocks = _.map([...this.localStocks], _.cloneDeep);
+        const stocks = _.map([...this.state.stocks], _.cloneDeep);
         const selectedStockIndex = selectedStocks.indexOf(symbol);
-        const targetStock = stocks.filter(stock => stock.symbol === symbol)[0];
+        const targetIndex = _.findIndex(stocks, stock => stock.symbol === symbol);
+        const targetStock = stocks[targetIndex];
         const targetLocalStock = localStocks.filter(stock => stock.symbol === symbol)[0];
         if (targetStock !== undefined) {
             if (selectedStockIndex === -1) {
@@ -292,7 +255,7 @@ export class SearchStocks extends React.Component {
                 targetStock.checked = false;
                 targetLocalStock.checked = false;
             }
-            console.log(this.state.stocks);
+            stocks[targetIndex] = targetStock;
             this.setState({selectedStocks, stocks});
             this.localStocks = localStocks;
         } else {
@@ -498,7 +461,6 @@ export class SearchStocks extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
-            console.log('StockComponent Updated');
             return true;
         }
 
@@ -770,181 +732,6 @@ export class SearchStocks extends React.Component {
             </React.Fragment>
         );
     }
-}
-
-class StockListComponent extends React.Component {
-    shouldComponentUpdate(nextProps, nextState) {
-        console.log(nextProps.stocks);
-        console.log(this.props.stocks);
-        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
-            console.log('StockList Updated');
-            return true;
-        }
-
-        return false;
-    }
-
-    render() {
-        const {stocks = []} = this.props;
-        return (
-            <React.Fragment>
-                {
-                    stocks.length === 0 &&
-                    <h3 style={{fontSize: '16px', textAlign: 'center'}}>No Stocks Found</h3>
-                }
-                {
-                    stocks.map((stock, index) => (
-                        <React.Fragment key={index}>
-                            <Media 
-                                query={`(max-width: ${screenSize.mobile})`}
-                                render={() => (
-                                    <StockListItemMobile 
-                                        key={index} 
-                                        {...stock} 
-                                        onClick={this.props.handleStockListItemClick} 
-                                        onAddIconClick={this.props.conditionallyAddItemToSelectedArray}
-                                        selected={stock.symbol === this.props.selectedStock}
-                                    />
-                                )}
-                            />
-                            <Media 
-                                query={`(min-width: ${screenSize.desktop})`}
-                                render={() => (
-                                    <StockListItem 
-                                        key={index} 
-                                        {...stock} 
-                                        onClick={this.props.handleStockListItemClick} 
-                                        onAddIconClick={this.props.conditionallyAddItemToSelectedArray}
-                                        selected={stock.symbol === this.props.selectedStock}
-                                    />
-                                )}
-                            />
-                        </React.Fragment>
-                    ))
-                }
-            </React.Fragment>
-        )
-    }
-}
-
-const StockListItemMobile = props => {
-    const {symbol, name, change, changePct, current, onClick, checked = false, onAddIconClick, selected = false} = props;
-    const containerStyle = {
-        borderBottom: '1px solid #eaeaea',
-        color: textColor,
-        // marginTop: '20px',
-        cursor: 'pointer',
-        backgroundColor: '#fff',
-        padding: '10px 0',
-        width: '100%'
-    };
-
-    const detailContainerStyle = {
-        ...verticalBox,
-        alignItems: 'flex-end',
-        paddingRight: '10px'
-    };
-
-    const leftContainerStyle = {
-        ...verticalBox,
-        alignItems: 'flex-start'
-    };
-
-    const changeColor = change < 0 ? metricColor.negative : metricColor.positive;
-    const changeIcon = change < 0 ? 'caret-down' : 'caret-up';
-    const nChangePct = (changePct * 100).toFixed(2);
-
-    return (
-        <Row className='stock-row' style={containerStyle} type="flex" align="middle">
-            <Col span={11} style={leftContainerStyle} onClick={() => onClick({symbol, name})}>
-                <div style={horizontalBox}>
-                    <h3 style={{fontSize: '16px', fontWeight: '700'}}>{symbol}</h3>
-                    <Icon style={{color: changeColor, marginLeft: '10px'}} type={changeIcon} />
-                </div>
-                <div style={horizontalBox}>
-                    <h3 style={{fontSize: '14px', fontWeight: '400'}}>
-                        {name}
-                    </h3>
-                </div>
-            </Col>
-            <Col span={11} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
-                <h3 style={{fontSize: '15px', fontWeight: '700'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
-                <div style={horizontalBox}>
-                    <h3 
-                            style={{color: changeColor, fontSize: '14px', marginLeft: '10px', fontWeight: '400'}}
-                    >
-                        {change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(change)}
-                    </h3>
-                    <h3 
-                            style={{color: changeColor, marginLeft: '5px', fontSize: '14px'}}
-                    >
-                        ({change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(nChangePct)} %)
-                    </h3>
-                </div>
-            </Col>
-            <Col span={2} onClick={() => onAddIconClick(symbol)}>
-                <AddIcon checked={checked} size='24px'/>
-            </Col>
-        </Row>
-    );
-}
-
-const StockListItem = ({symbol, name, change, changePct, close, open, current, onClick, checked = false, onAddIconClick, selected = false}) => {
-    const containerStyle = {
-        borderBottom: '1px solid #eaeaea',
-        color: textColor,
-        // marginTop: '20px',
-        cursor: 'pointer',
-        backgroundColor: selected ? '#CFD8DC' : '#fff',
-        padding: '10px',
-        paddingRight: '0px'
-    };
-
-    const detailContainerStyle = {
-        ...verticalBox,
-        alignItems: 'flex-end',
-        paddingRight: '10px'
-    };
-
-    const leftContainerStyle = {
-        ...verticalBox,
-        alignItems: 'flex-start'
-    };
-
-    const changeColor = change < 0 ? metricColor.negative : metricColor.positive;
-    const changeIcon = change < 0 ? 'caret-down' : 'caret-up';
-    const nChangePct = (changePct * 100).toFixed(2);
-
-    return (
-        <Row className='stock-row' style={containerStyle} type="flex" align="middle">
-            <Col span={15} style={leftContainerStyle} onClick={() => onClick({symbol, name})}>
-                <div style={horizontalBox}>
-                    <h3 style={{fontSize: '16px', fontWeight: '700'}}>{symbol}</h3>
-                    <Icon style={{color: changeColor, marginLeft: '10px'}} type={changeIcon} />
-                </div>
-                <h3 style={{fontSize: '12px'}}>{name}</h3>
-            </Col>
-            <Col span={8} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
-                <div style={horizontalBox}>
-                    <h3 style={{fontSize: '18px', fontWeight: '700'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
-                </div>
-                <div style={horizontalBox}>
-                    <h3 style={{color: changeColor, fontSize: '14px', marginLeft: '10px'}}>{change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(change)}</h3>
-                    <h3 style={{color: changeColor, marginLeft: '5px', fontSize: '14px'}}>({change > 0 && '+'} {Utils.formatMoneyValueMaxTwoDecimals(nChangePct)} %)</h3>
-                </div>
-            </Col>
-            <Col span={1} onClick={() => onAddIconClick(symbol)}>
-                <AddIcon checked={checked}/>
-            </Col>
-        </Row>
-    );
-}
-
-const AddIcon = ({checked = false, size = '20px'}) => {
-    const type = checked ? "minus-circle-o" : "plus-circle";
-    const color = checked ? metricColor.negative : primaryColor;
-
-    return <Icon style={{fontSize: size, color}} type={type} />
 }
 
 const topHeaderContainer = {

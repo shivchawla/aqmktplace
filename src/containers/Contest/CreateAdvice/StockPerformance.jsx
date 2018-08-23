@@ -23,7 +23,9 @@ class StockPerformanceImpl extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if(nextProps.stock !== this.props.stock) {
+        console.log(this.props.stock);
+        console.log(nextProps.stock);
+        if(nextProps.stock.symbol !== this.props.stock.symbol) {
             this.fetchStockData(nextProps.stock.symbol);
         }
     }

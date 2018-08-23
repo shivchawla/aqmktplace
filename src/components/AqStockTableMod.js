@@ -17,9 +17,14 @@ export class AqStockTableMod extends React.Component {
                     <div 
                         style={{...verticalBox, alignItems: 'flex-start'}}
                     >
-                        <span style={{fontSize: '14px', fontWeight: 700}}>
-                            {text}
-                        </span>
+                        <h3 style={{fontSize: '14px', fontWeight: 700, color: primaryColor}}>
+                            {text} 
+                            <span 
+                                    style={{fontSize: '12px', fontWeight: '400'}}
+                            >
+                                &nbsp;- {_.get(record, 'sector', '')}
+                            </span>
+                        </h3>
                         <span 
                                 style={{...nameEllipsisStyle, fontSize: '12px', color: '#444', width: '200px'}}
                         >
