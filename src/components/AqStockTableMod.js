@@ -26,7 +26,13 @@ export class AqStockTableMod extends React.Component {
                             </span>
                         </h3>
                         <span 
-                                style={{...nameEllipsisStyle, fontSize: '12px', color: '#444', width: '200px'}}
+                                style={{
+                                    ...nameEllipsisStyle, 
+                                    fontSize: '12px', 
+                                    color: '#444', 
+                                    width: '200px',
+                                    cursor: 'auto'
+                                }}
                         >
                             {_.get(record, 'name', '')}
                         </span>
