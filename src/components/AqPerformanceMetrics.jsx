@@ -122,9 +122,9 @@ export class AqPerformanceMetrics extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         const performanceTimeline = this.getPerformanceTimeline();
-        if (!_.isEqual(nextProps, this.props)) {
+        // if (!_.isEqual(nextProps, this.props)) {
             this.setState({metrics: this.getMetrics(performanceTimeline[0])});
-        }
+        // }
     }
 
     /*

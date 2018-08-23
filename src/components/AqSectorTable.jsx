@@ -59,8 +59,6 @@ export default class AqSectorTable extends React.Component {
         if (this.props.isUpdate) {
             if (value > this.props.maxSectorTargetTotal && value < this.props.maxSectorTargetTotalHard) {
                 maxSectorExposure = value;
-            } else {
-                maxSectorExposure = this.props.maxSectorTargetTotal;
             }
         }
         
@@ -80,7 +78,6 @@ export default class AqSectorTable extends React.Component {
     handleTargetTotalChange = (value, key, column) => {
         const newData = [...this.state.data];
         let positions = [...this.state.stockData];
-        let count = 0;
         let target = newData.filter(item => item.key === key)[0];
         if (target !== undefined) {
             const newNav = Number(value);

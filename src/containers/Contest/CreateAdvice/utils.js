@@ -6,6 +6,9 @@ export const handleSectorTargetTotalChange = (newNav, oldNav, sector, stocks) =>
     let stockData = [...stocks];
     let cNav = newNav - oldNav;
     while(Math.abs(cNav) > 5) {
+        if (count > 100) {
+            return;
+        }
         const positionsToChange = positions.filter(item => item.sector === sector).filter(position => {
             if (cNav > 0) { return  position.effTotal < 50000}
             else { return position.effTotal >= 0 }
