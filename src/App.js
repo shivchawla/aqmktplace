@@ -183,7 +183,10 @@ class App extends React.Component {
         if (this.props.location !== prevProps.location) { // Route changed
             const oldLocation = prevProps.location.pathname;
             const currentLocation = this.props.location.pathname;
-            if (!(leaderboardUrl.test(oldLocation) && entryDetailUrl.test(currentLocation))) {
+            if (
+                !(leaderboardUrl.test(oldLocation) && entryDetailUrl.test(currentLocation))
+                && !(leaderboardUrl.test(currentLocation) && entryDetailUrl.test(oldLocation))
+            ) {
                 Utils.localStorageSave('contestSelectedPage', 0);
             }
             console.log('Old Location', oldLocation);
