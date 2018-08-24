@@ -200,6 +200,9 @@ class ContestAdviceFormImpl extends React.Component {
         .then(() => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: []});
             this.searchStockComponent.resetFilterFromParent(this.state.stockSearchFilters.sector, this.state.stockSearchFilters.industry);
+            return this.toggleTwoWayBindingForTable(true);
+        })
+        .then(() => {
             this.setState({
                 positions: []
             }, () => {
@@ -208,6 +211,7 @@ class ContestAdviceFormImpl extends React.Component {
                     this.toggleSearchStockBottomSheet();
                 })
             });
+            this.toggleTwoWayBindingForTable(false);
         })
         .catch(err => console.log(err))
         .finally(() => {
