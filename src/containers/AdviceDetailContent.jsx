@@ -12,12 +12,14 @@ import {IconItem} from '../components/IconItem';
 import {AqRate} from '../components/AqRate';
 import {formatMetric} from '../containers/Contest/utils';
 import {metricDefs} from '../containers/Contest/constants';
+import {AqPerformanceMetrics} from '../components/AqPerformanceMetrics';
 import {AdviceMetricsItems} from '../components/AdviceMetricsItems';
 import {MetricItem} from '../components/MetricItem';
 import {AqStockPortfolioTable} from '../components/AqStockPortfolioTable';
 import medalIcon from '../assets/award.svg';
 import {Utils} from '../utils';
 import '../css/adviceDetail.css';
+import { HighChartBar } from '../components/HighChartBar';
 
 const MyChartNew = Loadable({
     loader: () => import('./MyChartNew'),
@@ -453,7 +455,7 @@ class AdviceDetailContentImpl extends React.Component {
                 </Row>
                 <Collapse 
                         bordered={false} 
-                        defaultActiveKey={defaultActiveKey} 
+                        defaultActiveKey={[...defaultActiveKey, '4', '6']} 
                         onChange={this.onCollapseChange}
                 >
                     {
@@ -667,17 +669,63 @@ class AdviceDetailContentImpl extends React.Component {
                             </Spin>
                         </Row>
                     </Panel>
+                    <Panel
+                            key="6"
+                            style={customPanelStyle}
+                            header={<h3 style={metricsHeaderStyle}>Rolling Performance</h3>}
+                        >
+                        <Row className="row-container">
+                            <Col span={24}>
+                                {this.props.renderRollingPerformanceSelector()}
+                            </Col>
+                            <Col span={24}>
+                                <Spin spinning={this.props.loading}>
+                                    <HighChartBar 
+                                        id='rollingPerformance'
+                                        dollarSeries={this.props.simulatedRollingPerformance}
+                                        percentageSeries={this.props.currentRollingPerformance}
+                                        radiogroupLabels = {['Historical', 'True']}
+                                        dollarCategories={this.props.simulatedRollingPerformanceCategories}
+                                        percentageCategories={this.props.trueRollingPerformanceCategories}
+                                    />
+                                </Spin>
+                            </Col>
+                        </Row>
+                    </Panel>
+                    <Panel
+                            key="4"
+                            style={customPanelStyle}
+                            header={<h3 style={metricsHeaderStyle}>Static Performance</h3>}
+                        >
+                        <Row className="row-container">
+                            <Col span={24}>
+                                {this.props.renderStaticPerformanceSelector()}
+                            </Col>
+                            <Col span={24}>
+                                <Spin spinning={this.props.loading}>
+                                    <HighChartBar 
+                                        id='staticPerformance'
+                                        dollarSeries={this.props.simulatedStaticPerformance}
+                                        percentageSeries={this.props.currentStaticPerformance}
+                                        radiogroupLabels = {['Historical', 'True']}
+                                        categories={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Yo']}
+                                        updateTimeline={true}
+                                    />
+                                </Spin>
+                            </Col>
+                        </Row>
+                    </Panel>
                 </Collapse>
             </Col>
         )
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (!_.isEqual(this.props, nextProps) || !_.isEqual(nextState, this.state)) {
-            return true;
-        } 
-        return false;
-    }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (!_.isEqual(this.props, nextProps) || !_.isEqual(nextState, this.state)) {
+    //         return true;
+    //     } 
+    //     return false;
+    // }
 
     render() {
         return (this.renderPageContent());
@@ -722,6 +770,7 @@ export const AdviceContestMetrics = ({selectedAdvice, view, onPerformanceToggle,
                     justifyContent: 'flex-end', 
                     top: '-40px', 
                     position:'absolute', 
+                    paddingRight: '20px'
                 }}>
                 {contestDropdown && contestDropdown()}
             </Col>

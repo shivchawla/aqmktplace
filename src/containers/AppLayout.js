@@ -92,7 +92,7 @@ class AppLayout extends React.Component {
                         <Menu.Item key="dashboard">Dashboard</Menu.Item>
                     }
 
-                    <Menu.Item key="advice">Screen Advices</Menu.Item>
+                    {/* <Menu.Item key="advice">Screen Advices</Menu.Item> */}
                     
                     {
                         Utils.isLoggedIn() &&

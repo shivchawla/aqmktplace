@@ -72,14 +72,16 @@ export default class LeaderBoard extends React.Component {
             advices: [], // list of advices currently participating in the contest
             selectedAdviceId: Utils.getFromLocalStorage('selectedAdviceId') || null,
             loading: false,
+            paginationLoading: false,
             selectedPage: Number(Utils.getFromLocalStorage('contestSelectedPage')) || 0,
             limit: 10,
             activeContests: [],
             selectedContestId: Utils.getFromLocalStorage('contestId') || null,
             selectedContest: {},
             showActivePerformance: true,
-            maxAdviceCount: 0
+            maxAdviceCount: 0,
         };
+        this.entryDetailPosition = 'fixed';
     }
 
     renderLeaderboardListHeader = () => {
@@ -128,7 +130,7 @@ export default class LeaderBoard extends React.Component {
                     style={{marginBottom: '10px'}}
                     align="middle"
             >
-                <Col span={4} >
+                {/* <Col span={4} >
                     <Button
                         style={{
                             fontSize: '12px', 
@@ -138,14 +140,14 @@ export default class LeaderBoard extends React.Component {
                         disabled={this.state.selectedPage === 0}
                         onClick={() => this.handlePagination('previous')}
                     >PREVIOUS</Button>
-                </Col>
-                <div style={verticalBox}>
+                </Col> */}
+                <Col span={24} style={verticalBox}>
                     <h3 style={{fontSize: '14px'}}>{this.state.maxAdviceCount} Entries</h3>
-                    <h3 style={{fontSize: '12px', fontWeight: 700}}>
+                    {/* <h3 style={{fontSize: '12px', fontWeight: 700}}>
                         Page {Number(this.state.selectedPage) + 1} / {Math.ceil(this.state.maxAdviceCount / this.state.limit)}
-                    </h3>
-                </div>
-                <Col span={4} style={{textAlign:'end'}}>
+                    </h3> */}
+                </Col>
+                {/* <Col span={4} style={{textAlign:'end'}}>
                     <Button
                         style={{
                             fontSize: '12px', 
@@ -158,7 +160,7 @@ export default class LeaderBoard extends React.Component {
                     >
                         NEXT
                     </Button>
-                </Col>
+                </Col> */}
             </Row>
         );
     }
@@ -171,17 +173,17 @@ export default class LeaderBoard extends React.Component {
                     span={24} 
                     style={{
                         ...horizontalBox, 
-                        justifyContent: 'space-between', 
+                        justifyContent: 'center', 
                         marginTop: '10px',
                         padding: '0 15px'
                     }}
             >
-                <Button 
+                {/* <Button 
                     disabled={this.state.selectedPage === 0}
                     onClick={() => this.handlePagination('previous')}
                 >
                     Prev
-                </Button>
+                </Button> */}
                 {/* {
                     this.state.loadingStocks &&
                     <Icon type="loading" style={{fontSize: '20px'}}/>
@@ -189,8 +191,10 @@ export default class LeaderBoard extends React.Component {
                 <Button
                     disabled={advicesDisplayed >= this.state.maxAdviceCount}
                     onClick={() => this.handlePagination('next')}
+                    loading={this.state.paginationLoading}
+                    type="primary"
                 >
-                    Next
+                    SHOW MORE
                 </Button>
             </Col>
         );
@@ -198,9 +202,10 @@ export default class LeaderBoard extends React.Component {
 
     renderLeaderList = () => {
         const leaders = this.state.advices;
+        const advicesDisplayed = (this.state.selectedPage * this.state.limit) + this.state.limit;
 
         return (
-            <Row>
+            <Row id='leader-list'>
                 <Col span={24}>
                     {this.renderPagination()}
                 </Col>
@@ -221,6 +226,21 @@ export default class LeaderBoard extends React.Component {
                             />
                         )
                     }
+                </Col>
+                <Col span={24} style={{textAlign:'center', marginTop: '20px'}}>
+                    <Button
+                        style={{
+                            fontSize: '12px', 
+                            fontWeight: '300', 
+                        }} 
+                        type="primary"
+                        disabled={advicesDisplayed >= this.state.maxAdviceCount}
+                        size="small"
+                        onClick={() => this.handlePagination('next')}
+                        loading={this.state.paginationLoading}
+                    >
+                        MORE
+                    </Button>
                 </Col>
             </Row>
         );
@@ -275,10 +295,13 @@ export default class LeaderBoard extends React.Component {
     }
 
     // Gets the summary of the latest ongoing contest
-    getLatestContestSummary = (contestId = this.state.selectedContestId, showLoader=true, updateAdviceId = false) => {
+    getLatestContestSummary = (contestId = this.state.selectedContestId, showLoader=true, updateAdviceId = false) => new Promise((resolve, reject) => {
         showLoader && this.setState({loading: true});
-        const limit = this.state.limit;
-        const skip = this.state.selectedPage * limit;
+        this.setState({paginationLoading: true});
+        const limit = (this.state.selectedPage + 1) * this.state.limit;
+        const skip = 0;
+        // const limit = this.state.limit;
+        // const skip = this.state.selectedPage * limit;
         const contestSummaryUrl = `${requestUrl}/contest/${contestId}/advices?skip=${skip}&limit=${limit}`;
         fetchAjax(contestSummaryUrl, this.props.history, this.props.match.params.url)
         .then(({data: contestSummaryData}) => {
@@ -295,14 +318,17 @@ export default class LeaderBoard extends React.Component {
                 selectedAdviceId, 
                 maxAdviceCount: adviceCount
             });
+            resolve(true);
         })
         .catch(err => {
-            return err;
+            reject(err);
+            // return err;
         })
         .finally(() => {
             showLoader && this.setState({loading: false});
+            this.setState({paginationLoading: false});
         })
-    }
+    })
 
     /**
      * Usage: Gets the advice item from response and processes the advice
@@ -406,14 +432,25 @@ export default class LeaderBoard extends React.Component {
         }
     }
 
+    // handlePagination = type => {
+    //     let {selectedPage = 0} = this.state;
+    //     selectedPage = type === 'next' ? selectedPage + 1 : selectedPage - 1;
+    //     Utils.localStorageSave('contestSelectedPage', selectedPage);
+    //     this.setState({
+    //         selectedPage
+    //     }, () => {
+    //         this.getLatestContestSummary(this.state.selectedContestId, true, true);
+    //     })
+    // }
+
     handlePagination = type => {
         let {selectedPage = 0} = this.state;
-        selectedPage = type === 'next' ? selectedPage + 1 : selectedPage - 1;
+        selectedPage += 1;
         Utils.localStorageSave('contestSelectedPage', selectedPage);
         this.setState({
             selectedPage
         }, () => {
-            this.getLatestContestSummary(this.state.selectedContestId, true, true);
+            this.getLatestContestSummary(this.state.selectedContestId, false, true);
         })
     }
 
@@ -473,25 +510,29 @@ export default class LeaderBoard extends React.Component {
         return (
             <Row gutter={0} style={{padding: '10px 20px'}}>
                 <ContestHomeMeta />
-                <Col span={16} style={{marginBottom: '20px'}}>
-                    <h3 style={{fontSize: '26px', color: primaryColor, marginBottom: '0px'}}>
-                        Leaderboard
-                    </h3>
-                    <div>
-                        <h5 style={{fontSize: '16px', color: '#6F6F6F'}}>
-                            For {_.get(this.state, 'selectedContest.name', '')}
-                            <span style={{fontSize: '14px', marginLeft: '4px', fontWeight: 700}}>[{moment(_.get(this.state, 'selectedContest.startDate', '')).format(dateFormat)}</span>
-                            <span style={{fontSize: '12px', margin: '0 3px'}}>to</span>
-                            <span style={{fontSize: '14px', fontWeight: 700}}>{moment(_.get(this.state, 'selectedContest.endDate', '')).format(dateFormat)}]</span>
-                        </h5>
-                    </div>
-                    <div style={{textAlign: 'end', marginTop: '-30px'}}>{this.renderContestDropdown()}</div>
-                </Col>
-
                 <Col span={16}>
-                    {this.renderLeaderList()}
+                    <Row>
+                        <Col span={24} style={{marginBottom: '20px'}}>
+                            <h3 style={{fontSize: '26px', color: primaryColor, marginBottom: '0px'}}>
+                                Leaderboard
+                            </h3>
+                            <div>
+                                <h5 style={{fontSize: '16px', color: '#6F6F6F'}}>
+                                    For {_.get(this.state, 'selectedContest.name', '')}
+                                    <span style={{fontSize: '14px', marginLeft: '4px', fontWeight: 700}}>[{moment(_.get(this.state, 'selectedContest.startDate', '')).format(dateFormat)}</span>
+                                    <span style={{fontSize: '12px', margin: '0 3px'}}>to</span>
+                                    <span style={{fontSize: '14px', fontWeight: 700}}>{moment(_.get(this.state, 'selectedContest.endDate', '')).format(dateFormat)}]</span>
+                                </h5>
+                            </div>
+                            <div style={{textAlign: 'end', marginTop: '-30px'}}>{this.renderContestDropdown()}</div>
+                        </Col>
+                        <Col span={24}>
+                            {this.renderLeaderList()}
+                        </Col>
+                    </Row>
                 </Col>
                 <Col 
+                    id='entry-detail-container'
                     span={7}
                     offset={1}
                     style={{
@@ -500,7 +541,11 @@ export default class LeaderBoard extends React.Component {
                         backgroundColor: '#fff',
                         marginTop:'-40px',
                         height:'500px',
-                        borderTop: `5px solid ${primaryColor}`
+                        borderTop: `5px solid ${primaryColor}`,
+                        position: this.entryDetailPosition,
+                        top: '150px',
+                        right: '20px',
+                        // transition: 'top 0.4s ease-in-out'
                     }}
                 >
                     {this.renderContestDetailMetrics()}
@@ -511,6 +556,32 @@ export default class LeaderBoard extends React.Component {
 
     componentWillMount() {
         this.getActiveContests();
+    }
+
+    componentDidMount() {
+        window.addEventListener('scroll', this.handleWindowScroll);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.handleWindowScroll);
+    }
+
+    handleWindowScroll = () => {
+        try {
+            const scrollYPosition = window.pageYOffset;
+            const leaderList = document.getElementById('leader-list');
+            const entryDetail = document.getElementById('entry-detail-container');
+            const leaderListHeight = leaderList.clientHeight;
+            const changeStyle = scrollYPosition > (leaderListHeight - 600);
+            entryDetail.style.position = changeStyle ? 'absolute' : 'fixed';
+            entryDetail.style.top = changeStyle 
+                    ? `${leaderListHeight - 450}px` 
+                    : scrollYPosition > 100
+                        ? '80px'
+                        : '150px';
+        } catch(err) {
+            
+        }
     }
 
     renderContestDetailMetrics = (mobile=false) => {
@@ -676,40 +747,51 @@ const ContestDetailMetrics = ({entryDetail, onPerformanceToggle, showActivePerfo
     );
 }
 
-let LeaderItem = ({leaderItem, onClick, selected}) => {
-    const containerStyle = {
-        borderBottom: '1px solid #eaeaea',
-        cursor: 'pointer',
-        paddingBottom: '10px',
-        paddingTop: '15px',
-        marginTop: '0px',
-        backgroundColor: selected ? '#e6f5f3' : '#fff'
-    };
-    const adviceId = _.get(leaderItem, 'adviceId', null);
-    const metricStyle = {paddingLeft: '10px', fontSize: '14px'};
+class LeaderItem extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            return true;
+        }
 
-    const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
-    const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct")
+        return false;
+    }
+    
+    render() {
+        const {leaderItem, onClick, selected} = this.props;
+        const containerStyle = {
+            borderBottom: '1px solid #eaeaea',
+            cursor: 'pointer',
+            paddingBottom: '10px',
+            paddingTop: '15px',
+            marginTop: '0px',
+            backgroundColor: selected ? '#e6f5f3' : '#fff'
+        };
+        const adviceId = _.get(leaderItem, 'adviceId', null);
+        const metricStyle = {paddingLeft: '10px', fontSize: '14px'};
 
-    return (
-        <Row className='leader-item' style={containerStyle} onClick={() => onClick(adviceId)} >
-            <Col span={4}>
-                <h3 style={{...metricStyle, margin: 0}}>{leaderItem.rank} .</h3>
-            </Col>
-            <Col span={6}>
-                <h5 style={{...metricStyle, margin: 0}}>{leaderItem.advisorName}</h5>
-            </Col>
-            <Col span={5}>
-                <h3 style={metricStyle}>{annualReturn}</h3>
-            </Col>
-            <Col span={5}>
-                <h3 style={metricStyle}>{volatility}</h3>
-            </Col>
-            <Col span={4}>
-                <h3 style={metricStyle}>{(leaderItem.metrics.current.score).toFixed(2)} / 100</h3>
-            </Col>
-        </Row>
-    );
+        const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
+        const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct")
+
+        return (
+            <Row className='leader-item' style={containerStyle} onClick={() => onClick(adviceId)} >
+                <Col span={4}>
+                    <h3 style={{...metricStyle, margin: 0}}>{leaderItem.rank} .</h3>
+                </Col>
+                <Col span={6}>
+                    <h5 style={{...metricStyle, margin: 0}}>{leaderItem.advisorName}</h5>
+                </Col>
+                <Col span={5}>
+                    <h3 style={metricStyle}>{annualReturn}</h3>
+                </Col>
+                <Col span={5}>
+                    <h3 style={metricStyle}>{volatility}</h3>
+                </Col>
+                <Col span={4}>
+                    <h3 style={metricStyle}>{(leaderItem.metrics.current.score).toFixed(2)} / 100</h3>
+                </Col>
+            </Row>
+        );
+    }
 };
 
 const MetricContainer = ({header, metrics}) => {

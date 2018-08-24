@@ -1,7 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import {Table, Tooltip} from 'antd';
-import {nameEllipsisStyle, metricColor} from '../constants';
+import {nameEllipsisStyle, metricColor, verticalBox, primaryColor} from '../constants';
 import {Utils, getUnrealizedPnlPct, getUnrealizedPnl} from '../utils';
 
 export class AqStockPortfolioTable extends React.Component {
@@ -17,24 +17,39 @@ export class AqStockPortfolioTable extends React.Component {
                 render: (text, record) => {
                     return (
                         <Tooltip title={text}>
-                            <h3 
-                                    onClick={() => props.updateTicker && props.updateTicker(record)} 
-                                    style={{
-                                        ...nameEllipsisStyle, 
-                                        // color: props.updateTicker ? '#0091EA' : '#000000a6',
-                                        cursor: props.updateTicker ? 'pointer' : 'auto'
-                                    }}
+                            <div 
+                                    style={{...verticalBox, alignItems: 'left', cursor: 'pointer'}}
+                                    onClick={() => props.updateTicker && props.updateTicker(record)}
                             >
-                                {text}
-                            </h3>
+                                <h3 
+                                        style={{
+                                            ...nameEllipsisStyle, 
+                                            fontSize: '14px', 
+                                            color: primaryColor, 
+                                            fontWeight: '700',
+                                            width: '275px',
+                                        }}
+                                >
+                                    {record.symbol}
+                                    <span 
+                                            style={{fontSize: '12px', fontWeight: 400}}>
+                                        &nbsp;- {_.get(record, 'sector', '')} | {_.get(record, 'industry', '')}
+                                    </span>
+                                </h3>
+                                <h3 
+                                        style={{
+                                            ...nameEllipsisStyle, 
+                                            fontSize: '12px',
+                                            color: '#444',
+                                            cursor: props.updateTicker ? 'pointer' : 'auto'
+                                        }}
+                                >
+                                    {text}
+                                </h3>
+                            </div>
                         </Tooltip>
                     );
                 }
-            },
-            {
-                title: this.renderHeaderText('SYMBOL'),
-                dataIndex: 'symbol',
-                key: 'symbol'
             },
             {
                 title: this.renderHeaderText('SHARES'),
@@ -44,7 +59,21 @@ export class AqStockPortfolioTable extends React.Component {
             {
                 title: this.renderHeaderText('LAST PRICE(\u20B9)'),
                 dataIndex: 'price',
-                key: 'price'
+                key: 'price',
+                render: (text, record) => {
+                    let priceEOD = _.get(record, 'priceEOD', 0);
+                    priceEOD = priceEOD === 0 ? record.price : priceEOD;
+                    const change = record.price - priceEOD;
+                    const changePct = (change * 100) / priceEOD;
+                    const color = Number(change) >= 0 ? metricColor.positive : metricColor.negative;
+
+                    return (
+                        <h3 style={{fontSize: '14px'}}>
+                            {Utils.formatMoneyValueMaxTwoDecimals(priceEOD)}&nbsp;&nbsp;
+                            <span style={{fontSize: '12px', color}}>{`${change.toFixed(2)}` || '-'} | {changePct.toFixed(2)}%</span>
+                        </h3>
+                    );
+                }
             },
             {
                 title: this.renderHeaderText('AVG. PRICE(\u20B9)'),
@@ -59,7 +88,14 @@ export class AqStockPortfolioTable extends React.Component {
                     const color = Number(text) >= 0 ? metricColor.positive : metricColor.negative;
 
                     return (
-                        <h3 style={{fontSize: '14px', color}}>{Utils.formatMoneyValueMaxTwoDecimals(text)}&nbsp;&nbsp;({`${record.unrealizedPnlPct} %` || '-'})</h3>
+                        <h3 
+                                style={{fontSize: '14px'}}
+                        >
+                            {Utils.formatMoneyValueMaxTwoDecimals(text)}
+                            <span style={{fontSize: '14px', color}}>
+                                &nbsp;| {`${record.unrealizedPnlPct} %` || '-'}
+                            </span>
+                        </h3>
                     );
                 }
             },
@@ -84,7 +120,9 @@ export class AqStockPortfolioTable extends React.Component {
                 name: _.get(position, 'security.detail.Nse_Name', '-'),
                 weight: (_.get(position, 'weightInPortfolio', 0.0) * 100).toFixed(2)+'%',
                 sector: _.get(position, 'security.detail.Sector', '-'),
-                price: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'lastPrice', 0)),
+                industry: _.get(position, 'security.detail.Industry', ''),
+                price: _.get(position, 'lastPrice', 0),
+                priceEOD: _.get(position, 'lastPriceEOD', 0),
                 shares: position.quantity || 0,
                 symbol: _.get(position, 'security.detail.NSE_ID', null) || _.get(position, 'security.ticker', '-'),
                 avgPrice: Utils.formatMoneyValueMaxTwoDecimals(_.get(position, 'avgPrice', 0)),

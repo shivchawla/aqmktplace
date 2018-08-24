@@ -1,23 +1,26 @@
 import * as React from 'react';
+import _ from 'lodash';
+import $ from 'jquery';
 import {Col, Row, Radio} from 'antd';
 import HighChart from 'highcharts';
+import {benchmarkColor, currentPerformanceColor, simulatedPerformanceColor} from '../constants';
 import {Utils} from '../utils';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
-
 
 export class HighChartBar extends React.Component {
     constructor(props) {
         super(props);
         this.dollarChart = null;
         this.percentageChart = null;
-        const {legendEnabled = true} = props; 
+        const {legendEnabled = false} = props; 
         this.state = {
             config: {
                 chart: {
                     type: 'column',
-                    height: 280
+                    height: 280,
+                    animation:false,
                 },
                 plotOptions: {
                     column: {
@@ -31,20 +34,22 @@ export class HighChartBar extends React.Component {
                 },
                 yAxis: {
                     labels: {
-                        //enabled: true
+                        format: '{value}%'
                     },
                     title: {
                         enabled: false,
                     },
                     gridLineColor: 'transparent',
+                    tickInterval: 5,
                 },
                 xAxis: {
                     gridLineColor: 'transparent',
                     title: {
-                        enabled: true,
-                        name: 'Stock'
-                    }
-                    // categories: props.categories || null
+                        enabled: false,
+                        name: 'Stock',
+                        text: null
+                    },
+                    categories: props.dollarCategories ? props.dollarCategories : props.categories || null
                 },
                 title: {
                     style: {
@@ -52,29 +57,15 @@ export class HighChartBar extends React.Component {
                     }
                 },
                 legend: {
-                    layout: 'vertical',
-                    align: 'right',
-                    itemDistance: '30px',
-                    itemStyle: {
-                        color: '#444',
-                        fontSize:'10px',
-                        fontWeight: '400',
-                        width: '200'
-                    },
-                    labelFormatter: function() {
-                        return `<h3>${this.name} - <span style="color: #353535">${Utils.formatMoneyValueMaxTwoDecimals(this.yData[0])}</span></h3>`;
-                    },
-                    x: -20,
-                    itemWidth: 100,
-                    verticalAlign: 'middle',
-                    itemMarginBottom:10,
-                    useHTML: true
+                    enabled: true,
                 },
                 credits: {
-                    //enabled: false
+                    enabled: false
                 },
                 tooltip: {
-                    enabled: true
+                    valueSuffix: '%',
+                    headerFormat: '<h3 style="font-size: 14px; font-weight: 700">{point.key}</h3><br></br>',
+                    shared: true,
                 },
                 series: []
             },
@@ -91,7 +82,6 @@ export class HighChartBar extends React.Component {
 
     componentDidMount() {
         this.initializeChart();
-        // console.log('Categories', this.props.categories);
     }
 
     componentWillReceiveProps(nextProps, nextState) {
@@ -112,8 +102,9 @@ export class HighChartBar extends React.Component {
 
     initializeChart = () => {
         const {dollarSeries, percentageSeries} = this.props;
-        this.dollarChart = new HighChart['Chart']('bar-chart-dollar', this.state.config);
-        this.percentageChart = new HighChart['Chart']('bar-chart-percentage', this.state.config);
+        const highChartId = _.get(this.props, 'id', '');
+        this.dollarChart = new HighChart['Chart'](`${highChartId}-bar-chart-dollar`, this.state.config);
+        this.percentageChart = new HighChart['Chart'](`${highChartId}-bar-chart-percentage`, this.state.config);
         try {
             this.updateDollarSeries(dollarSeries);
             this.updatePercentageSeries(percentageSeries)
@@ -125,19 +116,21 @@ export class HighChartBar extends React.Component {
     updateDollarSeries = series => {
         if (series.length > 0) {
             this.clearDollarSeries();
-            const categories = series.map(item => item.name);
-            // console.log('Categories', categories);
             series.map((item, index) => {
                 this.dollarChart.addSeries({
                     name: item.name,
-                    data: item.data,
-                    color: item.color
+                    data: this.props.updateTimeline 
+                        ? item.timelineData.map(itemValue  => itemValue.value)
+                        : item.data,
                 });
             });
-            this.dollarChart.update({
+            this.dollarChart.update({colors: [simulatedPerformanceColor, benchmarkColor]});
+            this.props.updateTimeline && this.dollarChart.update({
                 xAxis: {
                     gridLineColor: 'transparent',
-                    categories: series.map(item => item.name)
+                    categories: this.props.dollarCategories 
+                            ? this.props.dollarCategories 
+                            : series[0].timelineData.map(item => item.timeline.format('MMM YY'))
                 }
             })
         }
@@ -149,11 +142,41 @@ export class HighChartBar extends React.Component {
             series.map((item, index) => {
                 this.percentageChart.addSeries({
                     name: item.name,
-                    data: item.data,
-                    color: item.color
+                    data: this.props.updateTimeline 
+                            ? item.timelineData.map(itemValue  => itemValue.value)
+                            : item.data,
                 });
             });
+            this.percentageChart.update({colors: [currentPerformanceColor, benchmarkColor]});
+            this.props.updateTimeline && this.percentageChart.update({
+                xAxis: {
+                    gridLineColor: 'transparent',
+                    categories: this.props.percentageCategories 
+                            ? this.props.percentageCategories 
+                            : series[0].timelineData.map(item => item.timeline.format('MMM YY'))
+                }
+            })
         }
+    }
+
+    findYAxisMaxValue = series => {
+        let data = [];
+        series.map(seriesItem => {
+            data = [...data, ..._.get(seriesItem, 'data', [])];
+        });
+        const maxValue = _.max(data);
+
+        return Math.ceil(maxValue / 10) * 10;
+    }
+
+    findYAxisMinValue = series => {
+        let data = [];
+        series.map(seriesItem => {
+            data = [...data, ..._.get(seriesItem, 'data', [])];
+        });
+        const minValue = _.min(data);
+        
+        return Math.ceil(minValue / 10) * 10;
     }
 
     clearDollarSeries = () => {
@@ -169,13 +192,33 @@ export class HighChartBar extends React.Component {
     }
 
     handleRadioGroupChange = e => {
-        this.setState({dollarVisible: e.target.value === 'dollarPerformance' ? true : false});
+        this.setState({
+            dollarVisible: e.target.value === 'dollarPerformance' ? true : false,
+        });
+        if (this.props.dollarCategories) {
+            if (e.target.value === 'dollarPerformance') {
+                this.dollarChart.update({
+                    xAxis: {
+                        gridLineColor: 'transparent',
+                        categories: this.props.dollarCategories
+                    }
+                });
+            } else {
+                this.percentageChart.update({
+                    xAxis: {
+                        gridLineColor: 'transparent',
+                        categories: this.props.percentageCategories
+                    }
+                });
+            }
+        }
     }
 
     render() {
         const chartPercentageStyle = !this.state.dollarVisible ? {display: 'block'} : {display: 'none'};
         const chartDollarStyle = this.state.dollarVisible ? {display: 'block'} : {display: 'none'};
         const {alignLegend = 'right', legendStyle = {}} = this.props;
+        const highChartId = _.get(this.props, 'id', '');
 
         return (
             <Row style={{height: '320px'}}>
@@ -186,12 +229,20 @@ export class HighChartBar extends React.Component {
                             style={{marginRight: '10px'}} 
                             onChange={this.handleRadioGroupChange}
                     >
-                        <RadioButton value="dollarPerformance" style={{fontSize: '18px'}}>&#x20b9;</RadioButton>
-                        <RadioButton value="percentagePerformance" style={{fontSize: '18px'}}>%</RadioButton>
+                        <RadioButton 
+                                value="dollarPerformance" 
+                        >
+                            {_.get(this.props, 'radiogroupLabels[0]', '&#x20b9;')}
+                        </RadioButton>
+                        <RadioButton 
+                                value="percentagePerformance" 
+                        >
+                            {_.get(this.props, 'radiogroupLabels[1]', '%')}
+                        </RadioButton>
                     </RadioGroup>
                 </Col>
-                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle}} id='bar-chart-dollar'></Col>
-                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle}} id='bar-chart-percentage'></Col>
+                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle}} id={`${highChartId}-bar-chart-dollar`}></Col>
+                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle}} id={`${highChartId}-bar-chart-percentage`}></Col>
             </Row>
         );
     }

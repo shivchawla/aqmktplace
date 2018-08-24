@@ -33,9 +33,9 @@ export const getUnixStockData = (data) => {
     })
 }
 
-export const getStockPerformance = (tickerName, detailType='detail') => {
+export const getStockPerformance = (tickerName, detailType='detail', field='priceHistory') => {
     return new Promise((resolve, reject) => {
-        getStockData(tickerName, 'priceHistory', detailType)
+        getStockData(tickerName, field, detailType)
         .then(performance => {
             const data = performance.data.priceHistory;
             if (data.length > 0) { // Check if ticker is valid
@@ -53,6 +53,27 @@ export const getStockPerformance = (tickerName, detailType='detail') => {
     });
 }
 
+export const getStockStaticPerformance = (tickerName, detailType='detail', field='staticPerformance') => {
+	return new Promise((resolve, reject) => {
+		getStockData(tickerName, field, detailType)
+		.then(performance => {
+			const data = _.get(performance, 'data.staticPerformance.detail', {});
+			resolve(data);
+		})
+		.catch(err => reject(err));
+	})
+}
+
+export const getStockRollingPerformance = (tickerName, detailType='detail', field='rollingPerformance') => {
+	return new Promise((resolve, reject) => {
+		getStockData(tickerName, field, detailType)
+		.then(performance => {
+			const data = _.get(performance, 'data.rollingPerformance.detail', {});
+			resolve(data);
+		})
+		.catch(err => reject(err));
+	})
+}
 export const convertToPercentage = value => {
     return Number((100 * value).toFixed(2));
 }

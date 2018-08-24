@@ -178,7 +178,19 @@ class App extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
+        const entryDetailUrl = new RegExp('^\/contest\/entry\/[A-Za-z0-9]+$');
+        const leaderboardUrl = new RegExp('^\/contest\/leaderboard$');
         if (this.props.location !== prevProps.location) { // Route changed
+            const oldLocation = prevProps.location.pathname;
+            const currentLocation = this.props.location.pathname;
+            if (
+                !(leaderboardUrl.test(oldLocation) && entryDetailUrl.test(currentLocation))
+                && !(leaderboardUrl.test(currentLocation) && entryDetailUrl.test(oldLocation))
+            ) {
+                Utils.localStorageSave('contestSelectedPage', 0);
+            }
+            console.log('Old Location', oldLocation);
+            console.log('Current Location', currentLocation);
             this.fireTracking();
         }
     }

@@ -17,11 +17,34 @@ export class AqStockTableMod extends React.Component {
                     <div 
                         style={{...verticalBox, alignItems: 'flex-start'}}
                     >
-                        <span style={{fontSize: '14px'}}>
-                            {text}
-                        </span>
+                        <h3 
+                                style={{
+                                    ...nameEllipsisStyle,
+                                    fontSize: '14px', 
+                                    fontWeight: 700, 
+                                    color: primaryColor,
+                                    width: '275px',
+                                    cursor: 'auto',
+                                }}
+                        >
+                            {text} 
+                            <span 
+                                    style={{
+                                        fontSize: '12px', 
+                                        fontWeight: '400',
+                                    }}
+                            >
+                                &nbsp;- {_.get(record, 'sector', '')} | {_.get(record, 'industry', '')}
+                            </span>
+                        </h3>
                         <span 
-                                style={{...nameEllipsisStyle, fontSize: '12px', color: '#444', width: '200px'}}
+                                style={{
+                                    ...nameEllipsisStyle, 
+                                    fontSize: '12px', 
+                                    color: '#444', 
+                                    width: '200px',
+                                    cursor: 'auto'
+                                }}
                         >
                             {_.get(record, 'name', '')}
                         </span>
@@ -105,6 +128,7 @@ export class AqStockTableMod extends React.Component {
                 inputWidth='80%'
                 max={maxAllowedStockExposure}
                 hideValue
+                stepSize={1000}
             />
         );
     }
@@ -190,14 +214,14 @@ export class AqStockTableMod extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         let data = [];
-        // if (this.props.data !== nextProps.data) {
+        if (nextProps.shouldUpdate) {
             data = nextProps.data;
             this.setState({data});
-        // } 
+        } 
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.state !== nextState || this.props !== nextProps) {
+        if (!_.isEqual(this.state, nextState) || !_.isEqual(this.props, nextProps)) {
             return true;
         } 
         return false;

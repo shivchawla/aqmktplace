@@ -88,6 +88,8 @@ class ContestAdviceFormImpl extends React.Component {
             maxSectorTargetTotalHard: 0,
             maxStockTargetTotalSoft: 0,
             maxSectorTargetTotalSoft: 0,
+            shouldUpdateStockTable: true,
+            shouldUpdateSectorTable: true,
         };
     }
 
@@ -198,6 +200,9 @@ class ContestAdviceFormImpl extends React.Component {
         .then(() => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: []});
             this.searchStockComponent.resetFilterFromParent(this.state.stockSearchFilters.sector, this.state.stockSearchFilters.industry);
+            return this.toggleTwoWayBindingForTable(true);
+        })
+        .then(() => {
             this.setState({
                 positions: []
             }, () => {
@@ -206,6 +211,7 @@ class ContestAdviceFormImpl extends React.Component {
                     this.toggleSearchStockBottomSheet();
                 })
             });
+            this.toggleTwoWayBindingForTable(false);
         })
         .catch(err => console.log(err))
         .finally(() => {
@@ -410,6 +416,8 @@ class ContestAdviceFormImpl extends React.Component {
                 maxSectorTargetTotalHard={this.state.maxSectorTargetTotalHard}
                 maxStockTargetTotalHard={this.state.maxStockTargetTotalHard}
                 isUpdate={this.props.isUpdate}
+                shouldUpdateStockTable={this.state.shouldUpdateStockTable}
+                shouldUpdateSectorkTable={this.state.shouldUpdateSectorTable}
             />
         )
     }
@@ -504,16 +512,17 @@ class ContestAdviceFormImpl extends React.Component {
 
     conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
         const positions = [...this.state.positions];
-        this.updatePositions(this.updateAllWeights(selectedPositions), () => {
-            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-            this.handleSubmitAdvice('validate')
-            .then(() => resolve(true));
+        this.toggleTwoWayBindingForTable(true)
+        .then(() => {
+            this.updatePositions(this.updateAllWeights(selectedPositions), () => {
+                !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+                this.handleSubmitAdvice('validate')
+                .then(() => {
+                    resolve(true);
+                    this.toggleTwoWayBindingForTable(false);
+                });
+            });
         })
-        // this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
-        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-        //     this.handleSubmitAdvice('validate')
-        //     .then(() => resolve(true));
-        // });
     })
 
     deletePositions = toBeDeletedPositions => {
@@ -1355,6 +1364,7 @@ class ContestAdviceFormImpl extends React.Component {
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 sector: _.get(position, 'security.detail.Sector', null),
+                industry: _.get(position, 'security.detail.Industry', null),
                 name: _.get(position, 'security.detail.Nse_Name', ''),
                 ticker: symbol,
                 symbol,
@@ -1443,7 +1453,11 @@ class ContestAdviceFormImpl extends React.Component {
             const adviceId = this.props.adviceId;
             this.getAdviceSummaryAndPortfolio(adviceId)
             .finally(() => {
-                this.setState({loading: false});
+                this.setState({
+                    loading: false, 
+                    shouldUpdateStockTable: false, 
+                    shouldUpdateSectorkTable: false
+                });
             })
         } else {
             this.initializeNetValue();
@@ -1456,11 +1470,21 @@ class ContestAdviceFormImpl extends React.Component {
                 this.setState({noActiveContests: true});
             })
             .finally(() => {
-                this.setState({loading: false});
+                this.setState({
+                    loading: false, 
+                    shouldUpdateStockTable: false, 
+                    shouldUpdateSectorkTable: false
+                });
             })
-        }
-        
+        } 
     }
+
+    toggleTwoWayBindingForTable = (status = false) => new Promise(resolve => {
+        this.setState({
+            shouldUpdateStockTable: status, 
+            shouldUpdateSectorkTable: status
+        },() => resolve(true));
+    })
 
     shouldComponentUpdate(nextProps, nextState) {
         if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {

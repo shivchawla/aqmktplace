@@ -5,7 +5,6 @@ import {Row, Col, Icon} from 'antd';
 import {horizontalBox, verticalBox, primaryColor} from '../../constants';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
 import {MetricItem} from '../../components/MetricItem';
-import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {formatMetric} from './utils';
 
 export default class LeaderBoardMobile extends React.Component {
@@ -22,21 +21,6 @@ export default class LeaderBoardMobile extends React.Component {
 
     renderBottomSheet = () => {
         return (
-            // <SwipeableBottomSheet 
-            //         fullScreen 
-            //         style={{zIndex: '20000'}}
-            //         overlayStyle={{overflow: 'hidden'}}
-            //         open={this.state.bottomSheetOpenStatus}
-            //         onChange={this.toggleBottomSheet}
-            //         swipeableViewsProps={{
-            //             disabled: false
-            //         }}
-            // >
-                // <EntryDetailBottomSheet 
-                //     closeBottomSheet={this.toggleBottomSheet}
-                //     renderContestDetail={this.props.renderContestDetail}
-                // />
-            // </SwipeableBottomSheet>
             <Motion style={{x: spring(this.state.bottomSheetOpenStatus ? -44 : global.screen.height)}}>
                 {
                     ({x}) => (
@@ -124,46 +108,58 @@ export default class LeaderBoardMobile extends React.Component {
     }
 }
 
-const LeaderItem = ({leaderItem, onClick, getRankColor}) => {
-    const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
-    const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct");
-    const adviceId = _.get(leaderItem, 'adviceId', null);
+class LeaderItem extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            return true;
+        }
+
+        return false;
+    }
     
-    const containerStyle = {
-        margin: '5px 10px 0px 10px',
-        borderRadius: '2px',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-        border: '1px solid #eaeaea',
-        padding: '5px 10px',
-        cursor: 'pointer',
-        borderLeft: `3px solid ${getRankColor(Number(leaderItem.rank))}`
-    };
-    
-    return (
-        <Row style={containerStyle} onClick={() => onClick(adviceId)}>
-            <Col span={24} style={horizontalBox}>
-                <h3 style={{color: '#767676'}}>{leaderItem.rank}</h3>
-                <h3 style={{marginLeft: '18px'}}>{leaderItem.advisorName}</h3>
-            </Col>
-            <Col span={24} style={{marginLeft: '26px'}}>
-                <Row>
-                    <LeaderboardMetricItems
-                        label="Excess Return"
-                        value={annualReturn}
-                    />
-                    <LeaderboardMetricItems 
-                        label="Tracking Error"
-                        value={volatility}
-                    />
-                    <LeaderboardMetricItems 
-                        label="Score"
-                        value={(leaderItem.metrics.current.score).toFixed(2)}
-                    />
-                </Row>
-            </Col>
-        </Row>
-    );
-};
+    render() {
+        console.log('LeaderItem Component Updated');
+        const {leaderItem, onClick, getRankColor} = this.props;
+        const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
+        const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct");
+        const adviceId = _.get(leaderItem, 'adviceId', null);
+        
+        const containerStyle = {
+            margin: '5px 10px 0px 10px',
+            borderRadius: '2px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+            border: '1px solid #eaeaea',
+            padding: '5px 10px',
+            cursor: 'pointer',
+            borderLeft: `3px solid ${getRankColor(Number(leaderItem.rank))}`
+        };
+        
+        return (
+            <Row style={containerStyle} onClick={() => onClick(adviceId)}>
+                <Col span={24} style={horizontalBox}>
+                    <h3 style={{color: '#767676'}}>{leaderItem.rank}</h3>
+                    <h3 style={{marginLeft: '18px'}}>{leaderItem.advisorName}</h3>
+                </Col>
+                <Col span={24} style={{marginLeft: '26px'}}>
+                    <Row>
+                        <LeaderboardMetricItems
+                            label="Excess Return"
+                            value={annualReturn}
+                        />
+                        <LeaderboardMetricItems 
+                            label="Tracking Error"
+                            value={volatility}
+                        />
+                        <LeaderboardMetricItems 
+                            label="Score"
+                            value={(leaderItem.metrics.current.score).toFixed(2)}
+                        />
+                    </Row>
+                </Col>
+            </Row>
+        );
+    }
+}
 
 const LeaderboardMetricItems = ({label, value, onClick = null}) => {
     return (
@@ -194,20 +190,31 @@ const RankItem = ({rank}) => {
     );
 };
 
-const EntryDetailBottomSheet = ({closeBottomSheet, renderContestDetail}) => {
-    return(
-        <Row>
-            <Col span={24} style={{...horizontalBox, justifyContent: 'center', padding: '10px'}}>
-                <Icon 
-                    style={{fontSize: '22px', position: 'absolute', left: '10px'}}
-                    type="close-circle" 
-                    onClick={closeBottomSheet}
-                />
-                <h3>ENTRY DETAIL</h3>
-            </Col>
-            <Col span={24}>
-                {renderContestDetail()}
-            </Col>
-        </Row>
-    );
-};
+class EntryDetailBottomSheet extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    render() {
+        const {closeBottomSheet, renderContestDetail} = this.props;
+        return(
+            <Row>
+                <Col span={24} style={{...horizontalBox, justifyContent: 'center', padding: '10px'}}>
+                    <Icon 
+                        style={{fontSize: '22px', position: 'absolute', left: '10px'}}
+                        type="close-circle" 
+                        onClick={closeBottomSheet}
+                    />
+                    <h3>ENTRY DETAIL</h3>
+                </Col>
+                <Col span={24}>
+                    {renderContestDetail()}
+                </Col>
+            </Row>
+        );
+    }
+}

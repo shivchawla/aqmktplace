@@ -47,8 +47,8 @@ export default class AqSectorTable extends React.Component {
         ];
         this.state = {
             selectedRows: [],
-            data: processSectorStockData(this.props.data, this.props.data),
-            stockData: this.props.data
+            data: processSectorStockData(props.data, props.data),
+            stockData: props.data
         };
     }
 
@@ -101,6 +101,22 @@ export default class AqSectorTable extends React.Component {
     asyncProcessData = (data, disableTargetTotalUpdate = false) => new Promise((resolve, reject) => {
         resolve (processSectorStockData(data, this.state.data, disableTargetTotalUpdate));
     })
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.shouldUpdate) {
+            this.setState({
+                data: processSectorStockData(nextProps.data, nextProps.data),
+                stockData: nextProps.data
+            })
+        }
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(this.state, nextState) || !_.isEqual(this.props, nextProps)) {
+            return true;
+        } 
+        return false;
+    }
 
     render() {
         return (
