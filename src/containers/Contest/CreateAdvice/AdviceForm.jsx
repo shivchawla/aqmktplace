@@ -1360,6 +1360,7 @@ class ContestAdviceFormImpl extends React.Component {
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 sector: _.get(position, 'security.detail.Sector', null),
+                industry: _.get(position, 'security.detail.Industry', null),
                 name: _.get(position, 'security.detail.Nse_Name', ''),
                 ticker: symbol,
                 symbol,
