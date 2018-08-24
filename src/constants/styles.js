@@ -119,9 +119,9 @@ export const pageTitleStyle = {
 
 export const benchmarkColor = '#FF4136';
 
-export const currentPerformanceColor = '#00C853';
+export const currentPerformanceColor = '#007c71';
 
-export const simulatedPerformanceColor = '#607D8B';
+export const simulatedPerformanceColor = '#ffa636';
 
 export const statusColor = {
     subscribed: '#FFAB00',
