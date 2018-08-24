@@ -47,8 +47,8 @@ export default class AqSectorTable extends React.Component {
         ];
         this.state = {
             selectedRows: [],
-            data: processSectorStockData(this.props.data, this.props.data),
-            stockData: this.props.data
+            data: processSectorStockData(props.data, props.data),
+            stockData: props.data
         };
     }
 
@@ -112,7 +112,7 @@ export default class AqSectorTable extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.state !== nextState || this.props !== nextProps) {
+        if (!_.isEqual(this.state, nextState) || !_.isEqual(this.props, nextProps)) {
             return true;
         } 
         return false;

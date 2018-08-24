@@ -130,7 +130,7 @@ export default class LeaderBoard extends React.Component {
                     style={{marginBottom: '10px'}}
                     align="middle"
             >
-                <Col span={4} >
+                {/* <Col span={4} >
                     <Button
                         style={{
                             fontSize: '12px', 
@@ -140,14 +140,14 @@ export default class LeaderBoard extends React.Component {
                         disabled={this.state.selectedPage === 0}
                         onClick={() => this.handlePagination('previous')}
                     >PREVIOUS</Button>
-                </Col>
-                <div style={verticalBox}>
+                </Col> */}
+                <Col span={24} style={verticalBox}>
                     <h3 style={{fontSize: '14px'}}>{this.state.maxAdviceCount} Entries</h3>
-                    <h3 style={{fontSize: '12px', fontWeight: 700}}>
+                    {/* <h3 style={{fontSize: '12px', fontWeight: 700}}>
                         Page {Number(this.state.selectedPage) + 1} / {Math.ceil(this.state.maxAdviceCount / this.state.limit)}
-                    </h3>
-                </div>
-                <Col span={4} style={{textAlign:'end'}}>
+                    </h3> */}
+                </Col>
+                {/* <Col span={4} style={{textAlign:'end'}}>
                     <Button
                         style={{
                             fontSize: '12px', 
@@ -160,7 +160,7 @@ export default class LeaderBoard extends React.Component {
                     >
                         NEXT
                     </Button>
-                </Col>
+                </Col> */}
             </Row>
         );
     }
@@ -206,9 +206,9 @@ export default class LeaderBoard extends React.Component {
 
         return (
             <Row id='leader-list'>
-                {/* <Col span={24}>
+                <Col span={24}>
                     {this.renderPagination()}
-                </Col> */}
+                </Col>
 
                 <Col span={24}>
                     {this.renderLeaderboardListHeader()}
@@ -562,6 +562,10 @@ export default class LeaderBoard extends React.Component {
         window.addEventListener('scroll', this.handleWindowScroll);
     }
 
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.handleWindowScroll);
+    }
+
     handleWindowScroll = () => {
         try {
             const scrollYPosition = window.pageYOffset;
@@ -571,7 +575,7 @@ export default class LeaderBoard extends React.Component {
             const changeStyle = scrollYPosition > (leaderListHeight - 600);
             entryDetail.style.position = changeStyle ? 'absolute' : 'fixed';
             entryDetail.style.top = changeStyle 
-                    ? `${leaderListHeight - 500}px` 
+                    ? `${leaderListHeight - 450}px` 
                     : scrollYPosition > 100
                         ? '80px'
                         : '150px';

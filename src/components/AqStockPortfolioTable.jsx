@@ -21,11 +21,19 @@ export class AqStockPortfolioTable extends React.Component {
                                     style={{...verticalBox, alignItems: 'left', cursor: 'pointer'}}
                                     onClick={() => props.updateTicker && props.updateTicker(record)}
                             >
-                                <h3 style={{fontSize: '14px', color: primaryColor, fontWeight: '700'}}>
+                                <h3 
+                                        style={{
+                                            ...nameEllipsisStyle, 
+                                            fontSize: '14px', 
+                                            color: primaryColor, 
+                                            fontWeight: '700',
+                                            width: '275px',
+                                        }}
+                                >
                                     {record.symbol}
                                     <span 
                                             style={{fontSize: '12px', fontWeight: 400}}>
-                                        &nbsp;- {_.get(record, 'sector', '')}
+                                        &nbsp;- {_.get(record, 'sector', '')} | {_.get(record, 'industry', '')}
                                     </span>
                                 </h3>
                                 <h3 
@@ -112,6 +120,7 @@ export class AqStockPortfolioTable extends React.Component {
                 name: _.get(position, 'security.detail.Nse_Name', '-'),
                 weight: (_.get(position, 'weightInPortfolio', 0.0) * 100).toFixed(2)+'%',
                 sector: _.get(position, 'security.detail.Sector', '-'),
+                industry: _.get(position, 'security.detail.Industry', ''),
                 price: _.get(position, 'lastPrice', 0),
                 priceEOD: _.get(position, 'lastPriceEOD', 0),
                 shares: position.quantity || 0,

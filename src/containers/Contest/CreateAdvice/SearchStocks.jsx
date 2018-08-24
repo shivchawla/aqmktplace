@@ -232,7 +232,8 @@ export class SearchStocks extends React.Component {
                 open,
                 current,
                 checked: selectedStocks.indexOf(symbol) >= 0,
-                sector: _.get(stock, 'security.detail.Sector', null)
+                sector: _.get(stock, 'security.detail.Sector', null),
+                industry: _.get(stock, 'security.detail.Industry', null)
             };
         }).filter(stock => stock.name !== null);
     }
@@ -279,6 +280,7 @@ export class SearchStocks extends React.Component {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 name: _.get(stock, 'name', ''),
                 sector: _.get(stock, 'sector', null),
+                industry: _.get(stock, 'industry', null),
                 lastPrice: stock.current,
                 shares: 1,
                 symbol: stock.symbol,

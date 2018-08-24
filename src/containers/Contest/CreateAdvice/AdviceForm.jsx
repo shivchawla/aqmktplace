@@ -508,16 +508,17 @@ class ContestAdviceFormImpl extends React.Component {
 
     conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
         const positions = [...this.state.positions];
-        this.updatePositions(this.updateAllWeights(selectedPositions), () => {
-            !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-            this.handleSubmitAdvice('validate')
-            .then(() => resolve(true));
+        this.toggleTwoWayBindingForTable(true)
+        .then(() => {
+            this.updatePositions(this.updateAllWeights(selectedPositions), () => {
+                !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
+                this.handleSubmitAdvice('validate')
+                .then(() => {
+                    resolve(true);
+                    this.toggleTwoWayBindingForTable(false);
+                });
+            });
         })
-        // this.setState({positions: this.updateAllWeights(selectedPositions)}, () => {
-        //     !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-        //     this.handleSubmitAdvice('validate')
-        //     .then(() => resolve(true));
-        // });
     })
 
     deletePositions = toBeDeletedPositions => {
@@ -1470,9 +1471,15 @@ class ContestAdviceFormImpl extends React.Component {
                     shouldUpdateSectorkTable: false
                 });
             })
-        }
-        
+        } 
     }
+
+    toggleTwoWayBindingForTable = (status = false) => new Promise(resolve => {
+        this.setState({
+            shouldUpdateStockTable: status, 
+            shouldUpdateSectorkTable: status
+        },() => resolve(true));
+    })
 
     shouldComponentUpdate(nextProps, nextState) {
         if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {

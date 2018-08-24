@@ -4,10 +4,12 @@ import $ from 'jquery';
 import {Col, Row, Radio} from 'antd';
 import HighChart from 'highcharts';
 import {Utils} from '../utils';
-import {benchmarkColor, currentPerformanceColor, simulatedPerformanceColor} from '../constants';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
+const benchmarkColor = '#607D8B';
+const currentPerformanceColor = '#00E5FF';
+const simulatedPerformanceColor = '#2196F3';
 
 
 export class HighChartBar extends React.Component {
@@ -41,6 +43,7 @@ export class HighChartBar extends React.Component {
                         enabled: false,
                     },
                     gridLineColor: 'transparent',
+                    tickInterval: 5,
                 },
                 xAxis: {
                     gridLineColor: 'transparent',
@@ -63,18 +66,10 @@ export class HighChartBar extends React.Component {
                     enabled: false
                 },
                 tooltip: {
-                    formatter: function () {
-                        var s = '<b>' + this.x + '</b>';
-                        $.each(this.points, function () {
-                            s += '<br/>' + this.series.name + ': <b>' +
-                                this.y + '</b>%';
-                        });
-
-                        return s;
-                    },
+                    valueSuffix: '%',
+                    headerFormat: '<h3 style="font-size: 14px; font-weight: 700">{point.key}</h3><br></br>',
                     shared: true
                 },
-                colors: [simulatedPerformanceColor, benchmarkColor],
                 series: []
             },
             dollarVisible: true,
@@ -90,7 +85,6 @@ export class HighChartBar extends React.Component {
 
     componentDidMount() {
         this.initializeChart();
-        // console.log('Categories', this.props.categories);
     }
 
     componentWillReceiveProps(nextProps, nextState) {
@@ -131,17 +125,16 @@ export class HighChartBar extends React.Component {
                     data: this.props.updateTimeline 
                         ? item.timelineData.map(itemValue  => itemValue.value)
                         : item.data,
-                    color: item.color
                 });
             });
+            this.dollarChart.update({colors: [simulatedPerformanceColor, benchmarkColor]});
             this.props.updateTimeline && this.dollarChart.update({
                 xAxis: {
                     gridLineColor: 'transparent',
                     categories: this.props.dollarCategories 
                             ? this.props.dollarCategories 
                             : series[0].timelineData.map(item => item.timeline.format('MMM YY'))
-                },
-                colors: [simulatedPerformanceColor, benchmarkColor],
+                }
             })
         }
     }
@@ -155,19 +148,38 @@ export class HighChartBar extends React.Component {
                     data: this.props.updateTimeline 
                             ? item.timelineData.map(itemValue  => itemValue.value)
                             : item.data,
-                    color: item.color
                 });
             });
+            this.percentageChart.update({colors: [currentPerformanceColor, benchmarkColor]});
             this.props.updateTimeline && this.percentageChart.update({
                 xAxis: {
                     gridLineColor: 'transparent',
                     categories: this.props.percentageCategories 
                             ? this.props.percentageCategories 
                             : series[0].timelineData.map(item => item.timeline.format('MMM YY'))
-                },
-                colors: [currentPerformanceColor, benchmarkColor],
+                }
             })
         }
+    }
+
+    findYAxisMaxValue = series => {
+        let data = [];
+        series.map(seriesItem => {
+            data = [...data, ..._.get(seriesItem, 'data', [])];
+        });
+        const maxValue = _.max(data);
+
+        return Math.ceil(maxValue / 10) * 10;
+    }
+
+    findYAxisMinValue = series => {
+        let data = [];
+        series.map(seriesItem => {
+            data = [...data, ..._.get(seriesItem, 'data', [])];
+        });
+        const minValue = _.min(data);
+        
+        return Math.ceil(minValue / 10) * 10;
     }
 
     clearDollarSeries = () => {
@@ -232,22 +244,8 @@ export class HighChartBar extends React.Component {
                         </RadioButton>
                     </RadioGroup>
                 </Col>
-                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle}} id={`${highChartId}-bar-chart-dollar`}>
-                    {
-                        _.get(this.props, 'dollarSeries.data', []).length === 0 &&
-                        <h3 style={{fontSize: '14px', color: '#444'}}>
-                            No Data
-                        </h3>
-                    }
-                </Col>
-                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle}} id={`${highChartId}-bar-chart-percentage`}>
-                    {
-                        _.get(this.props, 'percentageSeries.data', []).length === 0 &&
-                        <h3 style={{fontSize: '14px', color: '#444'}}>
-                            No Data
-                        </h3>
-                    }
-                </Col>
+                <Col span={24} style={{textAlign: 'center', ...chartDollarStyle}} id={`${highChartId}-bar-chart-dollar`}></Col>
+                <Col span={24} style={{textAlign: 'center', ...chartPercentageStyle}} id={`${highChartId}-bar-chart-percentage`}></Col>
             </Row>
         );
     }
