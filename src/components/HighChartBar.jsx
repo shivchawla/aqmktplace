@@ -3,14 +3,11 @@ import _ from 'lodash';
 import $ from 'jquery';
 import {Col, Row, Radio} from 'antd';
 import HighChart from 'highcharts';
+import {benchmarkColor, currentPerformanceColor, simulatedPerformanceColor} from '../constants';
 import {Utils} from '../utils';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
-const benchmarkColor = '#607D8B';
-const currentPerformanceColor = '#00E5FF';
-const simulatedPerformanceColor = '#2196F3';
-
 
 export class HighChartBar extends React.Component {
     constructor(props) {
@@ -68,7 +65,7 @@ export class HighChartBar extends React.Component {
                 tooltip: {
                     valueSuffix: '%',
                     headerFormat: '<h3 style="font-size: 14px; font-weight: 700">{point.key}</h3><br></br>',
-                    shared: true
+                    shared: true,
                 },
                 series: []
             },

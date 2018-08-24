@@ -117,11 +117,11 @@ export const pageTitleStyle = {
     color: '#595959'
 };
 
-export const benchmarkColor = '#D50000';
+export const benchmarkColor = '#FF4136';
 
-export const currentPerformanceColor = '#9C27B0';
+export const currentPerformanceColor = '#00C853';
 
-export const simulatedPerformanceColor = '#00BCD4';
+export const simulatedPerformanceColor = '#607D8B';
 
 export const statusColor = {
     subscribed: '#FFAB00',
