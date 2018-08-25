@@ -107,11 +107,11 @@ export class SearchStocks extends React.Component {
     handleSearchInputChange = (e, type = 'desktop') => {
         const searchQuery = type === 'desktop' ? e.target.value : e;
         this.setState({searchInput: searchQuery, selectedPage: 0}, () => {
-            this.fetchStocks();
+            this.fetchStocks(this.state.searchInput, false);
         });
     }
 
-    fetchStocks = (searchQuery = this.state.searchInput) => new Promise(resolve => {
+    fetchStocks = (searchQuery = this.state.searchInput, shoudlConcatenate = true) => new Promise(resolve => {
         const limit = 10;
         const stocks = [...this.state.stocks];
         const skip = this.state.selectedPage * limit;
@@ -128,7 +128,11 @@ export class SearchStocks extends React.Component {
         fetchAjax(url, this.props.history, this.props.pageUrl)
         .then(({data: stockResponseData}) => {
             const processedStocks = this.processStockList(stockResponseData);
-            this.setState({stocks: [...stocks, ...processedStocks]});
+            if (!shoudlConcatenate) {
+                this.setState({stocks: processedStocks})
+            } else {
+                this.setState({stocks: [...stocks, ...processedStocks]});
+            }
             this.pushStocksToLocalArray(processedStocks);
             resolve(true);
         })
@@ -138,7 +142,7 @@ export class SearchStocks extends React.Component {
     })
 
     resetSearchFilters = () => new Promise((resolve, reject) => {
-        this.setState({selectedPage: 0}, () => this.fetchStocks('').then(() => resolve(true)));
+        this.setState({selectedPage: 0}, () => this.fetchStocks('', false).then(() => resolve(true)));
     })
 
     resetFilterFromParent = (sector, industry) => {
@@ -488,7 +492,7 @@ export class SearchStocks extends React.Component {
                     industry: _.join(industries.map(item => encodeURIComponent(item)), ',')
                 },
                 selectedPage: 0
-            }, () => this.fetchStocks());
+            }, () => this.fetchStocks(this.state.searchInput, false));
             resolve(true);
         });
     }
