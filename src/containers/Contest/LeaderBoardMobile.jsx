@@ -118,7 +118,6 @@ class LeaderItem extends React.Component {
     }
     
     render() {
-        console.log('LeaderItem Component Updated');
         const {leaderItem, onClick, getRankColor} = this.props;
         const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
         const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct");
@@ -191,16 +190,9 @@ const RankItem = ({rank}) => {
 };
 
 class EntryDetailBottomSheet extends React.Component {
-    shouldComponentUpdate(nextProps, nextState) {
-        if (!_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state)) {
-            return true;
-        }
-
-        return false;
-    }
-
     render() {
         const {closeBottomSheet, renderContestDetail} = this.props;
+
         return(
             <Row>
                 <Col span={24} style={{...horizontalBox, justifyContent: 'center', padding: '10px'}}>
