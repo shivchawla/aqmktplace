@@ -40,7 +40,7 @@ export class HighChartBar extends React.Component {
                         enabled: false,
                     },
                     gridLineColor: 'transparent',
-                    tickInterval: 5,
+                    // tickInterval: 5,
                 },
                 xAxis: {
                     gridLineColor: 'transparent',
@@ -124,7 +124,12 @@ export class HighChartBar extends React.Component {
                         : item.data,
                 });
             });
-            this.dollarChart.update({colors: [simulatedPerformanceColor, benchmarkColor]});
+            this.dollarChart.update({
+                colors: [simulatedPerformanceColor, benchmarkColor],
+                yAxis: {
+                    max: Number(this.findYAxisMaxValue(series))
+                }
+            });
             this.props.updateTimeline && this.dollarChart.update({
                 xAxis: {
                     gridLineColor: 'transparent',
@@ -147,7 +152,12 @@ export class HighChartBar extends React.Component {
                             : item.data,
                 });
             });
-            this.percentageChart.update({colors: [currentPerformanceColor, benchmarkColor]});
+            this.percentageChart.update({
+                colors: [currentPerformanceColor, benchmarkColor],
+                yAxis: {
+                    max: Number(this.findYAxisMaxValue(series))
+                }
+            });
             this.props.updateTimeline && this.percentageChart.update({
                 xAxis: {
                     gridLineColor: 'transparent',
@@ -166,7 +176,7 @@ export class HighChartBar extends React.Component {
         });
         const maxValue = _.max(data);
 
-        return Math.ceil(maxValue / 10) * 10;
+        return Math.round(maxValue);
     }
 
     findYAxisMinValue = series => {

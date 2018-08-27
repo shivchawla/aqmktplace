@@ -32,7 +32,7 @@ export class AqStockPortfolioTable extends React.Component {
                                 >
                                     {record.symbol}
                                     <span 
-                                            style={{fontSize: '12px', fontWeight: 400}}>
+                                            style={{fontSize: '12px', fontWeight: 400, color: '#444'}}>
                                         &nbsp;- {_.get(record, 'sector', '')} | {_.get(record, 'industry', '')}
                                     </span>
                                 </h3>
@@ -69,7 +69,7 @@ export class AqStockPortfolioTable extends React.Component {
 
                     return (
                         <h3 style={{fontSize: '14px'}}>
-                            {Utils.formatMoneyValueMaxTwoDecimals(priceEOD)}&nbsp;&nbsp;
+                            {Utils.formatMoneyValueMaxTwoDecimals(record.price)}&nbsp;&nbsp;
                             <span style={{fontSize: '12px', color}}>{`${change.toFixed(2)}` || '-'} | {changePct.toFixed(2)}%</span>
                         </h3>
                     );
@@ -89,10 +89,10 @@ export class AqStockPortfolioTable extends React.Component {
 
                     return (
                         <h3 
-                                style={{fontSize: '14px'}}
+                                style={{fontSize: '14px', color}}
                         >
                             {Utils.formatMoneyValueMaxTwoDecimals(text)}
-                            <span style={{fontSize: '14px', color}}>
+                            <span style={{fontSize: '14px'}}>
                                 &nbsp;| {`${record.unrealizedPnlPct} %` || '-'}
                             </span>
                         </h3>
