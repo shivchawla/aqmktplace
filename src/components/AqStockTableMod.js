@@ -32,6 +32,7 @@ export class AqStockTableMod extends React.Component {
                                     style={{
                                         fontSize: '12px', 
                                         fontWeight: '400',
+                                        color: '#444'
                                     }}
                             >
                                 &nbsp;- {_.get(record, 'sector', '')} | {_.get(record, 'industry', '')}
@@ -107,10 +108,11 @@ export class AqStockTableMod extends React.Component {
         const nPositionsInSector = positionsInSector.length;
         let maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
         const sectorExposure = _.sum(positionsInSector.map(item => item.effTotal));
+        const sectorMaxDifference = _.get(this.props, 'maxSectorTargetTotalHard', 0) - _.get(this.props, 'maxSectorTargetTotal', 0);
+        const maxSectorExposureSoft = maxSectorExposure;
+        const maxSectorExposureHard = maxSectorExposure + sectorMaxDifference;
         if (this.props.isUpdate) {
-            if (sectorExposure > this.props.maxSectorTargetTotal 
-                && sectorExposure < this.props.maxSectorTargetTotalHard
-            ) {
+            if (sectorExposure > maxSectorExposureSoft && sectorExposure < maxSectorExposureHard) {
                 maxSectorExposure = sectorExposure;
             }
         }

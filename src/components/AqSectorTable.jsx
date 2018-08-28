@@ -56,8 +56,12 @@ export default class AqSectorTable extends React.Component {
         const value = Number(text);
         const nPositionsInSector = this.state.stockData.filter(item => item.sector === record.sector).length;
         let maxSectorExposure = _.max([0, _.min([this.props.maxSectorTargetTotal, (nPositionsInSector * this.props.maxStockTargetTotal)])]);
+        const sectorMaxDifference = _.get(this.props, 'maxSectorTargetTotalHard', 0) - _.get(this.props, 'maxSectorTargetTotal', 0);
+        const maxSectorExposureSoft = maxSectorExposure;
+        const maxSectorExposureHard = maxSectorExposure + sectorMaxDifference;
+
         if (this.props.isUpdate) {
-            if (value > this.props.maxSectorTargetTotal && value < this.props.maxSectorTargetTotalHard) {
+            if (value > maxSectorExposureSoft && value < maxSectorExposureHard) {
                 maxSectorExposure = value;
             }
         }
