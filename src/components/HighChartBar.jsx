@@ -176,7 +176,7 @@ export class HighChartBar extends React.Component {
         });
         const maxValue = _.max(data);
 
-        return Math.round(maxValue);
+        return Math.ceil(maxValue);
     }
 
     findYAxisMinValue = series => {
