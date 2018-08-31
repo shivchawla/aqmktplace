@@ -567,7 +567,7 @@ class ContestAdviceFormImpl extends React.Component {
         const nPositionsInSector = positionsInSector.length;
         const maxSectorExposure = _.max([0, _.min([this.state.maxSectorTargetTotalSoft, ((nPositionsInSector + newPositionsLength)* this.state.maxStockTargetTotalSoft)])]);
         const maxAllowance = maxSectorExposure - _.sum(positionsInSector.filter(item => item.effTotal != undefined).map(item => item.effTotal));
-        return _.min([30000, (maxAllowance / _.max([newPositions.length, 1]))]);
+        return Math.max(0, _.min([30000, (maxAllowance / _.max([newPositions.length, 1]))]));
     }
 
     updateIndividualPosition = position => {
