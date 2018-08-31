@@ -16,7 +16,7 @@ import {ContestHomeMeta} from '../../metas';
 const Option = Select.Option;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
-const dateFormat = 'YYYY-MM-DD';
+const dateFormat = 'D MMM YYYY';
 
 const {requestUrl} = require('../../localConfig');
 // const contestId = '5b49cbe8f464ce168007bb79'; // For testing purpose only, this should be removed
