@@ -59,11 +59,18 @@ export class Home extends React.Component {
         return (
             <div>
                 <Col span={24}>
+                    <h2 style={{color:'white', fontWeight:300}}>
+                        Combining Winner Ideas
+                    </h2>
+
                     <h3 className='tab-content-text'>
                         Compete to showcase your Investment Ideas on the platform.
-                        Participate in our Investment Idea contest, win prizes and sell the winning ideas.
-                        Perfect platform for expert investment advisor and skillful stock pickers
+                        Participate in our Investment Idea contest, win prizes and allocation in Expert Portfolio.
                     </h3>
+                    {/*<h3 className='tab-content-text' style={{lineHeight: '26px', paddingRight: '10px'}}>
+                        Perfect platform for investment experts and skillful stock pickers
+                    </h3>*/}
+
                 </Col>
                 <Col span={12}>
                     <img src={adviceLogo} style={{transform: 'scale(0.8, 0.8)', marginLeft: '-40px'}}/>
@@ -83,11 +90,18 @@ export class Home extends React.Component {
         return (
             <React.Fragment>
                 <Col span={24}>
+                    <h2 style={{color:'white', fontWeight:300}}>
+                        Combining Winner Ideas
+                    </h2>
+
                     <h3 className='tab-content-text' style={{lineHeight: '26px', paddingRight: '10px'}}>
                         Compete to showcase your Investment Ideas on the platform.
-                        Participate in our Investment Idea contest, win prizes and sell the winning ideas.
-                        Perfect platform for expert investment advisor and skillful stock pickers
+                        Participate in our Investment Idea contest, win prizes and allocation in Expert Portfolio.
                     </h3>
+
+                    {/*<h3 className='tab-content-text' style={{lineHeight: '26px', paddingRight: '10px'}}>
+                        Perfect platform for investment experts and skillful stock pickers
+                    </h3>*/}
                 </Col>
                 <Col 
                         span={6} 
@@ -130,23 +144,25 @@ export class Home extends React.Component {
                     key="1" 
                     icon={people}
                     small={type === 'small' ? true : false}
-                    header="Marketplace for experts"
-                    content="While you focus primarily on improving your investment ideas, we help you find the investors"/>
+                    header="Marketplace for everyone"
+                    content="While you focus primarily on improving your investment ideas, we will allocate fund to your ideas"/>
                 
                 <DetailListComponent 
                     key="2" 
                     icon={globe}
                     small={type === 'small' ? true : false}
-                    header="Barrier Less Investment Advisory"
-                    content="The power of online to everyone. Now, you can sell your winner ideas to anyone, anywhere in the world"
-                    style={{marginTop: type === 'small' ? '40px' : '110px'}}/>
+                    header="Barrier Free"
+                    content="The power of online to everyone. Now, anyone can create and lease their winner ideas from anywhere in the world"
+                    style={{marginTop: type === 'small' ? '40px' : '110px'}}/>  
+
                 <DetailListComponent
                     key="3"  
                     icon={wheel}
                     small={type === 'small' ? true : false}
                     header="Superior Research Tools"
-                    content="We provide you the tools to test your investment ideas, historical performance and ranking. You can also automate your investment advice."
+                    content="We provide you the tools to test your investment ideas, historical performance and ranking."
                     style={{marginTop: type === 'small' ? '40px' : '110px'}}/>
+
             </React.Fragment>
         );
     }
@@ -350,7 +366,7 @@ export class Home extends React.Component {
             <Col span={12} style={{paddingLeft: '40px'}}>
                 <Row>
                     <Col span={24}>
-                        <h1 className="hero-text">Expert-Sourced<br></br>Investment Portfolio</h1>
+                        <h1 className="hero-text">Crowd-Sourced<br></br>Investment Portfolio</h1>
                     </Col>
                     <Col span={24}>
                         <h5 style={{fontWeight:300}} className="hero-description-text">
@@ -376,7 +392,7 @@ export class Home extends React.Component {
                                             className="hero-text-mobile" 
                                             style={{lineHeight: '30px', textAlign: 'center', fontWeight: 700, fontSize: '24px'}}
                                     >
-                                        Expert-Sourced <br></br> Investment Portfolio
+                                        Crowd-Sourced <br></br> Investment Portfolio
                                     </h1>
                                 </Col>
                                 <Col span={24}>
@@ -632,15 +648,15 @@ export class Home extends React.Component {
     renderMiddleSectionDesktop = () => {
         return (
             <React.Fragment>
-                <h3 style={{textAlign: 'center', fontSize:'24px', color: 'teal', marginBottom:'50px'}}>INVESTMENT IDEA MARKETPLACE</h3>
+                <h3 style={{textAlign: 'center', fontSize:'24px', color: 'teal', marginBottom:'50px'}}>Crowd-Sourced Investment Portfolio</h3>
                 <Col span={10} className="middle-left-section">
                     <Col className='tab-bar'>
-                        <TabBarElement 
+                        {/*<TabBarElement 
                                 onClick={() => this.handleTabBarClick('advisor')} 
                                 text='Expert' 
                                 isSelected={this.state.selectedTabBar === 'advisor' ? true : false} 
                         />
-                        {/* <TabBarElement 
+                        <TabBarElement 
                                 onClick={() => this.handleTabBarClick('investor')} 
                                 text='Investor' 
                                 isSelected={this.state.selectedTabBar === 'investor' ? true : false} 
@@ -666,19 +682,19 @@ export class Home extends React.Component {
     renderMiddleSectionMobile = () => {
         return (
             <React.Fragment>
-                <h3 style={{textAlign: 'center', fontSize:'20px', color: 'teal', marginBottom:'30px'}}>INVESTMENT IDEA MARKETPLACE</h3>
+                <h3 style={{textAlign: 'center', fontSize:'20px', color: 'teal', marginBottom:'30px'}}>Crowd-Sourced Investment Portfolio</h3>
                 <Col span={24} className="middle-left-section">
                     <Col className='tab-bar'>
-                        <TabBarElement 
+                        {/*<TabBarElement 
                                 onClick={() => this.handleTabBarClick('advisor')} 
                                 text='Expert' 
                                 isSelected={this.state.selectedTabBar === 'advisor' ? true : false} 
                         />
-                        {/* <TabBarElement 
+                        <TabBarElement 
                                 onClick={() => this.handleTabBarClick('investor')} 
                                 text='Investor' 
                                 isSelected={this.state.selectedTabBar === 'investor' ? true : false} 
-                        /> */}
+                        />*/}
                     </Col>
                     {
                         this.state.selectedTabBar === 'advisor' 
@@ -751,7 +767,7 @@ export class Home extends React.Component {
                     />
                     </Col>
 
-                    <Col offset={12} span={12} style={{paddingRight: '-10px', textAlign: 'right', marginTop:'-80px'}}>
+                    <Col offset={12} span={12} style={{paddingRight: '-10px', textAlign: 'right', marginTop:'-40px'}}>
                         <HowCard
                             key="3" 
                             icon={WinPrizes}
@@ -761,7 +777,7 @@ export class Home extends React.Component {
                         />
                     </Col>
 
-                    <Col span={13} style={{paddingLeft: '0px', textAlign: 'left', marginTop:'-110px'}}>
+                    <Col span={13} style={{paddingLeft: '0px', textAlign: 'left', marginTop:'-50px'}}>
                         <HowCard
                             key="4" 
                             icon={ExpertIdea}

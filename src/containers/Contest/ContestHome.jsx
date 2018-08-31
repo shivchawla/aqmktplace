@@ -591,8 +591,7 @@ const FAQCard = ({header, content, span=12}) => {
     return (
         <Col span={12} style={containerStyle}>
             <h3 style={cardHeaderTextStyle}>{header}</h3>
-            {/*<h5 dangerouslySetInnerHTML={{__html: content}} style={cardContentTextStyle}></h5>*/}
-            <h5 style={cardContentTextStyle}>{content}></h5>
+            <h5 style={cardContentTextStyle}>{content}</h5>
         </Col>
     );
 };

@@ -15,20 +15,8 @@ export default class FAQ extends React.Component {
                 answer: 'Investment Idea is an investment portfolio comprising of publicly traded stocks designed to beat a chosen benchmark. It is a building block to any public advice on the platform.'
             },
             {
-                question: 'What is an Advice?',
-                answer: 'Advice is a mix of top Investment Ideas carefully designed to achieve a stated Investment Objective. It is not a Personal Financial Advice and all users of the platform will have equal access to the same advice. '
-            },
-            {
                 question: 'Who is an Expert?',
                 answer: 'Any body on the platform who creates an Investment Idea, participates in the contest and is invited to publish/share his investment idea is called an Expert.'
-            },
-            {
-                question: 'Who is an Investor?',
-                answer: 'Any body on the platform who is primarily interested in screening advices and investing in stock markets.'
-            },
-            {
-                question: 'Can I be both an Investor and an Expert?',
-                answer: 'Yes. The platform allows anybody to assume both roles. As an Investor, you will have access to public advices on the platform. As an Expert, you can create, update and enter contest with your investment ideas. You can safely ignore other services provided by the platform, in case, you choose to be purely an Investor or an Expert.'
             },
             {
                 question: 'Can I create an Investment Idea as an Investor?',
@@ -37,11 +25,7 @@ export default class FAQ extends React.Component {
             {
                 question: 'Do I need to be an Registerd Investment Advisor to create an Investment Idea?',
                 answer: 'No. According to SEBI (Securities and Exchange Board of India), only a personal invesment advice along with financial planning specific to an individual client requires one to be an Registered Investment Advisor. An investment idea open to general public does not require one to be Registered Investment Advisor.'
-            },
-            {
-                question: 'How do I become a Registered Investment Advisor?',
-                answer: 'SEBI (Securities and Exchange Board of India), has laid down elaborate rules and requirements on how to be a Registered Investment Advisor. You can find out more at their website: www.sebi.gov.in'
-            },
+            }
         ];
 
         const investmentIdeaQAS = [
