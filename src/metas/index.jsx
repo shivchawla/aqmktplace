@@ -42,7 +42,7 @@ export const AdvisorDashboardMeta = props => {
         <Helmet>
             {/* <title>Advisor Dashboard</title> */}
             <meta charSet="utf-8"/>
-            <title>AdviceQube: Advisor Dashboard | Track your Advices </title>
+            <title>AdviceQube: Dashboard | Track your Investment Ideas </title>
             <meta name="description" content="Advisor Dashboard: Track your advices, subscribers, subscription activity and more"/>
             <meta name="keywords" content="www.adviceqube.com, Investments, Equity, NSE stocks, Investment Advice, Advice"/>
             <meta name="robots" content="index, follow" />
@@ -55,7 +55,7 @@ export const InvestorDashboardMeta = props => {
         <Helmet>
             {/* <title>Investor Dashboard</title> */}
             <meta charSet="utf-8" />
-            <title>AdviceQube: Investor Dashboard | Track your Portfolio </title>
+            <title>AdviceQube: Dashboard | Track your Portfolio </title>
             <meta name="description" content="Investor Dashboard: Track your portfolio, stock positions, subscribed advices and more"/>
             <meta name="keywords" content="www.adviceqube.com, Portfolio, Investments, Equity, NSE stocks, Investment Advice, Advice"/>
             <meta name="robots" content="index, follow" />
@@ -67,9 +67,9 @@ export const HomeMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>AdviceQube: Expert-Sourced Investment Portfolio | Best Investment Ideas</title>
-            <meta name="description" content="Expert Sourced Investment Portfolio. Screen the best investment ideas from professional and investment enthusiasts"/>
-            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Buy Advice, Sell Advice, returns, gain, Investment Advice, India"/>
+            <title>AdviceQube: Crowd-Sourced Investment Portfolio | Investing In Your Ideas</title>
+            <meta name="description" content="Crowd Sourced Investment Portfolio. Powering Invesment fund with the best investment ideas from professional and investment enthusiasts"/>
+            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Crowd, Crowd-sourced, returns, gain, Investment Advice, India"/>
             <meta name="robots" content="index, follow" />
         </Helmet>
     );
@@ -191,7 +191,7 @@ export const ContestLeaderboardMeta = props => {
     return (
         <Helmet>
             <meta charSet="utf-8" />
-            <title>Leaderboard | AdviceQube Investment Idea Contest</title>
+            <title>Leaderboard | AdviceQube</title>
             <meta name="description" content="Leader for Investment Idea Contest"/>
             <meta name="keywords" content="www.adviceqube.com, Leaderboard, Contest, Competition, Trading Challenge, Investments, Equity NSE stocks, Cash prize"/>
             <meta name="robots" content="index, follow" />

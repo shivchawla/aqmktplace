@@ -60,7 +60,7 @@ export const faqs = [
     },
     {
         header: 'How long are the entries evaluated?',
-        content: 'The entries are evaluated for at-least 1 month. The entries are automatically rolled into the next contest and the overall performance is used for ranking purposes.'
+        content: 'The entries are evaluated for at-least 1 month. The entries are automatically rolled into the next contest and the monthly performance is used for ranking purposes.'
     },
     {
         header: 'Do I have to re-enter in new weekly contests?',
