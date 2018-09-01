@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactQuill from 'react-quill';
 import {Utils} from '../utils';
-import { Spin, Icon } from 'antd';
+import { Spin, Icon, Col, Row} from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import Loading from 'react-loading-bar'
@@ -80,15 +80,15 @@ class TnC extends Component {
 
     const getTotalDiv = () => {
         return (
-          <div className="policy-div" style={{'padding': '1% 3% 1% 3%', 'width': '100%'}}>
-            <div style={{'display': 'flex', 'marginBottom': '10px'}}>
-              <h2 style={{'color': '#3c3c3c', 'fontWeight': 'normal'}}>Terms of Use</h2>
-            </div>
-            <div className="card" style={{'width': '100%', 'background': 'white',
-              'padding': '40px 5% 40px 5%'}}>
-              {getTnCDiv()}
-            </div>
-          </div>
+            <Col span={24} className="policy-div" style={{'padding': '1% 3% 1% 3%', 'width': '100%'}}>
+              <div style={{'display': 'flex', 'marginBottom': '10px'}}>
+                <h2 style={{'color': '#3c3c3c', 'fontWeight': 'normal'}}>Terms of Use</h2>
+              </div>
+              <div className="card" style={{'width': '100%', 'background': 'white',
+                'padding': '40px 5% 40px 5%'}}>
+                {getTnCDiv()}
+              </div>
+            </Col>
         );
     }
 

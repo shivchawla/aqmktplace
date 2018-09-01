@@ -739,18 +739,3 @@ export class SearchStocks extends React.Component {
         );
     }
 }
-
-const topHeaderContainer = {
-    ...horizontalBox,
-    justifyContent: 'space-between',
-    borderBottom: '1px solid lightgrey',
-    padding: '0 20px'
-};
-
-const fabButtonStyle = {
-    width: '150px',
-    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
-    margin: '0 auto',
-    background: '#30B9AD',
-    color: '#fff'
-};

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ReactQuill from 'react-quill';
+import {Row, Col} from 'antd';
 import {Utils} from '../utils';
 import { Spin, Icon } from 'antd';
 import axios from 'axios';
@@ -78,7 +79,7 @@ class Policy extends Component {
 
       const getTotalDiv = () => {
           return (
-            <div className="policy-div" style={{'padding': '1% 3% 1% 3%', 'width': '100%'}}>
+            <Col span={24} className="policy-div" style={{'padding': '1% 3% 1% 3%', 'width': '100%'}}>
               <div style={{'display': 'flex', 'marginBottom': '10px'}}>
                 <h2 style={{'color': '#3c3c3c', 'fontWeight': 'normal'}}>Privacy Policy</h2>
               </div>
@@ -86,7 +87,7 @@ class Policy extends Component {
                 'padding': '40px 5% 40px 5%'}}>
                 {getPolicyDiv()}
               </div>
-            </div>
+            </Col>
           );
       }
 
