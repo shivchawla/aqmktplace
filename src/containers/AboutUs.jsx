@@ -80,7 +80,6 @@ class AboutUs extends Component {
   }
 
   componentWillReceiveProps(nextProps){
-    console.log(nextProps.location);
 
   	if (nextProps.pageChange){
   		nextProps.pageChange('aboutUs');
