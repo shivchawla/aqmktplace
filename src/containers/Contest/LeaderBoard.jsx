@@ -318,9 +318,12 @@ export default class LeaderBoard extends React.Component {
     getContests = () => {
         const contestsUrl = `${requestUrl}/contest`;
         // Check if contestId is passed from the url
-        const contestId = this.state.selectedContestId !== null || this.state.selectedContestId !== undefined
-                ? this.state.selectedContestId 
-                : _.get(this.props, 'match.params.id', null);
+        // const contestId = this.state.selectedContestId !== null || this.state.selectedContestId !== undefined
+        //         ? this.state.selectedContestId 
+        //         : _.get(this.props, 'match.params.id', null);
+        const contestId = _.get(this.props, 'match.params.id', null) !== null
+                ? _.get(this.props, 'match.params.id', null)
+                : this.state.selectedContestId;
         return fetchAjax(contestsUrl, this.props.history, this.props.match.url)
         .then(response => {
             let contests = _.get(response.data, 'contests', []).map(contest => {
@@ -537,6 +540,7 @@ export default class LeaderBoard extends React.Component {
     }
 
     handleContestChange = contestId => {
+        window.history.pushState("", "", '/contest/leaderboard');
         const selectedContest = this.state.activeContests.filter(contest => contest.id === contestId)[0];
         Utils.localStorageSave('contestId', contestId);
         Utils.localStorageSave('contestSelectedPage', 0);

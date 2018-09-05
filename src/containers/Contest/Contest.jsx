@@ -84,7 +84,7 @@ export default class Contest extends React.Component {
                             />
                             <Route
                                 exact={true}
-                                path={`${this.props.match.url}/leaderboard`}
+                                path={`${this.props.match.url}/leaderboard/:id`}
                                 render={props => <LeaderBoard {...props}/>} 
                             />
                             <Route component={PageNotFoundMobile} />
