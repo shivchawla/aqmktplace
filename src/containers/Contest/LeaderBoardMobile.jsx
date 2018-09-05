@@ -2,7 +2,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import moment from 'moment';
 import {Motion, spring} from 'react-motion';
-import {Row, Col, Icon} from 'antd';
+import {Row, Col, Icon, Tag} from 'antd';
 import gold from '../../assets/gold.svg';
 import silver from '../../assets/silver.svg';
 import bronze from '../../assets/bronze.svg';
@@ -117,10 +117,8 @@ export default class LeaderBoardMobile extends React.Component {
                     </Col>
                     {
                         !active &&
-                        <Col span={24}>
-                            <h3 style={{fontSize: '14px', color: metricColor.negative, textAlign: 'center'}}>
-                                Ended
-                            </h3>
+                        <Col span={24} style={{textAlign: 'center'}}>
+                            <Tag color="#607D8B">Ended</Tag>
                         </Col>
                     }
                     <Col span={24} style={{marginTop:'5px'}}>{this.renderParticipants()}</Col>
@@ -159,8 +157,9 @@ class LeaderItem extends React.Component {
         ];
 
         if (isWinner) {
-            const rank = _.get(winners[winnerIndex], 'rank.value', 5);
-            const medal = rankMedals.filter(item => item.rank === rank)[0].medal;
+            const rank = _.get(winners[winnerIndex], 'prize.rank', 5);
+            const medalItem = rankMedals.filter(item => item.rank === rank)[0];
+            const medal = medalItem !== undefined ? medalItem.medal : null;
             return {rank, medal};
         } else {
             return {};

@@ -2,7 +2,7 @@ import * as React from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import Media from 'react-media';
-import {Row, Col, Button, Select, Radio, Tooltip} from 'antd';
+import {Row, Col, Button, Select, Radio, Tooltip, Tag} from 'antd';
 import {SegmentedControl} from  'antd-mobile';
 import AppLayout from '../AppLayout';
 import LeaderboardMobile from './LeaderBoardMobile';
@@ -150,7 +150,11 @@ export default class LeaderBoard extends React.Component {
                         onClick={() => this.handlePagination('previous')}
                     >PREVIOUS</Button>
                 </Col> */}
-                <Col span={24} style={verticalBox}>
+                <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
+                    {
+                        !_.get(this.state, 'selectedContest.active', false) &&
+                        <Tag color="#607D8B">Ended</Tag>
+                    }   
                     <h3 style={{fontSize: '14px'}}>{this.state.maxAdviceCount} Entries</h3>
                     {/* <h3 style={{fontSize: '12px', fontWeight: 700}}>
                         Page {Number(this.state.selectedPage) + 1} / {Math.ceil(this.state.maxAdviceCount / this.state.limit)}
@@ -631,10 +635,6 @@ export default class LeaderBoard extends React.Component {
                                     <span style={{fontSize: '14px', marginLeft: '4px', fontWeight: 700}}>[{moment(_.get(this.state, 'selectedContest.startDate', '')).format(leaderboardDateFormat)}</span>
                                     <span style={{fontSize: '12px', margin: '0 3px'}}>to</span>
                                     <span style={{fontSize: '14px', fontWeight: 700}}>{moment(_.get(this.state, 'selectedContest.endDate', '')).format(leaderboardDateFormat)}]</span>
-                                    {
-                                        !_.get(this.state, 'selectedContest.active', false) &&
-                                        <span style={{marginLeft: '5px', fontSize: '14px', color: metricColor.negative}}>Ended</span>
-                                    }   
                                 </h5>
                             </div>
                             <div style={{textAlign: 'end', marginTop: '-30px'}}>{this.renderContestDropdown()}</div>
@@ -889,9 +889,11 @@ class LeaderItem extends React.Component {
         ];
 
         if (isWinner) {
-            const rank = _.get(winners[winnerIndex], 'rank.value', 5);
-            const medal = rankMedals.filter(item => item.rank === rank)[0].medal;
-            return {rank, medal};
+            const rank = _.get(winners[winnerIndex], 'prize.rank', 5);
+            const prizeMoney = _.get(winners[winnerIndex], 'prize.value', 0);
+            const medalItem = rankMedals.filter(item => item.rank === rank)[0];
+            const medal = medalItem !== undefined ? medalItem.medal : null;
+            return {rank, medal, prizeMoney};
         } else {
             return {};
         }
@@ -917,13 +919,19 @@ class LeaderItem extends React.Component {
         const winnerStatus = this.getWinnerRank(leaderItem);
         const rank = _.get(winnerStatus, 'rank', null);
         medalLogo = _.get(winnerStatus, 'medal', null);
+        const prizeMoney = _.get(winnerStatus, 'prizeMoney', 0);
 
         
         return (
             <Row className='leader-item' style={containerStyle} onClick={() => onClick(adviceId)} >
                 <Col span={4} style={{...horizontalBox}}>
                     <h3 style={{...metricStyle, margin: 0, marginRight: '5px'}}>{leaderItem.rank}</h3>
-                    <img src={medalLogo} style={{height: '30px'}}/>
+                    {
+                        medalLogo !== null &&
+                        <Tooltip placement="right" title={`₹ ${prizeMoney}`}>
+                            <img src={medalLogo} style={{height: '30px'}}/>
+                        </Tooltip>
+                    }
                 </Col>
                 <Col span={6}>
                     <h5 style={{...metricStyle, margin: 0}}>{leaderItem.advisorName}</h5>
