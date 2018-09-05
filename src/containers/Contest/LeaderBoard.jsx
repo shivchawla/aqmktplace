@@ -2,16 +2,22 @@ import * as React from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import Media from 'react-media';
-import {Row, Col, Button, Select, Radio, Tooltip} from 'antd';
+import {Row, Col, Button, Select, Radio, Tooltip, Tag} from 'antd';
 import {SegmentedControl} from  'antd-mobile';
 import AppLayout from '../AppLayout';
 import LeaderboardMobile from './LeaderBoardMobile';
-import {primaryColor, verticalBox, horizontalBox} from '../../constants';
+import {primaryColor, verticalBox, horizontalBox, metricColor} from '../../constants';
 import {fetchAjax, Utils} from '../../utils';
+import WinnerItem from './Leaderboard/WinnerItem';
 import './css/leaderBoard.css';
 import {formatMetric} from './utils';
 import {metricDefs} from './constants';
 import {ContestHomeMeta} from '../../metas';
+import gold from '../../assets/gold.svg';
+import silver from '../../assets/silver.svg';
+import bronze from '../../assets/bronze.svg';
+import blue from '../../assets/fourth.svg';
+import green from '../../assets/fifth.svg';
 
 const Option = Select.Option;
 const RadioButton = Radio.Button;
@@ -76,10 +82,13 @@ export default class LeaderBoard extends React.Component {
             selectedPage: Number(Utils.getFromLocalStorage('contestSelectedPage')) || 0,
             limit: 10,
             activeContests: [],
+            pastContests: [],
             selectedContestId: Utils.getFromLocalStorage('contestId') || null,
             selectedContest: {},
             showActivePerformance: true,
             maxAdviceCount: 0,
+            winners: [],
+            selectedPastContestId: null
         };
         this.entryDetailPosition = 'fixed';
     }
@@ -141,7 +150,11 @@ export default class LeaderBoard extends React.Component {
                         onClick={() => this.handlePagination('previous')}
                     >PREVIOUS</Button>
                 </Col> */}
-                <Col span={24} style={verticalBox}>
+                <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
+                    {
+                        !_.get(this.state, 'selectedContest.active', false) &&
+                        <Tag color="#607D8B">Ended</Tag>
+                    }   
                     <h3 style={{fontSize: '14px'}}>{this.state.maxAdviceCount} Entries</h3>
                     {/* <h3 style={{fontSize: '12px', fontWeight: 700}}>
                         Page {Number(this.state.selectedPage) + 1} / {Math.ceil(this.state.maxAdviceCount / this.state.limit)}
@@ -223,6 +236,8 @@ export default class LeaderBoard extends React.Component {
                                 leaderItem={leader} 
                                 index={index + 1} 
                                 onClick={this.handleAdviceItemClicked} 
+                                active={_.get(this.state.selectedContest, 'active', false)}
+                                winners={_.get(this.state.selectedContest, 'winners', [])}
                             />
                         )
                     }
@@ -247,6 +262,50 @@ export default class LeaderBoard extends React.Component {
 
     }
 
+    renderWinnersList = () => {
+        const winners = this.state.winners;
+
+        return (
+            <Row id='leader-list'>
+                {/* <Col span={24}>
+                    {this.renderPagination()}
+                </Col> */}
+
+                <Col span={24}>
+                    {this.renderLeaderboardListHeader()}
+                </Col>
+                
+                <Col span={24}>
+                    {
+                        winners.map((winner, index) => 
+                            <WinnerItem
+                                {...winner} 
+                                key={index}
+                                index={index + 1} 
+                            />
+                        )
+                    }
+                </Col>
+                {/* <Col span={24} style={{textAlign:'center', marginTop: '20px'}}>
+                    <Button
+                        style={{
+                            fontSize: '12px', 
+                            fontWeight: '300', 
+                        }} 
+                        type="primary"
+                        disabled={advicesDisplayed >= this.state.maxAdviceCount}
+                        size="small"
+                        onClick={() => this.handlePagination('next')}
+                        loading={this.state.paginationLoading}
+                    >
+                        MORE
+                    </Button>
+                </Col> */}
+            </Row>
+        );
+
+    }
+
     getLeaderList = () => {
         const leaders = [];
         for(let i = 0; i < 10; i++) {
@@ -256,21 +315,25 @@ export default class LeaderBoard extends React.Component {
         return leaders;
     }
 
-    getActiveContests = () => {
+    getContests = () => {
         const contestsUrl = `${requestUrl}/contest`;
         // Check if contestId is passed from the url
-        const contestId = this.state.selectedContestId !== null || this.state.selectedContestId !== undefined
-                ? this.state.selectedContestId 
-                : _.get(this.props, 'match.params.id', null);
-        this.setState({loading: true});
-        fetchAjax(contestsUrl, this.props.history, this.props.match.url)
+        // const contestId = this.state.selectedContestId !== null || this.state.selectedContestId !== undefined
+        //         ? this.state.selectedContestId 
+        //         : _.get(this.props, 'match.params.id', null);
+        const contestId = _.get(this.props, 'match.params.id', null) !== null
+                ? _.get(this.props, 'match.params.id', null)
+                : this.state.selectedContestId;
+        return fetchAjax(contestsUrl, this.props.history, this.props.match.url)
         .then(response => {
             let contests = _.get(response.data, 'contests', []).map(contest => {
                 return {
                     id: _.get(contest, '_id', null),
                     name: _.get(contest, 'name', null),
                     startDate: _.get(contest, 'startDate', moment().format(dateFormat)),
-                    endDate: _.get(contest, 'endDate', moment().format(dateFormat))
+                    endDate: _.get(contest, 'endDate', moment().format(dateFormat)),
+                    winners: _.get(contest, 'winners', []),
+                    active: _.get(contest, 'active', false)
                 };
             })
             this.setState({activeContests: contests});
@@ -289,9 +352,26 @@ export default class LeaderBoard extends React.Component {
             return null;
         })
         .catch(err => err)
-        .finally(() => {
-            this.setState({loading: false});
+    }
+
+    getPastContests = () => {
+        const contestUrl = `${requestUrl}/contest/all?active=-1`;
+        return fetchAjax(contestUrl, this.props.history, this.props.match.url)
+        .then(response => {
+            let pastContests = _.get(response.data, 'contests', []).map(contest => {
+                return {
+                    id: _.get(contest, '_id', null),
+                    name: _.get(contest, 'name', null),
+                    startDate: _.get(contest, 'startDate', moment().format(dateFormat)),
+                    endDate: _.get(contest, 'endDate', moment().format(dateFormat)),
+                    winners: _.get(contest, 'winners', [])
+                };
+            });
+            const selectedPastContestId = pastContests[pastContests.length - 1].id;
+            const winners = pastContests[pastContests.length - 1].winners;
+            this.setState({pastContests, winners, selectedPastContestId});
         })
+        .catch(err => err)
     }
 
     // Gets the summary of the latest ongoing contest
@@ -432,17 +512,6 @@ export default class LeaderBoard extends React.Component {
         }
     }
 
-    // handlePagination = type => {
-    //     let {selectedPage = 0} = this.state;
-    //     selectedPage = type === 'next' ? selectedPage + 1 : selectedPage - 1;
-    //     Utils.localStorageSave('contestSelectedPage', selectedPage);
-    //     this.setState({
-    //         selectedPage
-    //     }, () => {
-    //         this.getLatestContestSummary(this.state.selectedContestId, true, true);
-    //     })
-    // }
-
     handlePagination = type => {
         let {selectedPage = 0} = this.state;
         selectedPage += 1;
@@ -471,6 +540,7 @@ export default class LeaderBoard extends React.Component {
     }
 
     handleContestChange = contestId => {
+        window.history.pushState("", "", '/contest/leaderboard');
         const selectedContest = this.state.activeContests.filter(contest => contest.id === contestId)[0];
         Utils.localStorageSave('contestId', contestId);
         Utils.localStorageSave('contestSelectedPage', 0);
@@ -479,6 +549,17 @@ export default class LeaderBoard extends React.Component {
             selectedContest,
             selectedPage: 0
         }, () => this.getLatestContestSummary(contestId, true, true));
+    }
+
+    handlePastContestChange = contestId => {
+        const selectedPastContest = this.state.pastContests.filter(contest => {
+            return contest.id === contestId;
+        })[0];
+        const winners = _.get(selectedPastContest, 'winners', []);
+        this.setState({
+            selectedPastContestId: contestId,
+            winners
+        });
     }
 
     renderContestDropdown = (width = '200px') => {
@@ -498,6 +579,24 @@ export default class LeaderBoard extends React.Component {
         );
     }
 
+    renderPastContestDropdown = (width = '200px') => {
+        const {pastContests = []} = this.state; 
+
+        return (
+            <Select 
+                    style={{width}} 
+                    value={this.state.selectedPastContestId} 
+                    onChange={this.handlePastContestChange}
+            >
+                {
+                    pastContests.map((contest, index) => {
+                        return <Option key={index} value={_.get(contest, 'id', null)}>{_.get(contest, 'name', null)}</Option>
+                    })
+                }
+            </Select>
+        );
+    }
+
     onPerformanceToggle = (e) => {
         this.setState({showActivePerformance: e.target.value});
     }
@@ -507,14 +606,15 @@ export default class LeaderBoard extends React.Component {
     }
 
     renderPageContent() {
+        const leaderboardDateFormat = 'Do MMM YY';
         return (
             <Row gutter={0} style={{padding: '10px 20px'}}>
                 <ContestHomeMeta />
                 <Col span={16}>
                     <Row>
-                        <Col span={24} style={{marginBottom: '20px'}}>
+                        {/* <Col span={24} style={{marginBottom: '20px'}}>
                             <h3 style={{fontSize: '26px', color: primaryColor, marginBottom: '0px'}}>
-                                Leaderboard
+                                Winners
                             </h3>
                             <div>
                                 <h5 style={{fontSize: '16px', color: '#6F6F6F'}}>
@@ -522,6 +622,23 @@ export default class LeaderBoard extends React.Component {
                                     <span style={{fontSize: '14px', marginLeft: '4px', fontWeight: 700}}>[{moment(_.get(this.state, 'selectedContest.startDate', '')).format(dateFormat)}</span>
                                     <span style={{fontSize: '12px', margin: '0 3px'}}>to</span>
                                     <span style={{fontSize: '14px', fontWeight: 700}}>{moment(_.get(this.state, 'selectedContest.endDate', '')).format(dateFormat)}]</span>
+                                </h5>
+                            </div>
+                            <div style={{textAlign: 'end', marginTop: '-30px'}}>{this.renderPastContestDropdown()}</div>
+                        </Col>
+                        <Col span={24}>
+                            {this.renderWinnersList()}
+                        </Col> */}
+                        <Col span={24} style={{marginBottom: '20px'}}>
+                            <h3 style={{fontSize: '26px', color: primaryColor, marginBottom: '0px'}}>
+                                Leaderboard
+                            </h3>
+                            <div>
+                                <h5 style={{fontSize: '16px', color: '#6F6F6F'}}>
+                                    For {_.get(this.state, 'selectedContest.name', '')}
+                                    <span style={{fontSize: '14px', marginLeft: '4px', fontWeight: 700}}>[{moment(_.get(this.state, 'selectedContest.startDate', '')).format(leaderboardDateFormat)}</span>
+                                    <span style={{fontSize: '12px', margin: '0 3px'}}>to</span>
+                                    <span style={{fontSize: '14px', fontWeight: 700}}>{moment(_.get(this.state, 'selectedContest.endDate', '')).format(leaderboardDateFormat)}]</span>
                                 </h5>
                             </div>
                             <div style={{textAlign: 'end', marginTop: '-30px'}}>{this.renderContestDropdown()}</div>
@@ -555,7 +672,12 @@ export default class LeaderBoard extends React.Component {
     }
 
     componentWillMount() {
-        this.getActiveContests();
+        this.setState({loading: true});
+        this.getContests()
+        // .then(() => this.getPastContests())
+        .finally(() => {
+            this.setState({loading: false});
+        })
     }
 
     componentDidMount() {
@@ -589,7 +711,6 @@ export default class LeaderBoard extends React.Component {
         const selectedAdvice = advices.filter(advice => advice.adviceId === selectedAdviceId)[0];
         const advisorName = selectedAdvice !== undefined ? selectedAdvice.advisorName: '';
         const adviceName = selectedAdvice !== undefined ? selectedAdvice.adviceName: '';
-
         const adviceNameStyle = {
             fontSize: '18px',
             fontWeight: '400',
@@ -637,6 +758,9 @@ export default class LeaderBoard extends React.Component {
                             renderPagination={this.renderPaginationMobile}
                             loading={this.state.loading}
                             renderContestDropdown={this.renderContestDropdown}
+                            active={_.get(this.state.selectedContest, 'active', false)}
+                            winners={_.get(this.state.selectedContest, 'winners', [])}
+                            selectedContest={this.state.selectedContest}
                         />
                     }
                 />
@@ -755,9 +879,33 @@ class LeaderItem extends React.Component {
 
         return false;
     }
+
+    getWinnerRank = leaderItem => {
+        const {active = false, winners = []} = this.props;
+        const winnerIndex = _.findIndex(winners, winner => winner.advice === leaderItem.adviceId);
+        const isWinner = winnerIndex > -1;
+        const rankMedals = [
+            {rank: 1, medal: gold},
+            {rank: 2, medal: silver},
+            {rank: 3, medal: bronze},
+            {rank: 4, medal: blue},
+            {rank: 5, medal: green},
+        ];
+
+        if (isWinner) {
+            const rank = _.get(winners[winnerIndex], 'prize.rank', 5);
+            const prizeMoney = _.get(winners[winnerIndex], 'prize.value', 0);
+            const medalItem = rankMedals.filter(item => item.rank === rank)[0];
+            const medal = medalItem !== undefined ? medalItem.medal : null;
+            return {rank, medal, prizeMoney};
+        } else {
+            return {};
+        }
+    }
     
     render() {
-        const {leaderItem, onClick, selected} = this.props;
+        
+        const {leaderItem, onClick, selected, winners = [], active = false} = this.props;
         const containerStyle = {
             borderBottom: '1px solid #eaeaea',
             cursor: 'pointer',
@@ -770,12 +918,24 @@ class LeaderItem extends React.Component {
         const metricStyle = {paddingLeft: '10px', fontSize: '14px'};
 
         const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
-        const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct")
+        const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct");
+        let medalLogo = null;
+        const winnerStatus = this.getWinnerRank(leaderItem);
+        const rank = _.get(winnerStatus, 'rank', null);
+        medalLogo = _.get(winnerStatus, 'medal', null);
+        const prizeMoney = _.get(winnerStatus, 'prizeMoney', 0);
 
+        
         return (
             <Row className='leader-item' style={containerStyle} onClick={() => onClick(adviceId)} >
-                <Col span={4}>
-                    <h3 style={{...metricStyle, margin: 0}}>{leaderItem.rank} .</h3>
+                <Col span={4} style={{...horizontalBox}}>
+                    <h3 style={{...metricStyle, margin: 0, marginRight: '5px'}}>{leaderItem.rank}</h3>
+                    {
+                        !active && medalLogo !== null &&
+                        <Tooltip placement="right" title={`₹ ${prizeMoney}`}>
+                            <img src={medalLogo} style={{height: '30px'}}/>
+                        </Tooltip>
+                    }
                 </Col>
                 <Col span={6}>
                     <h5 style={{...metricStyle, margin: 0}}>{leaderItem.advisorName}</h5>
