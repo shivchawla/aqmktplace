@@ -167,7 +167,7 @@ class LeaderItem extends React.Component {
     }
     
     render() {
-        const {leaderItem, onClick, getRankColor} = this.props;
+        const {leaderItem, onClick, getRankColor, active = false} = this.props;
         const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
         const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct");
         const adviceId = _.get(leaderItem, 'adviceId', null);
@@ -193,7 +193,10 @@ class LeaderItem extends React.Component {
                     <h3 style={{marginLeft: '18px'}}>{leaderItem.advisorName}</h3>
                 </Col>
                 <Col span={2} style={{textAlign: 'right'}}>
-                    <img src={medalLogo} style={{height: '30px'}}/>
+                    {
+                        !active && 
+                        <img src={medalLogo} style={{height: '30px'}}/>
+                    }
                 </Col>
                 <Col span={24} style={{marginLeft: '26px'}}>
                     <Row>

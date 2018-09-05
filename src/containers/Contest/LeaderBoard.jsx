@@ -927,7 +927,7 @@ class LeaderItem extends React.Component {
                 <Col span={4} style={{...horizontalBox}}>
                     <h3 style={{...metricStyle, margin: 0, marginRight: '5px'}}>{leaderItem.rank}</h3>
                     {
-                        medalLogo !== null &&
+                        !active && medalLogo !== null &&
                         <Tooltip placement="right" title={`₹ ${prizeMoney}`}>
                             <img src={medalLogo} style={{height: '30px'}}/>
                         </Tooltip>
