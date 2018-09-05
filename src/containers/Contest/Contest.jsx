@@ -83,6 +83,10 @@ export default class Contest extends React.Component {
                                 render={props => <AdviceDetailMobile {...props}/>} 
                             />
                             <Route
+                                path={`${this.props.match.url}/leaderboard`}
+                                render={props => <LeaderBoard {...props}/>} 
+                            />
+                            <Route
                                 exact={true}
                                 path={`${this.props.match.url}/leaderboard/:id`}
                                 render={props => <LeaderBoard {...props}/>} 
