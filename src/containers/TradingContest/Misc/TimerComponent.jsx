@@ -4,21 +4,36 @@ import moment from 'moment';
 import styled from 'styled-components';
 import {Row, Col} from 'antd';
 import { verticalBox } from '../../../constants';
+import {setEndTimeToDate} from '../utils';
 
 export default class TimeComponent extends React.Component {
     constructor(props) {
         super(props);
+        this.timer = null;
         this.state = {
             difference: null
         }
     }
 
     componentWillMount() {
-        setInterval(() => {
-            const endTimeInput = _.get(this.props, 'endTime', '21:00:00');
-            const timeFormat = 'HH:mm:ss';
+        this.setTimer();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setTimer(nextProps);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer);
+    }
+
+    setTimer = (props = this.props) => {
+        clearInterval(this.timer);
+        this.timer = setInterval(() => {
+            const {date = moment().format('YYYY-MM-DD')} = props;
+            const hourToSet = props.contestStarted ? 15 : 9;
+            const endTime = setEndTimeToDate(date, hourToSet);
             const startTime = moment();
-            const endTime = moment(endTimeInput, timeFormat);
             let difference = null;
             if (endTime.isAfter(startTime)) {
                 const secondsDifference = endTime.diff(startTime, 'seconds');
@@ -30,6 +45,7 @@ export default class TimeComponent extends React.Component {
 
     render() {
         const type = this.props.type || 'normal';
+        const {contestStarted = false} = this.props;
 
         return (
             <Row>
@@ -40,7 +56,9 @@ export default class TimeComponent extends React.Component {
                         {
                             this.state.difference === null
                             ? "Contest Ended"
-                            : "Contest ends in"
+                            : contestStarted
+                                ? "Contest ends in"
+                                : "Contest will start in"
                         }
                     </Header>
                 </Col>

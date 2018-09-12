@@ -1,19 +1,20 @@
 import React from 'react';
 import _ from 'lodash';
+import moment from 'moment';
 import Media from 'react-media';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
-import {Row, Col, Tabs, Button} from 'antd';
+import {Row, Col, Button} from 'antd';
 import {withRouter} from 'react-router';
 import {Motion, spring} from 'react-motion';
 import {SearchStocks} from '../../../containers/Contest/CreateAdvice/SearchStocks';
-import StockEditListItem from './components/StockEditListItem';
 import StockList from './components/StockList';
+import StockPreviewList from './components/StockPreviewList';
 import TimerComponent from '../Misc/TimerComponent';
 import {verticalBox, horizontalBox} from '../../../constants';
-import {Utils} from '../../../utils';
-import {constructTradingContestPositions} from '../utils';
+import {handleCreateAjaxError} from '../../../utils';
+import {submitEntry, getContestEntry, convertBackendPositions, processSelectedPosition, getContestSummary} from '../utils';
 
-const TabPane = Tabs.TabPane;
+const dateFormat = 'YYYY-MM-DD';
 
 class CreateEntry extends React.Component {
     constructor(props) {
@@ -21,7 +22,13 @@ class CreateEntry extends React.Component {
         this.searchStockComponent = null;
         this.state = {
             bottomSheetOpenStatus: false,
-            positions: []
+            positions: [],
+            previousPositions: [], // contains the positions for the previous entry in the current contest,
+            showPreviousPositions: false, // Whether to show the previous positions for the current contest,
+            contestActive: false, // Checks whether the contest is active,
+            selectedDate: moment().format(dateFormat), // Date that's selected from the DatePicker
+            contestStartDate: moment().format(dateFormat),
+            contestEndDate: moment().format(dateFormat)
         };
     }
 
@@ -29,9 +36,10 @@ class CreateEntry extends React.Component {
         this.setState({bottomSheetOpenStatus: !this.state.bottomSheetOpenStatus});
     }
 
-    conditionallyAddPosition = selectedPositions => new Promise((resolve, reject) => {
-        this.setState({positions: selectedPositions});
-    })
+    conditionallyAddPosition = async selectedPositions => {
+        const processedPositions = await processSelectedPosition(this.state.positions, selectedPositions);
+        this.setState({positions: processedPositions, showPreviousPositions: false});
+    }
 
     onStockItemChange = (symbol, value) => {
         const clonedPositions = _.map(this.state.positions, _.cloneDeep);
@@ -118,7 +126,7 @@ class CreateEntry extends React.Component {
     renderEmptySelections = () => {
         return (
             <Col span={24} style={{...verticalBox, marginTop: '-100px', top: '50%'}}>
-                <TimerComponent endDate='2018-09-12'/>
+                <TimerComponent endTime='15:30:00'/>
                 <h3 style={{textAlign: 'center', padding: '0 20px'}}>
                     Please add 5 stocks to participate in today’s contest
                 </h3>
@@ -133,13 +141,66 @@ class CreateEntry extends React.Component {
     }
 
     renderStockList = () => {
-        return <StockList positions={this.state.positions} onStockItemChange={this.onStockItemChange}/>;
+        return (
+            !this.state.showPreviousPositions
+            ? <StockList positions={this.state.positions} onStockItemChange={this.onStockItemChange} />
+            : <StockPreviewList positions={this.state.positions} />
+        )
+    }
+
+    getRecentContestEntry = () => new Promise((resolve, reject) => {
+        const errorCallback = (err) => {
+            const errorData = _.get(err, 'response.data', null);
+            reject(errorData);
+        };
+        const requiredDate = moment().format(dateFormat);
+        getContestEntry(requiredDate, this.props.history, this.props.match.url, errorCallback)
+        .then(async response => {
+            const positions = _.get(response, 'data.positions', []);
+            const processedPositions = await convertBackendPositions(positions);
+            this.setState({
+                positions: processedPositions,
+                previousPositions: processedPositions,
+                showPreviousPositions: true
+            });
+        });
+    })
+
+    getContestStatus = selectedDate => {
+        const date = moment(selectedDate).format(dateFormat);
+        this.setState({selectedDate: date});
+        const errorCallback = err => {
+            this.setState({contestActive: false});
+        }
+        getContestSummary(date, this.props.history, this.props.match.url, errorCallback)
+        .then(async response => {
+            const contestActive = _.get(response.data, 'active', false);
+            const contestStartDate = moment(_.get(response.data, 'startDate', null)).format(dateFormat);
+            const contestEndDate = moment(_.get(response.data, 'endDate', null)).format(dateFormat);
+            this.setState({
+                contestActive,
+                contestStartDate, 
+                contestEndDate
+            });
+        });
     }
 
     submitPositions = () => {
-        const positions = _.map(this.state.positions, _.cloneDeep);
-        const tradeablePositions = constructTradingContestPositions(positions);
-        console.log(tradeablePositions);
+        submitEntry(this.state.positions, this.state.previousPositions.length > 0)
+        .then(response => {
+            console.log(response.data);
+        })
+        .catch(error => {
+            console.log('Error Occured');
+            return handleCreateAjaxError(error, this.props.history, this.props.match.url)
+        })
+        .finally(() => {
+            console.log('Request Ended');
+        });
+    }
+
+    componentWillMount = () => {
+        this.getRecentContestEntry();
     }
 
     render() {
@@ -169,14 +230,21 @@ class CreateEntry extends React.Component {
                                 style={{...submitButtonStyle, backgroundColor: '#155FC0'}}
                                 onClick={this.toggleSearchStockBottomSheet}
                         >
-                            ADD
+                            {
+                                this.state.previousPositions.length > 0 ? 'EDIT' : 'ADD'
+                            }
                         </Button>
-                        <Button 
-                                style={submitButtonStyle}
-                                onClick={this.submitPositions}
-                        >
-                            SUBMIT
-                        </Button>
+                        {
+                            !this.state.showPreviousPositions &&
+                            <Button 
+                                    style={submitButtonStyle}
+                                    onClick={this.submitPositions}
+                            >
+                                {
+                                    this.state.previousPositions.length > 0 ? 'UPDATE' : 'SUBMIT'
+                                }
+                            </Button>
+                        }
                     </Col>
                 }
             </Row>

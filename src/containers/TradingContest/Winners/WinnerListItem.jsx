@@ -2,24 +2,25 @@ import React from 'react';
 import styled from 'styled-components';
 import {Row, Col} from 'antd';
 import {horizontalBox, verticalBox} from '../../../constants';
-import goldLogo from '../../../assets/gold.svg';
+import {getRankMedal} from '../utils';
 
 export default class WinnerListItem extends React.Component {
     render() {
-        const {symbol = 'TCS', points = 600, img = null, name = 'Tata Consultancy Services'} = this.props;
+        const {symbol = 'TCS', numUsers = 1, img = null, name = '', rank = 5} = this.props;
+        const medal = getRankMedal(rank);
 
         return (
             <SRow type='flex'>
                 <Col span={2} style={{...verticalBox, justifyContent: 'center'}}>
-                    <img src={goldLogo} width={20}/>
+                    <img src={medal} width={20}/>
                 </Col>
                 <Col span={18} style={{...verticalBox, alignItems: 'flex-start'}}>
                     <Symbol>{symbol}</Symbol>
                     <SecondaryText>{name}</SecondaryText>
                 </Col>
                 <Col span={4} style={{...horizontalBox, justifyContent: 'flex-end'}}>
-                    <Points>{points}</Points>
-                    <SecondaryText>pts</SecondaryText>
+                    <Points>{numUsers}</Points>
+                    <SecondaryText>&nbsp;users</SecondaryText>
                 </Col>
             </SRow>
         ); 

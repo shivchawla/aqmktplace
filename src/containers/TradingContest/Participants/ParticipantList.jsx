@@ -9,13 +9,11 @@ export default class ParticipantList extends React.Component {
         return (
             <Row>
                 <Col span={24}>
-                    <ParticipantListItem />
-                    <ParticipantListItem />
-                    <ParticipantListItem />
-                    <ParticipantListItem />
-                    <ParticipantListItem />
-                    <ParticipantListItem />
-                    <ParticipantListItem />
+                    {
+                        winners.map(winner => (
+                            <ParticipantListItem {...winner} />
+                        ))
+                    }
                 </Col>
             </Row>
         );

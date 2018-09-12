@@ -2,26 +2,27 @@ import React from 'react';
 import styled from 'styled-components';
 import {Row, Col} from 'antd';
 import {horizontalBox, verticalBox, metricColor} from '../../../constants';
-import goldLogo from '../../../assets/gold.svg';
+import {getRankMedal} from '../utils';
 
 export default class ParticipantListItem extends React.Component {
     render() {
-        const {name = 'Saurav Biswas', score = 99.5, img = null, excessReturn = -55.1} = this.props;
+        const {userName = 'Saurav Biswas', cost = 99.5, img = null, totalPnl = -55.1, rank = 5} = this.props;
+        const medal = getRankMedal(rank);
 
         return (
             <SRow type='flex'>
                 <Col span={2} style={{...verticalBox, justifyContent: 'center'}}>
-                    <img src={goldLogo} width={20}/>
+                    <img src={medal} width={20}/>
                 </Col>
                 <Col span={18} style={{...verticalBox, alignItems: 'flex-start'}}>
-                    <Name>{name}</Name>
+                    <Name>{userName}</Name>
                     <div style={horizontalBox}>
                         <SecondaryText>Excess Return</SecondaryText>
-                        <SecondaryText color={metricColor.negative} style={{marginLeft: '5px'}}>{excessReturn}%</SecondaryText>
+                        <SecondaryText color={metricColor.negative} style={{marginLeft: '5px'}}>{totalPnl}%</SecondaryText>
                     </div>
                 </Col>
                 <Col span={4} style={{...horizontalBox, justifyContent: 'flex-end'}}>
-                    <Score>{score}</Score>
+                    <Score>{cost}</Score>
                 </Col>
             </SRow>
         ); 

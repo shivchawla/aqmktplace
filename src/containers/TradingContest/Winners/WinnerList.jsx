@@ -9,13 +9,11 @@ export default class WinnerList extends React.Component {
         return (
             <Row>
                 <Col span={24}>
-                    <WinnerListItem />
-                    <WinnerListItem />
-                    <WinnerListItem />
-                    <WinnerListItem />
-                    <WinnerListItem />
-                    <WinnerListItem />
-                    <WinnerListItem />
+                    {
+                        winners.map((winner, index) => (
+                            <WinnerListItem {...winner} key={index} />
+                        ))
+                    }
                 </Col>
             </Row>
         );

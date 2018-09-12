@@ -16,8 +16,8 @@ export default class TradingContest extends React.Component {
     render() {
         const tabs = [
             { title: 'MY PICKS' },
-            { title: 'WINNERS' },
-            { title: 'PARTICIPANTS' },
+            { title: 'TOP PICKS' },
+            { title: 'LEADERBOARD' },
         ];
 
         return (
@@ -35,9 +35,6 @@ export default class TradingContest extends React.Component {
                         </Col>
                     </Row>
                 </Tabs>
-                {/* <Col span={24} style={{...horizontalBox, justifyContent: 'center'}}>
-                    <SegmentedControl style={{width: '40%'}} values={['SELL', 'BUY']} />
-                </Col> */}
             </div>
         );
     }

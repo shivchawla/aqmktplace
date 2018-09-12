@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import {Row, Col} from 'antd';
+import {Col} from 'antd';
 import StockEditListItem from './StockEditListItem';
 
 export default class StockList extends React.Component {

@@ -16,11 +16,13 @@ export default class DateComponent extends React.Component {
     navigateToPreviousDate = () => {
         const date = moment(this.state.selectedDate, dateFormat).subtract(1, 'days');
         this.setState({selectedDate: date.format(dateFormat)});
+        this.props.onDateChange && this.props.onDateChange(date);
     }
 
     navigateToNexDate = () => {
         const date = moment(this.state.selectedDate, dateFormat).add(1, 'days');
         this.setState({selectedDate: date.format(dateFormat)});
+        this.props.onDateChange && this.props.onDateChange(date);
     }
 
     render() {
@@ -28,19 +30,15 @@ export default class DateComponent extends React.Component {
         const iconStyle = {color, fontSize: '20px'}
 
         return (
-            <Row style={{width: '100%', position: 'absolute', top: 10, width: '100%', paddingRight: '20px', ...this.props.style}}>
-                <Col span={16} style={{...horizontalBox, alignItems: 'flex-start'}}>
+            <Row style={{width: '100%', position: 'absolute', top: 10, width: '100%', ...this.props.style}}>
+                <Col span={4} style={{...horizontalBox, justifyContent: 'flex-start'}} onClick={this.navigateToPreviousDate}>
+                    <Icon type="left" theme="outlined" style={iconStyle}/>
+                </Col>
+                <Col span={16} style={{...horizontalBox, justifyContent: 'center'}}>
                     <h3 style={{fontSize: '14px', color}}>{this.state.selectedDate}</h3>
                 </Col>
-                <Col span={8} style={{...horizontalBox, justifyContent: 'space-between'}}>
-                    <Row style={{width: '100%'}}>
-                        <Col span={12} style={{...horizontalBox, justifyContent: 'flex-start'}} onClick={this.navigateToPreviousDate}>
-                            <Icon type="left" theme="outlined" style={iconStyle}/>
-                        </Col>
-                        <Col span={12} style={{...horizontalBox, justifyContent: 'flex-end'}} onClick={this.navigateToNexDate}>
-                            <Icon type="right" theme="outlined" style={iconStyle}/>
-                        </Col>
-                    </Row>
+                <Col span={4} style={{...horizontalBox, justifyContent: 'flex-end'}} onClick={this.navigateToNexDate}>
+                    <Icon type="right" theme="outlined" style={iconStyle}/>
                 </Col>
             </Row>
         );
