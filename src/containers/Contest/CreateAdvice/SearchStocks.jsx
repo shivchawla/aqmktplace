@@ -116,7 +116,7 @@ export class SearchStocks extends React.Component {
         const stocks = [...this.state.stocks];
         const skip = this.state.selectedPage * limit;
         const populate = true;
-        const universe = _.get(this.props, 'filters.universe', null);
+        const universe = _.get(this.props, 'filters.universe', 'NIFTY_50');
         const sector = _.get(this.props, 'filters.sector', '').length === 0
                 ?   this.state.filter.sector
                 :   _.get(this.props, 'filters.sector', '');
@@ -290,6 +290,9 @@ export class SearchStocks extends React.Component {
                 symbol: stock.symbol,
                 ticker: stock.symbol,
                 totalValue: stock.current,
+                chg: stock.change,
+                chgPct: stock.changePct,
+                points: 10
             };
         });
         this.props.addPositions(positions)
@@ -415,7 +418,7 @@ export class SearchStocks extends React.Component {
     }
 
     renderBenchmarkDetailMobile = (hideBenchmarkConfig = false) => {
-        const universe = _.get(this.props, 'filters.universe', null);
+        const universe = _.get(this.props, 'filters.universe', 'NIFTY_50');
         const sector = _.get(this.props, 'filters.sector', null);
         const industry = _.get(this.props, 'filters.industry', null);
 
@@ -700,7 +703,8 @@ export class SearchStocks extends React.Component {
                             width: global.screen.width, 
                             overflow: 'hidden', 
                             height: global.screen.width <= 600 ? global.screen.height : global.screen.height - 100,
-                            position: 'relative'
+                            position: 'relative',
+                            zIndex: 20000
                         }}
                 >
                     <Media 

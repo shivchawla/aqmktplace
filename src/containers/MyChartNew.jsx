@@ -18,8 +18,6 @@ class MyChartNewImpl extends React.Component {
         const self = this;
         this.state = {
             config: {
-                //colors: ["#1DE9B6", "#f44336", "#00B0FF", "#009688", "#FFEA00", "#76DDFB", "#53A8E2", "#2C82BE", "#DBECF8", "#2C9BBE"],
-                //colors: ["#00B0FF", "#0375b4", "#cc6666", "#FFAA1D", "#007849", "#6e2667", "#fc4a1a"],
                 colors: ['#0082c8','#e6194b','#3cb44b','#ffe119','#f58231','#911eb4','#46f0f0','#f032e6','#d2f53c','#fabebe','#008080','#e6beff','#aa6e28','#fffac8','#800000','#aaffc3','#808000','#ffd8b1','#000080', '#808080'],
                 rangeSelector: {
                     selected: 3,
