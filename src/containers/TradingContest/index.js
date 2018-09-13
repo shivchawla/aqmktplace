@@ -4,7 +4,6 @@ import {Button as MobileButton, SegmentedControl, Tabs, Button} from 'antd-mobil
 import CreateEntry from './CreateEntry';
 import Winners from './Winners';
 import Participant from './Participants';
-import {verticalBox, horizontalBox} from '../../constants';
 
 export default class TradingContest extends React.Component {
     renderTab = data => {

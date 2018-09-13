@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import DateComponent from '../Misc/DateComponent';
+import LoaderComponent from '../Misc/Loader';
 import WinnerList from './WinnerList';
 import {verticalBox} from '../../../constants';
 import TimerComponent from '../Misc/TimerComponent';
@@ -20,13 +21,14 @@ class Winners extends React.Component {
             winnerStocks: [],
             contestActive: false,
             startDate: moment().format(dateFormat),
-            endDate: moment().add(2, 'days').format(dateFormat)
+            endDate: moment().add(2, 'days').format(dateFormat),
+            loading: false
         };
     }
 
     getContestRankings = selectedDate => {
         const date = moment(selectedDate).format(dateFormat);
-        this.setState({selectedDate: date});
+        this.setState({selectedDate: date, loading: true});
         const errorCallback = err => {
             this.setState({winnerStocks: [], contestActive: false});
         }
@@ -43,24 +45,34 @@ class Winners extends React.Component {
                 startDate, 
                 endDate
             });
-        });
+        })
+        .finally(() => {
+            this.setState({loading: false});
+        })
     }
 
     componentWillMount() {
         this.getContestRankings(this.state.selectedDate);
     }
 
-    render() {
+    renderPageContent() {
         const contestStarted = moment().isSameOrAfter(moment(this.state.startDate, dateFormat));
         
         return (
             <Row>
                 <Col span={24} style={topContainerStyle}>
                     <DateComponent 
-                        color='#737373'
                         onDateChange={this.getContestRankings}
                         style={{padding: '0 10px'}}
+                        date={moment(this.state.selectedDate).format('Do MMM YY')}
                     />
+                    <Row style={{padding: '0 10px', width: '100%'}}>
+                        <Col span={24}> 
+                            <h3 style={{fontSize: '18px', color: '#fff', textAlign: 'center'}}>TOP PICKS</h3>
+                        </Col>
+                    </Row>
+                </Col>
+                <Col span={24} style={{padding: '0 10px'}}>
                     {
                         !this.state.contestActive
                             ?   this.state.winnerStocks.length > 0 
@@ -76,6 +88,14 @@ class Winners extends React.Component {
                 </Col>
             </Row>
         );
+    }
+
+    render() {
+        if (this.state.loading) {
+            return <LoaderComponent />;
+        } else {
+            return this.renderPageContent();
+        }
     }
 }
 
@@ -105,8 +125,9 @@ const ContestEndedView = () => {
 
 const topContainerStyle = {
     ...verticalBox,
-    height: '140px',
-    padding: '0 10px'
+    height: '100px',
+    padding: '0 10px',
+    backgroundColor: '#15C08F',
 };
 
 const ContestStatus = styled.h3`

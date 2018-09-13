@@ -1,8 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
 import styled from 'styled-components';
-import {Row, Col} from 'antd';
-import {Slider} from 'antd-mobile';
+import {Row, Col, Slider} from 'antd';
+import ActionIcon from '../../Misc/ActionIcons';
 import {horizontalBox, verticalBox, metricColor, nameEllipsisStyle} from '../../../../constants';
 
 export default class StockEditListItem extends React.Component {
@@ -23,8 +23,28 @@ export default class StockEditListItem extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextState) {
-        const points = _.get(nextProps, 'stockItem.value', this.state.points);
+        const points = _.get(nextProps, 'stockItem.points', this.state.points);
         this.setState({points});
+    }
+
+    onAddClick = () => {
+        const {max = 60 , symbol = 'LT'} = this.props.stockItem;
+        let {points = 10} = this.state;
+        if (points < max) {
+            points += 10;
+            this.setState({points});
+            this.props.onStockItemChange(symbol, points);
+        }
+    }
+
+    onReduceClick = () => {
+        const {min = 10, symbol = 'LT'} = this.props.stockItem;
+        let {points = 10} = this.state;
+        if (points > min) {
+            points -= 10;
+            this.setState({points});
+            this.props.onStockItemChange(symbol, points);
+        }
     }
 
     render() {
@@ -56,22 +76,25 @@ export default class StockEditListItem extends React.Component {
                         <SliderMetric label='Min' value={min} />
                         <SliderMetric style={{marginLeft: '10px'}} label='Max' value={max} />
                     </div>
-                    <SecondayText><span style={{fontSize: '25px', marginRight: '5px'}}>{points}</span>pts</SecondayText>
-                </Col>
-                <Col span={24} style={{marginTop: '10px'}}>
-                    <Slider
-                        style={{ marginLeft: 30, marginRight: 30 }}
-                        value={this.state.points}
-                        onChange={this.handleSliderChange} 
-                        onAfterChange={this.onAfterChange}                       
-                        min={min}
-                        max={max}
-                        step={10}
+                    <PointsComponent 
+                        points={points} 
+                        onAddClick={this.onAddClick}
+                        onReduceClick={this.onReduceClick}
                     />
                 </Col>
             </SRow>
         );
     }
+}
+
+const PointsComponent = ({points, onAddClick, onReduceClick}) => {
+    return (
+        <div style={{...horizontalBox, justifyContent: 'center'}}>
+            <ActionIcon type='left' onClick={onReduceClick} />
+            <SecondayText><span style={{fontSize: '25px', marginRight: '5px'}}>{points}</span>pts</SecondayText>
+            <ActionIcon type='right' onClick={onAddClick} />
+        </div>
+    );
 }
 
 const SliderMetric = ({label, value, style}) => {
