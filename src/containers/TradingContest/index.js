@@ -1,9 +1,9 @@
 import React from 'react';
 import {Row, Col} from 'antd';
-import {Button as MobileButton, SegmentedControl, Tabs, Button} from 'antd-mobile';
+import {Tabs} from 'antd-mobile';
 import CreateEntry from './CreateEntry';
-import Winners from './Winners';
-import Participant from './Participants';
+import TopPicks from './TopPicks';
+import Leaderboard from './Leaderboard';
 
 export default class TradingContest extends React.Component {
     renderTab = data => {
@@ -25,12 +25,12 @@ export default class TradingContest extends React.Component {
                     <CreateEntry />
                     <Row>
                         <Col span={24}>
-                            <Winners />
+                            <TopPicks />
                         </Col>
                     </Row>
                     <Row>
                         <Col span={24}>
-                            <Participant />
+                            <Leaderboard />
                         </Col>
                     </Row>
                 </Tabs>
