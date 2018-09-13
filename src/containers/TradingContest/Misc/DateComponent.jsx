@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
-import {Row, Col, Icon} from 'antd';
-import { horizontalBox } from '../../../constants';
+import {Row, Col, Icon, Button} from 'antd';
+import {horizontalBox} from '../../../constants';
 
 const dateFormat = 'Do MMM YY';
 
@@ -9,7 +9,7 @@ export default class DateComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedDate: moment().format(dateFormat)
+            selectedDate: props.date || moment().format(dateFormat)
         }
     }
 
@@ -30,14 +30,16 @@ export default class DateComponent extends React.Component {
         const iconStyle = {color, fontSize: '20px'}
 
         return (
-            <Row style={{width: '100%', position: 'absolute', top: 10, width: '100%', ...this.props.style}}>
+            <Row style={{width: '100%', position: 'absolute', top: 10, width: '100%', ...this.props.style, padding: '0 30px'}}>
                 <Col span={4} style={{...horizontalBox, justifyContent: 'flex-start'}} onClick={this.navigateToPreviousDate}>
+                    {/* <Button shape="circle" icon="left" onClick={this.navigateToPreviousDate}/> */}
                     <Icon type="left" theme="outlined" style={iconStyle}/>
                 </Col>
                 <Col span={16} style={{...horizontalBox, justifyContent: 'center'}}>
                     <h3 style={{fontSize: '14px', color}}>{this.state.selectedDate}</h3>
                 </Col>
-                <Col span={4} style={{...horizontalBox, justifyContent: 'flex-end'}} onClick={this.navigateToNexDate}>
+                <Col span={4} style={{...horizontalBox, justifyContent: 'flex-end'}} onClick={this.navigateToNexDate}> 
+                    {/* <Button shape="circle" icon="right" onClick={this.navigateToNexDate}/> */}
                     <Icon type="right" theme="outlined" style={iconStyle}/>
                 </Col>
             </Row>

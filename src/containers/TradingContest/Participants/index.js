@@ -5,6 +5,7 @@ import {Row, Col} from 'antd';
 import {withRouter} from 'react-router';
 import DateComponent from '../Misc/DateComponent';
 import ParticipantList from './ParticipantList';
+import LoaderComponent from '../Misc/Loader';
 import {verticalBox} from '../../../constants';
 import {getContestSummary, processParticipants} from '../utils';
 
@@ -15,13 +16,14 @@ class Participants extends React.Component {
         super(props);
         this.state = {
             selectedDate: moment().format(dateFormat),
-            winners: []
+            winners: [],
+            loading: false
         };
     }
 
     getContestRankings = selectedDate => {
         const date = moment(selectedDate).format(dateFormat);
-        this.setState({selectedDate: date});
+        this.setState({selectedDate: date, loading: true});
         const errorCallback = err => {
             this.setState({winners: []});
         }
@@ -30,6 +32,9 @@ class Participants extends React.Component {
             const winnerParticipants = _.get(response.data, 'winners', []);
             const processedParticipants = await processParticipants(winnerParticipants);
             this.setState({winners: processedParticipants});
+        })
+        .finally(() => {
+            this.setState({loading: false});
         });
     }
 
@@ -55,18 +60,18 @@ class Participants extends React.Component {
         this.getContestRankings(this.state.selectedDate);
     }
 
-    render() {
+    renderPageContent() {
         return (
             <Row>
                 <Col span={24} style={topContainerStyle}>
                     <DateComponent 
+                        date={moment(this.state.selectedDate).format('Do MMM YY')}
                         onDateChange={this.getContestRankings}
                         style={{padding: '0 10px'}}
                     />
                     <Row style={{padding: '0 10px', width: '100%'}}>
                         <Col span={24}> 
-                            <h3 style={{fontSize: '18px', color: '#fff'}}>Winners</h3>
-                            <h3 style={{fontSize: '26px', color: '#fff'}}>{this.state.selectedDate}</h3>
+                            <h3 style={{fontSize: '18px', color: '#fff', textAlign: 'center'}}>Winners</h3>
                         </Col>
                     </Row>
                 </Col>
@@ -78,16 +83,23 @@ class Participants extends React.Component {
             </Row>
         );
     }
+
+    render() {
+        if (this.state.loading) {
+            return <LoaderComponent />;
+        } else {
+            return this.renderPageContent();
+        }
+    }
 }
 
 export default withRouter(Participants);
 
 const topContainerStyle = {
     ...verticalBox,
-    height: '150px',
+    height: '100px',
     backgroundColor: '#15C08F',
-    alignItems: 'flex-start',
-    // padding: '0 10px'
+    alignItems: 'flex-start'
 };
 
 const listContainer = {

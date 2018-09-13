@@ -3,7 +3,8 @@ import _ from 'lodash';
 import moment from 'moment';
 import styled from 'styled-components';
 import {Row, Col} from 'antd';
-import { verticalBox } from '../../../constants';
+import {verticalBox} from '../../../constants';
+import {contestEndHour, contestStartHour} from '../constants';
 import {setEndTimeToDate} from '../utils';
 
 export default class TimeComponent extends React.Component {
@@ -31,7 +32,7 @@ export default class TimeComponent extends React.Component {
         clearInterval(this.timer);
         this.timer = setInterval(() => {
             const {date = moment().format('YYYY-MM-DD')} = props;
-            const hourToSet = props.contestStarted ? 15 : 9;
+            const hourToSet = props.contestStarted ? contestEndHour : contestStartHour;
             const endTime = setEndTimeToDate(date, hourToSet);
             const startTime = moment();
             let difference = null;
