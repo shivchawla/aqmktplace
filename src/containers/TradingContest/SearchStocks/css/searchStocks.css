@@ -1,0 +1,12 @@
+.stock-row:hover{
+    background-color: '#B2DFDB'
+};
+
+.stock-row {
+    background: 'yellow'
+}
+
+.selectedstocks-mobile {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
