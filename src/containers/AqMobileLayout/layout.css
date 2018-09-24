@@ -1,3 +1,7 @@
 .header {
     background-color: '#fff'
 }
+
+.ant-menu-submenu > .ant-menu {
+    background-color: transparent;
+}

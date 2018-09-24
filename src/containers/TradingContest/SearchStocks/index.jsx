@@ -363,30 +363,39 @@ export class SearchStocks extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (!_.isEqual(nextProps, this.props)) {
-            this.syncStockListWithPortfolio(nextProps.portfolioPositions);
+            this.syncStockListWithPortfolio(nextProps);
         }
     }
 
-    syncStockListWithPortfolio = positions => {
+    syncStockListWithPortfolio = (props = this.props) => {
+        const positions = _.get(props, 'portfolioPositions', []);
+        const sellPositions = _.get(props, 'portfolioSellPositions', []);
+
         const selectedStocks = positions.map(position => position.symbol);
+        const sellSelectedStocks = sellPositions.map(position => position.symbol);
+
         let stocks = [...this.state.stocks]; 
         let localStocks = [...this.localStocks];
         stocks = stocks.map(stock => {
             // If stock is present in the portfolio mark checked as true else false
             const stockIndex = _.findIndex(positions, position => position.symbol === stock.symbol);
-            let checked = stockIndex !== -1 ? true : false;
+            const sellStockIndex = _.findIndex(sellPositions, sellPosition => sellPosition.symbol === stock.symbol);
+            const checked = stockIndex !== -1 ? true : false;
+            const sellChecked = sellStockIndex !== -1 ? true : false;
 
-            return {...stock, checked};
+            return {...stock, checked, sellChecked};
         });
         localStocks = localStocks.map(stock => {
             // If stock is present in the portfolio mark checked as true else false
             const stockIndex = _.findIndex(positions, position => position.symbol === stock.symbol);
-            let checked = stockIndex !== -1 ? true : false;
+            const sellStockIndex = _.findIndex(sellPositions, sellPosition => sellPosition.symbol === stock.symbol);
+            const checked = stockIndex !== -1 ? true : false;
+            const sellChecked = sellStockIndex !== -1 ? true : false;
 
-            return {...stock, checked};
+            return {...stock, checked, sellChecked};
         })
         this.localStocks = localStocks;
-        this.setState({selectedStocks, stocks});
+        this.setState({stocks});
     }
 
     initializeSelectedStocks = async () => {
@@ -394,8 +403,8 @@ export class SearchStocks extends React.Component {
         const sellPositions = [...this.props.portfolioSellPositions];
         const selectedStocks = positions.map(position => position.symbol);
         const sellSelectedStocks = sellPositions.map(position => position.symbol);
-        const processedBuySelectedStocks = await this.getLocalStocksFromPortfolio(selectedStocks, 'buy');
-        const processedSellSelectedStocks = await this.getLocalStocksFromPortfolio(sellSelectedStocks, 'sell');
+        const processedBuySelectedStocks = await this.getLocalStocksFromPortfolio(positions, 'buy');
+        const processedSellSelectedStocks = await this.getLocalStocksFromPortfolio(sellPositions, 'sell');
         this.localStocks = [...processedBuySelectedStocks, ...processedSellSelectedStocks];
         this.setState({selectedStocks, sellSelectedStocks});
     }
@@ -426,7 +435,8 @@ export class SearchStocks extends React.Component {
         // if (this.props.isUpdate) {
         this.initializeSelectedStocks();
         // }
-        this.syncStockListWithPortfolio(this.props.portfolioPositions);
+        this.syncStockListWithPortfolio();
+        // this.syncStockListWithPortfolio(this.props.portfolioPositions);
     }
 
     handlePagination = type => {

@@ -1,9 +1,10 @@
 export const sidebarUrls = [
-    {name: 'Contest', url: '/contest', icon: 'solution'},
-    {name: 'Create Contest Entry', url: '/contest/createentry', icon: 'rocket'},
-    {name: 'Contest Leaderboard', url: '/contest/leaderboard', icon: 'profile'},
-    // {name: 'Create Portfolio', url: '/dashboard/createportfolio', icon: 'file-text'},
-    // {name: 'Screen Advice', url: '/advice', icon: 'search'},
-    {name: 'Home', url: '/home', icon: 'home'},
-    // {name: 'Dashboard', url: '/dashboard', icon: 'dashboard'},
+    {name: 'Contest', url: '/contest', icon: 'explore'},
+    {name: 'Create Contest Entry', url: '/contest/createentry', icon: 'grade'},
+    {name: 'Contest Leaderboard', url: '/contest/leaderboard', icon: 'help_outline'},
+];
+
+export const tradingContestSidebarUrls = [
+    {name: 'Contest Home', url: '/contest', icon: 'explore'},
+    {name: 'Top Picks', url: '/contest/createentry', icon: 'grade'},
 ];
