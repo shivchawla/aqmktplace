@@ -145,42 +145,43 @@ class AqMobileLayoutImpl extends React.Component {
                                     style={{backgroundColor: 'transparent'}} 
                                     key="sub1" 
                                     title={
-                                        <span>
+                                        <div style={{...horizontalBox, alignItems: 'center'}}>
                                             <BubbleChart
                                                 size={26}
                                                 color={primaryColor}
                                             />
-                                            <span>Stock Picks Contest</span>
-                                        </span>
+                                            <span style={{marginLeft: '10px'}}>Stock Picks Contest</span>
+                                        </div>
                                     }
                             >
-                                {/* {
+                                {
                                     tradingContestSidebarUrls.map((item, index) => (
-                                        <Menu.Item key={index} onClick={() => this.props.history.push(item.url)}>
+                                        <Menu.Item key={index} onClick={() => window.location.href = item.url}>
                                             <SideMenuItem menuItem={item} />
                                         </Menu.Item>
                                     ))
-                                } */}
+                                }
                             </SubMenu>
                             <SubMenu 
                                     style={{backgroundColor: 'transparent'}} 
                                     key="sub2" 
                                     title={
-                                        <span>
+                                        <div style={{...horizontalBox, alignItems: 'center'}}>
                                             <CardTravel
                                                 size={26}
                                                 color={primaryColor}
                                             />
-                                            <span>Investment Idea Contest</span></span>
+                                            <span style={{marginLeft: '10px'}}>Investment Idea Contest</span>
+                                        </div>
                                     }
                             >
-                                {/* {
+                                {
                                     sidebarUrls.map((item, index) => (
                                         <Menu.Item key={index} onClick={() => this.props.history.push(item.url)}>
                                             <SideMenuItem menuItem={item} />
                                         </Menu.Item>
                                     ))
-                                } */}
+                                }
                             </SubMenu>
                             <Menu.Item 
                                     key={20} 
@@ -255,7 +256,7 @@ const SideMenuItem = ({menuItem}) => {
                     color={primaryColor}
                 />
             }
-            <h3 style={{fontSize: '14px', color: '#686868'}}>{menuItem.name}</h3>
+            <span style={{fontSize: '14px', color: '#686868', margin: 0, padding: 0, marginLeft: '10px'}}>{menuItem.name}</span>
         </div>
     );
 }
