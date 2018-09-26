@@ -1,15 +1,25 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
+import BubbleChart from 'rmdi/lib/BubbleChart';
+import Home from 'rmdi/lib/Home';
+import CardTravel from 'rmdi/lib/CardTravel';
+import Accessibility from 'rmdi/lib/Accessibility';
+import NewReleases from 'rmdi/lib/NewReleases';
 import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import {slide as HamburgerMenu} from 'react-burger-menu';
-import {Layout, Menu, Icon} from 'antd';
+import {Icon as MaterialIcon} from 'rmdi'
+import {Layout, Menu, Icon as AntdIcon} from 'antd';
 import {NavBar, Button as MobileButton} from 'antd-mobile';
-import {sidebarUrls} from './constants';
+import {sidebarUrls, tradingContestSidebarUrls} from './constants';
 import {Utils} from '../../utils';
 import {primaryColor, horizontalBox, loadingColor} from '../../constants';
 import logo from "../../assets/logo-advq-new.png";
 import * as style from './layoutStyle';
+import './layout.css';
+
+const SubMenu = Menu.SubMenu;
+const MenuItemGroup = Menu.ItemGroup;
 
 class AqMobileLayoutImpl extends React.Component {
     constructor(props) {
@@ -33,7 +43,7 @@ class AqMobileLayoutImpl extends React.Component {
             <NavBar
                 mode="light"
                 icon={
-                    <Icon 
+                    <AntdIcon 
                         type={this.props.innerPage ? "left" : "menu-unfold"} 
                         style={{
                             ...style.sideBarMenuIconStyle, 
@@ -128,21 +138,57 @@ class AqMobileLayoutImpl extends React.Component {
                                 <span style={{color: '#e06666'}}>UBE</span>
                             </div>
                         </div>
-                        {/* <Icon 
-                            type="close" 
-                            style={{fontSize: '24px', zIndex: '20'}}
-                            onClick={this.toggleSideMenu}
-                        /> */}
                     </Col>
                     <Col span={24} style={{marginTop: '20px'}}>
-                        <Menu style={{backgroundColor: 'transparent'}}>
-                            {
-                                sidebarUrls.map((item, index) => (
-                                    <Menu.Item key={index} onClick={() => this.props.history.push(item.url)}>
-                                        <SideMenuItem menuItem={item} />
-                                    </Menu.Item>
-                                ))
-                            }
+                        <Menu style={{backgroundColor: 'transparent'}} mode="inline">
+                            <SubMenu 
+                                    style={{backgroundColor: 'transparent'}} 
+                                    key="sub1" 
+                                    title={
+                                        <div style={{...horizontalBox, alignItems: 'center'}}>
+                                            <BubbleChart
+                                                size={26}
+                                                color={primaryColor}
+                                            />
+                                            <span style={{marginLeft: '10px'}}>Stock Picks Contest</span>
+                                        </div>
+                                    }
+                            >
+                                {
+                                    tradingContestSidebarUrls.map((item, index) => (
+                                        <Menu.Item key={index} onClick={() => window.location.href = item.url}>
+                                            <SideMenuItem menuItem={item} />
+                                        </Menu.Item>
+                                    ))
+                                }
+                            </SubMenu>
+                            <SubMenu 
+                                    style={{backgroundColor: 'transparent'}} 
+                                    key="sub2" 
+                                    title={
+                                        <div style={{...horizontalBox, alignItems: 'center'}}>
+                                            <CardTravel
+                                                size={26}
+                                                color={primaryColor}
+                                            />
+                                            <span style={{marginLeft: '10px'}}>Investment Idea Contest</span>
+                                        </div>
+                                    }
+                            >
+                                {
+                                    sidebarUrls.map((item, index) => (
+                                        <Menu.Item key={index} onClick={() => this.props.history.push(item.url)}>
+                                            <SideMenuItem menuItem={item} />
+                                        </Menu.Item>
+                                    ))
+                                }
+                            </SubMenu>
+                            <Menu.Item 
+                                    key={20} 
+                                    onClick={() => {this.props.history.push('/home')}}
+                            >
+                                <SideMenuItem menuItem={{name: 'Home', Icon: Home}} />
+                            </Menu.Item>
                             <Menu.Item 
                                     key={20} 
                                     onClick={() => {
@@ -154,7 +200,7 @@ class AqMobileLayoutImpl extends React.Component {
                                 <SideMenuItem 
                                     menuItem={{
                                         name: Utils.isLoggedIn() ? 'Logout' : 'Login', 
-                                        icon: Utils.isLoggedIn() ? 'logout' : 'login'
+                                        Icon: Utils.isLoggedIn() ? Accessibility : NewReleases
                                     }} 
                                 />
                             </Menu.Item>
@@ -199,13 +245,18 @@ class AqMobileLayoutImpl extends React.Component {
 export const AqMobileLayout = withRouter(AqMobileLayoutImpl);
 
 const SideMenuItem = ({menuItem}) => {
+    const {Icon = null} = menuItem;
+
     return (
         <div style={{...horizontalBox, alignItems: 'center'}}>
             {
-                menuItem.icon &&
-                <Icon style={{fontSize: '18px', color: primaryColor}} type={menuItem.icon}/>
+                Icon &&
+                <Icon 
+                    size={26}
+                    color={primaryColor}
+                />
             }
-            <h3 style={{fontSize: '17px', color: '#686868'}}>{menuItem.name}</h3>
+            <span style={{fontSize: '14px', color: '#686868', margin: 0, padding: 0, marginLeft: '10px'}}>{menuItem.name}</span>
         </div>
     );
 }

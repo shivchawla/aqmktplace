@@ -4,10 +4,10 @@ import moment from 'moment';
 import Media from 'react-media';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Row, Col} from 'antd';
-import {Button} from 'antd-mobile';
+import {Button, SegmentedControl} from 'antd-mobile';
 import {withRouter} from 'react-router';
 import {Motion, spring} from 'react-motion';
-import {SearchStocks} from '../../../containers/Contest/CreateAdvice/SearchStocks';
+import {SearchStocks} from '../SearchStocks';
 import StockList from './components/StockList';
 import StockPreviewList from './components/StockPreviewList';
 import TimerComponent from '../Misc/TimerComponent';
@@ -26,15 +26,18 @@ class CreateEntry extends React.Component {
         this.searchStockComponent = null;
         this.state = {
             bottomSheetOpenStatus: false,
-            positions: [],
-            previousPositions: [], // contains the positions for the previous entry in the current contest,
+            positions: [], // Positions to buy
+            sellPositions: [], // Positions to sell
+            previousPositions: [], // contains the positions for the previous entry in the current contest for buy,
+            previousSellPositions: [], // contains the positions for the previous entry in the current contest for sell,
             showPreviousPositions: false, // Whether to show the previous positions for the current contest,
             contestActive: false, // Checks whether the contest is active,
             selectedDate: moment().format(dateFormat), // Date that's selected from the DatePicker
             contestStartDate: moment().format(dateFormat),
             contestEndDate: moment().format(dateFormat),
             noEntryFound: false,
-            loading: false
+            loading: false,
+            listView: 'BUY'
         };
     }
 
@@ -43,13 +46,25 @@ class CreateEntry extends React.Component {
     }
 
     conditionallyAddPosition = async selectedPositions => {
-        const processedPositions = await processSelectedPosition(this.state.positions, selectedPositions);
-        this.setState({positions: processedPositions, showPreviousPositions: false});
+        try {
+            const positionsToSell = selectedPositions.filter(position => position.points < 0);
+            const positionsToBuy = selectedPositions.filter(position => position.points >= 0);
+            const processedPositionsToBuy = await processSelectedPosition(this.state.positions, positionsToBuy);
+            const processedPositionsToSell = await processSelectedPosition(this.state.positionsToSell, positionsToSell);
+            this.setState({
+                positions: processedPositionsToBuy, 
+                sellPositions: processedPositionsToSell,
+                showPreviousPositions: false
+            });
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     onStockItemChange = (symbol, value) => {
-        console.log(symbol, value);
-        const clonedPositions = _.map(this.state.positions, _.cloneDeep);
+        // If listView = BUY then modify positions else sellPositions
+        const positions = this.state.listView === 'BUY' ? this.state.positions : this.state.sellPositions;
+        const clonedPositions = _.map(positions, _.cloneDeep);
         const requiredPositionIndex = _.findIndex(clonedPositions, position => position.symbol === symbol);
         if (requiredPositionIndex !== -1) {
             const requiredPosition = clonedPositions[requiredPositionIndex];
@@ -57,7 +72,11 @@ class CreateEntry extends React.Component {
                 ...requiredPosition,
                 points: value
             };
-            this.setState({positions: clonedPositions});
+            if (this.state.listView === 'BUY') {
+                this.setState({positions: clonedPositions});
+            } else {
+                this.setState({sellPositions: clonedPositions});
+            }
         }
     }
 
@@ -83,12 +102,14 @@ class CreateEntry extends React.Component {
                                             toggleBottomSheet={this.toggleSearchStockBottomSheet}
                                             addPositions={this.conditionallyAddPosition}
                                             portfolioPositions={this.state.positions}
+                                            portfolioSellPositions={this.state.sellPositions}
                                             filters={{}}
                                             ref={el => this.searchStockComponent = el}
                                             history={this.props.history}
                                             pageUrl={this.props.match.url}
                                             isUpdate={false}
                                             benchmark='NIFTY_50'
+                                            maxLimit={5}
                                         />
                                     </div>
                             }
@@ -165,10 +186,13 @@ class CreateEntry extends React.Component {
     }
 
     renderStockList = () => {
+        const positions = this.state.listView === 'BUY' ? this.state.positions : this.state.sellPositions;
+        const previewPositions = this.state.listView === 'BUY' ? this.state.previousPositions : this.state.previousSellPositions;
+
         return (
             !this.state.showPreviousPositions
-            ? <StockList positions={this.state.positions} onStockItemChange={this.onStockItemChange} />
-            : <StockPreviewList positions={this.state.previousPositions} />
+            ? <StockList positions={positions} onStockItemChange={this.onStockItemChange} />
+            : <StockPreviewList positions={previewPositions} />
         )
     }
 
@@ -184,9 +208,13 @@ class CreateEntry extends React.Component {
         getContestEntry(requiredDate, this.props.history, this.props.match.url, errorCallback)
         .then(async response => {
             const positions = _.get(response, 'data.positions', []);
-            const processedPositions = await convertBackendPositions(positions);
+            const buyPositions = positions.filter(position => _.get(position, 'investment', 10) >= 0);
+            const sellPositions = positions.filter(position => _.get(position, 'investment', 10) < 0);
+            const processedBuyPositions = await convertBackendPositions(buyPositions);
+            const processedSellPositions = await convertBackendPositions(sellPositions);
+            console.log(processedSellPositions);
             this.setState({noEntryFound: positions.length === 0});
-            resolve({positions: processedPositions});
+            resolve({positions: processedBuyPositions, sellPositions: processedSellPositions});
         })
         .finally(() => {
             this.setState({loading: false});
@@ -212,8 +240,10 @@ class CreateEntry extends React.Component {
         });
     }
 
-    submitPositions = () => {
-        submitEntry(this.state.positions, this.state.previousPositions.length > 0)
+    submitPositions = async () => {
+        const processedSellPositions = await this.processSellPositions();
+        const positions = [...this.state.positions, ...processedSellPositions];
+        submitEntry(positions, this.state.previousPositions.length > 0)
         .then(response => {
             console.log(response.data);
         })
@@ -226,16 +256,33 @@ class CreateEntry extends React.Component {
         });
     }
 
+    processSellPositions = () => {
+        const sellPositions = _.map(this.state.sellPositions, _.cloneDeep);
+
+        return Promise.map(sellPositions, position => {
+            return {
+                ...position,
+                points: -(_.get(position, 'points', 10))
+            }
+        })
+    }
+
     handleContestDateChange = async selectedDate => {
         const requiredDate = selectedDate.format(dateFormat);
         this.setState({selectedDate: requiredDate});
         const contestData = await this.getRecentContestEntry(requiredDate);
-        const {positions = []} = contestData;
+        const {positions = [], sellPositions = []} = contestData;
         this.setState({
             positions,
+            sellPositions,
             previousPositions: positions,
+            previousSellPositions: sellPositions,
             showPreviousPositions: true,
         }) 
+    }
+
+    onSegmentValueChange = value => {
+        this.setState({listView: value});
     }
 
     componentWillMount = () => {
@@ -245,9 +292,11 @@ class CreateEntry extends React.Component {
             this.getContestStatus(this.state.selectedDate)
         ])
         .then(([contestData]) => {
-            const {positions = []} = contestData;
+            const {positions = [], sellPositions = []} = contestData;
             this.setState({
                 positions,
+                sellPositions,
+                previousSellPositions: sellPositions,
                 previousPositions: positions,
                 showPreviousPositions: true
             });
@@ -271,12 +320,20 @@ class CreateEntry extends React.Component {
                     style={{width: '100%', height: global.screen.height - 45}}
             >
                 {this.renderSearchStocksBottomSheet()}
-                <Col span={24}>
+                <Col span={24} style={{height: '40px'}}>
                     <DateComponent 
                         color='#737373'
                         onDateChange={this.handleContestDateChange}
                         style={{padding: '0 10px', position: 'relative'}}
                         date={moment(this.state.selectedDate).format('Do MMM YY')}
+                    />
+                </Col>
+                <Col span={24} style={{...verticalBox}}>
+                    <SegmentedControl
+                        style={{width: '70%'}}
+                        values={['BUY', 'SELL']}
+                        onValueChange={this.onSegmentValueChange}
+                        selectedIndex={this.state.listView === 'BUY' ? 0 : 1}
                     />
                 </Col>
                 {

@@ -55,7 +55,7 @@ export const convertBackendPositions = positions => {
             name: _.get(position, 'security.detail.Nse_Name', ''),
             industry: _.get(position, 'security.detail.Industry', ''),
             sector: _.get(position, 'security.detail.Sector', ''),
-            points: _.get(position, 'investment', ''),
+            points: Math.abs(_.get(position, 'investment', 10)),
             lastPrice: _.get(position, 'lastPrice', ''),
             symbol: _.get(position, 'security.ticker', '')
         }
@@ -69,14 +69,16 @@ export const processSelectedPosition = (oldPositions = [], selectedPositions = [
     return Promise.map(clonedSelectedPositions, selectedPosition => {
         // Check if position was previously present, if present use the points from the previous position
         const oldPositionIndex = _.findIndex(clonedOldPositions, oldPosition => oldPosition.symbol === selectedPosition.symbol);
-
         if (oldPositionIndex > -1) {
             return {
                 ...selectedPosition,
-                points: _.get(clonedOldPositions[oldPositionIndex], 'points', 10)
+                points: Math.abs(_.get(clonedOldPositions[oldPositionIndex], 'points', 10))
             }
         } else {
-            return selectedPosition
+            return {
+                ...selectedPosition,
+                points: Math.abs(_.get(selectedPosition, 'points', 10))
+            };
         }
     });
 }
