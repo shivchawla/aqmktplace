@@ -9,6 +9,6 @@ export const sidebarUrls = [
 ];
 
 export const tradingContestSidebarUrls = [
-    {name: 'Contest Home', url: 'dailycontest/home', Icon: Explore},
+    {name: 'Contest Home', url: '/dailycontest/home', Icon: Explore},
     {name: 'Top Picks', url: '/dailycontest/create', Icon: Grade},
 ];
