@@ -1,8 +1,14 @@
 import * as React from 'react';
 import _ from 'lodash';
+import moment from 'moment';
 import {Motion, spring} from 'react-motion';
-import {Row, Col, Icon} from 'antd';
-import {horizontalBox, verticalBox, primaryColor} from '../../constants';
+import {Row, Col, Icon, Tag} from 'antd';
+import gold from '../../assets/gold.svg';
+import silver from '../../assets/silver.svg';
+import bronze from '../../assets/bronze.svg';
+import blue from '../../assets/fourth.svg';
+import green from '../../assets/fifth.svg';
+import {horizontalBox, verticalBox, primaryColor, metricColor} from '../../constants';
 import {AqMobileLayout} from '../AqMobileLayout/Layout';
 import {MetricItem} from '../../components/MetricItem';
 import {formatMetric} from './utils';
@@ -62,6 +68,8 @@ export default class LeaderBoardMobile extends React.Component {
                                 onClick={this.onLeaderItemClicked}
                                 leaderItem={leader} 
                                 getRankColor={this.getRankColor}
+                                active={this.props.active}
+                                winners={this.props.winners}
                             />
                         );
                     })
@@ -84,6 +92,12 @@ export default class LeaderBoardMobile extends React.Component {
     }
 
     render() {
+        const {active = false} = this.props;
+        const dateFormat = 'Do MMM YY';
+        let {startDate = moment(), endDate = moment()} = this.props.selectedContest;
+        startDate = moment(startDate).format(dateFormat);
+        endDate = moment(endDate).format(dateFormat);
+
         return (
             <AqMobileLayout 
                     loading={this.props.loading}
@@ -91,9 +105,22 @@ export default class LeaderBoardMobile extends React.Component {
             >
                 {this.renderBottomSheet()}
                 <Row>
-                    <Col span={24} style={{...horizontalBox, justifyContent: 'center', marginTop: '15px'}}>
+                    <Col span={24} style={{...horizontalBox, justifyContent: 'center', marginTop: '10px'}}>
                         {this.props.renderContestDropdown('150px')}
                     </Col>
+                    <Col span={24}>
+                        <h3 style={{fontSize: '12px', textAlign: 'center', color: '#444'}}>
+                            <span style={{fontWeight: 700}}>{startDate}</span>
+                            <span style={{fontWeight: 400,  margin: '0 3px'}}>to</span>
+                            <span style={{fontWeight: 700}}>{endDate}</span>
+                        </h3>
+                    </Col>
+                    {
+                        !active &&
+                        <Col span={24} style={{textAlign: 'center'}}>
+                            <Tag color="#607D8B">Ended</Tag>
+                        </Col>
+                    }
                     <Col span={24} style={{marginTop:'5px'}}>{this.renderParticipants()}</Col>
                     <Col span={24}>
                         {
@@ -116,12 +143,38 @@ class LeaderItem extends React.Component {
 
         return false;
     }
+
+    getWinnerRank = leaderItem => {
+        const {active = false, winners = []} = this.props;
+        const winnerIndex = _.findIndex(winners, winner => winner.advice === leaderItem.adviceId);
+        const isWinner = winnerIndex > -1;
+        const rankMedals = [
+            {rank: 1, medal: gold},
+            {rank: 2, medal: silver},
+            {rank: 3, medal: bronze},
+            {rank: 4, medal: blue},
+            {rank: 5, medal: green},
+        ];
+
+        if (isWinner) {
+            const rank = _.get(winners[winnerIndex], 'prize.rank', 5);
+            const medalItem = rankMedals.filter(item => item.rank === rank)[0];
+            const medal = medalItem !== undefined ? medalItem.medal : null;
+            return {rank, medal};
+        } else {
+            return {};
+        }
+    }
     
     render() {
-        const {leaderItem, onClick, getRankColor} = this.props;
+        const {leaderItem, onClick, getRankColor, active = false} = this.props;
         const annualReturn = formatMetric(_.get(leaderItem, 'metrics.current.annualReturn.metricValue', NaN), "pct");
         const volatility = formatMetric(_.get(leaderItem, 'metrics.current.volatility.metricValue', NaN), "pct");
         const adviceId = _.get(leaderItem, 'adviceId', null);
+        let medalLogo = null;
+        const winnerStatus = this.getWinnerRank(leaderItem);
+        const rank = _.get(winnerStatus, 'rank', null);
+        medalLogo = _.get(winnerStatus, 'medal', null);
         
         const containerStyle = {
             margin: '5px 10px 0px 10px',
@@ -135,9 +188,15 @@ class LeaderItem extends React.Component {
         
         return (
             <Row style={containerStyle} onClick={() => onClick(adviceId)}>
-                <Col span={24} style={horizontalBox}>
+                <Col span={22} style={horizontalBox}>
                     <h3 style={{color: '#767676'}}>{leaderItem.rank}</h3>
                     <h3 style={{marginLeft: '18px'}}>{leaderItem.advisorName}</h3>
+                </Col>
+                <Col span={2} style={{textAlign: 'right'}}>
+                    {
+                        !active && 
+                        <img src={medalLogo} style={{height: '30px'}}/>
+                    }
                 </Col>
                 <Col span={24} style={{marginLeft: '26px'}}>
                     <Row>

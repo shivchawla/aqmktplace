@@ -1,9 +1,8 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Row, Col, Icon} from 'antd';
+import {Row, Col, Icon, Button} from 'antd';
 import {Utils} from '../../../../utils';
 import {metricColor, primaryColor, horizontalBox, verticalBox} from '../../../../constants';
-import {AddIcon} from '../AddIcon';
 
 const textColor = '#757575';
 
@@ -16,8 +15,27 @@ export default class StockListItemMobile extends React.Component {
         return false;
     }
 
+    renderActionButtons = () => {
+        const {symbol, checked = false, onAddIconClick, onSellIconClick, sellChecked = false} = this.props;
+
+        if (checked || sellChecked) {
+            const onClick = checked ? onAddIconClick : onSellIconClick;
+
+            return (
+                <Button onClick={() => onClick(symbol)}>Remove</Button>
+            );
+        } else {
+            return (
+                <React.Fragment>
+                    <Button onClick={() => onSellIconClick(symbol)}>Sell</Button>
+                    <Button onClick={() => onAddIconClick(symbol)}>Buy</Button>
+                </React.Fragment>
+            );
+        }
+    }
+
     render() {
-        const {symbol, name, change, changePct, current, onClick, checked = false, onAddIconClick, selected = false} = this.props;
+        const {symbol, name, change, changePct, current, onClick, checked = false, onAddIconClick, selected = false, onSellIconClick} = this.props;
         const containerStyle = {
             borderBottom: '1px solid #eaeaea',
             color: textColor,
@@ -56,7 +74,7 @@ export default class StockListItemMobile extends React.Component {
                         </h3>
                     </div>
                 </Col>
-                <Col span={11} style={detailContainerStyle} onClick={() => onAddIconClick(symbol)}>
+                <Col span={11} style={detailContainerStyle}>
                     <h3 style={{fontSize: '15px', fontWeight: '700'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
                     <div style={horizontalBox}>
                         <h3 
@@ -71,8 +89,10 @@ export default class StockListItemMobile extends React.Component {
                         </h3>
                     </div>
                 </Col>
-                <Col span={2} onClick={() => onAddIconClick(symbol)}>
-                    <AddIcon checked={checked} size='24px'/>
+                <Col style={verticalBox} span={2}>
+                    {
+                        this.renderActionButtons()
+                    }
                 </Col>
             </Row>
         );

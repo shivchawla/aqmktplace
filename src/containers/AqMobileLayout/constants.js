@@ -1,9 +1,14 @@
+import Grade from 'rmdi/lib/Grade';
+import Explore from 'rmdi/lib/Explore';
+import HelpOutline from 'rmdi/lib/HelpOutline';
+
 export const sidebarUrls = [
-    {name: 'Contest', url: '/contest', icon: 'solution'},
-    {name: 'Create Contest Entry', url: '/contest/createentry', icon: 'rocket'},
-    {name: 'Contest Leaderboard', url: '/contest/leaderboard', icon: 'profile'},
-    // {name: 'Create Portfolio', url: '/dashboard/createportfolio', icon: 'file-text'},
-    // {name: 'Screen Advice', url: '/advice', icon: 'search'},
-    {name: 'Home', url: '/home', icon: 'home'},
-    // {name: 'Dashboard', url: '/dashboard', icon: 'dashboard'},
+    {name: 'Contest', url: '/contest', Icon: Explore},
+    {name: 'Create Contest Entry', url: '/contest/createentry', Icon: Grade},
+    {name: 'Contest Leaderboard', url: '/contest/leaderboard', Icon: HelpOutline},
+];
+
+export const tradingContestSidebarUrls = [
+    {name: 'Contest Home', url: '/dailycontest/home', Icon: Explore},
+    {name: 'Top Picks', url: '/dailycontest/create', Icon: Grade},
 ];

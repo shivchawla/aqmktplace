@@ -4,15 +4,15 @@ import {Motion, spring} from 'react-motion';
 import _  from 'lodash';
 import {Row, Col, Input, Icon, Button, Tag} from 'antd';
 import {SearchBar, Tag as TagMobile} from 'antd-mobile';
-import {StockPerformance} from './StockPerformance';
-import {screenSize} from './constants';
-import StockFilter from '../SearchStockFilter/StockFilter';
-import SearchStockHeader from './Mobile/SearchStockHeader';
-import SearchStockHeaderMobile from './Mobile/StockSearchHeaderMobile';
-import StockList from './StockList';
+import {StockPerformance} from '../../Contest/CreateAdvice/StockPerformance';
+import {screenSize} from '../../Contest/CreateAdvice/constants';
+import StockFilter from '../../Contest/SearchStockFilter/StockFilter';
+import SearchStockHeader from '../../Contest/CreateAdvice/Mobile/SearchStockHeader';
+import SearchStockHeaderMobile from './components/StockSearchHeaderMobile';
+import StockList from './components/StockList';
 import {horizontalBox, verticalBox} from '../../../constants';
-import {fetchAjax} from '../../../utils';
-import '../css/searchStocks.css';
+import {fetchAjax, openNotification} from '../../../utils';
+import './css/searchStocks.css';
 
 const {Search} = Input;
 const {requestUrl} = require('../../../localConfig');
@@ -22,9 +22,11 @@ export class SearchStocks extends React.Component {
         super(props);
         this.state = {
             stocks: [],
+            sellStocks: [],
             searchInput: '',
             selectedStock: '',
-            selectedStocks: [], // This will contain the symbols of all stocks that are selected
+            selectedStocks: [], // This will contain the symbols of all stocks that are selected for buying
+            sellSelectedStocks: [], // This will contain the symbols of all stocks that are selected for selling
             selectedPage: 0,
             portfolioLoading: false,
             loadingStocks: false,
@@ -134,6 +136,9 @@ export class SearchStocks extends React.Component {
             this.pushStocksToLocalArray(processedStocks);
             resolve(true);
         })
+        .catch(err => {
+            console.log(err);
+        })
         .finally(() => {
             this.setState({loadingStocks: false});
         })
@@ -173,6 +178,7 @@ export class SearchStocks extends React.Component {
                 selectedStock={selectedStock}
                 handleStockListItemClick={this.handleStockListItemClick}
                 conditionallyAddItemToSelectedArray={this.conditionallyAddItemToSelectedArray}
+                conditionallyAddItemToSellSelectedArray={this.conditionallyAddItemToSellSelectedArray}
             />
         )
     }
@@ -190,6 +196,8 @@ export class SearchStocks extends React.Component {
      */
     processStockList = (stocks = []) => {
         const selectedStocks = [...this.state.selectedStocks];
+        const sellSelectedStocks = [...this.state.sellSelectedStocks];
+
         return stocks.map(stock => {
             const symbol = _.get(stock, 'security.detail.NSE_ID', null) !== null
                     ? _.get(stock, 'security.detail.NSE_ID', null) 
@@ -234,6 +242,7 @@ export class SearchStocks extends React.Component {
                 open,
                 current,
                 checked: selectedStocks.indexOf(symbol) >= 0,
+                sellChecked: sellSelectedStocks.indexOf(symbol) >= 0,
                 sector: _.get(stock, 'security.detail.Sector', null),
                 industry: _.get(stock, 'security.detail.Industry', null)
             };
@@ -241,6 +250,11 @@ export class SearchStocks extends React.Component {
     }
 
     conditionallyAddItemToSelectedArray = (symbol, addToPortfolio = false) => {
+        const {maxLimit = 5} = this.props;
+        if (this.state.selectedStocks.length >= maxLimit) {
+            openNotification('info', 'Max Limit Reached', "You can't buy more than 5 stocks");
+            return;
+        }
         const selectedStocks = _.map([...this.state.selectedStocks], _.cloneDeep);
         const localStocks = _.map([...this.localStocks], _.cloneDeep);
         const stocks = _.map([...this.state.stocks], _.cloneDeep);
@@ -274,10 +288,62 @@ export class SearchStocks extends React.Component {
         }
     }
 
-    addSelectedStocksToPortfolio = () => {
+    conditionallyAddItemToSellSelectedArray = (symbol, addToPortfolio = false) => {
+        const {maxLimit = 5} = this.props;
+        if (this.state.sellSelectedStocks.length >= maxLimit) {
+            openNotification('info', 'Max Limit Reached', "You can't sell more than 5 stocks");
+            return;
+        }
+        const selectedStocks = _.map([...this.state.sellSelectedStocks], _.cloneDeep);
+        const localStocks = _.map([...this.localStocks], _.cloneDeep);
+        const stocks = _.map([...this.state.stocks], _.cloneDeep);
+        const selectedStockIndex = selectedStocks.indexOf(symbol);
+        const targetIndex = _.findIndex(stocks, stock => stock.symbol === symbol);
+        const targetStock = stocks[targetIndex];
+        const targetLocalStock = localStocks.filter(stock => stock.symbol === symbol)[0];
+        if (targetStock !== undefined) {
+            if (selectedStockIndex === -1) {
+                selectedStocks.push(symbol);
+                targetStock.sellChecked = true;
+                targetLocalStock.sellChecked = true;
+            } else {
+                selectedStocks.splice(selectedStockIndex, 1);
+                targetStock.sellChecked = false;
+                targetLocalStock.sellChecked = false;
+            }
+            stocks[targetIndex] = targetStock;
+            this.setState({sellSelectedStocks: selectedStocks, stocks});
+            this.localStocks = localStocks;
+        } else {
+            if (selectedStockIndex === -1) {
+                selectedStocks.push(symbol);
+                targetLocalStock.sellChecked = true;
+            } else {
+                selectedStocks.splice(selectedStockIndex, 1);
+                targetLocalStock.sellChecked = false;
+            }
+            this.setState({sellSelectedStocks: selectedStocks});
+            this.localStocks = localStocks;
+        }
+    }
+
+    addSelectedStocksToPortfolio = async () => {
+        const buyPositions = await this.processPositionsForPortfolio('buy');
+        const sellPositions = await this.processPositionsForPortfolio('sell');
+        const positions = [...buyPositions, ...sellPositions];
+        this.props.addPositions(positions);
+        this.props.toggleBottomSheet();
+    }
+
+    processPositionsForPortfolio = (type = 'buy') => {
         let localStocks = [...this.localStocks];
-        localStocks = localStocks.filter(stock => stock.checked === true);
-        const positions = localStocks.map(stock => {
+        if (type === 'buy') {
+            localStocks = localStocks.filter(stock => stock.checked === true);
+        } else {
+            localStocks = localStocks.filter(stock => stock.sellChecked === true);
+        }
+
+        return Promise.map(localStocks, stock => {
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 name: _.get(stock, 'name', ''),
@@ -290,49 +356,68 @@ export class SearchStocks extends React.Component {
                 totalValue: stock.current,
                 chg: stock.change,
                 chgPct: stock.changePct,
-                points: 10
+                points: type === 'buy' ? 10 : -10
             };
         });
-        this.props.addPositions(positions)
-        this.props.toggleBottomSheet();
     }
 
     componentWillReceiveProps(nextProps) {
         if (!_.isEqual(nextProps, this.props)) {
-            this.syncStockListWithPortfolio(nextProps.portfolioPositions);
+            this.syncStockListWithPortfolio(nextProps);
         }
     }
 
-    syncStockListWithPortfolio = positions => {
+    syncStockListWithPortfolio = (props = this.props) => {
+        const positions = _.get(props, 'portfolioPositions', []);
+        const sellPositions = _.get(props, 'portfolioSellPositions', []);
+
         const selectedStocks = positions.map(position => position.symbol);
+        const sellSelectedStocks = sellPositions.map(position => position.symbol);
+
         let stocks = [...this.state.stocks]; 
         let localStocks = [...this.localStocks];
         stocks = stocks.map(stock => {
             // If stock is present in the portfolio mark checked as true else false
             const stockIndex = _.findIndex(positions, position => position.symbol === stock.symbol);
-            let checked = stockIndex !== -1 ? true : false;
+            const sellStockIndex = _.findIndex(sellPositions, sellPosition => sellPosition.symbol === stock.symbol);
+            const checked = stockIndex !== -1 ? true : false;
+            const sellChecked = sellStockIndex !== -1 ? true : false;
 
-            return {...stock, checked};
+            return {...stock, checked, sellChecked};
         });
         localStocks = localStocks.map(stock => {
             // If stock is present in the portfolio mark checked as true else false
             const stockIndex = _.findIndex(positions, position => position.symbol === stock.symbol);
-            let checked = stockIndex !== -1 ? true : false;
+            const sellStockIndex = _.findIndex(sellPositions, sellPosition => sellPosition.symbol === stock.symbol);
+            const checked = stockIndex !== -1 ? true : false;
+            const sellChecked = sellStockIndex !== -1 ? true : false;
 
-            return {...stock, checked};
+            return {...stock, checked, sellChecked};
         })
         this.localStocks = localStocks;
-        this.setState({selectedStocks, stocks});
+        this.setState({stocks});
     }
 
-    initializeSelectedStocks = () => {
+    initializeSelectedStocks = async () => {
         const positions = [...this.props.portfolioPositions];
+        const sellPositions = [...this.props.portfolioSellPositions];
         const selectedStocks = positions.map(position => position.symbol);
-        this.localStocks = positions.map(position => {
+        const sellSelectedStocks = sellPositions.map(position => position.symbol);
+        const processedBuySelectedStocks = await this.getLocalStocksFromPortfolio(positions, 'buy');
+        const processedSellSelectedStocks = await this.getLocalStocksFromPortfolio(sellPositions, 'sell');
+        this.localStocks = [...processedBuySelectedStocks, ...processedSellSelectedStocks];
+        this.setState({selectedStocks, sellSelectedStocks});
+    }
+
+    /**
+     * Processes positions obtained from CreateEntry to add in localStocks
+     */
+    getLocalStocksFromPortfolio = (positions = [], type = 'buy') => {
+        return Promise.map(positions, position => {
             return {
                 change: 0,
                 changePct: 0,
-                checked: true,
+                [type === 'buy' ? 'checked' : 'sellChecked']: true,
                 close: _.get(position, 'lastPrice', 0),
                 current: _.get(position, 'lastPrice', 0),
                 high: 0,
@@ -342,8 +427,7 @@ export class SearchStocks extends React.Component {
                 sector: _.get(position, 'sector', ''),
                 symbol: _.get(position, 'symbol', '')
             }
-        });
-        this.setState({selectedStocks});
+        })
     }
 
     componentWillMount() {
@@ -351,7 +435,8 @@ export class SearchStocks extends React.Component {
         // if (this.props.isUpdate) {
         this.initializeSelectedStocks();
         // }
-        this.syncStockListWithPortfolio(this.props.portfolioPositions);
+        this.syncStockListWithPortfolio();
+        // this.syncStockListWithPortfolio(this.props.portfolioPositions);
     }
 
     handlePagination = type => {
@@ -643,10 +728,10 @@ export class SearchStocks extends React.Component {
         );
     }
 
-    renderSelectedStocksMobile = () => {
-        const selectedStocks = [...this.state.selectedStocks];
+    renderSelectedStocksMobile = (type = 'buy') => {
+        const selectedStocks = type === 'buy' ? [...this.state.selectedStocks] : [...this.state.sellSelectedStocks];
         return (
-            this.state.selectedStocks.length > 0 
+            selectedStocks.length > 0 
             && !this.state.stockPerformanceOpen 
             && !this.state.stockFilterOpen 
             && global.screen.width <= 600
@@ -680,7 +765,9 @@ export class SearchStocks extends React.Component {
                                         key={stock}
                                         closable
                                         onClose={() => {
-                                            this.conditionallyAddItemToSelectedArray(stock)
+                                            type === 'buy'
+                                            ? this.conditionallyAddItemToSelectedArray(stock)
+                                            : this.conditionallyAddItemToSellSelectedArray(stock)
                                         }}
                                 >
                                     {stock}
@@ -694,6 +781,8 @@ export class SearchStocks extends React.Component {
     }
 
     render() { 
+        const selectedStocks = [...this.state.selectedStocks, ...this.state.sellSelectedStocks];
+
         return (
             <React.Fragment>
                 <Row 
@@ -710,7 +799,7 @@ export class SearchStocks extends React.Component {
                         render={() => 
                             <SearchStockHeaderMobile 
                                     filters={this.props.filters}
-                                    selectedStocks={this.state.selectedStocks}
+                                    selectedStocks={selectedStocks}
                                     stockPerformanceOpen={this.state.stockPerformanceOpen}
                                     stockFilterOpen={this.state.stockFilterOpen}
                                     toggleBottomSheet={this.props.toggleBottomSheet}

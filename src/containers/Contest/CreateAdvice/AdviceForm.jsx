@@ -536,7 +536,6 @@ class ContestAdviceFormImpl extends React.Component {
                     ? item.effTotal
                     : this.getEffTotal(item, data);
                     // : item.lastPrice > 30000 ? item.lastPrice : 30000
-            console.log(item);
             item['effTotal'] = total;
             item['shares'] = this.calculateSharesFromTotalReturn(total, item.lastPrice);
             item['totalValue'] = item['lastPrice'] * this.calculateSharesFromTotalReturn(total, item.lastPrice);
@@ -548,10 +547,8 @@ class ContestAdviceFormImpl extends React.Component {
     getEffTotal = (stock, data) => {
         const newPositions = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal === undefined);
         const newPositionsLength = newPositions.length;
-        console.log('New Positions', newPositions);
         const positionsInSector = data.filter(item => item.sector === stock.sector).filter(item => item.effTotal);
         const nPositionsInSector = positionsInSector.length;
-        console.log('Positions in Sector', positionsInSector);
         const maxSectorExposure = _.max([0, _.min([this.state.maxSectorTargetTotalSoft, ((nPositionsInSector + newPositionsLength)* this.state.maxStockTargetTotalSoft)])]);
         const maxAllowance = maxSectorExposure - _.sum(positionsInSector.filter(item => item.effTotal != undefined).map(item => item.effTotal));
         return Math.max(0, _.min([30000, (maxAllowance / _.max([newPositions.length, 1]))]));
