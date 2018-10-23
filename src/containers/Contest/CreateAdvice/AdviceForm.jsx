@@ -1,32 +1,30 @@
 import * as React from 'react';
 import _ from 'lodash';
 import Media from 'react-media';
-import {StickyContainer, Sticky} from 'react-sticky';
+import {StickyContainer} from 'react-sticky';
 import {Motion, spring} from 'react-motion';
 import axios from 'axios';
 import moment from 'moment';
 import {withRouter} from 'react-router';
-import {Row, Col, Select, Button, Modal, Tag, Icon, Affix, Radio, Spin} from 'antd';
+import {Row, Col, Button, Modal, Tag, Icon, Affix, Radio, Spin} from 'antd';
 import {Button as MobileButton, Picker, List, LocaleProvider, SegmentedControl} from 'antd-mobile';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {Portfolio} from './Portfolio';
 import {PortfolioPieChart} from './PortfolioPieChart';
 import {SearchStocks} from './SearchStocks';
 import LoginModal from '../../../containers/LoginModal';
-import SliderInput from '../../../components/AqSliderInput';
 import LoaderModal from '../../../components/LoaderModal';
 import {AqPageHeader} from '../../../components/AqPageHeader';
 import AppLayout from '../../../containers/AppLayout';
 import {AqMobileLayout} from '../../AqMobileLayout/Layout';
 import {benchmarks} from '../../../constants/benchmarks';
 import {shadowBoxStyle, horizontalBox, metricColor, benchmarkColor, verticalBox, primaryColor} from '../../../constants';
-import {CreateAdviceCrumb, UpdateAdviceCrumb} from '../../../constants/breadcrumbs';
+import {UpdateAdviceCrumb} from '../../../constants/breadcrumbs';
 import {getBreadCrumbArray, fetchAjax, openNotification, Utils, handleCreateAjaxError, getStockPerformance} from '../../../utils';
 import {getNextWeekday} from '../../../utils/date';
 import { MetricItem } from '../../../components/MetricItem';
 import enUS from 'antd-mobile/lib/locale-provider/en_US';
 
-const {Option} = Select;
 const textColor = '#595959';
 const dateFormat = 'YYYY-MM-DD';
 const {requestUrl} = require('../../../localConfig');
@@ -122,21 +120,7 @@ class ContestAdviceFormImpl extends React.Component {
                     <h3 style={labelTextStyle}>Portfolio Benchmark</h3>
                 </Col>
                 <Col span={24}>
-                    <Select
-                            disabled={this.props.isUpdate || !this.state.showPortfolioByStock} 
-                            style={dropdownStyle} 
-                            value={this.state.benchmark} 
-                            onChange={value => this.state.positions.length > 0 
-                                        ? this.handleBenchmarkChange(value) 
-                                        : this.handleEmptyPortfolioBenchmarkChange(value)
-                                    }
-                    >
-                        {
-                            benchmarks.map((benchmark, index) => {
-                                return <Option key={index} value={benchmark}>{benchmark}</Option>
-                            })
-                        }
-                    </Select>
+                    <h3 style={portfolioTextStyle}>{this.state.benchmark}</h3>
                 </Col>
                 <Col span={24}>
                     {
@@ -233,10 +217,10 @@ class ContestAdviceFormImpl extends React.Component {
             this.toggleLoginModal();
             return;
         }
-        const validateUpdateUrl = `${requestUrl}/advice/validate?operation=update&adviceId=${this.props.adviceId}`;
-        const validateCreateUrl = `${requestUrl}/advice/validate_default`;
+        const validateUpdateUrl = `${requestUrl}/contestentry/validate?operation=update&adviceId=${this.props.adviceId}`;
+        const validateCreateUrl = `${requestUrl}/contestentry/validate_default`;
         const validateUrl = this.props.isUpdate ? validateUpdateUrl : validateCreateUrl;
-        const adviceUrl = type === 'validate' ? validateUrl : `${requestUrl}/advice/create`;
+        const adviceUrl = type === 'validate' ? validateUrl : `${requestUrl}/contestentry/create`;
         const requestObject = this.constructCreateAdviceRequestObject(type);
         let adviceId = null;
         this.setState({adviceSubmissionLoading: true, adviceCreationLoading: type !== 'validate'});
@@ -244,7 +228,7 @@ class ContestAdviceFormImpl extends React.Component {
             url: type === 'validate' 
                     ? adviceUrl 
                     : this.props.isUpdate 
-                            ? `${requestUrl}/advice/${this.props.adviceId}` 
+                            ? `${requestUrl}/contestentry/${this.props.adviceId}` 
                             : adviceUrl,
             method: type === 'validate' 
                     ? 'POST' 
@@ -664,7 +648,8 @@ class ContestAdviceFormImpl extends React.Component {
                 startDate,
                 endDate,
                 positions: this.getPortfolioPositions(),
-                cash: 0
+                cash: 0,
+                positionType: 'shares'
             },
             benchmark: {
                 ticker: benchmark,
@@ -728,7 +713,8 @@ class ContestAdviceFormImpl extends React.Component {
                     startDate,
                     endDate,
                     positions: this.getPortfolioPositions(),
-                    cash: 0
+                    cash: 0,
+                    positionType: 'shares'
                 },
                 benchmark: {
                     ticker: this.state.benchmark,
@@ -736,30 +722,7 @@ class ContestAdviceFormImpl extends React.Component {
                     country: 'IN',
                     exchange: 'NSE'
                 },
-            },
-            rebalance: 'Daily',
-            maxNotional: 1000000,
-            investmentObjective: {
-                goal: {
-                    field: 'goalField',
-                    investorType: 'Contest Investors',
-                    suitability: 'Suitability'
-                },
-                sectors: {
-                    detail: ['Tech']
-                },
-                portfolioValuation: {
-                    field: 'Blend'
-                },
-                capitalization: {
-                    field: 'Small Cap'
-                },
-                userText: {
-                    detail: 'investmentObjUserText'
-                }
-            },
-            public: true,
-            contestOnly: true
+            }
         }
 
         return requestObject;
@@ -1582,3 +1545,9 @@ const leftContainerStyle = {
 };
 
 const labelTextStyle = {fontSize: '14px', color: textColor};
+
+const portfolioTextStyle = {
+    fontSize: '20px',
+    fontWeight: 500,
+    color: '#444'
+};

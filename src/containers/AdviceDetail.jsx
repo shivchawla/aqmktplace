@@ -373,8 +373,8 @@ class AdviceDetailImpl extends React.Component {
     
     getAdviceData = (startDate = moment().format('YYYY-MM-DD')) => {
         const adviceId = this.props.match.params.id;
-        const adviceSummaryUrl = `${requestUrl}/advice/${adviceId}`;
-        const advicePerformanceUrl = `${requestUrl}/performance/advice/${adviceId}`;
+        const adviceSummaryUrl = `${requestUrl}/contestentry/${adviceId}`;
+        const advicePerformanceUrl = `${requestUrl}/performance/contestentry/${adviceId}`;
         const adviceContestUrl = `${requestUrl}/contest/${contestId}/${adviceId}`;
         this.setState({loading: true});
         return Promise.all([
