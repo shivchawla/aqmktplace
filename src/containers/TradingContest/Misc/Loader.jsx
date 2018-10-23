@@ -3,7 +3,6 @@ import Loader from 'react-loaders';
 import {Row, Col} from 'antd';
 import {primaryColor} from '../../../constants';
 import {PacmanLoader} from 'react-spinners';
-import {css} from 'react-emotion';
 
 export default class LoaderComponent extends React.Component {
     render() {

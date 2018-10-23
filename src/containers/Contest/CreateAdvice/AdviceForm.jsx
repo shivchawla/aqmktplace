@@ -674,14 +674,14 @@ class ContestAdviceFormImpl extends React.Component {
         Changes the content of the portfolio array.
         Passed as a prop to AqStockTableMod
     */
-    onChange = positions => {
+    onChange = (positions, shouldValidate = true) => {
         new Promise(resolve => {
             const validatePortfolio = _.debounce(() => {
                 this.validatePortfolio();
             }, 1000);
             this.updatePositions(_.cloneDeep(positions), () => {
                 !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
-                validatePortfolio();
+                shouldValidate && validatePortfolio();
             })
         });
         // this.setState({positions: _.cloneDeep(positions)}, () => {
@@ -711,7 +711,7 @@ class ContestAdviceFormImpl extends React.Component {
                     endDate,
                     positions: this.getPortfolioPositions(),
                     cash: 0,
-                    positionType: 'shares'
+                    positionType: 'notional'
                 },
                 benchmark: {
                     ticker: this.state.benchmark,
@@ -751,7 +751,8 @@ class ContestAdviceFormImpl extends React.Component {
                     country: 'IN',
                     exchange: 'NSE'
                 }, 
-                quantity: parseInt(item.shares)
+                quantity: (item.buy ? 1 : -1) * parseInt(item.shares),
+                investment: (item.buy ? 1 : -1) * parseInt(item.effTotal)
             };
             positions.push(position);
         });
@@ -822,30 +823,29 @@ class ContestAdviceFormImpl extends React.Component {
             <div style={{...horizontalBox, justifyContent: 'flex-end'}}>
                 <MetricItem 
                     value={this.state.positions.filter(item => item.shares > 0).length}
-                    label="Number of positions"
-                    style={{width: '50%'}}
+                    label="Num. Positions"
                 />
-                <div style={{...verticalBox, alignItems: 'flex-start'}}>
-                    <MetricItem 
-                        value={this.state.portfolioNetValue}
-                        label="Net Value"
-                        money
-                    />
-                    {/*<SliderInput 
-                        style={{width: '100%'}}
-                        disabled={!this.state.showPortfolioByStock}
-                        sliderSpan={24}
-                        inputSpan={24}
-                        value={this.state.portfolioNetValue}
-                        hideValue={true}
-                        onChange={this.handleNetValueChange}
-                        min={0}
-                        max={this.state.portfolioMaxNetValue}
-                        inputWidth='100%'
-                    />*/}
-                </div>
+                <MetricItem 
+                    value={this.state.portfolioNetValue}
+                    label="Gross Value"
+                    money
+                />
+                <MetricItem 
+                    value={this.getPortfolioLongShortNetValue()}
+                    label="Net Value"
+                    money
+                />
             </div>
         );
+    }
+
+
+
+    getPortfolioLongShortNetValue = () => {
+        const buyPositionsNetValue = _.sum(this.state.positions.filter(item => item.buy === true).map(item => item.effTotal));
+        const sellPositionsNetValue = _.sum(this.state.positions.filter(item => item.buy === false).map(item => item.effTotal));
+    
+        return buyPositionsNetValue - sellPositionsNetValue;
     }
 
     handleNetValueChange = newNetValue => {
@@ -1104,7 +1104,15 @@ class ContestAdviceFormImpl extends React.Component {
                                 this.renderNetValue()
                             }
                         </Col>
-                        <Col span={24} style={{...horizontalBox, justifyContent: 'center', position: 'relative'}}>
+                        <Col 
+                                span={24} 
+                                style={{
+                                    ...horizontalBox, 
+                                    justifyContent: 'center', 
+                                    position: 'relative',
+                                    marginTop: '20px'
+                                }}
+                        >
                             {this.renderValidationErrors()}
                             <div style={verticalBox}>
                                 <h3 style={{fontSize: '16px', marginBottom: '5px'}}>Portfolio View</h3>
@@ -1112,12 +1120,6 @@ class ContestAdviceFormImpl extends React.Component {
                             </div>
                         </Col>
                     </Row>
-                    {/* <Row>
-                        <Col span={24} style={verticalBox}>
-                            <h3 style={{fontSize: '16px', marginBottom: '5px'}}>Portfolio View</h3>
-                            {this.renderPortfolioViewSelectorDesktop()}
-                        </Col>
-                    </Row> */}
                     <Row style={{margin: '0 20px', marginBottom: '20px'}}>
                         <Col span={24}>
                             {this.renderPortfolio()}
@@ -1374,7 +1376,7 @@ class ContestAdviceFormImpl extends React.Component {
         })
     })
 
-    getNetvalue = (positions, field = 'totalValue') => {
+    getNetvalue = (positions, field = 'effTotal') => {
         let totalValue = 0;
         positions.map(position => {
             totalValue += position[field];

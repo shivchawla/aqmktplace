@@ -290,7 +290,8 @@ export class SearchStocks extends React.Component {
                 totalValue: stock.current,
                 chg: stock.change,
                 chgPct: stock.changePct,
-                points: 10
+                points: 10,
+                buy: true
             };
         });
         this.props.addPositions(positions)

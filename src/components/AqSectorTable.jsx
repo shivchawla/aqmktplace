@@ -1,9 +1,12 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Table, Button, Row, Col, Tooltip} from 'antd';
+import {Table, Col, Radio} from 'antd';
 import SliderInput from '../components/AqSliderInput';
-import {Utils} from '../utils';
-import {handleSectorTargetTotalChange, processSectorStockData, updateSectorWeights} from '../containers/Contest/CreateAdvice/utils';
+import {
+    handleSectorTargetTotalChange, 
+    processSectorStockData, 
+    updateSectorWeights
+} from '../containers/Contest/CreateAdvice/utils';
 
 export default class AqSectorTable extends React.Component {
     constructor(props) {
@@ -23,13 +26,13 @@ export default class AqSectorTable extends React.Component {
                 render: (text, record) => this.renderSliderColumns(text, record, 'targetTotal', 'number'),
                 width: 170
             },
-            {
-                title: 'TOTAL',
-                dataIndex: 'total',
-                key: 'total',
-                render: (text, record) => <span>{Utils.formatMoneyValueMaxTwoDecimals(text)}</span>,
-                width: 150
-            },
+            // {
+            //     title: 'TOTAL',
+            //     dataIndex: 'total',
+            //     key: 'total',
+            //     render: (text, record) => <span>{Utils.formatMoneyValueMaxTwoDecimals(text)}</span>,
+            //     width: 150
+            // },
             {
                 title: 'STOCKS #',
                 dataIndex: 'numStocks',
@@ -43,7 +46,7 @@ export default class AqSectorTable extends React.Component {
                 key: 'weight',
                 render: (text, record) => <span>{text} %</span>,
                 width: 120
-            },
+            }
         ];
         this.state = {
             selectedRows: [],

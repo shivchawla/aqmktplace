@@ -8,10 +8,10 @@ import {primaryColor} from '../constants';
 import {Utils} from '../utils';
 import AppLayout from './AppLayout';
 
-const InvestorDashboard = Loadable({
-    loader: () => import('./InvestorDashboard'),
-    loading: () => <div>Loading</div>
-});
+// const InvestorDashboard = Loadable({
+//     loader: () => import('./InvestorDashboard'),
+//     loading: () => <div>Loading</div>
+// });
 const AdvisorDashboard = Loadable({
     loader: () => import('./AdvisorDashboard'),
     loading: () => <div>Loading</div>
@@ -153,7 +153,7 @@ class Dashboard extends React.Component {
                                             props => <AdvisorDashboard {...props} />
                                         }
                                 />
-                                <Route 
+                                {/* <Route 
                                         exact={true}
                                         path={`${this.props.match.url}/advisor/:section`} 
                                         render={
@@ -166,7 +166,7 @@ class Dashboard extends React.Component {
                                         render={
                                             props => <InvestorDashboard {...props} />
                                         }
-                                />
+                                /> */}
                             </Content>
                         </Layout>
                     </Layout>
