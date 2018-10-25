@@ -65,7 +65,7 @@ class Login extends Component {
                 if (redirectUrl){
                   this.props.history.push(redirectUrl);
                 } else{
-                  this.props.history.push('/contest');
+                    window.location.href = '/dailycontest';
                 }
               }else{
                 this.updateState({
@@ -104,7 +104,7 @@ class Login extends Component {
   componentDidMount(){
     this._mounted = true;
   	if (Utils.isLoggedIn()){
-      this.props.history.push('/contest');
+        window.location.href = '/dailycontest';
     }else{
       // if (this.props.pageChange){
       //   this.props.pageChange('login');
@@ -145,11 +145,11 @@ class Login extends Component {
             Utils.setLoggedInUserInfo(response.data);
             Utils.localStorageSave('selectedPage', 1);
             const redirectUrl = Utils.getRedirectAfterLoginUrl();
-            if (redirectUrl) {
-                this.props.history.push(redirectUrl);
-            } else {
-                this.props.history.push('/contest');
-            }
+            // if (redirectUrl) {
+            //     this.props.history.push(redirectUrl);
+            // } else {
+                window.location.href = '/dailycontest';
+            // }
         } else {
             this.updateState({
                 'loading': false,

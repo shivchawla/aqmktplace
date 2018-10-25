@@ -2,7 +2,9 @@ import * as React from 'react';
 import Loading from 'react-loading-bar';
 import BubbleChart from 'rmdi/lib/BubbleChart';
 import Home from 'rmdi/lib/Home';
-import CardTravel from 'rmdi/lib/CardTravel';
+import Create from 'rmdi/lib/Create';
+import Logout from 'rmdi/lib/Input';
+import MaterialIconReact, {colorPalette} from 'material-icons-react';
 import Accessibility from 'rmdi/lib/Accessibility';
 import NewReleases from 'rmdi/lib/NewReleases';
 import {withRouter} from 'react-router';
@@ -141,48 +143,18 @@ class AqMobileLayoutImpl extends React.Component {
                     </Col>
                     <Col span={24} style={{marginTop: '20px'}}>
                         <Menu style={{backgroundColor: 'transparent'}} mode="inline">
-                            <SubMenu 
-                                    style={{backgroundColor: 'transparent'}} 
-                                    key="sub1" 
-                                    title={
-                                        <div style={{...horizontalBox, alignItems: 'center'}}>
-                                            <BubbleChart
-                                                size={26}
-                                                color={primaryColor}
-                                            />
-                                            <span style={{marginLeft: '10px'}}>Stock Picks Contest</span>
-                                        </div>
-                                    }
+                            <Menu.Item 
+                                    key={20} 
+                                    onClick={() => {window.location.href = '/dailycontest'}}
                             >
-                                {
-                                    tradingContestSidebarUrls.map((item, index) => (
-                                        <Menu.Item key={index} onClick={() => window.location.href = item.url}>
-                                            <SideMenuItem menuItem={item} />
-                                        </Menu.Item>
-                                    ))
-                                }
-                            </SubMenu>
-                            <SubMenu 
-                                    style={{backgroundColor: 'transparent'}} 
-                                    key="sub2" 
-                                    title={
-                                        <div style={{...horizontalBox, alignItems: 'center'}}>
-                                            <CardTravel
-                                                size={26}
-                                                color={primaryColor}
-                                            />
-                                            <span style={{marginLeft: '10px'}}>Investment Idea Contest</span>
-                                        </div>
-                                    }
+                                <SideMenuItem menuItem={{name: 'Daily Contest', Icon: BubbleChart}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={20} 
+                                    onClick={() => {window.location.href = '/dailycontest/create'}}
                             >
-                                {
-                                    sidebarUrls.map((item, index) => (
-                                        <Menu.Item key={index} onClick={() => this.props.history.push(item.url)}>
-                                            <SideMenuItem menuItem={item} />
-                                        </Menu.Item>
-                                    ))
-                                }
-                            </SubMenu>
+                                <SideMenuItem menuItem={{name: 'Create Entry', Icon: Create}} />
+                            </Menu.Item>
                             <Menu.Item 
                                     key={20} 
                                     onClick={() => {this.props.history.push('/home')}}
@@ -200,7 +172,7 @@ class AqMobileLayoutImpl extends React.Component {
                                 <SideMenuItem 
                                     menuItem={{
                                         name: Utils.isLoggedIn() ? 'Logout' : 'Login', 
-                                        Icon: Utils.isLoggedIn() ? Accessibility : NewReleases
+                                        Icon: Utils.isLoggedIn() ? Logout : Logout
                                     }} 
                                 />
                             </Menu.Item>

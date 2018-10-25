@@ -37,7 +37,12 @@ class AppLayout extends React.Component {
     }
 
     handleNavMenuClick = e => {
-        this.props.history.push(`/${e.key}`);
+        if (e.key === 'logout') {
+            Utils.logoutUser();
+            window.location.href = '/login';
+            return;
+        }
+        window.location.href = (`/${e.key}`);
     }
 
     onRouteChanged = location => {
@@ -65,7 +70,7 @@ class AppLayout extends React.Component {
                         selectedKeys={[this.state.parentPath]}
                         // selectedKeys={[this.state.parentPath, 'contest/leaderboard']}
                 >
-                    <SubMenu 
+                    {/* <SubMenu 
                             key="contest"
                             title={
                                 <div style={{...horizontalBox, color: '#595959'}}>
@@ -77,7 +82,7 @@ class AppLayout extends React.Component {
                         <Menu.Item key="contest">Contest Home</Menu.Item>
                         <Menu.Item key="contest/leaderboard">Leaderboard</Menu.Item>
                         <Menu.Item key="contest/createentry">Create Entry</Menu.Item>
-                    </SubMenu>                       
+                    </SubMenu>                        */}
                     {/* <Menu.Item 
                             key="contest" 
                             style={{...horizontalBox, color: '#595959'}}
@@ -86,11 +91,13 @@ class AppLayout extends React.Component {
                         <div style={{marginTop: '-15px', fontSize: '10px', color:'red'}}>NEW</div>
                                 
                     </Menu.Item> */}
-
                     {
-                        Utils.isLoggedIn() &&
-                        <Menu.Item key="dashboard">Dashboard</Menu.Item>
+                        <Menu.Item key="dailycontest">Daily Contest</Menu.Item>
                     }
+                    {/* {
+                        Utils.isLoggedIn() &&
+                        <Menu.Item key="dailycontest/create">Create Entry</Menu.Item>
+                    } */}
 
                     {/* <Menu.Item key="advice">Screen Advices</Menu.Item> */}
                     
@@ -106,14 +113,18 @@ class AppLayout extends React.Component {
                         !Utils.isLoggedIn() &&
                         <Menu.Item key="signup">Signup</Menu.Item>
                     }
+                    {
+                        Utils.isLoggedIn() &&
+                        <Menu.Item key="logout">Logout</Menu.Item>
+                    }
                 </Menu>
-                <Button 
+                {/* <Button 
                         onClick={this.toggleContactUsModal} 
                         type="primary" 
                         style={{marginTop: '15px'}}
                 >
                     Ask a Question
-                </Button>
+                </Button> */}
                 <React.Fragment>
                     {/* <div style={{margin:'auto 20px auto 20px', height:'50%', borderRight:'1px solid grey'}}/> */}
                     {/* <Button 
