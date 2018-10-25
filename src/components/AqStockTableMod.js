@@ -1,8 +1,8 @@
 import * as React from 'react';
 import _ from 'lodash';
-import styled from 'styled-components';
-import {Table, Button, Row, Col, Tooltip, Radio} from 'antd';
+import {Table, Button, Row, Col, Tooltip} from 'antd';
 import SliderInput from '../components/AqSliderInput';
+import RadioActionButtons from './selections/RadioActionButtons';
 import {verticalBox, nameEllipsisStyle, primaryColor, metricColor, horizontalBox} from '../constants';
 import {Utils} from '../utils';
 
@@ -94,7 +94,7 @@ export class AqStockTableMod extends React.Component {
                 dataIndex: 'buy',
                 key: 'buy',
                 render: (text, record) => (
-                    <ActionButtons 
+                    <RadioActionButtons 
                         onChange={value => this.handleActionButtonChange(value, record, text)} 
                         defaultValue={text}
                     />
@@ -277,51 +277,3 @@ export class AqStockTableMod extends React.Component {
         );
     }
 }
-
-class ActionButtons extends React.Component {
-    render() {
-        const {onChange, defaultValue = false} = this.props;
-        const buyBtnColor = defaultValue ? {color: metricColor.positive} : {};
-        const sellBtnColor = defaultValue ? {} : {color: metricColor.negative};
-
-        return (
-            <div style={{...horizontalBox, justifyContent: 'flex-start'}}>
-                <AButton 
-                        {...buyBtnColor} 
-                        size='small' 
-                        onClick={() => onChange('buy')}
-                        style={{marginRight: '5px'}}
-                >
-                    BUY
-                </AButton>
-                <AButton 
-                        {...sellBtnColor} 
-                        size='small' 
-                        onClick={() => onChange('sell')}
-                >
-                    SELL
-                </AButton>
-            </div>
-        );
-    }
-}
-
-const AButton = styled(Button)`
-    background-color: ${props => props.color || '#f9f9f9'};
-    border-color: ${props => props.color || '#B7B7B7'};
-    color: ${props => props.color ? '#fff' : '#444'};
-    transition: all 0.3s ease-in-out;
-    font-size: 12px;
-
-    &:hover {
-        background-color: ${props => props.color || '#f9f9f9'};
-        border-color: ${props => props.color || '#B7B7B7'};
-        color: ${props => props.color ? '#fff' : '#444'};
-    }
-
-    &:enabled {
-        background-color: ${props => props.color || '#f9f9f9'};
-        border-color: ${props => props.color || '#B7B7B7'};
-        color: ${props => props.color ? '#fff' : '#444'};
-    }
-`;

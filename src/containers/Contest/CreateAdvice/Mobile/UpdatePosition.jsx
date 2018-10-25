@@ -1,10 +1,11 @@
 import * as React from 'react';
 import _ from 'lodash';
 import {withRouter} from 'react-router';
-import {Row, Col, Spin, AutoComplete, Input, Icon} from 'antd';
+import {Row, Col, Spin, AutoComplete, Input, Icon, Button} from 'antd';
 import {Button as MobileButton, InputItem} from 'antd-mobile';
 import {fetchAjax, getStockData, Utils, openNotification} from '../../../../utils';
 import {horizontalBox, primaryColor} from '../../../../constants';
+import RadioActionButtons from '../../../../components/selections/RadioActionButtons'
 
 const {requestUrl} = require('../../../../localConfig');
 const AutocompleteOption = AutoComplete.Option;
@@ -44,6 +45,14 @@ class UpdatePositionMobileImpl extends React.Component {
                 this.setState({stockData: defaultStockData});
             }
         }
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState)) {
+            return true;
+        }
+
+        return false;
     }
 
     onSearchChange = value => {
@@ -147,6 +156,19 @@ class UpdatePositionMobileImpl extends React.Component {
         })
     }
 
+    handleRadioActionButtonChange = (type = 'sell') => {
+        const buyStatus = type === 'buy';
+        console.log('handleRadioActionButtonChange called');
+        this.setState({
+            stockData: {
+                ...this.state.stockData,
+                buy: buyStatus
+            }
+        }, () => {
+            console.log('Updated State');
+        });
+    }
+
     getMaxStockValueAllowed = () => {
         const positionsInSector = this.props.positions.filter(item => item.sector === this.state.stockData.sector);
         const nPositionsInSector = positionsInSector.length;
@@ -206,7 +228,18 @@ class UpdatePositionMobileImpl extends React.Component {
     }
 
     render() {
-        const {symbol, name, shares, lastPrice, totalValue, targetTotal, weight} = this.state.stockData;
+        let {
+            symbol, 
+            name, 
+            shares, 
+            lastPrice, 
+            totalValue, 
+            targetTotal, 
+            weight,
+            buy = false
+        } = this.state.stockData;
+        shares = (buy ? 1 : -1) * shares;
+        weight = (buy ? 1 : -1) * weight;
 
         return (
             <Row style={{height: '100%', position: 'relative', padding: '0 10px'}}>
@@ -308,12 +341,6 @@ class UpdatePositionMobileImpl extends React.Component {
                             </Col>
                             <Col span={24}>
                                 <StockDetailComponent 
-                                    label="Total Value" 
-                                    value={`₹ ${Utils.formatMoneyValueMaxTwoDecimals(totalValue)}`} 
-                                />
-                            </Col>
-                            <Col span={24}>
-                                <StockDetailComponent 
                                     label="Shares" 
                                     value={shares} 
                                 />
@@ -322,6 +349,14 @@ class UpdatePositionMobileImpl extends React.Component {
                                 <StockDetailComponent 
                                     label="Weight" 
                                     value={`${weight} %`} 
+                                />
+                            </Col>
+                            <Col span={24} style={{...horizontalBox, justifyContent: 'space-between'}}>
+                                <h3 style={{fontSize: '16px', color: '#4A4A4A'}}>Type</h3>
+                                <RadioActionButtons 
+                                    defaultValue={buy}
+                                    onChange={this.handleRadioActionButtonChange}
+                                    small
                                 />
                             </Col>
                         </Row>

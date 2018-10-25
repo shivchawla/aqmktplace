@@ -141,26 +141,19 @@ class ContestAdviceFormImpl extends React.Component {
         this.toggleBenchmarkChangeModal();
     }
 
-    renderBenchmarkDropdownMobile = () => {
+    renderBenchmark = () => {
         return (
-            <Col span={24}>
-                <Picker
-                        data={benchmarks.map(benchmark => {return {label: benchmark, value: benchmark}})}
-                        title=""
-                        cols={1}
-                        okText="Select"
-                        dismissText="Cancel"
-                        onChange={value => this.state.positions.length > 0 
-                                    ? this.onBenchmarkPickerChange(value)
-                                    : this.handleEmptyPortfolioBenchmarkChange(value[0])
-                                }
-                        extra={this.state.benchmark}
-                        disabled={this.props.isUpdate}
-                >
-                    <List.Item style={{paddingLeft: '0px', paddingRight: '0px'}} arrow="horizontal">
-                        Benchmark
-                    </List.Item>
-                </Picker>
+            <Col 
+                    span={24} 
+                    style={{
+                        ...horizontalBox, 
+                        justifyContent: 'space-between',
+                        paddingRight: '10px',
+                        margin: '12px 0'
+                    }}
+            >
+                <h3 style={{color: '#757575', fontSize: '17px'}}>Benchmark</h3>
+                <h3 style={{color: '#424242', fontSize: '17px'}}>{this.state.benchmark}</h3>
             </Col>
         );
     }
@@ -217,7 +210,7 @@ class ContestAdviceFormImpl extends React.Component {
             this.toggleLoginModal();
             return;
         }
-        const validateUpdateUrl = `${requestUrl}/contestentry/validate?operation=update&adviceId=${this.props.adviceId}`;
+        const validateUpdateUrl = `${requestUrl}/contestentry/validate?operation=update&entryId=${this.props.adviceId}`;
         const validateCreateUrl = `${requestUrl}/contestentry/validate_default`;
         const validateUrl = this.props.isUpdate ? validateUpdateUrl : validateCreateUrl;
         const adviceUrl = type === 'validate' ? validateUrl : `${requestUrl}/contestentry/create`;
@@ -561,6 +554,7 @@ class ContestAdviceFormImpl extends React.Component {
             targetPosition.shares = position.shares;
             targetPosition.effTotal = position.effTotal;
             targetPosition.totalValue = position.totalValue;
+            targetPosition.buy = position.buy;
         }
         this.updatePositions(this.updateAllWeights(positions), () => {
             !this.props.isUpdate && Utils.localStorageSaveObject('positions', {data: this.state.positions});
@@ -1243,7 +1237,7 @@ class ContestAdviceFormImpl extends React.Component {
                                     type="flex" 
                                     align="start"
                             >
-                                {this.renderBenchmarkDropdownMobile()}
+                                {this.renderBenchmark()}
                             </Row>
                             <Row>
                                 <Col span={24}>
@@ -1329,6 +1323,7 @@ class ContestAdviceFormImpl extends React.Component {
 
             return {
                 key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                buy: total >= 0 ? true : false,
                 sector: _.get(position, 'security.detail.Sector', null),
                 industry: _.get(position, 'security.detail.Industry', null),
                 name: _.get(position, 'security.detail.Nse_Name', ''),
@@ -1344,7 +1339,7 @@ class ContestAdviceFormImpl extends React.Component {
     }
 
     getAdviceSummary = adviceId => new Promise((resolve, reject) => {
-        const adviceSumaryUrl = `${requestUrl}/advice/${adviceId}`;
+        const adviceSumaryUrl = `${requestUrl}/contestentry/${adviceId}`;
         fetchAjax(adviceSumaryUrl, this.props.history, this.props.match.url)
         .then(response => resolve(response.data))
         .catch(error => reject(error));
@@ -1352,7 +1347,7 @@ class ContestAdviceFormImpl extends React.Component {
 
     getAdvicePortfolio = adviceId => new Promise((resolve, reject) => {
         const nextWeekday = moment(getNextWeekday()).format(dateFormat);
-        const advicePortfolioUrl = `${requestUrl}/advice/${adviceId}/portfolio?date=${nextWeekday}`;
+        const advicePortfolioUrl = `${requestUrl}/contestentry/${adviceId}/portfolio?date=${nextWeekday}`;
         fetchAjax(advicePortfolioUrl, this.props.history, this.props.match.url)
         .then(response => resolve(response.data))
         .catch(error => reject(error));

@@ -1,22 +1,17 @@
 import * as React from 'react';
 import _ from 'lodash';
+import styled from 'styled-components';
 import {Motion, spring} from 'react-motion';
-import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import {withRouter} from 'react-router';
-import {Row, Col, Modal, Spin, Select, Icon, Checkbox, Button} from 'antd';
+import {Row, Col, Icon, Checkbox, Button} from 'antd';
 import {UpdatePosition} from './UpdatePosition';
 import {UpdateSector} from './UpdateSector';
-import {SegmentedControl} from 'antd-mobile';
-import {metricColor, primaryColor, horizontalBox, verticalBox} from '../../../../constants';
+import {metricColor, primaryColor, horizontalBox} from '../../../../constants';
 import {benchmarks} from '../../../../constants/benchmarks';
-import MyChartNew from '../../../../containers/MyChartNew';
 import {MetricItem} from '../../../../components/MetricItem';
-import {HighChartNew} from '../../../../components/HighChartNew';
 import {generateColorData} from '../../../../utils';
 import { Utils } from '../../../../utils';
 
-const Option = Select.Option;
-// const CheckboxItem = Checkbox.CheckboxItem;
 
 class PortfolioListImpl extends React.Component {
     constructor(props) {
@@ -165,10 +160,18 @@ class PortfolioListImpl extends React.Component {
         const {positions = []} = this.props;
         let totalValue = 0;
         positions.map(position => {
-            totalValue += position.totalValue;
+            totalValue += position.effTotal;
         });
 
         return totalValue;
+    }
+
+    getPortfolioNetValue = () => {
+        const {positions = []} = this.props;
+        const buyNetValue = _.sum(positions.filter(position => position.buy === true).map(positon => positon.effTotal));
+        const sellNetValue = _.sum(positions.filter(position => position.buy === false).map(positon => positon.effTotal));
+        
+        return buyNetValue - sellNetValue;
     }
 
     takeDeleteAction = toBeDeletePosition => {
@@ -246,7 +249,6 @@ class PortfolioListImpl extends React.Component {
                             background: '#fff',
                             borderBottom: '1px solid #DFDFDF',
                             height: '50px',
-                            // marginTop: '-11px',
                         }}
                 >
                     <div
@@ -271,11 +273,6 @@ class PortfolioListImpl extends React.Component {
                         />
                         <h3 style={{fontSize: '16px', marginLeft: '35px'}}>Add Positions</h3>
                         <div style={horizontalBox}>
-                            {/* <Icon 
-                                onClick={this.props.toggleBottomSheet} 
-                                type="plus-circle" 
-                                style={{fontSize: '22px', fontWeight: '700', marginRight: '20px', color: primaryColor}} 
-                            /> */}
                             <Icon 
                                 onClick={() => this.props.positions.length >= 1 && this.props.togglePerformanceModal()} 
                                 type="line-chart" 
@@ -289,15 +286,22 @@ class PortfolioListImpl extends React.Component {
                 </Col>
                 <Col span={24} style={{...horizontalBox, justifyContent: 'space-between', marginTop: '20px', padding: '0 20px'}}>
                     <h3 style={{fontSize: '14px'}}>
-                        Num. of Stocks: 
-                        &nbsp;<span style={{fontWeight: '700', fontSize: '16px'}}>{positions.length}</span>
+                        <span style={{fontWeight: '700', fontSize: '16px'}}>{positions.length}</span><br></br>
+                        Positions
                     </h3>
                     <h3 style={{fontSize: '14px'}}>
-                        Total Value (₹): 
-                        &nbsp;
                         <span style={{fontWeight: '700', fontSize: '16px'}}>
                             {Utils.formatMoneyValueMaxTwoDecimals(this.getTotalPortfolioValuation())}
                         </span>
+                        <br></br>
+                        Gross Value (₹)
+                    </h3>
+                    <h3 style={{fontSize: '14px'}}>
+                        <span style={{fontWeight: '700', fontSize: '16px'}}>
+                            {Utils.formatMoneyValueMaxTwoDecimals(this.getPortfolioNetValue())}
+                        </span>
+                        <br></br>
+                        Net Value (₹)
                     </h3>
                 </Col>
                 <Col span={24} style={{marginTop: '10px'}}>
@@ -317,13 +321,24 @@ class PortfolioListImpl extends React.Component {
 export default withRouter(PortfolioListImpl);
 
 const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorder, topBorder}) => {
-    const {name = '', shares = 0, lastPrice = 0, weight = 0, totalValue = 0, key = 0, symbol, effTotal = 0} = position;
+    let {
+        name = '', 
+        shares = 0, 
+        lastPrice = 0, 
+        weight = 0, 
+        totalValue = 0, 
+        key = 0, 
+        symbol, 
+        effTotal = 0,
+        buy = false
+    } = position;
+    shares = (buy ? 1 : -1) * shares;
+    weight = (buy ? 1 : -1) * weight;
+
 
     return (
         <Row 
                 style={{
-                    // marginBottom: '10px',
-                    // marginTop: '20px',
                     borderRadius: '2px'
                 }}
         >
@@ -335,15 +350,18 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
             </Col>
             <Col span={24} style={{marginTop: '10px'}}>
                 <Row type="flex" align="middle" style={{padding: '0 20px'}}>
-                    <Col span={2}>
+                    <Col span={24}>
+                        <Tag buy={buy}/>
+                    </Col>
+                    <Col span={2} style={{marginTop: '4px'}}>
                         <Checkbox 
                             style={{paddingLeft: '0px'}}
                             onChange={() => takeDeleteAction(position)}
                             checked={checked}
                         />
                     </Col>
-                    <Col span={19}>
-                        <h3 style={{color: primaryColor, fontSize: '16px'}}>{symbol}</h3>
+                    <Col span={19} style={{...horizontalBox, justifyContent: 'flex-start'}}>
+                        <h3 style={{color: primaryColor, fontSize: '16px', marginRight: '10px'}}>{symbol}</h3>
                     </Col>
                     <Col span={3}>
                         <Button
@@ -367,22 +385,13 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     </Col>
                     <Col span={6}>
                         <MetricItem 
-                            label="Total"
-                            value={Number(totalValue.toFixed(2))}
-                            labelStyle={metricLabelStyle}
-                            valueStyle={metricValueStyle}
-                            money
-                        />
-                    </Col>
-                    {/* <Col span={8}>
-                        <MetricItem 
                             label="Target Total"
                             value={effTotal}
                             labelStyle={metricLabelStyle}
                             valueStyle={metricValueStyle}
                             money
-                        />  
-                    </Col> */}
+                        />
+                    </Col>
                     <Col span={6}>
                         <MetricItem 
                             label="Weight"
@@ -395,15 +404,6 @@ const PositionItem = ({position, onClick, takeDeleteAction, checked, bottomBorde
                     </Col>
                 </Row>
             </Col>
-            {/* <Col span={24} style={{...verticalBox, padding: '0 20px'}}>
-                <MetricItem 
-                    label="Target Total"
-                    value={effTotal}
-                    labelStyle={metricLabelStyle}
-                    valueStyle={metricValueStyle}
-                    money
-                />  
-            </Col> */}
             <Col span={24}>
                 <div style={{height: '7px', backgroundColor: '#efeff4', marginTop: '5px'}}></div>
             </Col>
@@ -445,7 +445,9 @@ const SectorItem = ({item, onClick, takeDeleteAction, checked, bottomBorder, top
                             size="small" 
                             onClick={() => onClick(item)}
                             style={{fontSize: '14px'}} 
-                        >EDIT</Button>
+                        >
+                            EDIT
+                        </Button>
                     </Col>
                 </Row>
             </Col>
@@ -486,6 +488,26 @@ const SectorItem = ({item, onClick, takeDeleteAction, checked, bottomBorder, top
         </Row>
     );
 }
+
+const Tag = ({buy = false}) => {
+    return (
+        <TagContainer buy={buy}>
+            <TagText>{buy ? 'BUY' : 'SELL'}</TagText>
+        </TagContainer>
+    );
+}
+
+const TagContainer = styled.div`
+    width: 45px;
+    padding: 1px 10px;
+    border-radius: 4px;
+    background-color: ${props => props.buy ? metricColor.positive : '#ff747b'};
+`;
+
+const TagText = styled.h3`
+    color: #fff;
+    font-size: 12px;
+`;
 
 const metricValueStyle = {
     fontSize: '18px',

@@ -55,10 +55,10 @@ const AdviceDetail = Loadable({
     loading: () => <Icon type="loading" />
 });
 
-// const AdviceDetailMobile = Loadable({
-//     loader: () => import('./containers/AdviceDetailMobile/AdviceDetailMobile'),
-//     loading: () => <Icon type="loading" />
-// });
+const AdviceDetailMobile = Loadable({
+    loader: () => import('./containers/AdviceDetailMobile/AdviceDetailMobile'),
+    loading: () => <Icon type="loading" />
+});
 
 // const CreateAdvice = Loadable({
 //     loader: () => import('./containers/CreateAdvice'),
@@ -238,11 +238,11 @@ class App extends React.Component {
     render() {
         return (
             <React.Fragment>
-                {/* <Media  */}
-                    {/* query="(max-width: 599px)" */}
-                    {/* render={() => { */}
-                        {/* return ( */}
-                            {/* <Switch> */}
+                <Media 
+                    query="(max-width: 599px)" 
+                    render={() => {
+                        return (
+                            <Switch> 
                                 {/* <Route exact={true} path='/home' component={Home} />  */}
                                 {/* <Route exact={true} path='/' component={Home} /> */}
                                 {/* <Route exact={true} path='/aboutus' component={AboutUs} />  */}
@@ -250,10 +250,10 @@ class App extends React.Component {
                                 {/* <Route exact={true} path='/aboutus/careers' component={AboutUs} />  */}
                                 {/* <Route exact={true} path='/aboutus/connect' component={AboutUs} />  */}
                                 {/* <Route exact={true} path='/advice' component={ScreenAdviceMobile} />  */}
-                                {/* <Route path='/contest' component={Contest} /> */}
+                                <Route path='/contest' component={Contest} />
                                 {/* <Route path="/stockresearch" exact component={WorkInProgress} />  */}
-                                {/* <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/> */}
-                                {/* <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} />  */}
+                                <Route exact={true} path='/tokenUpdate' component={TokenUpdate}/>
+                                <Route exact={true} path='/advice/:id' component={AdviceDetailMobile} /> 
                                 {/* <Route exact={true} path='/dashboard/createadvice' component={CreateAdviceMobile} />  */}
                                 {/* <Route exact={true} path='/dashboard/createportfolio' component={WorkInProgress} />  */}
                                 {/* <Route exact={true} path='/dashboard/updateadvice/:id' component={UpdateAdviceMobile} />  */}
@@ -268,15 +268,15 @@ class App extends React.Component {
                                 {/* <Route path='/errorPage' component={NoIternetAccess} />  */}
                                 {/* <Route path='/forbiddenAccess' component={ForbiddenAccess} />  */}
                                 {/* <Route path='/authMessage' component={AuthMessage} />  */}
-                                {/* <Route exact={true} path='/login' component={Login} />  */}
+                                <Route exact={true} path='/login' component={Login} /> 
                                 {/* <Route exact={true} path='/signup' component={Signup} />  */}
                                 {/* <Route exact={true} path='/faq' component={FAQ} />  */}
                                 {/* <Route exact={true} path='/resetPassword' component={ResetPassword} />  */}
-                                {/* <Route component={PageNotFound} /> */}
-                            {/* </Switch> */}
-                        {/* ); */}
-                    {/* }} */}
-                {/* /> */}
+                                <Route component={PageNotFound} />
+                            </Switch>
+                        );
+                    }}
+                />
                 <Media 
                     query="(min-width: 600px)"
                     render={() => {

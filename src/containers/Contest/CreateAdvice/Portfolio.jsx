@@ -287,36 +287,6 @@ export class Portfolio extends React.Component {
         );
     }
 
-    renderPortfolio = () => {
-        return (
-            <React.Fragment>
-                <Media 
-                    query="(max-width: 600px)"
-                    render={() => this.renderPortfolioList()}
-                />
-                <Media 
-                    query="(min-width: 601px)"
-                    render={() => this.renderPortfolioTable()}
-                />
-            </React.Fragment>
-        );
-    }
-
-    renderSectorPortfolio = () => {
-        return (
-            <React.Fragment>
-                <Media 
-                    query="(max-width: 600px)"
-                    render={() => this.renderSectorPortfolioList()}
-                />
-                <Media 
-                    query="(min-width: 601px)"
-                    render={() => this.renderSectorTable()}
-                />
-            </React.Fragment>
-        );
-    }
-
     renderActionButtonsDesktop = () => {
         return (
             <div style={{
