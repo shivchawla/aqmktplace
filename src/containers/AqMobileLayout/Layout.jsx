@@ -4,6 +4,7 @@ import BubbleChart from 'rmdi/lib/BubbleChart';
 import Home from 'rmdi/lib/Home';
 import Create from 'rmdi/lib/Create';
 import Logout from 'rmdi/lib/Input';
+import RemoveRedEye from 'rmdi/lib/RemoveRedEye';
 import MaterialIconReact, {colorPalette} from 'material-icons-react';
 import Accessibility from 'rmdi/lib/Accessibility';
 import NewReleases from 'rmdi/lib/NewReleases';
@@ -145,13 +146,13 @@ class AqMobileLayoutImpl extends React.Component {
                         <Menu style={{backgroundColor: 'transparent'}} mode="inline">
                             <Menu.Item 
                                     key={20} 
-                                    onClick={() => {window.location.href = '/dailycontest'}}
+                                    onClick={() => {window.location.href = '/dailycontest/home'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Daily Contest', Icon: BubbleChart}} />
                             </Menu.Item>
                             <Menu.Item 
                                     key={20} 
-                                    onClick={() => {window.location.href = '/dailycontest/create'}}
+                                    onClick={() => {window.location.href = '/dailycontest/mypicks'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Create Entry', Icon: Create}} />
                             </Menu.Item>
@@ -160,6 +161,12 @@ class AqMobileLayoutImpl extends React.Component {
                                     onClick={() => {this.props.history.push('/home')}}
                             >
                                 <SideMenuItem menuItem={{name: 'Home', Icon: Home}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={20} 
+                                    onClick={() => {window.location.href = '/dailycontest/watchlist'}}
+                            >
+                                <SideMenuItem menuItem={{name: 'Watchlist', Icon: RemoveRedEye}} />
                             </Menu.Item>
                             <Menu.Item 
                                     key={20} 
