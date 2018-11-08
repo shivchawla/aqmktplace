@@ -204,31 +204,31 @@ export class SearchStocks extends React.Component {
                     : _.get(stock, 'security.ticker', null);
             const close = _.get(stock, 'latestDetailRT.close', 0) !== 0 
                 ?  _.get(stock, 'latestDetailRT.close', 0)
-                :  _.get(stock, 'latestDetail.values.Close', 0);
+                :  _.get(stock, 'latestDetail.Close', 0);
 
             const change = _.get(stock, 'latestDetailRT.change', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.change', 0)
-                    :  _.get(stock, 'latestDetail.values.Change', 0);
+                    :  _.get(stock, 'latestDetail.Change', 0);
 
             const changePct = _.get(stock, 'latestDetailRT.changePct', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.changePct', 0)
-                    :  _.get(stock, 'latestDetail.values.ChangePct', 0);
+                    :  _.get(stock, 'latestDetail.ChangePct', 0);
 
             const high = _.get(stock, 'latestDetailRT.high', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.high', 0)
-                    :  _.get(stock, 'latestDetail.values.High', 0);
+                    :  _.get(stock, 'latestDetail.High', 0);
 
             const low = _.get(stock, 'latestDetailRT.low', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.low', 0)
-                    :  _.get(stock, 'latestDetail.values.Low', 0);
+                    :  _.get(stock, 'latestDetail.Low', 0);
             
             const open = _.get(stock, 'latestDetailRT.open', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.open', 0)
-                    :  _.get(stock, 'latestDetail.values.Open', 0);
+                    :  _.get(stock, 'latestDetail.Open', 0);
 
             const current = _.get(stock, 'latestDetailRT.current', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.current', 0)
-                    :  _.get(stock, 'latestDetail.values.Close', 0);
+                    :  _.get(stock, 'latestDetail.Close', 0);
 
 
             return {

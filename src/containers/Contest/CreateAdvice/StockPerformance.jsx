@@ -72,13 +72,13 @@ class StockPerformanceImpl extends React.Component {
         const latestDetail = {};
         latestDetail.ticker = data.security.ticker;
         latestDetail.exchange = data.security.exchange;
-        latestDetail.close = data.latestDetail.values.Close;
-        latestDetail.latestPrice = _.get(data, 'latestDetailRT.current', 0) || data.latestDetail.values.Close
-        latestDetail.open = _.get(data, 'latestDetailRT.open', 0) || data.latestDetail.values.Open;
-        latestDetail.low = _.get(data, 'latestDetailRT.low', 0) || data.latestDetail.values.Low;
-        latestDetail.high = _.get(data, 'latestDetailRT.high', 0) || data.latestDetail.values.High;
-        latestDetail.low_52w = Math.min(_.get(data, 'latestDetailRT.low', 0), data.latestDetail.values.Low_52w);
-        latestDetail.high_52w = Math.max(_.get(data, 'latestDetailRT.high', 0), data.latestDetail.values.High_52w);
+        latestDetail.close = data.latestDetail.Close;
+        latestDetail.latestPrice = _.get(data, 'latestDetailRT.current', 0) || data.latestDetail.Close
+        latestDetail.open = _.get(data, 'latestDetailRT.open', 0) || data.latestDetail.Open;
+        latestDetail.low = _.get(data, 'latestDetailRT.low', 0) || data.latestDetail.Low;
+        latestDetail.high = _.get(data, 'latestDetailRT.high', 0) || data.latestDetail.High;
+        latestDetail.low_52w = Math.min(_.get(data, 'latestDetailRT.low', 0), data.latestDetail.Low_52w);
+        latestDetail.high_52w = Math.max(_.get(data, 'latestDetailRT.high', 0), data.latestDetail.High_52w);
         latestDetail.changePct = _.get(data, 'latestDetailRT.changePct', 0);
         latestDetail.change = _.get(data, 'latestDetailRT.change', 0);
         latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
