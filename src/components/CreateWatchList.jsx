@@ -1,12 +1,10 @@
 import * as React from 'react';
 import axios from 'axios';
 import _ from 'lodash';
-import moment from 'moment';
 import {withRouter} from 'react-router';
 import {Row, Col, AutoComplete, Input, Icon, List, Modal, message} from 'antd';
 import {Utils} from '../utils';
 
-const dateFormat = 'YYYY-MM-DD';
 const Option = AutoComplete.Option;
 const {requestUrl} = require('../localConfig');
 
@@ -164,12 +162,10 @@ class CreateWatchListImpl extends React.Component {
         try {
             this.setState({name: e.target.value});
         } catch(error) {
-            // console.log(error);
         }
     }
 
     render() {
-        const {dataSource} = this.state;
         return (
             <Modal
                     visible={this.props.visible}
@@ -183,27 +179,9 @@ class CreateWatchListImpl extends React.Component {
                         <Input placeholder="Watchlist Name" onChange={this.handleInputChange} value={this.state.name}/>
                     </Col>
                 </Row>
-                {/* <Col span={24} style={{backgroundColor: '#fff', padding: '10px'}}>
-                    <AutoComplete
-                            dataSource={dataSource.map(this.renderOption)}
-                            onSelect={value => this.onSelect(value)}
-                            onSearch={this.handleNewSearch}
-                            placeholder="Search Stocks"
-                            style={{width: '100%'}}
-                            optionLabelProp="valuess"
-                    >
-                        <Input suffix={<Icon style={searchIconStyle} type="search" />} />
-                    </AutoComplete>
-                    {this.renderTickers()}
-                </Col> */}
             </Modal>
         );
     }
 }
 
 export const CreateWatchList = withRouter(CreateWatchListImpl);
-
-const searchIconStyle = {
-    marginRight: '20px',
-    fontSize: '18px'
-};
