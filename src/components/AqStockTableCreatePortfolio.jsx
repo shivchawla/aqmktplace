@@ -209,7 +209,7 @@ export class AqStockTableCreatePortfolio extends React.Component {
             getStockData(ticker, 'latestDetail')
             .then(response => {
                 const lastPrice = _.get(response.data, 'latestDetailRT.current', 0.0) || 
-                                    _.get(response.data, 'latestDetail.values.Close', 0.0);
+                                    _.get(response.data, 'latestDetail.Close', 0.0);
                 target['price'] = lastPrice;
                 target['tickerValidationStatus'] = 'success';
                 target['ticker'] = ticker;

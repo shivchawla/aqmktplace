@@ -59,7 +59,7 @@ class UpdatePositionMobileImpl extends React.Component {
             const {data} = latestDetailResponse;
             const name = _.get(data, 'security.detail.Nse_Name', '');
             const symbol = _.get(data, 'security.ticker', '');
-            const lastPrice = _.get(data, 'latestDetail.values.Close', 0);
+            const lastPrice = _.get(data, 'latestDetail.Close', 0);
             const shares = this.state.stockData.shares;
             const totalValue = Number((lastPrice * shares).toFixed(2));
             const sector = _.get(data, 'security.detail.Sector', '');
