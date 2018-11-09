@@ -65,7 +65,7 @@ class Login extends Component {
                 if (redirectUrl){
                   this.props.history.push(redirectUrl);
                 } else{
-                    window.location.href = '/dailycontest';
+                    window.location.href = '/dailycontest/home';
                 }
               }else{
                 this.updateState({
