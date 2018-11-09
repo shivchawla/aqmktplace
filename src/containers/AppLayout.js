@@ -191,7 +191,11 @@ class AppLayout extends React.Component {
                             <Header style={headerStyle}>
                                 <Row type="flex">
                                     <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                        <img src={logo} style={{height: '40px', marginTop: '-10px'}}/>
+                                        <img
+                                            onClick={() => this.props.history.push('/home')}  
+                                            src={logo} 
+                                            style={{height: '40px', marginTop: '-10px', cursor: 'pointer'}}
+                                        />
                                         <h1 onClick={() => this.props.history.push('/home')} 
                                             style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
                                             <span style={{...biggerFont, color:primaryColor}}>A</span>
