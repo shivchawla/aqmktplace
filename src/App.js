@@ -272,6 +272,7 @@ class App extends React.Component {
                                 <Route exact={true} path='/signup' component={Signup} /> 
                                 <Route exact={true} path='/faq' component={FAQ} /> 
                                 <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
+                                <Route exact={true} path='/404' component={PageNotFound} />
                                 <Route component={PageNotFound} />
                             </Switch>
                         );
@@ -308,6 +309,7 @@ class App extends React.Component {
                                 <Route path='/signup' component={Signup} /> 
                                 <Route path='/faq' component={FAQ} /> 
                                 <Route path='/resetPassword' component={ResetPassword} /> 
+                                <Route exact={true} path='/404' component={PageNotFound} />
                                 <Route component={PageNotFound} />
                             </Switch>
                         );
