@@ -61,10 +61,15 @@ class AppLayout extends React.Component {
                         justifyContent: 'flex-end', 
                         height: '64px', 
                         paddingRight: '10px',
+                        zIndex: 200
                     }}
             >   
                 <Menu
-                        style={{marginTop: '10px'}} 
+                        style={{
+                            marginTop: '10px',
+                            backgroundColor: this.props.headerType === 'transparent' ? 'transparent' : '#fff',
+                            border: this.props.headerType === 'transparent' ? 'none' : '1px solid #fff'
+                        }} 
                         mode="horizontal"
                         onClick={this.handleNavMenuClick}
                         selectedKeys={[this.state.parentPath]}
@@ -92,7 +97,15 @@ class AppLayout extends React.Component {
                                 
                     </Menu.Item> */}
                     {
-                        <Menu.Item key="dailycontest">Daily Contest</Menu.Item>
+                        <Menu.Item 
+                            key="dailycontest"
+                            style={{
+                                color: this.props.headerType === 'transparent'
+                                ? '#fff' : '#444'
+                            }}
+                        >
+                            Daily Contest
+                        </Menu.Item>
                     }
                     {/* {
                         Utils.isLoggedIn() &&
@@ -103,19 +116,39 @@ class AppLayout extends React.Component {
                     
                     {
                         Utils.isLoggedIn() &&
-                        <Menu.Item key="stockresearch">Stock Research</Menu.Item>
+                        <Menu.Item 
+                            style={{
+                                color: this.props.headerType === 'transparent'
+                                ? '#fff' : '#444'
+                            }}
+                            key="stockresearch">Stock Research</Menu.Item>
                     }
                     {
                         !Utils.isLoggedIn() &&
-                        <Menu.Item key="login">Login</Menu.Item>
+                        <Menu.Item 
+                            style={{
+                                color: this.props.headerType === 'transparent'
+                                ? '#fff' : '#444'
+                            }}
+                            key="login">Login</Menu.Item>
                     }
                     {
                         !Utils.isLoggedIn() &&
-                        <Menu.Item key="signup">Signup</Menu.Item>
+                        <Menu.Item 
+                            style={{
+                                color: this.props.headerType === 'transparent'
+                                ? '#fff' : '#444'
+                            }}
+                            key="signup">Signup</Menu.Item>
                     }
                     {
                         Utils.isLoggedIn() &&
-                        <Menu.Item key="logout">Logout</Menu.Item>
+                        <Menu.Item 
+                            style={{
+                                color: this.props.headerType === 'transparent'
+                                ? '#fff' : '#444'
+                            }}
+                            key="logout">Logout</Menu.Item>
                     }
                 </Menu>
                 {/* <Button 
@@ -147,7 +180,59 @@ class AppLayout extends React.Component {
         return false;
     }
 
+    renderHeaderTextTransparentMobike = () => {
+        return (
+            <div onClick={() => this.props.history.push('/home')} 
+                style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                <span style={{...biggerFont, color: '#fff'}}>A</span>
+                <span style={{color: '#fff'}}>DVICE</span>
+                <span style={{...biggerFont, color: '#fff'}}>Q</span>
+                <span style={{color: '#fff'}}>UBE</span>
+            </div>
+        );
+    }
+
+    renderHeaderTextNormalMobile = () => {
+        return (
+            <div onClick={() => this.props.history.push('/home')} 
+                style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                <span style={{...biggerFont, color: primaryColor}}>A</span>
+                <span style={{color: primaryColor}}>DVICE</span>
+                <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                <span style={{color: '#e06666'}}>UBE</span>
+            </div>
+        );
+    }
+
+    renderHeaderTextTransparentDesktop = () => {
+        return (
+            <h1 onClick={() => this.props.history.push('/home')} 
+                style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                <span style={{...biggerFont, color:'#fff'}}>A</span>
+                <span style={{color: '#fff'}}>DVICE</span>
+                <span style={{...biggerFont, color: '#fff'}}>Q</span>
+                <span style={{color: '#fff'}}>UBE</span>
+
+            </h1>
+        );
+    }
+
+    renderHeaderTextNormalDesktop = () => {
+        return (
+            <h1 onClick={() => this.props.history.push('/home')} 
+                style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
+                <span style={{...biggerFont, color:primaryColor}}>A</span>
+                <span style={{color: primaryColor}}>DVICE</span>
+                <span style={{...biggerFont, color: '#e06666'}}>Q</span>
+                <span style={{color: '#e06666'}}>UBE</span>
+
+            </h1>
+        );
+    }
+
     renderHeader = () => {
+        const {headerType = null} = this.props;
+
         return (
             <React.Fragment>
                 {
@@ -158,7 +243,9 @@ class AppLayout extends React.Component {
                             return (
                                 <Header
                                     style={{
-                                        backgroundColor: '#f9f9f9'
+                                        backgroundColor: headerType === 'transparent' 
+                                            ? 'transparent' 
+                                            : '#f9f9f9'
                                     }}
                                 >
                                     <Col 
@@ -171,13 +258,11 @@ class AppLayout extends React.Component {
                                             }}
                                     >
                                         <img src={logo} style={{height: '40px'}}/>
-                                        <div onClick={() => this.props.history.push('/home')} 
-                                            style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-                                            <span style={{...biggerFont, color:primaryColor}}>A</span>
-                                            <span style={{color: primaryColor}}>DVICE</span>
-                                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                                            <span style={{color: '#e06666'}}>UBE</span>
-                                        </div>
+                                        {
+                                            headerType === 'transparent'
+                                            ? this.renderHeaderTextTransparentMobike()
+                                            : this.renderHeaderTextNormalMobile()
+                                        }
                                     </Col>
                                 </Header>
                             );
@@ -188,22 +273,32 @@ class AppLayout extends React.Component {
                     query="(min-width: 600px)"
                     render={() => {
                         return (
-                            <Header style={headerStyle}>
+                            <Header 
+                                    style={{
+                                        ...headerStyle,
+                                        backgroundColor: headerType === 'transparent' ? 'transparent' : '#fff',
+                                    }}
+                            >
                                 <Row type="flex">
-                                    <Col span={4} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                    <Col 
+                                            span={4} 
+                                            style={{
+                                                display: 'flex', 
+                                                flexDirection: 'row', 
+                                                alignItems: 'center',
+                                                zIndex: 200
+                                            }}
+                                    >
                                         <img
                                             onClick={() => this.props.history.push('/home')}  
                                             src={logo} 
                                             style={{height: '40px', marginTop: '-10px', cursor: 'pointer'}}
                                         />
-                                        <h1 onClick={() => this.props.history.push('/home')} 
-                                            style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
-                                            <span style={{...biggerFont, color:primaryColor}}>A</span>
-                                            <span style={{color: primaryColor}}>DVICE</span>
-                                            <span style={{...biggerFont, color: '#e06666'}}>Q</span>
-                                            <span style={{color: '#e06666'}}>UBE</span>
-
-                                        </h1>
+                                        {
+                                            headerType === 'transparent'
+                                                ? this.renderHeaderTextTransparentDesktop()
+                                                : this.renderHeaderTextNormalDesktop()
+                                        }
                                     </Col>
                                     {this.renderHeaderActionItemsDesktop()}
                                 </Row>
@@ -260,7 +355,8 @@ class AppLayout extends React.Component {
                     !this.props.loading &&
                     <div style={{height:'100%'}}> 
                         
-                        {!this.props.noHeader &&
+                        {
+                            !this.props.noHeader &&
                             this.renderHeader()
                         }
                         <Content>

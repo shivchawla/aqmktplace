@@ -52,7 +52,8 @@ class AqMobileLayoutImpl extends React.Component {
                             ...style.sideBarMenuIconStyle, 
                             ...this.state.iconRotateStyle, 
                             ...this.props.menuIconStyle,
-                            color: theme === 'light' ? iconLightThemeColor : '#fff'
+                            color: theme === 'light' ? iconLightThemeColor : '#fff',
+                            zIndex: 20
                         }}
                         onClick = {
                             () => 
@@ -71,6 +72,7 @@ class AqMobileLayoutImpl extends React.Component {
                     justifyContent: 'center',
                     position: 'relative',
                     borderBottom: `1px solid ${theme === 'light' ? '#eaeaea' : primaryColor}`,
+                    zIndex: 20,
                     ...navBarStyle,
                     ...this.props.navbarStyle
                 }}
@@ -203,12 +205,10 @@ class AqMobileLayoutImpl extends React.Component {
                     !this.props.loading &&
                     <Layout id="aq-layout-container">
                         {this.renderLeftSidebar()}
-                        {/* <Header style={style.headerStyle}> */}
                         {
                             !this.props.noHeader &&
                             this.renderHeader()
                         }
-                        {/* </Header> */}
                         <Layout id="menu-wrapper">
                             <Layout style={{backgroundColor: '#fff', ...this.props.style}}>
                                 {this.props.children}
