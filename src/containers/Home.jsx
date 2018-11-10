@@ -14,8 +14,8 @@ import adviceLogo from '../assets/AdviceLogo.svg';
 import adviceLogoMobile from '../assets/AdviceLogoMobile.svg';
 import portfolioLogoMobile from '../assets/PortfolioLogo.svg';
 import portfolioLogo from '../assets/PortfolioLogo.svg';
-import heroImage from '../assets/HeroImageSmall.svg';
-import heroImageMobile from '../assets/HeroImageMobile.svg';
+import heroImage from '../assets/funnel.svg';
+import heroImageMobile from '../assets/funnel-mobile.svg';
 import people from '../assets/people.svg';
 import wheel from '../assets/wheel.svg';
 import globe from '../assets/globe.svg'
@@ -580,8 +580,17 @@ export class Home extends React.Component {
 
     renderTopHeroImageDesktop = () => {
         return (
-            <Col span={12} className='hero-image' style={{height: '100%', display: 'flex'}}>
-                <object style={{width: '85%'}} type="image/svg+xml" data={heroImage}></object>
+            <Col 
+                    span={12} 
+                    className='hero-image' 
+                    style={{
+                        height: '100%',
+                        display: 'flex',
+                        display: 'flex',
+                        justifyContent: 'center'
+                    }}
+            >
+                <object style={{width: '50%'}} type="image/svg+xml" data={heroImage}></object>
             </Col>
         );
     }
@@ -594,10 +603,15 @@ export class Home extends React.Component {
                     render={() => (
                         <Col 
                                 span={24} 
-                                style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} 
+                                style={{
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center',
+                                    marginTop: '20px'
+                                }} 
                                 className='hero-image-mobile'
                         >
-                            <object style={{width: '100%'}} type="image/svg+xml" data={heroImageMobile}></object>
+                            <object style={{width: '48%'}} type="image/svg+xml" data={heroImageMobile}></object>
                         </Col>
                     )}
                 />
@@ -606,11 +620,17 @@ export class Home extends React.Component {
                     render={() => (
                         <Col 
                                 span={24} 
-                                style={{display: 'flex', flexDirection: 'column', alignItems: 'center', height: '400px'}} 
+                                style={{
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center', 
+                                    height: '400px',
+                                    marginTop: '20px'
+                                }} 
                                 className='hero-image-mobile'
                         >
                             <object 
-                                    style={{width: '100%', height: '400px'}} 
+                                    style={{width: '48%', height: '400px'}} 
                                     type="image/svg+xml" 
                                     data={heroImageMobile}
                             ></object>
@@ -894,7 +914,7 @@ export class Home extends React.Component {
                     <React.Fragment>
                         {this.renderVidePlayerModalDesktop()}
                         <Col span={24} className='page-container'>
-                            <Row className="top-section">
+                            <Row className="top-section" style={{width: '100%'}}>
                                 <React.Fragment>
                                     {this.renderTopLeftSectionDesktop()}
                                     {this.renderTopHeroImageDesktop()}
