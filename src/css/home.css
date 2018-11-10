@@ -37,7 +37,7 @@ body {
 
 .hero-text-mobile {
     font-weight: 400;
-    color: #444444;
+    color: #fff;
     font-size: 24px;
     margin-bottom: 0;
 }
@@ -52,7 +52,7 @@ body {
 
 .hero-description-text-mobile {
     font-weight: 400;
-    color: #000000;
+    color: #fff;
     font-size: 14.3px;
     margin-top: 10px;
 }
@@ -69,25 +69,24 @@ body {
 }
 
 .signup-button-mobile {
-    border: 1px solid #00A2A2;
-    background-color: #00A2A2;
+    background-color: #52516E;
+    border: 1px solid #52516E;
     outline: none;
     color: #fff;
     margin-top: 50px;
-    width: 80%;
+    /* width: 80%; */
     height: 40px;
-    font-size: 16px;
+    font-size: 12px;
 }
 
 .create-advice-button-mobile {
-    border: 1px solid #00A2A2;
-    background-color: #fff;
+    border: 1px solid #fff;
+    background-color: transparent;
     outline: none;
-    color: #00A2A2;
-    margin-top: 20px;
-    font-size: 16px;
+    color: #fff;
+    font-size: 12px;
     height: 40px;
-    width: 80%;
+    /* width: 80%; */
 }
 
 .action-buttons, .action-buttons:hover {

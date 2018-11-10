@@ -32,7 +32,7 @@ import ExpertIdea from '../assets/ExpertIdea-Home.svg';
 import {HomeMeta} from '../metas';
 import '../css/home.css';
 import AppLayout from './AppLayout'
-import { verticalBox } from '../constants';
+import { verticalBox, horizontalBox} from '../constants';
 
 const {youtubeVideoId} = require('../localConfig');
 
@@ -397,13 +397,21 @@ export class Home extends React.Component {
                                 <Col span={24}>
                                     <h1 
                                             className="hero-text-mobile" 
-                                            style={{lineHeight: '30px', textAlign: 'center', fontWeight: 700, fontSize: '24px'}}
+                                            style={{
+                                                lineHeight: '30px', 
+                                                textAlign: 'center', 
+                                                fontWeight: 700, 
+                                                fontSize: '24px'
+                                            }}
                                     >
                                         Crowd-Sourced <br></br> Investment Portfolio
                                     </h1>
                                 </Col>
                                 <Col span={24}>
-                                    <h5 className="hero-description-text-mobile" style={{textAlign: 'center'}}>
+                                    <h5 
+                                            className="hero-description-text-mobile" 
+                                            style={{textAlign: 'center'}}
+                                    >
                                         Let the experts help you build the portfolio you desire
                                     </h5>
                                 </Col>
@@ -494,30 +502,39 @@ export class Home extends React.Component {
                 <Media 
                     query="(max-width: 600px)"
                     render={() => (
-                        <Col span={24} style={verticalBox}>
-                            <Button 
-                                    className="signup-button-mobile"
-                                    style={{marginTop: 0}}
-                                    onClick={() => this.props.history.push('/dailycontest/home')}
-                            >
-                                ENTER CONTEST
-                            </Button>
-                            <Button 
-                                    className="create-advice-button-mobile"
-                                    onClick={() => {
-                                        const domNode = ReactDOM.findDOMNode(this.howItWorks);
-                                        if (domNode) {
-                                            domNode.scrollIntoView();
-                                        }
+                        <Col span={24} style={{...verticalBox, marginTop: '40px'}}>
+                            <div 
+                                    style={{
+                                        ...horizontalBox, 
+                                        justifyContent: 'space-between',
+                                        width: '80%'
                                     }}
                             >
-                                HOW IT WORKS
-                            </Button>
+                                <Button 
+                                        className="signup-button-mobile"
+                                        style={{marginTop: 0}}
+                                        onClick={() => this.props.history.push('/dailycontest/home')}
+                                >
+                                    ENTER CONTEST
+                                </Button>
+                                <Button 
+                                        className="create-advice-button-mobile"
+                                        onClick={() => {
+                                            const domNode = ReactDOM.findDOMNode(this.howItWorks);
+                                            if (domNode) {
+                                                domNode.scrollIntoView();
+                                            }
+                                        }}
+                                >
+                                    HOW IT WORKS
+                                </Button>
+                            </div>
                             <span 
                                     style={{
-                                        marginTop: '10px',
+                                        marginTop: '30px',
                                         cursor: 'pointer',
-                                        fontSize: '16px'
+                                        fontSize: '16px',
+                                        color: '#fff'
                                     }}
                                     onClick={this.toggleContactUsModal}
                             >
@@ -718,45 +735,20 @@ export class Home extends React.Component {
         );
     }
 
-    renderLowerSectionDesktop_O = () => {
-        return (
-            <React.Fragment>
-                <h3 className="lower-section-header">Other Features</h3>
-                <Col span={24} className="lower-section-card-container">
-                    <FeatureCard 
-                            key="1"
-                            icon={research}
-                            header="Quant Research"
-                            content="Systematically research investment ideas"
-                    />
-                    <FeatureCard 
-                            key="2"
-                            icon={share}
-                            header="Share"
-                            content="Share your ideas with community"
-                    />
-                    <FeatureCard
-                            key="3" 
-                            icon={automate}
-                            header="Automate"
-                            content="Automate your investment process"
-                    />
-                    <FeatureCard
-                            key="4" 
-                            iconStyle={{transform: 'scale(0.9, 0.9)'}}
-                            icon={realtime}
-                            header="Realtime"
-                            content="Get real-time data for latest updates"
-                    />
-                </Col>
-            </React.Fragment>
-        );
-    }
-
     renderLowerSectionDesktop = () => {
         return (
             <React.Fragment>
-                <h3 className="lower-section-header">HOW IT WORKS?</h3>
+                <h3 
+                        className="lower-section-header"
+                        style={{
+                            width: '100%',
+                            top: '20%',
+                            textAlign: 'center',
+                            position: 'absolute'
+                        }}
+                >
+                    HOW IT WORKS?
+                </h3>
                 <Row type="flex" className="lower-section-card-container" style={{marginTop: '20px'}}>
                     <Col span={8} style={{display: 'flex', justifyContent: 'center'}}>
                         <StepsCard 
@@ -788,78 +780,7 @@ export class Home extends React.Component {
                             color='#9FD0FF'
                         />
                     </Col>
-                    {/* <Col span={8} style={{paddingLeft: '50px', textAlign:'left'}}>
-                    <HowCard 
-                        key="2"
-                        icon={EnterContest}
-                        header="Step 1: Enter Contest"
-                        content="Create a diversified portfolio to beat the market."
-                        container
-                    />
-                    </Col>
-
-                    <Col offset={12} span={} style={{paddingRight: '-10px', textAlign: 'right', marginTop:'-40px'}}>
-                        <HowCard
-                            key="3" 
-                            icon={WinPrizes}
-                            header="Step 2: Win cash prizes"
-                            content="Beat the market benchmark and win cash prizes every week worth Rs.10,000"
-                            right
-                        />
-                    </Col>
-
-                    <Col span={13} style={{paddingLeft: '0px', textAlign: 'left', marginTop:'-50px'}}>
-                        <HowCard
-                            key="4" 
-                            icon={ExpertIdea}
-                            header="Step 3: Expert Portfolio Allocation"
-                            content='Winners contribute to the “Expert Portfolio” and earn royalty'
-                        />
-                    </Col> */}
                 </Row>
-            </React.Fragment>
-        );
-    }
-
-    renderLowerSectionMobile_O = () => {
-        return (
-            <React.Fragment>
-                <h3 className="lower-section-header">Other Features</h3>
-                <Col span={24} className="lower-section-card-container-mobile">
-                    <FeatureCard 
-                            key="1"
-                            small={true}
-                            icon={research}
-                            header="Quant Research"
-                            content="Systematically research investment ideas"
-                    />
-                    <FeatureCard 
-                            key="2"
-                            small={true}
-                            icon={share}
-                            header="Share"
-                            content="Share your ideas with community"
-                            containerStyle={{marginTop: '20px'}}
-                    />
-                    <FeatureCard
-                            key="3"
-                            iconStyle={{width: '90%'}}
-                            small={true} 
-                            icon={automate}
-                            header="Automate"
-                            content="Automate your investment process"
-                            containerStyle={{marginTop: '20px'}}
-                    />
-                    <FeatureCard
-                            key="4" 
-                            small={true}
-                            iconStyle={{transform: 'scale(0.9, 0.9)'}}
-                            icon={realtime}
-                            header="Realtime"
-                            content="Get real-time data for latest updates"
-                            containerStyle={{marginTop: '20px'}}
-                    />
-                </Col>
             </React.Fragment>
         );
     }
@@ -868,35 +789,40 @@ export class Home extends React.Component {
         return (
             <React.Fragment>
                 <h3 className="lower-section-header" style={{marginTop: '50px'}}>HOW IT WORKS?</h3>
-                <Row type="flex" className="lower-section-card-container">
+                <Row  
+                        type="flex" 
+                        className="lower-section-card-container"
+                >
                     <Col span={24} style={{textAlign:'center'}}>
-                    <HowCard 
-                        key="2"
-                        icon={EnterContest}
-                        header="Step 1: Enter Contest"
-                        content="Create a diversified portfolio to beat the market."
-                        mobile
-                    />
-                    </Col>
-
-                    <Col span={24} style={{textAlign: 'center'}}>
-                        <HowCard
-                            key="3" 
-                            icon={WinPrizes}
-                            header="Step 2: Win cash prizes"
-                            content="Beat the market benchmark and win cash prizes every week worth Rs.10,000"
-                            right
-                            mobile
+                        <StepsCard 
+                            step={1}
+                            header='Enter Contest'
+                            headerText='Create a diversified portfolio to beat the market.'
+                            color='#EBD53B'
                         />
                     </Col>
 
-                    <Col span={24} style={{textAlign: 'center'}}>
-                        <HowCard
-                            key="4" 
-                            icon={ExpertIdea}
-                            header="Step 3: Expert Portfolio Allocation"
-                            content='Winners contribute to the “Expert Portfolio” and earn royalty'
-                            mobile
+                    <Col span={24} style={{textAlign: 'center'}} style={{marginTop: '20px'}}>
+                        <StepsCard 
+                            step={2}
+                            header='Win cash prizes'
+                            headerText='Beat the market benchmark 
+                            and win cash prizes every 
+                            week worth Rs.10,000
+                            '
+                            color='#86F0E1'
+                        />
+                    </Col>
+
+                    <Col span={24} style={{textAlign: 'center'}} style={{marginTop: '20px'}}>
+                        <StepsCard 
+                            step={3}
+                            header='Expert Portfolio 
+                            Allocation'
+                            headerText='Winners contribute to the 
+                            “Expert Portfolio” and earn 
+                            royalty'
+                            color='#9FD0FF'
                         />
                     </Col>
                 </Row>
@@ -906,7 +832,15 @@ export class Home extends React.Component {
 
     renderMobile = () => {
         return (
-            <AqMobileLayout loading={this.state.loading}>
+            <AqMobileLayout 
+                    theme='transparent'
+                    headerType='transparent'
+                    loading={this.state.loading}
+                    navbarStyle={{
+                        backgroundColor: 'transparent',
+                        border: 'none'
+                    }}
+            >
                 <Media 
                     query="(max-width: 600px)"
                     render={() => this.renderVideoPlayerModalMobile()}
@@ -915,22 +849,32 @@ export class Home extends React.Component {
                     query="(min-width: 601px)"
                     render={() => this.renderVideoPlayerModalMobile('tablet')}
                 />
-                <Col span={24} style={verticalBox}>
-                    <Row>
-                        <React.Fragment>
-                            {this.renderTopLeftSectionMobile()}
-                            {this.renderTopHeroImageMobile()}
-                            {this.renderActionButtonsMobile()}
-                        </React.Fragment>
-                    </Row>
+                <Col 
+                        span={24} 
+                        style={{
+                            ...verticalBox,
+                            marginTop: '-45px',
+                            // paddingTop: '45px'
+                        }}
+                >
+                    <TopSectionMobile>
+                        {this.renderTopLeftSectionMobile()}
+                        {this.renderTopHeroImageMobile()}
+                        {this.renderActionButtonsMobile()}
+                    </TopSectionMobile>
                     <Row 
                             className="lower-section" 
-                            style={{marginTop: '30px', height:'100vh', minHeight: '600px'}}
+                            style={{marginTop: '30px', height:'120vh', minHeight: '600px'}}
                             ref={el => this.howItWorks = el}
                     >
                         {this.renderLowerSectionMobile()}
                     </Row>
-                    <Row className="middle-section" style={{marginTop: '50px'}}>
+                    <Row 
+                            className="middle-section" 
+                            style={{
+                                marginTop: '50px'
+                                }}
+                    >
                         {this.renderMiddleSectionMobile()}
                     </Row>
                     <Row>
@@ -964,7 +908,11 @@ export class Home extends React.Component {
                                         height:'100vh', 
                                         minHeight: '600px',
                                         backgroundColor: '#F8F6FF',
-                                        paddingTop: '60px'
+                                        paddingTop: '60px',
+                                        height: '100vh',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center'
                                     }}
                             >
                                 {this.renderLowerSectionDesktop()}
@@ -1256,7 +1204,13 @@ const CardHeader = styled.h3`
 
 const Text = styled.h3`
     font-weight: 600;
-    color: #3F3F3F;
+    color: #636363;
     font-size: 18px;
     text-align: start;
+`;
+
+const TopSectionMobile = styled(Row)`
+    background: linear-gradient(to bottom right, #39D6B1, #8A9DFF);
+    height: 100vh;
+    padding-top: 45px;
 `;
