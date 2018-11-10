@@ -147,31 +147,31 @@ class AqMobileLayoutImpl extends React.Component {
                     <Col span={24} style={{marginTop: '20px'}}>
                         <Menu style={{backgroundColor: 'transparent'}} mode="inline">
                             <Menu.Item 
-                                    key={20} 
+                                    key={1} 
                                     onClick={() => {window.location.href = '/dailycontest/home'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Daily Contest', Icon: BubbleChart}} />
                             </Menu.Item>
                             <Menu.Item 
-                                    key={20} 
+                                    key={2} 
                                     onClick={() => {window.location.href = '/dailycontest/mypicks'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Create Entry', Icon: Create}} />
                             </Menu.Item>
                             <Menu.Item 
-                                    key={20} 
+                                    key={3} 
                                     onClick={() => {this.props.history.push('/home')}}
                             >
                                 <SideMenuItem menuItem={{name: 'Home', Icon: Home}} />
                             </Menu.Item>
                             <Menu.Item 
-                                    key={20} 
+                                    key={4} 
                                     onClick={() => {window.location.href = '/dailycontest/watchlist'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Watchlist', Icon: RemoveRedEye}} />
                             </Menu.Item>
                             <Menu.Item 
-                                    key={20} 
+                                    key={5} 
                                     onClick={() => {
                                         Utils.isLoggedIn()
                                         ?   this.logoutUser()
