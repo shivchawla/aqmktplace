@@ -14,8 +14,8 @@ import adviceLogo from '../assets/AdviceLogo.svg';
 import adviceLogoMobile from '../assets/AdviceLogoMobile.svg';
 import portfolioLogoMobile from '../assets/PortfolioLogo.svg';
 import portfolioLogo from '../assets/PortfolioLogo.svg';
-import heroImage from '../assets/HeroImageSmall.svg';
-import heroImageMobile from '../assets/HeroImageMobile.svg';
+import heroImage from '../assets/funnel-stocks.svg';
+import heroImageMobile from '../assets/funnel-stocks.svg';
 import people from '../assets/people.svg';
 import wheel from '../assets/wheel.svg';
 import globe from '../assets/globe.svg'
@@ -66,7 +66,7 @@ export class Home extends React.Component {
 
                     <h3 className='tab-content-text'>
                         Compete to showcase your Investment Ideas on the platform.
-                        Participate in our Investment Idea contest, win prizes and allocation in Expert Portfolio.
+                        Participate in our Stock prediction contest, win prizes and allocation worth crores.
                     </h3>
                     {/*<h3 className='tab-content-text' style={{lineHeight: '26px', paddingRight: '10px'}}>
                         Perfect platform for investment experts and skillful stock pickers
@@ -254,7 +254,7 @@ export class Home extends React.Component {
                     key="1" 
                     icon={performance}
                     small={type === 'small' ? true : false}
-                    header="Best Investment Ideas"
+                    header="Aggregating Investment Ideas"
                     content="With many winner ideas on the platform, select the best that fits your needs."/>
 
                 <DetailListComponent 
@@ -376,8 +376,8 @@ export class Home extends React.Component {
                         <h1 className="hero-text">Crowd-Sourced<br></br>Investment Portfolio</h1>
                     </Col>
                     <Col span={24}>
-                        <h5 style={{fontWeight:400}} className="hero-description-text">
-                            <i>Best Investment Ideas</i><br></br>Let the experts help you build the portfolio you desire
+                        <h5 style={{fontWeight:300}} className="hero-description-text">
+                            <i>Investing In Your Ideas</i><br></br>Aggregating stock predictions to manage investment portfolio
                         </h5>
                     </Col>
                     {this.renderActionButtonsDesktop()}
@@ -412,7 +412,7 @@ export class Home extends React.Component {
                                             className="hero-description-text-mobile" 
                                             style={{textAlign: 'center'}}
                                     >
-                                        Let the experts help you build the portfolio you desire
+                                        Aggregating stock predictions to manage investment portfolio
                                     </h5>
                                 </Col>
                             </Row>
@@ -466,8 +466,7 @@ export class Home extends React.Component {
             <Col 
                     span={24} 
                     style={{
-                        position: 'absolute',
-                        bottom: '15%'
+                        marginTop: '30px'
                     }}
             >
                 <Row>
@@ -529,7 +528,7 @@ export class Home extends React.Component {
                                     HOW IT WORKS
                                 </Button>
                             </div>
-                            <span 
+                            {/*<span 
                                     style={{
                                         marginTop: '30px',
                                         cursor: 'pointer',
@@ -539,7 +538,7 @@ export class Home extends React.Component {
                                     onClick={this.toggleContactUsModal}
                             >
                                 Ask a Question
-                            </span>
+                            </span>*/}
                         </Col>
                     )}
                 />
@@ -580,8 +579,17 @@ export class Home extends React.Component {
 
     renderTopHeroImageDesktop = () => {
         return (
-            <Col span={12} className='hero-image' style={{height: '100%', display: 'flex'}}>
-                <object style={{width: '85%'}} type="image/svg+xml" data={heroImage}></object>
+            <Col 
+                    span={12} 
+                    className='hero-image' 
+                    style={{
+                        height: '100%',
+                        display: 'flex',
+                        display: 'flex',
+                        justifyContent: 'center'
+                    }}
+            >
+                <object style={{width: '50%'}} type="image/svg+xml" data={heroImage}></object>
             </Col>
         );
     }
@@ -594,10 +602,15 @@ export class Home extends React.Component {
                     render={() => (
                         <Col 
                                 span={24} 
-                                style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} 
+                                style={{
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center',
+                                    marginTop: '20px'
+                                }} 
                                 className='hero-image-mobile'
                         >
-                            <object style={{width: '100%'}} type="image/svg+xml" data={heroImageMobile}></object>
+                            <object style={{width: '48%'}} type="image/svg+xml" data={heroImageMobile}></object>
                         </Col>
                     )}
                 />
@@ -606,11 +619,17 @@ export class Home extends React.Component {
                     render={() => (
                         <Col 
                                 span={24} 
-                                style={{display: 'flex', flexDirection: 'column', alignItems: 'center', height: '400px'}} 
+                                style={{
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center', 
+                                    height: '400px',
+                                    marginTop: '20px'
+                                }} 
                                 className='hero-image-mobile'
                         >
                             <object 
-                                    style={{width: '100%', height: '400px'}} 
+                                    style={{width: '48%', height: '400px'}} 
                                     type="image/svg+xml" 
                                     data={heroImageMobile}
                             ></object>
@@ -894,7 +913,7 @@ export class Home extends React.Component {
                     <React.Fragment>
                         {this.renderVidePlayerModalDesktop()}
                         <Col span={24} className='page-container'>
-                            <Row className="top-section">
+                            <Row className="top-section" style={{width: '100%'}}>
                                 <React.Fragment>
                                     {this.renderTopLeftSectionDesktop()}
                                     {this.renderTopHeroImageDesktop()}
