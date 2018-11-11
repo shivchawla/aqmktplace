@@ -58,8 +58,8 @@ body {
 }
 
 .signup-button {
-    background-color: #52516E;
-    border: 1px solid #52516E;
+    background-color: #ff5722;
+    border: 1px solid #ff5722;
     outline: none;
     color: #fff;
     margin-top: 50px;
@@ -69,8 +69,8 @@ body {
 }
 
 .signup-button-mobile {
-    background-color: #52516E;
-    border: 1px solid #52516E;
+    background-color: #ff5722;
+    border: 1px solid #ff5722;
     outline: none;
     color: #fff;
     margin-top: 50px;
@@ -101,7 +101,7 @@ body {
 }
 
 .signup-button:hover {
-    background-color: #52516E;
+    background-color: #ff9800;
     color: #fff;
 }
 
@@ -277,6 +277,7 @@ body {
 
 .home-action-buttons:hover {
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    color: #fff;
 }
 
 .youtube-player {
