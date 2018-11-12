@@ -52,7 +52,7 @@ class FooterImpl extends React.Component{
                         <div className="footer-list">
                             <Link className="footer-link" to="/policies/tnc">Terms of use</Link>
                             <Link className="footer-link" to="/policies/privacy">Privacy Policy</Link>
-                            <Link className="footer-link" to="/contest/rules">Contest Rules</Link>
+                            <Link className="footer-link" to="/dailycontest/rules">Contest Rules</Link>
                         </div>
                     </Col>
                     {/* <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
@@ -65,7 +65,7 @@ class FooterImpl extends React.Component{
                     <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                         <h5 className="footer-group-header">Help</h5>
                         <div className="footer-list">
-                            <a className="footer-link" href="/faq">FAQ</a>
+                            {/*<a className="footer-link" href="/faq">FAQ</a>*/}
                             <a style={{color: '#fff'}} onClick={this.toggleContactUsModal}>Contact Us</a>
                         </div>
                     </Col>

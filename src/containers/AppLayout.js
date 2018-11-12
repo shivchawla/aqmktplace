@@ -98,7 +98,7 @@ class AppLayout extends React.Component {
                     </Menu.Item> */}
                     {
                         <Menu.Item 
-                            key="dailycontest"
+                            key="dailycontest/home"
                             style={{
                                 color: this.props.headerType === 'transparent'
                                 ? '#fff' : '#444'

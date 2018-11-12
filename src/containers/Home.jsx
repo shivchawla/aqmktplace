@@ -435,7 +435,7 @@ export class Home extends React.Component {
                                                 marginTop: '70px'
                                             }}
                                     >
-                                        Expert-Sourced Investment Portfolio
+                                        Crowd-Sourced Investment Portfolio
                                     </h1>
                                 </Col>
                                 <Col span={24}>

@@ -385,7 +385,7 @@ class Login extends Component {
   				</p>
   				<p style={{'color': '#37474F', 'fontStyle': 'italic',
   					'fontSize': '15px', 'margin': '0px'}}>
-  					Expert-Sourced Investment Portfolio
+  					Crowd-Sourced Investment Portfolio
   				</p>
                 <Button 
                         icon='google' 
