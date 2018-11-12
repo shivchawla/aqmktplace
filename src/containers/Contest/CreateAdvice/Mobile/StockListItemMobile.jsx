@@ -56,7 +56,7 @@ export default class StockListItemMobile extends React.Component {
                         </h3>
                     </div>
                 </Col>
-                <Col span={11} style={detailContainerStyle} onClick={() => onClick({symbol, name})}>
+                <Col span={11} style={detailContainerStyle} onClick={() => onAddIconClick(symbol)}>
                     <h3 style={{fontSize: '15px', fontWeight: '700'}}>{Utils.formatMoneyValueMaxTwoDecimals(current)}</h3>
                     <div style={horizontalBox}>
                         <h3 

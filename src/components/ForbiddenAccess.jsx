@@ -12,7 +12,7 @@ export default class ForbiddenAccess extends React.Component {
                         403 Forbidden
                         <span style={{fontSize: '20px', fontWeight: '400', marginLeft: '5px'}}>Access Denied.</span>
                     </h1>
-                    <Button type="primary" onClick={() => this.props.history.push('/contest')}>GO TO CONTEST</Button>
+                    <Button type="primary" onClick={() => this.props.history.push('/dailycontest')}>GO TO DAILY CONTEST</Button>
                 </div>
             </Row>
         );

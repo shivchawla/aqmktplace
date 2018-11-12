@@ -1,15 +1,28 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
+import BubbleChart from 'rmdi/lib/BubbleChart';
+import Home from 'rmdi/lib/Home';
+import Create from 'rmdi/lib/Create';
+import Logout from 'rmdi/lib/Input';
+import RemoveRedEye from 'rmdi/lib/RemoveRedEye';
+import MaterialIconReact, {colorPalette} from 'material-icons-react';
+import Accessibility from 'rmdi/lib/Accessibility';
+import NewReleases from 'rmdi/lib/NewReleases';
 import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import {slide as HamburgerMenu} from 'react-burger-menu';
-import {Layout, Menu, Icon} from 'antd';
+import {Icon as MaterialIcon} from 'rmdi'
+import {Layout, Menu, Icon as AntdIcon} from 'antd';
 import {NavBar, Button as MobileButton} from 'antd-mobile';
-import {sidebarUrls} from './constants';
+import {sidebarUrls, tradingContestSidebarUrls} from './constants';
 import {Utils} from '../../utils';
 import {primaryColor, horizontalBox, loadingColor} from '../../constants';
 import logo from "../../assets/logo-advq-new.png";
 import * as style from './layoutStyle';
+import './layout.css';
+
+const SubMenu = Menu.SubMenu;
+const MenuItemGroup = Menu.ItemGroup;
 
 class AqMobileLayoutImpl extends React.Component {
     constructor(props) {
@@ -33,13 +46,14 @@ class AqMobileLayoutImpl extends React.Component {
             <NavBar
                 mode="light"
                 icon={
-                    <Icon 
+                    <AntdIcon 
                         type={this.props.innerPage ? "left" : "menu-unfold"} 
                         style={{
                             ...style.sideBarMenuIconStyle, 
                             ...this.state.iconRotateStyle, 
                             ...this.props.menuIconStyle,
-                            color: theme === 'light' ? iconLightThemeColor : '#fff'
+                            color: theme === 'light' ? iconLightThemeColor : '#fff',
+                            zIndex: 20
                         }}
                         onClick = {
                             () => 
@@ -58,6 +72,7 @@ class AqMobileLayoutImpl extends React.Component {
                     justifyContent: 'center',
                     position: 'relative',
                     borderBottom: `1px solid ${theme === 'light' ? '#eaeaea' : primaryColor}`,
+                    zIndex: 20,
                     ...navBarStyle,
                     ...this.props.navbarStyle
                 }}
@@ -128,23 +143,35 @@ class AqMobileLayoutImpl extends React.Component {
                                 <span style={{color: '#e06666'}}>UBE</span>
                             </div>
                         </div>
-                        {/* <Icon 
-                            type="close" 
-                            style={{fontSize: '24px', zIndex: '20'}}
-                            onClick={this.toggleSideMenu}
-                        /> */}
                     </Col>
                     <Col span={24} style={{marginTop: '20px'}}>
-                        <Menu style={{backgroundColor: 'transparent'}}>
-                            {
-                                sidebarUrls.map((item, index) => (
-                                    <Menu.Item key={index} onClick={() => this.props.history.push(item.url)}>
-                                        <SideMenuItem menuItem={item} />
-                                    </Menu.Item>
-                                ))
-                            }
+                        <Menu style={{backgroundColor: 'transparent'}} mode="inline">
                             <Menu.Item 
-                                    key={20} 
+                                    key={1} 
+                                    onClick={() => {window.location.href = '/dailycontest/home'}}
+                            >
+                                <SideMenuItem menuItem={{name: 'Daily Contest', Icon: BubbleChart}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={2} 
+                                    onClick={() => {window.location.href = '/dailycontest/mypicks'}}
+                            >
+                                <SideMenuItem menuItem={{name: 'Create Entry', Icon: Create}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={3} 
+                                    onClick={() => {this.props.history.push('/home')}}
+                            >
+                                <SideMenuItem menuItem={{name: 'Home', Icon: Home}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={4} 
+                                    onClick={() => {window.location.href = '/dailycontest/watchlist'}}
+                            >
+                                <SideMenuItem menuItem={{name: 'Watchlist', Icon: RemoveRedEye}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={5} 
                                     onClick={() => {
                                         Utils.isLoggedIn()
                                         ?   this.logoutUser()
@@ -154,7 +181,7 @@ class AqMobileLayoutImpl extends React.Component {
                                 <SideMenuItem 
                                     menuItem={{
                                         name: Utils.isLoggedIn() ? 'Logout' : 'Login', 
-                                        icon: Utils.isLoggedIn() ? 'logout' : 'login'
+                                        Icon: Utils.isLoggedIn() ? Logout : Logout
                                     }} 
                                 />
                             </Menu.Item>
@@ -178,12 +205,10 @@ class AqMobileLayoutImpl extends React.Component {
                     !this.props.loading &&
                     <Layout id="aq-layout-container">
                         {this.renderLeftSidebar()}
-                        {/* <Header style={style.headerStyle}> */}
                         {
                             !this.props.noHeader &&
                             this.renderHeader()
                         }
-                        {/* </Header> */}
                         <Layout id="menu-wrapper">
                             <Layout style={{backgroundColor: '#fff', ...this.props.style}}>
                                 {this.props.children}
@@ -199,13 +224,18 @@ class AqMobileLayoutImpl extends React.Component {
 export const AqMobileLayout = withRouter(AqMobileLayoutImpl);
 
 const SideMenuItem = ({menuItem}) => {
+    const {Icon = null} = menuItem;
+
     return (
         <div style={{...horizontalBox, alignItems: 'center'}}>
             {
-                menuItem.icon &&
-                <Icon style={{fontSize: '18px', color: primaryColor}} type={menuItem.icon}/>
+                Icon &&
+                <Icon 
+                    size={26}
+                    color={primaryColor}
+                />
             }
-            <h3 style={{fontSize: '17px', color: '#686868'}}>{menuItem.name}</h3>
+            <span style={{fontSize: '14px', color: '#686868', margin: 0, padding: 0, marginLeft: '10px'}}>{menuItem.name}</span>
         </div>
     );
 }

@@ -12,12 +12,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: -64px;
 }
 
 .top-section {
     background-color: #f9f9f9;
-    height: 92vh;
+    height: 100vh;
     min-height: 540px;
+    background: linear-gradient(to bottom right, #39D6B1, #8A9DFF);
 }
 
 .page-header { 
@@ -27,7 +29,7 @@ body {
 
 .hero-text {
     font-weight: 700;
-    color: #444444;
+    color: #fff;
     font-size: 50px;
     line-height: 60px;
     margin-top: 150px;
@@ -35,14 +37,14 @@ body {
 
 .hero-text-mobile {
     font-weight: 400;
-    color: #444444;
+    color: #fff;
     font-size: 24px;
     margin-bottom: 0;
 }
 
 .hero-description-text {
     font-weight: 400;
-    color: #000000;
+    color: #fff;
     font-size: 24px;
     line-height: 35px;
     margin-top: 50px;
@@ -50,49 +52,49 @@ body {
 
 .hero-description-text-mobile {
     font-weight: 400;
-    color: #000000;
+    color: #fff;
     font-size: 14.3px;
     margin-top: 10px;
 }
 
 .signup-button {
-    border: 1px solid #00A2A2;
-    background-color: #00A2A2;
+    background-color: #ff5722;
+    border: 1px solid #ff5722;
     outline: none;
     color: #fff;
     margin-top: 50px;
-    width: 250px;
+    width: 300px;
     height: 45px;
     font-size: 16px;
 }
 
 .signup-button-mobile {
-    border: 1px solid #00A2A2;
-    background-color: #00A2A2;
+    background-color: #ff5722;
+    border: 1px solid #ff5722;
     outline: none;
     color: #fff;
     margin-top: 50px;
-    width: 80%;
+    /* width: 80%; */
     height: 40px;
-    font-size: 16px;
+    font-size: 12px;
 }
 
 .create-advice-button-mobile {
-    border: 1px solid #00A2A2;
-    background-color: #fff;
+    border: 1px solid #fff;
+    background-color: transparent;
     outline: none;
-    color: #00A2A2;
-    margin-top: 20px;
-    font-size: 16px;
+    color: #fff;
+    font-size: 12px;
     height: 40px;
-    width: 80%;
+    margin-top: 10px;
+    /* width: 80%; */
 }
 
 .action-buttons, .action-buttons:hover {
-    border: 1px solid #00A2A2;
-    background-color: #fff;
+    border: 1px solid #fff;
+    background-color: transparent;
     outline: none;
-    color: #00A2A2;
+    color: #fff;
     margin-top: 50px;
     font-size: 16px;
     height: 45px;
@@ -100,8 +102,7 @@ body {
 }
 
 .signup-button:hover {
-    border: 1px solid #00A2A2;
-    background-color: #00A2A2;
+    background-color: #ff9800;
     color: #fff;
 }
 
@@ -277,6 +278,7 @@ body {
 
 .home-action-buttons:hover {
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    color: #fff;
 }
 
 .youtube-player {

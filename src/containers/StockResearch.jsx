@@ -10,7 +10,7 @@ import {AqPageHeader} from '../components/AqPageHeader';
 import {WatchList} from '../components/WatchList';
 import {CreateWatchList} from '../components/CreateWatchList';
 import {AqPerformanceMetrics} from '../components/AqPerformanceMetrics';
-import {shadowBoxStyle, loadingColor, primaryColor, horizontalBox} from '../constants';
+import {shadowBoxStyle, primaryColor, horizontalBox} from '../constants';
 import {getStockData, Utils, getBreadCrumbArray, fetchAjax, getStockPerformance} from '../utils';
 import '../css/stockResearch.css';
 import AppLayout from './AppLayout';
@@ -111,18 +111,18 @@ class StockResearchImpl extends React.Component {
         ])
         .then(([latestDetailResponse, performanceResponse, stockPricehistoryPerformance]) => {
             const {data} = latestDetailResponse;
-            latestDetail.ticker = data.security.ticker;
-            latestDetail.exchange = data.security.exchange;
-            latestDetail.close = data.latestDetail.values.Close;
-            latestDetail.latestPrice = _.get(data, 'latestDetailRT.current', 0) || data.latestDetail.values.Close
-            latestDetail.open = _.get(data, 'latestDetailRT.open', 0) || data.latestDetail.values.Open;
-            latestDetail.low = _.get(data, 'latestDetailRT.low', 0) || data.latestDetail.values.Low;
-            latestDetail.high = _.get(data, 'latestDetailRT.high', 0) || data.latestDetail.values.High;
-            latestDetail.low_52w = Math.min(_.get(data, 'latestDetailRT.low', 0), data.latestDetail.values.Low_52w);
-            latestDetail.high_52w = Math.max(_.get(data, 'latestDetailRT.high', 0), data.latestDetail.values.High_52w);
-            latestDetail.change = _.get(data, 'latestDetailRT.current', 0) != 0.0 ?  Number(((_.get(data, 'latestDetailRT.changePct', 0) || data.latestDetail.values.ChangePct)*100).toFixed(2)) : "-";
+            latestDetail.ticker = data.ticker;
+            latestDetail.exchange = data.exchange;
+            latestDetail.close = data.latestDetail.Close;
+            latestDetail.latestPrice = _.get(data, 'latestDetailRT.current', 0) || data.latestDetail.Close
+            latestDetail.open = _.get(data, 'latestDetailRT.open', 0) || data.latestDetail.Open;
+            latestDetail.low = _.get(data, 'latestDetailRT.low', 0) || data.latestDetail.Low;
+            latestDetail.high = _.get(data, 'latestDetailRT.high', 0) || data.latestDetail.High;
+            latestDetail.low_52w = Math.min(_.get(data, 'latestDetailRT.low', 0), data.latestDetail.Low_52w);
+            latestDetail.high_52w = Math.max(_.get(data, 'latestDetailRT.high', 0), data.latestDetail.High_52w);
+            latestDetail.change = _.get(data, 'latestDetailRT.current', 0) != 0.0 ?  Number(((_.get(data, 'latestDetailRT.changePct', 0) || data.latestDetail.ChangePct)*100).toFixed(2)) : "-";
 
-            latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
+            latestDetail.name = data.detail !== undefined ? data.detail.Nse_Name : ' ';
             tickers.push({name: value, destroy: true, data: stockPricehistoryPerformance, noLoadDat: true});
             
             this.setState({
@@ -186,7 +186,6 @@ class StockResearchImpl extends React.Component {
             Utils.goToLoginPage(this.props.history, this.props.match.url);
         } else {
             if (!this.props.openAsDialog) {
-                //// console.log("Downloading Watchlists");
                 this.getWatchlists();
                 this.onSelect("NIFTY_50", true);
             } else {
@@ -291,11 +290,7 @@ class StockResearchImpl extends React.Component {
     }
 
     takeAction = () => {
-        //// console.log(`Taking Action: ${this.mounted}`);
         if (this.mounted) {
-            //// console.log(this.state.latestDetail.ticker);
-            //// console.log(this.state.selectedWatchlistTab);
-
             this.subscribeToStock(this.state.latestDetail.ticker);
             this.subscribeToWatchList(this.state.selectedWatchlistTab);
         } else {
@@ -351,7 +346,6 @@ class StockResearchImpl extends React.Component {
     }
 
     subscribeToStock = ticker => {
-        //// console.log(`Subscription Started for ${ticker}`);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -362,7 +356,6 @@ class StockResearchImpl extends React.Component {
     }
 
     unSubscribeToStock = ticker => {
-        //// console.log(`Unsubscription Started for ${ticker}`);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -373,7 +366,6 @@ class StockResearchImpl extends React.Component {
     }
 
     subscribeToWatchList = watchListId => {
-        //// console.log(`Subscription Started to Watchlist: ${watchListId}`);
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'subscribe-mktplace',
@@ -384,7 +376,6 @@ class StockResearchImpl extends React.Component {
     }
 
     unsubscribeToWatchlist = watchListId => {
-        //// console.log('Un Subscription Started');
         const msg = {
             'aimsquant-token': Utils.getAuthToken(),
             'action': 'unsubscribe-mktplace',
@@ -491,7 +482,6 @@ class StockResearchImpl extends React.Component {
             this.toggleDeleteModalVisible();
         })
         .catch(error => {
-            // console.log(error);
             message.error('Error occured while deleting watchlist. Please try again');
             Utils.checkForInternet(error, this.props.history);
             if (error.response) {
@@ -505,9 +495,7 @@ class StockResearchImpl extends React.Component {
         const currentWatchListId = key;
         if (previousWatchListId.length > 0) {
             this.unsubscribeToWatchlist(previousWatchListId);
-        }
-        //this.subscribeToWatchList(currentWatchListId);
-        
+        }        
         this.setState({selectedWatchlistTab: currentWatchListId});
 
         //Download latest watchlist on watchlist tab 
@@ -663,22 +651,11 @@ class StockResearchImpl extends React.Component {
                                 </Row>
                             </Col>
                             <Col span={10}>
-                                {/* <Row style={cardStyle}> */}
-                                    <AqPerformanceMetrics 
-                                            rollingPerformance={this.state.rollingPerformance} 
-                                            style={{height: '100%'}}
-                                            selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
-                                    />
-                                    {/* <Col span={24}>
-                                        <h3 style={cardHeaderStyle}>Performance Metrics</h3>
-                                    </Col>
-                                    <Col span={24} style={{textAlign: 'right'}}>
-                                        {this.renderPriceMetricsTimeline(performanceMetricsTimeline)}
-                                    </Col>
-                                    <Col span={24}>
-                                        {this.renderPerformanceMetrics()}
-                                    </Col> */}
-                                {/* </Row> */}
+                                <AqPerformanceMetrics 
+                                        rollingPerformance={this.state.rollingPerformance} 
+                                        style={{height: '100%'}}
+                                        selectedTimeline={['ytd', '1y', '2y', '5y', '10y']}
+                                />
                             </Col>
                         </Row>
                         <Row style={{...metricStyle, marginBottom:'10px'}}>  
@@ -701,7 +678,6 @@ class StockResearchImpl extends React.Component {
                     !this.props.openAsDialog &&
                     <Col xl={6} md={0} xs={0} sm={0}>
                         <Row style={{...sideCardStyle, height: '375px'}}>
-                            {/* <Button type="primary" onClick={this.toggleWatchListModal}>Create Watchlist</Button> */}
                             <Col 
                                     span={24} 
                                     style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '10px 5px'}}
@@ -714,7 +690,6 @@ class StockResearchImpl extends React.Component {
                                     this.state.watchlists.length > 0
                                     ?   <Tabs 
                                             onChange={this.handleWatchlistTabChange} 
-                                            // tabBarExtraContent={this.watchlistTabBarExtraContent()}
                                             tabBarStyle={{
                                                 display: 'flex',
                                                 flexDirection: 'row',
@@ -796,9 +771,6 @@ class StockResearchImpl extends React.Component {
 
     render() {
         return (
-            // this.state.loading
-            // ? <h3>Loading</h3>
-            // : this.renderPageContent()
             this.props.openAsDialog 
             ?   this.state.loading ? this.renderEmptyLoadingScreen() : this.renderPageContent()
             :   <AppLayout 
@@ -823,9 +795,7 @@ class StockResearchImpl extends React.Component {
 export default withRouter(StockResearchImpl);
 
 const metricStyle = {
-    // marginTop: '20px',
     padding: '15px 20px 0px 20px',
-    //paddingBottom:'0px',
 };
 
 const tickerNameStyle = {

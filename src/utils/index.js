@@ -200,7 +200,7 @@ export class Utils{
 		this.localStorageSaveObject('adviceFilter', {});
 		this.localStorageSave('selectedPage', 1);
 		this.localStorageSave('selectedTab', 'all');
-		this.localStorageSave('redirectToUrlFromLogin', '/contest');
+		this.localStorageSave('redirectToUrlFromLogin', '/dailycontest/home');
 		this.localStorageSave('selectedAdviceId', null);
 		this.localStorageSave('contestId', null);
 		this.localStorageSave('contestSelectedPage', 0);

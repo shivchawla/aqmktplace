@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="410px" height="553px" viewBox="0 0 410 553" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 22</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="99.0697254%" id="linearGradient-1">
+            <stop stop-color="#B0FDFF" offset="0%"></stop>
+            <stop stop-color="#1EC2CB" offset="52.6621207%"></stop>
+            <stop stop-color="#2B84FF" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="5.03716311%" y1="60.9700586%" x2="95.78201%" y2="60.9700586%" id="linearGradient-2">
+            <stop stop-color="#1EC9E5" offset="0%"></stop>
+            <stop stop-color="#4F14C4" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-5" transform="translate(-1304.000000, -617.000000)">
+            <g id="Group-22" transform="translate(1293.000000, 613.000000)">
+                <g id="Group-15">
+                    <g id="Group-2" transform="translate(29.000000, 65.000000)" fill-rule="nonzero">
+                        <g id="Falling-Coins" transform="translate(193.435484, 439.500000) rotate(180.000000) translate(-193.435484, -439.500000) translate(137.935484, 385.000000)">
+                            <g id="Oval-33-+-Oval-33" transform="translate(17.362918, 47.540766) rotate(-64.000000) translate(-17.362918, -47.540766) translate(-1.332096, 37.638761)">
+                                <path d="M0,12.770508 L0,6.38525401 L36.9240558,6.38525401 L36.9240558,12.770508 C36.9240558,16.2969864 28.6583243,19.1557621 18.4620278,19.1557621 C8.26573143,19.1557621 0,16.2969864 0,12.770508 Z" id="Oval-33" fill="#E4A51C"></path>
+                                <ellipse id="Oval-32" fill="#FFD400" cx="18.4620278" cy="6.38525401" rx="18.4620278" ry="6.38525401"></ellipse>
+                            </g>
+                            <g id="Oval-33-+-Oval-36" transform="translate(36.801279, 95.910622) rotate(-14.000000) translate(-36.801279, -95.910622) translate(19.755825, 87.108840)">
+                                <path d="M9.32538537e-15,11.5211181 L9.32538537e-15,5.76055903 L33.3116274,5.76055903 L33.3116274,11.5211181 C33.3116274,14.702587 25.8545657,17.2816771 16.6558137,17.2816771 C7.45706181,17.2816771 9.32538537e-15,14.702587 9.32538537e-15,11.5211181 Z" id="Oval-33" fill="#E4A51C"></path>
+                                <ellipse id="Oval-32" fill="#FFD400" cx="16.6558137" cy="5.76055903" rx="16.6558137" ry="5.76055903"></ellipse>
+                            </g>
+                            <g id="Oval-33-+-Oval-35" transform="translate(90.868815, 74.856003) rotate(45.000000) translate(-90.868815, -74.856003) translate(72.723654, 65.504110)">
+                                <path d="M-1.21053103e-13,12.2770061 L-1.21053103e-13,6.13850304 L35.497167,6.13850304 L35.497167,12.2770061 C35.497167,15.6672077 27.5508555,18.4155091 17.7485835,18.4155091 C7.94631151,18.4155091 -1.21053103e-13,15.6672077 -1.21053103e-13,12.2770061 Z" id="Oval-33" fill="#E4A51C"></path>
+                                <ellipse id="Oval-32" fill="#FFD400" cx="17.7485835" cy="6.13850304" rx="17.7485835" ry="6.13850304"></ellipse>
+                            </g>
+                            <g id="Oval-33-+-Oval-34" transform="translate(54.161938, 0.000000)">
+                                <g id="Group" transform="translate(17.173440, 20.011123) rotate(64.000000) translate(-17.173440, -20.011123) translate(-0.421867, 10.659230)">
+                                    <path d="M4.22771381e-14,11.8966956 L4.22771381e-14,5.94834778 L34.3975548,5.94834778 L34.3975548,11.8966956 C34.3975548,15.1818773 26.6974,17.8450433 17.1987774,17.8450433 C7.70015494,17.8450433 4.22771381e-14,15.1818773 4.22771381e-14,11.8966956 Z" id="Oval-33" fill="#E4A51C"></path>
+                                    <ellipse id="Oval-32" fill="#FFD400" cx="17.1987774" cy="5.94834778" rx="17.1987774" ry="5.94834778"></ellipse>
+                                </g>
+                            </g>
+                        </g>
+                        <g id="Group-7" transform="translate(0.000000, 0.280624)">
+                            <g id="Group-4">
+                                <path d="M38.5250754,86.5469465 C81.6774111,92.1548918 130.371529,94.9588645 184.607427,94.9588645 C238.843326,94.9588645 290.523405,92.1548918 339.647662,86.5469465 L184.607427,37.8972901 L38.5250754,86.5469465 Z" id="Path-12" fill="url(#linearGradient-1)"></path>
+                                <path d="M0.191697196,24.9356559 C83.1673577,8.8207847 145.558574,0.763349068 187.365345,0.763349068 C229.172116,0.763349068 291.563332,8.8207847 374.538993,24.9356559 L339.647662,87.4356053 C271.765932,77.967978 221.005159,73.2188738 187.365345,73.1882929 C153.72553,73.1577118 103.90485,77.8153804 37.9033018,87.1612983 L0.191697196,24.9356559 Z" id="Path-8" fill="url(#linearGradient-2)"></path>
+                            </g>
+                            <g id="Group-4-Copy" transform="translate(55.955667, 121.945806)">
+                                <path d="M27.8039437,60.5828625 C58.0831037,64.5084243 92.2508248,66.4712051 130.307107,66.4712051 C168.363389,66.4712051 204.626301,64.5084243 239.095843,60.5828625 L130.307107,26.528103 L27.8039437,60.5828625 Z" id="Path-12" fill="url(#linearGradient-1)"></path>
+                                <path d="M0.906153184,17.4549591 C59.1285705,6.17454928 102.907281,0.534344347 132.242284,0.534344347 C161.577288,0.534344347 205.355998,6.17454928 263.578415,17.4549591 L239.095843,61.2049237 C191.464545,54.5775845 155.846692,51.2532116 132.242284,51.231805 C108.637877,51.2103983 73.6796677,54.4707662 27.3676573,61.0129088 L0.906153184,17.4549591 Z" id="Path-8" fill="url(#linearGradient-2)"></path>
+                            </g>
+                            <g id="Group-4-Copy-2" transform="translate(95.577454, 226.470781)">
+                                <path d="M19.4794096,41.8310241 C40.6929529,44.541531 64.6308174,45.8967845 91.293003,45.8967845 C117.955189,45.8967845 143.360942,44.541531 167.510261,41.8310241 L91.293003,18.3170236 L19.4794096,41.8310241 Z" id="Path-12" fill="url(#linearGradient-1)"></path>
+                                <path d="M0.634849835,12.0522337 C41.4254056,4.26337927 72.0967177,0.368952049 92.648786,0.368952049 C113.200854,0.368952049 143.872167,4.26337927 184.662723,12.0522337 L167.510261,42.2605426 C134.13983,37.6845226 109.186006,35.3891224 92.648786,35.3743415 C76.1115663,35.3595607 51.619887,37.6107671 19.1737479,42.1279609 L0.634849835,12.0522337 Z" id="Path-8" fill="url(#linearGradient-2)"></path>
+                            </g>
+                            <g id="Group-4-Copy-3" transform="translate(124.105140, 308.823793)">
+                                <path d="M18.3254472,49.7029725 C30.4853228,53.5315877 45.9084197,55.4458952 64.5947378,55.4458952 C83.2810559,55.4458952 98.781547,53.5315877 111.096211,49.7029725 L64.5947378,36.4253704 L18.3254472,49.7029725 Z" id="Path-12" fill="url(#linearGradient-1)"></path>
+                                <path d="M0.444937491,8.31188531 C29.0331903,2.94026156 50.5293235,0.254449689 64.9333371,0.254449689 C79.3373508,0.254449689 100.833484,2.94026156 129.421736,8.31188531 L111.38485,49.702975 C93.0948732,43.8314877 78.1547905,40.8906471 66.5646024,40.8804534 C54.9744143,40.8702598 38.9419125,43.8110994 18.467097,49.7029725 L0.444937491,8.31188531 Z" id="Path-8" fill="url(#linearGradient-2)"></path>
+                            </g>
+                        </g>
+                    </g>
+                    <g id="Group-3" transform="translate(44.000000, 97.000000)">
+                        <text id="HINDPETRO-241.20" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327" fill="#FFFFFF">
+                            <tspan x="1.54818336" y="10">HINDPETRO </tspan>
+                            <tspan x="14.17351" y="24">241.20</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#B8E986" stroke-width="0.7" fill="#B8E986" points="52.5813953 17.5714286 54.270565 21.8701929 55.0232558 23.7857143 50.1395349 23.7857143"></polygon>
+                    </g>
+                    <text id="HEROMOTOCO-2959.90" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327" fill="#FFFFFF">
+                        <tspan x="123.048402" y="98">HEROMOTOCO </tspan>
+                        <tspan x="141.274428" y="112">2959.90</tspan>
+                    </text>
+                    <polygon id="Triangle" stroke="#B8E986" stroke-width="0.7" fill="#B8E986" points="183.311927 105.571429 185.000063 109.870193 185.752294 111.785714 180.87156 111.785714"></polygon>
+                    <g id="Group-12" transform="translate(182.000000, 201.000000)">
+                        <g id="Group-11" fill="#FFFFFF" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327">
+                            <text id="ADANIPORTS-338.20">
+                                <tspan x="1.9629017" y="10">ADANIPORTS </tspan>
+                                <tspan x="17.67351" y="24">338.20</tspan>
+                            </text>
+                        </g>
+                        <g id="Group-10" transform="translate(52.000000, 18.000000)" fill="#B8E986" stroke="#B8E986" stroke-width="0.7">
+                            <polygon id="Triangle" points="3 0 5.07526555 4.15053111 6 6 0 6"></polygon>
+                        </g>
+                    </g>
+                    <g id="Group-9" transform="translate(303.000000, 95.000000)">
+                        <text id="DRREDDY-2399.95" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327" fill="#FFFFFF">
+                            <tspan x="10.4886467" y="10">DRREDDY </tspan>
+                            <tspan x="14.7744284" y="24">2399.95</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#D0021B" stroke-width="0.7" fill="#D0021B" transform="translate(58.182292, 20.678571) scale(1, -1) translate(-58.182292, -20.678571) " points="58.1822917 17.5714286 60.3548353 21.8701929 61.3229167 23.7857143 55.0416667 23.7857143"></polygon>
+                    </g>
+                    <g id="Group-14" transform="translate(212.000000, 302.000000)">
+                        <g id="Group-16">
+                            <g id="Group-17">
+                                <g id="Group-18">
+                                    <g id="Group-19">
+                                        <g id="Group-20">
+                                            <text id="TCS-1908.00" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327" fill="#FFFFFF">
+                                                <tspan x="24.8340733" y="10">TCS </tspan>
+                                                <tspan x="15.2744284" y="24">1908.00</tspan>
+                                            </text>
+                                            <polygon id="Triangle" stroke="#D0021B" stroke-width="0.7" fill="#D0021B" transform="translate(59.065609, 20.678571) scale(1, -1) translate(-59.065609, -20.678571) " points="59.0656095 17.5714286 61.2705791 21.8701929 62.2531095 23.7857143 55.8781095 23.7857143"></polygon>
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                    <g id="Group-6" transform="translate(136.000000, 303.000000)">
+                        <text id="RELIANCE-1093.00" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327" fill="#FFFFFF">
+                            <tspan x="9.77496503" y="10">RELIANCE </tspan>
+                            <tspan x="14.7744284" y="24">1093.00</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#D0021B" stroke-width="0.7" fill="#D0021B" transform="translate(57.182292, 20.678571) scale(1, -1) translate(-57.182292, -20.678571) " points="57.1822917 17.5714286 59.3548353 21.8701929 60.3229167 23.7857143 54.0416667 23.7857143"></polygon>
+                    </g>
+                    <g id="Group-13" transform="translate(264.000000, 209.000000)">
+                        <text id="INFY-658.70" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327" fill="#FFFFFF">
+                            <tspan x="22.6109917" y="10">INFY </tspan>
+                            <tspan x="17.67351" y="24">658.70</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#D0021B" stroke-width="0.7" fill="#D0021B" transform="translate(55.088542, 20.678571) scale(1, -1) translate(-55.088542, -20.678571) " points="55.0885417 17.5714286 57.2610853 21.8701929 58.2291667 23.7857143 51.9479167 23.7857143"></polygon>
+                    </g>
+                    <g id="Group-8" transform="translate(220.000000, 87.000000)">
+                        <g id="Group-7" fill="#FFFFFF" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327">
+                            <text id="BHARTARTL-297.40">
+                                <tspan x="6.00858336" y="10">BHARTARTL </tspan>
+                                <tspan x="17.67351" y="24">297.40</tspan>
+                            </text>
+                        </g>
+                        <polygon id="Triangle" stroke="#D0021B" stroke-width="0.7" fill="#D0021B" transform="translate(55.578125, 21.678571) scale(1, -1) translate(-55.578125, -21.678571) " points="55.578125 18.5714286 57.7506686 22.8701929 58.71875 24.7857143 52.4375 24.7857143"></polygon>
+                    </g>
+                    <g id="Group-5" transform="translate(92.000000, 210.000000)">
+                        <g id="Group-4" fill="#FFFFFF" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327">
+                            <text id="GAIL-367.95">
+                                <tspan x="22.3120917" y="10">GAIL </tspan>
+                                <tspan x="17.67351" y="24">367.95</tspan>
+                            </text>
+                        </g>
+                        <polygon id="Triangle" stroke="#D0021B" stroke-width="0.7" fill="#D0021B" transform="translate(55.182292, 20.678571) scale(1, -1) translate(-55.182292, -20.678571) " points="55.1822917 17.5714286 57.3548353 21.8701929 58.3229167 23.7857143 52.0416667 23.7857143"></polygon>
+                    </g>
+                    <g id="Group-21" transform="translate(189.000000, 397.000000)">
+                        <text id="IOC-141.65" font-family="AvenirNext-Regular, Avenir Next" font-size="9.8" font-weight="normal" letter-spacing="0.114163327" fill="#FFFFFF">
+                            <tspan x="20.8046733" y="10">IOC </tspan>
+                            <tspan x="14.17351" y="24">141.65</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#B8E986" stroke-width="0.7" fill="#B8E986" points="50.5813953 17.5714286 52.270565 21.8701929 53.0232558 23.7857143 48.1395349 23.7857143"></polygon>
+                    </g>
+                    <g id="Group-32" transform="translate(0.411765, 11.734007)">
+                        <text id="YESBANK-227.55" font-family="AvenirNext-Regular, Avenir Next" font-size="14.112" font-weight="normal" letter-spacing="0.164395183" fill="#FFFFFF">
+                            <tspan x="11.0091694" y="14">YESBANK </tspan>
+                            <tspan x="20.4451486" y="33">227.55</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#B8E986" stroke-width="1.008" fill="#B8E986" points="72.8967168 23.8807119 75.3311084 30.0755642 76.4158687 32.8359788 69.377565 32.8359788"></polygon>
+                    </g>
+                    <g id="Group-33" transform="translate(217.205882, 0.205387)">
+                        <text id="SUNPHARMA-595.95" font-family="AvenirNext-Regular, Avenir Next" font-size="14.112" font-weight="normal" letter-spacing="0.164395183" fill="#FFFFFF">
+                            <tspan x="5.85083255" y="14">SUNPHARMA </tspan>
+                            <tspan x="27.6510309" y="33">595.95</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#B8E986" stroke-width="1.008" fill="#B8E986" points="81.8588235 25.3217893 84.6502592 31.5166417 85.8941176 34.2770563 77.8235294 34.2770563"></polygon>
+                    </g>
+                    <g id="Group-34" transform="translate(96.441176, 1.080808)">
+                        <text id="TCS-1908.00" font-family="AvenirNext-Regular, Avenir Next" font-size="14.112" font-weight="normal" letter-spacing="0.164395183" fill="#FFFFFF">
+                            <tspan x="35.0804774" y="14">TCS </tspan>
+                            <tspan x="21.3145886" y="33">1908.00</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#D0021B" stroke-width="1.008" fill="#D0021B" transform="translate(80.968597, 28.358345) scale(1, -1) translate(-80.968597, -28.358345) " points="80.9685968 23.8807119 84.0996156 30.0755642 85.4947917 32.8359788 76.442402 32.8359788"></polygon>
+                    </g>
+                    <g id="Group-6" transform="translate(334.000000, 3.000000)">
+                        <text id="RELIANCE-1093.00" font-family="AvenirNext-Regular, Avenir Next" font-size="14.112" font-weight="normal" letter-spacing="0.164395183" fill="#FFFFFF">
+                            <tspan x="14.1153614" y="14">RELIANCE </tspan>
+                            <tspan x="21.3145886" y="33">1093.00</tspan>
+                        </text>
+                        <polygon id="Triangle" stroke="#D0021B" stroke-width="1.008" fill="#D0021B" transform="translate(80.968597, 28.358345) scale(1, -1) translate(-80.968597, -28.358345) " points="80.9685968 23.8807119 84.0996156 30.0755642 85.4947917 32.8359788 76.442402 32.8359788"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

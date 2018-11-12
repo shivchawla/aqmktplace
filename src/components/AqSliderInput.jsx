@@ -40,7 +40,6 @@ export default class SliderInput extends React.Component {
             : value < 0
                 ? 0
                 : value;
-        console.log(nValue);
         clearTimeout(timeout);
         if (typeof value === 'number') {
             timeout = setTimeout(() => {

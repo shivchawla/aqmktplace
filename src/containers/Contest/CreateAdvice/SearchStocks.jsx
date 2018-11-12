@@ -2,8 +2,7 @@ import * as React from 'react';
 import Media from 'react-media';
 import {Motion, spring} from 'react-motion';
 import _  from 'lodash';
-import ReactDOM from 'react-dom';
-import {Row, Col, Input, Icon, Badge, Button, Tag, Checkbox} from 'antd';
+import {Row, Col, Input, Icon, Button, Tag} from 'antd';
 import {SearchBar, Tag as TagMobile} from 'antd-mobile';
 import {StockPerformance} from './StockPerformance';
 import {screenSize} from './constants';
@@ -11,11 +10,10 @@ import StockFilter from '../SearchStockFilter/StockFilter';
 import SearchStockHeader from './Mobile/SearchStockHeader';
 import SearchStockHeaderMobile from './Mobile/StockSearchHeaderMobile';
 import StockList from './StockList';
-import {horizontalBox, verticalBox, metricColor, primaryColor} from '../../../constants';
-import {fetchAjax, Utils} from '../../../utils';
+import {horizontalBox, verticalBox} from '../../../constants';
+import {fetchAjax} from '../../../utils';
 import '../css/searchStocks.css';
 
-const CheckboxGroup = Checkbox.Group;
 const {Search} = Input;
 const {requestUrl} = require('../../../localConfig');
 
@@ -116,7 +114,7 @@ export class SearchStocks extends React.Component {
         const stocks = [...this.state.stocks];
         const skip = this.state.selectedPage * limit;
         const populate = true;
-        const universe = _.get(this.props, 'filters.universe', null);
+        const universe = _.get(this.props, 'filters.universe', 'NIFTY_50');
         const sector = _.get(this.props, 'filters.sector', '').length === 0
                 ?   this.state.filter.sector
                 :   _.get(this.props, 'filters.sector', '');
@@ -198,31 +196,31 @@ export class SearchStocks extends React.Component {
                     : _.get(stock, 'security.ticker', null);
             const close = _.get(stock, 'latestDetailRT.close', 0) !== 0 
                 ?  _.get(stock, 'latestDetailRT.close', 0)
-                :  _.get(stock, 'latestDetail.values.Close', 0);
+                :  _.get(stock, 'latestDetail.Close', 0);
 
             const change = _.get(stock, 'latestDetailRT.change', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.change', 0)
-                    :  _.get(stock, 'latestDetail.values.Change', 0);
+                    :  _.get(stock, 'latestDetail.Change', 0);
 
             const changePct = _.get(stock, 'latestDetailRT.changePct', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.changePct', 0)
-                    :  _.get(stock, 'latestDetail.values.ChangePct', 0);
+                    :  _.get(stock, 'latestDetail.ChangePct', 0);
 
             const high = _.get(stock, 'latestDetailRT.high', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.high', 0)
-                    :  _.get(stock, 'latestDetail.values.High', 0);
+                    :  _.get(stock, 'latestDetail.High', 0);
 
             const low = _.get(stock, 'latestDetailRT.low', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.low', 0)
-                    :  _.get(stock, 'latestDetail.values.Low', 0);
+                    :  _.get(stock, 'latestDetail.Low', 0);
             
             const open = _.get(stock, 'latestDetailRT.open', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.open', 0)
-                    :  _.get(stock, 'latestDetail.values.Open', 0);
+                    :  _.get(stock, 'latestDetail.Open', 0);
 
             const current = _.get(stock, 'latestDetailRT.current', 0) !== 0 
                     ?  _.get(stock, 'latestDetailRT.current', 0)
-                    :  _.get(stock, 'latestDetail.values.Close', 0);
+                    :  _.get(stock, 'latestDetail.Close', 0);
 
 
             return {
@@ -290,6 +288,10 @@ export class SearchStocks extends React.Component {
                 symbol: stock.symbol,
                 ticker: stock.symbol,
                 totalValue: stock.current,
+                chg: stock.change,
+                chgPct: stock.changePct,
+                points: 10,
+                buy: true
             };
         });
         this.props.addPositions(positions)
@@ -415,7 +417,7 @@ export class SearchStocks extends React.Component {
     }
 
     renderBenchmarkDetailMobile = (hideBenchmarkConfig = false) => {
-        const universe = _.get(this.props, 'filters.universe', null);
+        const universe = _.get(this.props, 'filters.universe', 'NIFTY_50');
         const sector = _.get(this.props, 'filters.sector', null);
         const industry = _.get(this.props, 'filters.industry', null);
 
@@ -700,7 +702,8 @@ export class SearchStocks extends React.Component {
                             width: global.screen.width, 
                             overflow: 'hidden', 
                             height: global.screen.width <= 600 ? global.screen.height : global.screen.height - 100,
-                            position: 'relative'
+                            position: 'relative',
+                            zIndex: 20000
                         }}
                 >
                     <Media 

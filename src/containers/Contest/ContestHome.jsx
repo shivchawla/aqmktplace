@@ -36,7 +36,7 @@ class ContestHome extends React.Component {
     }
 
     getActiveContests = () => new Promise((resolve, reject) => {
-        const contestsUrl = `${requestUrl}/contest`;
+        const contestsUrl = `${requestUrl}/contest?current=true`;
         this.setState({loading: true});
         fetchAjax(contestsUrl, this.props.history, this.props.match.url)
         .then(response => {

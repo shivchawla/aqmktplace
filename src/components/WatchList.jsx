@@ -22,7 +22,6 @@ export class WatchListImpl extends React.Component {
     }
 
     renderTickers = () => {
-        // {name: 'TCS', y: 145, change: 1.5, hideCheckbox: true}
         const {tickers = [], preview = true} = this.props;
         return tickers.map((ticker, index) => 
             <ChartTickerItem 

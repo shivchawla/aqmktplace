@@ -2,23 +2,18 @@ import * as React from 'react';
 import _ from 'lodash';
 import Media from 'react-media';
 import {Motion, spring} from 'react-motion';
-import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
-import {Row, Col, Button, Modal, Spin, Select, Tooltip, Radio, Icon, Switch} from 'antd';
+import {Row, Col, Button, Modal, Spin, Tooltip, Icon} from 'antd';
 import {SegmentedControl} from 'antd-mobile';
 import {metricColor, horizontalBox, primaryColor, verticalBox} from '../../../constants';
-import {generateColorData} from '../../../utils';
 import {AqStockTableMod} from '../../../components/AqStockTableMod';
 import AqSectorTable from '../../../components/AqSectorTable';
 import PortfolioList from './Mobile/PortfolioList';
 import PortfolioSectorList from './Mobile/PortfolioSectorList';
 import {benchmarks} from '../../../constants/benchmarks';
 import MyChartNew from '../../MyChartNew';
-import {HighChartNew} from '../../../components/HighChartNew';
 import '../css/portfolioMobile.css';
 
-const Option = Select.Option;
 const screenSize = {mobile: '600px', desktop: '601px'};
-const RadioGroup = Radio.Group;
 
 export class Portfolio extends React.Component {
     constructor(props) {

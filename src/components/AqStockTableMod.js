@@ -1,8 +1,9 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {Table, Button, Row, Col, Tooltip, Slider, InputNumber} from 'antd';
+import styled from 'styled-components';
+import {Table, Button, Row, Col, Tooltip, Radio} from 'antd';
 import SliderInput from '../components/AqSliderInput';
-import {verticalBox, nameEllipsisStyle, primaryColor} from '../constants';
+import {verticalBox, nameEllipsisStyle, primaryColor, metricColor, horizontalBox} from '../constants';
 import {Utils} from '../utils';
 
 export class AqStockTableMod extends React.Component {
@@ -71,7 +72,7 @@ export class AqStockTableMod extends React.Component {
                 title: 'SHARES',
                 dataIndex: 'shares',
                 key: 'shares',
-                render: val => <span>{val}</span>,
+                render: (val, record) => <span>{(record.buy ? 1 : -1) * val}</span>,
                 width: 170,
             },
             {
@@ -82,24 +83,43 @@ export class AqStockTableMod extends React.Component {
                 render: val => <span>{Utils.formatMoneyValueMaxTwoDecimals(val)}</span>
             },
             {
-                title: 'TOTAL',
-                dataIndex: 'totalValue',
-                key: 'totalValue',
-                width: 150,
-                render: val => <span>{Utils.formatMoneyValueMaxTwoDecimals(val)}</span>
-            },
-            {
                 title: 'WEIGHT',
                 dataIndex: 'weight',
                 key: 'weight',
                 width: 120,
-                render: val => <span>{Utils.formatMoneyValueMaxTwoDecimals(val)}%</span>
+                render: (val, record) => <span>{(record.buy ? 1 : -1) * Utils.formatMoneyValueMaxTwoDecimals(val)}%</span>
+            },
+            {
+                title: 'ACTION',
+                dataIndex: 'buy',
+                key: 'buy',
+                render: (text, record) => (
+                    <ActionButtons 
+                        onChange={value => this.handleActionButtonChange(value, record, text)} 
+                        defaultValue={text}
+                    />
+                ),
+                width: 170
             }
         ];
         this.state = {
             selectedRows: [],
             data: this.props.data,
         };
+    }
+
+    handleActionButtonChange = (type, record, text) => {
+        const buyStatus = type === 'buy';
+        const clonedData = _.map(this.state.data, _.cloneDeep);
+        const key = _.get(record, 'key', null);
+        const targetIndex = _.findIndex(clonedData, item => item.key === key);
+        const targetPosition = clonedData[targetIndex];
+        if (targetPosition !== undefined) {
+            targetPosition.buy = buyStatus;
+            clonedData[targetIndex] = targetPosition ;
+            this.setState({data: clonedData});
+            this.props.onChange(clonedData, false)
+        }
     }
 
     renderSliderColumns = (text, record, column, type) => {
@@ -258,3 +278,50 @@ export class AqStockTableMod extends React.Component {
     }
 }
 
+class ActionButtons extends React.Component {
+    render() {
+        const {onChange, defaultValue = false} = this.props;
+        const buyBtnColor = defaultValue ? {color: metricColor.positive} : {};
+        const sellBtnColor = defaultValue ? {} : {color: metricColor.negative};
+
+        return (
+            <div style={{...horizontalBox, justifyContent: 'flex-start'}}>
+                <AButton 
+                        {...buyBtnColor} 
+                        size='small' 
+                        onClick={() => onChange('buy')}
+                        style={{marginRight: '5px'}}
+                >
+                    BUY
+                </AButton>
+                <AButton 
+                        {...sellBtnColor} 
+                        size='small' 
+                        onClick={() => onChange('sell')}
+                >
+                    SELL
+                </AButton>
+            </div>
+        );
+    }
+}
+
+const AButton = styled(Button)`
+    background-color: ${props => props.color || '#f9f9f9'};
+    border-color: ${props => props.color || '#B7B7B7'};
+    color: ${props => props.color ? '#fff' : '#444'};
+    transition: all 0.3s ease-in-out;
+    font-size: 12px;
+
+    &:hover {
+        background-color: ${props => props.color || '#f9f9f9'};
+        border-color: ${props => props.color || '#B7B7B7'};
+        color: ${props => props.color ? '#fff' : '#444'};
+    }
+
+    &:enabled {
+        background-color: ${props => props.color || '#f9f9f9'};
+        border-color: ${props => props.color || '#B7B7B7'};
+        color: ${props => props.color ? '#fff' : '#444'};
+    }
+`;
