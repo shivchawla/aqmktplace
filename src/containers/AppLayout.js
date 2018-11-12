@@ -39,10 +39,10 @@ class AppLayout extends React.Component {
     handleNavMenuClick = e => {
         if (e.key === 'logout') {
             Utils.logoutUser();
-            window.location.href = '/login';
+            window.location = '/login';
             return;
         }
-        window.location.href = (`/${e.key}`);
+        window.location = (`/${e.key}`);
     }
 
     onRouteChanged = location => {

@@ -148,13 +148,13 @@ class AqMobileLayoutImpl extends React.Component {
                         <Menu style={{backgroundColor: 'transparent'}} mode="inline">
                             <Menu.Item 
                                     key={1} 
-                                    onClick={() => {window.location.href = '/dailycontest/home'}}
+                                    onClick={() => {window.location = '/dailycontest/home'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Daily Contest', Icon: BubbleChart}} />
                             </Menu.Item>
                             <Menu.Item 
                                     key={2} 
-                                    onClick={() => {window.location.href = '/dailycontest/mypicks'}}
+                                    onClick={() => {window.location = '/dailycontest/mypicks'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Create Entry', Icon: Create}} />
                             </Menu.Item>
@@ -166,7 +166,7 @@ class AqMobileLayoutImpl extends React.Component {
                             </Menu.Item>
                             <Menu.Item 
                                     key={4} 
-                                    onClick={() => {window.location.href = '/dailycontest/watchlist'}}
+                                    onClick={() => {window.location = '/dailycontest/watchlist'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Watchlist', Icon: RemoveRedEye}} />
                             </Menu.Item>

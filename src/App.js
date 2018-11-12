@@ -232,7 +232,7 @@ class App extends React.Component {
     }
 
     fireTracking = () => {
-        ReactGA.pageview(window.location.href);
+        ReactGA.pageview(window.location);
     }
 
     render() {
