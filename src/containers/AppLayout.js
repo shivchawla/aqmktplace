@@ -104,7 +104,7 @@ class AppLayout extends React.Component {
                                 ? '#fff' : '#444'
                             }}
                         >
-                            Daily Contest
+                            Contest
                         </Menu.Item>
                     }
                     {/* {
