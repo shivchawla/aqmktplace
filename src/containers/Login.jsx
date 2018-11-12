@@ -63,7 +63,7 @@ class Login extends Component {
                 Utils.localStorageSave('selectedPage', 1);
                 const redirectUrl = Utils.getRedirectAfterLoginUrl();
                 if (redirectUrl){
-                  this.props.history.push(redirectUrl);
+                    window.location.href = redirectUrl;
                 } else{
                     window.location = '/dailycontest/home';
                 }
