@@ -474,7 +474,7 @@ export class Home extends React.Component {
                     <Col span={24}>
                         <Button 
                                 className="signup-button"
-                                onClick={() => window.location = '/dailycontest/home'}
+                                onClick={() => window.location.href = '/dailycontest/home'}
                         >
                             STOCK PREDICTION CONTEST
                         </Button>
@@ -507,7 +507,7 @@ export class Home extends React.Component {
                                 <Button 
                                     className="signup-button-mobile"
                                     style={{marginTop: 0}}
-                                    onClick={() => window.location = '/dailycontest/home'}
+                                    onClick={() => window.location.href = '/dailycontest/home'}
                                 >
                                     STOCK PREDICTION CONTEST
                                 </Button>

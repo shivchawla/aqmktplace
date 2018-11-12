@@ -590,7 +590,7 @@ export const sendErrorToBackend = (errorToSend = '', email = '', subject = 'Logi
               phone:  md.phone(),
 			  mobileOs: md.os(),
 			  error: errorToSend,
-			  currentUrl: window.location
+			  currentUrl: window.location.href
 		};
 	let stringifiedData = JSON.stringify(data);
 	axios({

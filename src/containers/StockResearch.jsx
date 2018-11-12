@@ -547,7 +547,7 @@ class StockResearchImpl extends React.Component {
             <Modal
                     title="Redirection"
                     onOk={() => {
-                        window.location = 'https://www.aimsquant.com/'
+                        window.location.href = 'https://www.aimsquant.com/'
                     }}
                     onCancel={this.toggleAimsquantRedirectModal}
                     visible={this.state.aimsquantRedirectModalVisible}
