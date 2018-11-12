@@ -70,17 +70,17 @@ class FooterImpl extends React.Component{
                         </div>
                     </Col>
 
-                    <Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
+                    {/*<Col xl={4} lg={4} md={4} sm={9} xs={9} className="footer-container">
                         <h5 className="footer-group-header">Other Products</h5>
                         <div className="footer-list">
                             <a className="footer-link" target="_blank" href={`${aimsquantUrl}/home`}>Quant Research</a>
                         </div>
-                    </Col>
+                    </Col>*/}
                     
-                    <Col xl={24} style={aimsquantContainerStyle}>
-                        <h3 style={{color: '#fff', fontSize: '12px'}}>
+                    <Col span={12} style={aimsquantContainerStyle} className="footer-container">
+                        <span style={{color: '#fff', fontSize: '12px'}}>
                             AimsQuant Private Limited
-                        </h3>
+                        </span>
                     </Col>
                 </Row>
             </Col>
@@ -93,9 +93,10 @@ export const Footer = Form.create()(windowSize(FooterImpl));
 const aimsquantContainerStyle = {
     position: 'absolute',
     bottom: 0,
+    right:0,
     textAlign: 'right',
-    left: '-20px',
-    paddingBottom: '20px'
+    //left: '-20px',
+    paddingBottom: '5px'
 };
 
 const contactUsInputStyle = {
