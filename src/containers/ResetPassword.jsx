@@ -155,7 +155,7 @@ class ResetPassword extends Component {
           </p>
           <p style={{'color': '#37474F', 'fontStyle': 'italic',
             'fontSize': '15px', 'margin': '0px'}}>
-            Expert-Sourced Investment Portfolio
+            Crowd-Sourced Investment Portfolio
           </p>
           <Form onSubmit={this.handleSubmit} className="login-form">
             <FormItem>
@@ -273,7 +273,7 @@ class ResetPassword extends Component {
 				<Col span={24}>
 					<p style={{'color': '#37474F', 'fontStyle': 'italic',
 						'fontSize': '15px', 'margin': '0px', marginTop: '10px'}}>
-						Expert-Sourced Investment Portfolio
+						Crowd-Sourced Investment Portfolio
 					</p>
 				</Col>
 				<Col span={24} style={{marginTop: '15%'}}>

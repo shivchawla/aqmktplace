@@ -111,8 +111,8 @@ class StockResearchImpl extends React.Component {
         ])
         .then(([latestDetailResponse, performanceResponse, stockPricehistoryPerformance]) => {
             const {data} = latestDetailResponse;
-            latestDetail.ticker = data.security.ticker;
-            latestDetail.exchange = data.security.exchange;
+            latestDetail.ticker = data.ticker;
+            latestDetail.exchange = data.exchange;
             latestDetail.close = data.latestDetail.Close;
             latestDetail.latestPrice = _.get(data, 'latestDetailRT.current', 0) || data.latestDetail.Close
             latestDetail.open = _.get(data, 'latestDetailRT.open', 0) || data.latestDetail.Open;
@@ -122,7 +122,7 @@ class StockResearchImpl extends React.Component {
             latestDetail.high_52w = Math.max(_.get(data, 'latestDetailRT.high', 0), data.latestDetail.High_52w);
             latestDetail.change = _.get(data, 'latestDetailRT.current', 0) != 0.0 ?  Number(((_.get(data, 'latestDetailRT.changePct', 0) || data.latestDetail.ChangePct)*100).toFixed(2)) : "-";
 
-            latestDetail.name = data.security.detail !== undefined ? data.security.detail.Nse_Name : ' ';
+            latestDetail.name = data.detail !== undefined ? data.detail.Nse_Name : ' ';
             tickers.push({name: value, destroy: true, data: stockPricehistoryPerformance, noLoadDat: true});
             
             this.setState({
