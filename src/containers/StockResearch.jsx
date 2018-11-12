@@ -730,7 +730,7 @@ class StockResearchImpl extends React.Component {
                                 }
                             </Col>
                         </Row>
-                        <Row style={{...sideCardStyle, marginTop: '30px'}}>
+                        {/* <Row style={{...sideCardStyle, marginTop: '30px'}}>
                             <Col 
                                     style={{
                                         display: 'flex', 
@@ -753,7 +753,7 @@ class StockResearchImpl extends React.Component {
                                     Backtest Now
                                 </Button>
                             </Col>
-                        </Row>
+                        </Row> */}
                     </Col>
                 }
                 </Row>
