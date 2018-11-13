@@ -408,6 +408,7 @@ export class Home extends React.Component {
                                     </h1>
                                 </Col>
                                 <Col span={24}>
+
                                     <h5 
                                             className="hero-description-text-mobile" 
                                             style={{textAlign: 'center'}}
@@ -435,7 +436,7 @@ export class Home extends React.Component {
                                                 marginTop: '70px'
                                             }}
                                     >
-                                        Expert-Sourced Investment Portfolio
+                                        Crowd-Sourced Investment Portfolio
                                     </h1>
                                 </Col>
                                 <Col span={24}>
@@ -475,7 +476,7 @@ export class Home extends React.Component {
                                 className="signup-button"
                                 onClick={() => window.location.href = '/dailycontest/home'}
                         >
-                            ENTER CONTEST
+                            STOCK PREDICTION CONTEST
                         </Button>
                         <Button 
                                 style={{marginLeft: '20px', border: '2px solid #fff'}}
@@ -502,20 +503,15 @@ export class Home extends React.Component {
                     query="(max-width: 600px)"
                     render={() => (
                         <Col span={24} style={{...verticalBox, marginTop: '40px'}}>
-                            <div 
-                                    style={{
-                                        ...horizontalBox, 
-                                        justifyContent: 'space-between',
-                                        width: '80%'
-                                    }}
-                            >
+                            
                                 <Button 
                                         className="signup-button-mobile"
                                         style={{marginTop: 0}}
                                         onClick={() => window.location.href = '/dailycontest/home'}
                                 >
-                                    ENTER CONTEST
+                                    STOCK PREDICTION CONTEST
                                 </Button>
+
                                 <Button 
                                         className="create-advice-button-mobile"
                                         onClick={() => {
@@ -527,7 +523,6 @@ export class Home extends React.Component {
                                 >
                                     HOW IT WORKS
                                 </Button>
-                            </div>
                             {/*<span 
                                     style={{
                                         marginTop: '30px',
@@ -761,9 +756,10 @@ export class Home extends React.Component {
                         className="lower-section-header"
                         style={{
                             width: '100%',
-                            top: '20%',
+                            top: '15%',
                             textAlign: 'center',
-                            position: 'absolute'
+                            //position: 'absolute',
+                            marginBottom:'50px'
                         }}
                 >
                     HOW IT WORKS?
@@ -773,30 +769,29 @@ export class Home extends React.Component {
                         <StepsCard 
                             step={1}
                             header='Enter Contest'
-                            headerText='Create a diversified portfolio to beat the market.'
-                            color='#EBD53B'
+                            headerText='Submit stock predictions for your favorite stocks'
+                            color='crimson'
+                            imgSrc={EnterContest}
                         />
                     </Col>
                     <Col span={8} style={{display: 'flex', justifyContent: 'center'}}>
                         <StepsCard 
                             step={2}
                             header='Win cash prizes'
-                            headerText='Beat the market benchmark 
-                            and win cash prizes every 
-                            week worth Rs.10,000
-                            '
-                            color='#86F0E1'
+                            headerText='Top profitable predictions win cash prizes everyday'
+                            color='cornflowerblue'
+                            imgSrc={WinPrizes}
                         />
                     </Col>
                     <Col span={8} style={{display: 'flex', justifyContent: 'center'}}>
                         <StepsCard 
                             step={3}
-                            header='Expert Portfolio 
-                            Allocation'
-                            headerText='Winners contribute to the 
-                            “Expert Portfolio” and earn 
-                            royalty'
-                            color='#9FD0FF'
+                            header='Investment Portfolio'
+                            headerText='Winning predictions are combined to manage
+                            an Investment Portfolio'
+                            color='darkslateblue'
+                            imgSrc={ExpertIdea}
+                            imgStyle={{marginTop:'-45px'}}
                         />
                     </Col>
                 </Row>
@@ -807,7 +802,7 @@ export class Home extends React.Component {
     renderLowerSectionMobile = () => {
         return (
             <React.Fragment>
-                <h3 className="lower-section-header" style={{marginTop: '50px'}}>HOW IT WORKS?</h3>
+                <h3 className="lower-section-header" style={{margin: '30px 0px'}}>HOW IT WORKS?</h3>
                 <Row  
                         type="flex" 
                         className="lower-section-card-container"
@@ -816,8 +811,9 @@ export class Home extends React.Component {
                         <StepsCard 
                             step={1}
                             header='Enter Contest'
-                            headerText='Create a diversified portfolio to beat the market.'
-                            color='#EBD53B'
+                            headerText='Submit stock predictions for your favorite stocks'
+                            color='crimson'
+                            imgSrc={EnterContest}
                         />
                     </Col>
 
@@ -825,23 +821,21 @@ export class Home extends React.Component {
                         <StepsCard 
                             step={2}
                             header='Win cash prizes'
-                            headerText='Beat the market benchmark 
-                            and win cash prizes every 
-                            week worth Rs.10,000
-                            '
-                            color='#86F0E1'
+                            headerText='Top profitable predictions win cash prizes everyday'
+                            color='cornflowerblue'
+                            imgSrc={WinPrizes}
                         />
                     </Col>
 
                     <Col span={24} style={{textAlign: 'center'}} style={{marginTop: '20px'}}>
                         <StepsCard 
                             step={3}
-                            header='Expert Portfolio 
-                            Allocation'
-                            headerText='Winners contribute to the 
-                            “Expert Portfolio” and earn 
-                            royalty'
-                            color='#9FD0FF'
+                            header='Investment Portfolio'
+                            headerText='Winning predictions are combined to manage
+                            an Investment Portfolio'
+                            color='darkslateblue'
+                            imgSrc={ExpertIdea}
+                            imgStyle={{marginTop:'-45px'}}
                         />
                     </Col>
                 </Row>
@@ -883,7 +877,7 @@ export class Home extends React.Component {
                     </TopSectionMobile>
                     <Row 
                             className="lower-section" 
-                            style={{marginTop: '30px', height:'120vh', minHeight: '600px'}}
+                            style={{marginTop: '30px', minHeight: '600px'}}
                             ref={el => this.howItWorks = el}
                     >
                         {this.renderLowerSectionMobile()}
@@ -1177,12 +1171,12 @@ const FeatureCard = props => {
 };
 
 const StepsCard = props => {
-    const {color = '#EBD53B', step = 1, header = 'Enter Contest', headerText = 'Header Text'} = props;
+    const {color = '#EBD53B', step = 1, header = 'Enter Contest', headerText = 'Header Text', imgSrc = null, imgStyle={}} = props;
 
     return (
         <div
                 style={{
-                    border: `2px solid ${color}`,
+                    //border: `2px solid ${color}`,
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'flex-start',
@@ -1190,14 +1184,15 @@ const StepsCard = props => {
                     width: '300px',
                     borderRadius: '8px',
                     backgroundColor: '#fff',
-                    height: '250px',
+                    height: '350px',
                     padding: '10px',
                     boxShadow: '0 4px 16px #CECECE'
                 }}
         >
-            <CardStep>0{step}</CardStep>
-            <CardHeader>{header}</CardHeader>
+            <CardStep>#{step}</CardStep>
+            <CardHeader style={{color: color}}>{header}</CardHeader>
             <Text>{headerText}</Text>
+            <img src={imgSrc} style={{margin:'0 auto', transform: 'scale(0.6, 0.6)', ...imgStyle}}/>
         </div>
     );
 }
@@ -1212,17 +1207,17 @@ const styles = {
 const CardStep = styled.h3`
     font-weight: 700;
     color: #4E4E4E;
-    font-size: 22px;
+    font-size: 24px;
 `;
 
 const CardHeader = styled.h3`
-    font-weight: 700;
+    font-weight: 400;
     color: #3F3F3F;
     font-size: 22px;
 `;
 
 const Text = styled.h3`
-    font-weight: 600;
+    font-weight: 300;
     color: #636363;
     font-size: 18px;
     text-align: start;

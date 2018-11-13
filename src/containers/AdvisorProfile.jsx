@@ -102,9 +102,9 @@ export default class AdvisorProfile extends React.Component {
                     <Col span={8}>
                         <Row>
                             <Col span={24} style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-                                {linkedinUrl && <Icon onClick={() => window.location.assign(linkedinUrl)} type="linkedin" style={socialIconStyle}/>}
-                                {twitterUrl && <Icon onClick={() => window.location.assign(twitterUrl)} type="twitter" style={socialIconStyle}/>}
-                                {facebookUrl && <Icon onClick={() => window.location.assign(facebookUrl)} type="facebook" style={socialIconStyle}/>}
+                                {linkedinUrl && <Icon onClick={() => window.location.href.assign(linkedinUrl)} type="linkedin" style={socialIconStyle}/>}
+                                {twitterUrl && <Icon onClick={() => window.location.href.assign(twitterUrl)} type="twitter" style={socialIconStyle}/>}
+                                {facebookUrl && <Icon onClick={() => window.location.href.assign(facebookUrl)} type="facebook" style={socialIconStyle}/>}
                             </Col>
                             <Col 
                                     span={24} 
