@@ -79,7 +79,7 @@ export class Home extends React.Component {
                 <Col span={12} className="tab-content-button-container">
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => this.props.history.push('/dailycontest/home')}>
+                        onClick={() => window.location.href = '/dailycontest/home'}>
                         ENTER CONTEST
                     </Button>
                 </Col>
@@ -130,7 +130,7 @@ export class Home extends React.Component {
                 >
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => this.props.history.push('/dailycontest/home')}>
+                        onClick={() => window.location.href = '/dailycontest/home'}>
                         ENTER CONTEST
                     </Button>
                 </Col>
@@ -473,7 +473,7 @@ export class Home extends React.Component {
                     <Col span={24}>
                         <Button 
                                 className="signup-button"
-                                onClick={() => this.props.history.push('/dailycontest/home')}
+                                onClick={() => window.location.href = '/dailycontest/home'}
                         >
                             ENTER CONTEST
                         </Button>
@@ -512,7 +512,7 @@ export class Home extends React.Component {
                                 <Button 
                                         className="signup-button-mobile"
                                         style={{marginTop: 0}}
-                                        onClick={() => this.props.history.push('/dailycontest/home')}
+                                        onClick={() => window.location.href = '/dailycontest/home'}
                                 >
                                     ENTER CONTEST
                                 </Button>
@@ -558,7 +558,7 @@ export class Home extends React.Component {
                             <Button 
                                     className="signup-button-mobile"
                                     style={{marginTop: 0}}
-                                    onClick={() => this.props.history.push('/dailycontest/home')}
+                                    onClick={() => window.location.href = '/dailycontest/home'}
                             >
                                 ENTER CONTEST
                             </Button>
