@@ -14,8 +14,10 @@ import adviceLogo from '../assets/AdviceLogo.svg';
 import adviceLogoMobile from '../assets/AdviceLogoMobile.svg';
 import portfolioLogoMobile from '../assets/PortfolioLogo.svg';
 import portfolioLogo from '../assets/PortfolioLogo.svg';
-import heroImage from '../assets/funnel-stocks.svg';
-import heroImageMobile from '../assets/funnel-stocks.svg';
+//import heroImage from '../assets/funnel-stocks.svg';
+import heroImage from '../assets/BullBearNegotiate-green.png';
+//import heroImageMobile from '../assets/funnel-stocks.svg';
+import heroImageMobile from '../assets/BullBearNegotiate-green-mini.png';
 import people from '../assets/people.svg';
 import wheel from '../assets/wheel.svg';
 import globe from '../assets/globe.svg'
@@ -79,8 +81,8 @@ export class Home extends React.Component {
                 <Col span={12} className="tab-content-button-container">
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => window.location.href = '/dailycontest/home'}>
-                        ENTER CONTEST
+                        onClick={() => window.location.href = '/dailycontest/mypicks'}>
+                        SUBMIT PREDICTION
                     </Button>
                 </Col>
             </div>
@@ -130,8 +132,8 @@ export class Home extends React.Component {
                 >
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => window.location.href = '/dailycontest/home'}>
-                        ENTER CONTEST
+                        onClick={() => window.location.href = '/dailycontest/mypicks'}>
+                        SUBMIT PREDICTION
                     </Button>
                 </Col>
             </React.Fragment>
@@ -411,7 +413,7 @@ export class Home extends React.Component {
 
                                     <h5 
                                             className="hero-description-text-mobile" 
-                                            style={{textAlign: 'center'}}
+                                            style={{textAlign: 'center', width:'80%', margin: '0 auto'}}
                                     >
                                         Aggregating stock predictions to manage investment portfolio
                                     </h5>
@@ -474,9 +476,9 @@ export class Home extends React.Component {
                     <Col span={24}>
                         <Button 
                                 className="signup-button"
-                                onClick={() => window.location.href = '/dailycontest/home'}
+                                onClick={() => window.location.href = '/dailycontest/mypicks'}
                         >
-                            STOCK PREDICTION CONTEST
+                            SUBMIT PREDICTION
                         </Button>
                         <Button 
                                 style={{marginLeft: '20px', border: '2px solid #fff'}}
@@ -507,9 +509,9 @@ export class Home extends React.Component {
                                 <Button 
                                         className="signup-button-mobile"
                                         style={{marginTop: 0}}
-                                        onClick={() => window.location.href = '/dailycontest/home'}
+                                        onClick={() => window.location.href = '/dailycontest/mypicks'}
                                 >
-                                    STOCK PREDICTION CONTEST
+                                    SUBMIT PREDICTION
                                 </Button>
 
                                 <Button 
@@ -553,9 +555,9 @@ export class Home extends React.Component {
                             <Button 
                                     className="signup-button-mobile"
                                     style={{marginTop: 0}}
-                                    onClick={() => window.location.href = '/dailycontest/home'}
+                                    onClick={() => window.location.href = '/dailycontest/mypicks'}
                             >
-                                ENTER CONTEST
+                                SUBMIT PREDICTION
                             </Button>
                             <div style={{width: '40px'}}></div>
                             <Button 
@@ -575,16 +577,16 @@ export class Home extends React.Component {
     renderTopHeroImageDesktop = () => {
         return (
             <Col 
-                    span={12} 
-                    className='hero-image' 
+                span={12} 
+                className='hero-image'
+                style={{height:'100%', marginTop: '150px'}}>
+                <object 
                     style={{
-                        height: '100%',
-                        display: 'flex',
-                        display: 'flex',
-                        justifyContent: 'center'
-                    }}
-            >
-                <object style={{width: '50%'}} type="image/svg+xml" data={heroImage}></object>
+                        height:'100%',
+                        width:'100%'}} 
+                    type="image/svg+xml" 
+                    data={heroImage}>
+                </object>
             </Col>
         );
     }
@@ -601,11 +603,12 @@ export class Home extends React.Component {
                                     display: 'flex', 
                                     flexDirection: 'column', 
                                     alignItems: 'center',
-                                    marginTop: '20px'
+                                    margin: '-10px 0px'
                                 }} 
                                 className='hero-image-mobile'
                         >
-                            <object style={{width: '48%'}} type="image/svg+xml" data={heroImageMobile}></object>
+                            {/*<object style={{transform: 'scale(0.7,0.7)', height:'300px', width:'410px'}} type="image/svg+xml" data={heroImageMobile}></object>*/}
+                            <img style={{transform: 'scale(0.7,0.7)'}} src={heroImageMobile}/>
                         </Col>
                     )}
                 />
@@ -768,7 +771,7 @@ export class Home extends React.Component {
                     <Col span={8} style={{display: 'flex', justifyContent: 'center'}}>
                         <StepsCard 
                             step={1}
-                            header='Enter Contest'
+                            header='Submit Predictions'
                             headerText='Submit stock predictions for your favorite stocks'
                             color='crimson'
                             imgSrc={EnterContest}
@@ -810,7 +813,7 @@ export class Home extends React.Component {
                     <Col span={24} style={{textAlign:'center'}}>
                         <StepsCard 
                             step={1}
-                            header='Enter Contest'
+                            header='Submit Predictions'
                             headerText='Submit stock predictions for your favorite stocks'
                             color='crimson'
                             imgSrc={EnterContest}
