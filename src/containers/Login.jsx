@@ -65,7 +65,9 @@ class Login extends Component {
                 if (redirectUrl){
                     window.location.href = redirectUrl;
                 } else{
-                    window.location.href = '/dailycontest/home';
+                    window.location.href = global.screen.width > 600 
+                        ? '/dailycontest/mypicks'
+                        : '/dailycontest/stockpredictions';
                 }
               }else{
                 this.updateState({
@@ -145,11 +147,13 @@ class Login extends Component {
             Utils.setLoggedInUserInfo(response.data);
             Utils.localStorageSave('selectedPage', 1);
             const redirectUrl = Utils.getRedirectAfterLoginUrl();
-            // if (redirectUrl) {
-            //     this.props.history.push(redirectUrl);
-            // } else {
-                window.location.href = '/dailycontest';
-            // }
+                if (redirectUrl){
+                    window.location.href = redirectUrl;
+                } else{
+                    window.location.href = global.screen.width > 600 
+                        ? '/dailycontest/mypicks'
+                        : '/dailycontest/stockpredictions';
+                }
         } else {
             this.updateState({
                 'loading': false,

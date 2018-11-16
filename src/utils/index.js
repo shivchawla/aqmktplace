@@ -196,11 +196,12 @@ export class Utils{
 	}
 
 	static logoutUser(){
+		const redirectUrl = global.screen.width > 600 ? '/dailycontest/mypicks' : 'dailycontest/stockpredictions';
 		this.localStorageSaveObject('USERINFO', {});
 		this.localStorageSaveObject('adviceFilter', {});
 		this.localStorageSave('selectedPage', 1);
 		this.localStorageSave('selectedTab', 'all');
-		this.localStorageSave('redirectToUrlFromLogin', '/dailycontest/home');
+		this.localStorageSave('redirectToUrlFromLogin', redirectUrl);
 		this.localStorageSave('selectedAdviceId', null);
 		this.localStorageSave('contestId', null);
 		this.localStorageSave('contestSelectedPage', 0);
