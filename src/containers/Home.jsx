@@ -14,9 +14,7 @@ import adviceLogo from '../assets/AdviceLogo.svg';
 import adviceLogoMobile from '../assets/AdviceLogoMobile.svg';
 import portfolioLogoMobile from '../assets/PortfolioLogo.svg';
 import portfolioLogo from '../assets/PortfolioLogo.svg';
-//import heroImage from '../assets/funnel-stocks.svg';
 import heroImage from '../assets/BullBearNegotiate-green.png';
-//import heroImageMobile from '../assets/funnel-stocks.svg';
 import heroImageMobile from '../assets/BullBearNegotiate-green-mini.png';
 import people from '../assets/people.svg';
 import wheel from '../assets/wheel.svg';
@@ -132,7 +130,7 @@ export class Home extends React.Component {
                 >
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => window.location.href = '/dailycontest/mypicks'}>
+                        onClick={() => window.location.href = '/dailycontest/stockpredictions'}>
                         SUBMIT PREDICTION
                     </Button>
                 </Col>
@@ -509,7 +507,7 @@ export class Home extends React.Component {
                                 <Button 
                                         className="signup-button-mobile"
                                         style={{marginTop: 0}}
-                                        onClick={() => window.location.href = '/dailycontest/mypicks'}
+                                        onClick={() => window.location.href = '/dailycontest/stockpredictions'}
                                 >
                                     SUBMIT PREDICTION
                                 </Button>
@@ -555,7 +553,7 @@ export class Home extends React.Component {
                             <Button 
                                     className="signup-button-mobile"
                                     style={{marginTop: 0}}
-                                    onClick={() => window.location.href = '/dailycontest/mypicks'}
+                                    onClick={() => window.location.href = '/dailycontest/stockpredictions'}
                             >
                                 SUBMIT PREDICTION
                             </Button>
