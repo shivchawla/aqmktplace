@@ -292,7 +292,10 @@ class App extends React.Component {
                                 <Route path='/aboutus' component={AboutUs} />  
                                 <Route
                                     path='/contest'
-                                    render={() => window.location.href = '/dailycontest/stockpredictions'}
+                                    render={() => {
+                                        window.location.href = '/dailycontest/stockpredictions';
+                                        return null;
+                                    }}
                                 />
                                 {/* <Route exact={true} path='/advice' component={ScreenAdvices} />  */}
                                 {/* <Route path='/contest' component={Contest} /> */}
