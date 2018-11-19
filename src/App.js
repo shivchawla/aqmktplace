@@ -249,6 +249,10 @@ class App extends React.Component {
                                 <Route exact={true} path='/aboutus/people' component={AboutUs} /> 
                                 <Route exact={true} path='/aboutus/careers' component={AboutUs} /> 
                                 <Route exact={true} path='/aboutus/connect' component={AboutUs} /> 
+                                <Route
+                                        path='/contest'
+                                        render={() => window.location.href = '/dailycontest/stockpredictions'}
+                                    />
                                 {/* <Route exact={true} path='/advice' component={ScreenAdviceMobile} />  */}
                                 {/* <Route path='/contest' component={Contest} /> */}
                                 <Route path="/stockresearch" exact component={WorkInProgress} /> 
