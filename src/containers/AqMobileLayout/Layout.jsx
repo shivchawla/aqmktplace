@@ -16,7 +16,7 @@ import {Layout, Menu, Icon as AntdIcon} from 'antd';
 import {NavBar, Button as MobileButton} from 'antd-mobile';
 import {sidebarUrls, tradingContestSidebarUrls} from './constants';
 import {Utils} from '../../utils';
-import {primaryColor, horizontalBox, loadingColor} from '../../constants';
+import {primaryColor, horizontalBox, loadingColor, verticalBox} from '../../constants';
 import logo from "../../assets/logo-advq-new.png";
 import * as style from './layoutStyle';
 import './layout.css';
@@ -120,7 +120,7 @@ class AqMobileLayoutImpl extends React.Component {
                     styles={style.sideBarMenuStyle}
                     disableOverlayClick={this.toggleSideMenu}
             >
-                <Row>
+                <Row style={{position: 'relative', height: '100vh'}}>
                     <Col 
                             span={24} 
                             style={{
@@ -187,6 +187,55 @@ class AqMobileLayoutImpl extends React.Component {
                             </Menu.Item>
                         </Menu>
                     </Col>
+                    {
+                        Utils.isLoggedIn() &&
+                        <Col 
+                                span={24}
+                                style={{
+                                    ...horizontalBox,
+                                    width: '100%',
+                                    backgroundColor: '#efeded',
+                                    height: '55px',
+                                    position: 'absolute',
+                                    bottom: 0
+                                }}
+                        >
+                            <div 
+                                    style={{
+                                        ...verticalBox , 
+                                        width: '40px', 
+                                        height: '40px',
+                                        borderRadius: '100%',
+                                        backgroundColor: primaryColor,
+                                        marginLeft: '10px',
+                                    }}
+                            >
+                                <h3 
+                                        style={{
+                                            fontFamily: 'Lato, sans-serif',
+                                            fontWeight: '14px',
+                                            fontWeight: 500,
+                                            color: '#fff',
+                                            marginBottom: 0
+                                        }}
+                                >
+                                    {Utils.getLoggedInUserInitials()}
+                                </h3>
+                            </div>
+                            <h3 
+                                    style={{
+                                        marginLeft: '10px', 
+                                        color: primaryColor,
+                                        fontFamily: 'Lato, sans-serif',
+                                        fontWeight: 500,
+                                        fontSize: '16px',
+                                        marginBottom: 0
+                                    }}
+                            >
+                                {Utils.getLoggedInUserName()}
+                            </h3>
+                        </Col>
+                    }
                 </Row>
             </HamburgerMenu>
         );
