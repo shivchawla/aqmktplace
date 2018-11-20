@@ -69,7 +69,7 @@ export const HomeMeta = props => {
             <meta charSet="utf-8" />
             <title>AdviceQube: Crowd-Sourced Investment Portfolio | Investing In Your Ideas</title>
             <meta name="description" content="Crowd Sourced Investment Portfolio. Powering Invesment fund with the best investment ideas from professional and investment enthusiasts"/>
-            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Crowd, Crowd-sourced, returns, gain, Investment Advice, India"/>
+            <meta name="keywords" content="www.adviceqube.com, Investments, Equity, Stock market, Share Market, NSE stocks, Crowd, Crowd-sourced, returns, gain, Predict, Predictions, India"/>
             <meta name="robots" content="index, follow" />
         </Helmet>
     );
