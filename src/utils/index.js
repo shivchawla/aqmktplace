@@ -196,7 +196,7 @@ export class Utils{
 	}
 
 	static logoutUser(){
-		const redirectUrl = global.screen.width > 600 ? '/dailycontest/mypicks' : 'dailycontest/stockpredictions';
+		const redirectUrl = '/dailycontest/stockpredictions';
 		this.localStorageSaveObject('USERINFO', {});
 		this.localStorageSaveObject('adviceFilter', {});
 		this.localStorageSave('selectedPage', 1);
