@@ -132,7 +132,7 @@ class AqMobileLayoutImpl extends React.Component {
                             }}
                     >
                         <div 
-                                onClick={() => this.props.history.push('/home')} 
+                                onClick={() => window.location.href = '/home'}
                                 style={{...horizontalBox}}
                         >
                             <img src={logo} style={{height: '25px'}}/>
@@ -160,7 +160,7 @@ class AqMobileLayoutImpl extends React.Component {
                             </Menu.Item>
                             <Menu.Item 
                                     key={3} 
-                                    onClick={() => {this.props.history.push('/home')}}
+                                    onClick={() => window.location.href = '/home'}
                             >
                                 <SideMenuItem menuItem={{name: 'Home', Icon: Home}} />
                             </Menu.Item>

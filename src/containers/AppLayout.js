@@ -182,7 +182,7 @@ class AppLayout extends React.Component {
 
     renderHeaderTextTransparentMobike = () => {
         return (
-            <div onClick={() => this.props.history.push('/home')} 
+            <div onClick={() => window.location.href = '/home'}
                 style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
                 <span style={{...biggerFont, color: '#fff'}}>A</span>
                 <span style={{color: '#fff'}}>DVICE</span>
@@ -194,7 +194,7 @@ class AppLayout extends React.Component {
 
     renderHeaderTextNormalMobile = () => {
         return (
-            <div onClick={() => this.props.history.push('/home')} 
+            <div onClick={() => window.location.href = '/home'}
                 style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
                 <span style={{...biggerFont, color: primaryColor}}>A</span>
                 <span style={{color: primaryColor}}>DVICE</span>
@@ -206,7 +206,7 @@ class AppLayout extends React.Component {
 
     renderHeaderTextTransparentDesktop = () => {
         return (
-            <h1 onClick={() => this.props.history.push('/home')} 
+            <h1 onClick={() => window.location.href = '/home'}
                 style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
                 <span style={{...biggerFont, color:'#fff'}}>A</span>
                 <span style={{color: '#fff'}}>DVICE</span>
@@ -219,7 +219,7 @@ class AppLayout extends React.Component {
 
     renderHeaderTextNormalDesktop = () => {
         return (
-            <h1 onClick={() => this.props.history.push('/home')} 
+            <h1 onClick={() => window.location.href = '/home'}
                 style={{...headerColor, cursor: 'pointer', marginLeft: '10px'}}>
                 <span style={{...biggerFont, color:primaryColor}}>A</span>
                 <span style={{color: primaryColor}}>DVICE</span>
@@ -290,7 +290,7 @@ class AppLayout extends React.Component {
                                             }}
                                     >
                                         <img
-                                            onClick={() => this.props.history.push('/home')}  
+                                            onClick={() => window.location.href = '/home'}  
                                             src={logo} 
                                             style={{height: '40px', marginTop: '-10px', cursor: 'pointer'}}
                                         />
