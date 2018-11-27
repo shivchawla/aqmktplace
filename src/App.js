@@ -243,8 +243,6 @@ class App extends React.Component {
                     render={() => {
                         return (
                             <Switch>
-                                <Route exact={true} path='/home' component={Home} />
-                                <Route exact={true} path='/' component={Home} />
                                 <Route exact={true} path='/aboutus' component={AboutUs} />
                                 <Route exact={true} path='/aboutus/people' component={AboutUs} /> 
                                 <Route exact={true} path='/aboutus/careers' component={AboutUs} /> 
@@ -287,8 +285,6 @@ class App extends React.Component {
                     render={() => {
                         return (
                             <Switch>
-                                <Route exact={true} path='/home' component={Home} />
-                                <Route exact={true} path='/' component={Home} />
                                 <Route path='/aboutus' component={AboutUs} />  
                                 <Route
                                     path='/contest'
