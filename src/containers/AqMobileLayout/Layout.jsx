@@ -4,6 +4,8 @@ import BubbleChart from 'rmdi/lib/BubbleChart';
 import Home from 'rmdi/lib/Home';
 import Create from 'rmdi/lib/Create';
 import Logout from 'rmdi/lib/Input';
+import Assignment from 'rmdi/lib/Assignment';
+import MultilineChart from 'rmdi/lib/MultilineChart';
 import RemoveRedEye from 'rmdi/lib/RemoveRedEye';
 import MaterialIconReact, {colorPalette} from 'material-icons-react';
 import Accessibility from 'rmdi/lib/Accessibility';
@@ -148,21 +150,21 @@ class AqMobileLayoutImpl extends React.Component {
                         <Menu style={{backgroundColor: 'transparent'}} mode="inline">
                             <Menu.Item 
                                     key={1} 
-                                    onClick={() => {window.location.href = '/dailycontest/home'}}
-                            >
-                                <SideMenuItem menuItem={{name: 'Stock Prediction Contest', Icon: BubbleChart}} />
-                            </Menu.Item>
-                            <Menu.Item 
-                                    key={2} 
                                     onClick={() => {window.location.href = '/dailycontest/stockpredictions'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Create Entry', Icon: Create}} />
                             </Menu.Item>
                             <Menu.Item 
-                                    key={3} 
-                                    onClick={() => window.location.href = '/home'}
+                                    key={2} 
+                                    onClick={() => {window.location.href = '/dailycontest/toppicks'}}
                             >
-                                <SideMenuItem menuItem={{name: 'Home', Icon: Home}} />
+                                <SideMenuItem menuItem={{name: 'Top Picks', Icon: Assignment}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={3} 
+                                    onClick={() => {window.location.href = '/dailycontest/leaderboard'}}
+                            >
+                                <SideMenuItem menuItem={{name: 'Leaderboard', Icon: MultilineChart}} />
                             </Menu.Item>
                             <Menu.Item 
                                     key={4} 
