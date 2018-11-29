@@ -1,15 +1,13 @@
 import * as React from 'react';
 import Loading from 'react-loading-bar';
-import BubbleChart from 'rmdi/lib/BubbleChart';
-import Home from 'rmdi/lib/Home';
 import Create from 'rmdi/lib/Create';
+import ViewList from 'rmdi/lib/ViewList';
+import Assessment from 'rmdi/lib/Assessment';
+
 import Logout from 'rmdi/lib/Input';
 import Assignment from 'rmdi/lib/Assignment';
 import MultilineChart from 'rmdi/lib/MultilineChart';
 import RemoveRedEye from 'rmdi/lib/RemoveRedEye';
-import MaterialIconReact, {colorPalette} from 'material-icons-react';
-import Accessibility from 'rmdi/lib/Accessibility';
-import NewReleases from 'rmdi/lib/NewReleases';
 import {withRouter} from 'react-router';
 import {Row, Col} from 'antd';
 import {slide as HamburgerMenu} from 'react-burger-menu';
@@ -156,24 +154,36 @@ class AqMobileLayoutImpl extends React.Component {
                             </Menu.Item>
                             <Menu.Item 
                                     key={2} 
+                                    onClick={() => {window.location.href = '/dailycontest/mypicks'}}
+                            >
+                                <SideMenuItem menuItem={{name: 'My Picks', Icon: ViewList}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={3} 
+                                    onClick={() => {window.location.href = '/dailycontest/metrics'}}
+                            >
+                                <SideMenuItem menuItem={{name: 'Metrics', Icon: Assessment}} />
+                            </Menu.Item>
+                            <Menu.Item 
+                                    key={4} 
                                     onClick={() => {window.location.href = '/dailycontest/toppicks'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Top Picks', Icon: Assignment}} />
                             </Menu.Item>
                             <Menu.Item 
-                                    key={3} 
+                                    key={5} 
                                     onClick={() => {window.location.href = '/dailycontest/leaderboard'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Leaderboard', Icon: MultilineChart}} />
                             </Menu.Item>
                             <Menu.Item 
-                                    key={4} 
+                                    key={6} 
                                     onClick={() => {window.location.href = '/dailycontest/watchlist'}}
                             >
                                 <SideMenuItem menuItem={{name: 'Watchlist', Icon: RemoveRedEye}} />
                             </Menu.Item>
                             <Menu.Item 
-                                    key={5} 
+                                    key={7} 
                                     onClick={() => {
                                         Utils.isLoggedIn()
                                         ?   this.logoutUser()
