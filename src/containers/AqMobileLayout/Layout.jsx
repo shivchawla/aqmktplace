@@ -150,7 +150,7 @@ class AqMobileLayoutImpl extends React.Component {
                                     key={1} 
                                     onClick={() => {window.location.href = '/dailycontest/stockpredictions'}}
                             >
-                                <SideMenuItem menuItem={{name: 'Create Entry', Icon: Create}} />
+                                <SideMenuItem menuItem={{name: 'Submit Predictions', Icon: Create}} />
                             </Menu.Item>
                             <Menu.Item 
                                     key={2} 
