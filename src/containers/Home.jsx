@@ -79,7 +79,7 @@ export class Home extends React.Component {
                 <Col span={12} className="tab-content-button-container">
                     <Button 
                         className="home-action-buttons"
-                        onClick={() => window.location.href = '/dailycontest/mypicks'}>
+                        onClick={() => window.location.href = '/dailycontest/stockpredictions'}>
                         SUBMIT PREDICTION
                     </Button>
                 </Col>
@@ -474,7 +474,7 @@ export class Home extends React.Component {
                     <Col span={24}>
                         <Button 
                                 className="signup-button"
-                                onClick={() => window.location.href = '/dailycontest/mypicks'}
+                                onClick={() => window.location.href = '/dailycontest/stockpredictions'}
                         >
                             SUBMIT PREDICTION
                         </Button>

@@ -65,9 +65,7 @@ class Login extends Component {
                 if (redirectUrl){
                     window.location.href = redirectUrl;
                 } else{
-                    window.location.href = global.screen.width > 600 
-                        ? '/dailycontest/mypicks'
-                        : '/dailycontest/stockpredictions';
+                    window.location.href = '/dailycontest/stockpredictions'
                 }
               }else{
                 this.updateState({
@@ -103,10 +101,11 @@ class Login extends Component {
     }
   }
 
-  componentDidMount(){
+  componentWillMount(){
     this._mounted = true;
   	if (Utils.isLoggedIn()){
-        window.location.href = '/dailycontest';
+        // window.location.href = '/dailycontest';
+        window.history.back();
     }else{
       // if (this.props.pageChange){
       //   this.props.pageChange('login');
@@ -150,9 +149,7 @@ class Login extends Component {
                 if (redirectUrl){
                     window.location.href = redirectUrl;
                 } else{
-                    window.location.href = global.screen.width > 600 
-                        ? '/dailycontest/mypicks'
-                        : '/dailycontest/stockpredictions';
+                    window.location.href = '/dailycontest/stockpredictions';
                 }
         } else {
             this.updateState({
@@ -215,6 +212,10 @@ class Login extends Component {
             </div>
         );
       }
+    }
+
+    if (Utils.isLoggedIn()) {
+        return null;
     }
 
   	return (

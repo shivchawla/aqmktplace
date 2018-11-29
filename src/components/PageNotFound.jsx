@@ -12,7 +12,12 @@ export default class PageNotFound extends React.Component {
                         404
                         <span style={{fontSize: '20px', fontWeight: '400', marginLeft: '5px'}}>Page Not Found</span>
                     </h1>
-                    <Button type="primary" onClick={() => this.props.history.goBack()}>GO BACK</Button>
+                    <Button 
+                            type="primary" 
+                            onClick={() => window.location.href = '/dailycontest/home'}
+                    >
+                        CONTEST HOME
+                    </Button>
                 </div>
             </Row>
         );
