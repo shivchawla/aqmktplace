@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Media from 'react-media';
+import styled from 'styled-components';
 import {Row, Col} from 'antd';
 import _ from 'lodash';
 import GoogleLogin from 'react-google-login';
@@ -16,6 +17,7 @@ import '../css/login.css';
 import {AqMobileLayout} from './AqMobileLayout/Layout';
 import AppLayout from './AppLayout';
 import ContactUs from '../components/ContactUs';
+import googleLogo from '../assets/google-logo.svg';
 
 const {requestUrl, sendErrorEmailsForLogin = false, googleClientId} = require('../localConfig');
 const appLoginEmailSent = Utils.getFromLocalStorage('appLoginEmailSent') === undefined ? false : true;
@@ -254,23 +256,17 @@ class Login extends Component {
                     >
                         Login
                     </h3>
-                    <Button 
-                            icon='google' 
-                            style={{color: '#e2402b', borderColor: '#e2402b'}} 
-                            className='google-login-button-container'
+                    <GoogleLoginDesktop
+                        clientId={googleClientId}
+                        buttonText="Login"
+                        onSuccess={this.responseGoogle}
+                        onFailure={this.responseGoogle}
+                        buttonText="Login with Google"
+                        className='google-login-button'
+                        style={{fontSize: '16px'}}
                     >
-                        <GoogleLogin
-                            clientId={googleClientId}
-                            buttonText="Login"
-                            onSuccess={this.responseGoogle}
-                            onFailure={this.responseGoogle}
-                            buttonText="Login with Google"
-                            className='google-login-button'
-                            style={{fontSize: '16px'}}
-                        >
-                            Login with Google
-                        </GoogleLogin>
-                    </Button>
+                        Login with Google
+                    </GoogleLoginDesktop>
                 </div>
                 <p 
                     style={{
@@ -392,20 +388,15 @@ class Login extends Component {
   					'fontSize': '15px', 'margin': '0px'}}>
   					Crowd-Sourced Investment Portfolio
   				</p>
-                <Button 
-                        icon='google' 
-                        style={{color: '#e2402b', marginTop: '10px'}} 
-                        className='google-login-button-container'
-                >
-                    <GoogleLogin
-                        clientId={googleClientId}
-                        buttonText="Login"
-                        onSuccess={this.responseGoogle}
-                        onFailure={this.responseGoogle}
-                        buttonText="Login with Google"
-                        className='google-login-button'
-                    />
-                </Button>
+                <GoogleLoginDesktop
+                    clientId={googleClientId}
+                    buttonText="Login"
+                    onSuccess={this.responseGoogle}
+                    onFailure={this.responseGoogle}
+                    buttonText="Login with Google"
+                    className='google-login-button'
+                    marginTop='20px'
+                />
   				<Form onSubmit={this.handleSubmit} className="login-form" style={{width: '100%'}}>
   					<FormItem>
   					{getFieldDecorator('userName', {
@@ -464,3 +455,31 @@ const headerColor = {
     color: '#595959',
     fontSize: '16px'
 };
+
+const GoogleLoginDesktop = styled(GoogleLogin)`
+    background-color: #fff;
+    border-radius: 4px;
+    border: 1px solid;
+    border-color: transparent;
+    transition: all 0.4s ease-in-out;
+    padding: 6px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: ${props => props.marginTop || '0px'};
+    position: relative;
+    padding-left: 28px;
+    color: #3c3c3c;
+
+    &:hover {
+        border-color: #4285f4;
+    };
+    &:before {
+        content: url(${googleLogo});
+        margin-right: 5px;
+        position: absolute;
+        left: 7px;
+        margin-top: 1px;
+    }
+`;
