@@ -83,8 +83,22 @@ class AuthMessageImpl extends Component {
         );
       }
       else if (this.params.get('mode') === 'unsubscribe'){
-        const emailType = this.params.get('type') == "daily_performance_digest" ?
-            "Daily performance emails" : "Weekly performance emails"
+        const type = this.params.get('type');
+        let emailType = "Weekly performance emails";
+        switch(type) {
+          case "daily_performance_digest":
+            emailType = "Daily performance emails";
+            break;
+          case "marketing_digest":
+            emailType = "Marketing emails";
+            break;
+          case "weekly_performance_digest":
+            emailType = "Weekly performance emails";
+            break;
+          default:
+            emailType = "Weekly performance emails";
+            break;
+        }
         return (
           <React.Fragment>
             <h2 style={{'fontSize': '24px', 'color': 'teal'}}>
@@ -96,6 +110,7 @@ class AuthMessageImpl extends Component {
           </React.Fragment>
         );
       }
+      
     }
 
 
