@@ -106,12 +106,7 @@ class Login extends Component {
   componentWillMount(){
     this._mounted = true;
   	if (Utils.isLoggedIn()){
-        // window.location.href = '/dailycontest';
-        window.history.back();
-    }else{
-      // if (this.props.pageChange){
-      //   this.props.pageChange('login');
-      // }
+        window.location.href = '/dailycontest/home';
     }
   }
 

@@ -235,6 +235,15 @@ class App extends React.Component {
         ReactGA.pageview(window.location.href);
     }
 
+    renderLogin = () => {
+        if (Utils.isLoggedIn()) {
+            window.location.href = '/dailycontest/home'
+            return null;
+        } else {
+            return <Login />
+        }
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -270,7 +279,10 @@ class App extends React.Component {
                                 <Route path='/errorPage' component={NoIternetAccess} /> 
                                 <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
                                 <Route path='/authMessage' component={AuthMessage} /> 
-                                <Route exact={true} path='/login' component={Login} /> 
+                                <Route 
+                                    path='/login'
+                                    render={this.renderLogin}
+                                />
                                 <Route exact={true} path='/signup' component={Signup} /> 
                                 <Route exact={true} path='/faq' component={FAQ} /> 
                                 <Route exact={true} path='/resetPassword' component={ResetPassword} /> 
@@ -312,7 +324,10 @@ class App extends React.Component {
                                 <Route path='/errorPage' component={NoIternetAccess} /> 
                                 <Route path='/forbiddenAccess' component={ForbiddenAccess} /> 
                                 <Route path='/authMessage' component={AuthMessage} />  */}
-                                <Route path='/login' component={Login} /> 
+                                <Route 
+                                    path='/login'
+                                    render={this.renderLogin}
+                                />
                                 <Route path='/signup' component={Signup} /> 
                                 <Route path='/faq' component={FAQ} /> 
                                 <Route path='/resetPassword' component={ResetPassword} /> 
